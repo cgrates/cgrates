@@ -45,10 +45,11 @@ func TestExporters(t *testing.T) {
 func TestExportItemsErrors(t *testing.T) {
 	ctx := context.Background()
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 
 	for exportType, exporter := range exporters {

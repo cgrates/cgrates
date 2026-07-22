@@ -37,6 +37,7 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			utils.DB,
 			utils.ConnManager,
 			utils.CoreS,
+			utils.GuardianS,
 		},
 		cS.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -46,11 +47,13 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	dbs := srvDeps[utils.DB].(*DBService)
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	cs := srvDeps[utils.CoreS].(*CoreService)
+	gs := srvDeps[utils.GuardianS].(*GuardianService)
 
 	cS.mu.Lock()
 	defer cS.mu.Unlock()
 
-	cache := engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(), cs.CoreS().CapsStats)
+	cache := engine.NewCacheS(cS.cfg, dbs.DataManager(), cms.ConnManager(),
+		cs.CoreS().CapsStats, gs.Locker())
 	dbs.DataManager().SetCache(cache)
 	cms.ConnManager().SetCache(cache)
 	if capsStats := cs.CoreS().CapsStats; capsStats != nil {

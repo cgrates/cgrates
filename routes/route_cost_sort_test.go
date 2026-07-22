@@ -51,8 +51,9 @@ import (
 func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	lcs := NewLeastCostSorter(cfg, cM, fltrS)
@@ -67,6 +68,7 @@ func TestLeastCostSorterSortRoutesErr(t *testing.T) {
 func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -89,7 +91,7 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -165,8 +167,9 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 func TestHightCostSorterSortRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	hcs := NewHighestCostSorter(cfg, cM, fltrS)
@@ -181,6 +184,7 @@ func TestHightCostSorterSortRoutesErr(t *testing.T) {
 func TestHightCostSorterSortRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -202,7 +206,7 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -280,6 +284,7 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -297,7 +302,7 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	cfg.RouteSCfg().Opts.Usage = dynOpts
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
@@ -330,6 +335,7 @@ func TestPopulateCostForRoutesGetDecimalBigOptsErr(t *testing.T) {
 func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -339,7 +345,7 @@ func TestPopulateCostForRoutesMissingIdsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, cM, nil)
 	routes := map[string]*RouteWithWeight{
@@ -376,6 +382,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -397,7 +404,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -440,6 +447,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -461,7 +469,7 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -495,6 +503,7 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -525,7 +534,7 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -563,6 +572,7 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -614,7 +624,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, cc)
 
@@ -662,6 +672,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaRates: {
 			{
@@ -679,7 +690,7 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 		},
 	}
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), utils.RateSv1, cc)
 

@@ -307,8 +307,9 @@ func main() {
 
 	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
 		utils.MetaDefault: dataDB}, ldrCfg.DbCfg())
-	dm := engine.NewDataManager(dbcManager, ldrCfg, cM)
-	cacheS := engine.NewCacheS(ldrCfg, dm, cM, nil)
+	locker := engine.NewGuardianLocker(ldrCfg)
+	dm := engine.NewDataManager(dbcManager, ldrCfg, cM, locker)
+	cacheS := engine.NewCacheS(ldrCfg, dm, cM, nil, locker)
 	dm.SetCache(cacheS)
 	cM.SetCache(cacheS)
 	fS := engine.NewFilterS(ldrCfg, cM, dm)

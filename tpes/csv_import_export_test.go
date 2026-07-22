@@ -19,6 +19,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 var itemIDsByExport = map[string][]string{
@@ -505,7 +506,9 @@ func TestCSVImportExport(t *testing.T) {
 		},
 	}
 	inputZip := zipCSV(t, files)
-	cfg, dm, connMgr, filters := newTestEnv(t, files)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	_, dm, connMgr, filters := newTestEnv(t, files, cfg, locker)
 
 	loader := loaders.NewLoaderS(cfg, dm, filters, connMgr)
 	var loaderReply string
@@ -535,16 +538,15 @@ func TestCSVImportExport(t *testing.T) {
 	checkCSVZip(t, inputZip, outputZip)
 }
 
-func newTestEnv(t *testing.T, files map[string][][]string) (*config.CGRConfig, *engine.DataManager, *engine.ConnManager, *engine.FilterS) {
+func newTestEnv(t *testing.T, files map[string][][]string, cfg *config.CGRConfig, locker *guardian.GuardianLocker) (*config.CGRConfig, *engine.DataManager, *engine.ConnManager, *engine.FilterS) {
 	t.Helper()
-	cfg := config.NewDefaultCGRConfig()
 	cfg.LoaderCfg()[0].Enabled = true
 	cfg.LoaderCfg()[0].LockFilePath = utils.MetaMemory
 	cfg.LoaderCfg()[0].TpInDir = ""
 	cfg.LoaderCfg()[0].TpOutDir = ""
 	cfg.LoaderCfg()[0].Data = filterLoaderData(t, cfg.LoaderCfg()[0].Data, files)
 
-	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cache)
 	internalDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -552,7 +554,7 @@ func newTestEnv(t *testing.T, files map[string][][]string) (*config.CGRConfig, *
 		t.Fatal(err)
 	}
 	dbConn := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: internalDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbConn, cfg, connMgr)
+	dm := engine.NewDataManager(dbConn, cfg, connMgr, locker)
 	dm.SetCache(cache)
 	filters := engine.NewFilterS(cfg, connMgr, dm)
 	return cfg, dm, connMgr, filters

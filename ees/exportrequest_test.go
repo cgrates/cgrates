@@ -17,7 +17,8 @@ import (
 
 func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -47,7 +48,8 @@ func TestExportRequestParseFieldDateTimeDaily(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -77,7 +79,8 @@ func TestExportReqParseFieldDateTimeTimeZone(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -106,7 +109,8 @@ func TestExportReqParseFieldDateTimeMonthly(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -135,7 +139,8 @@ func TestExportReqParseFieldDateTimeMonthlyEstimated(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -164,7 +169,8 @@ func TestExportReqParseFieldDateTimeYearly(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -193,7 +199,8 @@ func TestExportReqParseFieldDateTimeMetaUnlimited(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -222,7 +229,8 @@ func TestExportReqParseFieldDateTimeEmpty(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -251,7 +259,8 @@ func TestExportReqParseFieldDateTimeMonthEnd(t *testing.T) {
 
 func TestExportReqParseFieldDateTimeError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -278,7 +287,8 @@ func TestExportReqParseFieldDateTimeError2(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(mS, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaDateTime,
@@ -300,7 +310,8 @@ func TestExportReqFieldAsInterface(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
@@ -339,7 +350,8 @@ func TestExportReqNewEventExporter(t *testing.T) {
 		utils.MetaReq: onm,
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &ExportRequest{
 		inData:           inData,
 		filterS:          nil,
@@ -369,7 +381,8 @@ func TestExportRequestString(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	exp := utils.ToIJSON(eeR)
@@ -388,7 +401,8 @@ func TestExportReqFieldAsInterfaceBadPrefix(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fldPath := []string{"inexistant"}
@@ -407,7 +421,8 @@ func TestExportReqFieldAsInterfaceMetaUCHErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fldPath := []string{utils.MetaUCH}
@@ -435,7 +450,8 @@ func TestExportReqFieldAsInterfaceNMSliceType(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Slice"}
 	expVal := "cgrates.org"
@@ -455,7 +471,8 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eventReq := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fldPath := []string{utils.MetaReq, "Usage"}
 	expVal := "10m"
@@ -468,7 +485,8 @@ func TestExportReqFieldAsStringOK(t *testing.T) {
 
 func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaFiller,
@@ -488,7 +506,8 @@ func TestExportRequestParseFieldMetaFiller(t *testing.T) {
 
 func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	EventReq := NewExportRequest(map[string]utils.DataStorage{}, "", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 	fctTemp := &config.FCTemplate{
 		Type:     utils.MetaGroup,
@@ -508,7 +527,8 @@ func TestExportRequestParseFieldMetaGroup(t *testing.T) {
 
 func TestExportRequestSetAsSliceMetaUCH(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -555,7 +575,8 @@ func TestExportRequestSetAsSliceMetaOpts(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -592,7 +613,8 @@ func TestExportRequestSetAsSliceExpDataErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -620,7 +642,8 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -651,7 +674,8 @@ func TestExportRequestSetAsSliceDefaultOK(t *testing.T) {
 
 func TestExportRequestAppendMetaUCH(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -698,7 +722,8 @@ func TestExportRequestAppendMetaOpts(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -735,7 +760,8 @@ func TestExportRequestAppendExpDataErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -763,7 +789,8 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -798,7 +825,8 @@ func TestExportRequestAppendDefaultOK(t *testing.T) {
 
 func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -835,7 +863,8 @@ func TestExportRequestComposeMetaUCHNotOK(t *testing.T) {
 
 func TestExportRequestComposeMetaUCHPathSet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	inData := map[string]utils.DataStorage{
 		utils.MetaReq: utils.MapStorage{
@@ -887,7 +916,8 @@ func TestExportRequestComposeMetaOptsOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -923,7 +953,8 @@ func TestExportRequestComposeMetaOptsFoundOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, nil, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -962,7 +993,8 @@ func TestExportRequestComposeDefaultOK(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -1002,7 +1034,8 @@ func TestExportRequestComposeExpDataErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	eeR := NewExportRequest(inData, "cgrates.org", cacheS, nil, expData, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone)
 
 	fullPath := &utils.FullPath{
@@ -1030,10 +1063,11 @@ func TestExportRequestSetFieldsPassErr(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 
@@ -1069,10 +1103,11 @@ func TestExportRequestSetFieldsPassFalse(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltr := engine.NewFilterS(cfg, nil, dm)
 

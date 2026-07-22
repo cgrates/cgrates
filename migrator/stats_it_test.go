@@ -83,13 +83,14 @@ func TestStatsQueueITMove(t *testing.T) {
 }
 
 func testStsITConnect(t *testing.T) {
-	cacheIn := engine.NewCacheS(stsCfgIn, nil, nil, nil)
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgIn.GeneralCfg().DBDataEncoding, stsCfgIn, cacheIn)
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	cacheIn := engine.NewCacheS(stsCfgIn, nil, nil, nil, locker)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgIn.GeneralCfg().DBDataEncoding, stsCfgIn, cacheIn, locker)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cacheOut := engine.NewCacheS(stsCfgOut, nil, nil, nil)
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgOut.GeneralCfg().DBDataEncoding, stsCfgOut, cacheOut)
+	cacheOut := engine.NewCacheS(stsCfgOut, nil, nil, nil, locker)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, stsCfgOut.GeneralCfg().DBDataEncoding, stsCfgOut, cacheOut, locker)
 	if err != nil {
 		t.Fatal(err)
 	}

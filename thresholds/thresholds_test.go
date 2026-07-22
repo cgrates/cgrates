@@ -87,10 +87,11 @@ func TestThresholdsCache(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmTH = engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmTH = engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dmTH.SetCache(cacheS)
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -266,10 +267,11 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmTH = engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmTH = engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dmTH.SetCache(cacheS)
 	cfg.ThresholdSCfg().StoreInterval = 0
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -390,13 +392,14 @@ func TestThresholdsmatchingThresholdsForEvent(t *testing.T) {
 
 func TestThresholdsUpdateThreshold(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	thp := &utils.ThresholdProfile{
 		Tenant: "cgrates.org",
@@ -505,10 +508,11 @@ func TestThresholdsUpdateThreshold(t *testing.T) {
 
 func TestThresholdsStoreThresholdsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	tS := NewThresholdService(cfg, dm, cacheS, nil, nil)
 
@@ -543,7 +547,8 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	tS := NewThresholdService(cfg, nil, cacheS, nil, nil)
 
 	value := &utils.Threshold{
@@ -581,10 +586,11 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 4)
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	tS := NewThresholdService(cfg, dm, cacheS, nil, nil)
 
@@ -609,11 +615,12 @@ func TestThresholdsStoreThresholdsCacheGetErr(t *testing.T) {
 
 func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().StoreInterval = -1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -677,15 +684,16 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	filterS := engine.NewFilterS(cfg, nil, dm)
-	cacheS := engine.NewCacheS(cfg, dm, cM, nil)
+	cacheS := engine.NewCacheS(cfg, dm, cM, nil, locker)
 	dm.SetCache(cacheS)
 	cM.SetCache(cacheS)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, cM)
@@ -739,10 +747,11 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 
 func TestThresholdsProcessEventNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -793,14 +802,15 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 
 func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 
 	defer func() {
 		guardian.Guardian = guardian.New()
 	}()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -853,11 +863,12 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 
 func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 
 	defer func() {
 		guardian.Guardian = guardian.New()
 	}()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ThresholdProfile, error) {
 			if id == "TH1" {
@@ -881,7 +892,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 		},
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -906,16 +917,17 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 
 func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 
 	defer func() {
 		guardian.Guardian = guardian.New()
 	}()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
-	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	cfg.ThresholdSCfg().StoreInterval = 1
 	cfg.ThresholdSCfg().StringIndexedFields = nil
@@ -955,11 +967,12 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 
 func TestThresholdsRunBackupStop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	tnt := "cgrates.org"
 	thID := "Th1"
@@ -998,8 +1011,9 @@ func TestThresholdsRunBackupStop(t *testing.T) {
 
 func TestThresholdsReload(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	synctest.Test(t, func(*testing.T) {
 		tS := NewThresholdService(cfg, nil, cacheS, nil, nil)
 		tS.StartLoop(context.Background())
@@ -1012,8 +1026,9 @@ func TestThresholdsReload(t *testing.T) {
 
 func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().StoreInterval = 5 * time.Millisecond
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	synctest.Test(t, func(*testing.T) {
 		tS := NewThresholdService(cfg, nil, cacheS, nil, nil)
 		tS.StartLoop(context.Background())
@@ -1026,7 +1041,8 @@ func TestThresholdsReloadShutdownConcurrent(t *testing.T) {
 
 func TestThresholdsStartLoop(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	synctest.Test(t, func(*testing.T) {
 		tS := NewThresholdService(cfg, nil, cacheS, nil, nil)
 		tS.StartLoop(context.Background())
@@ -1036,10 +1052,11 @@ func TestThresholdsStartLoop(t *testing.T) {
 
 func TestThresholdsMatchingThresholdsForEventNotFoundErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -1083,14 +1100,15 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 	}()
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheThresholds].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
-	dm := engine.NewDataManager(dbCM, cfg, cM)
-	cacheS := engine.NewCacheS(cfg, dm, cM, nil)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
+	cacheS := engine.NewCacheS(cfg, dm, cM, nil, locker)
 	dm.SetCache(cacheS)
 	cM.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
@@ -1112,10 +1130,11 @@ func TestThresholdsStoreThresholdCacheSetErr(t *testing.T) {
 
 func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -1155,10 +1174,11 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 
 func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -1221,10 +1241,11 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 
 func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	tS := NewThresholdService(cfg, dm, cacheS, filterS, nil)
@@ -1268,6 +1289,7 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		{
 			FilterIDs: []string{"*string"},
@@ -1278,10 +1300,10 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, cM, dm)
 	tS := &ThresholdS{
@@ -1314,6 +1336,7 @@ func TestThresholdSmatchingThresholdsForEventGetOptsErr(t *testing.T) {
 
 func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ThresholdSCfg().Opts.ProfileIDs = []*config.DynamicStringSliceOpt{
 		{
 			Tenant: "cgrates.org",
@@ -1324,7 +1347,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 		config.NewDynamicBoolOpt(nil, "cgrates.org", true, nil),
 	}
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	db := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
@@ -1349,7 +1372,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 		},
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, cM, dm)
 	tS := &ThresholdS{

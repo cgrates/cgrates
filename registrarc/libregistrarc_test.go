@@ -293,7 +293,8 @@ func TestLibRegistrarcRegister(t *testing.T) {
 		Response:         nil,
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	result, err := register(cfg, req, cache)
 	expected := &json.RawMessage{}
 	if reflect.DeepEqual(result, expected) {
@@ -363,7 +364,8 @@ func TestRegisterRegistrarSv1UnregisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	cfg := config.NewDefaultCGRConfig()
-	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	if rplyID, err := register(cfg, req, cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
@@ -393,6 +395,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RPCConns()["errCon"] = &config.RPCConn{
 		Strategy: utils.MetaFirst,
 		PoolSize: 1,
@@ -407,7 +410,7 @@ func TestRegisterRegistrarSv1UnregisterRPCHostsError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	cfg.CacheCfg().ReplicationConns = []string{"errCon"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
-	cache := engine.NewCacheS(cfg, nil, connMgr, nil)
+	cache := engine.NewCacheS(cfg, nil, connMgr, nil, locker)
 	connMgr.SetCache(cache)
 	regCfg := config.NewDefaultCGRConfig()
 	regCfg.RPCConns()["errCon"] = cfg.RPCConns()["errCon"]
@@ -452,7 +455,8 @@ func TestRegisterRegistrarSv1RegisterRPCHosts(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:2356"
 	cfg := config.NewDefaultCGRConfig()
-	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	if rplyID, err := register(cfg, req, cache); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(id, *rplyID) {
@@ -495,6 +499,7 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 	}
 	req.RemoteAddr = "127.0.0.1:3000"
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RPCConns()["errCon1"] = &config.RPCConn{
 		Strategy: utils.MetaFirst,
 		PoolSize: 1,
@@ -509,7 +514,7 @@ func TestRegisterRegistrarSv1RegisterRPCHostsError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	cfg.CacheCfg().ReplicationConns = []string{"errCon1"}
 	cfg.CacheCfg().Partitions[utils.CacheRPCConnections].Replicate = true
-	cache := engine.NewCacheS(cfg, nil, connMgr, nil)
+	cache := engine.NewCacheS(cfg, nil, connMgr, nil, locker)
 	connMgr.SetCache(cache)
 	regCfg := config.NewDefaultCGRConfig()
 	regCfg.RPCConns()["errCon1"] = cfg.RPCConns()["errCon1"]

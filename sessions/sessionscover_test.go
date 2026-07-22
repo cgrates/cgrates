@@ -4704,10 +4704,11 @@ func (sT *mkCall) Call(ctx *context.Context, method string, arg any, rply any) e
 func TestBiRPCv1DisconnectPeer(t *testing.T) {
 	client := new(mkCall)
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
@@ -4751,10 +4752,11 @@ func (sT *mkCallForces) Call(ctx *context.Context, method string, arg any, rply 
 func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	ctx := context.WithClient(context.Background(), new(mkCall))
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
@@ -4822,16 +4824,17 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 func TestSyncSessionsSync(t *testing.T) {
 	log.SetOutput(io.Discard)
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheClosedSessions] = &config.CacheParamCfg{
 		Replicate: true,
 	}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
 	sessions.aSessions = map[string]*Session{}

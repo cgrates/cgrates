@@ -58,13 +58,14 @@ func testLoadIdsStart(testName string, t *testing.T) {
 }
 
 func testLoadIdsITConnect(t *testing.T) {
-	cacheIn := engine.NewCacheS(loadCfgIn, nil, nil, nil)
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn, cacheIn)
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	cacheIn := engine.NewCacheS(loadCfgIn, nil, nil, nil, locker)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn, cacheIn, locker)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cacheOut := engine.NewCacheS(loadCfgOut, nil, nil, nil)
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgOut.GeneralCfg().DBDataEncoding, loadCfgOut, cacheOut)
+	cacheOut := engine.NewCacheS(loadCfgOut, nil, nil, nil, locker)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgOut.GeneralCfg().DBDataEncoding, loadCfgOut, cacheOut, locker)
 	if err != nil {
 		t.Fatal(err)
 	}

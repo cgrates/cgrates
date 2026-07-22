@@ -46,10 +46,11 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := NewCacheS(cfg, nil, nil, nil)
+	locker := NewGuardianLocker(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
+	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 
 	cM := NewConnManager(cfg)
@@ -76,10 +77,11 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := NewCacheS(cfg, nil, nil, nil)
+	locker := NewGuardianLocker(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
+	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -106,9 +108,10 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 		},
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := NewCacheS(cfg, nil, nil, nil)
+	locker := NewGuardianLocker(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmMatch := NewDataManager(dbCM, cfg, nil)
+	dmMatch := NewDataManager(dbCM, cfg, nil, locker)
 	dmMatch.SetCache(cacheS)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
@@ -126,10 +129,11 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 		"Fiel..d":        "profile",
 	}}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := NewCacheS(cfg, nil, nil, nil)
+	locker := NewGuardianLocker(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmMatch := NewDataManager(dbCM, cfg, nil)
+	dmMatch := NewDataManager(dbCM, cfg, nil, locker)
 	dmMatch.SetCache(cacheS)
 
 	tntCtx := utils.ConcatenatedKey(utils.CGRateSorg, utils.MetaRating)
@@ -207,13 +211,14 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := NewGuardianLocker(cfg)
 	data, dErr := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if dErr != nil {
 		t.Fatal(dErr)
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := NewDataManager(dbCM, cfg, nil)
-	cacheS := NewCacheS(cfg, nil, nil, nil)
+	dm := NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 
 	tnt := cfg.GeneralCfg().DefaultTenant

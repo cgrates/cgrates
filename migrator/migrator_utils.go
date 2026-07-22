@@ -9,10 +9,12 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
-	cfg *config.CGRConfig, cache *engine.CacheS) (db *engine.DataManager, err error) {
+	cfg *config.CGRConfig, cache *engine.CacheS,
+	locker *guardian.GuardianLocker) (db *engine.DataManager, err error) {
 	dataDBs := make(map[string]engine.DataDB, len(dbConnIDList))
 	for _, dbConnID := range dbConnIDList {
 		dbCon, err := engine.NewDBConn(cfg.DbCfg().DBConns[dbConnID].Type,
@@ -28,7 +30,7 @@ func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 		dataDBs[dbConnID] = dbCon
 	}
 	dbcManager := engine.NewDBConnManager(dataDBs, cfg.DbCfg())
-	dm := engine.NewDataManager(dbcManager, cfg, nil)
+	dm := engine.NewDataManager(dbcManager, cfg, nil, locker)
 	dm.SetCache(cache)
 	return dm, nil
 }

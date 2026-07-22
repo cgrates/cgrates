@@ -16,11 +16,12 @@ import (
 
 func TestAuthorizeEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -41,11 +42,12 @@ func TestAuthorizeEvent(t *testing.T) {
 
 func TestAuthorizeEventWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -88,11 +90,12 @@ func TestAuthorizeEventWithDigest(t *testing.T) {
 
 func TestInitiateSessionWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -113,11 +116,12 @@ func TestInitiateSessionWithDigest(t *testing.T) {
 
 func TestUpdateSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -138,11 +142,12 @@ func TestUpdateSession(t *testing.T) {
 
 func TestSyncSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -162,11 +167,12 @@ func TestSyncSessions(t *testing.T) {
 
 func TestTerminateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	ssv1 := &SessionSv1{
@@ -187,11 +193,12 @@ func TestTerminateSessions(t *testing.T) {
 
 func TestProcessCDR(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -221,11 +228,12 @@ func TestProcessCDR(t *testing.T) {
 
 func TestProcessMessage(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -250,11 +258,12 @@ func TestProcessMessage(t *testing.T) {
 
 func TestProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -283,11 +292,12 @@ func TestProcessEvent(t *testing.T) {
 
 func TestGetActiveSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -311,11 +321,12 @@ func TestGetActiveSessions(t *testing.T) {
 
 func TestGetActiveSessionsCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -342,11 +353,12 @@ func TestGetActiveSessionsCount(t *testing.T) {
 
 func TestForceDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -370,11 +382,12 @@ func TestForceDisconnect(t *testing.T) {
 
 func TestGetPassiveSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -398,11 +411,12 @@ func TestGetPassiveSessions(t *testing.T) {
 
 func TestGetPassiveSessionsCount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -449,11 +463,12 @@ func TestGetPassiveSessionsCount(t *testing.T) {
 
 func TestActivateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -474,11 +489,12 @@ func TestActivateSessions(t *testing.T) {
 
 func TestDeactivateSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -499,11 +515,12 @@ func TestDeactivateSessions(t *testing.T) {
 
 func TestDisconnectPeer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -528,11 +545,12 @@ func TestDisconnectPeer(t *testing.T) {
 
 func TestSTIRAuthenticate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -557,11 +575,12 @@ func TestSTIRAuthenticate(t *testing.T) {
 func TestSTIRIdentity(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
@@ -588,11 +607,12 @@ func TestSTIRIdentity(t *testing.T) {
 
 func TestRegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	connMgr := engine.NewConnManager(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
 	connMgr.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{

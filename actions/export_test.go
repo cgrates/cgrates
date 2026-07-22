@@ -17,6 +17,7 @@ import (
 
 func TestACHTTPPostExecute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.EFsCfg().PosterAttempts = 1
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
@@ -29,7 +30,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 			},
 		},
 	}
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
 		cacheS, new(engine.FilterS), cfg, apAction)
 	if err != nil {
@@ -81,6 +82,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 
 func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Attempts = 1
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir = utils.MetaNone
 	apAction := &utils.APAction{
@@ -94,7 +96,7 @@ func TestACHTTPPostValues(t *testing.T) {
 			},
 		},
 	}
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
 		cacheS, new(engine.FilterS), cfg, apAction)
 	if err != nil {

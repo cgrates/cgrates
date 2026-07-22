@@ -18,7 +18,8 @@ import (
 
 func TestNewSQSER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &SQSER{
 		cgrCfg:  cfg,
 		cfgIdx:  0,
@@ -52,7 +53,8 @@ func TestNewSQSER(t *testing.T) {
 
 func TestSQSERServeRunDelay0(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
 			ID:             utils.MetaDefault,
@@ -78,7 +80,8 @@ func TestSQSERServeRunDelay0(t *testing.T) {
 
 func TestSQSERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
 		{
 			ID:             utils.MetaDefault,
@@ -179,10 +182,11 @@ func TestSQSERProcessMessageError1(t *testing.T) {
 
 func TestSQSERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	cfg.ERsCfg().Readers[0].ProcessedPath = ""
 	fltrs := engine.NewFilterS(cfg, nil, dm)

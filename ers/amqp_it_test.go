@@ -52,6 +52,7 @@ func TestAMQPER(t *testing.T) {
 	],
 },
 }`)
+	locker := engine.NewGuardianLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +65,7 @@ func TestAMQPER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewAMQPER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil, locker), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	connection, err := amqp.Dial("amqp://guest:guest@localhost:5672/")

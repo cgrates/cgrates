@@ -36,6 +36,10 @@ func (db *DBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	if err != nil {
 		return
 	}
+	gs, err := registry.WaitForService(shutdown, utils.GuardianS, utils.StateServiceUP, db.cfg.GeneralCfg().ConnectTimeout)
+	if err != nil {
+		return
+	}
 	db.mu.Lock()
 	defer db.mu.Unlock()
 	db.oldDBCfg = db.cfg.DbCfg().Clone()
@@ -56,7 +60,8 @@ func (db *DBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 			utils.Logger.Info("<DB> Internal DB established")
 		}
 	}
-	db.dm = engine.NewDataManager(dbConnMap, db.cfg, cms.(*ConnManagerService).ConnManager())
+	db.dm = engine.NewDataManager(dbConnMap, db.cfg,
+		cms.(*ConnManagerService).ConnManager(), gs.(*GuardianService).Locker())
 	if db.setVersions {
 		db, _, err := dbConnMap.GetConn(utils.CacheVersions)
 		if err != nil {

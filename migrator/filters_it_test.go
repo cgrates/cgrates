@@ -62,13 +62,14 @@ func testFltrStart(testName string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	cacheIn := engine.NewCacheS(fltrCfgIn, nil, nil, nil)
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn, cacheIn)
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	cacheIn := engine.NewCacheS(fltrCfgIn, nil, nil, nil, locker)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn, cacheIn, locker)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cacheOut := engine.NewCacheS(fltrCfgOut, nil, nil, nil)
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgOut.GeneralCfg().DBDataEncoding, fltrCfgOut, cacheOut)
+	cacheOut := engine.NewCacheS(fltrCfgOut, nil, nil, nil, locker)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgOut.GeneralCfg().DBDataEncoding, fltrCfgOut, cacheOut, locker)
 	if err != nil {
 		t.Fatal(err)
 	}

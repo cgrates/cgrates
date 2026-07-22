@@ -65,6 +65,7 @@ func TestKafkaER(t *testing.T) {
 	]
 }
 }`)
+	locker := engine.NewGuardianLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -76,7 +77,7 @@ func TestKafkaER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewKafkaER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil, locker), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	rdr.Serve()

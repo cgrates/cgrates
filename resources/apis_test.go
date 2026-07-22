@@ -20,11 +20,12 @@ import (
 func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	var dmRES *engine.DataManager
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dmRES = engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dmRES = engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dmRES.SetCache(cacheS)
 	cfg.ResourceSCfg().StoreInterval = 1
 	cfg.ResourceSCfg().StringIndexedFields = nil
@@ -72,13 +73,14 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 	}
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltS := engine.NewFilterS(cfg, nil, dm)
 	rs := NewResourceService(cfg, dm, cacheS, fltS, nil)
@@ -119,7 +121,9 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 }
 
 func TestResourcesV1ResourcesForEventOK(t *testing.T) {
-	rS, dm := newTestResourceSWithCache(t)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	rS, dm := newTestResourceSWithCache(t, cfg, locker)
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
 		ID:                "RES1",
@@ -187,7 +191,9 @@ func TestResourcesV1ResourcesForEventOK(t *testing.T) {
 }
 
 func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
-	rS, dm := newTestResourceSWithCache(t)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	rS, dm := newTestResourceSWithCache(t, cfg, locker)
 	rsPrf := &utils.ResourceProfile{
 		Tenant:       "cgrates.org",
 		ID:           "RES1",
@@ -238,7 +244,9 @@ func TestResourcesV1ResourcesForEventNotFound(t *testing.T) {
 }
 
 func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
-	rS, dm := newTestResourceSWithCache(t)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	rS, dm := newTestResourceSWithCache(t, cfg, locker)
 
 	rsPrf := &utils.ResourceProfile{
 		Tenant:            "cgrates.org",
@@ -311,11 +319,12 @@ func TestResourcesV1ResourcesForEventMissingParameters(t *testing.T) {
 
 func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
 		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
@@ -395,11 +404,12 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 
 func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	cacheKey := utils.ConcatenatedKey(utils.ResourceSv1GetResourcesForEvent,
 		utils.ConcatenatedKey("cgrates.org", "ResourcesForEventTest"))
@@ -522,7 +532,9 @@ func TestResourcesV1GetResource(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			rS, dm := newTestResourceSWithCache(t)
+			cfg := config.NewDefaultCGRConfig()
+			locker := engine.NewGuardianLocker(cfg)
+			rS, dm := newTestResourceSWithCache(t, cfg, locker)
 			if tc.storeRes {
 				rs := &utils.Resource{
 					Tenant: "cgrates.org",
@@ -607,7 +619,9 @@ func TestResourcesV1GetResourceWithConfig(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			rS, dm := newTestResourceSWithCache(t)
+			cfg := config.NewDefaultCGRConfig()
+			locker := engine.NewGuardianLocker(cfg)
+			rS, dm := newTestResourceSWithCache(t, cfg, locker)
 			if tc.profileID != "" {
 				prf := *rsPrf
 				prf.ID = tc.profileID
@@ -702,7 +716,9 @@ func TestResourcesV1AuthorizeResources(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			rS, dm := newTestResourceSWithCache(t)
+			cfg := config.NewDefaultCGRConfig()
+			locker := engine.NewGuardianLocker(cfg)
+			rS, dm := newTestResourceSWithCache(t, cfg, locker)
 			rsPrf := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
 				ID:                "RES1",
@@ -783,8 +799,9 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-			dm := engine.NewDataManager(dbCM, cfg, nil)
-			cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+			cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 			dm.SetCache(cacheS)
 
 			cacheKey := utils.ConcatenatedKey(tc.method,
@@ -899,8 +916,9 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-			dm := engine.NewDataManager(dbCM, cfg, nil)
-			cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+			cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 			dm.SetCache(cacheS)
 
 			cacheKey := utils.ConcatenatedKey(tc.method,
@@ -991,7 +1009,9 @@ func TestResourcesV1MissingParameters(t *testing.T) {
 	}
 	for _, m := range methods {
 		t.Run(m.name, func(t *testing.T) {
-			rS, dm := newTestResourceSWithCache(t)
+			cfg := config.NewDefaultCGRConfig()
+			locker := engine.NewGuardianLocker(cfg)
+			rS, dm := newTestResourceSWithCache(t, cfg, locker)
 
 			rsPrf := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
@@ -1099,7 +1119,9 @@ func TestResourcesV1AllocateResources(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			rS, dm := newTestResourceSWithCache(t)
+			cfg := config.NewDefaultCGRConfig()
+			locker := engine.NewGuardianLocker(cfg)
+			rS, dm := newTestResourceSWithCache(t, cfg, locker)
 			rsPrf := &utils.ResourceProfile{
 				Tenant:            "cgrates.org",
 				ID:                tc.profileID,
@@ -1155,12 +1177,13 @@ func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, re
 
 func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 
 	rsPrf := &utils.ResourceProfile{
@@ -1236,7 +1259,9 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 
 func TestResourcesV1ReleaseResources(t *testing.T) {
 	t.Run("OK", func(t *testing.T) {
-		rS, dm := newTestResourceSWithCache(t)
+		cfg := config.NewDefaultCGRConfig()
+		locker := engine.NewGuardianLocker(cfg)
+		rS, dm := newTestResourceSWithCache(t, cfg, locker)
 		rsPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES1",
@@ -1272,7 +1297,9 @@ func TestResourcesV1ReleaseResources(t *testing.T) {
 	})
 
 	t.Run("UsageNotFound", func(t *testing.T) {
-		rS, dm := newTestResourceSWithCache(t)
+		cfg := config.NewDefaultCGRConfig()
+		locker := engine.NewGuardianLocker(cfg)
+		rS, dm := newTestResourceSWithCache(t, cfg, locker)
 		rsPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES1",
@@ -1318,7 +1345,9 @@ func TestResourcesV1ReleaseResources(t *testing.T) {
 	})
 
 	t.Run("NoMatch", func(t *testing.T) {
-		rS, dm := newTestResourceSWithCache(t)
+		cfg := config.NewDefaultCGRConfig()
+		locker := engine.NewGuardianLocker(cfg)
+		rS, dm := newTestResourceSWithCache(t, cfg, locker)
 		rsPrf := &utils.ResourceProfile{
 			Tenant:            "cgrates.org",
 			ID:                "RES1",
@@ -1352,12 +1381,13 @@ func TestResourcesV1ReleaseResources(t *testing.T) {
 
 func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	ccM := &ccMock{
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
@@ -1447,6 +1477,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 
 func TestResourcesStoreResourceError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ResourceSCfg().StoreInterval = -1
 	cfg.RPCConns()["test"] = &config.RPCConn{
 		Conns: []*config.RemoteHost{{}},
@@ -1455,9 +1486,9 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr.SetCache(cacheS)
-	dm := engine.NewDataManager(dbCM, cfg, connMgr)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 
 	rS := NewResourceService(cfg, dm, cacheS, engine.NewFilterS(cfg, nil, dm), nil)
@@ -1588,8 +1619,9 @@ func TestErrRetrieveOpts(t *testing.T) {
 			tc.setCfg(cfg)
 			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-			dm := engine.NewDataManager(dbCM, cfg, nil)
-			cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+			locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+			dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+			cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 			dm.SetCache(cacheS)
 			fltrs := engine.NewFilterS(cfg, nil, dm)
 			rS := NewResourceService(cfg, dm, cacheS, fltrs, nil)

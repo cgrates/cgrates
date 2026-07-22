@@ -29,11 +29,12 @@ func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args
 }
 func TestActionsAPIs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	aS := NewActionS(cfg, cacheS, fltrs, dm, nil)
@@ -78,12 +79,13 @@ func TestActionsAPIs(t *testing.T) {
 
 func TestActionsExecuteActionsResetTH(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -167,12 +169,13 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 
 func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaStats] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -256,12 +259,13 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 
 func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -342,12 +346,13 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 }
 func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -436,11 +441,12 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 6)
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -493,12 +499,13 @@ func TestActionsExecuteActionsLog(t *testing.T) {
 
 func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.CDRs)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -579,12 +586,13 @@ func TestActionsExecuteActionsLogCDRs(t *testing.T) {
 
 func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 

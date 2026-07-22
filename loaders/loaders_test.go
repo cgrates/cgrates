@@ -23,10 +23,11 @@ import (
 
 func TestNewLoaderService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.LoaderCfg()[0].Enabled = true
 	cfg.LoaderCfg()[0].RunDelay = -1
 	cfg.LoaderCfg()[0].TpInDir = "notAFolder"
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -34,7 +35,7 @@ func TestNewLoaderService(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -94,6 +95,7 @@ func TestNewLoaderService(t *testing.T) {
 
 func TestLoaderServiceV1Run(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -136,7 +138,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -144,7 +146,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
@@ -182,6 +184,7 @@ func (mockLock2) IsLockFile(string) (_ bool) { return }
 
 func TestLoaderServiceV1RunErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
 	}
@@ -223,7 +226,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -231,7 +234,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
@@ -319,6 +322,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 func TestLoaderServiceV1ImportZip(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -349,7 +353,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -357,7 +361,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
@@ -388,6 +392,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 
 func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
 	}
@@ -416,7 +421,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -424,7 +429,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
@@ -534,6 +539,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 
 func TestLoaderServiceV1RunPath(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -575,7 +581,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	cfg.LoaderCfg()[0].TpInDir = inPath
 	defer os.RemoveAll(inPath)
 
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -583,7 +589,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 

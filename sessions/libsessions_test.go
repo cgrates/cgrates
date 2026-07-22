@@ -194,7 +194,8 @@ func TestVerifySignature(t *testing.T) {
 		t.Error(err)
 	}
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
 	expectedErr := "crypto/ecdsa: verification error"
@@ -211,7 +212,8 @@ func TestVerifySignature(t *testing.T) {
 
 func TestAuthStirShaken(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	if err := AuthStirShaken(context.Background(), cacheS, "", "1001", "", "1002", "", utils.NewStringSet([]string{utils.MetaAny}), -1, cfg.GeneralCfg().ReplyTimeout); err == nil {
 		t.Error("Expected invalid identity")
 	}
@@ -256,7 +258,8 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 
 func TestNewSTIRIdentityError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	rply, err := NewProcessedIdentity("eyJhbGciOiJFUzI1NiIsInBwdCI6InNoYWtlbiIsInR5cCI6InBhc3Nwb3J0IiwieDV1IjoiaHR0cHM6Ly93d3cuZXhhbXBsZS5vcmcvY2VydC5jZXIifQ.eyJhdHRlc3QiOiJBIiwiZGVzdCI6eyJ0biI6WyIxMDAyIl19LCJpYXQiOjE1ODcwMTk4MjIsIm9yaWciOnsidG4iOiIxMDAxIn0sIm9yaWdpZCI6IjEyMzQ1NiJ9.4ybtWmgqdkNyJLS9Iv3PuJV8ZxR7yZ_NEBhCpKCEu2WBiTchqwoqoWpI17Q_ALm38tbnpay32t95ZY_LhSgwJg;info=<https://www.example.org/cert.cer>;ppt=shaken")
 	if err != nil {
 		t.Error(err)
@@ -274,7 +277,8 @@ func TestNewSTIRIdentityError(t *testing.T) {
 
 func TestNewIdentity(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	payload := &utils.PASSporTPayload{
 		ATTest: "A",
 		Dest:   utils.PASSporTDestinationsIdentity{Tn: []string{"1002"}},

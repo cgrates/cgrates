@@ -339,10 +339,11 @@ func testXMLITKillEngine(t *testing.T) {
 
 func TestNewXMLFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ERsCfg().Readers[0].SourcePath = "/tmp/xmlErs/out/"
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = 1
 	fltrs := &engine.FilterS{}
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expEr := &XMLFileER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,
@@ -462,11 +463,12 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 
 func TestFileXMLProcessEVentError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.ERsCfg().Readers[0].Fields = []*config.FCTemplate{}
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil))
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	filePath := "/tmp/TestFileXMLProcessEvent/"
 	fname := "file1.xml"

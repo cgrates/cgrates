@@ -17,8 +17,9 @@ import (
 func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 
 	expErr := "MANDATORY_IE_MISSING: [connIDs]"
@@ -31,6 +32,7 @@ func TestPopulatStatsForQOSRouteCallErr(t *testing.T) {
 func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -56,7 +58,7 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 
@@ -75,8 +77,9 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
 	ctx := context.Background()
@@ -102,6 +105,7 @@ func TestQOSRouteSorterRoutesNoStatSConns(t *testing.T) {
 func TestQOSRouteSorterRoutesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -126,7 +130,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
@@ -182,6 +186,7 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -206,7 +211,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
@@ -248,6 +253,7 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -262,7 +268,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
@@ -306,6 +312,7 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.RouteSCfg().Conns = map[string][]*config.DynamicConns{
 		utils.MetaStats: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats)}}},
 	}
@@ -320,7 +327,7 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 	}
 
 	cM := engine.NewConnManager(cfg)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), utils.StatSv1, cc)
 	qos := NewQOSRouteSorter(cfg, cM, nil)
