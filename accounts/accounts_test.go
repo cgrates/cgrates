@@ -74,8 +74,8 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 		newDm := engine.NewDataManager(mockDataDB, cfg.CacheCfg(), nil)
 		newDm.SetCache(engine.Cache)
 		accnts = NewAccountS(cfg, fltr, nil, newDm)
-		if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-			[]string{}, false,true); err == nil || err != utils.ErrNotFound {
+		if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+			[]string{}, false); err == nil || err != utils.ErrNotFound {
 			t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 		}
 
@@ -87,8 +87,8 @@ func TestMatchingAccountsForEventMockingErrors(t *testing.T) {
 	newDm := engine.NewDataManager(dbCm, cfg, nil)
 	newDm.SetCache(cacheS)
 	accnts = NewAccountS(cfg, fltr, nil, newDm)
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err != utils.ErrNotImplemented {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 }
@@ -131,8 +131,8 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 		},
 	}
 
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err != utils.ErrNotFound {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
@@ -142,40 +142,36 @@ func TestMatchingAccountsForEvent(t *testing.T) {
 	}
 
 	cgrEvent.APIOpts = make(map[string]any)
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err != utils.ErrNotFound {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 
 	accPrf.FilterIDs = []string{"invalid_filter_format"}
 	expected := "NOT_FOUND:invalid_filter_format"
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err.Error() != expected {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.FilterIDs = []string{"*string:~*req.Account:1003"}
 
 	expected = "NOT_FOUND"
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err.Error() != expected {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.FilterIDs = []string{"*string:~*req.Account:1004"}
 
 	expected = "NOT_FOUND:invalid_filter_format"
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, true); err == nil || err.Error() != expected {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
+		[]string{}, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Weights[0].FilterIDs = []string{}
 
-	expectedAccPrfWeght := utils.Accounts{
-		{
-			Account: accPrf,
-		},
-	}
+	expectedAccPrfWeght := []*utils.Account{accPrf}
 	if rcv, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", cgrEvent,
-		[]string{}, false, false); err != nil {
+		[]string{}, false); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expectedAccPrfWeght, rcv) {
 		t.Errorf("Expected %+v, received %+v", expectedAccPrfWeght, utils.ToJSON(rcv))
@@ -285,28 +281,26 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accntsPrf := []*utils.AccountWithLock{
+	accntsPrf := []*utils.Account{
 		{
-			Account: &utils.Account{
-				Tenant:    "cgrates.org",
-				ID:        "TestAccountsDebitGetUsage",
-				FilterIDs: []string{"*prefix:~*req.Destination:+44"},
-				Balances: map[string]*utils.Balance{
-					"ConcreteBal1": {
-						ID: "ConcreteBal1",
-						Weights: utils.DynamicWeights{
-							{
-								Weight: 10,
-							},
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsDebitGetUsage",
+			FilterIDs: []string{"*prefix:~*req.Destination:+44"},
+			Balances: map[string]*utils.Balance{
+				"ConcreteBal1": {
+					ID: "ConcreteBal1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
 						},
-						Type:  utils.MetaConcrete,
-						Units: &utils.Decimal{Big: decimal.New(90, 0)},
-						CostIncrements: []*utils.CostIncrement{
-							{
-								Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{Big: decimal.New(2, 1)}, // 0.2
-								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
-							},
+					},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{Big: decimal.New(90, 0)},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(2, 1)}, // 0.2
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 						},
 					},
 				},
@@ -358,7 +352,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 			},
 		},
 		Accounts: map[string]*utils.Account{
-			"TestAccountsDebitGetUsage": accntsPrf[0].Account,
+			"TestAccountsDebitGetUsage": accntsPrf[0],
 		},
 	}
 
@@ -382,7 +376,7 @@ func TestAccountsDebitGetUsage(t *testing.T) {
 
 	// get usage from *usage
 	//firstly reset the account
-	accntsPrf[0].Account.Balances["ConcreteBal1"].Units = utils.NewDecimal(90, 0)
+	accntsPrf[0].Balances["ConcreteBal1"].Units = utils.NewDecimal(90, 0)
 	accnts = NewAccountS(cfg, fltr, nil, dm)
 	cgrEvent = &utils.CGREvent{
 		ID:     "TEST_EVENT_get_usage",
@@ -412,40 +406,38 @@ func TestAccountsDebit(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	accnts := NewAccountS(cfg, fltr, nil, dm)
 
-	accntsPrf := []*utils.AccountWithLock{
+	accntsPrf := []*utils.Account{
 		{
-			Account: &utils.Account{
-				Tenant:    "cgrates.org",
-				ID:        "TestAccountsDebit",
-				FilterIDs: []string{"*string:~*req.Account:1004"},
-				Balances: map[string]*utils.Balance{
-					"AbstractBalance1": {
-						ID: "AbstractBalance1",
-						Weights: utils.DynamicWeights{
-							{
-								Weight: 25,
-							},
-						},
-						Type:  utils.MetaAbstract,
-						Units: &utils.Decimal{Big: decimal.New(40, 0)},
-						CostIncrements: []*utils.CostIncrement{
-							{
-								Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
-								FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
-							},
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsDebit",
+			FilterIDs: []string{"*string:~*req.Account:1004"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 25,
 						},
 					},
-					"ConcreteBalance2": {
-						ID: "ConcreteBalance2",
-						Weights: utils.DynamicWeights{
-							{
-								Weight: 20,
-							},
+					Type:  utils.MetaAbstract,
+					Units: &utils.Decimal{Big: decimal.New(40, 0)},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    &utils.Decimal{Big: decimal.New(1, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
 						},
-						Type:  utils.MetaConcrete,
-						Units: &utils.Decimal{Big: decimal.New(213, 0)},
 					},
+				},
+				"ConcreteBalance2": {
+					ID: "ConcreteBalance2",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{Big: decimal.New(213, 0)},
 				},
 			},
 		},
@@ -1437,14 +1429,14 @@ func TestMultipleAccountsErr(t *testing.T) {
 	}
 
 	expected := "NOT_FOUND:invalid_format"
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false, true); err == nil || err.Error() != expected {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", args,
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
 	expected = "NOT_FOUND:invalid_format"
-	if _, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", args,
-		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false, true); err == nil || err.Error() != expected {
+	if _, _, err := accnts.matchingLockedAccountsForEvent(context.Background(), "cgrates.org", args,
+		[]string{"TestV1MaxAbstracts", "TestV1MaxAbstracts2", "TestV1MaxAbstracts3"}, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }

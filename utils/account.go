@@ -671,48 +671,6 @@ func (blnc *Balance) Clone() (cln *Balance) {
 	return
 }
 
-// AccountWithLock wraps Account with LockID.
-type AccountWithLock struct {
-	*Account
-	LockID string
-}
-
-// Accounts is a collection of AccountWithLock objects
-type Accounts []*AccountWithLock
-
-// Accounts returns the list of Account
-func (apWws Accounts) Accounts() (aps []*Account) {
-	if apWws != nil {
-		aps = make([]*Account, len(apWws))
-		for i, apWw := range apWws {
-			aps[i] = apWw.Account
-		}
-	}
-	return
-}
-
-// LockIDs returns the list of LockIDs
-func (apWws Accounts) LockIDs() (lkIDs []string) {
-	if apWws != nil {
-		lkIDs = make([]string, len(apWws))
-		for i, apWw := range apWws {
-			lkIDs[i] = apWw.LockID
-		}
-	}
-	return
-}
-
-// Account returns the Account object with ID
-func (apWws Accounts) Account(acntID string) (acnt *Account) {
-	for _, aWw := range apWws {
-		if aWw.Account.ID == acntID {
-			acnt = aWw.Account
-			break
-		}
-	}
-	return
-}
-
 // BalanceWithWeight attaches static Weight to Balance
 type BalanceWithWeight struct {
 	*Balance

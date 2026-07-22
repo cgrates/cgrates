@@ -261,100 +261,6 @@ func TestAPNewDefaultBalance(t *testing.T) {
 	}
 }
 
-func TestAPAccount(t *testing.T) {
-	apS := Accounts{
-		{
-			Account: &Account{
-				Tenant:    "testTenant1",
-				ID:        "testID1",
-				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
-				Weights:   nil,
-				Balances: map[string]*Balance{
-					"testBalance1": {
-						ID:    "testBalance1",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			LockID: "testString1",
-		},
-		{
-			Account: &Account{
-				Tenant:    "testTenant2",
-				ID:        "testID2",
-				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
-				Weights:   nil,
-				Balances: map[string]*Balance{
-					"testBalance2": {
-						ID:    "testBalance2",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			LockID: "testString2",
-		},
-	}
-
-	expected := make([]*Account, 0)
-	for i := range apS {
-		expected = append(expected, apS[i].Account)
-	}
-	received := apS.Accounts()
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", ToJSON(expected), ToJSON(received))
-	}
-}
-
-func TestAPLockIDs(t *testing.T) {
-	apS := Accounts{
-		{
-			Account: &Account{
-				Tenant:    "testTenant1",
-				ID:        "testID1",
-				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
-				Weights:   nil,
-				Balances: map[string]*Balance{
-					"testBalance1": {
-						ID:    "testBalance1",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			LockID: "testString1",
-		},
-		{
-			Account: &Account{
-				Tenant:    "testTenant2",
-				ID:        "testID2",
-				FilterIDs: []string{"testFID1", "testFID2", "*ai:~*req.AnswerTime:2020-04-12T00:00:00Z|2020-04-12T10:00:00Z"},
-				Weights:   nil,
-				Balances: map[string]*Balance{
-					"testBalance2": {
-						ID:    "testBalance2",
-						Type:  MetaAbstract,
-						Units: &Decimal{decimal.New(0, 0)},
-					},
-				},
-			},
-			LockID: "testString3",
-		},
-	}
-
-	expected := make([]string, 0)
-	for i := range apS {
-		expected = append(expected, apS[i].LockID)
-	}
-	received := apS.LockIDs()
-
-	if !reflect.DeepEqual(received, expected) {
-		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, received)
-	}
-}
-
 func TestAPBlcsSort(t *testing.T) {
 
 	blncS := BalancesWithWeight{
@@ -1534,25 +1440,6 @@ func TestAccountUnitFactorClone(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			ToJSON(uF), ToJSON(rcv))
 	}
-}
-
-func TestAccountObjectID(t *testing.T) {
-	apWws := &Accounts{
-		{
-			Account: &Account{
-				ID: "ID",
-			},
-		},
-	}
-
-	exp := &Account{
-		ID: "ID",
-	}
-
-	if val := apWws.Account("ID"); !reflect.DeepEqual(val, exp) {
-		t.Errorf("expected %v ,received %v", exp, val)
-	}
-
 }
 
 func TestMapStringInterfaceToAccount(t *testing.T) {
