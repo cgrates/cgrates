@@ -15,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
@@ -29,14 +28,6 @@ type replicationCall struct {
 	args   any
 }
 
-type mockConnector struct {
-	err error
-}
-
-func (c *mockConnector) Call(_ *context.Context, _ string, _, _ any) error {
-	return c.err
-}
-
 type countingConnector struct {
 	calls atomic.Uint64
 }
@@ -44,38 +35,6 @@ type countingConnector struct {
 func (c *countingConnector) Call(_ *context.Context, _ string, _, _ any) error {
 	c.calls.Add(1)
 	return nil
-}
-
-func setupReplicator(b *testing.B, failedDir string,
-	connector birpc.ClientConnector) *ConnManager {
-	b.Helper()
-	cfg := config.NewDefaultCGRConfig()
-	connID := "replicator-benchmark"
-	cfg.RPCConns()[connID] = config.NewDfltRPCConn()
-	dbCfg := cfg.DbCfg().DBConns[utils.MetaDefault]
-	dbCfg.RplConns = []string{connID}
-	dbCfg.RplInterval = 0
-	dbCfg.RplFailedDir = failedDir
-	dbCfg.RplFiltered = false
-
-	locker := NewLocker(cfg)
-	cache := NewCacheS(cfg, nil, nil, nil, locker)
-	cm := NewConnManager(cfg)
-	cm.SetCache(cache)
-	// Keep ConnManager dispatch in the benchmark without adding RPC transport overhead.
-	cache.SetWithoutReplicate(utils.CacheRPCConnections, connID,
-		connector, nil, true, utils.NonTransactional)
-	return cm
-}
-
-func newBenchReplicator(b *testing.B, interval time.Duration, failedDir string,
-	connector birpc.ClientConnector) *replicator {
-	b.Helper()
-	cm := setupReplicator(b, failedDir, connector)
-	r := newReplicator(cm.cfg.DbCfg().DBConns[utils.MetaDefault], cm, NewLocker(cm.cfg))
-	// Set the interval after construction so interval benchmarks control flushing without a ticker.
-	r.interval = interval
-	return r
 }
 
 func newReplicationCall(objID string) replicationCall {
@@ -132,7 +91,7 @@ func sameObjectSetRemoveCalls(size int) []replicationCall {
 func newReplicationTask() *ReplicationTask {
 	call := newReplicationCall("cgrates.org:benchmark")
 	return &ReplicationTask{
-		ConnIDs: []string{"replicator-benchmark"},
+		ConnIDs: []string{"replicator-test"},
 		ObjType: utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles],
 		ObjID:   call.objID,
 		Method:  call.method,
@@ -146,7 +105,7 @@ func BenchmarkReplicatorImmediate(b *testing.B) {
 	objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 
 	b.Run("FailedDirDisabled", func(b *testing.B) {
-		r := newBenchReplicator(b, 0, "", &mockConnector{})
+		r := newTestReplicator(b, 0, "", &mockConnector{})
 		for b.Loop() {
 			if err := r.replicate(context.Background(), objType, call.objID, call.method, call.args, item); err != nil {
 				b.Fatal(err)
@@ -154,7 +113,7 @@ func BenchmarkReplicatorImmediate(b *testing.B) {
 		}
 	})
 	b.Run("FailedDirEnabled", func(b *testing.B) {
-		r := newBenchReplicator(b, 0, b.TempDir(), &mockConnector{})
+		r := newTestReplicator(b, 0, b.TempDir(), &mockConnector{})
 		for b.Loop() {
 			if err := r.replicate(context.Background(), objType, call.objID, call.method, call.args, item); err != nil {
 				b.Fatal(err)
@@ -169,7 +128,7 @@ func BenchmarkReplicatorImmediateParallel(b *testing.B) {
 	objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 
 	b.Run("SameObject", func(b *testing.B) {
-		r := newBenchReplicator(b, 0, "", &mockConnector{})
+		r := newTestReplicator(b, 0, "", &mockConnector{})
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
@@ -181,7 +140,7 @@ func BenchmarkReplicatorImmediateParallel(b *testing.B) {
 		})
 	})
 	b.Run("DifferentObjects", func(b *testing.B) {
-		r := newBenchReplicator(b, 0, "", &mockConnector{})
+		r := newTestReplicator(b, 0, "", &mockConnector{})
 		calls := uniqueReplicationCalls(runtime.GOMAXPROCS(0))
 		var workerID atomic.Uint64
 		b.ResetTimer()
@@ -209,7 +168,7 @@ func BenchmarkReplicatorIntervalQueue(b *testing.B) {
 	}
 	for _, benchmark := range benchmarks {
 		b.Run(benchmark.name, func(b *testing.B) {
-			r := newBenchReplicator(b, time.Hour, "", &mockConnector{})
+			r := newTestReplicator(b, time.Hour, "", &mockConnector{})
 			objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 			next := 0
 			for b.Loop() {
@@ -244,7 +203,7 @@ func BenchmarkReplicatorIntervalBatch(b *testing.B) {
 	for _, benchmark := range benchmarks {
 		b.Run(benchmark.name, func(b *testing.B) {
 			connector := &countingConnector{}
-			r := newBenchReplicator(b, time.Hour, "", connector)
+			r := newTestReplicator(b, time.Hour, "", connector)
 			for b.Loop() {
 				objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 				for _, call := range benchmark.calls {
@@ -261,7 +220,7 @@ func BenchmarkReplicatorIntervalBatch(b *testing.B) {
 
 func BenchmarkReplicatorFailedWrite(b *testing.B) {
 	wantErr := errors.New("replication failed")
-	r := newBenchReplicator(b, 0, b.TempDir(),
+	r := newTestReplicator(b, 0, b.TempDir(),
 		&mockConnector{err: wantErr})
 	item := &config.ItemOpts{Replicate: true}
 	call := newReplicationCall("cgrates.org:benchmark")
