@@ -13,7 +13,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 	"gorm.io/gorm"
 )
 
@@ -1443,63 +1442,6 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		Limit(1).Count(&count).Error
 
 	return count > 0, err
-}
-
-// AddLoadHistory adds a single load instance to the load history.
-func (sqls *SQLStorage) AddLoadHistory(ldInst *utils.LoadInstance,
-	loadHistSize int, transactionID string) error {
-	if loadHistSize == 0 { // Load history disabled
-		return nil
-	}
-	// Make sure we do it locked since other instances can modify the history while we read it.
-	err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) error {
-		return sqls.db.Transaction(func(tx *gorm.DB) error {
-			var mdl []*LoadInstanceMdl
-			if qErr := tx.Table(utils.LoadInstKey).Where(&LoadInstanceMdl{Key: utils.LoadInstKey}).Find(&mdl).Error; qErr != nil {
-				return qErr
-			}
-			var existingLoadHistory []*utils.LoadInstance
-			if len(mdl) != 0 && len(mdl[0].LoadInstance) > 0 {
-				existingLoadHistory = utils.MapStringInterfaceToLoadInstances(mdl[0].LoadInstance)
-			}
-
-			// Insert at the first position
-			existingLoadHistory = append(existingLoadHistory, nil)
-			copy(existingLoadHistory[1:], existingLoadHistory[0:])
-			existingLoadHistory[0] = ldInst
-
-			histLen := len(existingLoadHistory)
-			if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element
-				existingLoadHistory = existingLoadHistory[:loadHistSize]
-			}
-			newMdl := &LoadInstanceMdl{
-				Key:          utils.LoadInstKey,
-				LoadInstance: utils.LoadInstancesAsMapStringInterface(existingLoadHistory),
-			}
-
-			return tx.Table(utils.LoadInstKey).Save(&newMdl).Error
-		})
-	}, 0, utils.LoadInstKey)
-	return err
-}
-
-// Limit will only retrieve the last n items out of history, newest first
-func (sqls *SQLStorage) GetLoadHistory(limit int, skipCache bool,
-	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
-	if limit == 0 {
-		return nil, nil
-	}
-	var mdl []*LoadInstanceMdl
-	if err := sqls.db.Table(utils.LoadInstKey).Where(&LoadInstanceMdl{Key: utils.LoadInstKey}).Find(&mdl).Error; err != nil {
-		return nil, err
-	} else if len(mdl) == 0 {
-		return nil, utils.ErrNotFound
-	}
-	loadInstances := utils.MapStringInterfaceToLoadInstances(mdl[0].LoadInstance)
-	if len(loadInstances) < limit || limit == -1 {
-		return loadInstances, nil
-	}
-	return loadInstances[:limit], nil
 }
 
 func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {

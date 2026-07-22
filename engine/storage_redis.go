@@ -299,57 +299,6 @@ func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	return false, errors.New("unsupported HasData category")
 }
 
-// Limit will only retrieve the last n items out of history, newest first
-func (rs *RedisStorage) GetLoadHistory(limit int, skipCache bool,
-	transactionID string) (loadInsts []*utils.LoadInstance, err error) {
-	if limit == 0 {
-		return nil, nil
-	}
-
-	if limit != -1 {
-		limit -= -1 // Decrease limit to match redis approach on lrange
-	}
-	var marshaleds [][]byte
-	if err = rs.Cmd(&marshaleds, redisLRANGE,
-		utils.LoadInstKey, "0", strconv.Itoa(limit)); err != nil {
-		return nil, err
-	}
-	loadInsts = make([]*utils.LoadInstance, len(marshaleds))
-	for idx, marshaled := range marshaleds {
-		if err = rs.ms.Unmarshal(marshaled, loadInsts[idx]); err != nil {
-			return nil, err
-		}
-	}
-	if len(loadInsts) < limit || limit == -1 {
-		return loadInsts, nil
-	}
-	return loadInsts[:limit], nil
-}
-
-// Adds a single load instance to load history
-func (rs *RedisStorage) AddLoadHistory(ldInst *utils.LoadInstance, loadHistSize int, transactionID string) (err error) {
-	if loadHistSize == 0 { // Load history disabled
-		return
-	}
-	var marshaled []byte
-	if marshaled, err = rs.ms.Marshal(&ldInst); err != nil {
-		return
-	}
-	err = guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error { // Make sure we do it locked since other instance can modify history while we read it
-		var histLen int
-		if err := rs.Cmd(&histLen, redisLLEN, utils.LoadInstKey); err != nil {
-			return err
-		}
-		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
-			if err = rs.Cmd(nil, redisRPOP, utils.LoadInstKey); err != nil {
-				return err
-			}
-		}
-		return rs.Cmd(nil, redisLPUSH, utils.LoadInstKey, string(marshaled))
-	}, 0, utils.LoadInstKey)
-	return err
-}
-
 func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
