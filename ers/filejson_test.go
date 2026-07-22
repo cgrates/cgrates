@@ -16,7 +16,8 @@ import (
 
 func TestNewJSONFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cfgIdx := 0
 	expected := &JSONFileER{
 		RWMutex:   sync.RWMutex{},

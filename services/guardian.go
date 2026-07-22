@@ -5,6 +5,7 @@ package services
 
 import (
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -19,7 +20,8 @@ func NewGuardianService(cfg *config.CGRConfig) *GuardianService {
 
 // GuardianService implements Service interface.
 type GuardianService struct {
-	cfg *config.CGRConfig
+	cfg    *config.CGRConfig
+	locker *guardian.GuardianLocker
 }
 
 // Start handles the service start.
@@ -33,15 +35,8 @@ func (s *GuardianService) Start(shutdown *utils.SyncedChan, registry *servmanage
 		return err
 	}
 
-	// TODO: Replace global guardian.Guardian with local instance that should
-	// be passed around where needed.
-	// Currently only logger option is used, but other options (e.g. for
-	// timeout) could be added later.
-	opts := make([]guardian.Option, 0, 1)
-	if s.cfg.LoggerCfg().Level >= 0 {
-		opts = append(opts, guardian.WithLogger(utils.Logger))
-	}
-	guardian.Guardian = guardian.New(opts...)
+	s.locker = engine.NewGuardianLocker(s.cfg)
+	guardian.Guardian = s.locker
 
 	return nil
 }
@@ -64,4 +59,9 @@ func (s *GuardianService) ServiceName() string {
 // ShouldRun returns if the service should be running.
 func (s *GuardianService) ShouldRun() bool {
 	return true
+}
+
+// Locker returns the process Guardian locker.
+func (s *GuardianService) Locker() *guardian.GuardianLocker {
+	return s.locker
 }

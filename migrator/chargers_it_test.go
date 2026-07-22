@@ -104,13 +104,14 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 }
 
 func testChrgITConnect(t *testing.T) {
-	cacheIn := engine.NewCacheS(chrgCfgIn, nil, nil, nil)
-	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgIn.GeneralCfg().DBDataEncoding, chrgCfgIn, cacheIn)
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	cacheIn := engine.NewCacheS(chrgCfgIn, nil, nil, nil, locker)
+	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgIn.GeneralCfg().DBDataEncoding, chrgCfgIn, cacheIn, locker)
 	if err != nil {
 		t.Fatal(err)
 	}
-	cacheOut := engine.NewCacheS(chrgCfgOut, nil, nil, nil)
-	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgOut.GeneralCfg().DBDataEncoding, chrgCfgOut, cacheOut)
+	cacheOut := engine.NewCacheS(chrgCfgOut, nil, nil, nil, locker)
+	dataDBOut, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgOut.GeneralCfg().DBDataEncoding, chrgCfgOut, cacheOut, locker)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1644,6 +1644,7 @@ func TestLoadersLoad(t *testing.T) {
 	defer f2.Close()
 
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	loaderCfg := &config.LoaderSCfg{
 		ID:             "LoaderID",
 		Enabled:        true,
@@ -1659,8 +1660,8 @@ func TestLoadersLoad(t *testing.T) {
 	cfg.LoaderCfg()[0] = loaderCfg
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 	ldrS := loaders.NewLoaderS(cfg, dm, fltrs, nil)

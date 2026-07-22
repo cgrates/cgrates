@@ -188,8 +188,10 @@ func main() {
 	// order and compare the DBConns. If IDs are the same it means the db conns will be the same
 	sameDataDB = utils.EqualUnorderedStringSlices(fromDBIDsList, toDBIDsList)
 
-	cacheS := engine.NewCacheS(mgrCfg, nil, nil, nil)
-	if dmFrom, err = migrator.NewMigratorDataDBs(fromDBIDsList, mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg, cacheS); err != nil {
+	locker := engine.NewGuardianLocker(mgrCfg)
+	cacheS := engine.NewCacheS(mgrCfg, nil, nil, nil, locker)
+	if dmFrom, err = migrator.NewMigratorDataDBs(fromDBIDsList,
+		mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg, cacheS, locker); err != nil {
 		log.Fatal(err)
 	}
 
@@ -201,7 +203,8 @@ func main() {
 	if sameDataDB {
 		dmTo = dmFrom
 	} else {
-		if dmTo, err = migrator.NewMigratorDataDBs(toDBIDsList, mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg, cacheS); err != nil {
+		if dmTo, err = migrator.NewMigratorDataDBs(toDBIDsList,
+			mgrCfg.GeneralCfg().DBDataEncoding, mgrCfg, cacheS, locker); err != nil {
 			log.Fatal(err)
 		}
 	}

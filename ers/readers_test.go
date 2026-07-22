@@ -14,7 +14,8 @@ import (
 
 func TestNewInvalidReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = "Invalid"
 	reader.ID = "InvaidReader"
@@ -29,7 +30,8 @@ func TestNewInvalidReader(t *testing.T) {
 
 func TestNewCsvReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaFileCSV
@@ -63,7 +65,8 @@ func TestNewCsvReader(t *testing.T) {
 
 func TestNewKafkaReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0]
 	reader.Type = utils.MetaKafkajsonMap
@@ -86,7 +89,8 @@ func TestNewKafkaReader(t *testing.T) {
 
 func TestNewSQLReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0].Clone()
 	reader.Type = utils.MetaSQL
@@ -114,7 +118,8 @@ func TestNewSQLReader(t *testing.T) {
 
 func TestNewSQLReaderError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	reader := cfg.ERsCfg().Readers[0].Clone()
 	reader.Type = utils.MetaSQL
@@ -134,7 +139,8 @@ func TestNewSQLReaderError(t *testing.T) {
 
 func TestNewFileXMLReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileXML
 	expected, err := NewXMLFileER(cfg, 0, nil, nil, nil, cacheS, fltr, nil)
@@ -155,7 +161,8 @@ func TestNewFileXMLReader(t *testing.T) {
 
 func TestNewFileFWVReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileFWV
 	expected, err := NewFWVFileER(cfg, 0, nil, nil, nil, cacheS, fltr, nil)
@@ -176,7 +183,8 @@ func TestNewFileFWVReader(t *testing.T) {
 
 func TestNewJSONReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaFileJSON
 	expected, err := NewJSONFileER(cfg, 0, nil, nil, nil, cacheS, fltr, nil)
@@ -197,7 +205,8 @@ func TestNewJSONReader(t *testing.T) {
 
 func TestNewAMQPReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPjsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
@@ -218,7 +227,8 @@ func TestNewAMQPReader(t *testing.T) {
 
 func TestNewAMQPv1Reader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaAMQPV1jsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
@@ -244,7 +254,8 @@ func TestNewAMQPv1Reader(t *testing.T) {
 
 func TestNewS3Reader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaS3jsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1
@@ -271,7 +282,8 @@ func TestNewS3Reader(t *testing.T) {
 
 func TestNewSQSReader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	fltr := &engine.FilterS{}
 	cfg.ERsCfg().Readers[0].Type = utils.MetaSQSjsonMap
 	cfg.ERsCfg().Readers[0].ConcurrentReqs = -1

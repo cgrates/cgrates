@@ -63,6 +63,7 @@ func TestS3ER(t *testing.T) {
 	],
 },
 }`)
+	locker := engine.NewGuardianLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -74,7 +75,7 @@ func TestS3ER(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewS3ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil, locker), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	s3Rdr := rdr.(*S3ER)
@@ -126,7 +127,8 @@ func TestS3ER(t *testing.T) {
 
 func TestNewS3ER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    1,
@@ -177,7 +179,8 @@ func TestNewS3ER(t *testing.T) {
 
 func TestNewS3ERCase2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &S3ER{
 		cgrCfg:    cfg,
 		cfgIdx:    0,

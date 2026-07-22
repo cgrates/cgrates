@@ -28,6 +28,7 @@ var (
 
 func TestDMitinitDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := NewGuardianLocker(cfg)
 	var dataDB DataDB
 	var err error
 
@@ -54,8 +55,8 @@ func TestDMitinitDB(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm2 = NewDataManager(dbCM, cfg, nil)
-	dm2Cache = NewCacheS(cfg, nil, nil, nil)
+	dm2 = NewDataManager(dbCM, cfg, nil, locker)
+	dm2Cache = NewCacheS(cfg, nil, nil, nil, locker)
 	dm2.SetCache(dm2Cache)
 
 	for _, stest := range sTestsDMit {

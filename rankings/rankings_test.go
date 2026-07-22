@@ -84,9 +84,12 @@ func TestRankingProfileLockKey(t *testing.T) {
 }
 
 func TestNewRankingService(t *testing.T) {
-	dm := &engine.DataManager{}
-	cache := &engine.CacheS{}
-	cgrcfg := &config.CGRConfig{}
+	cgrcfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrcfg)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cgrcfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cgrcfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cgrcfg, nil, locker)
+	cache := engine.NewCacheS(cgrcfg, nil, nil, nil, locker)
 	filterS := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 
@@ -119,10 +122,11 @@ func TestNewRankingService(t *testing.T) {
 
 func TestStoreRanking(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	dataDB, _ := engine.NewInternalDB([]string{}, []string{}, &ltcache.TransCacheOpts{}, map[string]*config.ItemOpts{})
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	cacheS := engine.NewCacheS(cfg, dm, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	rkg := NewRankingS(dm, cacheS, nil, nil, cfg)
 	ranking := &utils.Ranking{}

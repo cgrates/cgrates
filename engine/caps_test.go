@@ -123,8 +123,9 @@ func TestFloatDP(t *testing.T) {
 func TestCapsStatsGetAverageOnEvict(t *testing.T) {
 	cs := &CapsStats{st: utils.NewStatAverage(1, utils.MetaDynReq, nil)}
 	cfg := config.NewDefaultCGRConfig()
+	locker := NewGuardianLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheCapsEvents] = &config.CacheParamCfg{Limit: 2}
-	cacheS := NewCacheS(cfg, nil, nil, cs)
+	cacheS := NewCacheS(cfg, nil, nil, cs, locker)
 	cs.SetCache(cacheS)
 
 	cs.addSample("1", 10)

@@ -67,8 +67,9 @@ func testInitDataDB(t *testing.T) {
 		log.Fatal(err)
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dbConn}, vrsCfg.DbCfg())
-	dm3 = NewDataManager(dbCM, vrsCfg, nil)
-	cacheS := NewCacheS(vrsCfg, nil, nil, nil)
+	locker := NewGuardianLocker(config.NewDefaultCGRConfig())
+	dm3 = NewDataManager(dbCM, vrsCfg, nil, locker)
+	cacheS := NewCacheS(vrsCfg, nil, nil, nil, locker)
 	dm3.SetCache(cacheS)
 
 	if err != nil {

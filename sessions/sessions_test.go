@@ -50,10 +50,11 @@ var attrs = &attributes.ProcessEventReply{
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
@@ -83,10 +84,11 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
@@ -1273,10 +1275,11 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil, locker), cacheS, nil, nil)
 	sS.dm.SetCache(cacheS)
 	expIndx := map[string][]string{}
 	rule, err := engine.NewFilterRule(utils.MetaString,
@@ -1295,7 +1298,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
 		"ToR": {},
 	}
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil, locker), cacheS, nil, nil)
 	sS.dm.SetCache(cacheS)
 	expIndx = map[string][]string{utils.ToR: {utils.MetaVoice}}
 	expUindx = nil
@@ -1309,7 +1312,7 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 		Tenant: "cgrates.org",
 		ID:     "FLTR1",
 	})
-	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil), cacheS, nil, nil)
+	sS = NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil, locker), cacheS, nil, nil)
 	sS.dm.SetCache(cacheS)
 	expIndx = map[string][]string{}
 	expUindx = nil
@@ -1762,7 +1765,8 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	sS := new(SessionS)
 	sS.cfg = cfg
 	sS.cache = cacheS
@@ -1806,7 +1810,8 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 
 func TestBiRPCv1STIRIdentity(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	sS := new(SessionS)
 	sS.cfg = cfg
 	sS.cache = cacheS

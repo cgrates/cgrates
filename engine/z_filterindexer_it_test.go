@@ -80,6 +80,7 @@ var sTests = []func(t *testing.T){
 
 func TestFilterIndexerIT(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := NewGuardianLocker(cfg)
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -87,8 +88,8 @@ func TestFilterIndexerIT(t *testing.T) {
 			t.Fatal(err)
 		}
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-		dataManager = NewDataManager(dbCM, cfg, nil)
-		dataManagerCache = NewCacheS(cfg, nil, nil, nil)
+		dataManager = NewDataManager(dbCM, cfg, nil, locker)
+		dataManagerCache = NewCacheS(cfg, nil, nil, nil, locker)
 		dataManager.SetCache(dataManagerCache)
 	case utils.MetaRedis:
 		cfg := config.NewDefaultCGRConfig()
@@ -106,8 +107,8 @@ func TestFilterIndexerIT(t *testing.T) {
 		cfgDBName = cfg.DbCfg().DBConns[utils.MetaDefault].Name
 		defer redisDB.Close()
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: redisDB}, cfg.DbCfg())
-		dataManager = NewDataManager(dbCM, cfg, nil)
-		dataManagerCache = NewCacheS(cfg, nil, nil, nil)
+		dataManager = NewDataManager(dbCM, cfg, nil, locker)
+		dataManagerCache = NewCacheS(cfg, nil, nil, nil, locker)
 		dataManager.SetCache(dataManagerCache)
 	case utils.MetaMySQL:
 		t.SkipNow()

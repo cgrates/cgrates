@@ -56,6 +56,7 @@ func TestAMQPERv1(t *testing.T) {
 	],
 },
 }`)
+	locker := engine.NewGuardianLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -68,7 +69,7 @@ func TestAMQPERv1(t *testing.T) {
 	rdrExit = make(chan struct{}, 1)
 
 	if rdr, err = NewAMQPv1ER(cfg, 1, rdrEvents, make(chan *erEvent, 1),
-		rdrErr, engine.NewCacheS(cfg, nil, nil, nil), new(engine.FilterS), rdrExit); err != nil {
+		rdrErr, engine.NewCacheS(cfg, nil, nil, nil, locker), new(engine.FilterS), rdrExit); err != nil {
 		t.Fatal(err)
 	}
 	amqpv1Rdr := rdr.(*AMQPv1ER)
@@ -125,8 +126,9 @@ func TestAMQPERv1(t *testing.T) {
 
 func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfgIdx := 0
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,
@@ -156,8 +158,9 @@ func TestAmqpv1NewAMQPv1ER(t *testing.T) {
 
 func TestAmqpv1NewAMQPv1ER2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfgIdx := 0
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &AMQPv1ER{
 		cgrCfg: cfg,
 		cfgIdx: cfgIdx,

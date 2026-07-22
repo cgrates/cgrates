@@ -8,12 +8,16 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewTrendService(t *testing.T) {
-	dm := &engine.DataManager{}
-	cache := &engine.CacheS{}
-	cfg := &config.CGRConfig{}
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	filterS := &engine.FilterS{}
 	connMgr := &engine.ConnManager{}
 

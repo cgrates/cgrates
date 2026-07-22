@@ -16,6 +16,7 @@ import (
 
 func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	m := sipingo.Message{}
 	rplyFlds := []*config.FCTemplate{
 		{Tag: "Request", Path: utils.MetaRep + utils.NestingSep + "Request",
@@ -28,7 +29,7 @@ func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 	for _, v := range rplyFlds {
 		v.ComputePath()
 	}
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	agReq := NewAgentRequest(nil, nil, nil, nil, nil, nil, "cgrates.org", "", cfg, cacheS, nil, nil)
 	agReq.CGRReply.Set([]string{utils.CapMaxUsage}, utils.NewLeafNode(time.Hour))
 	agReq.CGRReply.Set([]string{utils.CapAttributes, "Request"}, utils.NewLeafNode("SIP/2.0 302 Moved Temporarily"))

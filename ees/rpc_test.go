@@ -19,7 +19,8 @@ func TestNewRpcEE(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 
 	rcv, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
@@ -93,7 +94,8 @@ func TestRPCConnect(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -136,7 +138,8 @@ func TestRPCClose(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -158,7 +161,8 @@ func TestRPCGetMetrics(t *testing.T) {
 		},
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)
@@ -176,7 +180,8 @@ func TestRPCPrepareMap(t *testing.T) {
 		t.Fatal(err)
 	}
 	connMgr := engine.NewConnManager(config.NewDefaultCGRConfig())
-	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil))
+	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	connMgr.SetCache(engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker))
 	rpcEe, err := NewRpcEE(eeSCfg, em, connMgr)
 	if err != nil {
 		t.Error(err)

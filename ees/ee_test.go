@@ -18,9 +18,10 @@ import (
 
 func TestNewEventExporter(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileCSV
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
@@ -52,9 +53,10 @@ func TestNewEventExporter(t *testing.T) {
 
 func TestNewEventExporterCase2(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaFileFWV
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	errExpect := "open /var/spool/cgrates/ees/*default_"
@@ -86,9 +88,10 @@ func TestNewEventExporterCase2(t *testing.T) {
 
 func TestNewEventExporterCase3(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	if err != nil {
@@ -112,9 +115,10 @@ func TestNewEventExporterCase3(t *testing.T) {
 
 func TestNewEventExporterCase4(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPjsonMap
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	if err != nil {
@@ -138,9 +142,10 @@ func TestNewEventExporterCase4(t *testing.T) {
 
 func TestNewEventExporterCase6(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaVirt
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	if err != nil {
@@ -161,9 +166,10 @@ func TestNewEventExporterCase6(t *testing.T) {
 
 func TestNewEventExporterDefaultCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaNone
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	errExpect := fmt.Sprintf("unsupported exporter type: <%s>", utils.MetaNone)
@@ -175,10 +181,11 @@ func TestNewEventExporterDefaultCase(t *testing.T) {
 // Test for Case 7
 func TestNewEventExporterCase7(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaElastic
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = "/invalid/path"
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	ee, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	if err != nil {
@@ -204,9 +211,10 @@ func TestNewEventExporterCase7(t *testing.T) {
 // Test for Case 8
 func TestNewEventExporterCase8(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.EEsCfg().Exporters[0].Type = utils.MetaSQL
 	cgrCfg.EEsCfg().Exporters[0].ConcurrentRequests = 0
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	filterS := engine.NewFilterS(cgrCfg, nil, nil)
 	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, filterS, nil, nil)
 	errExpect := "MANDATORY_IE_MISSING: [sqlTableName]"
@@ -218,8 +226,9 @@ func TestNewEventExporterCase8(t *testing.T) {
 // Test for invalid "dc"
 func TestNewEventExporterDcCase(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cgrCfg)
 	cgrCfg.GeneralCfg().DefaultTimezone = "invalid_timezone"
-	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil)
+	cacheS := engine.NewCacheS(cgrCfg, nil, nil, nil, locker)
 	_, err := NewEventExporter(cgrCfg.EEsCfg().Exporters[0], cgrCfg, cacheS, nil, nil, nil)
 	errExpect := "failed to initialize exporter metrics: unknown time zone invalid_timezone"
 	if err == nil || err.Error() != errExpect {
@@ -300,7 +309,8 @@ func TestExportRequestTenant(t *testing.T) {
 	}
 	tpFields[0].ComputePath()
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	if err := NewExportRequest(inData, "cgrates.org", cacheS, nil, map[string]*utils.OrderedNavigableMap{utils.MetaExp: expNM}, cfg.GeneralCfg().RoundingDecimals, cfg.GeneralCfg().DefaultTimezone).SetFields(nil, tpFields); err != nil {
 		t.Error(err)
 	}

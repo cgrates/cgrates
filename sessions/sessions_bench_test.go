@@ -12,6 +12,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 // benchMockClient is a minimal mock that returns canned responses for chargers.
@@ -42,9 +43,8 @@ func (benchMockClient) Call(ctx *context.Context, method string, args any, reply
 
 // setupBenchSessionS creates a fully wired SessionS with mock internal connections
 // for benchmarking.
-func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
+func setupBenchSessionS(b *testing.B, enableChargers bool, cfg *config.CGRConfig, locker *guardian.GuardianLocker) *SessionS {
 	b.Helper()
-	cfg := config.NewDefaultCGRConfig()
 
 	// Disable RPC caching to avoid guardian lock overhead in benchmark
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
@@ -54,8 +54,8 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 		b.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
@@ -88,7 +88,9 @@ func setupBenchSessionS(b *testing.B, enableChargers bool) *SessionS {
 // BenchmarkProcessEventChargersOnly benchmarks a full BiRPCv1ProcessEvent
 // with only chargers enabled.
 func BenchmarkProcessEventChargersOnly(b *testing.B) {
-	sS := setupBenchSessionS(b, true)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	sS := setupBenchSessionS(b, true, cfg, locker)
 	ctx := context.TODO()
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -113,7 +115,9 @@ func BenchmarkProcessEventChargersOnly(b *testing.B) {
 // BenchmarkProcessEventNoSubsystems benchmarks ProcessEvent when no
 // subsystem flags are enabled.
 func BenchmarkProcessEventNoSubsystems(b *testing.B) {
-	sS := setupBenchSessionS(b, false)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	sS := setupBenchSessionS(b, false, cfg, locker)
 	// Disable chargers so nothing triggers
 	sS.cfg.SessionSCfg().Opts.Chargers = nil
 	ctx := context.TODO()
@@ -139,7 +143,9 @@ func BenchmarkProcessEventNoSubsystems(b *testing.B) {
 // BenchmarkProcessEventChargersParallel benchmarks concurrent ProcessEvent
 // calls with chargers.
 func BenchmarkProcessEventChargersParallel(b *testing.B) {
-	sS := setupBenchSessionS(b, true)
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
+	sS := setupBenchSessionS(b, true, cfg, locker)
 	ctx := context.TODO()
 	b.ResetTimer()
 	b.RunParallel(func(pb *testing.PB) {

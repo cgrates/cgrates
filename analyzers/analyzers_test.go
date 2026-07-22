@@ -190,6 +190,7 @@ func TestAnalyzersListenAndServe(t *testing.T) {
 
 func TestAnalyzersV1Search(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewGuardianLocker(cfg)
 	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
@@ -203,8 +204,8 @@ func TestAnalyzersV1Search(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil, locker))
 	methodRule, err := engine.NewFilterRule(utils.MetaString, "~*hdr.RequestMethod", []string{utils.CoreSv1Ping})
 	if err != nil {
 		t.Fatal(err)
@@ -484,14 +485,15 @@ func TestAnalyzersV1Search(t *testing.T) {
 
 func TestAnalyzerSFilteredPagination(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
 	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil, locker))
 	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
@@ -547,14 +549,15 @@ func TestAnalyzerSFilteredPagination(t *testing.T) {
 
 func TestAnalyzerSQueryOrder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
 	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
-	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil))
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, dm, nil, nil, locker))
 	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)

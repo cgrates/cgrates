@@ -30,13 +30,14 @@ import (
 
 func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	for _, lType := range []string{utils.MetaAttributes, utils.MetaResources, utils.MetaFilters, utils.MetaStats,
 		utils.MetaThresholds, utils.MetaRoutes, utils.MetaChargers,
@@ -188,13 +189,14 @@ func TestSetToDBWithDBError(t *testing.T) {
 
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	v1 := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 	if err := setToDB(context.Background(), dm, utils.MetaAttributes, v1, true, false); err != nil {
@@ -310,7 +312,8 @@ func TestSetToDB(t *testing.T) {
 
 func TestLoaderProcess(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -318,7 +321,7 @@ func TestLoaderProcess(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -422,7 +425,8 @@ func TestLoaderStoreRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cache := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewLocker(cfg)
+	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cache)
 	internalDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -430,10 +434,10 @@ func TestLoaderStoreRemove(t *testing.T) {
 		t.Fatal(err)
 	}
 	dbConn := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: internalDB}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbConn, cfg, connMgr)
+	dm := engine.NewDataManager(dbConn, cfg, connMgr, locker)
 	dm.SetCache(cache)
 	filters := engine.NewFilterS(cfg, connMgr, dm)
-	loader := NewLoaderS(cfg, dm, filters, connMgr)
+	loader := NewLoaderS(cfg, dm, filters, connMgr, locker)
 	args := &ArgsProcessFolder{APIOpts: map[string]any{
 		utils.MetaCache:       utils.MetaNone,
 		utils.MetaForceLock:   true,
@@ -484,7 +488,8 @@ func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args any, rep
 func TestLoaderProcessCallCahe(t *testing.T) {
 	var reloadCache, clearCache any
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCache)
@@ -500,7 +505,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -799,7 +804,8 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 func TestLoaderProcessData(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -807,7 +813,7 @@ func TestLoaderProcessData(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -852,7 +858,8 @@ func (mockReader) Read([]byte) (int, error) { return 0, utils.ErrNotFound }
 
 func TestLoaderProcessDataErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -860,7 +867,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -904,7 +911,8 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
 
 func TestLoaderProcessFileURL(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -912,7 +920,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -973,7 +981,8 @@ func (mockLock) IsLockFile(string) (_ bool) { return }
 
 func TestLoaderProcessIFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -981,7 +990,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -1071,7 +1080,8 @@ func TestLoaderProcessIFile(t *testing.T) {
 
 func TestLoaderProcessFolder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1079,7 +1089,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -1199,7 +1209,8 @@ func TestLoaderProcessFolder(t *testing.T) {
 
 func TestLoaderProcessFolderErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1207,7 +1218,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -1421,7 +1432,8 @@ func TestLoaderListenAndServeI(t *testing.T) {
 
 func TestLoaderProcessZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1429,7 +1441,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 		t.Error(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, cM)
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 	cache := map[string]*ltcache.Cache{}
@@ -1519,13 +1531,14 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 
 func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 
 	rp := &utils.RateProfile{
@@ -1584,13 +1597,14 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 
 func TestSetToDBChargerProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	locker := engine.NewGuardianLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 
 	cp := &utils.ChargerProfile{
