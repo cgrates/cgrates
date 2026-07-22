@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -34,7 +33,6 @@ func TestCDRsNewCDRServer(t *testing.T) {
 		cfg:     cfg,
 		dm:      dm,
 		cache:   cacheS,
-		guard:   guardian.Guardian,
 		fltrS:   fltrs,
 		connMgr: connMng,
 	}
