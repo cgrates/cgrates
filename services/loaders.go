@@ -41,6 +41,7 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 			utils.ConnManager,
 			utils.FilterS,
 			utils.DB,
+			utils.GuardianS,
 		},
 		s.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -50,11 +51,12 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	fs := srvDeps[utils.FilterS].(*FilterService).FilterS()
 	dbs := srvDeps[utils.DB].(*DBService).DataManager()
+	gs := srvDeps[utils.GuardianS].(*GuardianService)
 
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.ldrs = loaders.NewLoaderS(s.cfg, dbs, fs, cms.ConnManager())
+	s.ldrs = loaders.NewLoaderS(s.cfg, dbs, fs, cms.ConnManager(), gs.Locker())
 	if !s.ldrs.Enabled() {
 		return nil
 	}

@@ -4,95 +4,214 @@
 package loaders
 
 import (
-	"os"
 	"path"
-	"reflect"
 	"testing"
+	"time"
 
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
+type lockResult struct {
+	unlock func()
+	err    error
+}
+
 func TestNopLocker(t *testing.T) {
-	np := newLocker(utils.EmptyString, utils.EmptyString)
-	if err := np.Lock(); err != nil {
-		t.Error(err)
+	locker := newLoaderLocker("", "", engine.NewLocker(nil))
+	unlock, err := locker.lock()
+	if err != nil {
+		t.Fatal(err)
 	}
-	exp := new(nopLock)
-	if !reflect.DeepEqual(np, exp) {
-		t.Errorf("Expeceted: %+v, received: %+v", exp, np)
+	unlock()
+	if locked, err := locker.locked(); err != nil {
+		t.Fatal(err)
+	} else if locked {
+		t.Fatal("expected no lock")
 	}
-	if lk, err := np.Locked(); err != nil {
-		t.Error(err)
-	} else if lk {
-		t.Error("Expected no lock")
+	if err := locker.forceUnlock(); err != nil {
+		t.Fatal(err)
 	}
-	if err := np.Unlock(); err != nil {
-		t.Error(err)
-	}
-	if np.IsLockFile(utils.EmptyString) {
-		t.Error("Expected to not be lock file")
+	if locker.isLockFile("") {
+		t.Fatal("expected no lock file")
 	}
 }
 
 func TestFolderLocker(t *testing.T) {
-	dir, err := os.MkdirTemp(utils.EmptyString, "TestFolderLocker")
+	filePath := path.Join(t.TempDir(), ".lkr")
+	locker := newLoaderLocker(filePath, "", engine.NewLocker(nil))
+	unlock, err := locker.lock()
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer os.RemoveAll(dir)
-	fp := path.Join(dir, ".lkr")
-	np := newLocker(fp, utils.EmptyString)
-	exp := folderLock(fp)
-	if !reflect.DeepEqual(np, exp) {
-		t.Errorf("Expeceted: %+v, received: %+v", exp, np)
+	if locked, err := locker.locked(); err != nil {
+		t.Fatal(err)
+	} else if !locked {
+		t.Fatal("expected lock")
 	}
-	if err := np.Lock(); err != nil {
-		t.Error(err)
+	if locker.isLockFile("") {
+		t.Fatal("expected no match")
 	}
-	if lk, err := np.Locked(); err != nil {
-		t.Error(err)
-	} else if !lk {
-		t.Error("Expected lock")
+	if !locker.isLockFile(filePath) {
+		t.Fatal("expected lock file match")
 	}
-	if err := np.Unlock(); err != nil {
-		t.Error(err)
-	}
-	if np.IsLockFile(utils.EmptyString) {
-		t.Error("Expected to not be lock file")
-	}
-	if !np.IsLockFile(fp) {
-		t.Error("Expected to be lock file")
-	}
-	if lk, err := np.Locked(); err != nil {
-		t.Error(err)
-	} else if lk {
-		t.Error("Expected no lock")
+	unlock()
+	if locked, err := locker.locked(); err != nil {
+		t.Fatal(err)
+	} else if locked {
+		t.Fatal("expected no lock")
 	}
 }
 
 func TestMemoryLocker(t *testing.T) {
-	np := newLocker(utils.MetaMemory, "ID")
-	exp := &memoryLock{loaderID: "ID"}
-	if !reflect.DeepEqual(np, exp) {
-		t.Errorf("Expeceted: %+v, received: %+v", exp, np)
+	memory := engine.NewLocker(nil)
+	locker := newLoaderLocker(utils.MetaMemory, "ID", memory)
+	unlock, err := locker.lock()
+	if err != nil {
+		t.Fatal(err)
 	}
-	if err := np.Lock(); err != nil {
-		t.Error(err)
+	if locked, err := locker.locked(); err != nil {
+		t.Fatal(err)
+	} else if locked {
+		t.Fatal("expected memory lock state to be hidden")
 	}
-	if lk, err := np.Locked(); err != nil {
-		t.Error(err)
-	} else if !lk {
-		t.Error("Expected lock")
+	if err := locker.forceUnlock(); err != nil {
+		t.Fatal(err)
 	}
-	if err := np.Unlock(); err != nil {
-		t.Error(err)
+	acquired := make(chan lockResult, 1)
+	started := make(chan struct{})
+	go func() {
+		close(started)
+		unlock, err := locker.lock()
+		acquired <- lockResult{unlock: unlock, err: err}
+	}()
+	<-started
+	select {
+	case result := <-acquired:
+		if result.err == nil {
+			result.unlock()
+		}
+		t.Fatal("memory force unlock released active work")
+	case <-time.After(20 * time.Millisecond):
 	}
-	if np.IsLockFile(utils.EmptyString) {
-		t.Error("Expected to not be lock file")
+	unlock()
+	select {
+	case result := <-acquired:
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		result.unlock()
+	case <-time.After(time.Second):
+		t.Fatal("memory lock was not released")
 	}
-	if lk, err := np.Locked(); err != nil {
-		t.Error(err)
-	} else if lk {
-		t.Error("Expected no lock")
+	if locker.isLockFile("") {
+		t.Fatal("expected no lock file")
+	}
+}
+
+func TestMemoryLockerCoordinatesIDs(t *testing.T) {
+	memory := engine.NewLocker(nil)
+	first := newLoaderLocker(utils.MetaMemory, "one", memory)
+	same := newLoaderLocker(utils.MetaMemory, "one", memory)
+	different := newLoaderLocker(utils.MetaMemory, "two", memory)
+
+	unlockFirst, err := first.lock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	sameAcquired := make(chan lockResult, 1)
+	sameStarted := make(chan struct{})
+	go func() {
+		close(sameStarted)
+		unlock, err := same.lock()
+		sameAcquired <- lockResult{unlock: unlock, err: err}
+	}()
+	<-sameStarted
+
+	differentAcquired := make(chan lockResult, 1)
+	go func() {
+		unlock, err := different.lock()
+		differentAcquired <- lockResult{unlock: unlock, err: err}
+	}()
+	select {
+	case result := <-differentAcquired:
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		result.unlock()
+	case <-time.After(time.Second):
+		t.Fatal("different loader IDs blocked each other")
+	}
+	select {
+	case result := <-sameAcquired:
+		if result.err == nil {
+			result.unlock()
+		}
+		t.Fatal("same loader ID did not wait")
+	case <-time.After(20 * time.Millisecond):
+	}
+	unlockFirst()
+	select {
+	case result := <-sameAcquired:
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		result.unlock()
+	case <-time.After(time.Second):
+		t.Fatal("same loader ID remained blocked")
+	}
+}
+
+func TestMemoryLockerTimeoutKeepsOwnerBoundRelease(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().LockingTimeout = 100 * time.Millisecond
+	memory := engine.NewLocker(cfg)
+	first := newLoaderLocker(utils.MetaMemory, "ID", memory)
+	second := newLoaderLocker(utils.MetaMemory, "ID", memory)
+	third := newLoaderLocker(utils.MetaMemory, "ID", memory)
+
+	unlockFirst, err := first.lock()
+	if err != nil {
+		t.Fatal(err)
+	}
+	secondAcquired := make(chan lockResult, 1)
+	go func() {
+		unlock, err := second.lock()
+		secondAcquired <- lockResult{unlock: unlock, err: err}
+	}()
+	var secondResult lockResult
+	select {
+	case secondResult = <-secondAcquired:
+		if secondResult.err != nil {
+			t.Fatal(secondResult.err)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("timed out owner did not release the lock")
+	}
+
+	unlockFirst()
+	thirdAcquired := make(chan lockResult, 1)
+	go func() {
+		unlock, err := third.lock()
+		thirdAcquired <- lockResult{unlock: unlock, err: err}
+	}()
+	select {
+	case result := <-thirdAcquired:
+		if result.err == nil {
+			result.unlock()
+		}
+		t.Fatal("old owner released its successor")
+	case <-time.After(20 * time.Millisecond):
+	}
+	secondResult.unlock()
+	select {
+	case result := <-thirdAcquired:
+		if result.err != nil {
+			t.Fatal(result.err)
+		}
+		result.unlock()
+	case <-time.After(time.Second):
+		t.Fatal("successor did not release the lock")
 	}
 }

@@ -28,7 +28,7 @@ var (
 
 func TestDMitinitDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	var dataDB DataDB
 	var err error
 

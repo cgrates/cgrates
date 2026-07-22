@@ -62,7 +62,7 @@ func testFltrStart(testName string, t *testing.T) {
 }
 
 func testFltrITConnect(t *testing.T) {
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheIn := engine.NewCacheS(fltrCfgIn, nil, nil, nil, locker)
 	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, fltrCfgIn.GeneralCfg().DBDataEncoding, fltrCfgIn, cacheIn, locker)
 	if err != nil {

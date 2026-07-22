@@ -50,7 +50,7 @@ var attrs = &attributes.ProcessEventReply{
 
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -84,7 +84,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1275,7 +1275,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1765,7 +1765,7 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 
 func TestBiRPCv1STIRAuthenticate(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	sS := new(SessionS)
 	sS.cfg = cfg
@@ -1810,7 +1810,7 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 
 func TestBiRPCv1STIRIdentity(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	sS := new(SessionS)
 	sS.cfg = cfg

@@ -307,7 +307,7 @@ func main() {
 
 	dbcManager := engine.NewDBConnManager(map[string]engine.DataDB{
 		utils.MetaDefault: dataDB}, ldrCfg.DbCfg())
-	locker := engine.NewGuardianLocker(ldrCfg)
+	locker := engine.NewLocker(ldrCfg)
 	dm := engine.NewDataManager(dbcManager, ldrCfg, cM, locker)
 	cacheS := engine.NewCacheS(ldrCfg, dm, cM, nil, locker)
 	dm.SetCache(cacheS)
@@ -352,7 +352,7 @@ func main() {
 		ldrSCfg.Data = present
 	}
 
-	ldrS := loaders.NewLoaderS(ldrCfg, dm, fS, cM)
+	ldrS := loaders.NewLoaderS(ldrCfg, dm, fS, cM, locker)
 	var rply string
 	if err = ldrS.V1Run(context.Background(), &loaders.ArgsProcessFolder{
 		Path: *dataPath,

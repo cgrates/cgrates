@@ -228,7 +228,7 @@ func testSes2StirInit(t *testing.T) {
 		args, &rply); err != nil { // no error verificated with success
 		t.Error(err)
 	}
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheS := engine.NewCacheS(ses2Cfg, nil, nil, nil, locker)
 	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)
@@ -269,7 +269,7 @@ func testSes2STIRIdentity(t *testing.T) {
 		args, &rply); err != nil {
 		t.Error(err)
 	}
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheS := engine.NewCacheS(ses2Cfg, nil, nil, nil, locker)
 	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
 		t.Fatal(err)

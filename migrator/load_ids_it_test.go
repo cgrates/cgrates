@@ -58,7 +58,7 @@ func testLoadIdsStart(testName string, t *testing.T) {
 }
 
 func testLoadIdsITConnect(t *testing.T) {
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheIn := engine.NewCacheS(loadCfgIn, nil, nil, nil, locker)
 	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, loadCfgIn.GeneralCfg().DBDataEncoding, loadCfgIn, cacheIn, locker)
 	if err != nil {

@@ -14,26 +14,28 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 	"github.com/cgrates/ltcache"
 )
 
 func NewLoaderS(cfg *config.CGRConfig, dm *engine.DataManager,
-	filterS *engine.FilterS,
-	connMgr *engine.ConnManager) (ldrS *LoaderS) {
-	ldrS = &LoaderS{cfg: cfg, cache: make(map[string]*ltcache.Cache)}
+	filterS *engine.FilterS, connMgr *engine.ConnManager,
+	locker *guardian.Locker) *LoaderS {
+	ldrS := &LoaderS{cfg: cfg, locker: locker, cache: make(map[string]*ltcache.Cache)}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
 	ldrS.createLoaders(dm, filterS, connMgr)
-	return
+	return ldrS
 }
 
 // LoaderS is the Loader service handling independent Loaders
 type LoaderS struct {
 	sync.RWMutex
-	cfg   *config.CGRConfig
-	cache map[string]*ltcache.Cache
-	ldrs  map[string]*loader
+	cfg    *config.CGRConfig
+	locker *guardian.Locker
+	cache  map[string]*ltcache.Cache
+	ldrs   map[string]*loader
 }
 
 // Enabled returns true if at least one loader is enabled
@@ -70,7 +72,7 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
 	}
 	var locked bool
-	if locked, err = ldr.Locked(); err != nil {
+	if locked, err = ldr.locker.locked(); err != nil {
 		return utils.NewErrServerError(err)
 	} else if locked {
 		fl := ldr.ldrCfg.Opts.ForceLock
@@ -82,7 +84,7 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 		if !fl {
 			return errors.New("ANOTHER_LOADER_RUNNING")
 		}
-		if err := ldr.Unlock(); err != nil {
+		if err := ldr.locker.forceUnlock(); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -130,7 +132,7 @@ func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,
 		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
 	}
 	var locked bool
-	if locked, err = ldr.Locked(); err != nil {
+	if locked, err = ldr.locker.locked(); err != nil {
 		return utils.NewErrServerError(err)
 	} else if locked {
 		fl := ldr.ldrCfg.Opts.ForceLock
@@ -142,7 +144,7 @@ func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,
 		if !fl {
 			return errors.New("ANOTHER_LOADER_RUNNING")
 		}
-		if err := ldr.Unlock(); err != nil {
+		if err := ldr.locker.forceUnlock(); err != nil {
 			return utils.NewErrServerError(err)
 		}
 	}
@@ -188,7 +190,7 @@ func (ldrS *LoaderS) createLoaders(dm *engine.DataManager,
 					utils.LoaderS, ldrCfg.ID, err))
 				continue
 			}
-			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, filterS, connMgr, cacheSConns)
+			ldrS.ldrs[ldrCfg.ID] = newLoader(ldrS.cfg, ldrCfg, dm, ldrS.cache, filterS, connMgr, cacheSConns, ldrS.locker)
 		}
 	}
 }

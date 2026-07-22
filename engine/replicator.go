@@ -37,7 +37,7 @@ type replicationData struct {
 type replicator struct {
 	mu sync.Mutex
 
-	locker *guardian.GuardianLocker
+	locker *guardian.Locker
 	cm     *ConnManager
 	conns  []string // ids of connections to replicate to
 
@@ -56,7 +56,7 @@ type replicator struct {
 // or batched replications based on configuration.
 // When interval > 0, replications are queued and processed in batches at that interval.
 // When interval = 0, each replication is performed immediately when requested.
-func newReplicator(cfg *config.DBConn, cm *ConnManager, locker *guardian.GuardianLocker) *replicator {
+func newReplicator(cfg *config.DBConn, cm *ConnManager, locker *guardian.Locker) *replicator {
 	r := &replicator{
 		locker:    locker,
 		cm:        cm,
@@ -163,13 +163,12 @@ func (r *replicator) flush() {
 			failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
 
 			// Clean up any existing file containing failed replications.
-			_ = r.locker.Guard(context.TODO(), func(*context.Context) error {
-				if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
-					utils.Logger.Warning(fmt.Sprintf(
-						"<DataManager> failed to remove file for %q: %v", key, err))
-				}
-				return nil
-			}, 0, utils.FileLockPrefix+failedPath)
+			unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
+			if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<DataManager> failed to remove file for %q: %v", key, err))
+			}
+			unlock()
 		}
 
 		if err := replicate(context.TODO(), r.cm, r.conns, r.filtered, data.objType, data.objID,
@@ -251,15 +250,14 @@ type ReplicationTask struct {
 
 // NewReplicationTaskFromFile loads a replication task from the specified file.
 // The file is removed after successful loading.
-func NewReplicationTaskFromFile(ctx *context.Context, path string, locker *guardian.GuardianLocker) (*ReplicationTask, error) {
-	var taskBytes []byte
-	if err := locker.Guard(ctx, func(*context.Context) error {
-		var err error
-		if taskBytes, err = os.ReadFile(path); err != nil {
-			return err
-		}
-		return os.Remove(path) // file is not needed anymore
-	}, 0, utils.FileLockPrefix+path); err != nil {
+func NewReplicationTaskFromFile(_ *context.Context, path string, locker *guardian.Locker) (*ReplicationTask, error) {
+	unlock := locker.Lock(utils.FileLockPrefix + path)
+	taskBytes, err := os.ReadFile(path)
+	if err == nil {
+		err = os.Remove(path) // file is not needed anymore
+	}
+	unlock()
+	if err != nil {
 		return nil, err
 	}
 	dec := gob.NewDecoder(bytes.NewBuffer(taskBytes))
@@ -272,16 +270,16 @@ func NewReplicationTaskFromFile(ctx *context.Context, path string, locker *guard
 
 // WriteToFile saves the replication task to the specified path.
 // This allows failed tasks to be recovered and retried later.
-func (r *ReplicationTask) WriteToFile(ctx *context.Context, path string, locker *guardian.GuardianLocker) error {
-	return locker.Guard(ctx, func(*context.Context) error {
-		f, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-		enc := gob.NewEncoder(f)
-		return enc.Encode(r)
-	}, 0, utils.FileLockPrefix+path)
+func (r *ReplicationTask) WriteToFile(_ *context.Context, path string, locker *guardian.Locker) error {
+	unlock := locker.Lock(utils.FileLockPrefix + path)
+	defer unlock()
+	f, err := os.Create(path)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	enc := gob.NewEncoder(f)
+	return enc.Encode(r)
 }
 
 // Execute performs the replication task.

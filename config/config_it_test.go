@@ -1604,6 +1604,13 @@ func TestGetLockFilePath(t *testing.T) {
 		t.Errorf("Expected %s \n but received \n %s", exp, pathL)
 	}
 
+	l.LockFilePath = utils.MetaMemory
+	pathL = l.GetLockFilePath()
+	exp = utils.MetaMemory
+	if pathL != exp {
+		t.Errorf("Expected %s \n but received \n %s", exp, pathL)
+	}
+
 	if err := os.Mkdir(path.Join("/tmp", "TestGetLockFilePath"), 0777); err != nil {
 		t.Error(err)
 	}

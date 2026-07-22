@@ -17,7 +17,7 @@ import (
 
 func TestACHTTPPostExecute(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.EFsCfg().PosterAttempts = 1
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
@@ -82,7 +82,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 
 func TestACHTTPPostValues(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).Attempts = 1
 	cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir = utils.MetaNone
 	apAction := &utils.APAction{

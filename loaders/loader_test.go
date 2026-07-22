@@ -30,7 +30,7 @@ import (
 
 func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -189,7 +189,7 @@ func TestSetToDBWithDBError(t *testing.T) {
 
 func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -312,7 +312,7 @@ func TestSetToDB(t *testing.T) {
 
 func TestLoaderProcess(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -328,7 +328,7 @@ func TestLoaderProcess(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil, locker)
 	expLd := &loader{
 		cfg:       cfg,
 		ldrCfg:    cfg.LoaderCfg()[0],
@@ -336,7 +336,7 @@ func TestLoaderProcess(t *testing.T) {
 		filterS:   fS,
 		connMgr:   cM,
 		dataCache: cache,
-		Locker:    newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
+		locker:    newLoaderLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID, locker),
 	}
 	if !reflect.DeepEqual(expLd, ld) {
 		t.Errorf("Expected: %+v, received: %+v", expLd, ld)
@@ -488,7 +488,7 @@ func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args any, rep
 func TestLoaderProcessCallCahe(t *testing.T) {
 	var reloadCache, clearCache any
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -512,7 +512,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID})
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, []string{connID}, locker)
 	{
 		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if err := ld.process(context.Background(), v, utils.MetaAttributes, utils.MetaStore,
@@ -804,7 +804,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 
 func TestLoaderProcessData(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -820,7 +820,7 @@ func TestLoaderProcessData(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil, locker)
 
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -858,7 +858,7 @@ func (mockReader) Read([]byte) (int, error) { return 0, utils.ErrNotFound }
 
 func TestLoaderProcessDataErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -874,7 +874,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil, locker)
 
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
@@ -911,7 +911,7 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
 
 func TestLoaderProcessFileURL(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -927,7 +927,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
 		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
 	}
-	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil)
+	ld := newLoader(cfg, cfg.LoaderCfg()[0], dm, cache, fS, cM, nil, locker)
 
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
@@ -971,17 +971,9 @@ func TestLoaderProcessFileURL(t *testing.T) {
 
 }
 
-type mockLock struct{}
-
-// lockFolder will attempt to lock the folder by creating the lock file
-func (mockLock) Lock() error                { return utils.ErrExists }
-func (mockLock) Unlock() (_ error)          { return }
-func (mockLock) Locked() (_ bool, _ error)  { return true, utils.ErrExists }
-func (mockLock) IsLockFile(string) (_ bool) { return }
-
 func TestLoaderProcessIFile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1032,7 +1024,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, fS, cM, nil)
+	}, dm, cache, fS, cM, nil, locker)
 	expErrMsg := fmt.Sprintf(`rename %s/Chargers.csv %s/Chargers.csv: no such file or directory`, tmpIn, tmpOut)
 	if err := ld.processIFile(utils.ChargersCsv); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
@@ -1072,15 +1064,15 @@ func TestLoaderProcessIFile(t *testing.T) {
 		t.Errorf("Expected file to be moved")
 	}
 
-	ld.Locker = mockLock{}
-	if err := ld.processIFile(utils.AttributesCsv); err != utils.ErrExists {
-		t.Fatal(err)
+	ld.locker = loaderLocker{path: path.Join(t.TempDir(), "missing", ".lck")}
+	if err := ld.processIFile(utils.AttributesCsv); !os.IsNotExist(err) {
+		t.Fatalf("expected not-exist error, got %v", err)
 	}
 }
 
 func TestLoaderProcessFolder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1131,7 +1123,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, fS, cM, nil)
+	}, dm, cache, fS, cM, nil, locker)
 
 	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
 	if err != nil {
@@ -1192,13 +1184,13 @@ func TestLoaderProcessFolder(t *testing.T) {
 		t.Errorf("Expected file to be moved")
 	}
 
-	ld.Locker = mockLock{}
+	ld.locker = loaderLocker{path: path.Join(t.TempDir(), "missing", ".lck")}
 	if err := ld.processFolder(context.Background(), utils.EmptyString,
-		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != utils.ErrExists {
-		t.Fatal(err)
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); !os.IsNotExist(err) {
+		t.Fatalf("expected not-exist error, got %v", err)
 	}
 
-	ld.Locker = nopLock{}
+	ld.locker = loaderLocker{}
 	ld.ldrCfg.TpInDir = "http://localhost:0"
 	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
 	if err := ld.processFolder(context.Background(), utils.EmptyString,
@@ -1209,7 +1201,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 
 func TestLoaderProcessFolderErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1259,7 +1251,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, fS, cM, nil)
+	}, dm, cache, fS, cM, nil, locker)
 
 	f, err := os.Create(path.Join(tmpIn, utils.AttributesCsv))
 	if err != nil {
@@ -1317,7 +1309,7 @@ func TestLoaderMoveUnprocessedFilesErrors(t *testing.T) {
 		ID:      "test",
 		Enabled: true,
 		TpInDir: "notAFolder",
-	}, nil, nil, nil, nil, nil)
+	}, nil, nil, nil, nil, nil, engine.NewLocker(cfg))
 
 	expErrMsg := "open notAFolder: no such file or directory"
 	if err := ld.moveUnprocessedFiles(ld.ldrCfg.TpInDir); err == nil || err.Error() != expErrMsg {
@@ -1352,8 +1344,8 @@ func TestLoaderHandleFolder(t *testing.T) {
 		RunDelay: time.Nanosecond,
 		TpInDir:  "/tmp/TestLoaderHandleFolder",
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, nil, nil, nil)
-	ld.Locker = mockLock{}
+	}, nil, nil, nil, nil, nil, engine.NewLocker(cfg))
+	ld.locker = loaderLocker{}
 	stop := make(chan struct{})
 	close(stop)
 
@@ -1380,8 +1372,8 @@ func TestLoaderListenAndServe(t *testing.T) {
 		RunDelay: time.Nanosecond,
 		TpInDir:  "/tmp/TestLoaderListenAndServe",
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, nil, nil, nil)
-	ld.Locker = mockLock{}
+	}, nil, nil, nil, nil, nil, engine.NewLocker(cfg))
+	ld.locker = loaderLocker{}
 	stop := make(chan struct{})
 	close(stop)
 
@@ -1409,8 +1401,8 @@ func TestLoaderListenAndServeI(t *testing.T) {
 		TpInDir:  "/tmp/TestLoaderListenAndServeI",
 		RunDelay: -1,
 		Opts:     &config.LoaderSOptsCfg{},
-	}, nil, nil, nil, nil, nil)
-	ld.Locker = mockLock{}
+	}, nil, nil, nil, nil, nil, engine.NewLocker(cfg))
+	ld.locker = loaderLocker{}
 	stop := make(chan struct{})
 	close(stop)
 
@@ -1432,7 +1424,7 @@ func TestLoaderListenAndServeI(t *testing.T) {
 
 func TestLoaderProcessZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -1473,7 +1465,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 			WithIndex: true,
 			Cache:     utils.MetaNone,
 		},
-	}, dm, cache, fS, cM, nil)
+	}, dm, cache, fS, cM, nil, locker)
 	bufz := new(bytes.Buffer)
 	w := zip.NewWriter(bufz)
 	f, err := w.Create(utils.AttributesCsv)
@@ -1521,17 +1513,17 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 		t.Errorf("Expected %+q, received %+q", expLog, rplyLog)
 	}
 
-	ld.Locker = mockLock{}
+	ld.locker = loaderLocker{path: path.Join(t.TempDir(), "missing", ".lck")}
 	if err := ld.processZip(context.Background(),
-		map[string]any{utils.MetaCache: utils.MetaNone}, true, true, r); err != utils.ErrExists {
-		t.Fatal(err)
+		map[string]any{utils.MetaCache: utils.MetaNone}, true, true, r); !os.IsNotExist(err) {
+		t.Fatalf("expected not-exist error, got %v", err)
 	}
 
 }
 
 func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -1597,7 +1589,7 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 
 func TestSetToDBChargerProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {

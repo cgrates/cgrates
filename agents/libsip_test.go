@@ -16,7 +16,7 @@ import (
 
 func TestUpdateSIPMsgFromNavMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	m := sipingo.Message{}
 	rplyFlds := []*config.FCTemplate{
 		{Tag: "Request", Path: utils.MetaRep + utils.NestingSep + "Request",

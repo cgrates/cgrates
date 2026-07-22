@@ -17,7 +17,7 @@ import (
 )
 
 func NewAdminSv1(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.ConnManager,
-	fltrS *engine.FilterS, locker *guardian.GuardianLocker) *AdminSv1 {
+	fltrS *engine.FilterS, locker *guardian.Locker) *AdminSv1 {
 	return &AdminSv1{
 		cfg:     cfg,
 		dm:      dm,
@@ -30,7 +30,7 @@ func NewAdminSv1(cfg *config.CGRConfig, dm *engine.DataManager, connMgr *engine.
 type AdminSv1 struct {
 	cfg     *config.CGRConfig
 	dm      *engine.DataManager
-	locker  *guardian.GuardianLocker
+	locker  *guardian.Locker
 	connMgr *engine.ConnManager
 	fltrS   *engine.FilterS
 }

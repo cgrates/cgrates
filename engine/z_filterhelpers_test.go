@@ -23,7 +23,7 @@ func TestFilterMatchingItemIDsForEvent(t *testing.T) {
 	prefixFilterID := "prefixFilterID"
 	suffixFilterID := "suffixFilterID"
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -133,7 +133,7 @@ func TestFilterMatchingItemIDsForEvent2(t *testing.T) {
 	stringFilterID := "stringFilterID"
 	prefixFilterID := "prefixFilterID"
 	cfg := config.NewDefaultCGRConfig()
-	locker := NewGuardianLocker(cfg)
+	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())

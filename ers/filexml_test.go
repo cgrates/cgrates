@@ -15,7 +15,7 @@ import (
 
 func TestERSNewXMLFileER(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	expected := &XMLFileER{
 		cgrCfg:    cfg,
@@ -40,7 +40,7 @@ func TestERSNewXMLFileER(t *testing.T) {
 
 func TestERSXMLFileERConfig(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
 		ID:             utils.MetaDefault,
@@ -64,7 +64,7 @@ func TestERSXMLFileERConfig(t *testing.T) {
 
 func TestERSXMLFileERServeNil(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cfg.ERsCfg().Readers[0] = &config.EventReaderCfg{
 		ID:             utils.MetaDefault,

@@ -205,7 +205,7 @@ func prepareRoutesData(t *testing.T, dm *engine.DataManager, cfg *config.CGRConf
 
 func TestRoutesCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -221,7 +221,7 @@ func TestRoutesCache(t *testing.T) {
 
 func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -251,7 +251,7 @@ func TestRoutesmatchingRouteProfilesForEvent(t *testing.T) {
 
 func TestRoutesSortedForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -364,7 +364,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -419,7 +419,7 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 func TestRoutesSortedForEventWithOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -465,7 +465,7 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -571,7 +571,7 @@ func TestRoutesNewOptsGetRoutesIgnoreErrors(t *testing.T) {
 
 func TestRoutesMatchWithIndexFalse(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -601,7 +601,7 @@ func TestRoutesMatchWithIndexFalse(t *testing.T) {
 
 func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	sppTest := []*utils.RouteProfile{
@@ -746,7 +746,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 
 func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -771,7 +771,7 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 
 func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -796,7 +796,7 @@ func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 
 func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -822,7 +822,7 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 
 func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -847,7 +847,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 
 func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
@@ -876,7 +876,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 
 func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -903,7 +903,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 
 func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -930,7 +930,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 
 func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -957,7 +957,7 @@ func TestRoutesV1GetRouteProfilesForEventMsnEventError(t *testing.T) {
 
 func TestRouteSV1GetRoutesListErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	cacheS.Clear(nil)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -983,7 +983,7 @@ func TestRouteSV1GetRoutesListErr(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -1041,7 +1041,7 @@ func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, re
 func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator)}
 	cfg.CacheCfg().Partitions[utils.CacheRouteProfiles].Replicate = true
 
@@ -1124,7 +1124,7 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -1198,7 +1198,7 @@ func TestRouteSMatchingRouteProfilesForEventPassErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -1286,7 +1286,7 @@ func TestRouteSMatchingRPSForEventWeightFromDynamicsErr(t *testing.T) {
 func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
@@ -1379,7 +1379,7 @@ func TestRouteSMatchingRPSForEventBlockerFromDynamicsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
@@ -1412,7 +1412,7 @@ func TestNewOptsGetRoutesGetBoolOptsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.Limit = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -1445,7 +1445,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsLimitErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -1478,7 +1478,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsOffsetErr(t *testing.T) {
 func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -1511,7 +1511,7 @@ func TestNewOptsGetRoutesGetIntPointerOptsMaxItemsErr(t *testing.T) {
 func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.MaxCost = []*config.DynamicInterfaceOpt{
 		{
 			FilterIDs: []string{"*string.invalid:filter"},
@@ -1548,7 +1548,7 @@ func TestNewOptsGetRoutesGetInterfaceOptsErr(t *testing.T) {
 func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -1637,7 +1637,7 @@ func TestSortedRoutesForEventsortedRoutesForProfileErr(t *testing.T) {
 func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt([]string{"*string.invalid:filter"}, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -1724,7 +1724,7 @@ func TestSortedRoutesForEventGetIntPointerOptsErr(t *testing.T) {
 func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.IgnoreErrors = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
@@ -1811,7 +1811,7 @@ func TestSortedRoutesForEventNewOptsGetRoutesErr(t *testing.T) {
 func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.MaxItems = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(1), nil),
 	}
@@ -1900,7 +1900,7 @@ func TestSortedRoutesForEventExceedMaxItemsErr(t *testing.T) {
 
 func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.Context = []*config.DynamicStringOpt{
 		config.NewDynamicStringOpt([]string{"*string.invalid:filter"}, "cgrates.org", "value2", nil),
 	}
@@ -1945,7 +1945,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RPCConns()["testConn"] = config.NewDfltRPCConn()
 	cfg.RouteSCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}}
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2056,7 +2056,7 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.ProfileCount = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(4), nil),
 	}
@@ -2123,7 +2123,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2197,7 +2197,7 @@ func TestV1GetRouteProfilesForEventMatchingRouteProfErr(t *testing.T) {
 func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().StringIndexedFields = nil
 	cfg.RouteSCfg().PrefixIndexedFields = nil
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -2254,7 +2254,7 @@ func TestV1GetRouteProfilesForEventOK(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2315,7 +2315,7 @@ func TestRoutessortedRoutesForProfileLazyPassErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2382,7 +2382,7 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2447,7 +2447,7 @@ func TestRoutessortedRoutesForProfileWeightFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2517,7 +2517,7 @@ func TestRoutessortedRoutesForProfileBlockerFromDynamicsErr(t *testing.T) {
 func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
@@ -2582,7 +2582,7 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.RouteSCfg().Opts.Offset = []*config.DynamicIntPointerOpt{
 		config.NewDynamicIntPointerOpt(nil, "cgrates.org", utils.IntPointer(10), nil),
 	}
@@ -2642,7 +2642,7 @@ func TestRoutessortedRoutesForEventNoSortedRoutesErr(t *testing.T) {
 func TestRouteSV1GetRoutesListOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)

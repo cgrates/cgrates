@@ -16,7 +16,7 @@ import (
 
 func TestAccountsSetGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -111,7 +111,7 @@ func TestAccountsSetGetAccount(t *testing.T) {
 
 func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -174,7 +174,7 @@ func TestAccountsGetAccountErrorMissingID(t *testing.T) {
 
 func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -200,7 +200,7 @@ func TestAccountsGetAccountErrorNotFound(t *testing.T) {
 
 func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
@@ -226,7 +226,7 @@ func TestAccountsGetAccountErrorGetAccount(t *testing.T) {
 
 func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -320,7 +320,7 @@ func TestAccountsSetGetAccountNoTenant(t *testing.T) {
 
 func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -370,7 +370,7 @@ func TestAccountsSetGetAccountErrorMissingID(t *testing.T) {
 
 func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -424,7 +424,7 @@ func TestAccountsSetGetAccountErrorBadFilter(t *testing.T) {
 
 func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
@@ -489,7 +489,7 @@ func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 
 func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
@@ -558,7 +558,7 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 
 func TestAccountsSetGetAccountIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -784,7 +784,7 @@ func TestAccountsSetGetAccountIDs(t *testing.T) {
 
 func TestAccountsGetAccountsCountError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
@@ -804,7 +804,7 @@ func TestAccountsGetAccountsCountError(t *testing.T) {
 
 func TestAccountsGetAccountIDSError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
@@ -824,7 +824,7 @@ func TestAccountsGetAccountIDSError(t *testing.T) {
 
 func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -850,7 +850,7 @@ func TestAccountsRemoveAccountErrorMissingID(t *testing.T) {
 
 func TestAccountsRemoveAccountErrorRmvAccount(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{}
@@ -876,7 +876,7 @@ func TestAccountsRemoveAccountErrorRmvAccount(t *testing.T) {
 
 func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
@@ -918,7 +918,7 @@ func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 
 func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = "123"
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
@@ -964,7 +964,7 @@ func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 
 func TestAccountsGetAccountsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1104,7 +1104,7 @@ func TestAccountsGetAccountsOK(t *testing.T) {
 
 func TestAccountsGetAccountsGetIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -1159,7 +1159,7 @@ func TestAccountsGetAccountsGetIDsErr(t *testing.T) {
 
 func TestAccountsGetAccountsGetErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
 		SetAccountDrvF: func(*context.Context, *utils.Account) error {
@@ -1197,7 +1197,7 @@ func TestAccountsGetAccountsGetErr(t *testing.T) {
 
 func TestAccountsGetAccountIDsGetOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
 		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
@@ -1245,7 +1245,7 @@ func TestAccountsGetAccountIDsGetOptsErr(t *testing.T) {
 
 func TestAccountsGetAccountIDsPaginateErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
 		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {

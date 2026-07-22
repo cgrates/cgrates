@@ -15,7 +15,7 @@ import (
 
 func TestNewTPeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMng := engine.NewConnManager(cfg)
 	connMng.SetCache(cacheS)
@@ -28,7 +28,7 @@ func TestNewTPeS(t *testing.T) {
 
 func TestGetTariffPlansKeys(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -363,7 +363,7 @@ func TestGetTariffPlansKeys(t *testing.T) {
 
 func TestV1ExportTariffPlan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMng := engine.NewConnManager(cfg)
 	connMng.SetCache(cacheS)
@@ -410,7 +410,7 @@ func TestV1ExportTariffPlan(t *testing.T) {
 
 func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMng := engine.NewConnManager(cfg)
 	connMng.SetCache(cacheS)
@@ -432,7 +432,7 @@ func TestV1ExportTariffPlanZeroExp(t *testing.T) {
 
 func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMng := engine.NewConnManager(cfg)
 	connMng.SetCache(cacheS)
@@ -456,7 +456,7 @@ func TestV1ExportTariffPlanZeroIDs(t *testing.T) {
 
 func TestV1ExportTariffPlanInvalidExpType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMng := engine.NewConnManager(cfg)
 	connMng.SetCache(cacheS)

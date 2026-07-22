@@ -104,7 +104,7 @@ func TestChargersITMoveEncoding2(t *testing.T) {
 }
 
 func testChrgITConnect(t *testing.T) {
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheIn := engine.NewCacheS(chrgCfgIn, nil, nil, nil, locker)
 	dataDBIn, err := NewMigratorDataDBs([]string{utils.MetaDefault}, chrgCfgIn.GeneralCfg().DBDataEncoding, chrgCfgIn, cacheIn, locker)
 	if err != nil {

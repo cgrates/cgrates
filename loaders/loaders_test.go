@@ -18,12 +18,11 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 func TestNewLoaderService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.LoaderCfg()[0].Enabled = true
 	cfg.LoaderCfg()[0].RunDelay = -1
 	cfg.LoaderCfg()[0].TpInDir = "notAFolder"
@@ -38,35 +37,11 @@ func TestNewLoaderService(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
-	cache := map[string]*ltcache.Cache{}
-	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
-	}
-	ld := NewLoaderS(cfg, dm, fS, cM)
-	exp := &LoaderS{
-		cfg:   cfg,
-		cache: cache,
-		ldrs: map[string]*loader{
-			utils.MetaDefault: {
-				cfg:        cfg,
-				ldrCfg:     cfg.LoaderCfg()[0],
-				dm:         dm,
-				filterS:    fS,
-				connMgr:    cM,
-				dataCache:  cache,
-				cacheConns: cfg.LoaderCfg()[0].Conns[utils.MetaCaches][0].ConnIDs,
-				Locker:     newLocker(cfg.LoaderCfg()[0].GetLockFilePath(), cfg.LoaderCfg()[0].ID),
-			},
-		},
-	}
-	if !reflect.DeepEqual(exp, ld) {
-		t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(ld))
-	}
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	if !ld.Enabled() {
 		t.Error("Expected loader to be enabled")
 	}
 
-	ld.ldrs[utils.MetaDefault].Locker = mockLock{}
 	stop := make(chan struct{})
 	close(stop)
 
@@ -95,7 +70,7 @@ func TestNewLoaderService(t *testing.T) {
 
 func TestLoaderServiceV1Run(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -150,7 +125,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderS(cfg, dm, fS, cM)
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	var rply string
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		APIOpts: map[string]any{
@@ -174,17 +149,9 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	}
 }
 
-type mockLock2 struct{}
-
-// lockFolder will attempt to lock the folder by creating the lock file
-func (mockLock2) Lock() (_ error)            { return }
-func (mockLock2) Unlock() (_ error)          { return utils.ErrExists }
-func (mockLock2) Locked() (_ bool, _ error)  { return true, nil }
-func (mockLock2) IsLockFile(string) (_ bool) { return }
-
 func TestLoaderServiceV1RunErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
 	}
@@ -238,7 +205,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderS(cfg, dm, fS, cM)
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	var rply string
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
@@ -275,7 +242,9 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	ld.ldrs[utils.MetaDefault].Locker.Lock()
+	if _, err := ld.ldrs[utils.MetaDefault].locker.lock(); err != nil {
+		t.Fatal(err)
+	}
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
@@ -299,19 +268,6 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	ld.ldrs[utils.MetaDefault].Locker = mockLock{}
-
-	expErrMsg = `SERVER_ERROR: EXISTS`
-	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{}, &rply); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	ld.ldrs[utils.MetaDefault].Locker = mockLock2{}
-	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{APIOpts: map[string]any{
-		utils.MetaForceLock: true}}, &rply); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
 	cfg.LoaderCfg()[0].Enabled = false
 	ld.Reload(dm, fS, cM)
 	expErrMsg = `UNKNOWN_LOADER: *default`
@@ -322,7 +278,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 
 func TestLoaderServiceV1ImportZip(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -365,7 +321,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderS(cfg, dm, fS, cM)
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	var rply string
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
@@ -392,7 +348,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 
 func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Filters: []string{"*string"}},
 	}
@@ -433,7 +389,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderS(cfg, dm, fS, cM)
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	var rply string
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
@@ -485,7 +441,9 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	ld.ldrs[utils.MetaDefault].Locker.Lock()
+	if _, err := ld.ldrs[utils.MetaDefault].locker.lock(); err != nil {
+		t.Fatal(err)
+	}
 	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
 		Data: buf.Bytes(),
 		APIOpts: map[string]any{
@@ -511,22 +469,6 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
 
-	ld.ldrs[utils.MetaDefault].Locker = mockLock{}
-
-	expErrMsg = `SERVER_ERROR: EXISTS`
-	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
-		Data: buf.Bytes(),
-	}, &rply); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
-	ld.ldrs[utils.MetaDefault].Locker = mockLock2{}
-	if err := ld.V1ImportZip(context.Background(), &ArgsProcessZip{
-		Data: buf.Bytes(), APIOpts: map[string]any{
-			utils.MetaForceLock: true}}, &rply); err == nil || err.Error() != expErrMsg {
-		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
-	}
-
 	cfg.LoaderCfg()[0].Enabled = false
 	ld.Reload(dm, fS, cM)
 	expErrMsg = `UNKNOWN_LOADER: *default`
@@ -537,9 +479,137 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	}
 }
 
+func waitForLoaderCall(t *testing.T, unlock func(), call func() error) error {
+	t.Helper()
+	started := make(chan struct{})
+	done := make(chan error, 1)
+	go func() {
+		close(started)
+		done <- call()
+	}()
+	<-started
+	select {
+	case err := <-done:
+		unlock()
+		t.Fatalf("loader call did not wait: %v", err)
+	case <-time.After(20 * time.Millisecond):
+	}
+	unlock()
+	select {
+	case err := <-done:
+		return err
+	case <-time.After(time.Second):
+		t.Fatal("loader call remained blocked")
+		return nil
+	}
+}
+
+func newMemoryLoaderS(t *testing.T) *LoaderS {
+	t.Helper()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].LockFilePath = utils.MetaMemory
+	cfg.LoaderCfg()[0].TpInDir = t.TempDir()
+	cfg.LoaderCfg()[0].TpOutDir = ""
+	cfg.LoaderCfg()[0].Data = nil
+	cfg.LoaderCfg()[0].Conns = nil
+	cfg.LoaderCfg()[0].RunDelay = 0
+	locker := engine.NewLocker(cfg)
+	return NewLoaderS(cfg, nil, nil, nil, locker)
+}
+
+func TestLoaderMemoryLockCoordinatesWork(t *testing.T) {
+	t.Run("RunForceLock", func(t *testing.T) {
+		ldrS := newMemoryLoaderS(t)
+		ldr := ldrS.ldrs[utils.MetaDefault]
+		unlock, err := ldr.locker.lock()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var reply string
+		err = waitForLoaderCall(t, unlock, func() error {
+			return ldrS.V1Run(context.Background(), &ArgsProcessFolder{
+				APIOpts: map[string]any{utils.MetaForceLock: true},
+			}, &reply)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("ImportZip", func(t *testing.T) {
+		ldrS := newMemoryLoaderS(t)
+		ldr := ldrS.ldrs[utils.MetaDefault]
+		var buf bytes.Buffer
+		zipWriter := zip.NewWriter(&buf)
+		if err := zipWriter.Close(); err != nil {
+			t.Fatal(err)
+		}
+		unlock, err := ldr.locker.lock()
+		if err != nil {
+			t.Fatal(err)
+		}
+		var reply string
+		err = waitForLoaderCall(t, unlock, func() error {
+			return ldrS.V1ImportZip(context.Background(), &ArgsProcessZip{
+				Data: buf.Bytes(),
+			}, &reply)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("Periodic", func(t *testing.T) {
+		ldrS := newMemoryLoaderS(t)
+		ldr := ldrS.ldrs[utils.MetaDefault]
+		unlock, err := ldr.locker.lock()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := waitForLoaderCall(t, unlock, func() error {
+			return ldr.processFolder(context.Background(), "", nil, false, false)
+		}); err != nil {
+			t.Fatal(err)
+		}
+	})
+
+	t.Run("FSNotify", func(t *testing.T) {
+		ldrS := newMemoryLoaderS(t)
+		ldr := ldrS.ldrs[utils.MetaDefault]
+		ldr.ldrCfg.Data = []*config.LoaderDataType{{Filename: "missing.csv"}}
+		unlock, err := ldr.locker.lock()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := waitForLoaderCall(t, unlock, func() error {
+			return ldr.processIFile("missing.csv")
+		}); err == nil {
+			t.Fatal("expected missing input file error")
+		}
+	})
+
+	t.Run("Reload", func(t *testing.T) {
+		ldrS := newMemoryLoaderS(t)
+		oldLoader := ldrS.ldrs[utils.MetaDefault]
+		unlock, err := oldLoader.locker.lock()
+		if err != nil {
+			t.Fatal(err)
+		}
+		ldrS.Reload(nil, nil, nil)
+		var reply string
+		err = waitForLoaderCall(t, unlock, func() error {
+			return ldrS.V1Run(context.Background(), &ArgsProcessFolder{}, &reply)
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+	})
+}
+
 func TestLoaderServiceV1RunPath(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	fc := []*config.FCTemplate{
 		{Path: utils.Tenant, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.0", utils.RSRConstSep)},
 		{Path: utils.ID, Type: utils.MetaVariable, Value: utils.NewRSRParsersMustCompile("~*req.1", utils.RSRConstSep)},
@@ -593,7 +663,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	dm.SetCache(cacheS)
 	fS := engine.NewFilterS(cfg, cM, dm)
 
-	ld := NewLoaderS(cfg, dm, fS, cM)
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
 	var rply string
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		Path: tmpPath,

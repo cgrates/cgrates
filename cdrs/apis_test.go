@@ -17,7 +17,7 @@ import (
 
 func TestCDRsV1ProcessEventMock(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -88,7 +88,7 @@ func TestCDRsV1ProcessEventMock(t *testing.T) {
 
 func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -162,7 +162,7 @@ func TestCDRsV1ProcessEventMockErr(t *testing.T) {
 
 func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -239,7 +239,7 @@ func TestCDRsV1ProcessEventMockCache(t *testing.T) {
 
 func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{
 		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal,
 			utils.MetaEEs)}},
@@ -318,7 +318,7 @@ func TestCDRsV1ProcessEventWithGetMockCache(t *testing.T) {
 
 func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -377,7 +377,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErr(t *testing.T) {
 
 func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -418,7 +418,7 @@ func TestCDRsV1ProcessEventCacheGet(t *testing.T) {
 
 func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -462,7 +462,7 @@ func TestCDRsV1ProcessEventWithGetCacheGet(t *testing.T) {
 func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -512,7 +512,7 @@ func TestCDRsV1ProcessEventWithGetMockCacheErrResp(t *testing.T) {
 
 func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
@@ -577,7 +577,7 @@ func TestCDRsV1ProcessStoredEvents(t *testing.T) {
 
 func TestCDRsV1ProcessStoredEventsWithEmptyArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cfg.CdrsCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)

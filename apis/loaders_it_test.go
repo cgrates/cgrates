@@ -1644,7 +1644,7 @@ func TestLoadersLoad(t *testing.T) {
 	defer f2.Close()
 
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	loaderCfg := &config.LoaderSCfg{
 		ID:             "LoaderID",
 		Enabled:        true,
@@ -1664,7 +1664,7 @@ func TestLoadersLoad(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dm)
-	ldrS := loaders.NewLoaderS(cfg, dm, fltrs, nil)
+	ldrS := loaders.NewLoaderS(cfg, dm, fltrs, nil, locker)
 	lSv1 := NewLoaderSv1(ldrS)
 
 	args := &loaders.ArgsProcessFolder{

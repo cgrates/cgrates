@@ -90,7 +90,7 @@ func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply any
 
 func TestProcessAttributeS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{ // coverage purpose
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -122,7 +122,7 @@ func TestProcessAttributeS(t *testing.T) {
 
 func TestRatesCostForEvent(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -152,7 +152,7 @@ func TestRatesCostForEvent(t *testing.T) { // coverage purpose
 
 func TestRatesCostForEvent2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
@@ -192,7 +192,7 @@ func TestRatesCostForEvent2(t *testing.T) { // coverage purpose
 
 func TestDebitUsageFromConcretes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -276,7 +276,7 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 
 func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -399,7 +399,7 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 
 func TestDebitUsageFromConcretesRestore(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -438,7 +438,7 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 
 func TestMaxDebitUsageFromConcretes(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -497,7 +497,7 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 
 func TestRestoreAccount(t *testing.T) { //coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -542,7 +542,7 @@ type dataDBMockError struct {
 
 func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &dataDBMockError{}}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -583,7 +583,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 
 func TestRestoreAccount3(t *testing.T) { //coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -753,7 +753,7 @@ dm.SetCache(engine.Cache)
 
 func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)

@@ -158,7 +158,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil, locker)
 	cacheS := engine.NewCacheS(cfgDflt, nil, nil, nil, locker)
 	dm.SetCache(cacheS)
@@ -183,7 +183,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
-	locker := engine.NewGuardianLocker(config.NewDefaultCGRConfig())
+	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil, locker)
 	cacheS := engine.NewCacheS(cfgDflt, nil, nil, nil, locker)
 	dm.SetCache(cacheS)

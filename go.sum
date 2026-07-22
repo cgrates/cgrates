@@ -78,8 +78,8 @@ github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b h1:PQzDye+0GcgJ3cKG5
 github.com/cgrates/fsock v0.0.0-20240522220429-b6cc1d96fd2b/go.mod h1:bKByLko2HF33K+PbiiToAgevrrbr96C+7Pp3HGS6oag=
 github.com/cgrates/go-diameter v0.0.0-20260512102405-f9dcf589d4ac h1:gWIhl6CHA5VFO0wc+a6n3WOf4NrAB4AeKxroVJnSuW4=
 github.com/cgrates/go-diameter v0.0.0-20260512102405-f9dcf589d4ac/go.mod h1:IogzcCjY766qE66ITmxp1SLXIAKszLICBomubKrtnLo=
-github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b h1:SqTeoUV65ki0ls7zvCAn2LmKRL1jPUZO70JOspplu84=
-github.com/cgrates/guardian v0.0.0-20250331150912-885bd700e96b/go.mod h1:te9B6PUvoE0jWCM7Zj4Ftrsco3mREKZ0Y29ODxAYDpY=
+github.com/cgrates/guardian v0.0.0-20260717083347-4dd989a9dc8f h1:hdXqCk7Ar9XBpiWQCDgZ6xjYkZdRMcuC4dIquvDiM8k=
+github.com/cgrates/guardian v0.0.0-20260717083347-4dd989a9dc8f/go.mod h1:mh+xVyKFS/X2CvS+Ki9e1v5dKjv9mQfpuDWwHw+DMAg=
 github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73 h1:7AYhvpegrSkY9tLGCQsZgNl8yTjL5CaQOTr3/kYlPek=
 github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73/go.mod h1:XBQDDjrIn+RCS4PDApYjTWwdp51NbqYfUGAYtzSB5ag=
 github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191 h1:R8CCMTO4SYvpJv6nND7SlszZ5qcExN1pmtCJrUkOOrs=

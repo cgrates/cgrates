@@ -15,7 +15,7 @@ import (
 
 func TestS3ERServe(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	rdr, err := NewS3ER(cfg, 0, nil, nil, nil, cacheS, nil, nil)
 	if err != nil {
@@ -126,7 +126,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 
 func TestS3ERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)

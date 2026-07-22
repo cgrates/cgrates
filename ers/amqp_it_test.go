@@ -52,7 +52,7 @@ func TestAMQPER(t *testing.T) {
 	],
 },
 }`)
-	locker := engine.NewGuardianLocker(cfg)
+	locker := engine.NewLocker(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}

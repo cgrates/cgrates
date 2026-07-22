@@ -14,7 +14,7 @@ import (
 
 func TestLibErsMergePartialEvents(t *testing.T) {
 	confg := config.NewDefaultCGRConfig()
-	locker := engine.NewGuardianLocker(confg)
+	locker := engine.NewLocker(confg)
 	cacheS := engine.NewCacheS(confg, nil, nil, nil, locker)
 	fltrS := engine.NewFilterS(confg, nil, nil)
 	cgrEvs := []*utils.CGREvent{
