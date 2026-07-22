@@ -23,15 +23,15 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.Accounts
+	var acnts []*utils.Account
 	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, ignFilters, false); err != nil {
+		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	*aps = acnts.Accounts()
+	*aps = acnts
 	return
 }
 
@@ -47,15 +47,16 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.Accounts
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, ignFilters, true); err != nil {
+	var acnts []*utils.Account
+	var unlock func()
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer unlockAccounts(acnts)
+	defer unlock()
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, false); err != nil {
@@ -77,15 +78,16 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.Accounts
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, ignFilters, true); err != nil {
+	var acnts []*utils.Account
+	var unlock func()
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer unlockAccounts(acnts)
+	defer unlock()
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, false, true); err != nil {
@@ -107,15 +109,16 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.Accounts
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, ignFilters, true); err != nil {
+	var acnts []*utils.Account
+	var unlock func()
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer unlockAccounts(acnts)
+	defer unlock()
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, false); err != nil {
@@ -137,15 +140,16 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var acnts utils.Accounts
-	if acnts, err = aS.matchingAccountsForEvent(ctx, args.Tenant,
-		args, accIDs, ignFilters, true); err != nil {
+	var acnts []*utils.Account
+	var unlock func()
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
 		}
 		return
 	}
-	defer unlockAccounts(acnts)
+	defer unlock()
 
 	var procEC *utils.EventCharges
 	if procEC, err = aS.accountsDebit(ctx, acnts, args, true, true); err != nil {
