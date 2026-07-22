@@ -15,7 +15,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 	"github.com/mediocregopher/radix/v3"
 )
 
@@ -1095,26 +1094,15 @@ func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpd
 		return err
 	}
 
-	var lockIDs []string // used to lock used indexes while setting
-	for key := range idx {
-		lockIDs = append(lockIDs, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant, key))
-	}
-	if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-		// Store the CDR in Redis
-		if err := rs.Cmd(nil, redisSET, utils.CDRsPrefix+urID, string(cdrMs)); err != nil {
-			return err
-		}
-		return
-	}, 0, lockIDs...); err != nil {
+	// Store the CDR in Redis
+	if err := rs.Cmd(nil, redisSET, utils.CDRsPrefix+urID, string(cdrMs)); err != nil {
 		return err
 	}
 
 	// Store indexes
 	for key := range idx {
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			return rs.Cmd(nil, redisSADD, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant,
-				key), utils.CDRsPrefix+urID)
-		}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant, key)); err != nil {
+		if err := rs.Cmd(nil, redisSADD, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant,
+			key), utils.CDRsPrefix+urID); err != nil {
 			return err
 		}
 	}
@@ -1144,7 +1132,6 @@ func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 		}
 	}
 
-	var lockIDs []string // used to lock used indexes while setting
 	// Find indexed fields
 	var cdrMpIDs utils.StringSet
 	for keySlice, fltrSlice := range pairFltrs {
@@ -1153,11 +1140,8 @@ func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 		}
 		grpMpIDs := make(utils.StringSet)
 		for _, id := range fltrSlice {
-			lockIDs = append(lockIDs, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
 			var ids []string
-			if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-				return rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
-			}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
+			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
 				return nil, err
 			}
 			grpMpIDs.AddSlice(ids)
@@ -1176,17 +1160,12 @@ func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 	}
 
 	if cdrMpIDs == nil {
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			// Get all CDR IDs if no filters
-			var allIDs []string
-			if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
-				return err
-			}
-			cdrMpIDs = utils.NewStringSet(allIDs)
-			return
-		}, 0, lockIDs...); err != nil {
+		// Get all CDR IDs if no filters
+		var allIDs []string
+		if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
 			return nil, err
 		}
+		cdrMpIDs = utils.NewStringSet(allIDs)
 	}
 
 	// Check for Not filters
@@ -1195,11 +1174,8 @@ func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 			continue
 		}
 		for _, id := range fltrSlice {
-			lockIDs = append(lockIDs, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
 			var ids []string
-			if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-				return rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
-			}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
+			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
 				return nil, err
 			}
 			for _, cid := range ids {
@@ -1214,12 +1190,7 @@ func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts ma
 	// Retrieve CDRs
 	for key := range cdrMpIDs {
 		var cdrBytes []byte // holds the CDR gotten from redis as []byte
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
-				return err
-			}
-			return
-		}, 0, lockIDs...); err != nil {
+		if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
 			return nil, err
 		}
 		cgrEv := new(utils.CGREvent)
@@ -1282,7 +1253,6 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 			}
 		}
 	}
-	var lockIDs []string // used to lock used indexes while setting
 	// Find indexed fields
 	var cdrMpIDs utils.StringSet
 	for keySlice, fltrSlice := range pairFltrs {
@@ -1291,11 +1261,8 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 		}
 		grpMpIDs := make(utils.StringSet)
 		for _, id := range fltrSlice {
-			lockIDs = append(lockIDs, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
 			var ids []string
-			if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-				return rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
-			}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
+			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
 				return err
 			}
 			grpMpIDs.AddSlice(ids)
@@ -1316,12 +1283,7 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	if cdrMpIDs == nil {
 		// Get all CDR IDs if no filters
 		var allIDs []string
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
-				return err
-			}
-			return
-		}, 0, lockIDs...); err != nil {
+		if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
 			return err
 		}
 		cdrMpIDs = utils.NewStringSet(allIDs)
@@ -1333,11 +1295,8 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 			continue
 		}
 		for _, id := range fltrSlice {
-			lockIDs = append(lockIDs, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
 			var ids []string
-			if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-				return rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id))
-			}, 0, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
+			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
 				return err
 			}
 			for _, cid := range ids {
@@ -1352,13 +1311,8 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 	// Remove CDRs and their indexes
 	for key := range cdrMpIDs {
 		var cdrBytes []byte
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			// key includes "cdr_" prefix
-			if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
-				return err
-			}
-			return
-		}, 0, lockIDs...); err != nil {
+		// key includes "cdr_" prefix
+		if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
 			return err
 		}
 		cgrEv := new(utils.CGREvent)
@@ -1407,21 +1361,14 @@ func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err
 
 		// Remove CDR from all indexes
 		for indexKey := range idx {
-			if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-				return rs.Cmd(nil, redisSREM, utils.CDRsIndexes+
-					utils.ConcatenatedKey(cgrEv.Tenant, indexKey), key)
-			}, 0, utils.ConcatenatedKey(cgrEv.Tenant, indexKey)); err != nil {
+			if err := rs.Cmd(nil, redisSREM, utils.CDRsIndexes+
+				utils.ConcatenatedKey(cgrEv.Tenant, indexKey), key); err != nil {
 				return err
 			}
 		}
 
-		if err := guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) (err error) {
-			// Remove CDR
-			if err := rs.Cmd(nil, redisDEL, key); err != nil {
-				return err
-			}
-			return
-		}, 0, lockIDs...); err != nil {
+		// Remove CDR
+		if err := rs.Cmd(nil, redisDEL, key); err != nil {
 			return err
 		}
 	}
