@@ -181,6 +181,13 @@ type CacheS struct {
 	tCache  *ltcache.TransCache
 }
 
+func (c *CacheS) LockRPCResponse(key string) func() {
+	refID := c.locker.GuardIDs("", c.cfg.GeneralCfg().LockingTimeout, key)
+	return func() {
+		c.locker.UnguardIDs(refID)
+	}
+}
+
 // Set is an exported method from TransCache
 // handled Replicate functionality
 func (chS *CacheS) Set(ctx *context.Context, chID, itmID string, value any,

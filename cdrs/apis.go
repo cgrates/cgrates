@@ -10,7 +10,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 // V1ProcessEvent will process the CGREvent
@@ -24,9 +23,8 @@ func (cdrS *CDRServer) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	// RPC caching
 	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEvent, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
-		defer guardian.Guardian.UnguardIDs(refID)
+		unlock := cdrS.cache.LockRPCResponse(cacheKey) // RPC caching needs to be atomic
+		defer unlock()
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -59,9 +57,8 @@ func (cdrS *CDRServer) V1ProcessEventWithGet(ctx *context.Context, args *utils.C
 	// RPC caching
 	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessEventWithGet, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey) // RPC caching needs to be atomic
-		defer guardian.Guardian.UnguardIDs(refID)
+		unlock := cdrS.cache.LockRPCResponse(cacheKey) // RPC caching needs to be atomic
+		defer unlock()
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
@@ -95,9 +92,8 @@ func (cdrS *CDRServer) V1ProcessStoredEvents(ctx *context.Context, args *utils.C
 	// RPC caching
 	if cdrS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
 		cacheKey := utils.ConcatenatedKey(utils.CDRsV1ProcessStoredEvents, args.ID)
-		refID := guardian.Guardian.GuardIDs("",
-			cdrS.cfg.GeneralCfg().LockingTimeout, cacheKey)
-		defer guardian.Guardian.UnguardIDs(refID)
+		unlock := cdrS.cache.LockRPCResponse(cacheKey)
+		defer unlock()
 
 		if itm, has := cdrS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
 			cachedResp := itm.(*utils.CachedRPCResponse)
