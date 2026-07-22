@@ -1273,8 +1273,17 @@ func TestResourcesStoreResources(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewGuardianLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dbMock := &engine.DataDBMock{
+		SetResourceDrvF: func(*context.Context, *utils.Resource) error {
+			return utils.ErrNoDatabaseConn
+		},
+	}
+	dm := engine.NewDataManager(engine.NewDBConnManager(
+		map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg()), cfg, nil, locker)
+	dm.SetCache(cacheS)
 	rS := &ResourceS{
 		cfg:   cfg,
+		dm:    dm,
 		cache: cacheS,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
@@ -1293,6 +1302,7 @@ func TestResourcesStoreResources(t *testing.T) {
 		utils.ResourceS, value.ID, utils.ErrNoDatabaseConn.Error())
 	exp := &ResourceS{
 		cfg:   cfg,
+		dm:    dm,
 		cache: cacheS,
 		storedResources: utils.StringSet{
 			"Res1": struct{}{},
@@ -1926,8 +1936,11 @@ func TestResourcesMatchingResourcesForEventFinalCacheSetErr(t *testing.T) {
 	if err != nil {
 		t.Fatalf("expected no error, received: %+v", err)
 	}
-	defer unlock()
-	exp.lockID = rcv[0].lockID
+	if rcv[0].unlock == nil {
+		t.Fatal("expected unlock function")
+	}
+	unlock()
+	rcv[0].unlock = nil
 	if !reflect.DeepEqual(rcv[0], exp) {
 		t.Errorf("expected: <%+v>, received: <%+v>", exp, rcv[0])
 	}

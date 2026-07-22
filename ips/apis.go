@@ -276,10 +276,8 @@ func (s *IPs) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAP
 	}
 
 	// make sure resource is locked at process level
-	lkID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.IPAllocationsLockKey(tnt, arg.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	unlock := s.dm.Lock(utils.IPAllocationsLockKey(tnt, arg.ID))
+	defer unlock()
 
 	ip, err := s.dm.GetIPAllocations(ctx, tnt, arg.ID, true, true, utils.NonTransactional)
 	if err != nil {
@@ -301,10 +299,8 @@ func (s *IPs) V1ClearIPAllocations(ctx *context.Context, args *utils.ClearIPAllo
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
-	lkID := guardian.Guardian.GuardIDs("",
-		s.cfg.GeneralCfg().LockingTimeout,
-		utils.IPAllocationsLockKey(tnt, args.ID))
-	defer guardian.Guardian.UnguardIDs(lkID)
+	unlock := s.dm.Lock(utils.IPAllocationsLockKey(tnt, args.ID))
+	defer unlock()
 
 	allocs, err := s.dm.GetIPAllocations(ctx, tnt, args.ID, true, true, utils.NonTransactional)
 	if err != nil {

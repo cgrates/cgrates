@@ -11,7 +11,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 	"github.com/ericlagergren/decimal"
 )
 
@@ -86,26 +85,28 @@ func (aS *AccountS) matchingLockedAccountsForEvent(ctx *context.Context, tnt str
 	accIDs = slices.Compact(accIDs)
 
 	accs := make([]*utils.Account, 0, len(accIDs))
-	lockIDs := make([]string, 0, len(accIDs))
-	unlock := func() { releaseAccountLocks(lockIDs) }
+	unlocks := make([]func(), 0, len(accIDs))
+	unlockAll := func() {
+		for _, unlock := range unlocks {
+			unlock()
+		}
+	}
 	weights := make(map[string]float64)
 	for _, accID := range accIDs {
-		lockID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			aS.cfg.GeneralCfg().LockingTimeout,
-			utils.ConcatenatedKey(utils.CacheAccounts, tnt, accID))
+		unlock := aS.dm.Lock(utils.ConcatenatedKey(utils.CacheAccounts, tnt, accID))
 		acc, weight, err := aS.matchingAccountForEvent(ctx, tnt, cgrEv, evNm, accID, ignoreFilters)
 		if err != nil {
-			guardian.Guardian.UnguardIDs(lockID)
 			unlock()
+			unlockAll()
 			return nil, nil, err
 		}
 		if acc == nil {
-			guardian.Guardian.UnguardIDs(lockID)
+			unlock()
 			continue
 		}
 		weights[acc.ID] = weight
 		accs = append(accs, acc)
-		lockIDs = append(lockIDs, lockID)
+		unlocks = append(unlocks, unlock)
 	}
 	if len(accs) == 0 {
 		return nil, nil, utils.ErrNotFound
@@ -115,7 +116,7 @@ func (aS *AccountS) matchingLockedAccountsForEvent(ctx *context.Context, tnt str
 	slices.SortFunc(accs, func(a, b *utils.Account) int {
 		return cmp.Compare(weights[b.ID], weights[a.ID])
 	})
-	return accs, unlock, nil
+	return accs, unlockAll, nil
 }
 
 func (aS *AccountS) matchingAccountIDsForEvent(ctx *context.Context, tnt string,
@@ -163,12 +164,6 @@ func (aS *AccountS) matchingAccountForEvent(ctx *context.Context, tnt string, cg
 		return nil, 0, err
 	}
 	return acc, weight, nil
-}
-
-func releaseAccountLocks(lockIDs []string) {
-	for _, lockID := range lockIDs {
-		guardian.Guardian.UnguardIDs(lockID)
-	}
 }
 
 // accountsDebit will debit an usage out of multiple accounts
@@ -320,9 +315,13 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 // refundCharges implements the mechanism of refunding the charges into accounts
 func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (err error) {
 	acnts := make([]*utils.Account, 0, len(ecs.Accounts))
-	lockIDs := make([]string, 0, len(ecs.Accounts))
-	unlock := func() { releaseAccountLocks(lockIDs) }
-	defer unlock() // no unlocking in upper layers
+	unlocks := make([]func(), 0, len(ecs.Accounts))
+	unlockAll := func() {
+		for _, unlock := range unlocks {
+			unlock()
+		}
+	}
+	defer unlockAll() // no unlocking in upper layers
 
 	acntsIdxed := make(map[string]*utils.Account) // so we can access Account easier
 	alteredAcnts := make(utils.StringSet)         // hold here the list of modified accounts
@@ -332,12 +331,10 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 	}
 	slices.Sort(acntIDs)
 	for _, acntID := range acntIDs {
-		refID := guardian.Guardian.GuardIDs(utils.EmptyString,
-			aS.cfg.GeneralCfg().LockingTimeout,
-			utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID))
+		unlock := aS.dm.Lock(utils.ConcatenatedKey(utils.CacheAccounts, tnt, acntID))
 		var qAcnt *utils.Account
 		if qAcnt, err = aS.dm.GetAccount(ctx, tnt, acntID); err != nil {
-			guardian.Guardian.UnguardIDs(refID)
+			unlock()
 			if err == utils.ErrNotFound { // Account was removed in the mean time
 				err = nil
 				continue
@@ -345,7 +342,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 			return
 		}
 		acnts = append(acnts, qAcnt)
-		lockIDs = append(lockIDs, refID)
+		unlocks = append(unlocks, unlock)
 		acntsIdxed[acntID] = qAcnt
 	}
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts)) // so we can restore in case of issues

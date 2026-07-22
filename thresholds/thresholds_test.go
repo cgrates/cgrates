@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 )
 
 func TestThresholdsCache(t *testing.T) {
@@ -549,7 +548,11 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewGuardianLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	tS := NewThresholdService(cfg, nil, cacheS, nil, nil)
+	dbMock := &engine.DataDBMock{}
+	dm := engine.NewDataManager(engine.NewDBConnManager(
+		map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg()), cfg, nil, locker)
+	dm.SetCache(cacheS)
+	tS := NewThresholdService(cfg, dm, cacheS, nil, nil)
 
 	value := &utils.Threshold{
 		Tenant: "cgrates.org",
@@ -563,7 +566,7 @@ func TestThresholdsStoreThresholdsStoreThErr(t *testing.T) {
 	exp := utils.StringSet{
 		"TH1": struct{}{},
 	}
-	expLog := `[WARNING] <ThresholdS> failed saving Threshold with tenant: cgrates.org and ID: TH1, error: NO_DATABASE_CONNECTION`
+	expLog := `[WARNING] <ThresholdS> failed saving Threshold with tenant: cgrates.org and ID: TH1, error: NOT_IMPLEMENTED`
 	tS.storeThresholds(context.Background())
 
 	if !reflect.DeepEqual(tS.storedThresholds, exp) {
@@ -804,9 +807,6 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewGuardianLocker(cfg)
 
-	defer func() {
-		guardian.Guardian = guardian.New()
-	}()
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
@@ -865,9 +865,6 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewGuardianLocker(cfg)
 
-	defer func() {
-		guardian.Guardian = guardian.New()
-	}()
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db := &engine.DataDBMock{
 		GetThresholdProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ThresholdProfile, error) {
@@ -919,9 +916,6 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewGuardianLocker(cfg)
 
-	defer func() {
-		guardian.Guardian = guardian.New()
-	}()
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
