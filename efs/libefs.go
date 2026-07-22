@@ -14,7 +14,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 	"github.com/cgrates/ltcache"
 )
 
@@ -65,15 +64,11 @@ func WriteToFile(filePath string, expEv FailoverPoster) (err error) {
 // NewFailoverPosterFromFile returns ExportEvents from the file
 // used only on replay failed post
 func NewFailoverPosterFromFile(filePath, provider string, efs *EfS) (FailoverPoster, error) {
-	var content []byte
-	err := guardian.Guardian.Guard(context.TODO(), func(_ *context.Context) error {
-		var readErr error
-		if content, readErr = os.ReadFile(filePath); readErr != nil {
-			return readErr
-		}
-		return os.Remove(filePath)
-	}, efs.cfg.GeneralCfg().LockingTimeout, utils.FileLockPrefix+filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
+		return nil, err
+	}
+	if err := os.Remove(filePath); err != nil {
 		return nil, err
 	}
 
