@@ -285,14 +285,6 @@ func (iDB *InternalDB) RemoveIPAllocationsDrv(_ *context.Context, tenant, id str
 	return nil
 }
 
-func (iDB *InternalDB) GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error) {
-	return nil, nil
-}
-
-func (iDB *InternalDB) AddLoadHistory(*utils.LoadInstance, int, string) error {
-	return nil
-}
-
 func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {

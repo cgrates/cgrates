@@ -196,14 +196,6 @@ func (dbM *DataDBMock) RemoveIPAllocationsDrv(ctx *context.Context, tnt, id stri
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error) {
-	return nil, utils.ErrNotImplemented
-}
-
-func (dbM *DataDBMock) AddLoadHistory(*utils.LoadInstance, int, string) error {
-	return utils.ErrNotImplemented
-}
-
 func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dbM.GetIndexesDrvF != nil {
 		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, transactionID, idxKeys...)

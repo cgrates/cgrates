@@ -17,7 +17,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/guardian"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -593,87 +592,6 @@ func (ms *MongoStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 		return err
 	})
 	return has, err
-}
-
-// GetLoadHistory retrieves the last n items from the load history, newest first.
-func (ms *MongoStorage) GetLoadHistory(limit int, skipCache bool,
-	transactionID string) ([]*utils.LoadInstance, error) {
-	if limit == 0 {
-		return nil, nil
-	}
-	var kv struct {
-		Key   string
-		Value []*utils.LoadInstance
-	}
-	err := ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		sr := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LoadInstKey})
-		decodeErr := sr.Decode(&kv)
-		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
-			return utils.ErrNotFound
-		}
-		return decodeErr
-	})
-	if err != nil {
-		return nil, err
-	}
-	if len(kv.Value) < limit || limit == -1 {
-		return kv.Value, nil
-	}
-	return kv.Value[:limit], nil
-}
-
-// AddLoadHistory adds a single load instance to the load history.
-func (ms *MongoStorage) AddLoadHistory(ldInst *utils.LoadInstance,
-	loadHistSize int, transactionID string) error {
-	if loadHistSize == 0 { // Load history disabled
-		return nil
-	}
-
-	// Get existing load history.
-	var existingLoadHistory []*utils.LoadInstance
-	var kv struct {
-		Key   string
-		Value []*utils.LoadInstance
-	}
-	err := ms.query(context.TODO(), func(sctx mongo.SessionContext) (err error) {
-		sr := ms.getCol(ColLht).FindOne(sctx, bson.M{"key": utils.LoadInstKey})
-		decodeErr := sr.Decode(&kv)
-		if errors.Is(decodeErr, mongo.ErrNoDocuments) {
-			return nil // utils.ErrNotFound
-		}
-		return decodeErr
-	})
-	if err != nil {
-		return err
-	}
-	if kv.Value != nil {
-		existingLoadHistory = kv.Value
-	}
-
-	// Make sure we do it locked since other instances can modify the history while we read it.
-	err = guardian.Guardian.Guard(context.TODO(), func(ctx *context.Context) error {
-
-		// Insert at the first position.
-		existingLoadHistory = append(existingLoadHistory, nil)
-		copy(existingLoadHistory[1:], existingLoadHistory[0:])
-		existingLoadHistory[0] = ldInst
-
-		histLen := len(existingLoadHistory)
-		if histLen >= loadHistSize { // Have hit maximum history allowed, remove oldest element in order to add new one
-			existingLoadHistory = existingLoadHistory[:loadHistSize]
-		}
-		return ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
-			_, err = ms.getCol(ColLht).UpdateOne(sctx, bson.M{"key": utils.LoadInstKey},
-				bson.M{"$set": struct {
-					Key   string
-					Value []*utils.LoadInstance
-				}{Key: utils.LoadInstKey, Value: existingLoadHistory}},
-				options.Update().SetUpsert(true),
-			)
-			return err
-		})
-	}, 0, utils.LoadInstKey)
-	return err
 }
 
 func (ms *MongoStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (*utils.ResourceProfile, error) {

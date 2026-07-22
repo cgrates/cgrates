@@ -33,7 +33,6 @@ var (
 		// ToDo: testOnStorITLoadAccountingCache
 		testOnStorITResource,
 		testOnStorITResourceProfile,
-		//testOnStorITCRUDHistory,
 		testOnStorITCRUDStructVersion,
 		testOnStorITStatQueueProfile,
 		testOnStorITStatQueue,
@@ -222,24 +221,6 @@ func testOnStorITResource(t *testing.T) {
 	if _, rcvErr := onStor.GetResource(context.TODO(), res.Tenant, res.ID,
 		false, false, utils.NonTransactional); rcvErr != utils.ErrNotFound {
 		t.Error(rcvErr)
-	}
-}
-
-func testOnStorITCRUDHistory(t *testing.T) {
-	time := time.Date(2012, 1, 1, 0, 0, 0, 0, time.UTC)
-	ist := &utils.LoadInstance{
-		LoadID:           "Load",
-		RatingLoadID:     "RatingLoad",
-		AccountingLoadID: "Account",
-		LoadTime:         time,
-	}
-	if err := onStor.DB()[utils.MetaDefault].AddLoadHistory(ist, 1, utils.NonTransactional); err != nil {
-		t.Error(err)
-	}
-	if rcv, err := onStor.DB()[utils.MetaDefault].GetLoadHistory(1, true, utils.NonTransactional); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ist, rcv[0]) {
-		t.Errorf("Expecting: %v, received: %v", utils.ToJSON(ist), utils.ToJSON(rcv[0]))
 	}
 }
 

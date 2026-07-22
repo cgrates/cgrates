@@ -37,8 +37,6 @@ type DataDB interface {
 	GetIPAllocationsDrv(*context.Context, string, string) (*utils.IPAllocations, error)
 	SetIPAllocationsDrv(*context.Context, *utils.IPAllocations) error
 	RemoveIPAllocationsDrv(*context.Context, string, string) error
-	GetLoadHistory(int, bool, string) ([]*utils.LoadInstance, error)
-	AddLoadHistory(*utils.LoadInstance, int, string) error
 	GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
 	SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
 		indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
