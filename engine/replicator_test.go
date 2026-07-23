@@ -23,6 +23,7 @@ func TestReplicationKey(t *testing.T) {
 		set    string
 		remove string
 	}{
+		{set: utils.ReplicatorSv1SetAccount, remove: utils.ReplicatorSv1RemoveAccount},
 		{set: utils.ReplicatorSv1SetDestination, remove: utils.ReplicatorSv1RemoveDestination},
 		{set: utils.ReplicatorSv1SetThresholdProfile, remove: utils.ReplicatorSv1RemoveThresholdProfile},
 		{set: utils.ReplicatorSv1SetThreshold, remove: utils.ReplicatorSv1RemoveThreshold},
@@ -58,8 +59,6 @@ func TestReplicationKey(t *testing.T) {
 	}
 
 	separate := []string{
-		utils.ReplicatorSv1SetAccount,
-		utils.ReplicatorSv1RemoveAccount,
 		utils.ReplicatorSv1SetRanking,
 		utils.ReplicatorSv1RemoveRanking,
 		utils.ReplicatorSv1SetRatingPlan,

@@ -822,19 +822,6 @@ func (rs *RedisStorage) GetAccountDrv(key string) (ub *Account, err error) {
 }
 
 func (rs *RedisStorage) SetAccountDrv(acc *Account) (err error) {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were cleaned it makes
-	// sense to write empty balance map
-	if len(acc.BalanceMap) == 0 {
-		var ac *Account
-		if ac, err = rs.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = acc.ActionTriggers
-			ac.UnitCounters = acc.UnitCounters
-			ac.AllowNegative = acc.AllowNegative
-			ac.Disabled = acc.Disabled
-			acc = ac
-		}
-	}
 	acc.UpdateTime = time.Now()
 	var result []byte
 	if result, err = rs.ms.Marshal(acc); err != nil {

@@ -604,6 +604,15 @@ func TestDMSetAccount(t *testing.T) {
 	if err := dm.SetAccount(acc); err != nil {
 		t.Error(err)
 	}
+	empty := &Account{ID: acc.ID, BalanceMap: map[string]Balances{}}
+	if err := db.SetAccountDrv(empty); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := db.GetAccountDrv(acc.ID); err != nil {
+		t.Fatal(err)
+	} else if len(got.BalanceMap) != 0 {
+		t.Errorf("driver replacement BalanceMap = %#v, want empty", got.BalanceMap)
+	}
 	var dmnil *DataManager
 	if err = dmnil.SetAccount(acc); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Error(err)
@@ -611,6 +620,93 @@ func TestDMSetAccount(t *testing.T) {
 	dm.dataDB = &DataDBMock{}
 	if err = dm.SetAccount(acc); err == nil || err != utils.ErrNotImplemented {
 		t.Error(err)
+	}
+}
+
+func TestDMSetAccountReplication(t *testing.T) {
+	oldCfg := config.CgrConfig()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.DataDbCfg().Items[utils.MetaAccounts].Replicate = true
+	config.SetCgrConfig(cfg)
+	t.Cleanup(func() { config.SetCgrConfig(oldCfg) })
+
+	id := "cgrates.org:account"
+	stored := &Account{
+		ID: id,
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {
+				&Balance{Value: 10},
+			},
+		},
+	}
+	var reads int
+	var written *Account
+	db := &DataDBMock{
+		GetAccountDrvF: func(string) (*Account, error) {
+			reads++
+			return stored.Clone(), nil
+		},
+		SetAccountDrvF: func(acc *Account) error {
+			written = acc
+			return nil
+		},
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	dm.replicator.interval = time.Hour
+
+	for _, test := range []struct {
+		name       string
+		balanceMap map[string]Balances
+		expired    bool
+	}{
+		{name: "Empty", balanceMap: map[string]Balances{}},
+		{name: "Nil"},
+		{name: "ExpiredOnly", balanceMap: map[string]Balances{}, expired: true},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			reads = 0
+			written = nil
+			stored.BalanceMap[utils.MetaMonetary][0].ExpirationDate = time.Time{}
+			if test.expired {
+				stored.BalanceMap[utils.MetaMonetary][0].ExpirationDate = time.Now().Add(-time.Hour)
+			}
+			incoming := &Account{
+				ID:             id,
+				BalanceMap:     test.balanceMap,
+				UnitCounters:   UnitCounters{},
+				ActionTriggers: ActionTriggers{},
+				AllowNegative:  true,
+				Disabled:       true,
+			}
+			if err := dm.SetAccount(incoming); err != nil {
+				t.Fatal(err)
+			}
+			if reads != 1 {
+				t.Errorf("GetAccountDrv called %d times, want 1", reads)
+			}
+			wantBalances := stored.BalanceMap
+			if test.expired {
+				wantBalances = incoming.BalanceMap
+			}
+			if written == nil || !reflect.DeepEqual(written.BalanceMap, wantBalances) ||
+				!reflect.DeepEqual(written.UnitCounters, incoming.UnitCounters) ||
+				!reflect.DeepEqual(written.ActionTriggers, incoming.ActionTriggers) ||
+				written.AllowNegative != incoming.AllowNegative || written.Disabled != incoming.Disabled {
+				t.Errorf("SetAccountDrv received %#v", written)
+			}
+			pending := dm.replicator.pending[replicationKey(utils.AccountPrefix, id,
+				utils.ReplicatorSv1SetAccount)]
+			if pending == nil {
+				t.Fatal("pending Account replication not found")
+			}
+			args, ok := pending.args.(*AccountWithAPIOpts)
+			if !ok {
+				t.Fatalf("replication args have type %T", pending.args)
+			}
+			if args.Account != written {
+				t.Error("stored and replicated Accounts differ")
+			}
+		})
 	}
 }
 

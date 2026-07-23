@@ -1063,19 +1063,6 @@ func (ms *MongoStorage) GetAccountDrv(key string) (*Account, error) {
 }
 
 func (ms *MongoStorage) SetAccountDrv(acc *Account) error {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were cleaned it makes
-	// sense to write empty balance map
-	if len(acc.BalanceMap) == 0 {
-		ac, err := ms.GetAccountDrv(acc.ID)
-		if err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = acc.ActionTriggers
-			ac.UnitCounters = acc.UnitCounters
-			ac.AllowNegative = acc.AllowNegative
-			ac.Disabled = acc.Disabled
-			acc = ac
-		}
-	}
 	acc.UpdateTime = time.Now()
 	return ms.query(func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColAcc).UpdateOne(sctx, bson.M{"id": acc.ID},

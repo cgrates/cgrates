@@ -73,7 +73,8 @@ func newReplicator(cm *ConnManager) *replicator {
 // operation makes the earlier one unnecessary.
 func replicationKey(objType, objID, method string) string {
 	switch method {
-	case utils.ReplicatorSv1SetDestination, utils.ReplicatorSv1RemoveDestination,
+	case utils.ReplicatorSv1SetAccount, utils.ReplicatorSv1RemoveAccount,
+		utils.ReplicatorSv1SetDestination, utils.ReplicatorSv1RemoveDestination,
 		utils.ReplicatorSv1SetThresholdProfile, utils.ReplicatorSv1RemoveThresholdProfile,
 		utils.ReplicatorSv1SetThreshold, utils.ReplicatorSv1RemoveThreshold,
 		utils.ReplicatorSv1SetStatQueueProfile, utils.ReplicatorSv1RemoveStatQueueProfile,

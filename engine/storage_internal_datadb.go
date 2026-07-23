@@ -462,18 +462,6 @@ func (iDB *InternalDB) GetAccountDrv(id string) (acc *Account, err error) {
 }
 
 func (iDB *InternalDB) SetAccountDrv(acc *Account) (err error) {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were cleaned it makes
-	// sense to write empty balance map
-	if len(acc.BalanceMap) == 0 {
-		if ac, err := iDB.GetAccountDrv(acc.ID); err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = acc.ActionTriggers
-			ac.UnitCounters = acc.UnitCounters
-			ac.AllowNegative = acc.AllowNegative
-			ac.Disabled = acc.Disabled
-			acc = ac
-		}
-	}
 	acc.UpdateTime = time.Now()
 	iDB.db.Set(utils.CacheAccounts, acc.ID, acc, nil,
 		true, utils.NonTransactional)
