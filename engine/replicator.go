@@ -74,7 +74,8 @@ func newReplicator(cfg *config.DBConn, cm *ConnManager, locker *guardian.Locker)
 // operation makes the earlier one unnecessary.
 func replicationKey(objType, objID, method string) string {
 	switch method {
-	case utils.ReplicatorSv1SetThresholdProfile, utils.ReplicatorSv1RemoveThresholdProfile,
+	case utils.ReplicatorSv1SetAccount, utils.ReplicatorSv1RemoveAccount,
+		utils.ReplicatorSv1SetThresholdProfile, utils.ReplicatorSv1RemoveThresholdProfile,
 		utils.ReplicatorSv1SetThreshold, utils.ReplicatorSv1RemoveThreshold,
 		utils.ReplicatorSv1SetStatQueueProfile, utils.ReplicatorSv1RemoveStatQueueProfile,
 		utils.ReplicatorSv1SetStatQueue, utils.ReplicatorSv1RemoveStatQueue,
