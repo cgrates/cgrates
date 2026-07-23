@@ -945,9 +945,7 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
-			return nil
-		},
+		SetAccountDrvF: data.SetAccountDrv,
 	}
 
 	ap := &utils.Account{
@@ -989,6 +987,15 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 	}
 	// tests replicete
 	dm.SetAccount(context.Background(), ap, false)
+	empty := &utils.Account{Tenant: ap.Tenant, ID: ap.ID, Balances: map[string]*utils.Balance{}}
+	if err := data.SetAccountDrv(context.Background(), empty); err != nil {
+		t.Fatal(err)
+	}
+	if got, err := data.GetAccountDrv(context.Background(), ap.Tenant, ap.ID); err != nil {
+		t.Fatal(err)
+	} else if len(got.Balances) != 0 {
+		t.Errorf("driver replacement Balances = %#v, want empty", got.Balances)
+	}
 }
 
 func TestDMRemoveThresholdProfileNilDM(t *testing.T) {
