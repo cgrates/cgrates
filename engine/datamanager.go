@@ -614,6 +614,15 @@ func (dm *DataManager) SetAccount(acc *Account) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
+	if len(acc.BalanceMap) == 0 {
+		if stored, err := dm.dataDB.GetAccountDrv(acc.ID); err == nil && !stored.allBalancesExpired() {
+			stored.ActionTriggers = acc.ActionTriggers
+			stored.UnitCounters = acc.UnitCounters
+			stored.AllowNegative = acc.AllowNegative
+			stored.Disabled = acc.Disabled
+			acc = stored
+		}
+	}
 	if err := dm.dataDB.SetAccountDrv(acc); err != nil {
 		return err
 	}
