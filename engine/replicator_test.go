@@ -14,6 +14,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/birpc/context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -78,6 +81,18 @@ func TestReplicationKey(t *testing.T) {
 		if got := replicationKey("type_", "id", method); got != want {
 			t.Errorf("replicationKey(%q) = %q, want %q", method, got, want)
 		}
+	}
+}
+
+func TestFailedReplicationFileName(t *testing.T) {
+	ordinaryKey := replicationKey(utils.DestinationPrefix, "destination",
+		utils.ReplicatorSv1SetDestination)
+	if got := failedReplicationFileName(ordinaryKey); got != ordinaryKey {
+		t.Fatalf("failed filename = %q, want unchanged key %q", got, ordinaryKey)
+	}
+	patchKey := indexPatchKey("parent")
+	if got := failedReplicationFileName(patchKey); got == patchKey || !strings.HasPrefix(got, "index_") {
+		t.Fatalf("failed filename = %q, want hashed index name", got)
 	}
 }
 
@@ -252,5 +267,366 @@ func TestReplicatorIntervalFinalOperation(t *testing.T) {
 				t.Errorf("args = %#v, want %#v", got.args, test.wantArgs)
 			}
 		})
+	}
+}
+
+type indexConnector struct {
+	err   error
+	calls []*utils.SetIndexesArg
+}
+
+func (c *indexConnector) Call(_ *context.Context, method string, args, _ any) error {
+	if method != utils.ReplicatorSv1SetIndexes {
+		return c.err
+	}
+	c.calls = append(c.calls, args.(*utils.SetIndexesArg))
+	return c.err
+}
+
+func newIndexDataManager(tb testing.TB, interval time.Duration, failedDir string,
+	connector birpc.ClientConnector) *DataManager {
+	tb.Helper()
+	cm := setupReplicator(tb, failedDir, connector)
+	cfg := config.CgrConfig()
+	cfg.DataDbCfg().Items[utils.CacheAttributeFilterIndexes].Replicate = true
+	db, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		tb.Fatal(err)
+	}
+	dm := NewDataManager(db, cfg.CacheCfg(), cm)
+	dm.replicator.interval = interval
+	return dm
+}
+
+func readFailedIndexTask(t *testing.T, dir, key string) (*ReplicationTask, *utils.SetIndexesArg) {
+	t.Helper()
+	data, err := os.ReadFile(filepath.Join(dir, failedReplicationFileName(key)+utils.GOBSuffix))
+	if err != nil {
+		t.Fatal(err)
+	}
+	var task *ReplicationTask
+	if err := gob.NewDecoder(bytes.NewReader(data)).Decode(&task); err != nil {
+		t.Fatal(err)
+	}
+	args, ok := task.Args.(*utils.SetIndexesArg)
+	if !ok || task.Method != utils.ReplicatorSv1SetIndexes || task.ObjID != args.TntCtx {
+		t.Fatalf("unexpected failed task %#v", task)
+	}
+	return task, args
+}
+
+func TestReplicatorIndexFields(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	tntCtx := "cgrates.org"
+	fieldA := "A"
+	fieldB := "B"
+	fieldC := "C"
+	fieldD := "D"
+	valueOne := utils.StringSet{"RL1": {}}
+	valueTwo := utils.StringSet{"RL2": {}}
+
+	type operation struct {
+		indexes map[string]utils.StringSet
+		remove  []string
+		clear   bool
+	}
+	for _, test := range []struct {
+		name       string
+		operations []operation
+		wantClear  bool
+		want       map[string]utils.StringSet
+	}{
+		{
+			name:       "Set A and Set B",
+			operations: []operation{{indexes: map[string]utils.StringSet{fieldA: valueOne, fieldB: valueTwo}}},
+			want:       map[string]utils.StringSet{fieldA: valueOne, fieldB: valueTwo},
+		},
+		{
+			name: "repeated Set A",
+			operations: []operation{
+				{indexes: map[string]utils.StringSet{fieldA: valueOne}},
+				{indexes: map[string]utils.StringSet{fieldA: valueTwo}},
+			},
+			want: map[string]utils.StringSet{fieldA: valueTwo},
+		},
+		{
+			name: "mixed fields",
+			operations: []operation{
+				{indexes: map[string]utils.StringSet{fieldA: valueOne}},
+				{remove: []string{fieldB}},
+				{indexes: map[string]utils.StringSet{fieldC: valueOne}},
+				{remove: []string{fieldC}},
+				{indexes: map[string]utils.StringSet{fieldB: valueTwo}},
+				{remove: []string{fieldD}},
+			},
+			want: map[string]utils.StringSet{
+				fieldA: valueOne,
+				fieldB: valueTwo,
+				fieldC: nil,
+				fieldD: nil,
+			},
+		},
+		{
+			name:       "Set A then remove all",
+			operations: []operation{{indexes: map[string]utils.StringSet{fieldA: valueOne}}, {clear: true}},
+			wantClear:  true,
+			want:       map[string]utils.StringSet{},
+		},
+		{
+			name: "remove all then Set A then Remove B",
+			operations: []operation{
+				{clear: true},
+				{indexes: map[string]utils.StringSet{fieldA: valueOne}},
+				{remove: []string{fieldB}},
+			},
+			wantClear: true,
+			want: map[string]utils.StringSet{
+				fieldA: valueOne,
+				fieldB: nil,
+			},
+		},
+	} {
+		t.Run("interval/"+test.name, func(t *testing.T) {
+			connector := &indexConnector{}
+			dm := newIndexDataManager(t, time.Hour, "", connector)
+			for _, operation := range test.operations {
+				var err error
+				switch {
+				case operation.clear:
+					err = dm.RemoveIndexes(idxItmType, tntCtx)
+				case operation.remove != nil:
+					err = dm.RemoveIndexes(idxItmType, tntCtx, operation.remove...)
+				default:
+					err = dm.SetIndexes(idxItmType, tntCtx, operation.indexes, true, "")
+				}
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+			if len(dm.replicator.pending) != 1 {
+				t.Fatalf("pending has %d patches, want 1", len(dm.replicator.pending))
+			}
+			for _, pending := range dm.replicator.pending {
+				if pending.objID != tntCtx {
+					t.Fatalf("pending objID = %q, want %q", pending.objID, tntCtx)
+				}
+			}
+			dm.replicator.flush()
+			if len(connector.calls) != 1 {
+				t.Fatalf("connector has %d calls, want 1", len(connector.calls))
+			}
+			got := connector.calls[0]
+			if got.Clear != test.wantClear || !reflect.DeepEqual(got.Indexes, test.want) {
+				t.Fatalf("replicated patch = {Clear:%t Indexes:%#v}, want {Clear:%t Indexes:%#v}",
+					got.Clear, got.Indexes, test.wantClear, test.want)
+			}
+		})
+	}
+}
+
+func TestReplicatorIndexesImmediate(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	tntCtx := "cgrates.org"
+	fieldA := "A"
+	fieldB := "B"
+
+	connector := &indexConnector{}
+	dm := newIndexDataManager(t, 0, "", connector)
+	calls := []func() error{
+		func() error {
+			return dm.SetIndexes(idxItmType, tntCtx, map[string]utils.StringSet{
+				fieldA: {"RL1": {}},
+				fieldB: {"RL2": {}},
+			}, true, "")
+		},
+		func() error { return dm.RemoveIndexes(idxItmType, tntCtx, fieldA, fieldB) },
+		func() error { return dm.RemoveIndexes(idxItmType, tntCtx) },
+	}
+	for i, call := range calls {
+		before := len(connector.calls)
+		if err := call(); err != nil {
+			t.Fatal(err)
+		}
+		if got := len(connector.calls) - before; got != 1 {
+			t.Fatalf("call %d sent %d RPCs, want 1", i, got)
+		}
+	}
+	if got := connector.calls[1].Indexes; len(got) != 2 || len(got[fieldA]) != 0 || len(got[fieldB]) != 0 {
+		t.Fatalf("selected removal patch = %#v", got)
+	}
+	if !connector.calls[2].Clear {
+		t.Fatal("remove all patch does not clear context")
+	}
+}
+
+func TestReplicatorIndexesImmediateFailure(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	tntCtx := "cgrates.org"
+
+	failedDir := t.TempDir()
+	connector := &indexConnector{err: errors.New("replication failed")}
+	dm := newIndexDataManager(t, 0, failedDir, connector)
+	indexes := map[string]utils.StringSet{
+		"A": {"RL1": {}},
+		"B": {"RL2": {}},
+	}
+	if err := dm.SetIndexes(idxItmType, tntCtx, indexes, true, ""); err != nil {
+		t.Fatalf("SetIndexes returned replication error: %v", err)
+	}
+	if len(connector.calls) != 1 {
+		t.Fatalf("connector has %d calls, want 1", len(connector.calls))
+	}
+	stored, err := dm.DataDB().GetIndexesDrv(idxItmType, tntCtx)
+	if err != nil || !reflect.DeepEqual(stored, indexes) {
+		t.Fatalf("stored indexes = %#v, %v, want %#v", stored, err, indexes)
+	}
+	key := indexPatchKey(replicationKey(
+		utils.CacheInstanceToPrefix[idxItmType], tntCtx, utils.ReplicatorSv1SetIndexes))
+	task, args := readFailedIndexTask(t, failedDir, key)
+	if task.ObjID != tntCtx || args.TntCtx != tntCtx || !reflect.DeepEqual(args.Indexes, indexes) {
+		t.Fatalf("failed task = %#v", task)
+	}
+}
+
+func TestReplicatorFailedIndexPatches(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	tntCtx := "cgrates.org"
+	fieldA := "A"
+	fieldB := "B"
+	valueOne := utils.StringSet{"RL1": {}}
+	valueTwo := utils.StringSet{"RL2": {}}
+
+	t.Run("merges newer fields", func(t *testing.T) {
+		failedDir := t.TempDir()
+		connector := &indexConnector{err: errors.New("replication failed")}
+		dm := newIndexDataManager(t, time.Hour, failedDir, connector)
+		if err := dm.RemoveIndexes(idxItmType, tntCtx); err != nil {
+			t.Fatal(err)
+		}
+		if err := dm.SetIndexes(idxItmType, tntCtx,
+			map[string]utils.StringSet{fieldA: valueOne}, true, ""); err != nil {
+			t.Fatal(err)
+		}
+		dm.replicator.flush()
+		entries, err := os.ReadDir(failedDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(entries) != 1 {
+			t.Fatalf("failed directory has %d patches, want 1", len(entries))
+		}
+		key := indexPatchKey(replicationKey(
+			utils.CacheInstanceToPrefix[idxItmType], tntCtx, utils.ReplicatorSv1SetIndexes))
+		_, failed := readFailedIndexTask(t, failedDir, key)
+		if !failed.Clear || !reflect.DeepEqual(failed.Indexes,
+			map[string]utils.StringSet{fieldA: valueOne}) {
+			t.Fatalf("failed patch = %#v", failed)
+		}
+
+		connector.err = nil
+		if err := dm.SetIndexes(idxItmType, tntCtx,
+			map[string]utils.StringSet{fieldB: valueTwo}, true, ""); err != nil {
+			t.Fatal(err)
+		}
+		dm.replicator.flush()
+		got := connector.calls[len(connector.calls)-1]
+		want := map[string]utils.StringSet{fieldA: valueOne, fieldB: valueTwo}
+		if !got.Clear || !reflect.DeepEqual(got.Indexes, want) {
+			t.Fatalf("retried patch = %#v, want Clear with %#v", got, want)
+		}
+		failedPath := filepath.Join(failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
+		if _, err := os.Stat(failedPath); !os.IsNotExist(err) {
+			t.Fatalf("successful patch failed file still exists: %v", err)
+		}
+	})
+
+	t.Run("newer clear discards failed fields", func(t *testing.T) {
+		failedDir := t.TempDir()
+		connector := &indexConnector{err: errors.New("replication failed")}
+		dm := newIndexDataManager(t, time.Hour, failedDir, connector)
+		if err := dm.SetIndexes(idxItmType, tntCtx,
+			map[string]utils.StringSet{fieldA: valueOne}, true, ""); err != nil {
+			t.Fatal(err)
+		}
+		dm.replicator.flush()
+		connector.err = nil
+		if err := dm.RemoveIndexes(idxItmType, tntCtx); err != nil {
+			t.Fatal(err)
+		}
+		if err := dm.SetIndexes(idxItmType, tntCtx,
+			map[string]utils.StringSet{fieldB: valueTwo}, true, ""); err != nil {
+			t.Fatal(err)
+		}
+		dm.replicator.flush()
+		got := connector.calls[len(connector.calls)-1]
+		want := map[string]utils.StringSet{fieldB: valueTwo}
+		if !got.Clear || !reflect.DeepEqual(got.Indexes, want) {
+			t.Fatalf("retried patch = %#v, want Clear with %#v", got, want)
+		}
+	})
+}
+
+func TestReplicatorIndexTransactions(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	objType := utils.CacheInstanceToPrefix[idxItmType]
+	tntCtx := "cgrates.org"
+	fieldA := "A"
+	valueOne := utils.StringSet{"RL1": {}}
+
+	t.Run("interval", func(t *testing.T) {
+		connector := &indexConnector{}
+		dm := newIndexDataManager(t, time.Hour, "", connector)
+		indexes := map[string]utils.StringSet{fieldA: valueOne}
+		if err := dm.SetIndexes(idxItmType, tntCtx, indexes, false, "transaction"); err != nil {
+			t.Fatal(err)
+		}
+		key := replicationKey(objType, tntCtx, utils.ReplicatorSv1SetIndexes)
+		if _, has := dm.replicator.pending[key]; !has {
+			t.Fatal("transaction call did not use the generic pending path")
+		}
+		if _, has := dm.replicator.pending[indexPatchKey(key)]; has {
+			t.Fatal("transaction call entered the grouped index path")
+		}
+		dm.replicator.flush()
+		if len(connector.calls) != 1 || !reflect.DeepEqual(connector.calls[0].Indexes, indexes) {
+			t.Fatalf("connector calls = %#v, want one transaction call with %#v", connector.calls, indexes)
+		}
+	})
+
+	t.Run("immediate transaction failure keeps API success", func(t *testing.T) {
+		failedDir := t.TempDir()
+		connector := &indexConnector{err: errors.New("replication failed")}
+		dm := newIndexDataManager(t, 0, failedDir, connector)
+		indexes := map[string]utils.StringSet{fieldA: valueOne}
+		if err := dm.SetIndexes(idxItmType, tntCtx, indexes, false, "transaction"); err != nil {
+			t.Fatalf("SetIndexes returned replication error: %v", err)
+		}
+		key := replicationKey(objType, tntCtx, utils.ReplicatorSv1SetIndexes)
+		_, args := readFailedIndexTask(t, failedDir, key)
+		if !reflect.DeepEqual(args.Indexes, indexes) {
+			t.Fatalf("failed transaction indexes = %#v, want %#v", args.Indexes, indexes)
+		}
+	})
+}
+
+func TestReplicatorIndexesDisabled(t *testing.T) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	tntCtx := "cgrates.org"
+	fieldA := "A"
+
+	connector := &indexConnector{}
+	dm := newIndexDataManager(t, time.Hour, "", connector)
+	config.CgrConfig().DataDbCfg().Items[idxItmType].Replicate = false
+	if err := dm.SetIndexes(idxItmType, tntCtx,
+		map[string]utils.StringSet{fieldA: {"RL1": {}}}, true, ""); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.RemoveIndexes(idxItmType, tntCtx, fieldA); err != nil {
+		t.Fatal(err)
+	}
+	dm.replicator.flush()
+	if len(connector.calls) != 0 || len(dm.replicator.pending) != 0 {
+		t.Fatalf("disabled replication made %d calls with %d pending patches",
+			len(connector.calls), len(dm.replicator.pending))
 	}
 }

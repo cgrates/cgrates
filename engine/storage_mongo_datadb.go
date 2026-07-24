@@ -2156,22 +2156,31 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 			return err
 		}
 	}
+	deleteKeys := make([]string, 0, len(indexes))
 	var lastErr error
-	for idxKey, itmMp := range indexes {
-		err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
-			idxDbkey := utils.ConcatenatedKey(dbKey, idxKey)
-			if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
-				_, qryErr = ms.getCol(ColIndx).DeleteOne(sctx,
-					bson.M{"key": idxDbkey})
-			} else {
-				_, qryErr = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": idxDbkey},
-					bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.AsSlice()}},
-					options.Update().SetUpsert(true),
-				)
-			}
+	for idxKey, index := range indexes {
+		indexKey := utils.ConcatenatedKey(dbKey, idxKey)
+		if len(index) == 0 {
+			deleteKeys = append(deleteKeys, indexKey)
+			continue
+		}
+		if err := ms.query(func(sctx mongo.SessionContext) error {
+			_, qryErr := ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": indexKey},
+				bson.M{"$set": bson.M{"key": indexKey, "value": index.AsSlice()}},
+				options.Update().SetUpsert(true),
+			)
 			return qryErr
-		})
-		if err != nil {
+		}); err != nil {
+			lastErr = err
+		}
+	}
+	if len(deleteKeys) != 0 {
+		if err := ms.query(func(sctx mongo.SessionContext) error {
+			_, qryErr := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
+				"key": bson.M{"$in": deleteKeys},
+			})
+			return qryErr
+		}); err != nil {
 			lastErr = err
 		}
 	}
