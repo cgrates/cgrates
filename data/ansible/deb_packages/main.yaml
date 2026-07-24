@@ -3,7 +3,7 @@
   vars:
     rootUser: root
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    cgrates_branch: master
+    cgrates_branch: v0.10
 
     dependencies:
       - build-essential
