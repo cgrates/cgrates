@@ -3318,7 +3318,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 }
 
 func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx string,
-	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	indexes map[string]utils.StringSet, commit bool, transactionID string) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3326,14 +3326,17 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 	if err != nil {
 		return err
 	}
-	if err = db.SetIndexesDrv(ctx, idxItmType, tntCtx,
+	if err := db.SetIndexesDrv(ctx, idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
-		return
+		return err
 	}
-	if itm := dm.cfg.DbCfg().Items[idxItmType]; itm.Replicate {
+	itm := dm.cfg.DbCfg().Items[idxItmType]
+	if !itm.Replicate {
+		return nil
+	}
+	if transactionID != "" {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
-			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
+		if err := rpl.replicate(ctx, utils.CacheInstanceToPrefix[idxItmType], tntCtx,
 			utils.ReplicatorSv1SetIndexes,
 			&utils.SetIndexesArg{
 				IdxItmType: idxItmType,
@@ -3341,12 +3344,18 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 				Indexes:    indexes,
 				Tenant:     dm.cfg.GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm)
+					dbCfg.RplCache, ""),
+			}, itm); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to replicate index transaction for context %q: %v", tntCtx, err))
+		}
+		return nil
 	}
-	return
+	dm.replicateIndexes(ctx, idxItmType, tntCtx, indexes, false, itm, dbCfg)
+	return nil
 }
 
-func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3354,23 +3363,37 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx st
 	if err != nil {
 		return err
 	}
-	if err = db.RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKeys...); err != nil {
-		return
+	if err := db.RemoveIndexesDrv(ctx, idxItmType, tntCtx, idxKeys...); err != nil {
+		return err
 	}
-	if itm := dm.cfg.DbCfg().Items[idxItmType]; itm.Replicate {
-		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		rpl.replicate(ctx,
-			utils.CacheInstanceToPrefix[idxItmType], tntCtx, // this are used to get the host IDs from cache
-			utils.ReplicatorSv1RemoveIndexes,
-			&utils.GetIndexesArg{
-				IdxItmType: idxItmType,
-				TntCtx:     tntCtx,
-				IdxKeys:    idxKeys,
-				Tenant:     dm.cfg.GeneralCfg().DefaultTenant,
-				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm)
+	itm := dm.cfg.DbCfg().Items[idxItmType]
+	if !itm.Replicate {
+		return nil
 	}
-	return
+	indexes := make(map[string]utils.StringSet, len(idxKeys))
+	for _, idxKey := range idxKeys {
+		indexes[idxKey] = nil
+	}
+	dm.replicateIndexes(ctx, idxItmType, tntCtx, indexes, len(idxKeys) == 0, itm, dbCfg)
+	return nil
+}
+
+func (dm *DataManager) replicateIndexes(ctx *context.Context, idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, clear bool, itm *config.ItemOpts, dbCfg *config.DBConn) {
+	rpl := dm.dbConns.GetReplicator(itm.DBConn)
+	if err := rpl.replicateIndexes(ctx, utils.CacheInstanceToPrefix[idxItmType], tntCtx,
+		&utils.SetIndexesArg{
+			IdxItmType: idxItmType,
+			TntCtx:     tntCtx,
+			Indexes:    indexes,
+			Clear:      clear,
+			Tenant:     dm.cfg.GeneralCfg().DefaultTenant,
+			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+				dbCfg.RplCache, ""),
+		}); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<DataManager> failed to replicate indexes for context %q: %v", tntCtx, err))
+	}
 }
 
 func GetAPIBan(ctx *context.Context, cache *CacheS, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {

@@ -43,6 +43,10 @@ func setupReplicator(tb testing.TB, failedDir string,
 	return cm
 }
 
+func testReplicator(dm *DataManager) *replicator {
+	return dm.dbConns.GetReplicator(utils.MetaDefault)
+}
+
 func newTestReplicator(tb testing.TB, interval time.Duration, failedDir string,
 	connector birpc.ClientConnector) *replicator {
 	tb.Helper()

@@ -748,16 +748,39 @@ func (r *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetIndexesA
 	if err != nil {
 		return err
 	}
-	if err := db.SetIndexesDrv(ctx, args.IdxItmType, args.TntCtx, args.Indexes, true, utils.NonTransactional); err != nil {
+	indexes := args.Indexes
+	if args.Clear {
+		if err := db.RemoveIndexesDrv(ctx, args.IdxItmType, args.TntCtx); err != nil {
+			return err
+		}
+		indexes = make(map[string]utils.StringSet, len(args.Indexes))
+		for idxKey, index := range args.Indexes {
+			if len(index) != 0 {
+				indexes[idxKey] = index
+			}
+		}
+	}
+	if err := db.SetIndexesDrv(ctx, args.IdxItmType, args.TntCtx,
+		indexes, true, utils.NonTransactional); err != nil {
 		return err
 	}
-	cIDs := make([]string, 0, len(args.Indexes))
-	for idxKey := range args.Indexes {
-		cIDs = append(cIDs, utils.ConcatenatedKey(args.TntCtx, idxKey))
-	}
-	if err := r.admin.callCacheMultiple(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCache]),
-		args.Tenant, args.IdxItmType, cIDs, args.APIOpts); err != nil {
-		return err
+	cacheOpt := utils.IfaceAsString(args.APIOpts[utils.MetaCache])
+	if args.Clear {
+		if utils.FirstNonEmpty(cacheOpt, r.admin.cfg.GeneralCfg().DefaultCaching) != utils.MetaNone {
+			if err := r.admin.CallCache(ctx, utils.MetaRemove, args.Tenant, args.IdxItmType,
+				"", args.TntCtx, nil, args.APIOpts); err != nil {
+				return err
+			}
+		}
+	} else {
+		cIDs := make([]string, 0, len(args.Indexes))
+		for idxKey := range args.Indexes {
+			cIDs = append(cIDs, utils.ConcatenatedKey(args.TntCtx, idxKey))
+		}
+		if err := r.admin.callCacheMultiple(ctx, cacheOpt, args.Tenant,
+			args.IdxItmType, cIDs, args.APIOpts); err != nil {
+			return err
+		}
 	}
 	*reply = utils.OK
 	return nil
