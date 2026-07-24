@@ -822,6 +822,7 @@ type SetIndexesArg struct {
 	IdxItmType string
 	TntCtx     string
 	Indexes    map[string]StringSet
+	Clear      bool
 	Tenant     string
 	APIOpts    map[string]any
 }
