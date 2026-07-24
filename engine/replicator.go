@@ -5,8 +5,10 @@ package engine
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -18,6 +20,20 @@ import (
 	"github.com/cgrates/cgrates/guardian"
 	"github.com/cgrates/cgrates/utils"
 )
+
+// indexPatchKey marks context patches for merging on retry and safe failed filenames.
+func indexPatchKey(key string) string {
+	return "\x00" + key
+}
+
+// failedReplicationFileName preserves existing key names. It hashes marked
+// index keys into names of a fixed length that are safe to use in paths.
+func failedReplicationFileName(key string) string {
+	if key == "" || key[0] != 0 {
+		return key
+	}
+	return fmt.Sprintf("index_%x", sha256.Sum256([]byte(key)))
+}
 
 // replicationData holds the information about a pending replication task.
 type replicationData struct {
@@ -128,16 +144,104 @@ func (r *replicator) replicate(objType, objID, method string, args any,
 	return r.replicateAndRestore(key, objType, objID, method, args)
 }
 
+func mergeIndexPatch(patch, newer *utils.SetIndexesArg) {
+	if newer.Clear {
+		clear(patch.Indexes)
+		patch.Clear = true
+	}
+	if patch.Indexes == nil && len(newer.Indexes) != 0 {
+		patch.Indexes = make(map[string]utils.StringSet, len(newer.Indexes))
+	}
+	maps.Copy(patch.Indexes, newer.Indexes)
+	patch.IdxItmType = newer.IdxItmType
+	patch.TntCtx = newer.TntCtx
+	patch.Tenant = newer.Tenant
+	patch.APIOpts = newer.APIOpts
+}
+
+func (r *replicator) replicateIndexes(objType, objID string, args *utils.SetIndexesArg) error {
+	key := indexPatchKey(replicationKey(objType, objID, utils.ReplicatorSv1SetIndexes))
+	if r.interval <= 0 {
+		return r.replicateIndexPatchAndRestore(key, objType, objID, args)
+	}
+
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if pending, has := r.pending[key]; has {
+		mergeIndexPatch(pending.args.(*utils.SetIndexesArg), args)
+		return nil
+	}
+	patch := *args
+	patch.Indexes = maps.Clone(args.Indexes)
+	r.pending[key] = &replicationData{
+		objType: objType,
+		objID:   objID,
+		method:  utils.ReplicatorSv1SetIndexes,
+		args:    &patch,
+	}
+	return nil
+}
+
+func (r *replicator) replicateIndexPatchAndRestore(key, objType, objID string,
+	args *utils.SetIndexesArg) error {
+	var failedPath string
+	if r.failedDir != "" {
+		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
+		task, err := NewReplicationTaskFromFile(failedPath)
+		if err == nil {
+			if task == nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<DataManager> invalid failed index patch in %q", failedPath))
+			} else if failed, ok := task.Args.(*utils.SetIndexesArg); !ok ||
+				task.Method != utils.ReplicatorSv1SetIndexes ||
+				task.ObjType != objType || task.ObjID != objID {
+				utils.Logger.Err(fmt.Sprintf(
+					"<DataManager> invalid failed index patch in %q", failedPath))
+			} else {
+				mergeIndexPatch(failed, args)
+				args = failed
+			}
+		} else if !os.IsNotExist(err) {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to load index patch %q: %v", failedPath, err))
+		}
+	}
+	err := replicate(r.cm, r.conns, r.filtered, objType, objID,
+		utils.ReplicatorSv1SetIndexes, args)
+	if err != nil && failedPath != "" {
+		task := &ReplicationTask{
+			ConnIDs:  r.conns,
+			Filtered: r.filtered,
+			ObjType:  objType,
+			ObjID:    objID,
+			Method:   utils.ReplicatorSv1SetIndexes,
+			Args:     args,
+		}
+		if wErr := task.WriteToFile(failedPath); wErr != nil {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to save index patch %q: %v", failedPath, wErr))
+		}
+	}
+	return err
+}
+
 // replicateAndRestore is a wrapper over replicate function and checks failedDir
 // to create files for tracking unsuccessful writes
 func (r *replicator) replicateAndRestore(key string, objType, objID, method string, args any) error {
+	if key != "" && key[0] == 0 {
+		patch, ok := args.(*utils.SetIndexesArg)
+		if !ok {
+			return fmt.Errorf("invalid index replication patch %T", args)
+		}
+		return r.replicateIndexPatchAndRestore(key, objType, objID, patch)
+	}
 	var failedPath string
 	if r.failedDir != "" {
-		failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
+		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
 		// Clean up any existing file containing failed replications.
 		if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
 			utils.Logger.Warning(fmt.Sprintf(
-				"<DataManager> failed to remove file for %q: %v", key, err))
+				"<DataManager> failed to remove file %q: %v", failedPath, err))
 		}
 	}
 	err := replicate(r.cm, r.conns, r.filtered, objType, objID, method, args)

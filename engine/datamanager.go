@@ -3842,51 +3842,75 @@ func (dm *DataManager) GetIndexes(idxItmType, tntCtx string, cacheRead, cacheWri
 }
 
 func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
-	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+	indexes map[string]utils.StringSet, commit bool, transactionID string) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
 	/*
 		TODO: Check if there's any downside to returning early when len(indexes) == 0.
 	*/
-	if err = dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
+	if err := dm.DataDB().SetIndexesDrv(idxItmType, tntCtx,
 		indexes, commit, transactionID); err != nil {
-		return
+		return err
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[idxItmType]
-	return dm.replicator.replicate(
-		utils.CacheInstanceToPrefix[idxItmType], tntCtx, // these are used to get the host IDs from cache
-		utils.ReplicatorSv1SetIndexes,
+	if !itm.Replicate {
+		return nil
+	}
+	if transactionID != "" {
+		if err := dm.replicator.replicate(utils.CacheInstanceToPrefix[idxItmType], tntCtx,
+			utils.ReplicatorSv1SetIndexes,
+			&utils.SetIndexesArg{
+				IdxItmType: idxItmType,
+				TntCtx:     tntCtx,
+				Indexes:    indexes,
+				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
+				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
+					config.CgrConfig().DataDbCfg().RplCache, ""),
+			}, itm); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to replicate index transaction for context %q: %v", tntCtx, err))
+		}
+		return nil
+	}
+	dm.replicateIndexes(idxItmType, tntCtx, indexes, false, itm)
+	return nil
+}
+
+func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx string, idxKeys ...string) error {
+	if dm == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	if err := dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
+		return err
+	}
+	itm := config.CgrConfig().DataDbCfg().Items[idxItmType]
+	if !itm.Replicate {
+		return nil
+	}
+	indexes := make(map[string]utils.StringSet, len(idxKeys))
+	for _, idxKey := range idxKeys {
+		indexes[idxKey] = nil
+	}
+	dm.replicateIndexes(idxItmType, tntCtx, indexes, len(idxKeys) == 0, itm)
+	return nil
+}
+
+func (dm *DataManager) replicateIndexes(idxItmType, tntCtx string,
+	indexes map[string]utils.StringSet, clear bool, itm *config.ItemOpt) {
+	if err := dm.replicator.replicateIndexes(utils.CacheInstanceToPrefix[idxItmType], tntCtx,
 		&utils.SetIndexesArg{
 			IdxItmType: idxItmType,
 			TntCtx:     tntCtx,
 			Indexes:    indexes,
+			Clear:      clear,
 			Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm)
-}
-
-func (dm *DataManager) RemoveIndexes(idxItmType, tntCtx string, idxKeys ...string) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
+				config.CgrConfig().DataDbCfg().RplCache, ""),
+		}); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<DataManager> failed to replicate indexes for context %q: %v", tntCtx, err))
 	}
-	if err = dm.DataDB().RemoveIndexesDrv(idxItmType, tntCtx, idxKeys...); err != nil {
-		return
-	}
-	itm := config.CgrConfig().DataDbCfg().Items[idxItmType]
-	_ = dm.replicator.replicate(
-		utils.CacheInstanceToPrefix[idxItmType], tntCtx, // these are used to get the host IDs from cache
-		utils.ReplicatorSv1RemoveIndexes,
-		&utils.GetIndexesArg{
-			IdxItmType: idxItmType,
-			TntCtx:     tntCtx,
-			IdxKeys:    idxKeys,
-			Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
-			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm)
-	return
 }
 
 func (dm *DataManager) GetAPIBan(ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {

@@ -30,11 +30,12 @@ type replicationCall struct {
 
 type countingConnector struct {
 	calls atomic.Uint64
+	err   error
 }
 
 func (c *countingConnector) Call(_ *context.Context, _ string, _, _ any) error {
 	c.calls.Add(1)
-	return nil
+	return c.err
 }
 
 func newReplicationCall(objID string) replicationCall {
@@ -229,6 +230,76 @@ func BenchmarkReplicatorFailedWrite(b *testing.B) {
 		if err := r.replicate(objType, call.objID, call.method, call.args, item); !errors.Is(err, wantErr) {
 			b.Fatalf("replicate returned %v, want %v", err, wantErr)
 		}
+	}
+}
+
+func BenchmarkIndexReplication(b *testing.B) {
+	idxItmType := utils.CacheAttributeFilterIndexes
+	objType := utils.CacheInstanceToPrefix[idxItmType]
+	tntCtx := "cgrates.org:*cdrs"
+	for _, fields := range []int{1, 16, 256} {
+		indexes := make(map[string]utils.StringSet, fields)
+		for i := 0; i < fields; i++ {
+			indexes["field-"+strconv.Itoa(i)] = utils.StringSet{"value": {}}
+		}
+		name := "Fields" + strconv.Itoa(fields)
+
+		b.Run("Immediate/"+name, func(b *testing.B) {
+			connector := &countingConnector{}
+			dm := newIndexDataManager(b, 0, "", connector)
+			b.ReportAllocs()
+			for b.Loop() {
+				if err := dm.SetIndexes(idxItmType, tntCtx, indexes, true, ""); err != nil {
+					b.Fatal(err)
+				}
+			}
+			b.ReportMetric(float64(connector.calls.Load())/float64(b.N), "rpc/op")
+		})
+
+		b.Run("IntervalAdmission/"+name, func(b *testing.B) {
+			connector := &countingConnector{}
+			dm := newIndexDataManager(b, time.Hour, "", connector)
+			b.ReportAllocs()
+			for b.Loop() {
+				if err := dm.SetIndexes(idxItmType, tntCtx, indexes, true, ""); err != nil {
+					b.Fatal(err)
+				}
+			}
+			b.ReportMetric(float64(connector.calls.Load())/float64(b.N), "rpc/op")
+		})
+
+		b.Run("IntervalFlush/"+name, func(b *testing.B) {
+			connector := &countingConnector{}
+			dm := newIndexDataManager(b, time.Hour, "", connector)
+			b.ReportAllocs()
+			for b.Loop() {
+				b.StopTimer()
+				if err := dm.SetIndexes(idxItmType, tntCtx, indexes, true, ""); err != nil {
+					b.Fatal(err)
+				}
+				b.StartTimer()
+				dm.replicator.flush()
+			}
+			b.ReportMetric(float64(connector.calls.Load())/float64(b.N), "rpc/op")
+		})
+
+		b.Run("FailedRetry/"+name, func(b *testing.B) {
+			wantErr := errors.New("replication failed")
+			connector := &countingConnector{err: wantErr}
+			r := newTestReplicator(b, 0, b.TempDir(), connector)
+			args := &utils.SetIndexesArg{
+				IdxItmType: idxItmType,
+				TntCtx:     tntCtx,
+				Indexes:    indexes,
+			}
+			b.ReportAllocs()
+			for b.Loop() {
+				if err := r.replicateIndexes(objType, tntCtx, args); !errors.Is(err, wantErr) {
+					b.Fatalf("replicateIndexes returned %v, want %v", err, wantErr)
+				}
+			}
+			b.ReportMetric(float64(connector.calls.Load())/float64(b.N), "rpc/op")
+		})
 	}
 }
 
