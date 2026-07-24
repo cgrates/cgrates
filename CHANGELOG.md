@@ -1,13 +1,41 @@
 # Changelog
 
 
-## [0.10.5~dev] - 2024-09-24
+## [0.10.5] - 2026-07-24
+
+### Bug fixes
+
+- [SessionS/KamailioAgent] Improved channel synchronization under load by querying clients in parallel and using `reply_timeout` while waiting for active dialogs from Kamailio. Late replies are now discarded. Related to #5146.
+- [SessionS] Added a notice before synchronization terminates active sessions when no bidirectional clients are connected, and fixed error handling during client queries.
+- [SessionS] Fixed max usage calculation so `*none` requests are no longer skipped.
+- [Config] Rejected channel synchronization configurations where enabled agents have no internal SessionS connection.
+- [DispatcherS] Fixed a race when concurrent requests use the same route and subsystem.
+- [DispatcherS] Fixed a `CoreSv1Ping` panic when request or event data is missing.
+- [SessionS/CDRs] Fixed dispatcher routing for cloned call descriptors, refunds, rounding, rating, and rerating by passing along the fields used to choose the route.
+- [CDRs] Fixed a panic when AttributeS returns no altered fields.
+- [ERs] Fixed a data race while watching directories for new files.
+- [Logging] Fixed the rsyslog configuration to capture CGRateS messages on Debian and RPM systems.
+
+### Usability Improvements
+
+- [ERs] Made the existing row number available as `*fileLineNumber` in CSV, FWV, and XML field templates.
+- [AsteriskAgent] Improved ARI session updates by copying selected fields from channel change and termination events using `alterable_fields`.
+- [FilterS] Reduced memory use for very large filter sets by letting string, prefix, suffix, and exists filters run without indexes.
+- [AsteriskAgent] Improved ARI communication by filtering unused events and sending commands through the WebSocket connection when `ari_websocket` is enabled.
+- [DispatcherS] Made it possible to check the availability and response time of each host in a dispatcher profile with `DispatcherSv1.CheckDispatcherProfileHosts`.
+- [SessionS] Stopped logging warnings when synchronization clients report no active sessions.
+- [FilterS] Skipped locking and database calls when there are no filter indexes to remove.
 
 ### Maintenance
 
-- [Version] Incremented version
+- [General] Changed the project license from GPLv3 to AGPLv3.
+- [Build] Updated Go to 1.26.2.
+- [Dependencies] Updated dependencies.
+- [Packaging] Updated packaging and repository tooling.
+- [Documentation] Updated the installation and filter guides and added SchedulerS documentation.
+- [General] Fixed `go vet` warnings after the Go updates.
 
-Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.4...v0.10
+Full Changelog: https://github.com/cgrates/cgrates/compare/v0.10.4...v0.10.5
 
 ## [0.10.4] - 2024-09-24
 
