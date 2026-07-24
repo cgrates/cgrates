@@ -1,5 +1,5 @@
 # Define global variables
-%global version 0.10.4
+%global version 0.10.5
 %global go_version 1.26.2
 
 # Define system paths
@@ -12,7 +12,7 @@
 # Define package metadata
 Name:           cgrates
 Version:        v%{version}
-Release:        rc1.{{{releaseTag}}}
+Release:        {{{releaseTag}}}
 Summary:        Carrier Grade Real-time Charging System
 License:        GPLv3
 URL:            https://github.com/cgrates/cgrates
