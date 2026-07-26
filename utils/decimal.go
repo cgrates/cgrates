@@ -252,7 +252,6 @@ func (d *Decimal) Clone() *Decimal {
 // Compare wraps the decimal.Big.Cmp function. It does not handle nil d2
 func (d *Decimal) Compare(d2 *Decimal) int {
 	if d.IsNaN(0) && !d2.IsNaN(0) {
-		Logger.Info(fmt.Sprintf("### d.IsNaN %+v, !d2.IsNaN: %+v\n", d.IsNaN(0), !d2.IsNaN(0)))
 		return -1
 	}
 	if !d.IsNaN(0) && d2.IsNaN(0) {
@@ -299,4 +298,14 @@ func (d *Decimal) Duration() (time.Duration, bool) {
 
 func CloneDecimalBig(in *decimal.Big) *decimal.Big {
 	return decimal.WithContext(DecimalContext).Copy(in)
+}
+
+// QuoRemDecimal is a wrapper on top of QuoRem of decimal.Big
+// Returns Quotinent and Reminder of x/y
+func QuoRemDecimal(x, y *Decimal) (q *Decimal, r *Decimal) {
+	if x == nil || y == nil {
+		return
+	}
+	qBig, rBig := decimal.WithContext(DecimalContext).QuoRem(x.Big, y.Big, new(decimal.Big))
+	return &Decimal{qBig}, &Decimal{rBig}
 }

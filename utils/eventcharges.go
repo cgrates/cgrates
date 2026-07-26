@@ -151,6 +151,96 @@ func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	}
 }
 
+// Truncate will trim suffix atIndx, returning everything higher or equal to atIndx into rstEC
+func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error) {
+	if atIndx.Compare(NewDecimal(0, 0)) == 0 {
+		tEC = ec.Clone()
+		*ec = *NewEventCharges()
+		return
+	}
+	if atIndx.Compare(ec.Abstracts) >= 0 {
+		return // Nothing to truncate since the usage is smaller than the truncate units
+	}
+	// find chargeEntry which is active at the truncate point
+	tIdx := 0                       // truncate charges index
+	lastNTUnits := NewDecimal(0, 0) // last not trucanted units in Charges
+	for i, chrgEntry := range ec.Charges {
+		//fmt.Printf("### ec.Accounting[chrgEntry.ChargingID].Units: %s, chrgEntry.CompressFactor: %+v\n", ec.Accounting[chrgEntry.ChargingID].Units, chrgEntry.CompressFactor)
+		newParsedUnits := SumDecimal(lastNTUnits,
+			MultiplyDecimal(ec.Accounting[chrgEntry.ChargingID].Units, NewDecimal(int64(chrgEntry.CompressFactor), 0)))
+		//fmt.Printf("### lastNTUnits: %s, MultiplyDecimal: %s, newParsedUnits: %s\n", lastNTUnits, MultiplyDecimal(ec.Accounting[chrgEntry.ChargingID].Units, NewDecimal(int64(chrgEntry.CompressFactor), 0)), newParsedUnits)
+		if newParsedUnits.Compare(atIndx) > 0 { // found our Charges to truncate
+			tIdx = i
+			break
+		}
+		lastNTUnits = newParsedUnits // total non truncated so far
+	}
+	tCmprsFactDec, tUnits := QuoRemDecimal(SubstractDecimal(atIndx, lastNTUnits),
+		ec.Accounting[ec.Charges[tIdx].ChargingID].Units) // our separation points
+	//fmt.Printf("### SubstractDecimal(atIndx: %s, lastNTUnits: %s): %s, ec.Accounting[ec.Charges[tIdx].ChargingID].Units: %s, tCmprsFactDec: %s, tIdx: %v, tUnits: %s\n",
+	//atIndx, lastNTUnits, SubstractDecimal(atIndx, lastNTUnits), ec.Accounting[ec.Charges[tIdx].ChargingID].Units, tCmprsFactDec, tIdx, tUnits)
+	tCmprsFct, _ := tCmprsFactDec.Int64()
+
+	tEC = NewEventCharges()
+	// Abstracts value
+	tEC.Abstracts = SubstractDecimal(ec.Abstracts, atIndx)
+	ec.Abstracts = atIndx
+
+	// Charges value and Units
+	tEC.Charges = make([]*ChargeEntry, len(ec.Charges[tIdx:]))
+	for i, cE := range ec.Charges[tIdx:] {
+		tEC.Charges[i] = cE
+	}
+	for i := range ec.Charges[tIdx:] { // remove for garbage collector
+		ec.Charges[tIdx+i] = nil
+	}
+	ec.Charges = ec.Charges[:tIdx]
+	// Update tEC with rest of information
+	for _, chrg := range tEC.Charges {
+		tEC.Accounting[chrg.ChargingID] = ec.Accounting[chrg.ChargingID].Clone()
+	}
+	for _, acnting := range tEC.Accounting {
+		tEC.Accounts[acnting.AccountID] = ec.Accounts[acnting.AccountID].Clone()
+		tEC.Rating[acnting.RatingID] = ec.Rating[acnting.RatingID].Clone()
+		if acnting.UnitFactorID != EmptyString {
+			tEC.UnitFactors[acnting.UnitFactorID] = ec.UnitFactors[acnting.UnitFactorID].Clone()
+		}
+		for _, rating := range tEC.Rating {
+			for _, incrm := range rating.Increments {
+				tEC.Rates[incrm.RateID] = ec.Rates[incrm.RateID].Clone()
+			}
+		}
+	}
+	if tCmprsFct > 0 { // in case of compression factor higher than 0, need to move group of compressed from truncated to non-truncated
+		apndChrgs := tEC.Charges[0].Clone()
+		apndChrgs.CompressFactor = int(tCmprsFct)
+		ec.Charges = append(ec.Charges, apndChrgs)
+		tEC.Charges[len(tEC.Charges)-1].CompressFactor = tEC.Charges[len(tEC.Charges)-1].CompressFactor - int(tCmprsFct) // decrease by default compress factor
+	}
+	if tUnits.Compare(NewDecimal(0, 0)) > 0 { // last charges are incomplete, need to add one more
+		// handle accounting part for the rest of the units
+		prevAcnt := tEC.Accounting[tEC.Charges[0].ChargingID]
+		newAcntingID := UUIDSha1Prefix()
+		ec.Accounting[newAcntingID] = prevAcnt.Clone()
+		ec.Accounting[newAcntingID].Units = tUnits
+		ec.Charges = append(ec.Charges, &ChargeEntry{ChargingID: newAcntingID, CompressFactor: 1})
+		tEC.Charges[0].CompressFactor-- // decrease it since we have borrowed in non truncated
+		tEC.Accounting[newAcntingID] = prevAcnt.Clone()
+		tEC.Accounting[newAcntingID].Units = SubstractDecimal(prevAcnt.Units, tUnits)
+		if tEC.Charges[0].CompressFactor == 0 { // Correct previous data already moved from eC
+			tEC.Charges[0].CompressFactor = 1
+			tEC.Charges[0].ChargingID = newAcntingID // ad new units
+		} else { // prepend a new charging
+			tEC.Charges = append([]*ChargeEntry{&ChargeEntry{ChargingID: newAcntingID, CompressFactor: 1}}, tEC.Charges...)
+		}
+	}
+	ec.Cleanup()
+	tEC.Cleanup()
+	//fmt.Printf("### Ec: %s\n", ToIJSON(ec))
+	//fmt.Printf("### tEc: %s\n", ToIJSON(tEC))
+	return
+}
+
 // appendChargeEntry will add new charge to the  existing.
 // if possible, the existing last one in ec will be compressed
 func (ec *EventCharges) appendChargeEntry(cIls ...*ChargeEntry) {
@@ -165,6 +255,80 @@ func (ec *EventCharges) appendChargeEntry(cIls ...*ChargeEntry) {
 		}
 		ec.Charges = append(ec.Charges, cIl)
 	}
+}
+
+// Cleanup removes all the unecessary data from EventCharges, starting in Charges
+func (ec *EventCharges) Cleanup() {
+	// Accounting
+	for acntID := range ec.Accounting {
+		has := false
+		for _, chrging := range ec.Charges {
+			if chrging.ChargingID == acntID {
+				has = true
+				break
+			}
+		}
+		if !has {
+			delete(ec.Accounting, acntID)
+		}
+	}
+	// UnitFactors
+	for ufID := range ec.UnitFactors {
+		has := false
+		for _, acnting := range ec.Accounting {
+			if acnting.UnitFactorID == ufID {
+				has = true
+				break
+			}
+		}
+		if !has {
+			delete(ec.UnitFactors, ufID)
+		}
+	}
+	// Accounts
+	for acntID := range ec.Accounts {
+		has := false
+		for _, acnting := range ec.Accounting {
+			if acnting.AccountID == acntID {
+				has = true
+				break
+			}
+		}
+		if !has {
+			delete(ec.Accounts, acntID)
+		}
+	}
+	for rtingID := range ec.Rating {
+		has := false
+		for _, acnting := range ec.Accounting {
+			if acnting.RatingID == rtingID {
+				has = true
+				break
+			}
+		}
+		if !has {
+			delete(ec.Rating, rtingID)
+		}
+	}
+	// Rates
+	for rtID := range ec.Rates {
+		has := false
+		for _, rting := range ec.Rating {
+			for _, incrm := range rting.Increments {
+				if incrm.RateID == rtID {
+					has = true
+					break
+				}
+			}
+			if has {
+				break
+			}
+		}
+		if !has {
+			delete(ec.Rates, rtID)
+		}
+	}
+
 }
 
 // Equals return the equality between two ChargeEntry ignoring CompressFactor
