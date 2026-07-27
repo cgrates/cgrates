@@ -200,6 +200,62 @@ func TestERsListenAndServeRdrEvents(t *testing.T) {
 	}
 }
 
+func TestERsListenAndServePartialEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
+		{
+			Type: utils.MetaNone,
+		},
+	}
+	fltrS := &engine.FilterS{}
+	srv := NewERService(cfg, nil, fltrS, nil)
+	stopChan := make(chan struct{}, 1)
+	cfgRldChan := make(chan struct{}, 1)
+
+	errChan := make(chan error, 1)
+	go func() {
+		errChan <- srv.ListenAndServe(stopChan, cfgRldChan)
+	}()
+
+	partialEventSent := make(chan struct{})
+	go func() {
+		srv.partialEvents <- &erEvent{
+			cgrEvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "id",
+				Event: map[string]any{
+					utils.OriginID: "orgid",
+				},
+			},
+			rdrCfg: &config.EventReaderCfg{
+				ID: "rdrid",
+				Flags: map[string]utils.FlagParams{
+					utils.MetaNone: map[string][]string{},
+				},
+				Opts: &config.EventReaderOpts{},
+			},
+		}
+		close(partialEventSent)
+	}()
+
+	select {
+	case <-partialEventSent:
+	case <-time.After(1 * time.Second):
+		t.Fatal("timeout sending partial event to ListenAndServe")
+	}
+
+	stopChan <- struct{}{}
+
+	select {
+	case err := <-errChan:
+		if err != nil {
+			t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
+		}
+	case <-time.After(1 * time.Second):
+		t.Fatal("ListenAndServe blocked after processing partial event")
+	}
+}
+
 func TestERsListenAndServeCfgRldChan(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ERsCfg().Readers = []*config.EventReaderCfg{
