@@ -3123,11 +3123,13 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 	atIdx := NewDecimal(1, 0)
 	if rstEc, err := testEC.Truncate(atIdx); err != nil {
 		t.Error(err)
-	} else if len(testEC.Charges) != 1 ||
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 1 ||
 		testEC.Charges[0].CompressFactor != 1 ||
 		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(atIdx) != 0 {
 		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
-	} else if len(rstEc.Charges) != 4 ||
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 4 ||
 		rstEc.Charges[0].CompressFactor != 1 ||
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(SubstractDecimal(eC.Accounting[eC.Charges[0].ChargingID].Units, atIdx)) != 0 {
 		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
@@ -3137,11 +3139,13 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 	atIdx = NewDecimal(50*1000, 0)
 	if rstEc, err := testEC.Truncate(atIdx); err != nil {
 		t.Error(err)
-	} else if len(testEC.Charges) != 1 ||
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 1 ||
 		testEC.Charges[0].CompressFactor != 1 ||
 		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(atIdx) != 0 {
 		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
-	} else if len(rstEc.Charges) != 3 ||
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 3 ||
 		rstEc.Charges[0].CompressFactor != 1 ||
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 {
 		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
@@ -3151,12 +3155,14 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 	atIdx = NewDecimal(89*1000, 0)
 	if rstEc, err := testEC.Truncate(atIdx); err != nil {
 		t.Error(err)
-	} else if len(testEC.Charges) != 2 ||
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 2 ||
 		testEC.Charges[0].CompressFactor != 1 ||
 		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
 		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(NewDecimal(39*1000, 0)) != 0 {
 		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
-	} else if len(rstEc.Charges) != 3 ||
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 3 ||
 		rstEc.Charges[0].CompressFactor != 1 ||
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(1000, 0)) != 0 ||
 		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
@@ -3168,12 +3174,14 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 	atIdx = NewDecimal(90*1000, 0)
 	if rstEc, err := testEC.Truncate(atIdx); err != nil {
 		t.Error(err)
-	} else if len(testEC.Charges) != 2 ||
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 2 ||
 		testEC.Charges[0].CompressFactor != 1 ||
 		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
 		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 {
 		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
-	} else if len(rstEc.Charges) != 2 ||
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 2 ||
 		rstEc.Charges[0].CompressFactor != 3 ||
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
 		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
@@ -3184,18 +3192,146 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 	atIdx = NewDecimal(91*1000, 0)
 	if rstEc, err := testEC.Truncate(atIdx); err != nil {
 		t.Error(err)
-	} else if len(testEC.Charges) != 3 ||
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 3 ||
 		testEC.Charges[2].CompressFactor != 1 ||
 		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
 		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
 		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(NewDecimal(1000, 0)) != 0 {
 		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
-	} else if len(rstEc.Charges) != 3 ||
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 3 ||
 		rstEc.Charges[0].CompressFactor != 1 ||
 		rstEc.Charges[1].CompressFactor != 2 ||
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(49*1000, 0)) != 0 ||
 		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
 		rstEc.Accounting[rstEc.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate full of third charge with compress factor
+	testEC = eC.Clone()
+	atIdx = NewDecimal(140*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 3 ||
+		testEC.Charges[2].CompressFactor != 1 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 2 ||
+		rstEc.Charges[0].CompressFactor != 2 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
+		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate full of third charge with compress factor
+	testEC = eC.Clone()
+	atIdx = NewDecimal(141*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 4 ||
+		testEC.Charges[0].CompressFactor != 1 ||
+		testEC.Charges[1].CompressFactor != 1 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 3 ||
+		rstEc.Charges[1].CompressFactor != 1 ||
+		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
+		rstEc.Accounting[rstEc.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate second compress factor of third charge
+	testEC = eC.Clone()
+	atIdx = NewDecimal(190*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 3 ||
+		testEC.Charges[0].CompressFactor != 1 ||
+		testEC.Charges[2].CompressFactor != 2 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 2 ||
+		rstEc.Charges[0].CompressFactor != 1 ||
+		rstEc.Charges[1].CompressFactor != 1 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
+		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate second compress factor of third charge
+	testEC = eC.Clone()
+	atIdx = NewDecimal(191*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 4 ||
+		testEC.Charges[0].CompressFactor != 1 ||
+		testEC.Charges[1].CompressFactor != 1 ||
+		testEC.Charges[2].CompressFactor != 2 ||
+		testEC.Charges[3].CompressFactor != 1 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[3].ChargingID].Units.Compare(NewDecimal(1000, 0)) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 2 ||
+		rstEc.Charges[0].CompressFactor != 1 ||
+		rstEc.Charges[1].CompressFactor != 1 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(49*1000, 0)) != 0 ||
+		rstEc.Accounting[rstEc.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate to only last charge in full
+	testEC = eC.Clone()
+	atIdx = NewDecimal(240*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 3 ||
+		testEC.Charges[0].CompressFactor != 1 ||
+		testEC.Charges[1].CompressFactor != 1 ||
+		testEC.Charges[2].CompressFactor != 3 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 1 ||
+		rstEc.Charges[0].CompressFactor != 1 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[3].ChargingID].Units) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+	// Truncate inside last charge
+	testEC = eC.Clone()
+	atIdx = NewDecimal(241*1000, 0)
+	if rstEc, err := testEC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if testEC.Abstracts.Compare(atIdx) != 0 ||
+		len(testEC.Charges) != 4 ||
+		testEC.Charges[0].CompressFactor != 1 ||
+		testEC.Charges[1].CompressFactor != 1 ||
+		testEC.Charges[2].CompressFactor != 3 ||
+		testEC.Charges[3].CompressFactor != 1 ||
+		testEC.Accounting[testEC.Charges[0].ChargingID].Units.Compare(eC.Accounting[eC.Charges[0].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[1].ChargingID].Units.Compare(eC.Accounting[eC.Charges[1].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[2].ChargingID].Units.Compare(eC.Accounting[eC.Charges[2].ChargingID].Units) != 0 ||
+		testEC.Accounting[testEC.Charges[3].ChargingID].Units.Compare(NewDecimal(1000, 0)) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", testEC, atIdx)
+	} else if rstEc.Abstracts.Compare(SubstractDecimal(eC.Abstracts, atIdx)) != 0 ||
+		len(rstEc.Charges) != 1 ||
+		rstEc.Charges[0].CompressFactor != 1 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(59000, 0)) != 0 {
 		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
 	}
 }

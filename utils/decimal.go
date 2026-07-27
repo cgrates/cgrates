@@ -251,10 +251,16 @@ func (d *Decimal) Clone() *Decimal {
 
 // Compare wraps the decimal.Big.Cmp function. It does not handle nil d2
 func (d *Decimal) Compare(d2 *Decimal) int {
-	if d.IsNaN(0) && !d2.IsNaN(0) {
+	if d == nil && d2 == nil {
+		return 0
+	}
+	if (d == nil || d.IsNaN(0)) &&
+		!d2.IsNaN(0) {
 		return -1
 	}
-	if !d.IsNaN(0) && d2.IsNaN(0) {
+	if !d.IsNaN(0) &&
+		(d2 == nil || d2.IsNaN(0)) {
+		fmt.Printf("d2 is nill or : d: %v, d2: %v\n", d, d2)
 		return 1
 	}
 	return d.Big.Cmp(d2.Big)

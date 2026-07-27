@@ -165,10 +165,8 @@ func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error)
 	tIdx := 0                       // truncate charges index
 	lastNTUnits := NewDecimal(0, 0) // last not trucanted units in Charges
 	for i, chrgEntry := range ec.Charges {
-		//fmt.Printf("### ec.Accounting[chrgEntry.ChargingID].Units: %s, chrgEntry.CompressFactor: %+v\n", ec.Accounting[chrgEntry.ChargingID].Units, chrgEntry.CompressFactor)
 		newParsedUnits := SumDecimal(lastNTUnits,
 			MultiplyDecimal(ec.Accounting[chrgEntry.ChargingID].Units, NewDecimal(int64(chrgEntry.CompressFactor), 0)))
-		//fmt.Printf("### lastNTUnits: %s, MultiplyDecimal: %s, newParsedUnits: %s\n", lastNTUnits, MultiplyDecimal(ec.Accounting[chrgEntry.ChargingID].Units, NewDecimal(int64(chrgEntry.CompressFactor), 0)), newParsedUnits)
 		if newParsedUnits.Compare(atIndx) > 0 { // found our Charges to truncate
 			tIdx = i
 			break
@@ -177,8 +175,6 @@ func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error)
 	}
 	tCmprsFactDec, tUnits := QuoRemDecimal(SubstractDecimal(atIndx, lastNTUnits),
 		ec.Accounting[ec.Charges[tIdx].ChargingID].Units) // our separation points
-	//fmt.Printf("### SubstractDecimal(atIndx: %s, lastNTUnits: %s): %s, ec.Accounting[ec.Charges[tIdx].ChargingID].Units: %s, tCmprsFactDec: %s, tIdx: %v, tUnits: %s\n",
-	//atIndx, lastNTUnits, SubstractDecimal(atIndx, lastNTUnits), ec.Accounting[ec.Charges[tIdx].ChargingID].Units, tCmprsFactDec, tIdx, tUnits)
 	tCmprsFct, _ := tCmprsFactDec.Int64()
 
 	tEC = NewEventCharges()
@@ -215,7 +211,7 @@ func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error)
 		apndChrgs := tEC.Charges[0].Clone()
 		apndChrgs.CompressFactor = int(tCmprsFct)
 		ec.Charges = append(ec.Charges, apndChrgs)
-		tEC.Charges[len(tEC.Charges)-1].CompressFactor = tEC.Charges[len(tEC.Charges)-1].CompressFactor - int(tCmprsFct) // decrease by default compress factor
+		tEC.Charges[0].CompressFactor = tEC.Charges[0].CompressFactor - int(tCmprsFct) // decrease by default compress factor
 	}
 	if tUnits.Compare(NewDecimal(0, 0)) > 0 { // last charges are incomplete, need to add one more
 		// handle accounting part for the rest of the units
@@ -236,8 +232,6 @@ func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error)
 	}
 	ec.Cleanup()
 	tEC.Cleanup()
-	//fmt.Printf("### Ec: %s\n", ToIJSON(ec))
-	//fmt.Printf("### tEc: %s\n", ToIJSON(tEC))
 	return
 }
 
@@ -328,7 +322,7 @@ func (ec *EventCharges) Cleanup() {
 			delete(ec.Rates, rtID)
 		}
 	}
-
+	ec.abstractConcretes()
 }
 
 // Equals return the equality between two ChargeEntry ignoring CompressFactor
@@ -841,4 +835,18 @@ func (ec *EventCharges) getRatingForPath(fldPath []string, rtInterval *RateSInte
 		return rate.FieldAsInterface(fldPath[2:])
 	}
 	return incr.FieldAsInterface(fldPath[1:])
+}
+
+// abstractConcretes sets the Abstracts and Concretes within EventCharges based on units consumed within Accounting and CompressFactor
+func (ec *EventCharges) abstractConcretes() {
+	ec.Abstracts, ec.Concretes = nil, nil
+	for _, chrg := range ec.Charges {
+		ac := ec.Accounting[chrg.ChargingID]
+		switch ec.Accounts[ac.AccountID].Balances[ac.BalanceID].Type {
+		case MetaAbstract:
+			ec.Abstracts = SumDecimal(ec.Abstracts, MultiplyDecimal(ac.Units, NewDecimal(int64(chrg.CompressFactor), 0)))
+		case MetaConcrete:
+			ec.Concretes = SumDecimal(ec.Concretes, MultiplyDecimal(ac.Units, NewDecimal(int64(chrg.CompressFactor), 0)))
+		}
+	}
 }
