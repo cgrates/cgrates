@@ -2026,3 +2026,99 @@ dm.SetCache(engine.Cache)
 	}
 }
 */
+
+func TestSetSession(t *testing.T) {
+	t.Run("MissingCGRID", func(t *testing.T) {
+		sS := &SessionS{}
+		cch := map[string]any{
+			utils.MetaTotalUsage: 10 * time.Second,
+		}
+		s, err := sS.setSession(nil, &utils.CGREvent{}, cch, "")
+		if s != nil {
+			t.Errorf("expected nil session, got %+v", s)
+		}
+		if err == nil {
+			t.Fatal("expected error when MetaCGRid is missing")
+		}
+	})
+
+	t.Run("EmptyCGRID", func(t *testing.T) {
+		sS := &SessionS{}
+		cch := map[string]any{
+			utils.MetaCGRid:      "",
+			utils.MetaTotalUsage: 10 * time.Second,
+		}
+		if _, err := sS.setSession(nil, &utils.CGREvent{}, cch, ""); err == nil {
+			t.Fatal("expected error when MetaCGRid is empty string")
+		}
+	})
+
+	t.Run("MissingUsageKeys", func(t *testing.T) {
+		sS := &SessionS{}
+		cch := map[string]any{
+			utils.MetaCGRid: "cgrID1",
+			// neither MetaInterimUsage nor MetaTotalUsage present
+		}
+		if _, err := sS.setSession(nil, &utils.CGREvent{}, cch, ""); err == nil {
+			t.Fatal("expected error when neither InterimUsage nor TotalUsage is present")
+		}
+	})
+
+	t.Run("CreatesNewSession", func(t *testing.T) {
+		sS := &SessionS{
+			cfg:       config.NewDefaultCGRConfig(),
+			aSessions: make(map[string]*Session),
+		}
+		cgrEv := &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			Event:   map[string]any{"Account": "1001"},
+			APIOpts: map[string]any{},
+		}
+		cch := map[string]any{
+			utils.MetaCGRid:      "cgrID1",
+			utils.MetaTotalUsage: 10 * time.Second,
+		}
+
+		s, err := sS.setSession(nil, cgrEv, cch, "connID1")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if s == nil || s.ID != "cgrID1" {
+			t.Fatalf("expected new session with ID cgrID1, got %+v", s)
+		}
+		if _, has := sS.aSessions["cgrID1"]; !has {
+			t.Error("expected new session to be registered in aSessions")
+		}
+		if len(s.sRuns) != 1 {
+			t.Errorf("expected exactly 1 SRun (MetaPrimary), got %d", len(s.sRuns))
+		}
+	})
+
+	t.Run("UpdatesExistingSession", func(t *testing.T) {
+		existing := &Session{
+			ID:    "cgrID1",
+			sRuns: map[string]*SRun{utils.MetaPrimary: NewSRun(&utils.CGREvent{Event: map[string]interface{}{}, APIOpts: map[string]any{}})},
+		}
+		sS := &SessionS{
+			cfg:       config.NewDefaultCGRConfig(),
+			aSessions: map[string]*Session{"cgrID1": existing},
+		}
+		cgrEv := &utils.CGREvent{
+			Tenant:  "cgrates.org",
+			Event:   map[string]any{"Account": "1002"},
+			APIOpts: map[string]any{},
+		}
+		cch := map[string]any{
+			utils.MetaCGRid:      "cgrID1",
+			utils.MetaTotalUsage: 20 * time.Second,
+		}
+
+		s, err := sS.setSession(nil, cgrEv, cch, "connID1")
+		if err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+		if s != existing {
+			t.Error("expected setSession to return the same pointer as the existing registered session")
+		}
+	})
+}
