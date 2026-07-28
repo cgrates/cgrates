@@ -109,9 +109,11 @@
 						"value": "true"},
 					{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant",
 						"value": "true"},
-					{"tag": "OptTotalUsage", "path": "*opts.*totalUsage", "type": "*variable",
+					{"tag": "OptTotalUsage", "filters": ["*notempty:~*req.totalUnits:"],
+						"path": "*opts.*totalUsage", "type": "*variable",
 						"value": "~*req.totalUnits"}, // auth 50MB
-					{"tag": "OptPreviousUsage", "path": "*opts.*interimConsumed", "type": "*variable",
+					{"tag": "OptPreviousUsage", "filters": ["*notempty:~*req.usedUnits:"],
+					    "path": "*opts.*interimConsumed", "type": "*variable",
 						"value": "~*req.usedUnits"}, // confirmedConsumed
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},

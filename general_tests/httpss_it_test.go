@@ -344,14 +344,15 @@ func testHttpSsSessionUpdate3(t *testing.T) {
 	}
 }
 
+// Should correct the last debit, instead of 150000 have only used 100000, total session should be 200.000
 func testHttpSsTerminate(t *testing.T) {
-	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=Terminate&imsi=2343000000000123&destination=491239440004&sessionID=uuidTestHttpSs&usedUnits=30000&totalUnits=250000",
+	reqUrl := fmt.Sprintf("http://localhost:2080%s?requestType=Terminate&imsi=2343000000000123&destination=491239440004&sessionID=uuidTestHttpSs&usedUnits=100000",
 		httpSsCfg.HTTPAgentCfg()[0].URL)
 	rply, err := httpSsClnt.Get(reqUrl)
 	if err != nil {
 		t.Fatal(err)
 	}
-	eRply := "MaxUsage=250000"
+	eRply := "MaxUsage=200000" // total session usage
 	if rply, err := io.ReadAll(rply.Body); err != nil {
 		t.Error(err)
 	} else if strings.HasPrefix(string(rply), "Error") {
@@ -372,7 +373,7 @@ func testHttpSsTerminate(t *testing.T) {
 		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "2343000000000123"}},
 		&acnt); err != nil {
 		t.Fatalf("GetAccount: %v", err)
-	} else if acnt.Balances["DATA1"].Units.Compare(utils.NewDecimalFromFloat64(700*1000)) != 0 {
+	} else if acnt.Balances["DATA1"].Units.Compare(utils.NewDecimalFromFloat64(750*1000)) != 0 {
 		t.Error(fmt.Sprintf("Received account: %+v", acnt))
 	}
 }

@@ -963,11 +963,6 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		cgrIDVal.(string) == utils.EmptyString {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaCGRid)
 	}
-	_, hasInterimUsage := cch[utils.MetaInterimUsage]
-	_, hasTotalUsage := cch[utils.MetaTotalUsage]
-	if !hasInterimUsage && !hasTotalUsage { // make sure that we know what to charge
-		return nil, utils.NewErrMandatoryIeMissing(utils.MetaInterimUsage + "|" + utils.MetaTotalUsage)
-	}
 	if s = sS.getActivateSession(cch[utils.MetaCGRid].(string)); s == nil {
 		if s, err = sS.newSessionOutEvent(ctx, cch[utils.MetaCGRid].(string), cgrEv, clientConnID); err != nil {
 			return
@@ -981,11 +976,13 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		interimConsumed, _ = utils.IfaceAsDecimal(iCsmd)
 	}
 	var interimUsage *utils.Decimal
-	if hasInterimUsage {
-		interimUsage, _ = utils.IfaceAsDecimal(cch[utils.MetaInterimUsage])
+	if iU, has := cch[utils.MetaInterimUsage]; has {
+		interimUsage, _ = utils.IfaceAsDecimal(iU)
 	}
 	var totalUsage *utils.Decimal
-	totalUsage, _ = utils.IfaceAsDecimal(cch[utils.MetaTotalUsage])
+	if tU, has := cch[utils.MetaTotalUsage]; has {
+		totalUsage, _ = utils.IfaceAsDecimal(tU)
+	}
 	for _, sr := range s.sRuns { // FixMe: pass this from outside, so we can select individual debits per SRun
 		if err = sr.updateUsages(interimConsumed, interimUsage, totalUsage); err != nil {
 			return
@@ -1001,13 +998,44 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 	defer s.lk.Unlock()
 	s.stopSTerminator()
 	for _, sRun := range s.sRuns {
-		for i, eC := range sRun.Charges {
+
+		for i, eC := range sRun.Charges { // Unify the charges into one EventCharges
 			if i == 0 {
 				sRun.CGREvent.APIOpts[utils.MetaAccountsCost] = eC
 			} else {
 				sRun.CGREvent.APIOpts[utils.MetaAccountsCost].(*utils.EventCharges).Merge(eC)
 			}
-			sRun.UsageAdjustment = nil
+		}
+		if sRun.UsageAdjustment != nil && sRun.UsageAdjustment.Compare(utils.NewDecimal(0, 0)) != 0 {
+			var conns []string
+			if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts,
+				s.OriginCGREvent.Tenant, s.OriginCGREvent.AsDataProvider(), nil, sS.fltrS); err != nil {
+				return
+			}
+			if len(conns) == 0 {
+				return utils.NewErrNotConnected(utils.AccountS)
+			}
+			eC := sRun.CGREvent.APIOpts[utils.MetaAccountsCost].(*utils.EventCharges)
+			switch sRun.UsageAdjustment.Compare(utils.NewDecimal(0, 0)) {
+			case 1: // refund needs to be performed
+				var rfndEC *utils.EventCharges
+				if rfndEC, err = eC.Truncate(utils.AbsoluteDecimal(sRun.UsageAdjustment)); err != nil {
+					return
+				}
+				var ign string
+				if err = sS.connMgr.Call(ctx, conns,
+					utils.AccountSv1RefundCharges,
+					&utils.APIEventCharges{Tenant: sRun.CGREvent.Tenant, EventCharges: rfndEC}, &ign); err != nil {
+					return
+				}
+			case -1: // debit more
+				sRun.CGREvent.APIOpts[utils.MetaUsage] = sRun.UsageAdjustment
+				var acntCost *utils.EventCharges
+				if acntCost, err = sS.accountSDebitEvent(ctx, sRun.CGREvent, s); err != nil {
+					return
+				}
+				sRun.CGREvent.APIOpts[utils.MetaAccountsCost].(*utils.EventCharges).Merge(acntCost)
+			}
 		}
 	}
 	sS.unregisterSession(s.ID, false)
@@ -1072,6 +1100,9 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 
 // accountsMaxAbstracts will query the AccountS cost for Event
 func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
+	if _, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {
+		return nil, utils.NewErrMandatoryIeMissing(utils.MetaUsage)
+	}
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
@@ -1109,6 +1140,9 @@ func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (*uti
 // accountSDebitEvent will debit the abstracts for the provided event
 // if session is provided, it will try to debit first out of reserved balance
 func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent, s *Session) (eEc *utils.EventCharges, err error) {
+	if _, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {
+		return nil, utils.NewErrMandatoryIeMissing(utils.MetaUsage)
+	}
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaAccounts,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
