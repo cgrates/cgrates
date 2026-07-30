@@ -1311,7 +1311,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			}
 			if s != nil {
 				s.lk.Lock()
-				s.sRuns[runID].Charges = append(s.sRuns[runID].Charges, acntCost)
+				if s.sRuns[runID].Charges == nil {
+					s.sRuns[runID].Charges = acntCost
+				} else {
+					s.sRuns[runID].Charges.Merge(acntCost)
+				}
 				s.lk.Unlock()
 			}
 			acntDbt := acntCost.Abstracts
@@ -1326,7 +1330,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
 				cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
 			}
-
 		}
 
 	}

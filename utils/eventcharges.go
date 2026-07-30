@@ -130,6 +130,9 @@ func (ce *ChargeEntry) FieldAsInterface(fldPath []string) (_ any, err error) {
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
 	//ec.SyncIDs(eCs...) // so we can compare properly
 	for _, nEc := range eCs {
+		if nEc == nil {
+			continue // nothing to merge
+		}
 		ec.Abstracts = SumDecimal(ec.Abstracts, nEc.Abstracts)
 		ec.Concretes = SumDecimal(ec.Concretes, nEc.Concretes)
 		ec.appendChargeEntry(nEc.Charges...)

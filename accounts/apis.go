@@ -171,6 +171,9 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 
 // V1RefundCharges will refund charges recorded inside EventCharges
 func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+	if args.EventCharges == nil {
+		return utils.NewErrMandatoryIeMissing(utils.CacheEventCharges)
+	}
 	if err = aS.refundCharges(ctx, args.Tenant, args.EventCharges); err != nil {
 		return
 	}

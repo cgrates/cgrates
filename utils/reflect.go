@@ -143,6 +143,9 @@ func IfaceAsDecimal(itm any) (d *Decimal, err error) {
 
 func IfaceAsDuration(itm any) (d time.Duration, err error) {
 	switch it := itm.(type) {
+	case *Decimal:
+		usg, _ := itm.(*Decimal).Duration()
+		return usg, nil
 	case time.Duration:
 		return it, nil
 	case int: // check every int type

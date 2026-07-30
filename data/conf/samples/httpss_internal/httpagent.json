@@ -22,7 +22,7 @@
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptUsage", "path": "*opts.*usage", "type": "*constant",
-						"value": "1000000"}, // auth 1GB
+						"value": "1000"}, // auth 1GB
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.IMSI", "type": "*variable",
@@ -48,7 +48,7 @@
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
-						"value": "50000"}, // auth 50MB
+						"value": "50"}, // auth 50MB
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
 						"value": "~*req.sessionID", "mandatory": true},
 					{"tag": "Account", "path": "*cgreq.IMSI", "type": "*variable",
@@ -74,7 +74,7 @@
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
-						"value": "50000"}, // auth 50MB
+						"value": "50"}, // auth 50MB
 					{"tag": "OptPreviousUsage", "filters": ["*notempty:~*req.usedUnits:"],
 					    "path": "*opts.*interimConsumed", "type": "*variable",
 						"value": "~*req.usedUnits"}, // confirmedConsumed
