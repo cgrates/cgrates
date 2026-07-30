@@ -24,6 +24,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -812,5 +814,145 @@ func TestSessionUpdateSRuns(t *testing.T) {
 	session2.updateSRuns(updEv, utils.StringSet{})
 	if session2.SRuns[0].CGREvent.Event["Destination"] != "3001" {
 		t.Errorf("Expected Destination to remain '3001' when alterableFields is empty, got %v", session2.SRuns[0].CGREvent.Event["Destination"])
+	}
+}
+
+func TestSessionSGetSessionsFromOriginIDs(t *testing.T) {
+	s1 := &Session{ID: "s1"}
+	s2 := &Session{ID: "s2"}
+	s3 := &Session{ID: "s3"}
+
+	ss := &SessionS{
+		aSessions: map[string]*Session{
+			"origin1": s1,
+			"origin2": s2,
+		},
+		pSessions: map[string]*Session{
+			"porigin1": s3,
+		},
+	}
+
+	t.Run("get all active sessions", func(t *testing.T) {
+		got := ss.getSessionsFromOriginIDs(false)
+
+		if len(got) != 2 {
+			t.Fatalf("expected 2 sessions, got %d", len(got))
+		}
+
+		if got[0] != s1 && got[1] != s1 {
+			t.Errorf("expected s1 in result")
+		}
+		if got[0] != s2 && got[1] != s2 {
+			t.Errorf("expected s2 in result")
+		}
+	})
+
+	t.Run("get all passive sessions", func(t *testing.T) {
+		got := ss.getSessionsFromOriginIDs(true)
+
+		if len(got) != 1 {
+			t.Fatalf("expected 1 session, got %d", len(got))
+		}
+
+		if got[0] != s3 {
+			t.Errorf("expected s3")
+		}
+	})
+
+	t.Run("get sessions by origin ids", func(t *testing.T) {
+		got := ss.getSessionsFromOriginIDs(false, "origin2", "origin1")
+
+		if len(got) != 2 {
+			t.Fatalf("expected 2 sessions, got %d", len(got))
+		}
+
+		if got[0] != s2 {
+			t.Errorf("expected s2 at index 0")
+		}
+
+		if got[1] != s1 {
+			t.Errorf("expected s1 at index 1")
+		}
+	})
+
+	t.Run("unknown origin id returns nil", func(t *testing.T) {
+		got := ss.getSessionsFromOriginIDs(false, "missing")
+
+		if len(got) != 1 {
+			t.Fatalf("expected 1 result")
+		}
+
+		if got[0] != nil {
+			t.Errorf("expected nil for unknown originID")
+		}
+	})
+}
+
+func TestSessionSRelocateSession(t *testing.T) {
+	oldSID := "oldSID"
+	newSID := "newSID"
+
+	cfg := config.NewDefaultCGRConfig()
+
+	s := &Session{
+		ID: oldSID,
+		SRuns: []*SRun{
+			{
+				ID: "run1",
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaCGRid: oldSID,
+					},
+				},
+			},
+		},
+	}
+
+	ss := &SessionS{
+		cfg: cfg,
+		aSessions: map[string]*Session{
+			oldSID: s,
+		},
+		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
+		aSessionsRIdx: make(map[string][]*riFieldNameVal),
+	}
+
+	got := ss.relocateSession(context.Background(), oldSID, newSID)
+
+	if got == nil {
+		t.Fatal("expected relocated session, got nil")
+	}
+
+	if got.ID != newSID {
+		t.Errorf("expected ID %s, got %s", newSID, got.ID)
+	}
+
+	if _, ok := ss.aSessions[oldSID]; ok {
+		t.Errorf("old session ID still exists")
+	}
+
+	if _, ok := ss.aSessions[newSID]; !ok {
+		t.Errorf("new session ID does not exist")
+	}
+
+	if got.SRuns[0].CGREvent.APIOpts[utils.MetaCGRid] != newSID {
+		t.Errorf("expected MetaCGRid %s, got %v",
+			newSID,
+			got.SRuns[0].CGREvent.APIOpts[utils.MetaCGRid])
+	}
+}
+
+func TestSessionSRelocateSessionNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+
+	ss := &SessionS{
+		cfg:       cfg,
+		aSessions: map[string]*Session{},
+	}
+
+	got := ss.relocateSession(context.Background(), "missingSID", "newSID")
+
+	if got != nil {
+		t.Errorf("expected nil session, got %v", got)
 	}
 }
