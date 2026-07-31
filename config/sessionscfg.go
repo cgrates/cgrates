@@ -74,6 +74,8 @@ type SessionsOpts struct {
 	Stats                  []*DynamicBoolOpt
 	Thresholds             []*DynamicBoolOpt
 	Authorize              []*DynamicBoolOpt
+	Debit                  []*DynamicBoolOpt
+	Refund                 []*DynamicBoolOpt
 	Initiate               []*DynamicBoolOpt
 	Update                 []*DynamicBoolOpt
 	Terminate              []*DynamicBoolOpt
@@ -114,6 +116,7 @@ type SessionsOpts struct {
 	AccountsUpdate         []*DynamicBoolOpt
 	AccountsTerminate      []*DynamicBoolOpt
 	AccountsDebit          []*DynamicBoolOpt
+	AccountsRefund         []*DynamicBoolOpt
 	Session                []*DynamicBoolOpt
 	AutoChargeInterval     []*DynamicDurationOpt
 	EEs                    []*DynamicBoolOpt

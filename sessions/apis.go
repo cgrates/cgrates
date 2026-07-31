@@ -1182,6 +1182,36 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cchEv[utils.MetaAuthorize] = auth
 		}
 
+		// Refund
+		if rfnd, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
+			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Refund,
+			utils.MetaRefund); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaRefund))
+		} else {
+			cchEv[utils.MetaRefund] = rfnd
+		}
+
+		// Debit
+		if debit, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(),
+			cchEv, sS.fltrS, sS.cfg.SessionSCfg().Opts.Debit,
+			utils.MetaDebit); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaDebit))
+		} else {
+			cchEv[utils.MetaDebit] = debit
+		}
+
 		// IPs Authorization
 		if ipsAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAuthorize,
@@ -1283,6 +1313,39 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			}
 
 		}
+
+		// AccountsRefund
+		if acntsRfndBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsRefund,
+			utils.MetaAccountsRefundCfg); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaAccountsRefundCfg))
+		} else {
+			cchEv[utils.MetaAccountsRefundCfg] = acntsRfndBool
+		}
+		if utils.OptAsBool(cchEv, utils.MetaRefund) ||
+			utils.OptAsBool(cchEv, utils.MetaAccountsRefundCfg) {
+			rfndCharges, has := cgrEv.APIOpts[utils.MetaAccountsCost]
+			if !has {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Missing <%s> processing event: %+v for refund",
+						utils.SessionS, utils.MetaAccountsCost, cgrEv))
+			}
+			if errRfnd := sS.accountSRefundCharges(ctx, rfndCharges.(*utils.EventCharges), cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return errRfnd
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+						utils.SessionS, errRfnd.Error(), cgrEv, utils.MetaRefund))
+			}
+		}
 		// AccountS Debit
 		if acntsDebitBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AccountsDebit,
@@ -1298,7 +1361,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cchEv[utils.MetaAccountsDebitCfg] = acntsDebitBool
 		}
 		if utils.OptAsBool(cchEv, utils.MetaAccountsDebitCfg) ||
-			(utils.OptAsBool(cchEv, utils.MetaAccounts) && !utils.OptAsBool(cchEv, utils.MetaAuthorize)) {
+			(utils.OptAsBool(cchEv, utils.MetaAccounts) && utils.OptAsBool(cchEv, utils.MetaDebit)) {
 			var acntCost *utils.EventCharges
 			if acntCost, err = sS.accountSDebitEvent(ctx, cgrEv, s); err != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {

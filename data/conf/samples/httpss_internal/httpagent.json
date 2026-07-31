@@ -47,6 +47,8 @@
 						"value": "true"},
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
 						"value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant",
+						"value": "true"},
 					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
 						"value": "50"}, // auth 50MB
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable",
@@ -72,6 +74,8 @@
 					{"tag": "OptSession", "path": "*opts.*session", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptInterimUsage", "path": "*opts.*interimUsage", "type": "*constant",
 						"value": "50"}, // auth 50MB
@@ -104,6 +108,8 @@
 					{"tag": "OptSession", "path": "*opts.*session", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant",
+						"value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant",
 						"value": "true"},
 					{"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant",
 						"value": "true"},
