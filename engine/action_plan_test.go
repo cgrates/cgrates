@@ -338,6 +338,19 @@ func TestActionTimingGetNextStartTimesMonthlyEstimated(t *testing.T) {
 		expected time.Time
 	}{
 		{
+			name: "*recurring",
+			t1:   time.Date(2020, 2, 7, 14, 25, 0, 0, time.UTC),
+			at: &ActionTiming{
+				Timing: &RateInterval{
+					Timing: &RITiming{
+						ID:        "*recurring+720h",
+						StartTime: "*recurring+720h",
+					},
+				},
+			},
+			expected: time.Date(2020, 3, 8, 14, 25, 0, 0, time.UTC),
+		},
+		{
 			name: "February 7 to February 29",
 			t1:   time.Date(2020, 2, 7, 14, 25, 0, 0, time.UTC),
 			at: &ActionTiming{

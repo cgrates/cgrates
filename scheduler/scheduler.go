@@ -110,7 +110,9 @@ func (s *Scheduler) Loop() {
 				s.queue = s.queue[1:]
 			} else {
 				a0.ResetStartTimeCache()
-				now = time.Now().Add(time.Second)
+				if !strings.HasPrefix(a0.Timing.Timing.StartTime, utils.MetaRecurring) {
+					now = time.Now().Add(time.Second)
+				}
 				start = a0.GetNextStartTime(now)
 				if start.Before(now) {
 					s.queue = s.queue[1:]

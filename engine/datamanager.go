@@ -1822,7 +1822,7 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 	}
 	// Check if time strings can be split in a time format before storing in db
 	if t.StartTime != utils.EmptyString && t.StartTime != utils.MetaASAP &&
-		!strings.HasPrefix(t.StartTime, utils.PlusChar) && !utils.IsTimeFormated(t.StartTime) {
+		!strings.HasPrefix(t.StartTime, utils.PlusChar) && !strings.HasPrefix(t.StartTime, utils.MetaRecurring+utils.PlusChar) && !utils.IsTimeFormated(t.StartTime) {
 		return utils.ErrInvalidTime(t.StartTime)
 	}
 	if t.EndTime != utils.EmptyString && t.EndTime != utils.MetaASAP && !utils.IsTimeFormated(t.EndTime) {

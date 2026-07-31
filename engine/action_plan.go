@@ -131,13 +131,22 @@ func (at *ActionTiming) GetNextStartTime(refTime time.Time) time.Time {
 	if !at.stCache.IsZero() {
 		return at.stCache
 	}
-	// Put action schedule time in stCache for 1 time actions
-	if at.Timing != nil && at.Timing.Timing != nil &&
-		strings.HasPrefix(at.Timing.Timing.StartTime, utils.PlusChar) {
-		tmStrTmp, _ := time.ParseDuration(strings.TrimPrefix(
-			at.Timing.Timing.StartTime, utils.PlusChar))
-		at.stCache = time.Now().Add(tmStrTmp)
-		return at.stCache
+	// Put action schedule time in stCache for 1 time actions or recurring fixed duration
+	if at.Timing != nil && at.Timing.Timing != nil {
+		var prefix string
+		var tmStrTmp time.Duration
+		if strings.HasPrefix(at.Timing.Timing.StartTime, utils.PlusChar) {
+			prefix = utils.PlusChar
+		} else if strings.HasPrefix(at.Timing.Timing.StartTime, utils.MetaRecurring) {
+			prefix = utils.MetaRecurring + utils.PlusChar
+		}
+		if prefix != "" {
+			tmStrTmp, _ = time.ParseDuration(strings.TrimPrefix(at.Timing.Timing.StartTime, prefix))
+			if tmStrTmp > 0 {
+				at.stCache = refTime.Add(tmStrTmp)
+				return at.stCache
+			}
+		}
 	}
 	rateIvl := at.Timing
 	if rateIvl == nil || rateIvl.Timing == nil {
@@ -229,7 +238,10 @@ func (at *ActionTiming) getActions() (as []*Action, err error) {
 // Execute will execute all actions in an action plan
 // Reports on success/fail via channel if != nil
 func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdSyConn *thresholdSyConn) (err error) {
-	at.ResetStartTimeCache()
+	// dont reset recurring fixed duration action plans starting with "*recurring+"
+	if at.Timing != nil && at.Timing.Timing != nil && !strings.HasPrefix(at.Timing.Timing.StartTime, utils.MetaRecurring) {
+		at.ResetStartTimeCache()
+	}
 	acts, err := at.getActions()
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("Failed to get actions for %s: %s", at.ActionsID, err))
@@ -463,6 +475,17 @@ func (attr *AttrActionPlan) GetRITiming(dm *DataManager) (timing *RITiming, err 
 func checkDefaultTiming(tStr string) (rTm *RITiming, isDefault bool) {
 	currentTime := time.Now()
 	fmtTime := currentTime.Format("15:04:05")
+	if strings.HasPrefix(tStr, utils.MetaRecurring+utils.PlusChar) {
+		return &RITiming{
+			ID:        tStr,
+			Years:     utils.Years{},
+			Months:    utils.Months{},
+			MonthDays: utils.MonthDays{},
+			WeekDays:  utils.WeekDays{},
+			StartTime: tStr,
+			EndTime:   "",
+		}, true
+	}
 	switch tStr {
 	case utils.MetaEveryMinute:
 		return &RITiming{
@@ -550,7 +573,7 @@ func checkDefaultTiming(tStr string) (rTm *RITiming, isDefault bool) {
 
 func verifyFormat(tStr string) bool {
 	if tStr == utils.EmptyString || tStr == utils.MetaASAP ||
-		strings.HasPrefix(tStr, utils.PlusChar) {
+		strings.HasPrefix(tStr, utils.PlusChar) || strings.HasPrefix(tStr, utils.MetaRecurring+utils.PlusChar) {
 		return true
 	}
 
