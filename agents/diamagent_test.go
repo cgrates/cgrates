@@ -24,7 +24,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -105,7 +104,7 @@ func TestProcessRequest(t *testing.T) {
 				Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 			{Tag: "GrantedUnits",
 				Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-				Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep),
+				Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage.*primary{*durationSeconds}", utils.InfieldSep),
 				Mandatory: true},
 		},
 	}
@@ -125,11 +124,12 @@ func TestProcessRequest(t *testing.T) {
 		utils.RemoteHost:  utils.NewLeafNode(utils.LocalAddr().String()),
 	}}
 
+	expAPIOpts := map[string]any{}
 	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ any) error{
 		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ any) error {
 			return nil
 		},
-		utils.SessionSv1AuthorizeEvent: func(_ *context.Context, arg, rply any) error {
+		utils.SessionSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -150,302 +150,23 @@ func TestProcessRequest(t *testing.T) {
 					"ToR":         "*voice",
 					"Usage":       "10s",
 				},
-				APIOpts: map[string]any{
-					utils.MetaAccounts:  true,
-					utils.MetaAuthorize: true,
-				},
+				APIOpts: expAPIOpts,
 			}
 			if !reflect.DeepEqual(expargs, arg) {
 				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
 			}
-			prply, can := rply.(*sessions.V1AuthorizeReply)
+			prply, can := rply.(*sessions.V1ProcessEventReply)
 			if !can {
 				t.Errorf("Wrong argument type : %T", rply)
 				return nil
 			}
-			maxUsage := utils.NewDecimalFromFloat64(10)
-			*prply = sessions.V1AuthorizeReply{
-				MaxUsage: maxUsage,
-			}
-			return nil
-		},
-		utils.SessionSv1InitiateSession: func(_ *context.Context, arg, rply any) error {
-			var id string
-			if arg == nil {
-				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREvent); !can {
-				t.Errorf("args is not of sessions.V1InitSessionArgs type")
-			} else {
-				id = rargs.ID
-			}
-			expargs := &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     id,
-				Event: map[string]any{
-					"Account":     "1001",
-					"Category":    "call",
-					"Destination": "1003",
-					"OriginHost":  "local",
-					"OriginID":    "123456",
-					"ToR":         "*voice",
-					"Usage":       "10s",
-				},
-				APIOpts: map[string]any{
-					utils.MetaAttributes: true,
-					utils.MetaInitiate:   true,
-				},
-			}
-			if !reflect.DeepEqual(expargs, arg) {
-				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
-			}
-			prply, can := rply.(*sessions.V1InitSessionReply)
-			if !can {
-				t.Errorf("Wrong argument type : %T", rply)
-				return nil
-			}
-			*prply = sessions.V1InitSessionReply{
-				Attributes: &attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
-						{
-							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
-							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-						},
-					},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]any{
-							"Account":       "1001",
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
-						},
-						APIOpts: map[string]any{
-							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-						},
-					},
-				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
-			}
-			return nil
-		},
-		utils.SessionSv1UpdateSession: func(_ *context.Context, arg, rply any) error {
-			var id string
-			if arg == nil {
-				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREvent); !can {
-				t.Errorf("args is not of sessions.V1UpdateSessionArgs type")
-			} else {
-				id = rargs.ID
-			}
-			expargs := &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     id,
-				Event: map[string]any{
-					"Account":     "1001",
-					"Category":    "call",
-					"Destination": "1003",
-					"OriginHost":  "local",
-					"OriginID":    "123456",
-					"ToR":         "*voice",
-					"Usage":       "10s",
-				},
-				APIOpts: map[string]any{
-					utils.MetaAttributes: true,
-					utils.MetaUpdate:     true,
-				},
-			}
-			if !reflect.DeepEqual(expargs, arg) {
-				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
-			}
-			prply, can := rply.(*sessions.V1UpdateSessionReply)
-			if !can {
-				t.Errorf("Wrong argument type : %T", rply)
-				return nil
-			}
-			*prply = sessions.V1UpdateSessionReply{
-				Attributes: &attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
-						{
-							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
-							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-						},
-					},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]any{
-							"Account": "1001",
-
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
-						},
-						APIOpts: map[string]any{
-							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-						},
-					},
-				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
-			}
-			return nil
-		},
-		utils.SessionSv1ProcessCDR: func(_ *context.Context, arg, rply any) error {
-			var id string
-			if arg == nil {
-				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREvent); !can {
-				t.Errorf("args is not of utils.CGREventWithOpts type")
-			} else {
-				id = rargs.ID
-			}
-			expargs := &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     id,
-				Event: map[string]any{
-					"Account":     "1001",
-					"Category":    "call",
-					"Destination": "1003",
-					"OriginHost":  "local",
-					"OriginID":    "123456",
-					"ToR":         "*voice",
-					"Usage":       "10s",
-				},
-				APIOpts: map[string]any{
-					utils.MetaTerminate: true,
-				},
-			}
-			if !reflect.DeepEqual(expargs, arg) {
-				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
-			}
-			prply, can := rply.(*string)
-			if !can {
-				t.Errorf("Wrong argument type : %T", rply)
-				return nil
-			}
-			*prply = utils.OK
-			return nil
-		},
-		utils.SessionSv1TerminateSession: func(_ *context.Context, arg, rply any) error {
-			var id string
-			if arg == nil {
-				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREvent); !can {
-				t.Errorf("args is not of sessions.V1TerminateSessionArgs type")
-			} else {
-				id = rargs.ID
-			}
-			expargs := &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     id,
-				Event: map[string]any{
-					"Account":     "1001",
-					"Category":    "call",
-					"Destination": "1003",
-					"OriginHost":  "local",
-					"OriginID":    "123456",
-					"ToR":         "*voice",
-					"Usage":       "10s",
-				},
-				APIOpts: map[string]any{
-					utils.MetaTerminate: true,
-				},
-			}
-			if !reflect.DeepEqual(expargs, arg) {
-				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
-			}
-			prply, can := rply.(*string)
-			if !can {
-				t.Errorf("Wrong argument type : %T", rply)
-				return nil
-			}
-			*prply = utils.OK
-			return nil
-		},
-		utils.SessionSv1ProcessMessage: func(_ *context.Context, arg, rply any) error {
-			var id string
-			if arg == nil {
-				t.Errorf("args is nil")
-			} else if rargs, can := arg.(*utils.CGREvent); !can {
-				t.Errorf("args is not of sessions.V1ProcessMessageArgs type")
-			} else {
-				id = rargs.ID
-			}
-			expargs := &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     id,
-				Event: map[string]any{
-					"Account":     "1001",
-					"Category":    "call",
-					"Destination": "1003",
-					"OriginHost":  "local",
-					"OriginID":    "123456",
-					"ToR":         "*voice",
-					"Usage":       "10s",
-				},
-				APIOpts: map[string]any{
-					utils.MetaAttributes: "true",
-					utils.OptsSesMessage: "true",
-				},
-			}
-			if !reflect.DeepEqual(expargs, arg) {
-				t.Errorf("Expected:%s ,received: %s", utils.ToJSON(expargs), utils.ToJSON(arg))
-			}
-			prply, can := rply.(*sessions.V1ProcessMessageReply)
-			if !can {
-				t.Errorf("Wrong argument type : %T", rply)
-				return nil
-			}
-			*prply = sessions.V1ProcessMessageReply{
-				Attributes: &attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
-						{
-							MatchedProfileID: "ATTR_1001_SESSIONAUTH",
-							Fields:           []string{"*req.Password", "*req.PaypalAccount", "*req.RequestType", "*req.LCRProfile"},
-						},
-					},
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "e7d35bf",
-						Event: map[string]any{
-							"Account": "1001",
-
-							"Category":      "call",
-							"Destination":   "1003",
-							"LCRProfile":    "premium_cli",
-							"OriginHost":    "local",
-							"OriginID":      "123456",
-							"Password":      "CGRateS.org",
-							"PaypalAccount": "cgrates@paypal.com",
-							"RequestType":   "*prepaid",
-							"ToR":           "*voice",
-							"Usage":         "10s",
-						},
-						APIOpts: map[string]any{
-							"*originID": "1133dc80896edf5049b46aa911cb9085eeb27f4c",
-						},
-					},
-				},
-				MaxUsage: utils.DurationPointer(10 * time.Second),
+			*prply = sessions.V1ProcessEventReply{
+				AccountSUsage: map[string]time.Duration{utils.MetaPrimary: 10 * time.Second},
 			}
 			return nil
 		},
 	}}
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaAuthorize, utils.MetaAccounts})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
@@ -469,7 +190,7 @@ func TestProcessRequest(t *testing.T) {
 			Value: utils.NewRSRParsersMustCompile("2001", utils.InfieldSep)},
 		{Tag: "GrantedUnits",
 			Type: utils.MetaVariable, Path: utils.MetaRep + utils.NestingSep + "Granted-Service-Unit.CC-Time",
-			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage{*durationSeconds}", utils.InfieldSep),
+			Value:     utils.NewRSRParsersMustCompile("~*cgrep.MaxUsage.*primary{*durationSeconds}", utils.InfieldSep),
 			Mandatory: true},
 	}
 	for _, v := range tmpls {
@@ -486,10 +207,10 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaInitiate, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
 
 	tmpls2 := []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaInitiate,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -506,6 +227,10 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
+	expAPIOpts = map[string]any{
+		utils.MetaAttributes: "true",
+		utils.MetaSession:    "true",
+	}
 	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
@@ -515,10 +240,10 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaUpdate, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
 
 	tmpls = []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaUpdate,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -535,6 +260,10 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
+	expAPIOpts = map[string]any{
+		utils.MetaAttributes: "true",
+		utils.MetaSession:    "true",
+	}
 	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
@@ -543,7 +272,7 @@ func TestProcessRequest(t *testing.T) {
 	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaTerminate, utils.MetaAccounts, utils.MetaAttributes, utils.MetaCDRs})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaTerminate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -575,9 +304,11 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaMessage, utils.MetaAccounts, utils.MetaAttributes})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
 	tmpls = []*config.FCTemplate{
-		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.OptsSesMessage,
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
+			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
+		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaTerminate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaAttributes,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
