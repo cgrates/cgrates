@@ -512,6 +512,7 @@ const (
 	DispatcherHosts          = "DispatcherHosts"
 	MetaEveryMinute          = "*every_minute"
 	MetaHourly               = "*hourly"
+	MetaRecurring            = "*recurring"
 	ID                       = "ID"
 	UniqueID                 = "UniqueID"
 	Address                  = "Address"
