@@ -230,7 +230,7 @@ func (ec *EventCharges) Truncate(atIndx *Decimal) (tEC *EventCharges, err error)
 			tEC.Charges[0].CompressFactor = 1
 			tEC.Charges[0].ChargingID = newAcntingID // ad new units
 		} else { // prepend a new charging
-			tEC.Charges = append([]*ChargeEntry{&ChargeEntry{ChargingID: newAcntingID, CompressFactor: 1}}, tEC.Charges...)
+			tEC.Charges = append([]*ChargeEntry{{ChargingID: newAcntingID, CompressFactor: 1}}, tEC.Charges...)
 		}
 	}
 	ec.Cleanup()
