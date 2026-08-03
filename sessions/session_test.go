@@ -799,3 +799,249 @@ func TestSessionUpdateSRuns(t *testing.T) {
 		t.Errorf("Expected Destination to remain '3001' when alterableFields is empty, got %v", session2.SRuns[0].CGREvent.Event["Destination"])
 	}
 }
+
+func TestSessionAsExternalSessions(t *testing.T) {
+	t.Run("no sRuns", func(t *testing.T) {
+		session := &Session{ID: "session1"}
+		exp := []*ExternalSession{}
+		rcv := session.AsExternalSessions("UTC", "node1")
+		if !reflect.DeepEqual(rcv, exp) {
+			t.Errorf("Expected %v external sessions, got: %v", exp, rcv)
+		}
+	})
+	t.Run("SRun only", func(t *testing.T) {
+		session := &Session{
+			ID: "sessionID",
+			SRuns: []*SRun{
+				{
+					ID:              "run1",
+					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event1"},
+					UsageAdjustment: utils.NewDecimal(5, 0),
+					InterimUsage:    utils.NewDecimal(30, 0),
+					TotalUsage:      utils.NewDecimal(60, 0),
+					Charges:         utils.NewEventCharges(),
+					lclDebit:        utils.NewDecimal(50, 0),
+				},
+				{
+					ID:              "run2",
+					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event2"},
+					UsageAdjustment: utils.NewDecimal(5, 0),
+					InterimUsage:    utils.NewDecimal(20, 0),
+					TotalUsage:      utils.NewDecimal(25, 0),
+					Charges:         utils.NewEventCharges(),
+					lclDebit:        utils.NewDecimal(30, 0),
+				},
+			},
+		}
+		exp := []*ExternalSession{
+			{
+				ID:    "sessionID",
+				RunID: "run1",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+				},
+			},
+			{
+				ID:    "sessionID",
+				RunID: "run2",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event2",
+				},
+			},
+		}
+		rcv := session.AsExternalSessions("UTC", "node1")
+		if len(rcv) != 2 {
+			t.Errorf("Expected 2 external sessions, got %d", len(rcv))
+		}
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected %v, recieved %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+	t.Run("sRuns only", func(t *testing.T) {
+		session := &Session{
+			ID:                 "sessionID",
+			AutoChargeInterval: 10 * time.Second,
+			NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+			sRuns: map[string]*SRun{
+				"run1": {
+					ID:              "runid",
+					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
+					Charges:         utils.NewEventCharges(),
+					UsageAdjustment: utils.NewDecimal(5, 0),
+					InterimUsage:    utils.NewDecimal(30, 0),
+					TotalUsage:      utils.NewDecimal(60, 0),
+					lclDebit:        utils.NewDecimal(30, 0),
+				},
+			},
+		}
+
+		exp := []*ExternalSession{
+			{
+				ID:    "sessionID",
+				RunID: "runid",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event3",
+				},
+				NodeID:             "",
+				UsageAdjustment:    utils.Int64Pointer(5),
+				InterimUsage:       utils.Int64Pointer(30),
+				TotalUsage:         utils.Int64Pointer(60),
+				TotalCost:          0,
+				AutoChargeInterval: 10000000000,
+				NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+				Charges: &utils.EventCharges{
+					Accounting:  map[string]*utils.AccountCharge{},
+					UnitFactors: map[string]*utils.UnitFactor{},
+					Rating:      map[string]*utils.RateSInterval{},
+					Rates:       map[string]*utils.IntervalRate{},
+					Accounts:    map[string]*utils.Account{},
+				},
+			},
+		}
+
+		rcv := session.AsExternalSessions("UTC", "node1")
+		if len(rcv) != 1 {
+			t.Errorf("Expected 1 external sessions, got %d", len(rcv))
+		}
+		if !reflect.DeepEqual(exp, rcv) {
+			t.Errorf("Expected %v, recieved %v", utils.ToJSON(exp), utils.ToJSON(rcv))
+		}
+	})
+
+	t.Run("SRun only, empty parameters", func(t *testing.T) {
+		session := &Session{
+			ID: "sessionID",
+			SRuns: []*SRun{
+				{
+					ID:              "run1",
+					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event1"},
+					UsageAdjustment: utils.NewDecimal(5, 0),
+					InterimUsage:    utils.NewDecimal(30, 0),
+					TotalUsage:      utils.NewDecimal(60, 0),
+					Charges:         utils.NewEventCharges(),
+					lclDebit:        utils.NewDecimal(50, 0),
+				},
+			},
+		}
+		expect := []*ExternalSession{
+			{
+				ID:    "sessionID",
+				RunID: "run1",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+				},
+			},
+		}
+		rcv := session.AsExternalSessions(utils.EmptyString, utils.EmptyString)
+		if len(rcv) != 1 {
+			t.Errorf("Expected 1 external sessions, got %d", len(rcv))
+		}
+		if !reflect.DeepEqual(expect, rcv) {
+			t.Errorf("Expected %v, recieved %v", utils.ToJSON(expect), utils.ToJSON(rcv))
+		}
+		for _, s := range rcv {
+			if s.NodeID != utils.EmptyString {
+				t.Errorf("Expected NodeID to be empty, recieved: %v", s.NodeID)
+			}
+		}
+	})
+	t.Run("sRuns only, empty parameters", func(t *testing.T) {
+		session := &Session{
+			ID:                 "sessionID",
+			AutoChargeInterval: 10 * time.Second,
+			NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+			sRuns: map[string]*SRun{
+				"run1": {
+					ID:              "runid",
+					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
+					Charges:         utils.NewEventCharges(),
+					UsageAdjustment: utils.NewDecimal(5, 0),
+					InterimUsage:    utils.NewDecimal(30, 0),
+					TotalUsage:      utils.NewDecimal(60, 0),
+					lclDebit:        utils.NewDecimal(30, 0),
+				},
+			},
+		}
+
+		expect := []*ExternalSession{
+			{
+				ID:    "sessionID",
+				RunID: "runid",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event3",
+				},
+				NodeID:             "",
+				UsageAdjustment:    utils.Int64Pointer(5),
+				InterimUsage:       utils.Int64Pointer(30),
+				TotalUsage:         utils.Int64Pointer(60),
+				TotalCost:          0,
+				AutoChargeInterval: 10000000000,
+				NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+				Charges: &utils.EventCharges{
+					Accounting:  map[string]*utils.AccountCharge{},
+					UnitFactors: map[string]*utils.UnitFactor{},
+					Rating:      map[string]*utils.RateSInterval{},
+					Rates:       map[string]*utils.IntervalRate{},
+					Accounts:    map[string]*utils.Account{},
+				},
+			},
+		}
+
+		rcv := session.AsExternalSessions(utils.EmptyString, utils.EmptyString)
+		if len(rcv) != 1 {
+			t.Errorf("Expected 1 external sessions, got %d", len(rcv))
+		}
+		if !reflect.DeepEqual(expect, rcv) {
+			t.Errorf("Expected %v, recieved %v", utils.ToJSON(expect), utils.ToJSON(rcv))
+		}
+		for _, s := range rcv {
+			if s.NodeID != utils.EmptyString {
+				t.Errorf("Expected NodeID to be empty, recieved: %v", s.NodeID)
+			}
+		}
+	})
+}
+
+func TestAsCGREventsMap(t *testing.T) {
+	session := &Session{
+		sRuns: map[string]*SRun{
+			"run1": {
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event1",
+				},
+			},
+			"run2": {
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "event2",
+				},
+			},
+		},
+	}
+
+	want := map[string]*utils.CGREvent{
+		"run1": {
+			Tenant: "cgrates.org",
+			ID:     "event1",
+		},
+		"run2": {
+			Tenant: "cgrates.org",
+			ID:     "event2",
+		},
+	}
+	cgrEvs := session.asCGREventsMap()
+
+	if len(cgrEvs) != 2 {
+		t.Errorf("Expected 2 CGREvents, got %d", len(cgrEvs))
+	}
+
+	if !reflect.DeepEqual(cgrEvs, want) {
+		t.Errorf("Expected %v, recieved %v", utils.ToJSON(want), utils.ToJSON(cgrEvs))
+	}
+}
