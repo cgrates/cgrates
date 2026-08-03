@@ -147,7 +147,7 @@ func TestProcessRequest(t *testing.T) {
 				return nil
 			}
 			*prply = sessions.V1ProcessEventReply{
-				AccountSUsage: map[string]time.Duration{utils.MetaPrimary: 10 * time.Second},
+				AccountsUsage: map[string]time.Duration{utils.MetaPrimary: 10 * time.Second},
 			}
 			return nil
 		},
