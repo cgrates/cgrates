@@ -151,6 +151,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 					Value:  "eesid1",
 				},
 			},
+			UR: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  false,
+				},
+			},
 			ForceUsage: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
@@ -441,6 +447,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				{
 					Tenant: "cgrates.net",
 					value:  "eesid1",
+				},
+			},
+			UR: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  false,
 				},
 			},
 			ForceUsage: []*DynamicBoolOpt{
@@ -1149,6 +1161,19 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
 	cfgJSON.Opts.EEs = nil
+
+	/////
+	cfgJSON.Opts.UR = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.UR = nil
 }
 
 func TestSessionSCfgloadFromJsonCfgCase2(t *testing.T) {
@@ -1280,6 +1305,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
 			EEsIDs:                 []*DynamicStringOpt{},
+			UR:                     []*DynamicBoolOpt{},
 			TTLLastUsage: []*DynamicDurationPointerOpt{
 				{
 					value: utils.DurationPointer(1),
@@ -1439,6 +1465,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaAccountsForceUsage:        []*DynamicBoolOpt{},
 			utils.MetaEEs:                       []*DynamicBoolOpt{},
 			utils.MetaEEsIDs:                    []*DynamicStringOpt{},
+			utils.MetaUR:                        []*DynamicBoolOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -1585,6 +1612,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaAccountsForceUsage: []*DynamicBoolOpt{},
 			utils.MetaEEs:                []*DynamicBoolOpt{},
 			utils.MetaEEsIDs:             []*DynamicStringOpt{},
+			utils.MetaUR:                 []*DynamicBoolOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -2992,6 +3020,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  "eesid1",
 			},
 		},
+		UR: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
 		Stats: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
@@ -3229,6 +3263,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  "eesid2",
 			},
 		},
+		UR: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
 		Stats: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
@@ -3464,6 +3504,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			{
 				Tenant: "cgrates.net",
 				Value:  "eesid2",
+			},
+		},
+		UR: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
 			},
 		},
 		Stats: []*DynamicInterfaceOpt{

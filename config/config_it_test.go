@@ -886,6 +886,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
 			EEsIDs:                 []*DynamicStringOpt{},
+			UR:                     []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -989,6 +990,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
 			EEsIDs:                 []*DynamicStringOpt{},
+			UR:                     []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -1090,6 +1092,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			AccountsForceUsage:     []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
 			EEsIDs:                 []*DynamicStringOpt{},
+			UR:                     []*DynamicBoolOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {

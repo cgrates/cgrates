@@ -420,6 +420,13 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.EEsIDs = append(opts, sesOpts.EEsIDs...)
 	}
+	if jsnCfg.UR != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.UR)
+		if err != nil {
+			return err
+		}
+		sesOpts.UR = append(opts, sesOpts.UR...)
+	}
 	return nil
 }
 
@@ -545,6 +552,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaAccountsForceUsage:        scfg.Opts.AccountsForceUsage,
 		utils.MetaEEs:                       scfg.Opts.EEs,
 		utils.MetaEEsIDs:                    scfg.Opts.EEsIDs,
+		utils.MetaUR:                        scfg.Opts.UR,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -620,6 +628,7 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		AccountsForceUsage:     CloneDynamicBoolOpt(o.AccountsForceUsage),
 		EEs:                    CloneDynamicBoolOpt(o.EEs),
 		EEsIDs:                 CloneDynamicStringOpt(o.EEsIDs),
+		UR:                     CloneDynamicBoolOpt(o.UR),
 	}
 }
 
@@ -781,6 +790,7 @@ type SessionsOptsJson struct {
 	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
 	EEs                    []*DynamicInterfaceOpt `json:"*ees"`
 	EEsIDs                 []*DynamicInterfaceOpt `json:"*eesIDs"`
+	UR                     []*DynamicInterfaceOpt `json:"*ur"`
 }
 
 // SessionSJsonCfg config section
@@ -924,6 +934,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicStringOptEqual(v1.EEsIDs, v2.EEsIDs) {
 		d.EEsIDs = DynamicStringToInterfaceOpts(v2.EEsIDs)
+	}
+	if !DynamicBoolOptEqual(v1.UR, v2.UR) {
+		d.UR = BoolToIfaceDynamicOpts(v2.UR)
 	}
 	return d
 }
