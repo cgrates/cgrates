@@ -425,3 +425,140 @@ func TestSessionSv1ProcessEventInterimAccountDebit(t *testing.T) {
 		t.Errorf("expected 60s remaining after interim debits, got: %+v", acnt.Balances["BAL1"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventTerminate(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"BAL1": {
+						ID:      "BAL1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	originID := "OriginIDTerminate"
+
+	t.Run("SessionInitiate", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "initiate1",
+				APIOpts: map[string]any{
+					utils.MetaSession:  true,
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaInitiate: true,
+					utils.MetaUsage:    90 * time.Second,
+					utils.MetaOriginID: originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(initiate): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountSUsage missing *default")
+		}
+		if usage != 90*time.Second {
+			t.Errorf("AccountSUsage[*default] = %v, want 1m30s", usage)
+		}
+	})
+
+	t.Run("SessionTerminate", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "terminate1",
+				APIOpts: map[string]any{
+					utils.MetaSession:   true,
+					utils.MetaAccounts:  true,
+					utils.MetaDebit:     true,
+					utils.MetaTerminate: true,
+					utils.MetaUsage:     40 * time.Second,
+					utils.MetaOriginID:  originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(terminate): %v", err)
+		}
+	})
+
+	var aSessions []*ExternalSession
+	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+		utils.SessionFilter{}, &aSessions); err == nil || err.Error() != utils.NotFoundCaps {
+		t.Errorf("expected session to be closed after terminate, got: %+v, err: %v", aSessions, err)
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else if want := utils.NewDecimalFromFloat64(float64(170 * time.Second)); acnt.Balances["BAL1"].Units.Compare(want) != 0 {
+		t.Errorf("expected 170s remaining after terminate (300s - 90s initiate - 40s terminate), got: %+v", acnt.Balances["BAL1"].Units)
+	}
+}
