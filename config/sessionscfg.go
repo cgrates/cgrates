@@ -210,6 +210,20 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.Thresholds = append(opts, sesOpts.Thresholds...)
 	}
+	if jsnCfg.Debit != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Debit)
+		if err != nil {
+			return err
+		}
+		sesOpts.Debit = append(opts, sesOpts.Debit...)
+	}
+	if jsnCfg.Refund != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Refund)
+		if err != nil {
+			return err
+		}
+		sesOpts.Refund = append(opts, sesOpts.Refund...)
+	}
 	if jsnCfg.Initiate != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Initiate)
 		if err != nil {
@@ -406,6 +420,13 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.AccountsForceUsage = append(opts, sesOpts.AccountsForceUsage...)
 	}
+	if jsnCfg.AccountsDebit != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsDebit)
+		if err != nil {
+			return err
+		}
+		sesOpts.AccountsDebit = append(opts, sesOpts.AccountsDebit...)
+	}
 	if jsnCfg.EEs != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.EEs)
 		if err != nil {
@@ -522,6 +543,8 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaRoutes:                    scfg.Opts.Routes,
 		utils.MetaStats:                     scfg.Opts.Stats,
 		utils.MetaThresholds:                scfg.Opts.Thresholds,
+		utils.MetaDebit:                     scfg.Opts.Debit,
+		utils.MetaRefund:                    scfg.Opts.Refund,
 		utils.MetaInitiate:                  scfg.Opts.Initiate,
 		utils.MetaUpdate:                    scfg.Opts.Update,
 		utils.MetaTerminate:                 scfg.Opts.Terminate,
@@ -550,6 +573,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
 		utils.MetaOriginID:                  scfg.Opts.OriginID,
 		utils.MetaAccountsForceUsage:        scfg.Opts.AccountsForceUsage,
+		utils.MetaAccountsDebitCfg:          scfg.Opts.AccountsDebit,
 		utils.MetaEEs:                       scfg.Opts.EEs,
 		utils.MetaEEsIDs:                    scfg.Opts.EEsIDs,
 		utils.MetaUR:                        scfg.Opts.UR,
@@ -594,6 +618,8 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		Routes:                 CloneDynamicBoolOpt(o.Routes),
 		Stats:                  CloneDynamicBoolOpt(o.Stats),
 		Thresholds:             CloneDynamicBoolOpt(o.Thresholds),
+		Debit:                  CloneDynamicBoolOpt(o.Debit),
+		Refund:                 CloneDynamicBoolOpt(o.Refund),
 		Initiate:               CloneDynamicBoolOpt(o.Initiate),
 		Update:                 CloneDynamicBoolOpt(o.Update),
 		Terminate:              CloneDynamicBoolOpt(o.Terminate),
@@ -760,6 +786,8 @@ type SessionsOptsJson struct {
 	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
 	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
 	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
+	Debit                  []*DynamicInterfaceOpt `json:"*debit"`
+	Refund                 []*DynamicInterfaceOpt `json:"*refund"`
 	Initiate               []*DynamicInterfaceOpt `json:"*initiate"`
 	Update                 []*DynamicInterfaceOpt `json:"*update"`
 	Terminate              []*DynamicInterfaceOpt `json:"*terminate"`
@@ -788,6 +816,7 @@ type SessionsOptsJson struct {
 	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
 	OriginID               []*DynamicInterfaceOpt `json:"*originID"`
 	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
+	AccountsDebit          []*DynamicInterfaceOpt `json:"*accountsDebit"`
 	EEs                    []*DynamicInterfaceOpt `json:"*ees"`
 	EEsIDs                 []*DynamicInterfaceOpt `json:"*eesIDs"`
 	UR                     []*DynamicInterfaceOpt `json:"*ur"`
@@ -844,6 +873,12 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
 		d.Thresholds = BoolToIfaceDynamicOpts(v2.Thresholds)
+	}
+	if !DynamicBoolOptEqual(v1.Debit, v2.Debit) {
+		d.Debit = BoolToIfaceDynamicOpts(v2.Debit)
+	}
+	if !DynamicBoolOptEqual(v1.Refund, v2.Refund) {
+		d.Refund = BoolToIfaceDynamicOpts(v2.Refund)
 	}
 	if !DynamicBoolOptEqual(v1.Initiate, v2.Initiate) {
 		d.Initiate = BoolToIfaceDynamicOpts(v2.Initiate)
@@ -928,6 +963,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.AccountsForceUsage, v2.AccountsForceUsage) {
 		d.AccountsForceUsage = BoolToIfaceDynamicOpts(v2.AccountsForceUsage)
+	}
+	if !DynamicBoolOptEqual(v1.AccountsDebit, v2.AccountsDebit) {
+		d.AccountsDebit = BoolToIfaceDynamicOpts(v2.AccountsDebit)
 	}
 	if !DynamicBoolOptEqual(v1.EEs, v2.EEs) {
 		d.EEs = BoolToIfaceDynamicOpts(v2.EEs)

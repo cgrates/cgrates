@@ -793,6 +793,13 @@ const CGRATES_CFG_JSON = `
 		// 		"value": false
 		// 	}
 		// ],
+		// "*accountsDebit": [
+		// 	{
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
+		// 	}
+		// ],
 		// "*accountsForceUsage": [
 		// 	{
 		// 		"tenant": "*any",
@@ -800,6 +807,20 @@ const CGRATES_CFG_JSON = `
 		// 		"value": ""
 		// 	}
 		// ],		
+		// "*debit": [
+		// 	{
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
+		// 	}
+		// ],
+		// "*refund": [
+		// 	{
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "false"
+		// 	}
+		// ],
 		// "*attributes": [
 		// 	{
 		// 		"tenant": "*any",
@@ -822,6 +843,13 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 		// "*cdrs": [
+		// 	{
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": false
+		// 	}
+		// ],
+		// "*ur": [
 		// 	{
 		// 		"tenant": "*any",
 		// 		"filterIDs": [],

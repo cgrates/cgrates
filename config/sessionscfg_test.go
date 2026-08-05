@@ -163,6 +163,18 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 					Value:  true,
 				},
 			},
+			Debit: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
+			Refund: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.net",
+					Value:  true,
+				},
+			},
 			Initiate: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
@@ -372,8 +384,8 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				{},
 			},
-			AccountsDebit: []*DynamicBoolOpt{{}},
-			Session:       []*DynamicBoolOpt{{}},
+			AccountsDebit: []*DynamicBoolOpt{},
+			Session:       []*DynamicBoolOpt{},
 			InterimUsage:  []*DynamicDecimalOpt{},
 			TotalUsage:    []*DynamicDecimalOpt{},
 			AccountsForceUsage: []*DynamicBoolOpt{
@@ -456,6 +468,18 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 			},
 			ForceUsage: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+			},
+			Debit: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.net",
+					value:  true,
+				},
+			},
+			Refund: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					value:  true,
@@ -916,6 +940,32 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	cfgJSON.Opts.Thresholds = nil
 
 	/////
+	cfgJSON.Opts.Debit = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Debit = nil
+
+	/////
+	cfgJSON.Opts.Refund = []*DynamicInterfaceOpt{
+		{
+			Tenant: "cgrates.org",
+			Value:  utils.DurationPointer(4 * time.Second),
+		},
+	}
+	errExpect = "cannot convert field: 4s to bool"
+	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
+		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
+	}
+	cfgJSON.Opts.Refund = nil
+
+	/////
 	cfgJSON.Opts.Initiate = []*DynamicInterfaceOpt{
 		{
 			Tenant: "cgrates.org",
@@ -1299,10 +1349,12 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			Chargeable:             []*DynamicBoolOpt{{value: SessionsChargeableDftOpt}},
 			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			ForceUsage:             []*DynamicBoolOpt{},
-			AccountsDebit:          []*DynamicBoolOpt{{}},
-			Session:                []*DynamicBoolOpt{{}},
+			AccountsDebit:          []*DynamicBoolOpt{},
+			Session:                []*DynamicBoolOpt{},
 			OriginID:               []*DynamicStringOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
+			Debit:                  []*DynamicBoolOpt{},
+			Refund:                 []*DynamicBoolOpt{},
 			EEs:                    []*DynamicBoolOpt{},
 			EEsIDs:                 []*DynamicStringOpt{},
 			UR:                     []*DynamicBoolOpt{},
@@ -1463,6 +1515,9 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaForceUsageCfg:             []*DynamicBoolOpt{},
 			utils.MetaOriginID:                  []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage:        []*DynamicBoolOpt{},
+			utils.MetaAccountsDebitCfg:          []*DynamicBoolOpt{},
+			utils.MetaDebit:                     []*DynamicBoolOpt{},
+			utils.MetaRefund:                    []*DynamicBoolOpt{},
 			utils.MetaEEs:                       []*DynamicBoolOpt{},
 			utils.MetaEEsIDs:                    []*DynamicStringOpt{},
 			utils.MetaUR:                        []*DynamicBoolOpt{},
@@ -1610,6 +1665,9 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaForceUsageCfg:      []*DynamicBoolOpt{},
 			utils.MetaOriginID:           []*DynamicStringOpt{},
 			utils.MetaAccountsForceUsage: []*DynamicBoolOpt{},
+			utils.MetaAccountsDebitCfg:   []*DynamicBoolOpt{},
+			utils.MetaDebit:              []*DynamicBoolOpt{},
+			utils.MetaRefund:             []*DynamicBoolOpt{},
 			utils.MetaEEs:                []*DynamicBoolOpt{},
 			utils.MetaEEsIDs:             []*DynamicStringOpt{},
 			utils.MetaUR:                 []*DynamicBoolOpt{},
@@ -3008,6 +3066,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  false,
 			},
 		},
+		AccountsDebit: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
 		EEs: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
@@ -3033,6 +3097,18 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		Thresholds: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		Debit: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.org",
+				value:  false,
+			},
+		},
+		Refund: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
 				value:  false,
@@ -3251,6 +3327,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  true,
 			},
 		},
+		AccountsDebit: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
 		EEs: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
@@ -3276,6 +3358,18 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		Thresholds: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		Debit: []*DynamicBoolOpt{
+			{
+				Tenant: "cgrates.net",
+				value:  true,
+			},
+		},
+		Refund: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
 				value:  true,
@@ -3494,6 +3588,12 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				Value:  true,
 			},
 		},
+		AccountsDebit: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
 		EEs: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.net",
@@ -3519,6 +3619,18 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		Thresholds: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Debit: []*DynamicInterfaceOpt{
+			{
+				Tenant: "cgrates.net",
+				Value:  true,
+			},
+		},
+		Refund: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  true,
