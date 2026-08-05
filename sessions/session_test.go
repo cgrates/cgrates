@@ -555,11 +555,22 @@ func TestUpdateSRuns(t *testing.T) {
 		SRuns: []*SRun{
 			{CGREvent: &utils.CGREvent{Event: map[string]any{"ID": "1"}}},
 		},
+		sRuns: map[string]*SRun{
+			"run1": {CGREvent: &utils.CGREvent{Event: map[string]any{"ID": "3"}}},
+		},
 	}
 	updateEvent := engine.MapEvent{"ID": "2", "UID": "101010"}
 	alterableFields := utils.NewStringSet([]string{"ID"})
 	session.updateSRuns(updateEvent, alterableFields)
 	for _, sr := range session.SRuns {
+		if sr.CGREvent.Event["ID"] != "2" {
+			t.Errorf("expected ID to be updated to '2', got %v", sr.CGREvent.Event["ID"])
+		}
+		if _, exists := sr.CGREvent.Event["UID"]; exists {
+			t.Errorf("UID should not exist in event")
+		}
+	}
+	for _, sr := range session.sRuns {
 		if sr.CGREvent.Event["ID"] != "2" {
 			t.Errorf("expected ID to be updated to '2', got %v", sr.CGREvent.Event["ID"])
 		}
@@ -1043,5 +1054,292 @@ func TestAsCGREventsMap(t *testing.T) {
 
 	if !reflect.DeepEqual(cgrEvs, want) {
 		t.Errorf("Expected %v, recieved %v", utils.ToJSON(want), utils.ToJSON(cgrEvs))
+	}
+}
+
+func TestSRunUpdateUsages(t *testing.T) {
+	tests := []struct {
+		name            string
+		interimConsumed *utils.Decimal
+		interimUsage    *utils.Decimal
+		totalUsage      *utils.Decimal
+		sr              *SRun
+		expSRun         *SRun
+	}{
+		{
+			name: "all nil arguments on a new SRun",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+			},
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		{
+			name: "only interimUsage given",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(10, 0),
+			},
+			interimUsage: utils.NewDecimal(30, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(30, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(30, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+		},
+		{
+			name: "interimUsage and TotalUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(30, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+			interimUsage: utils.NewDecimal(20, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(20, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(20, 0),
+				TotalUsage:   utils.NewDecimal(50, 0),
+			},
+		},
+		{
+			name: "iterimConsumed with nil InterimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+			},
+			interimUsage:    utils.NewDecimal(10, 0),
+			interimConsumed: utils.NewDecimal(25, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(10, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(10, 0),
+				TotalUsage:   utils.NewDecimal(10, 0),
+			},
+		},
+		{
+			name: "iterimConsumed same as IterimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(30, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+			interimUsage:    utils.NewDecimal(10, 0),
+			interimConsumed: utils.NewDecimal(30, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(10, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(10, 0),
+				TotalUsage:   utils.NewDecimal(40, 0),
+			},
+		},
+		{
+			name: "interimConsumed lower than the IterimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(30, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+			interimUsage:    utils.NewDecimal(10, 0),
+			interimConsumed: utils.NewDecimal(10, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(0, 0),
+					},
+				},
+				InterimUsage:    utils.NewDecimal(10, 0),
+				UsageAdjustment: utils.NewDecimal(10, 0),
+				TotalUsage:      utils.NewDecimal(20, 0),
+				lclDebit:        utils.NewDecimal(10, 0),
+			},
+		},
+		{
+			name: "iterimConsumed higher than the IterimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(10, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+			interimUsage:    utils.NewDecimal(10, 0),
+			interimConsumed: utils.NewDecimal(30, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(30, 0),
+					},
+				},
+				InterimUsage:    utils.NewDecimal(10, 0),
+				UsageAdjustment: utils.NewDecimal(0, 0),
+				TotalUsage:      utils.NewDecimal(60, 0),
+				lclDebit:        utils.NewDecimal(-20, 0),
+			},
+		},
+		{
+			name: "Only TotalUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				TotalUsage: utils.NewDecimal(10, 0),
+			},
+			totalUsage: utils.NewDecimal(20, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(10, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(10, 0),
+				TotalUsage:   utils.NewDecimal(20, 0),
+			},
+		},
+		{
+			name: "TotalUsage and iterimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				TotalUsage: utils.NewDecimal(10, 0),
+			},
+			totalUsage:   utils.NewDecimal(50, 0),
+			interimUsage: utils.NewDecimal(5, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(45, 0),
+					},
+				},
+				InterimUsage: utils.NewDecimal(45, 0),
+				TotalUsage:   utils.NewDecimal(55, 0),
+			},
+		},
+		{
+			name: "iterimConsumed correction and totalUsage modified after",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				InterimUsage: utils.NewDecimal(30, 0),
+				TotalUsage:   utils.NewDecimal(30, 0),
+			},
+			interimConsumed: utils.NewDecimal(20, 0),
+			totalUsage:      utils.NewDecimal(100, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(70, 0),
+					},
+				},
+				UsageAdjustment: utils.NewDecimal(0, 0),
+				InterimUsage:    utils.NewDecimal(80, 0),
+				TotalUsage:      utils.NewDecimal(100, 0),
+				lclDebit:        utils.NewDecimal(10, 0),
+			},
+		},
+		{
+			name: "UsageAdjustment extends usage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				UsageAdjustment: utils.NewDecimal(100, 0),
+			},
+			interimUsage: utils.NewDecimal(15, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(0, 0),
+					},
+				},
+				UsageAdjustment: utils.NewDecimal(85, 0),
+				InterimUsage:    utils.NewDecimal(15, 0),
+				TotalUsage:      utils.NewDecimal(15, 0),
+				lclDebit:        utils.NewDecimal(15, 0),
+			},
+		},
+		{
+			name: "UsageAdjustment same as interimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+				UsageAdjustment: utils.NewDecimal(15, 0),
+			},
+			interimUsage: utils.NewDecimal(15, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(0, 0),
+					},
+				},
+				UsageAdjustment: utils.NewDecimal(0, 0),
+				InterimUsage:    utils.NewDecimal(15, 0),
+				TotalUsage:      utils.NewDecimal(15, 0),
+				lclDebit:        utils.NewDecimal(15, 0),
+			},
+		},
+		{
+			name: "Negative interimUsage",
+			sr: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{},
+				},
+			},
+			interimUsage: utils.NewDecimal(-15, 0),
+			expSRun: &SRun{
+				CGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{
+						utils.MetaUsage: utils.NewDecimal(0, 0),
+					},
+				},
+				UsageAdjustment: utils.NewDecimal(15, 0),
+				InterimUsage:    utils.NewDecimal(-15, 0),
+				TotalUsage:      utils.NewDecimal(-15, 0),
+				lclDebit:        utils.NewDecimal(-15, 0),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.sr.updateUsages(tt.interimConsumed, tt.interimUsage, tt.totalUsage)
+			if err != nil {
+				t.Error(err)
+			}
+			if !reflect.DeepEqual(tt.sr, tt.expSRun) {
+				t.Errorf("Expected %#v, recieved %#v", tt.expSRun, tt.sr)
+			}
+		})
 	}
 }

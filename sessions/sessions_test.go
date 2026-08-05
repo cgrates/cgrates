@@ -4,6 +4,7 @@
 package sessions
 
 import (
+	"net/netip"
 	"reflect"
 	"testing"
 	"time"
@@ -956,9 +957,16 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
+	allocIP := &utils.AllocatedIP{
+		ProfileID: "prfID",
+		PoolID:    "POOL1",
+		Message:   "alloc_success",
+		Address:   netip.MustParseAddr("192.168.1.101"),
+	}
 	v1AuthRpl = &V1AuthorizeReply{
 		Attributes:         attrs,
 		ResourceAllocation: utils.StringPointer("ResGr1"),
+		AllocatedIP:        allocIP,
 		MaxUsage:           utils.NewDecimalFromFloat64(float64(5 * time.Minute)),
 		RouteProfiles:      splrs,
 		ThresholdIDs:       thIDs,
@@ -968,6 +976,7 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 	expected = map[string]*utils.DataNode{
 		utils.CapAttributes:         {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}},
 		utils.CapResourceAllocation: utils.NewLeafNode("ResGr1"),
+		utils.AllocatedIPField:      {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"Address": {Value: &utils.DataLeaf{Data: "192.168.1.101"}}, "Message": {Value: &utils.DataLeaf{Data: "alloc_success"}}, "PoolID": {Value: &utils.DataLeaf{Data: "POOL1"}}, "ProfileID": {Value: &utils.DataLeaf{Data: "prfID"}}}},
 		utils.CapMaxUsage:           utils.NewLeafNode(v1AuthRpl.MaxUsage),
 		utils.CapRouteProfiles:      nm,
 		utils.CapThresholds:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("THD_RES_1"), utils.NewLeafNode("THD_STATS_1"), utils.NewLeafNode("THD_STATS_2"), utils.NewLeafNode("THD_CDRS_1")}},
@@ -981,6 +990,12 @@ func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
 func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
 	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
+	allocIP := &utils.AllocatedIP{
+		ProfileID: "prfID",
+		PoolID:    "POOL1",
+		Message:   "alloc_success",
+		Address:   netip.MustParseAddr("192.168.1.101"),
+	}
 	v1InitRpl := new(V1InitSessionReply)
 	expected := map[string]*utils.DataNode{}
 	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
@@ -1004,6 +1019,7 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	v1InitRpl = &V1InitSessionReply{
 		Attributes:         attrs,
 		ResourceAllocation: utils.StringPointer("ResGr1"),
+		AllocatedIP:        allocIP,
 		MaxUsage:           utils.DurationPointer(5 * time.Minute),
 		ThresholdIDs:       thIDs,
 		StatQueueIDs:       statIDs,
@@ -1011,6 +1027,7 @@ func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	expected = map[string]*utils.DataNode{
 		utils.CapAttributes:         {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}},
 		utils.CapResourceAllocation: utils.NewLeafNode("ResGr1"),
+		utils.AllocatedIPField:      {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"Address": {Value: &utils.DataLeaf{Data: "192.168.1.101"}}, "Message": {Value: &utils.DataLeaf{Data: "alloc_success"}}, "PoolID": {Value: &utils.DataLeaf{Data: "POOL1"}}, "ProfileID": {Value: &utils.DataLeaf{Data: "prfID"}}}},
 		utils.CapMaxUsage:           utils.NewLeafNode(5 * time.Minute),
 		utils.CapThresholds:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("THD_RES_1"), utils.NewLeafNode("THD_STATS_1"), utils.NewLeafNode("THD_STATS_2"), utils.NewLeafNode("THD_CDRS_1")}},
 		utils.CapStatQueues:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("Stats2"), utils.NewLeafNode("Stats1"), utils.NewLeafNode("Stats3")}},
@@ -1213,6 +1230,49 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 	expected[utils.OptsStirIdentity] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaRaw: utils.NewLeafNode(utils.EmptyString)}}
 	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+
+	//IPsAllocation check
+	v1per.IPsAllocation = map[string]*utils.AllocatedIP{
+		utils.MetaDefault: {
+			ProfileID: "prfID",
+			PoolID:    "POOL1",
+			Message:   "alloc_success",
+			Address:   netip.MustParseAddr("192.168.1.101"),
+		},
+	}
+	expected[utils.AllocatedIPField] = &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.MetaDefault: {
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					"Address": {
+						Value: &utils.DataLeaf{
+							Data: "192.168.1.101",
+						},
+					},
+					"Message": {
+						Value: &utils.DataLeaf{
+							Data: "alloc_success",
+						},
+					},
+					"PoolID": {
+						Value: &utils.DataLeaf{
+							Data: "POOL1",
+						},
+					},
+					"ProfileID": {
+						Value: &utils.DataLeaf{
+							Data: "prfID",
+						},
+					},
+				},
+			},
+		},
+	}
+	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
 	}
 }
 
