@@ -415,7 +415,7 @@ func TestFileXMLProcessEvent(t *testing.T) {
 	eR.Config().Fields[0].ComputePath()
 
 	fileName := "file1.xml"
-	if err := eR.processFile(fileName); err != nil {
+	if err := eR.processFile(fileName, eR.Config().Filters); err != nil {
 		t.Error(err)
 	}
 	expEvent := &utils.CGREvent{
@@ -455,7 +455,7 @@ func TestFileXMLProcessEventError1(t *testing.T) {
 		conReqs:   make(chan struct{}, 1),
 	}
 	errExpect := "open /tmp/TestFileXMLProcessEvent/file1.xml: no such file or directory"
-	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname, eR.Config().Filters); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 }
@@ -510,14 +510,14 @@ func TestFileXMLProcessEVentError2(t *testing.T) {
 	//
 	eR.Config().Filters = []string{"Filter1"}
 	errExpect := "NOT_FOUND:Filter1"
-	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname, eR.Config().Filters); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 
 	//
 	eR.Config().Filters = []string{"*exists:~*req..Account:"}
 	errExpect = "rename /tmp/TestFileXMLProcessEvent/file1.xml /var/spool/cgrates/ers/out/file1.xml: no such file or directory"
-	if err := eR.processFile(fname); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fname, eR.Config().Filters); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {
@@ -582,7 +582,7 @@ func TestFileXMLProcessEVentError3(t *testing.T) {
 
 	eR.Config().Fields[0].ComputePath()
 	errExpect := "Empty source value for fieldID: <OriginID>"
-	eR.processFile(fname)
+	eR.processFile(fname, eR.Config().Filters)
 	if !strings.Contains(buf.String(), errExpect) {
 		t.Errorf("Expected to contain %s", errExpect)
 	}
@@ -619,7 +619,7 @@ func TestFileXMLProcessEventParseError(t *testing.T) {
 
 	fileName := "file1.xml"
 	errExpect := "XML syntax error on line 2: unexpected EOF"
-	if err := eR.processFile(fileName); err == nil || err.Error() != errExpect {
+	if err := eR.processFile(fileName, eR.Config().Filters); err == nil || err.Error() != errExpect {
 		t.Errorf("Expected %v but received %v", errExpect, err)
 	}
 	if err := os.RemoveAll(filePath); err != nil {

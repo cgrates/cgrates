@@ -280,7 +280,7 @@ func TestFileJSONProcessFile(t *testing.T) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", nil, err)
 	}
 	expected := "open /var/spool/cgrates/ers/in: no such file or directory"
-	err2 := rdr.(*JSONFileER).processFile("")
+	err2 := rdr.(*JSONFileER).processFile("", rdr.Config().Filters)
 	if err2 == nil || err2.Error() != expected {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, err2)
 	}
