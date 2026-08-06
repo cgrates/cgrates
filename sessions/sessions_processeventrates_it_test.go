@@ -193,7 +193,6 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 }
 
 func TestSessionSv1ProcessEventSMS(t *testing.T) {
-	t.Skip("Err:  expected 9 *sms units remaining, got: &{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:10 exp:0 precision:2 form:0}")
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "sessions": {
@@ -253,6 +252,7 @@ func TestSessionSv1ProcessEventSMS(t *testing.T) {
 					utils.MetaDebit:    true,
 					utils.MetaUsage:    1,
 					utils.MetaOriginID: "smsOriginID",
+					utils.MetaUR:       true,
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -262,6 +262,17 @@ func TestSessionSv1ProcessEventSMS(t *testing.T) {
 				},
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent failed for SMS event: %v", err)
+		}
+		usageRecord, has := rply.UsageRecords[utils.MetaPrimary]
+		if !has {
+			t.Fatalf("missing %s UsageRecord", utils.MetaPrimary)
+		}
+		usage, err := utils.IfaceAsDuration(usageRecord.APIOpts[utils.MetaUsage])
+		if err != nil {
+			t.Fatal(err)
+		}
+		if usage != time.Nanosecond {
+			t.Errorf("unexpected UsageRecord usage: %s", usage)
 		}
 	})
 

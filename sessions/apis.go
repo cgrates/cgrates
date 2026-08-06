@@ -891,7 +891,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		return errUsage
 	} else if usage != nil {
 		cch[utils.MetaUsage] = usage
-		apiArgs.APIOpts[utils.MetaUsage] = usage // populated for Event at least
+		apiArgs.APIOpts[utils.MetaUsage] = &utils.Decimal{Big: usage} // populated for Event at least
 	}
 
 	// Set *totalUsage
