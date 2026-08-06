@@ -5,6 +5,7 @@ package ers
 
 import (
 	"errors"
+	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
@@ -15,14 +16,14 @@ type V1RunReaderParams struct {
 	Tenant   string
 	ID       string // unique identifier of the request
 	ReaderID string
+	Filters  []string
 	APIOpts  map[string]any
 }
 
-// V1RunReader processes files in the configured directory for the given reader. This function handles files
-// based on the reader's type and configuration. Only available for readers that are not processing files
-// automatically (RunDelay should equal 0).
+// V1RunReader processes the configured reader once. Request filters are applied together with the configured filters.
+// Only readers with RunDelay set to 0 can be run manually.
 //
-// Note: This API is not safe to call concurrently for the same reader. Ensure the current files finish being
+// Note: This API is not safe to call concurrently for the same reader. Ensure the current input finishes being
 // processed before calling again.
 func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams, reply *string) error {
 	rdrCfg := erS.cfg.ERsCfg().ReaderCfg(params.ReaderID)
@@ -33,15 +34,20 @@ func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams
 	if rdrCfg.RunDelay != 0 {
 		return errors.New("readers with RunDelay different from 0 are not supported")
 	}
+	filters := slices.Concat(rdrCfg.Filters, params.Filters)
 	switch rdr := er.(type) {
 	case *CSVFileER:
-		processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.CSVSuffix,
+			func(fileName string) error { return rdr.processFile(fileName, filters) })
 	case *XMLFileER:
-		processReaderDir(rdr.sourceDir, utils.XMLSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.XMLSuffix,
+			func(fileName string) error { return rdr.processFile(fileName, filters) })
 	case *FWVFileER:
-		processReaderDir(rdr.sourceDir, utils.FWVSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.FWVSuffix,
+			func(fileName string) error { return rdr.processFile(fileName, filters) })
 	case *JSONFileER:
-		processReaderDir(rdr.sourceDir, utils.JSONSuffix, rdr.processFile)
+		processReaderDir(rdr.sourceDir, utils.JSONSuffix,
+			func(fileName string) error { return rdr.processFile(fileName, filters) })
 	default:
 		return errors.New("reader type does not yet support manual processing")
 	}

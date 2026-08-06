@@ -62,6 +62,9 @@ func (rdr *CSVFileER) Config() *config.EventReaderCfg {
 }
 
 func (rdr *CSVFileER) Serve() (err error) {
+	processFile := func(fileName string) error {
+		return rdr.processFile(fileName, rdr.Config().Filters)
+	}
 	switch rdr.Config().RunDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
@@ -70,9 +73,9 @@ func (rdr *CSVFileER) Serve() (err error) {
 			time.Sleep(rdr.Config().StartDelay)
 			// Ensure that files already existing in the source path are processed
 			// before the reader starts listening for filesystem change events.
-			processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
+			processReaderDir(rdr.sourceDir, utils.CSVSuffix, processFile)
 
-			if err := utils.WatchDir(rdr.sourceDir, rdr.processFile,
+			if err := utils.WatchDir(rdr.sourceDir, processFile,
 				utils.ERs, rdr.rdrExit); err != nil {
 				rdr.rdrError <- err
 			}
@@ -101,7 +104,7 @@ func (rdr *CSVFileER) Serve() (err error) {
 					return
 				case <-tm.C:
 				}
-				processReaderDir(rdr.sourceDir, utils.CSVSuffix, rdr.processFile)
+				processReaderDir(rdr.sourceDir, utils.CSVSuffix, processFile)
 				tm.Reset(rdr.Config().RunDelay)
 			}
 		}()
@@ -110,7 +113,7 @@ func (rdr *CSVFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *CSVFileER) processFile(fName string) (err error) {
+func (rdr *CSVFileER) processFile(fName string, filters []string) (err error) {
 	if cap(rdr.conReqs) != 0 {
 		rdr.conReqs <- struct{}{}
 		defer func() { <-rdr.conReqs }()
@@ -178,7 +181,7 @@ func (rdr *CSVFileER) processFile(fName string) (err error) {
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 			rdr.cgrCfg, rdr.cache, rdr.fltrS, nil) // create an AgentRequest
-		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
+		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to filter error: <%s>",

@@ -70,6 +70,9 @@ func (rdr *FWVFileER) Config() *config.EventReaderCfg {
 }
 
 func (rdr *FWVFileER) Serve() (err error) {
+	processFile := func(fileName string) error {
+		return rdr.processFile(fileName, rdr.Config().Filters)
+	}
 	switch rdr.Config().RunDelay {
 	case time.Duration(0): // 0 disables the automatic read, maybe done per API
 		return
@@ -78,9 +81,9 @@ func (rdr *FWVFileER) Serve() (err error) {
 			time.Sleep(rdr.Config().StartDelay)
 			// Ensure that files already existing in the source path are processed
 			// before the reader starts listening for filesystem change events.
-			processReaderDir(rdr.sourceDir, utils.FWVSuffix, rdr.processFile)
+			processReaderDir(rdr.sourceDir, utils.FWVSuffix, processFile)
 
-			if err := utils.WatchDir(rdr.sourceDir, rdr.processFile,
+			if err := utils.WatchDir(rdr.sourceDir, processFile,
 				utils.ERs, rdr.rdrExit); err != nil {
 				rdr.rdrError <- err
 			}
@@ -109,7 +112,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 					return
 				case <-tm.C:
 				}
-				processReaderDir(rdr.sourceDir, utils.FWVSuffix, rdr.processFile)
+				processReaderDir(rdr.sourceDir, utils.FWVSuffix, processFile)
 				tm.Reset(rdr.Config().RunDelay)
 			}
 		}()
@@ -118,7 +121,7 @@ func (rdr *FWVFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *FWVFileER) processFile(fName string) (err error) {
+func (rdr *FWVFileER) processFile(fName string, filters []string) (err error) {
 	if cap(rdr.conReqs) != 0 {
 		rdr.conReqs <- struct{}{}
 		defer func() { <-rdr.conReqs }()
@@ -164,13 +167,13 @@ func (rdr *FWVFileER) processFile(fName string) (err error) {
 			}
 			if hasTrailer {
 				// process trailer here
-				if err = rdr.processTrailer(file, rowNr, evsPosted, absPath, trailerFields); err != nil {
+				if err = rdr.processTrailer(file, rowNr, evsPosted, absPath, trailerFields, filters); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Read trailer error: %s ", utils.ERs, err.Error()))
 					return
 				}
 			}
 			if hasHeader {
-				if err = rdr.processHeader(file, rowNr, evsPosted, absPath, headerFields); err != nil {
+				if err = rdr.processHeader(file, rowNr, evsPosted, absPath, headerFields, filters); err != nil {
 					utils.Logger.Err(fmt.Sprintf("<%s> Row 0, error reading header: %s", utils.ERs, err.Error()))
 					return
 				}
@@ -200,7 +203,7 @@ func (rdr *FWVFileER) processFile(fName string) (err error) {
 			utils.FirstNonEmpty(rdr.Config().Timezone,
 				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 			rdr.cgrCfg, rdr.cache, rdr.fltrS, map[string]utils.DataProvider{utils.MetaHdr: rdr.headerDP, utils.MetaTrl: rdr.trailerDP}) // create an AgentRequest
-		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
+		if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, filters,
 			agReq); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> reading file: <%s> row <%d>, ignoring due to filter error: <%s>",
@@ -286,7 +289,8 @@ func (rdr *FWVFileER) setLineLen(file *os.File, hasHeader, hasTrailer bool) erro
 	return nil
 }
 
-func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPath string, trailerFields []*config.FCTemplate) (err error) {
+func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPath string,
+	trailerFields []*config.FCTemplate, filters []string) (err error) {
 	buf := make([]byte, rdr.trailerLenght)
 	if nRead, err := file.ReadAt(buf, rdr.trailerOffset); err != nil && err != io.EOF {
 		return err
@@ -302,7 +306,7 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.cgrCfg, rdr.cache, rdr.fltrS, map[string]utils.DataProvider{utils.MetaTrl: rdr.trailerDP}) // create an AgentRequest
-	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, filters,
 		agReq); err != nil || !pass {
 		return nil
 	}
@@ -327,17 +331,19 @@ func (rdr *FWVFileER) processTrailer(file *os.File, rowNr, evsPosted int, absPat
 	return
 }
 
-func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) error {
+func (rdr *FWVFileER) processHeader(file *os.File, rowNr, evsPosted int, absPath string,
+	hdrFields []*config.FCTemplate, filters []string) error {
 	buf := make([]byte, rdr.headerOffset)
 	if nRead, err := file.Read(buf); err != nil {
 		return err
 	} else if nRead != len(buf) {
 		return fmt.Errorf("In header, line len: %d, have read: %d", rdr.headerOffset, nRead)
 	}
-	return rdr.createHeaderMap(string(buf), rowNr, evsPosted, absPath, hdrFields)
+	return rdr.createHeaderMap(string(buf), rowNr, evsPosted, absPath, hdrFields, filters)
 }
 
-func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string, hdrFields []*config.FCTemplate) (err error) {
+func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPath string,
+	hdrFields []*config.FCTemplate, filters []string) (err error) {
 	rdr.offset += rdr.headerOffset // increase the offset
 	rdr.headerDP = config.NewFWVProvider(record)
 	agReq := agents.NewAgentRequest(
@@ -347,7 +353,7 @@ func (rdr *FWVFileER) createHeaderMap(record string, rowNr, evsPosted int, absPa
 		utils.FirstNonEmpty(rdr.Config().Timezone,
 			rdr.cgrCfg.GeneralCfg().DefaultTimezone),
 		rdr.cgrCfg, rdr.cache, rdr.fltrS, map[string]utils.DataProvider{utils.MetaHdr: rdr.headerDP}) // create an AgentRequest
-	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, rdr.Config().Filters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), agReq.Tenant, filters,
 		agReq); err != nil || !pass {
 		return nil
 	}
