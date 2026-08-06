@@ -114,3 +114,76 @@ func TestERSRunReaderFilters(t *testing.T) {
 		t.Fatalf("request filters changed the next run:\n%s", output)
 	}
 }
+
+func TestERSRunReaderCgrCDR(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	urID := "record's id"
+	cdr1 := &utils.CDR{
+		Tenant: "cgrates.org",
+		Opts:   map[string]any{utils.MetaURID: utils.Sha1("record1")},
+		Event:  map[string]any{utils.OriginID: "event1"},
+	}
+	cdr2 := &utils.CDR{
+		Tenant: "cgrates.org",
+		Opts:   map[string]any{utils.MetaURID: urID},
+		Event:  map[string]any{utils.OriginID: "event2"},
+	}
+	db := openTestDB(t, "cgrates_runreader", utils.CDRsTBL, cdr1, cdr2)
+	var buf testBuffer
+	testEngine := engine.TestEngine{
+		ConfigJSON: `{
+"ers": {
+	"enabled": true,
+	"readers": [
+		{
+			"id": "cgrcdr",
+			"runDelay": "0",
+			"type": "*cgrcdr",
+			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"processedPath": "",
+			"flags": ["*dryRun"],
+			"opts": {
+				"sqlDBName": "cgrates_runreader",
+				"sqlTableName": "cdrs",
+				"sqlBatchSize": 1
+			}
+		}
+	]
+}
+}`,
+		DBCfg:            engine.InternalDBCfg,
+		Encoding:         *utils.Encoding,
+		LogBuffer:        &buf,
+		GracefulShutdown: true,
+	}
+	client, _ := testEngine.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.ErSv1RunReader,
+		&ers.V1RunReaderParams{
+			ReaderID: "cgrcdr",
+			Filters:  []string{"*string:~*req.opts.*urID:" + urID},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	const prefix = "<ERs> DRY_RUN, reader: <cgrcdr>"
+	waitFor(t, func() bool { return strings.Contains(buf.String(), prefix) },
+		"cgrcdr run did not process an event", 2*time.Second)
+	if got := strings.Count(buf.String(), prefix); got != 1 {
+		t.Fatalf("unexpected number of cgrcdr events: %d", got)
+	}
+	if output := buf.String(); !strings.Contains(output, `"OriginID": "event2"`) ||
+		strings.Contains(output, `"OriginID": "event1"`) {
+		t.Fatalf("unexpected cgrcdr events:\n%s", output)
+	}
+	if got := countRows(t, db, utils.CDRsTBL); got != 2 {
+		t.Fatalf("unexpected row count after manual run: %d", got)
+	}
+}

@@ -5,6 +5,7 @@ package ers
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"io"
 	"net/url"
@@ -52,11 +53,9 @@ type CgrCDR struct {
 	fltrS  *engine.FilterS
 	dm     *engine.DataManager
 
-	connString  string
-	connType    string
-	tableName   string
-	dbFilters   []string
-	lazyFilters []string
+	connString string
+	connType   string
+	tableName  string
 
 	rdrEvents     chan *erEvent
 	partialEvents chan *erEvent
@@ -69,7 +68,19 @@ func (rdr *CgrCDR) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-func (rdr *CgrCDR) Serve() (err error) {
+func (rdr *CgrCDR) Serve() error {
+	db, sqlDB, err := rdr.openDB()
+	if err != nil {
+		return err
+	}
+	if rdr.Config().RunDelay == 0 {
+		return sqlDB.Close()
+	}
+	go rdr.readLoop(db, sqlDB)
+	return nil
+}
+
+func (rdr *CgrCDR) openDB() (*gorm.DB, *sql.DB, error) {
 	var dialect gorm.Dialector
 	switch rdr.connType {
 	case utils.MySQL:
@@ -77,25 +88,50 @@ func (rdr *CgrCDR) Serve() (err error) {
 	case utils.Postgres:
 		dialect = postgres.Open(rdr.connString)
 	default:
-		return fmt.Errorf("db type <%s> not supported", rdr.connType)
+		return nil, nil, fmt.Errorf("db type <%s> not supported", rdr.connType)
 	}
-	var db *gorm.DB
-	if db, err = gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true}); err != nil {
-		return
+	db, err := gorm.Open(dialect, &gorm.Config{AllowGlobalUpdate: true})
+	if err != nil {
+		return nil, nil, err
 	}
-	var sqlDB *sql.DB
-	if sqlDB, err = db.DB(); err != nil {
-		return
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, nil, err
 	}
 	sqlDB.SetMaxOpenConns(10)
-	if err = sqlDB.Ping(); err != nil {
-		return
+	if err := sqlDB.Ping(); err != nil {
+		_ = sqlDB.Close()
+		return nil, nil, err
 	}
-	if rdr.Config().RunDelay == time.Duration(0) {
-		return
+	return db, sqlDB, nil
+}
+
+func (rdr *CgrCDR) filtersForQuery(filters []string) (dbFilters []string, dbFilterArgs []any,
+	lazyFilters []string, err error) {
+	for _, filterID := range filters {
+		filterObj, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant,
+			filterID, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		if err := engine.CheckFilter(filterObj); err != nil {
+			return nil, nil, nil, err
+		}
+		var lazyFilter bool
+		for _, rule := range filterObj.Rules {
+			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) {
+				conditions, args := rule.FilterToSQLQuery()
+				dbFilters = append(dbFilters, strings.Join(conditions, " OR "))
+				dbFilterArgs = append(dbFilterArgs, args...)
+				continue
+			}
+			if !lazyFilter {
+				lazyFilters = append(lazyFilters, filterObj.ID)
+				lazyFilter = true
+			}
+		}
 	}
-	go rdr.readLoop(db, sqlDB)
-	return
+	return dbFilters, dbFilterArgs, lazyFilters, nil
 }
 
 func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
@@ -110,41 +146,18 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			return
 		}
 	}
-	var filtersObjList []*engine.Filter
-	for _, fltrID := range rdr.Config().Filters {
-		f, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant,
-			fltrID, true, false, utils.NonTransactional)
-		if err != nil {
-			rdr.rdrErr <- err
-			return
-		}
-		filtersObjList = append(filtersObjList, f)
+	dbFilters, dbFilterArgs, lazyFilters, err := rdr.filtersForQuery(rdr.Config().Filters)
+	if err != nil {
+		rdr.rdrErr <- err
+		return
 	}
-	for _, filterObj := range filtersObjList {
-		if err := engine.CheckFilter(filterObj); err != nil {
-			rdr.rdrErr <- err
-			return
-		}
-		var lazyFltrPopulated bool
-		for _, rule := range filterObj.Rules {
-			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) {
-				rdr.dbFilters = append(rdr.dbFilters, strings.Join(rule.FilterToSQLQuery(), " OR "))
-				continue
-			}
-
-			if !lazyFltrPopulated {
-				rdr.lazyFilters = append(rdr.lazyFilters, filterObj.ID)
-				lazyFltrPopulated = true
-			}
-		}
-	}
-	selectWhereQuery := strings.Join(rdr.dbFilters, " AND ")
+	selectWhereQuery := strings.Join(dbFilters, " AND ")
 	tm := time.NewTimer(0)
 	for {
 		var cdrs []*utils.CDRSQLTable
 		tx := db.Table(rdr.tableName).Model(&utils.CDRSQLTable{})
 		if selectWhereQuery != "" {
-			tx = tx.Where(selectWhereQuery)
+			tx = tx.Where(selectWhereQuery, dbFilterArgs...)
 		}
 		if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
 			tx = tx.Limit(*rdr.Config().Opts.SQLBatchSize)
@@ -175,7 +188,7 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				}
 			}
 			go func(cdrSql *utils.CDRSQLTable) {
-				if err := rdr.processMessage(cdrSql); err != nil {
+				if err := rdr.processMessage(cdrSql, lazyFilters); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> processing CDR id <%d> error: %s",
 							utils.ERs, cdrSql.ID, err.Error()))
@@ -198,7 +211,44 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 }
 
-func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable) error {
+func (rdr *CgrCDR) run(filters []string) error {
+	if rdr.connType != utils.MySQL {
+		return errors.New("manual cgrcdr processing supports only mysql")
+	}
+	db, sqlDB, err := rdr.openDB()
+	if err != nil {
+		return err
+	}
+	defer func() { _ = sqlDB.Close() }()
+	dbFilters, dbFilterArgs, lazyFilters, err := rdr.filtersForQuery(filters)
+	if err != nil {
+		return err
+	}
+	var cdrs []*utils.CDRSQLTable
+	tx := db.Table(rdr.tableName).Model(&utils.CDRSQLTable{})
+	if selectWhereQuery := strings.Join(dbFilters, " AND "); selectWhereQuery != "" {
+		tx = tx.Where(selectWhereQuery, dbFilterArgs...)
+	}
+	if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
+		tx = tx.Limit(*rdr.Config().Opts.SQLBatchSize)
+	}
+	if err := tx.Find(&cdrs).Error; err != nil {
+		return err
+	}
+	for _, cdrSQL := range cdrs {
+		if rdr.Config().ProcessedPath == utils.MetaDelete {
+			if err := db.Table(rdr.tableName).Delete(&utils.CDRSQLTable{}, cdrSQL.ID).Error; err != nil {
+				return err
+			}
+		}
+		if err := rdr.processMessage(cdrSQL, lazyFilters); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable, lazyFilters []string) error {
 	cdr := &utils.CDR{
 		Tenant:    cdrSql.Tenant,
 		Opts:      cdrSql.Opts,
@@ -208,7 +258,7 @@ func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable) error {
 		DeletedAt: cdrSql.DeletedAt,
 	}
 	cgrEv := cdr.CGREvent()
-	if pass, err := rdr.fltrS.Pass(context.TODO(), cgrEv.Tenant, rdr.lazyFilters,
+	if pass, err := rdr.fltrS.Pass(context.TODO(), cgrEv.Tenant, lazyFilters,
 		cgrEv.AsDataProvider()); err != nil || !pass {
 		return err
 	}

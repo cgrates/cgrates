@@ -1112,8 +1112,8 @@ func (fltr *FilterRule) ElementItems() []string {
 	return strings.Split(fltr.Element, utils.NestingSep)
 }
 
-// Creates mysql conditions used in WHERE statement out of filters
-func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
+// FilterToSQLQuery creates MySQL conditions and arguments for a WHERE clause.
+func (fltr *FilterRule) FilterToSQLQuery() (conditions []string, args []any) {
 	var firstItem string
 	var restOfItems string
 	not := strings.HasPrefix(fltr.Type, utils.MetaNot)
@@ -1151,17 +1151,17 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 		case utils.MetaExists, utils.MetaNotExists:
 			if not {
 				conditions = append(conditions, fmt.Sprintf("%s IS NULL", expr))
-				return conditions
+				return conditions, args
 			}
 			conditions = append(conditions, fmt.Sprintf("%s IS NOT NULL", expr))
 		case utils.MetaEmpty, utils.MetaNotEmpty:
 			if not {
 				conditions = append(conditions, fmt.Sprintf("%s != ''", expr))
-				return conditions
+				return conditions, args
 			}
 			conditions = append(conditions, fmt.Sprintf("%s = ''", expr))
 		}
-		return conditions
+		return conditions, args
 	}
 	for _, value := range fltr.Values {
 		switch value { // MySQL uses 1/0 for booleans.
@@ -1174,42 +1174,47 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string) {
 		switch fltr.Type {
 		case utils.MetaString, utils.MetaNotString, utils.MetaEqual, utils.MetaNotEqual:
 			if not {
-				singleCond = fmt.Sprintf("%s != '%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s != ?", jsonExpr)
 			} else {
-				singleCond = fmt.Sprintf("%s = '%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s = ?", jsonExpr)
 			}
 		case utils.MetaLessThan, utils.MetaLessOrEqual, utils.MetaGreaterThan, utils.MetaGreaterOrEqual:
-			parsedValAny := utils.StringToInterface(value)
+			value = fmt.Sprint(utils.StringToInterface(value))
 			switch fltr.Type {
 			case utils.MetaGreaterOrEqual:
-				singleCond = fmt.Sprintf("%s >= '%v'", jsonExpr, parsedValAny)
+				singleCond = fmt.Sprintf("%s >= ?", jsonExpr)
 			case utils.MetaGreaterThan:
-				singleCond = fmt.Sprintf("%s > '%v'", jsonExpr, parsedValAny)
+				singleCond = fmt.Sprintf("%s > ?", jsonExpr)
 			case utils.MetaLessOrEqual:
-				singleCond = fmt.Sprintf("%s <= '%v'", jsonExpr, parsedValAny)
+				singleCond = fmt.Sprintf("%s <= ?", jsonExpr)
 			case utils.MetaLessThan:
-				singleCond = fmt.Sprintf("%s < '%v'", jsonExpr, parsedValAny)
+				singleCond = fmt.Sprintf("%s < ?", jsonExpr)
 			}
 		case utils.MetaPrefix, utils.MetaNotPrefix:
+			value += "%"
 			if not {
-				singleCond = fmt.Sprintf("%s NOT LIKE '%s%%'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s NOT LIKE ?", jsonExpr)
 			} else {
-				singleCond = fmt.Sprintf("%s LIKE '%s%%'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s LIKE ?", jsonExpr)
 			}
 		case utils.MetaSuffix, utils.MetaNotSuffix:
+			value = "%" + value
 			if not {
-				singleCond = fmt.Sprintf("%s NOT LIKE '%%%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s NOT LIKE ?", jsonExpr)
 			} else {
-				singleCond = fmt.Sprintf("%s LIKE '%%%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s LIKE ?", jsonExpr)
 			}
 		case utils.MetaRegex, utils.MetaNotRegex:
 			if not {
-				singleCond = fmt.Sprintf("%s NOT REGEXP '%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s NOT REGEXP ?", jsonExpr)
 			} else {
-				singleCond = fmt.Sprintf("%s REGEXP '%s'", jsonExpr, value)
+				singleCond = fmt.Sprintf("%s REGEXP ?", jsonExpr)
 			}
 		}
 		conditions = append(conditions, singleCond)
+		if singleCond != "" {
+			args = append(args, value)
+		}
 	}
-	return conditions
+	return conditions, args
 }
