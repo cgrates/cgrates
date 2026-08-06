@@ -3212,9 +3212,15 @@ func TestFilterToSQLQuery(t *testing.T) {
 	}
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got := tc.fltr.FilterToSQLQuery()
+			got, args := tc.fltr.FilterToSQLQuery()
 			if len(got) != len(tc.expected) {
 				t.Fatalf("expected %d conditions, got %d: %v", len(tc.expected), len(got), got)
+			}
+			if len(args) != len(tc.fltr.Values) {
+				t.Fatalf("expected %d arguments, got %d: %v", len(tc.fltr.Values), len(args), args)
+			}
+			for i, arg := range args {
+				got[i] = strings.Replace(got[i], "?", fmt.Sprintf("'%v'", arg), 1)
 			}
 			for i, want := range tc.expected {
 				if got[i] != want {

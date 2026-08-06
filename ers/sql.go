@@ -64,11 +64,12 @@ type SQLEventReader struct {
 	fltrS  *engine.FilterS
 	dm     *engine.DataManager
 
-	connString  string
-	connType    string
-	tableName   string
-	dbFilters   []string // filters converted to SQL WHERE conditions from reader config filters
-	lazyFilters []string // filters used when processing reader events
+	connString   string
+	connType     string
+	tableName    string
+	dbFilters    []string // filters converted to SQL WHERE conditions from reader config filters
+	dbFilterArgs []any
+	lazyFilters  []string // filters used when processing reader events
 
 	rdrEvents     chan *erEvent // channel to dispatch the events created to
 	partialEvents chan *erEvent // channel to dispatch the partial events created to
@@ -141,7 +142,9 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 		var lazyFltrPopulated bool // Track if a lazyFilter is already populated by the previous filterObj.Rules, so we dont store the same lazy filter more than once
 		for _, rule := range filterObj.Rules {
 			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) { // convert filter to WHERE condition only on filters with ~*req.
-				rdr.dbFilters = append(rdr.dbFilters, strings.Join(rule.FilterToSQLQuery(), " OR "))
+				conditions, args := rule.FilterToSQLQuery()
+				rdr.dbFilters = append(rdr.dbFilters, strings.Join(conditions, " OR "))
+				rdr.dbFilterArgs = append(rdr.dbFilterArgs, args...)
 				continue
 			}
 			// If not used in the WHERE condition, put the filter in rdr.lazyFilters
@@ -154,8 +157,8 @@ func (rdr *SQLEventReader) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	selectWhereQuery := strings.Join(rdr.dbFilters, " AND ") // the whole WHERE query gotten from filters
 	tm := time.NewTimer(0)
 	for {
-		tx := db.Table(rdr.tableName).Select(utils.Meta)         // Select everything from the table
-		if err := tx.Where(selectWhereQuery).Error; err != nil { // apply WHERE conditions to the select if any
+		tx := db.Table(rdr.tableName).Select(utils.Meta)                              // Select everything from the table
+		if err := tx.Where(selectWhereQuery, rdr.dbFilterArgs...).Error; err != nil { // apply WHERE conditions to the select if any
 			rdr.rdrErr <- err
 			return
 		}
