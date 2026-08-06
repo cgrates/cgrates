@@ -131,6 +131,9 @@ func IfaceAsDuration(itm any) (d time.Duration, err error) {
 	case *Decimal:
 		usg, _ := itm.(*Decimal).Duration()
 		return usg, nil
+	case *decimal.Big:
+		usg, _ := (&Decimal{Big: it}).Duration()
+		return usg, nil
 	case time.Duration:
 		return it, nil
 	case int: // check every int type

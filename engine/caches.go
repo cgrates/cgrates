@@ -85,6 +85,7 @@ func init() {
 	gob.Register(new(utils.AccountWithAPIOpts))
 	// CDR
 	gob.Register(new(utils.CGREvent))
+	gob.Register(new(utils.EventCharges))
 	// ChargerS
 	gob.Register(new(utils.ChargerProfile))
 	gob.Register(new(utils.ChargerProfileWithAPIOpts))
