@@ -1,0 +1,19 @@
+<include>
+  <context name="cgrates">
+    <extension name="cgrates_authorization">
+      <condition field="${cgrNotify}" expression="^$">
+        <action application="park"/>
+      </condition>
+    </extension>
+
+    <extension name="cgrates_call">
+      <condition field="${cgrNotify}" expression="^AUTH_OK$">
+        <action application="answer"/>
+        <action application="sleep" data="15000"/>
+        <action application="hangup"/>
+        <anti-action application="set" data="proto_specific_hangup_cause=sip:403"/>
+        <anti-action application="hangup"/>
+      </condition>
+    </extension>
+  </context>
+</include>

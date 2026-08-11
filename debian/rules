@@ -36,10 +36,5 @@ override_dh_auto_test:
 override_dh_auto_install:
 	PATH="/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin" dh_auto_install -- --no-source
 
-execute_after_dh_install:
-	tar -xavf debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz \
-	    -C debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/
-	rm -f debian/cgrates/usr/share/cgrates/tutorials/fs_evsock/freeswitch/etc/freeswitch_conf.tar.gz
-
 override_dh_dwz:
 	dh_dwz -Xcgr-console -Xcgr-engine -Xcgr-loader -Xcgr-migrator -Xcgr-tester
