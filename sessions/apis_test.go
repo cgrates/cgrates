@@ -794,3 +794,149 @@ func TestSessionSBiRPCv1AuthorizeEventCache(t *testing.T) {
 		t.Errorf("Expected AttributeS to still have been hit only once, got %d", hits)
 	}
 }
+
+func TestSessionSBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*attributes.ProcessEventReply) = attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{
+						{
+							MatchedProfileID: "cgrates.org:ATTR_1",
+							Fields:           []string{"*req.Field1"},
+						},
+						{
+							MatchedProfileID: "cgrates.org:ATTR_2",
+							Fields:           []string{"*req.Field2"},
+						},
+					},
+					CGREvent: args.(*utils.CGREvent),
+				}
+				return nil
+			},
+			utils.ResourceSv1AuthorizeResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = "OK"
+				return nil
+			},
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(45, 0)}
+				return nil
+			},
+			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{
+					Routes: []*routes.SortedRoute{
+						{RouteID: "RouteID"},
+					},
+				}}
+				return nil
+			},
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"THD1"}
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"STQ1"}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+
+	for _, flag := range []string{
+		utils.MetaAttributes,
+		utils.MetaAccounts,
+		utils.MetaResources,
+		utils.MetaRoutes,
+		utils.MetaThresholds,
+		utils.MetaStats,
+	} {
+		connID := utils.ConcatenatedKey(utils.MetaInternal, flag)
+		cfg.SessionSCfg().Conns[flag] = []*config.DynamicConns{
+			{ConnIDs: []string{connID}},
+		}
+		for _, apiPrefix := range []string{
+			utils.AttributeSv1,
+			utils.AccountSv1,
+			utils.ResourceSv1,
+			utils.RouteSv1,
+			utils.ThresholdSv1,
+			utils.StatSv1,
+		} {
+			sessions.connMgr.AddInternalConn(connID, apiPrefix, chanInternal)
+		}
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evDigest",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaAttributes: true,
+			utils.MetaAccounts:   true,
+			utils.MetaResources:  true,
+			utils.MetaRoutes:     true,
+			utils.MetaThresholds: true,
+			utils.MetaStats:      true,
+		},
+	}
+
+	var reply V1AuthorizeReplyWithDigest
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(ctx, args, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if reply.ResourceAllocation == nil || *reply.ResourceAllocation != utils.OK {
+		t.Errorf("Expected %v, got %v", utils.OK, reply.ResourceAllocation)
+	}
+
+	if reply.MaxUsage == 0 || reply.MaxUsage != 45 {
+		t.Errorf("Expected 45, recieved %v", reply.MaxUsage)
+	}
+
+	exp := utils.StringPointer("RouteID")
+	if !reflect.DeepEqual(reply.RoutesDigest, exp) {
+		t.Errorf("Expected %#+v, recieved %#+v", exp, reply.RoutesDigest)
+	}
+
+	expected := "THD1"
+	if reply.Thresholds == nil || *reply.Thresholds != expected {
+		t.Errorf("Expected %v, got %v", expected, reply.Thresholds)
+	}
+
+	expReply := "STQ1"
+	if reply.StatQueues == nil || *reply.StatQueues != expReply {
+		t.Errorf("Expected StatQueues %v, got %v", expReply, reply.StatQueues)
+	}
+
+	if reply.AttributesDigest == nil {
+		t.Error("Expected AttributesDigest to be set")
+	}
+
+	clnt.calls[utils.AccountSv1MaxAbstracts] = func(ctx *context.Context, m string, args, reply any) error {
+		return utils.ErrNotImplemented
+	}
+
+	expect := "ACCOUNTS_ERROR:NOT_IMPLEMENTED"
+	if err := sessions.BiRPCv1AuthorizeEventWithDigest(ctx, args, &reply); err == nil || err.Error() != expect {
+		t.Errorf("Expected %v, recieved %v", expect, err)
+	}
+}

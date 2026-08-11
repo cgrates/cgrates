@@ -16,6 +16,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/rpcclient"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
@@ -2073,3 +2074,171 @@ dm.SetCache(engine.Cache)
 	}
 }
 */
+
+type testMockCall struct {
+	calls map[string]func(ctx *context.Context, args, reply any) error
+}
+
+func (m *testMockCall) Call(ctx *context.Context, method string, args, reply any) error {
+	if calls, has := m.calls[method]; !has {
+		return rpcclient.ErrUnsupporteServiceMethod
+	} else {
+		return calls(ctx, args, reply)
+	}
+}
+func TestSessionSRatesCost(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
+	dm := engine.NewDataManager(dbCM, cfg, nil)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ev1",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaRates: true,
+		},
+	}
+	var expReply *utils.RateProfileCost
+
+	t.Run("Not Connected to Rates", func(t *testing.T) {
+		expErr := "NOT_CONNECTED: RateS"
+		rpl, err := sessions.ratesCost(context.Background(), args)
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected %+v, received %+v", expErr, err)
+		}
+		expReply = nil
+		if !reflect.DeepEqual(expReply, rpl) {
+			t.Errorf("Expected %v, received %+v", expReply, rpl)
+		}
+	})
+
+	//Connected to Rates
+	clnt := &testMockCall{
+		calls: map[string]func(_ *context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ any) error {
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)
+	cfg.SessionSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{
+		{
+			ConnIDs: []string{connID},
+		},
+	}
+	sessions.connMgr.AddInternalConn(connID, utils.RateSv1, chanInternal)
+	t.Run("RateProfileCost with values", func(t *testing.T) {
+		clnt.calls[utils.RateSv1CostForEvent] = func(ctx *context.Context, args, reply any) error {
+			*reply.(*utils.RateProfileCost) = utils.RateProfileCost{
+				ID:              "RP_1002",
+				Cost:            utils.NewDecimalFromFloat64(2.3),
+				MinCost:         utils.NewDecimalFromFloat64(0),
+				MaxCost:         utils.NewDecimalFromFloat64(0),
+				MaxCostStrategy: "",
+				CostIntervals: []*utils.RateSIntervalCost{
+					{
+						Increments: []*utils.RateSIncrementCost{
+							{
+								Usage:             utils.NewDecimalFromUsageIgnoreErr("2m"),
+								RateID:            "RT_WEEK",
+								RateIntervalIndex: 0,
+								CompressFactor:    1,
+							},
+							{
+								Usage:             utils.NewDecimalFromUsageIgnoreErr("1s"),
+								RateID:            "RT_WEEK",
+								RateIntervalIndex: 1,
+								CompressFactor:    60,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+			}
+			return nil
+		}
+
+		expReply = &utils.RateProfileCost{
+			ID:              "RP_1002",
+			Cost:            utils.NewDecimalFromFloat64(2.3),
+			MinCost:         utils.NewDecimalFromFloat64(0),
+			MaxCost:         utils.NewDecimalFromFloat64(0),
+			MaxCostStrategy: "",
+			CostIntervals: []*utils.RateSIntervalCost{
+				{
+					Increments: []*utils.RateSIncrementCost{
+						{
+							Usage:             utils.NewDecimalFromUsageIgnoreErr("2m"),
+							RateID:            "RT_WEEK",
+							RateIntervalIndex: 0,
+							CompressFactor:    1,
+						},
+						{
+							Usage:             utils.NewDecimalFromUsageIgnoreErr("1s"),
+							RateID:            "RT_WEEK",
+							RateIntervalIndex: 1,
+							CompressFactor:    60,
+						},
+					},
+					CompressFactor: 1,
+				},
+			},
+		}
+
+		rpl, err := sessions.ratesCost(context.Background(), args)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(expReply, rpl) {
+			t.Errorf("Expected %v, received %+v", expReply, rpl)
+		}
+	})
+	t.Run("Call error", func(t *testing.T) {
+		clnt.calls[utils.RateSv1CostForEvent] = func(ctx *context.Context, args, reply any) error {
+			return utils.ErrNotImplemented
+		}
+
+		rpl, err := sessions.ratesCost(context.Background(), args)
+		if err == nil || err != utils.ErrNotImplemented {
+			t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
+		}
+		expReply = nil
+		if !reflect.DeepEqual(expReply, rpl) {
+			t.Errorf("Expected %v, received %+v", expReply, rpl)
+		}
+	})
+	t.Run("Error case", func(t *testing.T) {
+		cfg.SessionSCfg().Conns[utils.MetaRates] = []*config.DynamicConns{
+			{
+				ConnIDs:   []string{connID},
+				FilterIDs: []string{"invalidFilter"},
+			},
+		}
+		sessions.connMgr.AddInternalConn(connID, utils.RateSv1, chanInternal)
+
+		expErr := "NOT_FOUND:invalidFilter"
+		rpl, err := sessions.ratesCost(context.Background(), args)
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected %+v, received %+v", expErr, err)
+		}
+		expReply = nil
+		if !reflect.DeepEqual(expReply, rpl) {
+			t.Errorf("Expected %v, received %+v", expReply, rpl)
+		}
+	})
+}
