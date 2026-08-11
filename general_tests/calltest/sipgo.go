@@ -18,10 +18,20 @@ import (
 	"github.com/emiago/sipgo/sip"
 )
 
+const inactivePCMUOffer = "v=0\r\n" +
+	"o=- 0 0 IN IP4 127.0.0.1\r\n" +
+	"s=calltest\r\n" +
+	"c=IN IP4 127.0.0.1\r\n" +
+	"t=0 0\r\n" +
+	"m=audio 9 RTP/AVP 0\r\n" +
+	"a=rtpmap:0 PCMU/8000\r\n" +
+	"a=inactive\r\n"
+
 // SipgoUAC places SIP calls through Addr using sipgo's dialog layer.
 type SipgoUAC struct {
-	Addr    string            // proxy address, host:port
-	Headers map[string]string // extra headers appended to the INVITE
+	Addr     string            // proxy address, host:port
+	Headers  map[string]string // extra headers appended to the INVITE
+	OfferSDP bool              // send an inactive PCMU offer
 }
 
 func (u SipgoUAC) headers() []sip.Header {
@@ -64,7 +74,13 @@ func (u SipgoUAC) Call(t testing.TB, c CallParams) {
 		Address: sip.Uri{User: fromUser, Host: "127.0.0.1"},
 	})
 
-	dialog, err := dialogCli.Invite(ctx, sip.Uri{User: c.To, Host: host, Port: port}, nil, u.headers()...)
+	var body []byte
+	headers := u.headers()
+	if u.OfferSDP {
+		body = []byte(inactivePCMUOffer)
+		headers = append(headers, sip.NewHeader("Content-Type", "application/sdp"))
+	}
+	dialog, err := dialogCli.Invite(ctx, sip.Uri{User: c.To, Host: host, Port: port}, body, headers...)
 	if err != nil {
 		t.Fatalf("sipgo uac %s->%s: invite: %v", fromUser, c.To, err)
 	}
