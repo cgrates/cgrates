@@ -1004,7 +1004,7 @@ func (rplSv1 *ReplicatorSv1) RemoveRanking(ctx *context.Context, args *utils.Ten
 		return
 	}
 	if err = rplSv1.v1.CallCache(utils.IfaceAsString(args.APIOpts[utils.CacheOpt]),
-		args.Tenant, utils.CacheTrends, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
+		args.Tenant, utils.CacheRankings, args.TenantID.TenantID(), utils.EmptyString, nil, nil, args.APIOpts); err != nil {
 		return
 	}
 	*reply = utils.OK

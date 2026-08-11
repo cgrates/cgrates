@@ -97,6 +97,7 @@ func replicationKey(objType, objID, method string) string {
 		utils.ReplicatorSv1SetStatQueue, utils.ReplicatorSv1RemoveStatQueue,
 		utils.ReplicatorSv1SetFilter, utils.ReplicatorSv1RemoveFilter,
 		utils.ReplicatorSv1SetRankingProfile, utils.ReplicatorSv1RemoveRankingProfile,
+		utils.ReplicatorSv1SetRanking, utils.ReplicatorSv1RemoveRanking,
 		utils.ReplicatorSv1SetTrendProfile, utils.ReplicatorSv1RemoveTrendProfile,
 		utils.ReplicatorSv1SetTrend, utils.ReplicatorSv1RemoveTrend,
 		utils.ReplicatorSv1SetTiming, utils.ReplicatorSv1RemoveTiming,
