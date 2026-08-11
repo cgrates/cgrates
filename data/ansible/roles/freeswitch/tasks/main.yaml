@@ -32,6 +32,6 @@
 - name: Install FreeSWITCH
   become: true
   ansible.builtin.apt:
-    name: freeswitch-meta-all
+    name: freeswitch-meta-vanilla
     state: present
     update_cache: true
