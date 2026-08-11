@@ -5469,7 +5469,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	dm.DataDB().Flush(utils.EmptyString)
 }
 
-func TestResourcesStoreResourceError(t *testing.T) {
+func TestResourcesStoreIgnoresReplicationFailure(t *testing.T) {
 	Cache.Clear(nil)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ResourceSCfg().StoreInterval = -1
@@ -5519,8 +5519,10 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
 	var reply string
-	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != utils.ErrDisconnected {
+	if err := rS.V1AllocateResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
+	} else if reply != "Approved" {
+		t.Errorf("Unexpected reply returned: %q", reply)
 	}
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = false
 
@@ -5531,7 +5533,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 	}
 
 	cfg.DataDbCfg().Items[utils.MetaResources].Replicate = true
-	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err != utils.ErrDisconnected {
+	if err := rS.V1ReleaseResources(context.Background(), args, &reply); err != nil {
 		t.Error(err)
 	}
 }

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"time"
 
@@ -3160,6 +3161,60 @@ func TestDMSetLoadIDs(t *testing.T) {
 	var dm2 *DataManager
 	if err = dm2.SetLoadIDs(ld); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Error(err)
+	}
+}
+
+func TestDMSetLoadIDsReplicationFailure(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	oldCfg := config.CgrConfig()
+	oldCache := Cache
+	oldConnMgr := connMgr
+	oldLogger := utils.Logger
+	t.Cleanup(func() {
+		config.SetCgrConfig(oldCfg)
+		Cache = oldCache
+		SetConnManager(oldConnMgr)
+		utils.Logger = oldLogger
+	})
+
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)
+	cfg.DataDbCfg().RplConns = []string{connID}
+	cfg.DataDbCfg().Items = map[string]*config.ItemOpt{
+		utils.CacheLoadIDs: {Limit: 3, Replicate: true},
+	}
+	config.SetCgrConfig(cfg)
+	Cache = NewCacheS(cfg, nil, nil)
+
+	failingConn := make(chan birpc.ClientConnector, 1)
+	failingConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetLoadIDs: func(ctx *context.Context, args, reply any) error {
+				return errors.New("replication failed")
+			},
+		},
+	}
+	db, err := NewInternalDB(nil, nil, true, nil, cfg.DataDbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cm := NewConnManager(cfg, map[string]chan birpc.ClientConnector{connID: failingConn})
+	dm := NewDataManager(db, cfg.CacheCfg(), cm)
+	logger := &warningLogger{}
+	utils.Logger = logger
+
+	loadIDs := map[string]int64{"load3": 21}
+	if err := dm.SetLoadIDs(loadIDs); err != nil {
+		t.Fatal(err)
+	}
+	if len(logger.warnings) != 1 || !strings.Contains(logger.warnings[0], "failed to replicate load IDs") {
+		t.Fatalf("expected a replication warning, got %v", logger.warnings)
+	}
+	stored, err := dm.DataDB().GetItemLoadIDsDrv("")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(stored, loadIDs) {
+		t.Errorf("locally stored load IDs = %#v, want %#v", stored, loadIDs)
 	}
 }
 

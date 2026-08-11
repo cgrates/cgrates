@@ -106,9 +106,7 @@ func TestReplicatorDestinationKeys(t *testing.T) {
 		utils.ReplicatorSv1SetDestination,
 		utils.ReplicatorSv1SetReverseDestination,
 	} {
-		if err := r.replicate(utils.DestinationPrefix, "destination", method, nil, item); err != nil {
-			t.Fatal(err)
-		}
+		r.replicate(utils.DestinationPrefix, "destination", method, nil, item)
 	}
 	if len(r.pending) != 2 {
 		t.Fatalf("pending has %d items, want 2", len(r.pending))
@@ -149,22 +147,15 @@ func TestReplicatorFailedTaskReplacement(t *testing.T) {
 				connector := &mockConnector{err: failedErr}
 				r := newTestReplicator(t, mode.interval, failedDir, connector)
 				item := &config.ItemOpt{Replicate: true}
-				attempt := func(method string, args any) error {
-					err := r.replicate(utils.DestinationPrefix, "destination", method, args, item)
+				attempt := func(method string, args any) {
+					r.replicate(utils.DestinationPrefix, "destination", method, args, item)
 					if mode.interval > 0 {
 						r.flush()
 					}
-					return err
 				}
 
 				for i, method := range sequence.methods {
-					err := attempt(method, sequence.args[i])
-					if mode.interval == 0 && !errors.Is(err, failedErr) {
-						t.Fatalf("replicate returned %v, want %v", err, failedErr)
-					}
-					if mode.interval > 0 && err != nil {
-						t.Fatal(err)
-					}
+					attempt(method, sequence.args[i])
 				}
 				entries, err := os.ReadDir(failedDir)
 				if err != nil {
@@ -193,9 +184,7 @@ func TestReplicatorFailedTaskReplacement(t *testing.T) {
 				}
 
 				connector.err = nil
-				if err := attempt(sequence.methods[0], sequence.args[0]); err != nil {
-					t.Fatal(err)
-				}
+				attempt(sequence.methods[0], sequence.args[0])
 				entries, err = os.ReadDir(failedDir)
 				if err != nil {
 					t.Fatal(err)
@@ -249,9 +238,7 @@ func TestReplicatorIntervalFinalOperation(t *testing.T) {
 			}
 			item := &config.ItemOpt{Replicate: true}
 			for i, method := range test.methods {
-				if err := r.replicate(utils.DestinationPrefix, "destination", method, test.args[i], item); err != nil {
-					t.Fatal(err)
-				}
+				r.replicate(utils.DestinationPrefix, "destination", method, test.args[i], item)
 			}
 			if len(r.pending) != 1 {
 				t.Fatalf("pending has %d items, want 1", len(r.pending))
@@ -628,5 +615,31 @@ func TestReplicatorIndexesDisabled(t *testing.T) {
 	if len(connector.calls) != 0 || len(dm.replicator.pending) != 0 {
 		t.Fatalf("disabled replication made %d calls with %d pending patches",
 			len(connector.calls), len(dm.replicator.pending))
+	}
+}
+
+type warningLogger struct {
+	*utils.StdLogger
+	warnings []string
+}
+
+func (l *warningLogger) Warning(msg string) error {
+	l.warnings = append(l.warnings, msg)
+	return nil
+}
+
+func TestReplicatorImmediateFailureWarns(t *testing.T) {
+	logger := &warningLogger{}
+	oldLogger := utils.Logger
+	utils.Logger = logger
+	defer func() { utils.Logger = oldLogger }()
+
+	r := newTestReplicator(t, 0, "", &mockConnector{err: errors.New("replication failed")})
+	item := &config.ItemOpt{Replicate: true}
+	r.replicate(utils.DestinationPrefix, "destination",
+		utils.ReplicatorSv1SetDestination,
+		&DestinationWithAPIOpts{Destination: &Destination{Id: "destination"}}, item)
+	if len(logger.warnings) != 1 || !strings.Contains(logger.warnings[0], "failed to replicate") {
+		t.Fatalf("expected one replication warning, got %v", logger.warnings)
 	}
 }

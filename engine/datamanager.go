@@ -416,7 +416,7 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DestinationPrefix, dest.Id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetDestination,
 		&DestinationWithAPIOpts{
@@ -425,6 +425,7 @@ func (dm *DataManager) SetDestination(dest *Destination, transactionID string) (
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveDestination(destID string, transactionID string) (err error) {
@@ -456,7 +457,7 @@ func (dm *DataManager) RemoveDestination(destID string, transactionID string) (e
 	}
 
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDestinations]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DestinationPrefix, destID, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveDestination,
 		&utils.StringWithAPIOpts{
@@ -476,7 +477,7 @@ func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, t
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaReverseDestinations]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DestinationPrefix, destID, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetReverseDestination,
 		&DestinationWithAPIOpts{
@@ -485,6 +486,7 @@ func (dm *DataManager) SetReverseDestination(destID string, prefixes []string, t
 				Prefixes: prefixes,
 			},
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) GetReverseDestination(prefix string,
@@ -627,12 +629,13 @@ func (dm *DataManager) SetAccount(acc *Account) error {
 		return err
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]
-	return dm.replicator.replicate(utils.AccountPrefix, acc.ID,
+	dm.replicator.replicate(utils.AccountPrefix, acc.ID,
 		utils.ReplicatorSv1SetAccount,
 		&AccountWithAPIOpts{
 			Account: acc,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID, "", ""),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveAccount(id string) error {
@@ -643,7 +646,7 @@ func (dm *DataManager) RemoveAccount(id string) error {
 		return err
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccounts]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.AccountPrefix, id,
 		utils.ReplicatorSv1RemoveAccount,
 		&utils.StringWithAPIOpts{
@@ -732,7 +735,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.FilterPrefix, fltr.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetFilter,
 		&FilterWithAPIOpts{
@@ -740,6 +743,7 @@ func (dm *DataManager) SetFilter(fltr *Filter, withIndex bool) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveFilter(tenant, id string, withIndex bool) (err error) {
@@ -773,7 +777,7 @@ func (dm *DataManager) RemoveFilter(tenant, id string, withIndex bool) (err erro
 		return utils.ErrNotFound
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaFilters]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.FilterPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveFilter,
 		&utils.TenantIDWithAPIOpts{
@@ -840,7 +844,7 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ThresholdPrefix, th.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetThreshold,
 		&ThresholdWithAPIOpts{
@@ -848,6 +852,7 @@ func (dm *DataManager) SetThreshold(th *Threshold) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveThreshold(tenant, id string) (err error) {
@@ -858,7 +863,7 @@ func (dm *DataManager) RemoveThreshold(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholds]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ThresholdPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveThreshold,
 		&utils.TenantIDWithAPIOpts{
@@ -947,16 +952,14 @@ func (dm *DataManager) SetThresholdProfile(th *ThresholdProfile, withIndex bool)
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ThresholdProfilePrefix, th.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetThresholdProfile,
 		&ThresholdProfileWithAPIOpts{
 			ThresholdProfile: th,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 
 	if oldTh == nil || // create the threshold if it didn't exist before
 		oldTh.MaxHits != th.MaxHits ||
@@ -1002,7 +1005,7 @@ func (dm *DataManager) RemoveThresholdProfile(tenant, id string, withIndex bool)
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaThresholdProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ThresholdProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveThresholdProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -1086,7 +1089,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.StatQueuePrefix, sq.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetStatQueue,
 		&StatQueueWithAPIOpts{
@@ -1094,6 +1097,7 @@ func (dm *DataManager) SetStatQueue(sq *StatQueue) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 // RemoveStatQueue removes the StoredStatQueue
@@ -1105,7 +1109,7 @@ func (dm *DataManager) RemoveStatQueue(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueues]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.StatQueuePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveStatQueue,
 		&utils.TenantIDWithAPIOpts{
@@ -1195,16 +1199,14 @@ func (dm *DataManager) SetStatQueueProfile(sqp *StatQueueProfile, withIndex bool
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.StatQueueProfilePrefix, sqp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetStatQueueProfile,
 		&StatQueueProfileWithAPIOpts{
 			StatQueueProfile: sqp,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 	if oldSts == nil || // create the stats queue if it didn't exist before
 		oldSts.QueueLength != sqp.QueueLength ||
 		oldSts.TTL != sqp.TTL ||
@@ -1282,7 +1284,7 @@ func (dm *DataManager) RemoveStatQueueProfile(tenant, id string, withIndex bool)
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaStatQueueProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.StatQueueProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveStatQueueProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -1369,7 +1371,7 @@ func (dm *DataManager) SetTrend(tr *Trend) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TrendPrefix, tr.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetTrend,
 		&TrendWithAPIOpts{
@@ -1377,6 +1379,7 @@ func (dm *DataManager) SetTrend(tr *Trend) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 // RemoveTrend removes the stored Trend
@@ -1388,7 +1391,7 @@ func (dm *DataManager) RemoveTrend(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrends]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TrendPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveTrend,
 		&utils.TenantIDWithAPIOpts{
@@ -1493,16 +1496,14 @@ func (dm *DataManager) SetTrendProfile(trp *TrendProfile) (err error) {
 		return err
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTrendProfiles]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TrendsProfilePrefix, trp.TenantID(),
 		utils.ReplicatorSv1SetTrendProfile,
 		&TrendProfileWithAPIOpts{
 			TrendProfile: trp,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 	if oldTrd == nil ||
 		oldTrd.QueueLength != trp.QueueLength ||
 		oldTrd.Schedule != trp.Schedule {
@@ -1529,7 +1530,7 @@ func (dm *DataManager) RemoveTrendProfile(tenant, id string) (err error) {
 		return utils.ErrNotFound
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TrendsProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveTrendProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -1632,16 +1633,14 @@ func (dm *DataManager) SetRankingProfile(rnp *RankingProfile) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RankingsProfilePrefix, rnp.TenantID(),
 		utils.ReplicatorSv1SetRankingProfile,
 		&RankingProfileWithAPIOpts{
 			RankingProfile: rnp,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 	if oldRnk == nil || oldRnk.Sorting != rnp.Sorting ||
 		oldRnk.Schedule != rnp.Schedule {
 		if err = dm.SetRanking(NewRankingFromProfile(rnp)); err != nil {
@@ -1666,7 +1665,7 @@ func (dm *DataManager) RemoveRankingProfile(tenant, id string) (err error) {
 		return utils.ErrNotFound
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankingProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RankingsProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveRankingProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -1733,7 +1732,7 @@ func (dm *DataManager) SetRanking(rn *Ranking) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankings]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RankingPrefix, rn.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetRanking,
 		&RankingWithAPIOpts{
@@ -1741,6 +1740,7 @@ func (dm *DataManager) SetRanking(rn *Ranking) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 // RemoveRanking removes the stored Ranking
@@ -1752,7 +1752,7 @@ func (dm *DataManager) RemoveRanking(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRankings]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RankingPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveRanking,
 		&utils.TenantIDWithAPIOpts{
@@ -1829,7 +1829,7 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TimingsPrefix, t.ID, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetTiming,
 		&utils.TPTimingWithAPIOpts{
@@ -1837,6 +1837,7 @@ func (dm *DataManager) SetTiming(t *utils.TPTiming) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
@@ -1851,7 +1852,7 @@ func (dm *DataManager) RemoveTiming(id, transactionID string) (err error) {
 		return errCh
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaTimings]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.TimingsPrefix, id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveTiming,
 		id, itm)
@@ -1916,7 +1917,7 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ResourcesPrefix, rs.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetResource,
 		&ResourceWithAPIOpts{
@@ -1924,6 +1925,7 @@ func (dm *DataManager) SetResource(rs *Resource) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveResource(tenant, id string) (err error) {
@@ -1934,7 +1936,7 @@ func (dm *DataManager) RemoveResource(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResources]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ResourcesPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveResource,
 		&utils.TenantIDWithAPIOpts{
@@ -2024,16 +2026,14 @@ func (dm *DataManager) SetResourceProfile(rp *ResourceProfile, withIndex bool) (
 		Cache.Clear([]string{utils.CacheEventResources})
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ResourceProfilesPrefix, rp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetResourceProfile,
 		&ResourceProfileWithAPIOpts{
 			ResourceProfile: rp,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 	if oldRes == nil || // create the resource if it didn't exist before
 		oldRes.UsageTTL != rp.UsageTTL ||
 		oldRes.Limit != rp.Limit ||
@@ -2078,7 +2078,7 @@ func (dm *DataManager) RemoveResourceProfile(tenant, id string, withIndex bool) 
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaResourceProfile]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ResourceProfilesPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveResourceProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -2153,13 +2153,14 @@ func (dm *DataManager) SetIPAllocations(ip *IPAllocations) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPAllocations]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.IPAllocationsPrefix, ip.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetIPAllocations,
 		&IPAllocationsWithAPIOpts{
 			IPAllocations: ip,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveIPAllocations(tenant, id string) (err error) {
@@ -2170,7 +2171,7 @@ func (dm *DataManager) RemoveIPAllocations(tenant, id string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPAllocations]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.IPAllocationsPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveIPAllocations,
 		&utils.TenantIDWithAPIOpts{
@@ -2259,16 +2260,14 @@ func (dm *DataManager) SetIPProfile(ipp *IPProfile, withIndex bool) (err error) 
 		Cache.Clear([]string{utils.CacheEventIPs})
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPProfiles]
-	if err = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.IPProfilesPrefix, ipp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetIPProfile,
 		&IPProfileWithAPIOpts{
 			IPProfile: ipp,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
-		}, itm); err != nil {
-		return
-	}
+		}, itm)
 	if oldIPP == nil || // create the resource if it didn't exist before
 		oldIPP.TTL != ipp.TTL ||
 		oldIPP.Stored != ipp.Stored && oldIPP.Stored { // reset the resource if the profile changed this fields
@@ -2312,7 +2311,7 @@ func (dm *DataManager) RemoveIPProfile(tenant, id string, withIndex bool) (err e
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaIPProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.IPProfilesPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveIPProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -2381,7 +2380,7 @@ func (dm *DataManager) RemoveActionTriggers(id, transactionID string) (err error
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionTriggerPrefix, id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveActionTriggers,
 		&utils.StringWithAPIOpts{
@@ -2412,7 +2411,7 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers) (err e
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionTriggers]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionTriggerPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetActionTriggers,
 		&SetActionTriggersArgWithAPIOpts{
@@ -2422,6 +2421,7 @@ func (dm *DataManager) SetActionTriggers(key string, attr ActionTriggers) (err e
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) GetSharedGroup(key string, skipCache bool,
@@ -2482,7 +2482,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.SharedGroupPrefix, sg.Id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetSharedGroup,
 		&SharedGroupWithAPIOpts{
@@ -2491,6 +2491,7 @@ func (dm *DataManager) SetSharedGroup(sg *SharedGroup) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
@@ -2505,7 +2506,7 @@ func (dm *DataManager) RemoveSharedGroup(id, transactionID string) (err error) {
 		return errCh
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSharedGroups]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.SharedGroupPrefix, id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveSharedGroup,
 		&utils.StringWithAPIOpts{
@@ -2588,7 +2589,7 @@ func (dm *DataManager) SetActions(key string, as Actions) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetActions,
 		&SetActionsArgsWithAPIOpts{
@@ -2598,6 +2599,7 @@ func (dm *DataManager) SetActions(key string, as Actions) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveActions(key string) (err error) {
@@ -2608,7 +2610,7 @@ func (dm *DataManager) RemoveActions(key string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActions]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveActions,
 		&utils.StringWithAPIOpts{
@@ -2700,7 +2702,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionPlanPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetActionPlan,
 		&SetActionPlanArgWithAPIOpts{
@@ -2710,6 +2712,7 @@ func (dm *DataManager) SetActionPlan(key string, ats *ActionPlan,
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) GetAllActionPlans() (ats map[string]*ActionPlan, err error) {
@@ -2744,7 +2747,7 @@ func (dm *DataManager) RemoveActionPlan(key string, transactionID string) (err e
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaActionPlans]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ActionPlanPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveActionPlan,
 		&utils.StringWithAPIOpts{
@@ -2830,7 +2833,7 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.AccountActionPlansPrefix, acntID, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetAccountActionPlans,
 		&SetAccountActionPlansArgWithAPIOpts{
@@ -2840,6 +2843,7 @@ func (dm *DataManager) SetAccountActionPlans(acntID string, aPlIDs []string, ove
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 // RemAccountActionPlansArgsWithAPIOpts is used in replicatorV1 for dispatcher
@@ -2873,7 +2877,7 @@ func (dm *DataManager) RemAccountActionPlans(acntID string, apIDs []string) (err
 		return
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAccountActionPlans]; itm.Replicate {
-		_ = dm.replicator.replicate(
+		dm.replicator.replicate(
 			utils.AccountActionPlansPrefix, acntID,
 			utils.ReplicatorSv1RemAccountActionPlans,
 			&RemAccountActionPlansArgsWithAPIOpts{
@@ -2941,7 +2945,7 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RatingPlanPrefix, rp.Id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetRatingPlan,
 		&RatingPlanWithAPIOpts{
@@ -2950,6 +2954,7 @@ func (dm *DataManager) SetRatingPlan(rp *RatingPlan) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err error) {
@@ -2960,7 +2965,7 @@ func (dm *DataManager) RemoveRatingPlan(key string, transactionID string) (err e
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingPlans]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RatingPlanPrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveRatingPlan,
 		&utils.StringWithAPIOpts{
@@ -3030,7 +3035,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RatingProfilePrefix, rpf.Id, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetRatingProfile,
 		&RatingProfileWithAPIOpts{
@@ -3039,6 +3044,7 @@ func (dm *DataManager) SetRatingProfile(rpf *RatingProfile) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveRatingProfile(key string) (err error) {
@@ -3049,7 +3055,7 @@ func (dm *DataManager) RemoveRatingProfile(key string) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRatingProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RatingProfilePrefix, key, // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveRatingProfile,
 		&utils.StringWithAPIOpts{
@@ -3151,7 +3157,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RouteProfilePrefix, rpp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetRouteProfile,
 		&RouteProfileWithAPIOpts{
@@ -3159,6 +3165,7 @@ func (dm *DataManager) SetRouteProfile(rpp *RouteProfile, withIndex bool) (err e
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveRouteProfile(tenant, id string, withIndex bool) (err error) {
@@ -3185,7 +3192,7 @@ func (dm *DataManager) RemoveRouteProfile(tenant, id string, withIndex bool) (er
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaRouteProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.RouteProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveRouteProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -3287,7 +3294,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.AttributeProfilePrefix, ap.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetAttributeProfile,
 		&AttributeProfileWithAPIOpts{
@@ -3295,6 +3302,7 @@ func (dm *DataManager) SetAttributeProfile(ap *AttributeProfile, withIndex bool)
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveAttributeProfile(tenant, id string, withIndex bool) (err error) {
@@ -3323,7 +3331,7 @@ func (dm *DataManager) RemoveAttributeProfile(tenant, id string, withIndex bool)
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaAttributeProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.AttributeProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveAttributeProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -3413,7 +3421,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ChargerProfilePrefix, cpp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetChargerProfile,
 		&ChargerProfileWithAPIOpts{
@@ -3421,6 +3429,7 @@ func (dm *DataManager) SetChargerProfile(cpp *ChargerProfile, withIndex bool) (e
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveChargerProfile(tenant, id string, withIndex bool) (err error) {
@@ -3447,7 +3456,7 @@ func (dm *DataManager) RemoveChargerProfile(tenant, id string, withIndex bool) (
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaChargerProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.ChargerProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveChargerProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -3541,7 +3550,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DispatcherProfilePrefix, dpp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetDispatcherProfile,
 		&DispatcherProfileWithAPIOpts{
@@ -3549,6 +3558,7 @@ func (dm *DataManager) SetDispatcherProfile(dpp *DispatcherProfile, withIndex bo
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveDispatcherProfile(tenant, id string, withIndex bool) (err error) {
@@ -3577,7 +3587,7 @@ func (dm *DataManager) RemoveDispatcherProfile(tenant, id string, withIndex bool
 		}
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherProfiles]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DispatcherProfilePrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveDispatcherProfile,
 		&utils.TenantIDWithAPIOpts{
@@ -3646,7 +3656,7 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 		return
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DispatcherHostPrefix, dpp.TenantID(), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1SetDispatcherHost,
 		&DispatcherHostWithAPIOpts{
@@ -3654,6 +3664,7 @@ func (dm *DataManager) SetDispatcherHost(dpp *DispatcherHost) (err error) {
 			APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 				config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString),
 		}, itm)
+	return nil
 }
 
 func (dm *DataManager) RemoveDispatcherHost(tenant, id string) (err error) {
@@ -3671,7 +3682,7 @@ func (dm *DataManager) RemoveDispatcherHost(tenant, id string) (err error) {
 		return utils.ErrDSPHostNotFound
 	}
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaDispatcherHosts]
-	_ = dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.DispatcherHostPrefix, utils.ConcatenatedKey(tenant, id), // these are used to get the host IDs from cache
 		utils.ReplicatorSv1RemoveDispatcherHost,
 		&utils.TenantIDWithAPIOpts{
@@ -3728,19 +3739,19 @@ func (dm *DataManager) GetItemLoadIDs(itemIDPrefix string, cacheWrite bool) (loa
 }
 
 // SetLoadIDs sets the loadIDs in the DB
-func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
+func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
-	if err = dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
-		return
+	if err := dm.DataDB().SetLoadIDsDrv(loadIDs); err != nil {
+		return err
 	}
 	if itm := config.CgrConfig().DataDbCfg().Items[utils.MetaLoadIDs]; itm.Replicate {
 		objIDs := make([]string, 0, len(loadIDs))
 		for k := range loadIDs {
 			objIDs = append(objIDs, k)
 		}
-		err = replicateMultipleIDs(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
+		if err := replicateMultipleIDs(dm.connMgr, config.CgrConfig().DataDbCfg().RplConns,
 			config.CgrConfig().DataDbCfg().RplFiltered,
 			utils.LoadIDPrefix, objIDs, // these are used to get the host IDs from cache
 			utils.ReplicatorSv1SetLoadIDs,
@@ -3748,9 +3759,12 @@ func (dm *DataManager) SetLoadIDs(loadIDs map[string]int64) (err error) {
 				LoadIDs: loadIDs,
 				Tenant:  config.CgrConfig().GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)})
+					config.CgrConfig().DataDbCfg().RplCache, utils.EmptyString)}); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to replicate load IDs: %v", err))
+		}
 	}
-	return
+	return nil
 }
 
 // Reconnect reconnects to the DB when the config was changed
@@ -3858,7 +3872,7 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 		return nil
 	}
 	if transactionID != "" {
-		if err := dm.replicator.replicate(utils.CacheInstanceToPrefix[idxItmType], tntCtx,
+		dm.replicator.replicate(utils.CacheInstanceToPrefix[idxItmType], tntCtx,
 			utils.ReplicatorSv1SetIndexes,
 			&utils.SetIndexesArg{
 				IdxItmType: idxItmType,
@@ -3867,10 +3881,7 @@ func (dm *DataManager) SetIndexes(idxItmType, tntCtx string,
 				Tenant:     config.CgrConfig().GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					config.CgrConfig().DataDbCfg().RplCache, ""),
-			}, itm); err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<DataManager> failed to replicate index transaction for context %q: %v", tntCtx, err))
-		}
+			}, itm)
 		return nil
 	}
 	dm.replicateIndexes(idxItmType, tntCtx, indexes, false, itm)
@@ -4015,7 +4026,7 @@ func (dm *DataManager) SetBackupSessions(nodeID, tenant string,
 	}
 
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSessionsBackup]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.SessionsBackupPrefix, utils.ConcatenatedKey(tenant, nodeID),
 		utils.ReplicatorSv1SetBackupSessions,
 		&SetBackupSessionsArgs{
@@ -4023,6 +4034,7 @@ func (dm *DataManager) SetBackupSessions(nodeID, tenant string,
 			NodeID:         nodeID,
 			Tenant:         tenant,
 		}, itm)
+	return nil
 }
 
 type RemoveSessionBackupArgs struct {
@@ -4041,7 +4053,7 @@ func (dm *DataManager) RemoveSessionsBackup(nodeID, tenant, cgrid string) (err e
 	}
 
 	itm := config.CgrConfig().DataDbCfg().Items[utils.MetaSessionsBackup]
-	return dm.replicator.replicate(
+	dm.replicator.replicate(
 		utils.SessionsBackupPrefix, utils.ConcatenatedKey(tenant, nodeID),
 		utils.ReplicatorSv1RemoveSessionBackup,
 		&RemoveSessionBackupArgs{
@@ -4049,4 +4061,5 @@ func (dm *DataManager) RemoveSessionsBackup(nodeID, tenant, cgrid string) (err e
 			NodeID: nodeID,
 			Tenant: tenant,
 		}, itm)
+	return nil
 }
