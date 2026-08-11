@@ -1,0 +1,10 @@
+<profile name="cgrates">
+  <settings>
+    <param name="context" value="cgrates"/>
+    <param name="dialplan" value="XML"/>
+    <param name="sip-ip" value="127.0.0.1"/>
+    <param name="rtp-ip" value="127.0.0.1"/>
+    <param name="sip-port" value="5090"/>
+    <param name="auth-calls" value="false"/>
+  </settings>
+</profile>
