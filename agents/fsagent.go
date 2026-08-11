@@ -219,22 +219,29 @@ func (fsa *FSsessions) authorizePark(uuid string, connIdx int, destNr string, cg
 	fsa.unparkCall(uuid, connIdx, destNr, AUTH_OK)
 }
 
-func minAccountUsage(cgrRply *utils.DataNode) (min time.Duration, found bool) {
-	maxUsageRpl, has := cgrRply.Map[utils.CapMaxUsage]
-	if !has || maxUsageRpl == nil || maxUsageRpl.Value == nil {
-		return
+func minAccountUsage(cgrRply *utils.DataNode) (time.Duration, bool) {
+	maxUsage, has := cgrRply.Map[utils.CapMaxUsage]
+	if !has || maxUsage == nil {
+		return 0, false
 	}
-	switch d := maxUsageRpl.Value.Data.(type) {
-	case time.Duration:
-		min, found = d, true
-	case *utils.Decimal:
-		min, found = d.Duration()
-	default:
-		if dur, err := utils.IfaceAsDuration(maxUsageRpl.Value.Data); err == nil {
-			min, found = dur, true
+	if maxUsage.Value != nil {
+		usage, err := utils.IfaceAsDuration(maxUsage.Value.Data)
+		return usage, err == nil
+	}
+
+	// ProcessEvent may return one limit per run ID. Use the shortest one.
+	var min time.Duration
+	found := false
+	for _, node := range maxUsage.Map {
+		if node == nil || node.Value == nil {
+			continue
+		}
+		usage, err := utils.IfaceAsDuration(node.Value.Data)
+		if err == nil && (!found || usage < min) {
+			min, found = usage, true
 		}
 	}
-	return
+	return min, found
 }
 
 // Sets the call timeout valid of starting of the call
