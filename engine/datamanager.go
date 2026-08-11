@@ -560,7 +560,7 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaFilters]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.FilterPrefix, fltr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetFilter,
 			&FilterWithAPIOpts{
@@ -683,7 +683,7 @@ func (dm *DataManager) SetThreshold(ctx *context.Context, th *utils.Threshold) (
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaThresholds]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ThresholdPrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThreshold,
 			&utils.ThresholdWithAPIOpts{
@@ -806,15 +806,13 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *utils.Thres
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaThresholdProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ThresholdProfilePrefix, th.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetThresholdProfile,
 			&utils.ThresholdProfileWithAPIOpts{
 				ThresholdProfile: th,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 
 	if oldTh == nil || // create the threshold if it didn't exist before
@@ -973,15 +971,13 @@ func (dm *DataManager) setStatQueue(ctx *context.Context, sq *utils.StatQueue, r
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueues]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err := rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.StatQueuePrefix, sq.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueue,
 			&utils.StatQueueWithAPIOpts{
 				StatQueue: sq,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return err
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	return nil
 }
@@ -1099,15 +1095,13 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaStatQueueProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.StatQueueProfilePrefix, sqp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetStatQueueProfile,
 			&utils.StatQueueProfileWithAPIOpts{
 				StatQueueProfile: sqp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	if oldSts == nil || // create the stats queue if it didn't exist before
 		oldSts.QueueLength != sqp.QueueLength ||
@@ -1289,15 +1283,13 @@ func (dm *DataManager) SetTrend(ctx *context.Context, tr *utils.Trend) (err erro
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaTrends]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.TrendPrefix, tr.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetTrend,
 			&utils.TrendWithAPIOpts{
 				Trend: tr,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	return
 }
@@ -1434,7 +1426,7 @@ func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *utils.TrendPro
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaTrendProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.TrendProfilePrefix, trp.TenantID(),
 			utils.ReplicatorSv1SetTrendProfile,
 			&utils.TrendProfileWithAPIOpts{
@@ -1588,7 +1580,7 @@ func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *utils.Rankin
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRankingProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.RankingProfilePrefix, rnp.TenantID(),
 			utils.ReplicatorSv1SetRankingProfile,
 			&utils.RankingProfileWithAPIOpts{
@@ -1701,15 +1693,13 @@ func (dm *DataManager) SetRanking(ctx *context.Context, rn *utils.Ranking) (err 
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRankings]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.RankingPrefix, rn.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRanking,
 			&utils.RankingWithAPIOpts{
 				Ranking: rn,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	return
 }
@@ -1806,7 +1796,7 @@ func (dm *DataManager) SetResource(ctx *context.Context, rs *utils.Resource) (er
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaResources]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ResourcesPrefix, rs.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResource,
 			&utils.ResourceWithAPIOpts{
@@ -1929,15 +1919,13 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.Resour
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaResourceProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ResourceProfilesPrefix, rp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetResourceProfile,
 			&utils.ResourceProfileWithAPIOpts{
 				ResourceProfile: rp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	if oldRes == nil || // create the resource if it didn't exist before
 		oldRes.UsageTTL != rp.UsageTTL ||
@@ -2067,7 +2055,7 @@ func (dm *DataManager) SetIPAllocations(ctx *context.Context, ip *utils.IPAlloca
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaIPAllocations]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.IPAllocationsPrefix, ip.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetIPAllocations,
 			&utils.IPAllocationsWithAPIOpts{
@@ -2191,15 +2179,13 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 	if itm := dm.cfg.DbCfg().Items[utils.MetaIPProfiles]; itm.Replicate {
 		var rpl *replicator
 		rpl = dm.dbConns.GetReplicator(itm.DBConn)
-		if err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.IPProfilesPrefix, ipp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetIPProfile,
 			&utils.IPProfileWithAPIOpts{
 				IPProfile: ipp,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)}, itm); err != nil {
-			return
-		}
+					dbCfg.RplCache, utils.EmptyString)}, itm)
 	}
 	if oldIPP == nil || // create the resource if it didn't exist before
 		oldIPP.TTL != ipp.TTL ||
@@ -2365,7 +2351,7 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *utils.RoutePro
 
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRouteProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.RouteProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRouteProfile,
 			&utils.RouteProfileWithAPIOpts{
@@ -2523,7 +2509,7 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *utils.Attri
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaAttributeProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.AttributeProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAttributeProfile,
 			&utils.AttributeProfileWithAPIOpts{
@@ -2662,7 +2648,7 @@ func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *utils.Charge
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaChargerProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ChargerProfilePrefix, cpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetChargerProfile,
 			&utils.ChargerProfileWithAPIOpts{
@@ -2764,7 +2750,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 }
 
 // SetLoadIDs sets the loadIDs in the DB
-func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64) (err error) {
+func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2772,15 +2758,15 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 	if err != nil {
 		return err
 	}
-	if err = db.SetLoadIDsDrv(ctx, loadIDs); err != nil {
-		return
+	if err := db.SetLoadIDsDrv(ctx, loadIDs); err != nil {
+		return err
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaLoadIDs]; itm.Replicate {
 		objIDs := make([]string, 0, len(loadIDs))
 		for k := range loadIDs {
 			objIDs = append(objIDs, k)
 		}
-		err = replicateMultipleIDs(ctx, dm.connMgr, dbCfg.RplConns,
+		if err := replicateMultipleIDs(ctx, dm.connMgr, dbCfg.RplConns,
 			dbCfg.RplFiltered,
 			utils.LoadIDPrefix, objIDs, // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetLoadIDs,
@@ -2788,9 +2774,12 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 				LoadIDs: loadIDs,
 				Tenant:  dm.cfg.GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
-					dbCfg.RplCache, utils.EmptyString)})
+					dbCfg.RplCache, utils.EmptyString)}); err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to replicate load IDs: %v", err))
+		}
 	}
-	return
+	return nil
 }
 
 func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
@@ -2940,7 +2929,7 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.RateProfilePrefix, rpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
 			&utils.RateProfileWithAPIOpts{
@@ -3050,7 +3039,7 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 
 	if itm := dm.cfg.DbCfg().Items[utils.MetaRateProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.RateProfilePrefix, oldRpp.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetRateProfile,
 			&utils.RateProfileWithAPIOpts{
@@ -3149,7 +3138,7 @@ func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *utils.ActionPr
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaActionProfiles]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.ActionProfilePrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetActionProfile,
 			&utils.ActionProfileWithAPIOpts{
@@ -3336,7 +3325,7 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 	}
 	if transactionID != "" {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		if err := rpl.replicate(ctx, utils.CacheInstanceToPrefix[idxItmType], tntCtx,
+		rpl.replicate(ctx, utils.CacheInstanceToPrefix[idxItmType], tntCtx,
 			utils.ReplicatorSv1SetIndexes,
 			&utils.SetIndexesArg{
 				IdxItmType: idxItmType,
@@ -3345,10 +3334,7 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 				Tenant:     dm.cfg.GeneralCfg().DefaultTenant,
 				APIOpts: utils.GenerateDBItemOpts(itm.APIKey, itm.RouteID,
 					dbCfg.RplCache, ""),
-			}, itm); err != nil {
-			utils.Logger.Warning(fmt.Sprintf(
-				"<DataManager> failed to replicate index transaction for context %q: %v", tntCtx, err))
-		}
+			}, itm)
 		return nil
 	}
 	dm.replicateIndexes(ctx, idxItmType, tntCtx, indexes, false, itm, dbCfg)
@@ -3541,7 +3527,7 @@ func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withI
 	}
 	if itm := dm.cfg.DbCfg().Items[utils.MetaAccounts]; itm.Replicate {
 		rpl := dm.dbConns.GetReplicator(itm.DBConn)
-		err = rpl.replicate(ctx,
+		rpl.replicate(ctx,
 			utils.AccountPrefix, ap.TenantID(), // this are used to get the host IDs from cache
 			utils.ReplicatorSv1SetAccount,
 			&utils.AccountWithAPIOpts{

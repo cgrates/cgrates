@@ -8,7 +8,6 @@ package general_tests
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
 	"time"
 
@@ -249,8 +248,8 @@ func TestReplicatorFailedPostsNoInterval(t *testing.T) {
 				ID:     "1001",
 			},
 		},
-		&reply); err == nil || !strings.Contains(err.Error(), "connect: connection refused") {
-		t.Fatal("expected connection refused error")
+		&reply); err != nil {
+		t.Fatal(err)
 	}
 	if err := primaryClient.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
 		&utils.APIAttributeProfileWithAPIOpts{
@@ -262,10 +261,33 @@ func TestReplicatorFailedPostsNoInterval(t *testing.T) {
 				},
 			},
 		},
-		&reply); err == nil || !strings.Contains(err.Error(), "connect: connection refused") {
-		t.Fatal("expected connection refused error")
+		&reply); err != nil {
+		t.Fatal(err)
 	}
 
+	var primaryAcnt utils.Account
+	if err := primaryClient.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+			},
+		},
+		&primaryAcnt); err != nil {
+		t.Fatalf("account 1001 not found on primary: %v", err)
+	}
+
+	var primaryAttr utils.APIAttributeProfile
+	if err := primaryClient.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{
+				Tenant: "cgrates.org",
+				ID:     "ATTR_1001",
+			},
+		},
+		&primaryAttr); err != nil {
+		t.Fatalf("attribute profile ATTR_1001 not found on primary: %v", err)
+	}
 	entries, err := os.ReadDir(failedDir)
 	if err != nil {
 		t.Fatal(err)

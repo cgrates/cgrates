@@ -105,22 +105,15 @@ func TestReplicatorFailedTaskReplacement(t *testing.T) {
 				connector := &mockConnector{err: failedErr}
 				r := newTestReplicator(t, mode.interval, failedDir, connector)
 				item := &config.ItemOpts{Replicate: true}
-				attempt := func(method string, args any) error {
-					err := r.replicate(context.Background(), utils.AttributeProfilePrefix, "cgrates.org:destination", method, args, item)
+				attempt := func(method string, args any) {
+					r.replicate(context.Background(), utils.AttributeProfilePrefix, "cgrates.org:destination", method, args, item)
 					if mode.interval > 0 {
 						r.flush()
 					}
-					return err
 				}
 
 				for i, method := range sequence.methods {
-					err := attempt(method, sequence.args[i])
-					if mode.interval == 0 && !errors.Is(err, failedErr) {
-						t.Fatalf("replicate returned %v, want %v", err, failedErr)
-					}
-					if mode.interval > 0 && err != nil {
-						t.Fatal(err)
-					}
+					attempt(method, sequence.args[i])
 				}
 				entries, err := os.ReadDir(failedDir)
 				if err != nil {
@@ -149,9 +142,7 @@ func TestReplicatorFailedTaskReplacement(t *testing.T) {
 				}
 
 				connector.err = nil
-				if err := attempt(sequence.methods[0], sequence.args[0]); err != nil {
-					t.Fatal(err)
-				}
+				attempt(sequence.methods[0], sequence.args[0])
 				entries, err = os.ReadDir(failedDir)
 				if err != nil {
 					t.Fatal(err)
@@ -202,9 +193,7 @@ func TestReplicatorIntervalFinalOperation(t *testing.T) {
 			r := newTestReplicator(t, time.Second, "", &mockConnector{})
 			item := &config.ItemOpts{Replicate: true}
 			for i, method := range test.methods {
-				if err := r.replicate(context.Background(), utils.AttributeProfilePrefix, "cgrates.org:destination", method, test.args[i], item); err != nil {
-					t.Fatal(err)
-				}
+				r.replicate(context.Background(), utils.AttributeProfilePrefix, "cgrates.org:destination", method, test.args[i], item)
 			}
 			if len(r.pending) != 1 {
 				t.Fatalf("pending has %d items, want 1", len(r.pending))
@@ -642,5 +631,31 @@ func TestReplicationTaskGobRoundTrip(t *testing.T) {
 				t.Fatalf("decode: %v", err)
 			}
 		})
+	}
+}
+
+type warningLogger struct {
+	*utils.StdLogger
+	warnings []string
+}
+
+func (l *warningLogger) Warning(msg string) error {
+	l.warnings = append(l.warnings, msg)
+	return nil
+}
+
+func TestReplicatorImmediateFailureWarns(t *testing.T) {
+	logger := &warningLogger{}
+	oldLogger := utils.Logger
+	utils.Logger = logger
+	defer func() { utils.Logger = oldLogger }()
+
+	r := newTestReplicator(t, 0, "", &mockConnector{err: errors.New("replication failed")})
+	item := &config.ItemOpts{Replicate: true}
+	r.replicate(context.Background(), utils.AttributeProfilePrefix, "destination",
+		utils.ReplicatorSv1SetAttributeProfile,
+		&utils.AttributeProfileWithAPIOpts{AttributeProfile: &utils.AttributeProfile{Tenant: "cgrates.org", ID: "destination"}}, item)
+	if len(logger.warnings) != 1 || !strings.Contains(logger.warnings[0], "failed to replicate") {
+		t.Fatalf("expected one replication warning, got %v", logger.warnings)
 	}
 }
