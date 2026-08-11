@@ -108,17 +108,13 @@ func BenchmarkReplicatorImmediate(b *testing.B) {
 	b.Run("FailedDirDisabled", func(b *testing.B) {
 		r := newTestReplicator(b, 0, "", &mockConnector{})
 		for b.Loop() {
-			if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-				b.Fatal(err)
-			}
+			r.replicate(objType, call.objID, call.method, call.args, item)
 		}
 	})
 	b.Run("FailedDirEnabled", func(b *testing.B) {
 		r := newTestReplicator(b, 0, b.TempDir(), &mockConnector{})
 		for b.Loop() {
-			if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-				b.Fatal(err)
-			}
+			r.replicate(objType, call.objID, call.method, call.args, item)
 		}
 	})
 }
@@ -133,10 +129,7 @@ func BenchmarkReplicatorImmediateParallel(b *testing.B) {
 		b.ResetTimer()
 		b.RunParallel(func(pb *testing.PB) {
 			for pb.Next() {
-				if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-					b.Error(err)
-					return
-				}
+				r.replicate(objType, call.objID, call.method, call.args, item)
 			}
 		})
 	})
@@ -148,10 +141,7 @@ func BenchmarkReplicatorImmediateParallel(b *testing.B) {
 		b.RunParallel(func(pb *testing.PB) {
 			call := calls[workerID.Add(1)-1]
 			for pb.Next() {
-				if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-					b.Error(err)
-					return
-				}
+				r.replicate(objType, call.objID, call.method, call.args, item)
 			}
 		})
 	})
@@ -174,9 +164,7 @@ func BenchmarkReplicatorIntervalQueue(b *testing.B) {
 			next := 0
 			for b.Loop() {
 				call := benchmark.calls[next]
-				if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-					b.Fatal(err)
-				}
+				r.replicate(objType, call.objID, call.method, call.args, item)
 				next++
 				if next == len(benchmark.calls) {
 					// Draining outside the timer keeps pending memory bounded without measuring RPC calls.
@@ -208,9 +196,7 @@ func BenchmarkReplicatorIntervalBatch(b *testing.B) {
 			for b.Loop() {
 				objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 				for _, call := range benchmark.calls {
-					if err := r.replicate(objType, call.objID, call.method, call.args, item); err != nil {
-						b.Fatal(err)
-					}
+					r.replicate(objType, call.objID, call.method, call.args, item)
 				}
 				r.flush()
 			}
@@ -220,16 +206,13 @@ func BenchmarkReplicatorIntervalBatch(b *testing.B) {
 }
 
 func BenchmarkReplicatorFailedWrite(b *testing.B) {
-	wantErr := errors.New("replication failed")
 	r := newTestReplicator(b, 0, b.TempDir(),
-		&mockConnector{err: wantErr})
+		&mockConnector{err: errors.New("replication failed")})
 	item := &config.ItemOpt{Replicate: true}
 	call := newReplicationCall("cgrates.org:benchmark")
 	objType := utils.CacheInstanceToPrefix[utils.CacheAttributeProfiles]
 	for b.Loop() {
-		if err := r.replicate(objType, call.objID, call.method, call.args, item); !errors.Is(err, wantErr) {
-			b.Fatalf("replicate returned %v, want %v", err, wantErr)
-		}
+		r.replicate(objType, call.objID, call.method, call.args, item)
 	}
 }
 

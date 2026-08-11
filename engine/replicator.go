@@ -125,9 +125,9 @@ func replicationKey(objType, objID, method string) string {
 // When interval > 0, the replication task is queued for the next batch.
 // Otherwise, it executes immediately.
 func (r *replicator) replicate(objType, objID, method string, args any,
-	item *config.ItemOpt) error {
+	item *config.ItemOpt) {
 	if !item.Replicate {
-		return nil
+		return
 	}
 	key := replicationKey(objType, objID, method)
 	if r.interval > 0 {
@@ -139,9 +139,13 @@ func (r *replicator) replicate(objType, objID, method string, args any,
 			method:  method,
 			args:    args,
 		}
-		return nil
+		return
 	}
-	return r.replicateAndRestore(key, objType, objID, method, args)
+	if err := r.replicateAndRestore(key, objType, objID, method, args); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<DataManager> failed to replicate %q for object %q: %v",
+			method, objType+objID, err))
+	}
 }
 
 func mergeIndexPatch(patch, newer *utils.SetIndexesArg) {
