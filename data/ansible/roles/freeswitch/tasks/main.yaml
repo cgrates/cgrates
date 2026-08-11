@@ -1,38 +1,37 @@
 ---
-- name: Update apt cache and install required packages
-  become: yes
-  ansible.builtin.apt:
-    name: "{{ freeswitch_dependencies }}"
-    state: present
-    update_cache: yes
-    cache_valid_time: 86400
-
 - name: Download SignalWire FreeSWITCH GPG key
-  become: yes
+  become: true
   ansible.builtin.get_url:
     url: https://freeswitch.signalwire.com/repo/deb/debian-release/signalwire-freeswitch-repo.gpg
     dest: /usr/share/keyrings/signalwire-freeswitch-repo.gpg
-    headers:
-      Authorization: "Basic {{ ('signalwire:' ~ signalwire_token) | b64encode }}"
+    url_username: signalwire
+    url_password: "{{ signalwire_token }}"
+    force_basic_auth: true
+    mode: '0644'
 
-
-- name: Create auth.conf file
-  become: yes
+- name: Configure FreeSWITCH repository authentication
+  become: true
   ansible.builtin.copy:
     dest: /etc/apt/auth.conf
     content: |
       machine freeswitch.signalwire.com login signalwire password {{ signalwire_token }}
+    owner: root
+    group: root
     mode: '0600'
+  no_log: true
 
 - name: Add SignalWire FreeSWITCH repository
-  become: yes
+  become: true
   ansible.builtin.template:
     src: freeswitch.list.j2
     dest: /etc/apt/sources.list.d/freeswitch.list
+    owner: root
+    group: root
+    mode: '0644'
 
-- name: Update apt cache and install FreeSWITCH
-  become: yes
+- name: Install FreeSWITCH
+  become: true
   ansible.builtin.apt:
     name: freeswitch-meta-all
     state: present
-    update_cache: yes
+    update_cache: true
