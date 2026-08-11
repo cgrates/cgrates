@@ -4,10 +4,12 @@
 package engine
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -3264,6 +3266,57 @@ func TestDMSetLoadIDsReplicate(t *testing.T) {
 
 }
 
+func TestDMSetLoadIDsReplicationFailure(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := NewLocker(cfg)
+
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicatorSv1)
+	dbCfg := cfg.DbCfg().DBConns[utils.MetaDefault]
+	dbCfg.RplConns = []string{connID}
+	cfg.DbCfg().Items = map[string]*config.ItemOpts{
+		utils.CacheLoadIDs: {Limit: 3, Replicate: true, DBConn: utils.MetaDefault},
+	}
+
+	failingConn := make(chan birpc.ClientConnector, 1)
+	failingConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetLoadIDs: func(ctx *context.Context, args, reply any) error {
+				return errors.New("replication failed")
+			},
+		},
+	}
+	db, err := NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cm := NewConnManager(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
+	cm.SetCache(cacheS)
+	cm.AddInternalConn(connID, utils.ReplicatorSv1, failingConn)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cm, locker)
+	dm.SetCache(cacheS)
+	logger := &warningLogger{}
+	oldLogger := utils.Logger
+	utils.Logger = logger
+	t.Cleanup(func() { utils.Logger = oldLogger })
+
+	loadIDs := map[string]int64{"load3": 21}
+	if err := dm.SetLoadIDs(context.Background(), loadIDs); err != nil {
+		t.Fatal(err)
+	}
+	if len(logger.warnings) != 1 || !strings.Contains(logger.warnings[0], "failed to replicate load IDs") {
+		t.Fatalf("expected a replication warning, got %v", logger.warnings)
+	}
+	stored, err := db.GetItemLoadIDsDrv(context.Background(), "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(stored, loadIDs) {
+		t.Errorf("locally stored load IDs = %#v, want %#v", stored, loadIDs)
+	}
+}
+
 func TestDMCheckFiltersErrBadReference(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
@@ -4193,8 +4246,8 @@ func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 		Async: true,
 	}
 
-	if err := dm.SetThresholdProfile(context.Background(), th, true); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetThresholdProfile(context.Background(), th, true); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -5272,8 +5325,8 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 
-	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetResourceProfile(context.Background(), &utils.ResourceProfile{}, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -5982,8 +6035,8 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetRouteProfile(context.Background(), rpp, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetRouteProfile(context.Background(), rpp, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -7375,8 +7428,8 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetAttributeProfile(context.Background(), attrPrfl, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -7665,8 +7718,8 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetChargerProfile(context.Background(), cpp, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -7869,8 +7922,8 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetActionProfile(context.Background(), ap, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetActionProfile(context.Background(), ap, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -8108,8 +8161,8 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetRateProfile(context.Background(), rpp, false, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetRateProfile(context.Background(), rpp, false, false); err != nil {
+		t.Error(err)
 	}
 
 }
@@ -8593,8 +8646,8 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	// tests replicate
-	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err != utils.ErrNotImplemented {
-		t.Errorf("Expected error <%v>, received error <%v>", utils.ErrNotImplemented, err)
+	if err := dm.SetStatQueueProfile(context.Background(), sqp, false); err != nil {
+		t.Error(err)
 	}
 
 }
