@@ -82,6 +82,11 @@ func (c *ERsCfg) appendERsReaders(jsnReaders *[]*EventReaderJsonCfg, msgTemplate
 		if err := rdr.loadFromJSONCfg(jsnReader, msgTemplates); err != nil {
 			return err
 		}
+		// CgrCDR loads complete events and does not need the default CSV Fields.
+		if rdr.Type == utils.MetaCgrcdr && jsnReader.Fields == nil &&
+			fcTemplatesEqual(rdr.Fields, getDftEvRdrCfg().Fields) {
+			rdr.Fields = nil
+		}
 
 	}
 	return nil

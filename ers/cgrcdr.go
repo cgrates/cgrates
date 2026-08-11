@@ -8,11 +8,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"maps"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -261,6 +263,36 @@ func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable, lazyFilters []strin
 	if pass, err := rdr.fltrS.Pass(context.TODO(), cgrEv.Tenant, lazyFilters,
 		cgrEv.AsDataProvider()); err != nil || !pass {
 		return err
+	}
+	if len(rdr.Config().Fields) != 0 {
+		reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
+			utils.MetaReaderID: utils.NewLeafNode(rdr.Config().ID),
+		}}
+		// Copy the options because their original values may be exported later.
+		opts := maps.Clone(cgrEv.APIOpts)
+		agReq := agents.NewAgentRequest(
+			utils.MapStorage(cgrEv.Event), reqVars,
+			nil, nil, utils.MapStorage(opts), nil,
+			cgrEv.Tenant,
+			utils.FirstNonEmpty(rdr.Config().Timezone,
+				rdr.cgrCfg.GeneralCfg().DefaultTimezone),
+			rdr.cgrCfg, nil, rdr.fltrS, nil)
+		// Copy the stored Event first so values not listed in Fields stay unchanged.
+		for k, v := range cgrEv.Event {
+			if err := agReq.CGRRequest.Set(utils.NewFullPath(k), v); err != nil {
+				return err
+			}
+		}
+		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
+			return err
+		}
+		if ev := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant,
+			utils.NestingSep, agReq.Opts); ev != nil {
+			cgrEv.Event = ev.Event
+		} else {
+			cgrEv.Event = make(map[string]any)
+		}
+		cgrEv.APIOpts = agReq.Opts
 	}
 	rdrEv := rdr.rdrEvents
 	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
