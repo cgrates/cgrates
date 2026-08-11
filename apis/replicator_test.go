@@ -172,6 +172,93 @@ func TestReplayGroupedIndexPatch(t *testing.T) {
 	}
 }
 
+func TestReplicatorRemoveCacheRouting(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)
+	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
+		{ConnIDs: []string{connID}},
+	}
+	locker := engine.NewLocker(cfg)
+	dataDB, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cache := make(replicationRPCMock, 1)
+	cacheConn := make(chan birpc.ClientConnector, 1)
+	cacheConn <- cache
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.AddInternalConn(connID, utils.CacheSv1, cacheConn)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	connMgr.SetCache(cacheS)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	dm.SetCache(cacheS)
+	api := NewAdminSv1(cfg, dm, connMgr, engine.NewFilterS(cfg, connMgr, dm), locker)
+	replicator := NewReplicatorSv1(dm, api)
+	tests := []struct {
+		name             string
+		remove           func(*context.Context, *utils.TenantIDWithAPIOpts, *string) error
+		expectedCacheIDs []string
+	}{
+		{"Threshold", replicator.RemoveThreshold, []string{utils.CacheThresholds}},
+		{"StatQueue", replicator.RemoveStatQueue, []string{utils.CacheStatQueues}},
+		{"Filter", replicator.RemoveFilter, []string{utils.CacheFilters}},
+		{"ThresholdProfile", replicator.RemoveThresholdProfile, []string{utils.CacheThresholdProfiles, utils.CacheThresholds}},
+		{"StatQueueProfile", replicator.RemoveStatQueueProfile, []string{utils.CacheStatQueueProfiles, utils.CacheStatQueues}},
+		{"RankingProfile", replicator.RemoveRankingProfile, []string{utils.CacheRankingProfiles}},
+		{"Ranking", replicator.RemoveRanking, []string{utils.CacheRankings}},
+		{"Trend", replicator.RemoveTrend, []string{utils.CacheTrends}},
+		{"TrendProfile", replicator.RemoveTrendProfile, []string{utils.CacheTrendProfiles}},
+		{"Resource", replicator.RemoveResource, []string{utils.CacheResources}},
+		{"ResourceProfile", replicator.RemoveResourceProfile, []string{utils.CacheResourceProfiles, utils.CacheResources}},
+		{"IPAllocations", replicator.RemoveIPAllocations, []string{utils.CacheIPAllocations}},
+		{"IPProfile", replicator.RemoveIPProfile, []string{utils.CacheIPProfiles, utils.CacheIPAllocations}},
+		{"RouteProfile", replicator.RemoveRouteProfile, []string{utils.CacheRouteProfiles}},
+		{"AttributeProfile", replicator.RemoveAttributeProfile, []string{utils.CacheAttributeProfiles}},
+		{"ChargerProfile", replicator.RemoveChargerProfile, []string{utils.CacheChargerProfiles}},
+	}
+	tntID := utils.NewTenantID("cgrates.org:item")
+	args := &utils.TenantIDWithAPIOpts{
+		TenantID: tntID,
+		APIOpts:  map[string]any{utils.MetaCache: utils.MetaRemove},
+	}
+	wantIDs := []string{tntID.TenantID()}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			var reply string
+			if err := test.remove(context.Background(), args, &reply); err != nil {
+				t.Fatal(err)
+			}
+			if reply != utils.OK {
+				t.Fatalf("reply = %q, want %q", reply, utils.OK)
+			}
+			if len(cache) != 1 {
+				t.Fatalf("cache has %d calls, want 1", len(cache))
+			}
+			request := <-cache
+			if request.method != utils.CacheSv1RemoveItems {
+				t.Fatalf("cache method = %q, want %q", request.method, utils.CacheSv1RemoveItems)
+			}
+			cacheArgs, ok := request.args.(*utils.AttrReloadCacheWithAPIOpts)
+			if !ok {
+				t.Fatalf("cache args = %#v, want *utils.AttrReloadCacheWithAPIOpts", request.args)
+			}
+			cacheIDs := cacheArgs.Map()
+			for _, cacheID := range test.expectedCacheIDs {
+				if ids := cacheIDs[cacheID]; !reflect.DeepEqual(ids, wantIDs) {
+					t.Fatalf("cache %q IDs = %v, want %v", cacheID, ids, wantIDs)
+				}
+				delete(cacheIDs, cacheID)
+			}
+			for cacheID, ids := range cacheIDs {
+				if len(ids) != 0 {
+					t.Fatalf("cache %q IDs = %v, want none", cacheID, ids)
+				}
+			}
+		})
+	}
+}
+
 func TestNewReplicatorSv1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
