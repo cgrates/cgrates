@@ -1,6 +1,2 @@
 ---
 signalwire_token: YOURSIGNALWIRETOKEN
-freeswitch_dependencies:
-  - gnupg2
-  - wget
-  - lsb-release
