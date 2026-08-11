@@ -33,6 +33,7 @@ func TestReplicationKey(t *testing.T) {
 		{set: utils.ReplicatorSv1SetStatQueue, remove: utils.ReplicatorSv1RemoveStatQueue},
 		{set: utils.ReplicatorSv1SetFilter, remove: utils.ReplicatorSv1RemoveFilter},
 		{set: utils.ReplicatorSv1SetRankingProfile, remove: utils.ReplicatorSv1RemoveRankingProfile},
+		{set: utils.ReplicatorSv1SetRanking, remove: utils.ReplicatorSv1RemoveRanking},
 		{set: utils.ReplicatorSv1SetTrendProfile, remove: utils.ReplicatorSv1RemoveTrendProfile},
 		{set: utils.ReplicatorSv1SetTrend, remove: utils.ReplicatorSv1RemoveTrend},
 		{set: utils.ReplicatorSv1SetResourceProfile, remove: utils.ReplicatorSv1RemoveResourceProfile},
@@ -54,8 +55,6 @@ func TestReplicationKey(t *testing.T) {
 	}
 
 	separate := []string{
-		utils.ReplicatorSv1SetRanking,
-		utils.ReplicatorSv1RemoveRanking,
 		utils.ReplicatorSv1SetRateProfile,
 		utils.ReplicatorSv1RemoveRateProfile,
 		utils.ReplicatorSv1SetIndexes,
