@@ -3320,3 +3320,398 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
 	}
 }
+
+func TestEventChargesAbstractConcretes(t *testing.T) {
+	tests := []struct {
+		name         string
+		ec           *EventCharges
+		expAbstracts *Decimal
+		expConcretes *Decimal
+	}{
+		{
+			name: "Balance Type: MetaAbstract",
+			ec: &EventCharges{
+				Abstracts: NewDecimal(30000, 0),
+				Concretes: NewDecimal(30000, 0),
+				Charges: []*ChargeEntry{
+					{
+						ChargingID:     "f894244",
+						CompressFactor: 1,
+					},
+					{
+						ChargingID:     "f894245",
+						CompressFactor: 4,
+					},
+				},
+				Accounting: map[string]*AccountCharge{
+					"f894244": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA1",
+						Units:        NewDecimal(30000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+					"f894245": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA2",
+						Units:        NewDecimal(20000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+				},
+				Rating: map[string]*RateSInterval{
+					"877a74e": {
+						Increments: []*RateSIncrement{
+							{
+								RateIntervalIndex: 0,
+								RateID:            "3365d99",
+								CompressFactor:    1,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*IntervalRate{
+					"3365d99": {
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				Accounts: map[string]*Account{
+					"2343000000000123": {
+						Tenant:    CGRateSorg,
+						ID:        "2343000000000123",
+						FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+						Balances: map[string]*Balance{
+							"DATA1": {
+								ID: "DATA1",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 4,
+									},
+								},
+								Type:  MetaAbstract,
+								Units: NewDecimal(300*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+							"DATA2": {
+								ID: "DATA2",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 4,
+									},
+								},
+								Type:  MetaAbstract,
+								Units: NewDecimal(500*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expAbstracts: NewDecimal(110000, 0),
+			expConcretes: nil,
+		},
+		{
+			name: "Balance Type: MetaConcrete",
+			ec: &EventCharges{
+				Charges: []*ChargeEntry{
+					{
+						ChargingID:     "97aa08e",
+						CompressFactor: 1,
+					},
+					{
+						ChargingID:     "97aa08e",
+						CompressFactor: 3,
+					},
+				},
+				Accounting: map[string]*AccountCharge{
+					"97aa08e": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA3",
+						Units:        NewDecimal(40000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+				},
+				Rating: map[string]*RateSInterval{
+					"877a74e": {
+						Increments: []*RateSIncrement{
+							{
+								RateIntervalIndex: 0,
+								RateID:            "3365d99",
+								CompressFactor:    1,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*IntervalRate{
+					"3365d99": {
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				Accounts: map[string]*Account{
+					"2343000000000123": {
+						Tenant:    CGRateSorg,
+						ID:        "2343000000000123",
+						FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+						Balances: map[string]*Balance{
+							"DATA3": {
+								ID: "DATA3",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 5,
+									},
+								},
+								Type:  MetaConcrete,
+								Units: NewDecimal(50*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expAbstracts: nil,
+			expConcretes: NewDecimal(160000, 0),
+		},
+		{
+			name: "Account with both balance types: MetaConcrete and MetaAbstract",
+			ec: &EventCharges{
+				Charges: []*ChargeEntry{
+					{
+						ChargingID:     "43e77a7",
+						CompressFactor: 1,
+					},
+					{
+						ChargingID:     "f894244",
+						CompressFactor: 1,
+					},
+				},
+				Accounting: map[string]*AccountCharge{
+					"43e77a7": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA1",
+						Units:        NewDecimal(50000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+					"f894244": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA2",
+						Units:        NewDecimal(30000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+				},
+				Rating: map[string]*RateSInterval{
+					"877a74e": {
+						Increments: []*RateSIncrement{
+							{
+								RateIntervalIndex: 0,
+								RateID:            "3365d99",
+								CompressFactor:    1,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*IntervalRate{
+					"3365d99": {
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				Accounts: map[string]*Account{
+					"2343000000000123": {
+						Tenant:    CGRateSorg,
+						ID:        "2343000000000123",
+						FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+						Balances: map[string]*Balance{
+							"DATA1": {
+								ID: "DATA1",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 5,
+									},
+								},
+								Type:  MetaConcrete,
+								Units: NewDecimal(50*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+							"DATA2": {
+								ID: "DATA2",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 4,
+									},
+								},
+								Type:  MetaAbstract,
+								Units: NewDecimal(300*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expAbstracts: NewDecimal(30000, 0),
+			expConcretes: NewDecimal(50000, 0),
+		},
+		{
+			name: "0 Units",
+			ec: &EventCharges{
+				Charges: []*ChargeEntry{
+					{
+						ChargingID:     "43e77a7",
+						CompressFactor: 1,
+					},
+				},
+				Accounting: map[string]*AccountCharge{
+					"43e77a7": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA1",
+						Units:        NewDecimal(0, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+				},
+				Rating: map[string]*RateSInterval{
+					"877a74e": {
+						Increments: []*RateSIncrement{
+							{
+								RateIntervalIndex: 0,
+								RateID:            "3365d99",
+								CompressFactor:    1,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*IntervalRate{
+					"3365d99": {
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				Accounts: map[string]*Account{
+					"2343000000000123": {
+						Tenant:    CGRateSorg,
+						ID:        "2343000000000123",
+						FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+						Balances: map[string]*Balance{
+							"DATA1": {
+								ID: "DATA1",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 5,
+									},
+								},
+								Type:  MetaConcrete,
+								Units: NewDecimal(50*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expAbstracts: nil,
+			expConcretes: NewDecimal(0, 0),
+		},
+		{
+			name: "Balance type different from  MetaConcrete or MetaAbstract",
+			ec: &EventCharges{
+				Charges: []*ChargeEntry{
+					{
+						ChargingID:     "43e77a7",
+						CompressFactor: 1,
+					},
+				},
+				Accounting: map[string]*AccountCharge{
+					"43e77a7": {
+						AccountID:    "2343000000000123",
+						BalanceID:    "DATA1",
+						Units:        NewDecimal(1000, 0),
+						BalanceLimit: NewDecimal(0, 0),
+						RatingID:     "877a74e",
+					},
+				},
+				Rating: map[string]*RateSInterval{
+					"877a74e": {
+						Increments: []*RateSIncrement{
+							{
+								RateIntervalIndex: 0,
+								RateID:            "3365d99",
+								CompressFactor:    1,
+							},
+						},
+						CompressFactor: 1,
+					},
+				},
+				Rates: map[string]*IntervalRate{
+					"3365d99": {
+						RecurrentFee: NewDecimal(0, 0),
+					},
+				},
+				Accounts: map[string]*Account{
+					"2343000000000123": {
+						Tenant:    CGRateSorg,
+						ID:        "2343000000000123",
+						FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+						Balances: map[string]*Balance{
+							"DATA1": {
+								ID: "DATA1",
+								Weights: []*DynamicWeight{
+									{
+										Weight: 5,
+									},
+								},
+								Type:  MetaMonetary,
+								Units: NewDecimal(50*1000, 0),
+								CostIncrements: []*CostIncrement{
+									{
+										Increment: NewDecimal(1, 0),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			expAbstracts: nil,
+			expConcretes: nil,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tt.ec.abstractConcretes()
+			if !reflect.DeepEqual(tt.expAbstracts, tt.ec.Abstracts) {
+				t.Errorf("Expected Abstracts: %v, \nrecieved %v", tt.expAbstracts, tt.ec.Abstracts)
+			}
+
+			if !reflect.DeepEqual(tt.expConcretes, tt.ec.Concretes) {
+				t.Errorf("Expected Concretes: %v, \nrecieved %v", tt.expConcretes, tt.ec.Concretes)
+			}
+		})
+	}
+}
