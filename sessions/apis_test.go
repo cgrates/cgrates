@@ -33,13 +33,14 @@ func (m *testMockClients) Call(ctx *context.Context, method string, args, reply 
 func TestSessionSBiRPCv1AuthorizeEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
@@ -297,13 +298,14 @@ func TestSessionSBiRPCv1AuthorizeEvent(t *testing.T) {
 func TestSessionSBiRPCv1AuthorizeEventNotConnected(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
@@ -465,13 +467,14 @@ func TestSessionSBiRPCv1AuthorizeEventNotConnected(t *testing.T) {
 func TestSessionSBiRPCv1AuthorizeEventErrors(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
@@ -630,8 +633,8 @@ func TestSessionSBiRPCv1AuthorizeEventErrors(t *testing.T) {
 	})
 
 	t.Run("Invalid bool value", func(t *testing.T) {
-		cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-		dm := engine.NewDataManager(dbCM, cfg, nil)
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 		dm.SetCache(cacheS)
 		fltrS := engine.NewFilterS(cfg, nil, dm)
 		connMgr := engine.NewConnManager(cfg)
@@ -729,14 +732,14 @@ func TestSessionSBiRPCv1AuthorizeEventErrors(t *testing.T) {
 func TestSessionSBiRPCv1AuthorizeEventCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = -1
-
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
@@ -798,13 +801,14 @@ func TestSessionSBiRPCv1AuthorizeEventCache(t *testing.T) {
 func TestSessionSBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
 	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil)
-	dm := engine.NewDataManager(dbCM, cfg, nil)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	fltrS := engine.NewFilterS(cfg, nil, dm)
 	connMgr := engine.NewConnManager(cfg)
