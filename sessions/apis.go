@@ -863,7 +863,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 
 	// Set *interimConsumed
-	if interimConsumed, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+	if interimConsumed, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimConsumed, utils.MetaInterimConsumed); errUsage != nil {
 		return errUsage
 	} else if interimConsumed != nil {
@@ -871,7 +871,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 
 	// Set *interimUsage
-	if interimUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+	if interimUsage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage, utils.MetaUsage); errUsage != nil {
 		return errUsage
 	} else if interimUsage != nil {
@@ -879,16 +879,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 
 	// Set *usage
-	if usage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+	if usage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.Usage, utils.MetaUsage); errUsage != nil {
 		return errUsage
 	} else if usage != nil {
 		cch[utils.MetaUsage] = usage
-		apiArgs.APIOpts[utils.MetaUsage] = &utils.Decimal{Big: usage} // populated for Event at least
+		apiArgs.APIOpts[utils.MetaUsage] = usage // populated for Event at least
 	}
 
 	// Set *totalUsage
-	if totalUsage, errUsage := engine.GetDecimalBigOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+	if totalUsage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.TotalUsage, utils.MetaTotalUsage); errUsage != nil {
 		return errUsage
 	} else if totalUsage != nil {
