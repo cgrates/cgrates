@@ -958,15 +958,24 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 	}
 	var interimConsumed *utils.Decimal
 	if iCsmd, has := cch[utils.MetaInterimConsumed]; has {
-		interimConsumed, _ = utils.IfaceAsDecimal(iCsmd)
+		t, canCast := iCsmd.(*utils.Decimal)
+		if canCast {
+			interimConsumed = t
+		}
 	}
 	var interimUsage *utils.Decimal
 	if iU, has := cch[utils.MetaInterimUsage]; has {
-		interimUsage, _ = utils.IfaceAsDecimal(iU)
+		t, canCast := iU.(*utils.Decimal)
+		if canCast {
+			interimUsage = t
+		}
 	}
 	var totalUsage *utils.Decimal
 	if tU, has := cch[utils.MetaTotalUsage]; has {
-		totalUsage, _ = utils.IfaceAsDecimal(tU)
+		t, canCast := tU.(*utils.Decimal)
+		if canCast {
+			totalUsage = t
+		}
 	}
 	for _, sr := range s.sRuns { // FixMe: pass this from outside, so we can select individual debits per SRun
 		if err = sr.updateUsages(interimConsumed, interimUsage, totalUsage); err != nil {

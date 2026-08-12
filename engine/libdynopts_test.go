@@ -1267,7 +1267,7 @@ func TestLibFiltersGetDecimalBigOptsReturnConfigOpt(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 
 	expected := decimal.New(1234, 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
 		utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(expected) != 0 {
@@ -1355,7 +1355,7 @@ func TestDynamicDecimalBigOptsDynVal(t *testing.T) {
 				t.Error(err)
 				return
 			}
-			out, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fs, dynOpts, utils.OptsRatesUsage)
+			out, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fs, dynOpts, utils.OptsRatesUsage)
 			if tt.expErr != nil {
 				if err == nil {
 					t.Error("expected err,received nil")
@@ -2344,34 +2344,34 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
 	dec.SetFloat64(43364.4)
 
 	fltrs := NewFilterS(cgrCfg, nil, nil)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1002
 	dec.SetUint64(15555)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1003
 	dec = *decimal.New(int64(5*time.Minute), 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1004
 	dec = *decimal.New(int64(12*time.Minute), 0)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(&dec) != 0 {
 		t.Errorf("expected %v,received %v", dec.String(), rcv.String())
 	}
 	ev.Event[utils.AccountField] = 1005
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
 		t.Errorf("expected %v,received %v", config.RatesUsageDftOpt.String(), rcv.String())
@@ -2404,7 +2404,7 @@ func TestLibFiltersGetDecimalBigOptsFilterCheckErr(t *testing.T) {
 	}
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 	experr := `inline parse error for string: <*string.invalid:filter>`
-	if _, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
+	if _, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
 		utils.OptsRatesUsage); err == nil ||
 		err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -2439,7 +2439,7 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
 		utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
@@ -2478,7 +2478,7 @@ func TestLibFiltersGetDecimalBigOptsReturnOptFromAPIOpts(t *testing.T) {
 	dynOpts, _ := config.IfaceToDecimalBigDynamicOpts(strOpts)
 
 	expected := decimal.New(4321, 5)
-	if rcv, err := GetDecimalBigOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
+	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
 		"nonExistingAPIOpt", utils.OptsRatesUsage); err != nil {
 		t.Error(err)
 	} else if rcv.Cmp(expected) != 0 {

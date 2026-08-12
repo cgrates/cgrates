@@ -173,8 +173,8 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	ec = utils.NewEventCharges()
 	cgrEvDP := cgrEv.AsDataProvider()
-	var usage *decimal.Big // total event usage
-	if usage, err = engine.GetDecimalBigOpts(ctx, cgrEv.Tenant, cgrEvDP, nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
+	var usage *utils.Decimal // total event usage
+	if usage, err = engine.GetDecimalOpts(ctx, cgrEv.Tenant, cgrEvDP, nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.Usage,
 		utils.OptsAccountsUsage, utils.MetaUsage); err != nil {
 		return
 	}
@@ -198,7 +198,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 		acntBkps[i] = acnt.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = aS.accountDebit(ctx, acnt,
-			utils.CloneDecimalBig(usage), cgrEv, concretes, dbted); err != nil {
+			utils.CloneDecimalBig(usage.Big), cgrEv, concretes, dbted); err != nil {
 			return
 		}
 		if ecDbt == nil { // no balance matched
@@ -215,7 +215,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 		} else {
 			used = ecDbt.Abstracts.Big
 		}
-		usage = utils.SubstractBig(usage, used)
+		usage.Big = utils.SubstractBig(usage.Big, used)
 		dbted = utils.SumBig(dbted, used)
 		ec.Merge(ecDbt)
 		// check for blockers for every profile

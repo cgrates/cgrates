@@ -8,7 +8,6 @@ import (
 	"slices"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -25,8 +24,8 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
-	var usage *decimal.Big
-	if usage, err = engine.GetDecimalBigOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, fltrS, cfg.RouteSCfg().Opts.Usage,
+	var usage *utils.Decimal
+	if usage, err = engine.GetDecimalOpts(ctx, ev.Tenant, ev.AsDataProvider(), nil, fltrS, cfg.RouteSCfg().Opts.Usage,
 		utils.OptsRoutesUsage, utils.MetaUsage); err != nil {
 		return
 	}

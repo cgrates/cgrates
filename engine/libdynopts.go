@@ -254,12 +254,12 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch ma
 	return
 }
 
-// GetDecimalBigOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
+// GetDecimalOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
-func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
-	optNames ...string) (cfgOpt *decimal.Big, err error) {
+func GetDecimalOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
+	optNames ...string) (cfgOpt *utils.Decimal, err error) {
 	if opt, err := optIfaceFromDP(dP, cch, optNames); err == nil {
-		return utils.IfaceAsBig(opt)
+		return utils.IfaceAsDecimal(opt)
 	} else if !errors.Is(err, utils.ErrNotFound) {
 		return nil, err
 	}
@@ -267,10 +267,16 @@ func GetDecimalBigOpts(ctx *context.Context, tnt string, dP utils.DataProvider, 
 		if !slices.Contains([]string{utils.EmptyString, utils.MetaAny, tnt}, opt.Tenant) {
 			continue
 		}
-		if pass, err := fS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
+		var pass bool
+		if pass, err = fS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
-			return opt.Value(dP)
+			var decValue *decimal.Big
+			decValue, err = opt.Value(dP)
+			if err != nil {
+				return
+			}
+			return &utils.Decimal{Big: decValue}, nil
 		}
 	}
 	return
