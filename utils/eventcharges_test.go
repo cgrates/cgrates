@@ -2289,6 +2289,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		name   string
 		fields []string
 		exp    any
+		expErr string
 	}{
 		{
 			name:   "Concretes",
@@ -2985,13 +2986,25 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 			fields: []string{"Charges[1]", "Charging", "CompressFactor"},
 			exp:    "3",
 		},
+		{
+			name:   "error case: NOT_FOUND",
+			fields: []string{"Charges[0]", "Charges[1]", "ChargingID"},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "error case: unsupported field prefix",
+			fields: []string{"Charges[1]", "test"},
+			exp:    "",
+			expErr: "unsupported field prefix: <test>",
+		},
 	}
 
 	for _, tc := range testcases {
 
 		t.Run(tc.name, func(t *testing.T) {
-			if val, err := ec.FieldAsString(tc.fields); err != nil {
-				t.Error(err)
+			if val, err := ec.FieldAsString(tc.fields); err != nil && err.Error() != tc.expErr {
+				t.Errorf("Expected %v \n, recieved %v", tc.expErr, err)
 			} else if tc.exp != val {
 				t.Errorf("expected: %s,\nreceived: %s", tc.exp, val)
 			}
@@ -3025,6 +3038,7 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 				AccountID:    "2343000000000123",
 				BalanceID:    "DATA1",
 				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
 				BalanceLimit: NewDecimal(0, 0),
 				RatingID:     "877a74e",
 			},
@@ -3032,6 +3046,7 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 				AccountID:    "2343000000000123",
 				BalanceID:    "DATA1",
 				Units:        NewDecimal(50000, 0),
+				UnitFactorID: "UF2",
 				BalanceLimit: NewDecimal(0, 0),
 				RatingID:     "877a74e",
 			},
@@ -3039,8 +3054,20 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 				AccountID:    "2343000000000123",
 				BalanceID:    "DATA1",
 				Units:        NewDecimal(60000, 0),
+				UnitFactorID: "UF3",
 				BalanceLimit: NewDecimal(0, 0),
 				RatingID:     "877a74e",
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF2": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF3": {
+				Factor: NewDecimal(1, 9),
 			},
 		},
 		Rating: map[string]*RateSInterval{
@@ -3713,5 +3740,127 @@ func TestEventChargesAbstractConcretes(t *testing.T) {
 				t.Errorf("Expected Concretes: %v, \nrecieved %v", tt.expConcretes, tt.ec.Concretes)
 			}
 		})
+	}
+}
+
+func TestEventChargesCleanup(t *testing.T) {
+	eC := &EventCharges{
+		Abstracts: NewDecimal(300000, 0),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "97aa08e",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "43e77a7",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "97aa08e",
+				CompressFactor: 3,
+			},
+			{
+				ChargingID:     "f894244",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"43e77a7": {
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			"97aa08e": {
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(50000, 0),
+				UnitFactorID: "UF2",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			"f894244": {
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(60000, 0),
+				UnitFactorID: "UF3",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF2": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF3": {
+				Factor: NewDecimal(1, 9),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"877a74e": {
+				Increments: []*RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "3365d99",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"3365d99": {
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+		Accounts: map[string]*Account{
+			"2343000000000123": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*Balance{
+					"DATA1": {
+						ID: "DATA1",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	evntC := eC.Clone()
+	eC.Cleanup()
+	if !reflect.DeepEqual(evntC, eC) {
+		t.Errorf("Expected %v, \nrecieved %v", evntC, eC)
+	}
+
+	eC.Charges = []*ChargeEntry{}
+	exp := &EventCharges{
+		Charges:     []*ChargeEntry{},
+		Accounting:  map[string]*AccountCharge{},
+		UnitFactors: map[string]*UnitFactor{},
+		Rating:      map[string]*RateSInterval{},
+		Rates:       map[string]*IntervalRate{},
+		Accounts:    map[string]*Account{},
+	}
+	eC.Cleanup()
+	if !reflect.DeepEqual(exp, eC) {
+		t.Errorf("Expected %v, \nrecieved %v", exp, eC)
 	}
 }
