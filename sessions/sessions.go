@@ -1076,6 +1076,58 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 	return resMessage, nil
 }
 
+func (sS *SessionS) resourcesAllocate(ctx *context.Context, cgrEv *utils.CGREvent) (string, error) {
+	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
+	if err != nil {
+		return "", err
+	}
+	if len(conns) == 0 {
+		return "", utils.NewErrNotConnected(utils.ResourceS)
+	}
+	resUsageID, err := engine.GetStringOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+		nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesUsageID,
+		utils.OptsResourcesUsageID)
+	if err != nil {
+		return "", err
+	}
+	cgrEv.APIOpts[utils.OptsResourcesUsageID] = resUsageID
+	resUnits, err := engine.GetIntOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+		nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesUnits,
+		utils.OptsResourcesUnits)
+	if err != nil {
+		return "", err
+	}
+	cgrEv.APIOpts[utils.OptsResourcesUnits] = resUnits
+	var resMessage string
+	if err := sS.connMgr.Call(ctx, conns,
+		utils.ResourceSv1AllocateResources,
+		cgrEv, &resMessage); err != nil {
+		return "", err
+	}
+	return resMessage, nil
+}
+
+func (sS *SessionS) resourcesRelease(ctx *context.Context, cgrEv *utils.CGREvent) error {
+	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
+	if err != nil {
+		return err
+	}
+	if len(conns) == 0 {
+		return utils.NewErrNotConnected(utils.ResourceS)
+	}
+	resUsageID, err := engine.GetStringOpts(ctx, cgrEv.Tenant, cgrEv.AsDataProvider(),
+		nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesUsageID,
+		utils.OptsResourcesUsageID)
+	if err != nil {
+		return err
+	}
+	cgrEv.APIOpts[utils.OptsResourcesUsageID] = resUsageID
+	var reply string
+	return sS.connMgr.Call(ctx, conns,
+		utils.ResourceSv1ReleaseResources,
+		cgrEv, &reply)
+}
+
 // accountsMaxAbstracts will query the AccountS cost for Event
 func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
 	if _, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {

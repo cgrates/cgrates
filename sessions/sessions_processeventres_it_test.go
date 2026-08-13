@@ -152,6 +152,75 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 		}
 	})
 
+	t.Run("allocateAndRelease", func(t *testing.T) {
+		const usageID = "resource-lifecycle"
+		var resource utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES1"}},
+			&resource); err != nil {
+			t.Fatal(err)
+		}
+		if usage := resource.TotalUsage(); usage != 0 {
+			t.Fatalf("resource usage before allocation is %v, want 0", usage)
+		}
+
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "allocateResources",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     usageID,
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "ResourceAllocationSuccess" {
+			t.Fatalf("unexpected allocation msg: %q", msg)
+		}
+
+		resource = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES1"}},
+			&resource); err != nil {
+			t.Fatal(err)
+		}
+		if usage := resource.TotalUsage(); usage != 1 {
+			t.Fatalf("resource usage after allocation is %v, want 1", usage)
+		}
+
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "releaseResources",
+				APIOpts: map[string]any{
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    usageID,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		resource = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES1"}},
+			&resource); err != nil {
+			t.Fatal(err)
+		}
+		if usage := resource.TotalUsage(); usage != 0 {
+			t.Fatalf("resource usage after release is %v, want 0", usage)
+		}
+	})
+
 	t.Run("missingUsageID", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
