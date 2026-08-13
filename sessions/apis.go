@@ -1247,12 +1247,69 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
-						utils.SessionS, err.Error(), cgrEv, utils.IPs))
+						utils.SessionS, err.Error(), cgrEv, utils.ResourceS))
 			}
 			if apiRply.ResourceAllocation == nil {
 				apiRply.ResourceAllocation = make(map[string]string)
 			}
 			apiRply.ResourceAllocation[runID] = resID
+		}
+
+		// ResourceS Allocation
+		if resAllocBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAllocate,
+			utils.MetaResourcesAllocateCfg); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaResourcesAllocateCfg))
+		} else {
+			cchEv[utils.MetaResourcesAllocateCfg] = resAllocBool
+		}
+		if utils.OptAsBool(cchEv, utils.MetaResourcesAllocateCfg) {
+			var resMessage string
+			if resMessage, err = sS.resourcesAllocate(ctx, cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.ResourceS))
+			}
+			if apiRply.ResourceAllocation == nil {
+				apiRply.ResourceAllocation = make(map[string]string)
+			}
+			apiRply.ResourceAllocation[runID] = resMessage
+		}
+
+		// ResourceS Release
+		if resReleaseBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesRelease,
+			utils.MetaResourcesReleaseCfg); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaResourcesReleaseCfg))
+		} else {
+			cchEv[utils.MetaResourcesReleaseCfg] = resReleaseBool
+		}
+		if utils.OptAsBool(cchEv, utils.MetaResourcesReleaseCfg) {
+			if err = sS.resourcesRelease(ctx, cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.ResourceS))
+			}
 		}
 
 		// AccountS Authorization
