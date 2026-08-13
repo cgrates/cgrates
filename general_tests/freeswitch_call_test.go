@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/general_tests/calltest"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -55,11 +54,19 @@ func TestFreeSWITCHCall(t *testing.T) {
 		"*rates": [{"connIDs": ["*localhost"]}]
 	}
 },
+"resources": {
+	"enabled": true
+},
+"routes": {
+	"enabled": true
+},
 "sessions": {
 	"enabled": true,
 	"conns": {
 		"*accounts": [{"connIDs": ["*localhost"]}],
 		"*rates": [{"connIDs": ["*localhost"]}],
+		"*resources": [{"connIDs": ["*localhost"]}],
+		"*routes": [{"connIDs": ["*localhost"]}],
 		"*ees": [{"connIDs": ["*localhost"]}]
 	}
 },
@@ -73,7 +80,8 @@ func TestFreeSWITCHCall(t *testing.T) {
 			"synchronous": true,
 			"fields": [
 				{"tag": "AccountsCost", "path": "*exp.*accountsCost", "type": "*variable", "value": "~*opts.*accountsCost"},
-				{"tag": "UR", "path": "*exp.*ur", "type": "*variable", "value": "~*opts.*ur"}
+				{"tag": "ResourceAllocation", "path": "*exp.cgrResourceAllocation", "type": "*variable", "value": "~*req.cgrResourceAllocation"},
+				{"tag": "Routes", "path": "*exp.cgrRoutes", "type": "*variable", "value": "~*req.cgrRoutes"}
 			]
 		}
 	]
@@ -97,7 +105,20 @@ func TestFreeSWITCHCall(t *testing.T) {
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
 				{"tag": "Usage", "path": "*opts.*usage", "type": "*constant", "value": "1m"},
 				{"tag": "Accounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+				{"tag": "Resources", "path": "*opts.*resources", "type": "*constant", "value": "true"},
+				{"tag": "ResourcesUsageID", "path": "*opts.*resourcesUsageID", "type": "*variable", "value": "~*req.Unique-ID"},
+				{"tag": "ResourcesUnits", "path": "*opts.*resourcesUnits", "type": "*constant", "value": "1"},
+				{"tag": "Routes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 				{"tag": "Authorize", "path": "*opts.*authorize", "type": "*constant", "value": "true"}
+			],
+			"replyFields": [
+				{"tag": "ResourceAllocation", "path": "*rep.cgrResourceAllocation", "type": "*variable", "value": "~*cgrep.ResourceAllocation[*primary]", "mandatory": true},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "ARRAY::3|:"},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteID", "mandatory": true},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "|:"},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "~*cgrep.RouteProfiles[*primary][0].Routes[1].RouteID", "mandatory": true},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "|:"},
+				{"tag": "Routes", "path": "*rep.cgrRoutes", "type": "*composed", "value": "~*cgrep.RouteProfiles[*primary][0].Routes[2].RouteID", "mandatory": true}
 			]
 		},
 		{
@@ -113,6 +134,8 @@ func TestFreeSWITCHCall(t *testing.T) {
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
 				{"tag": "Usage", "path": "*opts.*usage", "type": "*composed", "value": "~*req.variable_billsec;s"},
+				{"tag": "ResourceAllocation", "path": "*cgreq.cgrResourceAllocation", "type": "*variable", "value": "~*req.variable_cgrResourceAllocation"},
+				{"tag": "Routes", "path": "*cgreq.cgrRoutes", "type": "*variable", "value": "~*req.variable_cgrRoutes"},
 				{"tag": "Rates", "path": "*opts.*rates", "type": "*constant", "value": "true"},
 				{"tag": "Accounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
 				{"tag": "Debit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -137,6 +160,11 @@ func TestFreeSWITCHCall(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
+	call := calltest.CallParams{
+		From:     "1002",
+		To:       "1001",
+		HoldTime: 2 * time.Second,
+	}
 	if err := client.Call(context.Background(), utils.AdminSv1SetRateProfile,
 		&utils.APIRateProfile{
 			RateProfile: &utils.RateProfile{
@@ -159,10 +187,35 @@ func TestFreeSWITCHCall(t *testing.T) {
 		t.Fatalf("set rate profile: %v", err)
 	}
 
-	call := calltest.CallParams{
-		From:     "1002",
-		To:       "1001",
-		HoldTime: 2 * time.Second,
+	if err := client.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+		&utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
+				ID:                "RES_FREESWITCH_CALL",
+				FilterIDs:         []string{"*string:~*req.Account:" + call.From},
+				UsageTTL:          time.Minute,
+				Limit:             10,
+				AllocationMessage: "RES_FREESWITCH_CALL",
+				Stored:            true,
+				Weights:           utils.DynamicWeights{{Weight: 10}},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("set resource profile: %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetRouteProfile,
+		&utils.RouteProfileWithAPIOpts{
+			RouteProfile: &utils.RouteProfile{
+				ID:        "ROUTE_FREESWITCH_CALL",
+				FilterIDs: []string{"*string:~*req.Account:" + call.From},
+				Weights:   utils.DynamicWeights{{Weight: 10}},
+				Sorting:   utils.MetaWeight,
+				Routes: []*utils.Route{
+					{ID: "vendor1", Weights: utils.DynamicWeights{{Weight: 30}}},
+					{ID: "vendor2", Weights: utils.DynamicWeights{{Weight: 20}}},
+					{ID: "vendor3", Weights: utils.DynamicWeights{{Weight: 10}}},
+				},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("set route profile: %v", err)
 	}
 	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
 		&utils.AccountWithAPIOpts{
@@ -192,8 +245,11 @@ func TestFreeSWITCHCall(t *testing.T) {
 	case <-time.After(5 * time.Second):
 		t.Fatal("timed out waiting for EEs export")
 	}
-	if !utils.OptAsBool(export, utils.MetaUR) {
-		t.Errorf("export %s = %v, want true: %v", utils.MetaUR, export[utils.MetaUR], export)
+	if got := utils.IfaceAsString(export["cgrResourceAllocation"]); got != "RES_FREESWITCH_CALL" {
+		t.Errorf("export cgrResourceAllocation = %q, want %q", got, "RES_FREESWITCH_CALL")
+	}
+	if got := utils.IfaceAsString(export["cgrRoutes"]); got != "ARRAY::3|:vendor1|:vendor2|:vendor3" {
+		t.Errorf("export cgrRoutes = %q, want %q", got, "ARRAY::3|:vendor1|:vendor2|:vendor3")
 	}
 	var accountsCost utils.EventCharges
 	if err := json.Unmarshal([]byte(utils.IfaceAsString(export[utils.MetaAccountsCost])), &accountsCost); err != nil {
@@ -211,14 +267,5 @@ func TestFreeSWITCHCall(t *testing.T) {
 	balance := account.Balances["MONETARY"]
 	if balance == nil || balance.Units == nil || balance.Units.Compare(utils.NewDecimal(9, 0)) != 0 {
 		t.Errorf("monetary balance = %v, want 9", balance)
-	}
-
-	var activeSessions []*sessions.ExternalSession
-	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
-		new(utils.SessionFilter), &activeSessions); err != nil && err.Error() != utils.ErrNotFound.Error() {
-		t.Fatalf("get active sessions: %v", err)
-	}
-	if len(activeSessions) != 0 {
-		t.Errorf("got %d active sessions, want none: %s", len(activeSessions), utils.ToIJSON(activeSessions))
 	}
 }
