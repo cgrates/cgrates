@@ -2051,6 +2051,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 				RatingID:        "rating3",
 				JoinedChargeIDs: []string{},
 			},
+			"accounting2": nil,
 		},
 		UnitFactors: map[string]*UnitFactor{
 			"unit_factor1": {
@@ -2061,6 +2062,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 				FilterIDs: []string{"fltr3", "fltr4"},
 				Factor:    &Decimal{decimal.New(3, 0)},
 			},
+			"unit_factor3": nil,
 		},
 		Rating: map[string]*RateSInterval{
 			"rating1": {
@@ -2109,6 +2111,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 				},
 				CompressFactor: 3,
 			},
+			"rating4": nil,
 		},
 		Rates: map[string]*IntervalRate{
 			"rate1": {
@@ -2125,6 +2128,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 				Unit:          &Decimal{decimal.New(9, 0)},
 				Increment:     &Decimal{decimal.New(10, 0)},
 			},
+			"rate3": nil,
 		},
 		Accounts: map[string]*Account{
 			"acc1": {
@@ -2282,6 +2286,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 					},
 				},
 			},
+			"acc3": nil,
 		},
 	}
 
@@ -2997,6 +3002,424 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 			fields: []string{"Charges[1]", "test"},
 			exp:    "",
 			expErr: "unsupported field prefix: <test>",
+		},
+		{
+			name:   "Accounting",
+			fields: []string{"Accounting"},
+			exp:    `{"accounting1":{"AccountID":"acc1","BalanceID":"balance1","Units":10,"BalanceLimit":0,"UnitFactorID":"unit_factor1","AttributeIDs":["attr1","attr2"],"RatingID":"rating2","JoinedChargeIDs":["joined_charge"]},"accounting2":null,"joined_charge":{"AccountID":"acc2","BalanceID":"balance2","Units":10,"BalanceLimit":0,"UnitFactorID":"unit_factor2","AttributeIDs":["attr3","attr4"],"RatingID":"rating3","JoinedChargeIDs":[]}}`,
+		},
+		{
+			name:   "Accounting.accounting1",
+			fields: []string{"Accounting", "accounting1"},
+			exp:    `{"AccountID":"acc1","BalanceID":"balance1","Units":10,"BalanceLimit":0,"UnitFactorID":"unit_factor1","AttributeIDs":["attr1","attr2"],"RatingID":"rating2","JoinedChargeIDs":["joined_charge"]}`,
+		},
+		{
+			name:   "Accounting.accounting1.AccountID",
+			fields: []string{"Accounting", "accounting1", "AccountID"},
+			exp:    "acc1",
+		},
+		{
+			name:   "Accounting.accounting1.BalanceID",
+			fields: []string{"Accounting", "accounting1", "BalanceID"},
+			exp:    "balance1",
+		},
+		{
+			name:   "Accounting.accounting1.Units",
+			fields: []string{"Accounting", "accounting1", "Units"},
+			exp:    "10",
+		},
+		{
+			name:   "Accounting.accounting1.BalanceLimit",
+			fields: []string{"Accounting", "accounting1", "BalanceLimit"},
+			exp:    "0",
+		},
+		{
+			name:   "Accounting.accounting1.UnitFactorID",
+			fields: []string{"Accounting", "accounting1", "UnitFactorID"},
+			exp:    "unit_factor1",
+		},
+		{
+			name:   "Accounting.accounting1.AttributeIDs",
+			fields: []string{"Accounting", "accounting1", "AttributeIDs"},
+			exp:    `["attr1","attr2"]`,
+		},
+		{
+			name:   "Accounting.accounting1.RatingID",
+			fields: []string{"Accounting", "accounting1", "RatingID"},
+			exp:    "rating2",
+		},
+		{
+			name:   "Accounting.accounting1.JoinedChargeIDs",
+			fields: []string{"Accounting", "accounting1", "JoinedChargeIDs"},
+			exp:    `["joined_charge"]`,
+		},
+		{
+			name:   "Accounting.joined_charge",
+			fields: []string{"Accounting", "joined_charge"},
+			exp:    `{"AccountID":"acc2","BalanceID":"balance2","Units":10,"BalanceLimit":0,"UnitFactorID":"unit_factor2","AttributeIDs":["attr3","attr4"],"RatingID":"rating3","JoinedChargeIDs":[]}`,
+		},
+		{
+			name:   "Accounting.joined_charge.AccountID",
+			fields: []string{"Accounting", "joined_charge", "AccountID"},
+			exp:    "acc2",
+		},
+		{
+			name:   "Accounting.joined_charge.BalanceID",
+			fields: []string{"Accounting", "joined_charge", "BalanceID"},
+			exp:    "balance2",
+		},
+		{
+			name:   "Accounting.joined_charge.Units",
+			fields: []string{"Accounting", "joined_charge", "Units"},
+			exp:    "10",
+		},
+		{
+			name:   "Accounting.joined_charge.BalanceLimit",
+			fields: []string{"Accounting", "joined_charge", "BalanceLimit"},
+			exp:    "0",
+		},
+		{
+			name:   "Accounting.joined_charge.UnitFactorID",
+			fields: []string{"Accounting", "joined_charge", "UnitFactorID"},
+			exp:    "unit_factor2",
+		},
+		{
+			name:   "Accounting.joined_charge.AttributeIDs",
+			fields: []string{"Accounting", "joined_charge", "AttributeIDs"},
+			exp:    `["attr3","attr4"]`,
+		},
+		{
+			name:   "Accounting.joined_charge.RatingID",
+			fields: []string{"Accounting", "joined_charge", "RatingID"},
+			exp:    "rating3",
+		},
+		{
+			name:   "Accounting.joined_charge.JoinedChargeIDs",
+			fields: []string{"Accounting", "joined_charge", "JoinedChargeIDs"},
+			exp:    `[]`,
+		},
+		{
+			name:   "Accounting.accounting2",
+			fields: []string{"Accounting", "accounting2"},
+			exp:    "",
+		},
+		{
+			name:   "Accounting.accounting1.JoinedChargeIDs",
+			fields: []string{"Accounting", "accounting1", "JoinedChargeIDs"},
+			exp:    `["joined_charge"]`,
+		},
+		// TODO: uncomment after the panic is fixed
+		// {
+		// 	name:   "Rating",
+		// 	fields: []string{"Rating"},
+		// 	exp:    "",
+		// },
+		{
+			name:   "Rating",
+			fields: []string{"Rating", "rating1"},
+			exp:    `{"IntervalStart":4,"Increments":[{"IncrementStart":5,"RateIntervalIndex":1,"RateID":"rate1","CompressFactor":1,"Usage":6},{"IncrementStart":7,"RateIntervalIndex":2,"RateID":"rate2","CompressFactor":1,"Usage":8}],"CompressFactor":3}`,
+		},
+		{
+			name:   "Rating.rating4",
+			fields: []string{"Rating", "rating4"},
+			exp:    "",
+		},
+		{
+			name:   "Rating.rating2.CompressFactor",
+			fields: []string{"Rating", "rating2", "CompressFactor"},
+			exp:    "3",
+		},
+		{
+			name:   "Rating.rating1.IntervalStart",
+			fields: []string{"Rating", "rating1"},
+			exp:    `{"IntervalStart":4,"Increments":[{"IncrementStart":5,"RateIntervalIndex":1,"RateID":"rate1","CompressFactor":1,"Usage":6},{"IncrementStart":7,"RateIntervalIndex":2,"RateID":"rate2","CompressFactor":1,"Usage":8}],"CompressFactor":3}`,
+		},
+		{
+			name:   "Rating.rating1.Increments",
+			fields: []string{"Rating", "rating1"},
+			exp:    `{"IntervalStart":4,"Increments":[{"IncrementStart":5,"RateIntervalIndex":1,"RateID":"rate1","CompressFactor":1,"Usage":6},{"IncrementStart":7,"RateIntervalIndex":2,"RateID":"rate2","CompressFactor":1,"Usage":8}],"CompressFactor":3}`,
+		},
+		{
+			name:   "Rating.rating1.CompressFactor",
+			fields: []string{"Rating", "rating1", "CompressFactor"},
+			exp:    "3",
+		},
+		{
+			name:   "Rating.rating1.Increments[0].IncrementStart",
+			fields: []string{"Rating", "rating1", "Increments[0]", "IncrementStart"},
+			exp:    "5",
+		},
+		{
+			name:   "Rating.rating1.Increments[0].RateIntervalIndex",
+			fields: []string{"Rating", "rating1", "Increments[0]", "RateIntervalIndex"},
+			exp:    "1",
+		},
+		{
+			name:   "Rating.rating1.Increments[0].RateID",
+			fields: []string{"Rating", "rating1", "Increments[0]", "RateID"},
+			exp:    "rate1",
+		},
+		{
+			name:   "Rating.rating1.Increments[0].CompressFactor",
+			fields: []string{"Rating", "rating1", "Increments[0]", "CompressFactor"},
+			exp:    "1",
+		},
+		{
+			name:   "Rating.rating1.Increments[0].Usage",
+			fields: []string{"Rating", "rating1", "Increments[0]", "Usage"},
+			exp:    "6",
+		},
+		{
+			name:   "Rate",
+			fields: []string{"Rate"},
+			exp:    `{"rate1":{"IntervalStart":1,"FixedFee":2,"RecurrentFee":3,"Unit":4,"Increment":5},"rate2":{"IntervalStart":6,"FixedFee":7,"RecurrentFee":8,"Unit":9,"Increment":10},"rate3":null}`,
+		},
+		{
+			name:   "Rate.rate1",
+			fields: []string{"Rate", "rate1"},
+			exp:    `{"IntervalStart":1,"FixedFee":2,"RecurrentFee":3,"Unit":4,"Increment":5}`,
+		},
+		{
+			name:   "Rate.rate1.IntervalStart",
+			fields: []string{"Rate", "rate1", "IntervalStart"},
+			exp:    "1",
+		},
+		{
+			name:   "Rate.rate1.FixedFee",
+			fields: []string{"Rate", "rate1", "FixedFee"},
+			exp:    "2",
+		},
+		{
+			name:   "Rate.rate1.RecurrentFee",
+			fields: []string{"Rate", "rate1", "RecurrentFee"},
+			exp:    "3",
+		},
+		{
+			name:   "Rate.rate1.Unit",
+			fields: []string{"Rate", "rate1", "Unit"},
+			exp:    "4",
+		},
+		{
+			name:   "Rate.rate1.Increment",
+			fields: []string{"Rate", "rate1", "Increment"},
+			exp:    "5",
+		},
+		{
+			name:   "Rate.rate2",
+			fields: []string{"Rate", "rate2"},
+			exp:    `{"IntervalStart":6,"FixedFee":7,"RecurrentFee":8,"Unit":9,"Increment":10}`,
+		},
+		{
+			name:   "Rate.rate2.IntervalStart",
+			fields: []string{"Rate", "rate2", "IntervalStart"},
+			exp:    "6",
+		},
+		{
+			name:   "Rate.rate2.FixedFee",
+			fields: []string{"Rate", "rate2", "FixedFee"},
+			exp:    "7",
+		},
+		{
+			name:   "Rate.rate2.RecurrentFee",
+			fields: []string{"Rate", "rate2", "RecurrentFee"},
+			exp:    "8",
+		},
+		{
+			name:   "Rate.rate2.Unit",
+			fields: []string{"Rate", "rate2", "Unit"},
+			exp:    "9",
+		},
+		{
+			name:   "Rate.rate2.Increment",
+			fields: []string{"Rate", "rate2", "Increment"},
+			exp:    "10",
+		},
+		{
+			name:   "Rate.rate3",
+			fields: []string{"Rate", "rate3"},
+			exp:    "",
+		},
+		{
+			name:   "UnitFactor",
+			fields: []string{"UnitFactor"},
+			exp:    `{"unit_factor1":{"FilterIDs":["fltr1","fltr2"],"Factor":2},"unit_factor2":{"FilterIDs":["fltr3","fltr4"],"Factor":3},"unit_factor3":null}`,
+		},
+		{
+			name:   "UnitFactor.unit_factor1",
+			fields: []string{"UnitFactor", "unit_factor1"},
+			exp:    `{"FilterIDs":["fltr1","fltr2"],"Factor":2}`,
+		},
+		{
+			name:   "UnitFactor.unit_factor1.FilterIDs",
+			fields: []string{"UnitFactor", "unit_factor1", "FilterIDs"},
+			exp:    `["fltr1","fltr2"]`,
+		},
+		{
+			name:   "UnitFactor.unit_factor1.Factor",
+			fields: []string{"UnitFactor", "unit_factor1", "Factor"},
+			exp:    "2",
+		},
+		{
+			name:   "UnitFactor.unit_factor2",
+			fields: []string{"UnitFactor", "unit_factor2"},
+			exp:    `{"FilterIDs":["fltr3","fltr4"],"Factor":3}`,
+		},
+		{
+			name:   "UnitFactor.unit_factor2.FilterIDs",
+			fields: []string{"UnitFactor", "unit_factor2", "FilterIDs"},
+			exp:    `["fltr3","fltr4"]`,
+		},
+		{
+			name:   "UnitFactor.unit_factor2.Factor",
+			fields: []string{"UnitFactor", "unit_factor2", "Factor"},
+			exp:    "3",
+		},
+		{
+			name:   "UnitFactor.unit_factor3",
+			fields: []string{"UnitFactor", "unit_factor3"},
+			exp:    "",
+		},
+		// TODO: uncomment after the panic is fixed
+		// {
+		// 	name:   "Account",
+		// 	fields: []string{"Account"},
+		// 	exp:    "",
+		// },
+		{
+			name:   "Account",
+			fields: []string{"Account", "acc1"},
+			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
+		},
+		{
+			name:   "Account.acc1",
+			fields: []string{"Account", "acc1"},
+			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
+		},
+		{
+			name:   "Account.acc1.Tenant",
+			fields: []string{"Account", "acc1", "Tenant"},
+			exp:    "cgrates.org",
+		},
+		{
+			name:   "Account.acc1.FilterIDs",
+			fields: []string{"Account", "acc1", "FilterIDs"},
+			exp:    `["fltr1"]`,
+		},
+		{
+			name:   "Account.acc1.ID",
+			fields: []string{"Account", "acc1", "ID"},
+			exp:    "acc1",
+		},
+		{
+			name:   "Account.acc1.Weights",
+			fields: []string{"Account", "acc1", "Weights"},
+			exp:    "fltr2;10",
+		},
+		{
+			name:   "Account.acc1.Blockers",
+			fields: []string{"Account", "acc1", "Blockers"},
+			exp:    "fltr3;true",
+		},
+		{
+			name:   "Account.acc1.Opts",
+			fields: []string{"Account", "acc1", "Opts"},
+			exp:    `{"opt1":"value1"}`,
+		},
+		{
+			name:   "Account.acc1.Balances",
+			fields: []string{"Account", "acc1", "Balances"},
+			exp:    `{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}}`,
+		},
+		{
+			name:   "Account.acc1.Weights[0].FilterIDs",
+			fields: []string{"Account", "acc1", "Weights[0]", "FilterIDs"},
+			exp:    `["fltr2"]`,
+		},
+		{
+			name:   "Account.acc1.Weights[0].Weight",
+			fields: []string{"Account", "acc1", "Weights[0]", "Weight"},
+			exp:    "10",
+		},
+		{
+			name:   "Account.acc1.Blockers[0].FilterIDs",
+			fields: []string{"Account", "acc1", "Blockers[0]", "FilterIDs"},
+			exp:    `["fltr3"]`,
+		},
+		{
+			name:   "Account.acc1.Blockers[0].Weight",
+			fields: []string{"Account", "acc1", "Blockers[0]", "Blocker"},
+			exp:    "true",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1",
+			fields: []string{"Account", "acc1", "Balances", "balance1"},
+			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1,ID",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "ID"},
+			exp:    "balance1",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.FilterIDs",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "FilterIDs"},
+			exp:    `["fltr4"]`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.Weights",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "Weights"},
+			exp:    "fltr3;20",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.Blockers",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "Blockers"},
+			exp:    "fltr3;true",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.Type",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "Type"},
+			exp:    "*monetary",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.Units",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "Units"},
+			exp:    "1",
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.UnitFactors",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "UnitFactors"},
+			exp:    `[{"FilterIDs":["fltr1","fltr2"],"Factor":2}]`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.Opts",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "Opts"},
+			exp:    `{"opt1":"value1"}`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.CostIncrements",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "CostIncrements"},
+			exp:    `[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}]`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.AttributeIDs",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "AttributeIDs"},
+			exp:    `["attr1"]`,
+		},
+		{
+			name:   "Account.acc1.Balances.balance1.RateProfileIDs",
+			fields: []string{"Account", "acc1", "Balances", "balance1", "RateProfileIDs"},
+			exp:    `["rate_prf1"]`,
+		},
+		// TODO: uncomment after the panic is fixed
+		// {
+		// 	name:   "Account",
+		// 	fields: []string{"Account", "acc2"},
+		// 	exp:    "",
+		// },
+		{
+			name:   "Account.acc3",
+			fields: []string{"Account", "acc3"},
+			exp:    "",
 		},
 	}
 
