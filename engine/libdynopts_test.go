@@ -2373,7 +2373,7 @@ func TestRoutesDynamicOptsFromJson(t *testing.T) {
 	ev.Event[utils.AccountField] = 1005
 	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fltrs, cgrCfg.RouteSCfg().Opts.Usage); err != nil {
 		t.Error(err)
-	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
+	} else if rcv.Compare(config.RatesUsageDftOpt) != 0 {
 		t.Errorf("expected %v,received %v", config.RatesUsageDftOpt.String(), rcv.String())
 	}
 }
@@ -2442,7 +2442,7 @@ func TestLibFiltersGetDecimalBigOptsReturnDefaultOpt(t *testing.T) {
 	if rcv, err := GetDecimalOpts(context.Background(), "cgrates.org", ev.AsDataProvider(), nil, fS, dynOpts,
 		utils.OptsRatesUsage); err != nil {
 		t.Error(err)
-	} else if rcv.Cmp(config.RatesUsageDftOpt) != 0 {
+	} else if rcv.Compare(config.RatesUsageDftOpt) != 0 {
 		t.Errorf("expected: <%+v>,\nreceived: <%+v>", config.RatesUsageDftOpt, rcv)
 	}
 }

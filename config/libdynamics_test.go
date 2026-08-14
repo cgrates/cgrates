@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestCloneDynamicStringsSliceOpt(t *testing.T) {
@@ -134,8 +133,8 @@ func TestCloneDynamicDurationOpt(t *testing.T) {
 
 func TestCloneDynamicDecimalBigOpt(t *testing.T) {
 	in := []*DynamicDecimalOpt{
-		NewDynamicDecimalOpt([]string{"fltr1"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
-		NewDynamicDecimalOpt([]string{"fltr2"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+		NewDynamicDecimalOpt([]string{"fltr1"}, "", utils.NewDecimal(10, 0), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "", utils.NewDecimal(2, 0), nil),
 	}
 	clone := CloneDynamicDecimalOpt(in)
 	if !reflect.DeepEqual(in, clone) {
@@ -502,13 +501,13 @@ func TestDynamicDurationOptEquals(t *testing.T) {
 
 func TestDynamicDecimalBigOptEquals(t *testing.T) {
 	v1 := []*DynamicDecimalOpt{
-		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
-		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", utils.NewDecimal(10, 0), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", utils.NewDecimal(2, 0), nil),
 	}
 
 	v2 := []*DynamicDecimalOpt{
-		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil),
-		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+		NewDynamicDecimalOpt([]string{"fltr1"}, "cgrates.org", utils.NewDecimal(10, 0), nil),
+		NewDynamicDecimalOpt([]string{"fltr2"}, "cgrates.org", utils.NewDecimal(2, 0), nil),
 	}
 
 	if !DynamicDecimalOptEqual(v1, v2) {
@@ -529,7 +528,7 @@ func TestDynamicDecimalBigOptEquals(t *testing.T) {
 	}
 
 	//Test if different lengths
-	v1 = append(v1, NewDynamicDecimalOpt([]string{"fltr1"}, "", decimal.WithContext(utils.DecimalContext).SetUint64(10), nil))
+	v1 = append(v1, NewDynamicDecimalOpt([]string{"fltr1"}, "", utils.NewDecimal(10, 0), nil))
 	if DynamicDecimalOptEqual(v1, v2) {
 		t.Error("Expected slices to differ")
 	}
@@ -604,7 +603,7 @@ func TestIfaceToDecimalBigDynamicOpts(t *testing.T) {
 	}
 
 	exp := []*DynamicDecimalOpt{
-		NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(200), nil),
+		NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", utils.NewDecimal(200, 0), nil),
 	}
 
 	rcv, err := IfaceToDecimalBigDynamicOpts(dsOpt)
@@ -726,7 +725,7 @@ func TestDynamicDurationPointerOptEqual(t *testing.T) {
 
 func TestDecimalBigToStringDynamicOpts(t *testing.T) {
 	dbOpt := []*DynamicDecimalOpt{
-		NewDynamicDecimalOpt([]string{"test_filter", "test_filter2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(300), nil),
+		NewDynamicDecimalOpt([]string{"test_filter", "test_filter2"}, "cgrates.org", utils.NewDecimal(300, 0), nil),
 	}
 
 	exp := []*DynamicInterfaceOpt{

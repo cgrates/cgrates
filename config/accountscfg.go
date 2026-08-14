@@ -9,12 +9,11 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 var (
 	AccountsProfileIDsDftOpt = []string{}
-	AccountsUsageDftOpt      = decimal.New(int64(time.Minute), 0)
+	AccountsUsageDftOpt      = utils.NewDecimal(int64(time.Minute), 0)
 )
 
 const AccountsProfileIgnoreFiltersDftOpt = false

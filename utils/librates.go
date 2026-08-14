@@ -233,7 +233,7 @@ type RateSInterval struct {
 	Increments     []*RateSIncrement
 	CompressFactor int64
 
-	cost *decimal.Big // unexported total interval cost
+	cost *Decimal // unexported total interval cost
 }
 
 // Clone returns a copy of rI
@@ -251,8 +251,7 @@ func (rI *RateSInterval) Clone() *RateSInterval {
 		}
 	}
 	if rI.cost != nil {
-		tmp := &decimal.Big{}
-		cln.cost = tmp.Copy(rI.cost)
+		cln.cost = rI.cost.Clone()
 	}
 	return cln
 }
@@ -315,7 +314,7 @@ type RateSIncrement struct {
 	CompressFactor    int64
 	Usage             *Decimal
 
-	cost *decimal.Big // unexported total increment cost
+	cost *Decimal // unexported total increment cost
 }
 
 // Clone returns a copy of rI
@@ -332,8 +331,7 @@ func (rI *RateSIncrement) Clone() *RateSIncrement {
 		cln.Usage = rI.Usage.Clone()
 	}
 	if rI.cost != nil {
-		tmp := &decimal.Big{}
-		cln.cost = tmp.Copy(rI.cost)
+		cln.cost = rI.cost.Clone()
 	}
 	return cln
 }
@@ -575,10 +573,10 @@ func (rIv *RateSInterval) CompressEquals(rIv2 *RateSInterval) (eq bool) {
 	return true
 }
 
-func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *Decimal) {
 	if rIv.cost == nil {
 		for _, incrm := range rIv.Increments {
-			rIv.cost = SumBig(rIv.cost, incrm.Cost(rts))
+			rIv.cost = SumDecimal(rIv.cost, incrm.Cost(rts))
 		}
 	}
 	return rIv.cost
@@ -588,11 +586,11 @@ func (rIv *RateSInterval) Cost(rts map[string]*IntervalRate) (cost *decimal.Big)
 func (rIcr *RateSIncrement) CompressEquals(rIcr2 *RateSIncrement) (eq bool) {
 	return rIcr.RateID == rIcr2.RateID &&
 		rIcr.RateIntervalIndex == rIcr2.RateIntervalIndex &&
-		rIcr.Usage.Big.Cmp(rIcr2.Usage.Big) == 0
+		rIcr.Usage.Compare(rIcr2.Usage) == 0
 }
 
 // Cost computes the Cost on RateSIncrement
-func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Big) {
+func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *Decimal) {
 	if rIcr.cost == nil {
 		icrRt, has := rts[rIcr.RateID]
 		if !has {
@@ -600,18 +598,18 @@ func (rIcr *RateSIncrement) Cost(rts map[string]*IntervalRate) (cost *decimal.Bi
 			return
 		}
 		if rIcr.Usage.Compare(NewDecimal(-1, 0)) == 0 { // FixedFee
-			rIcr.cost = icrRt.FixedFee.Big
+			rIcr.cost = icrRt.FixedFee
 		} else {
-			rIcr.cost = icrRt.RecurrentFee.Big
+			rIcr.cost = icrRt.RecurrentFee
 			if icrRt.Unit != icrRt.Increment {
-				rIcr.cost = DivideBig(
-					MultiplyBig(rIcr.cost, icrRt.Increment.Big),
-					icrRt.Unit.Big)
+				rIcr.cost = DivideDecimal(
+					MultiplyDecimal(rIcr.cost, icrRt.Increment),
+					icrRt.Unit)
 			}
 			if rIcr.CompressFactor != 1 {
-				rIcr.cost = MultiplyBig(
+				rIcr.cost = MultiplyDecimal(
 					rIcr.cost,
-					decimal.WithContext(DecimalContext).SetUint64(uint64(rIcr.CompressFactor)))
+					NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(uint64(rIcr.CompressFactor))))
 			}
 		}
 	}
@@ -736,15 +734,15 @@ func (rp *RateProfile) Set(path []string, val any, newBranch bool) (err error) {
 		}
 	case MinCost:
 		if val != EmptyString {
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rp.MinCost = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rp.MinCost = valB
 		}
 	case MaxCost:
 		if val != EmptyString {
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rp.MaxCost = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rp.MaxCost = valB
 		}
 	case MaxCostStrategy:
 		rp.MaxCostStrategy = IfaceAsString(val)
@@ -785,25 +783,25 @@ func (rt *Rate) Set(path []string, val any, newBranch bool) (err error) {
 		}
 		switch path[1] {
 		case IntervalStart:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rt.IntervalRates[len(rt.IntervalRates)-1].IntervalStart = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].IntervalStart = valB
 		case FixedFee:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rt.IntervalRates[len(rt.IntervalRates)-1].FixedFee = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].FixedFee = valB
 		case RecurrentFee:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rt.IntervalRates[len(rt.IntervalRates)-1].RecurrentFee = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].RecurrentFee = valB
 		case Unit:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rt.IntervalRates[len(rt.IntervalRates)-1].Unit = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].Unit = valB
 		case Increment:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			rt.IntervalRates[len(rt.IntervalRates)-1].Increment = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			rt.IntervalRates[len(rt.IntervalRates)-1].Increment = valB
 		default:
 			return ErrWrongPath
 		}

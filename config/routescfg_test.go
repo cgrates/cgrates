@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
@@ -71,7 +70,7 @@ func TestRouteSCfgloadFromJsonCfg(t *testing.T) {
 			Limit:        []*DynamicIntPointerOpt{{value: utils.IntPointer(3)}},
 			Offset:       []*DynamicIntPointerOpt{{value: utils.IntPointer(3)}},
 			ProfileCount: []*DynamicIntPointerOpt{{value: utils.IntPointer(2)}, {}},
-			Usage:        []*DynamicDecimalOpt{{value: decimal.New(2, 0)}, {}},
+			Usage:        []*DynamicDecimalOpt{{value: utils.NewDecimal(2, 0)}, {}},
 			MaxItems: []*DynamicIntPointerOpt{
 				{
 					FilterIDs: []string{"id2"},
@@ -303,7 +302,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(3), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(3, 0), nil),
 			},
 			MaxItems: []*DynamicIntPointerOpt{
 				{
@@ -362,7 +361,7 @@ func TestDiffRouteSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(2, 0), nil),
 			},
 			MaxItems: []*DynamicIntPointerOpt{
 				{

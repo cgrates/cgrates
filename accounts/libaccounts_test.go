@@ -245,12 +245,12 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 		Accounts:    make(map[string]*utils.Account),
 	}
 
-	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(700, 0), utils.EmptyString,
+	if evCh, err := debitConcreteUnits(context.Background(), utils.NewDecimal(700, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	} else {
 		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
@@ -264,7 +264,7 @@ func TestDebitUsageFromConcretes(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(context.Background(), decimal.New(1100, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), utils.NewDecimal(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
 	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
@@ -354,12 +354,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 		Accounts:    make(map[string]*utils.Account),
 	}
 
-	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(700, 0), utils.EmptyString,
+	if evCh, err := debitConcreteUnits(context.Background(), utils.NewDecimal(700, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(300, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(300, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	} else {
 		//as the names of accounting, charges, UF are GENUUIDs generator, we will change their names for comparing
@@ -374,12 +374,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(context.Background(), decimal.New(1000, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), utils.NewDecimal(1000, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err != nil {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 
@@ -387,12 +387,12 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
 
-	if _, err := debitConcreteUnits(context.Background(), decimal.New(1100, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), utils.NewDecimal(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Errorf("Expected %+v, received %+v", utils.ErrInsufficientCredit, err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
@@ -425,13 +425,13 @@ func TestDebitUsageFromConcretesRestore(t *testing.T) {
 		fltrS: filterS,
 	}
 
-	if _, err := debitConcreteUnits(context.Background(), decimal.New(200, 0), utils.EmptyString,
+	if _, err := debitConcreteUnits(context.Background(), utils.NewDecimal(200, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2},
 		new(utils.CGREvent)); err == nil || err.Error() != "inline parse error for string: <*string>" {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
@@ -463,34 +463,34 @@ func TestMaxDebitUsageFromConcretes(t *testing.T) {
 		fltrS: filterS,
 	}
 
-	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(900, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), utils.NewDecimal(900, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, nil, new(utils.CGREvent),
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err != nil {
+		}, utils.NewDecimal(0, 0), cfg.AccountSCfg().MaxIterations); err != nil {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(0, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(100, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(100, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 
 	//debit more than we have in balances with the restored units
 	cb1.blnCfg.Units = utils.NewDecimal(500, 0)
 	cb2.blnCfg.Units = utils.NewDecimal(500, 0)
-	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(1100, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), utils.NewDecimal(1100, 0), utils.EmptyString,
 		[]*concreteBalance{cb1, cb2}, nil, &utils.CGREvent{
 			ID: "Unique_id",
 		},
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(1, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err != utils.ErrMaxIncrementsExceeded {
+		}, utils.NewDecimal(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err != utils.ErrMaxIncrementsExceeded {
 		t.Error(err)
-	} else if cb1.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb1.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb1.blnCfg.Units)
-	} else if cb2.blnCfg.Units.Cmp(decimal.New(500, 0)) != 0 {
+	} else if cb2.blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
 		t.Errorf("balance remaining: %s", cb2.blnCfg.Units)
 	}
 }
@@ -524,7 +524,7 @@ func TestRestoreAccount(t *testing.T) { //coverage purpose
 	}
 
 	restoreAccounts(context.Background(), dm, []*utils.Account{acntPrf}, []utils.AccountBalancesBackup{
-		map[string]*decimal.Big{"CB2": decimal.New(100, 0)},
+		map[string]*utils.Decimal{"CB2": utils.NewDecimal(100, 0)},
 	})
 
 	if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", "1001"); err != nil {
@@ -572,7 +572,7 @@ func TestRestoreAccount2(t *testing.T) { //coverage purpose
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
 	restoreAccounts(context.Background(), dm, []*utils.Account{acntPrf}, []utils.AccountBalancesBackup{
-		map[string]*decimal.Big{"CB1": decimal.New(100, 0)},
+		map[string]*utils.Decimal{"CB1": utils.NewDecimal(100, 0)},
 	})
 
 	subString := "<AccountS> error <NOT_IMPLEMENTED> restoring account <cgrates.org:1001>"
@@ -786,12 +786,12 @@ func TestMaxDebitAbstractFromConcretesInsufficientCredit(t *testing.T) {
 	}
 
 	expectedErr := "inline parse error for string: <*test>"
-	if _, err := maxDebitAbstractsFromConcretes(context.Background(), decimal.New(110, 0), utils.EmptyString,
+	if _, err := maxDebitAbstractsFromConcretes(context.Background(), utils.NewDecimal(110, 0), utils.EmptyString,
 		cncrtBlncs, nil, new(utils.CGREvent),
 		nil, nil, nil, nil, &utils.CostIncrement{
 			Increment:    utils.NewDecimal(2, 0),
 			RecurrentFee: utils.NewDecimal(1, 0),
-		}, decimal.New(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err.Error() != expectedErr {
+		}, utils.NewDecimal(0, 0), cfg.AccountSCfg().MaxIterations); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 
@@ -823,7 +823,7 @@ func TestRefundUnitsOnAccount(t *testing.T) {
 	}
 	origBlnc2 := &utils.Balance{
 		ID:    "blnc2",
-		Units: &utils.Decimal{Big: decimal.New(20, 0)},
+		Units: utils.NewDecimal(20, 0),
 	}
 	refund2 := &utils.Decimal{Big: decimal.New(7, 0)}
 

@@ -236,18 +236,18 @@ func TestAccountDebit(t *testing.T) {
 		},
 	}
 
-	usage := &utils.Decimal{Big: decimal.New(190, 0)}
+	usage := utils.NewDecimal(190, 0)
 	expected := "NOT_FOUND:invalid_filter_format"
-	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
-		cgrEvent, true, decimal.New(0, 0)); err == nil || err.Error() != expected {
+	if _, err := accnts.accountDebit(context.Background(), accPrf, usage,
+		cgrEvent, true, utils.NewDecimal(0, 0)); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Balances["ConcreteBalance1"].Weights[0].FilterIDs = []string{}
 	accPrf.Balances["ConcreteBalance1"].Type = utils.MetaConcrete
 
 	usage = &utils.Decimal{Big: decimal.New(0, 0)}
-	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
-		cgrEvent, true, decimal.New(0, 0)); err != nil {
+	if _, err := accnts.accountDebit(context.Background(), accPrf, usage,
+		cgrEvent, true, utils.NewDecimal(0, 0)); err != nil {
 		t.Error(err)
 	}
 	usage = &utils.Decimal{Big: decimal.New(190, 0)}
@@ -259,18 +259,18 @@ func TestAccountDebit(t *testing.T) {
 		},
 	}
 	expected = "NOT_FOUND:invalid_format_type"
-	if _, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
-		cgrEvent, true, decimal.New(0, 0)); err == nil || err.Error() != expected {
+	if _, err := accnts.accountDebit(context.Background(), accPrf, usage,
+		cgrEvent, true, utils.NewDecimal(0, 0)); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	accPrf.Balances["ConcreteBalance1"].UnitFactors[0].FilterIDs = []string{}
 
-	expectedUsage := &utils.Decimal{Big: decimal.New(150, 0)}
-	if evCh, err := accnts.accountDebit(context.Background(), accPrf, usage.Big,
-		cgrEvent, true, decimal.New(0, 0)); err != nil {
+	expectedUsage := utils.NewDecimal(150, 0)
+	if evCh, err := accnts.accountDebit(context.Background(), accPrf, usage,
+		cgrEvent, true, utils.NewDecimal(0, 0)); err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(evCh.Concretes.Big, expectedUsage.Big) {
-		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage.Big), utils.ToJSON(evCh.Concretes.Big))
+	} else if !reflect.DeepEqual(evCh.Concretes, expectedUsage) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedUsage), utils.ToJSON(evCh.Concretes))
 	}
 }
 

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestRateSConfigloadFromJsonCfg(t *testing.T) {
@@ -230,10 +229,10 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(2, 0), nil),
 			},
 			IntervalStart: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(2, 0), nil),
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
@@ -271,10 +270,10 @@ func TestDiffRateSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(3), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(3, 0), nil),
 			},
 			IntervalStart: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(3), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(3, 0), nil),
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{

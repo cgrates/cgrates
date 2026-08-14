@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 type DynamicStringSliceOpt struct {
@@ -63,7 +62,7 @@ type DynamicDurationOpt struct {
 type DynamicDecimalOpt struct {
 	FilterIDs []string `json:"filterIDs"`
 	Tenant    string   `json:"tenant"`
-	value     *decimal.Big
+	value     *utils.Decimal
 	rsVal     utils.RSRParsers
 }
 
@@ -221,7 +220,7 @@ func CloneDynamicDecimalOpt(in []*DynamicDecimalOpt) (cl []*DynamicDecimalOpt) {
 		cl[i] = &DynamicDecimalOpt{
 			Tenant:    val.Tenant,
 			FilterIDs: slices.Clone(val.FilterIDs),
-			value:     utils.CloneDecimalBig(val.value),
+			value:     val.value.Clone(),
 			rsVal:     val.rsVal.Clone(),
 		}
 	}
@@ -410,7 +409,7 @@ func DynamicDecimalOptEqual(v1, v2 []*DynamicDecimalOpt) bool {
 			return false
 		}
 		if !slices.Equal(v1[i].FilterIDs, v2[i].FilterIDs) ||
-			v1[i].value.Cmp(v2[i].value) != 0 {
+			v1[i].value.Compare(v2[i].value) != 0 {
 			return false
 		}
 		if v1[i].rsVal.GetRule() != v2[i].rsVal.GetRule() {
@@ -605,7 +604,7 @@ func IfaceToDecimalBigDynamicOpts(strOpts []*DynamicInterfaceOpt) (decOpts []*Dy
 			}
 			continue
 		}
-		if decOpts[index].value, err = utils.IfaceAsBig(opt.Value); err != nil {
+		if decOpts[index].value, err = utils.IfaceAsDecimal(opt.Value); err != nil {
 			return
 		}
 	}
@@ -802,7 +801,7 @@ func NewDynamicFloat64Opt(filterIDs []string, tenant string, value float64, dynV
 	}
 }
 
-func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *decimal.Big, dynValue utils.RSRParsers) *DynamicDecimalOpt {
+func NewDynamicDecimalOpt(filterIDs []string, tenant string, value *utils.Decimal, dynValue utils.RSRParsers) *DynamicDecimalOpt {
 	return &DynamicDecimalOpt{
 		FilterIDs: filterIDs,
 		Tenant:    tenant,
@@ -891,13 +890,13 @@ func (dynFlt *DynamicBoolOpt) Value(dP utils.DataProvider) (bool, error) {
 	return dynFlt.value, nil
 }
 
-func (dynDec *DynamicDecimalOpt) Value(dP utils.DataProvider) (*decimal.Big, error) {
+func (dynDec *DynamicDecimalOpt) Value(dP utils.DataProvider) (*utils.Decimal, error) {
 	if dynDec.rsVal != nil {
 		out, err := dynDec.rsVal.ParseDataProviderWithInterfaces2(dP)
 		if err != nil {
 			return nil, err
 		}
-		return utils.IfaceAsBig(out)
+		return utils.IfaceAsDecimal(out)
 	}
 	return dynDec.value, nil
 }

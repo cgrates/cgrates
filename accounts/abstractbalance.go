@@ -8,7 +8,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
@@ -39,8 +38,8 @@ func (aB *abstractBalance) id() string {
 
 // debitAbstracts implements the balanceOperator interface
 // it will debit the abstracts out of a single abstractBalance or pay it with one or multiple concrete balances
-func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.Big,
-	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
+func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Decimal,
+	cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.APIOpts,
 		utils.MetaReq:  cgrEv.Event,
@@ -59,8 +58,8 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	if blncLmt, err = balanceLimit(aB.blnCfg.Opts); err != nil {
 		return
 	}
-	if blncLmt != nil && blncLmt.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, blncLmt.Big) // reserve the limit
+	if blncLmt != nil && blncLmt.Compare(utils.NewDecimal(0, 0)) != 0 {
+		aB.blnCfg.Units = utils.SubstractDecimal(aB.blnCfg.Units, blncLmt) // reserve the limit
 		hasLmt = true
 	}
 
@@ -76,23 +75,23 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 		return
 	}
 	var hasUF bool
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+	if uF != nil && uF.Factor.Compare(utils.NewDecimal(1, 0)) != 0 {
 		hasUF = true
 	}
 	if blncLmt != nil { // unlimited balances do not need usage limiting
-		maxBlcDbt := utils.CloneDecimalBig(aB.blnCfg.Units.Big)
+		maxBlcDbt := aB.blnCfg.Units.Clone()
 		if hasUF {
-			maxBlcDbt = utils.DivideBig(maxBlcDbt, uF.Factor.Big) // common units with debit and increments
+			maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor) // common units with debit and increments
 		}
-		maxBlcDbt = roundUnitsWithIncrements(maxBlcDbt, costIcrm.Increment.Big)
-		if maxBlcDbt.Cmp(usage) == -1 { // balance smaller than usage, correct usage
+		maxBlcDbt = roundUnitsWithIncrements(maxBlcDbt, costIcrm.Increment)
+		if maxBlcDbt.Compare(usage) == -1 { // balance smaller than usage, correct usage
 			usage = maxBlcDbt
 		}
 	}
 	var ecCost *utils.EventCharges
 	if costIcrm.FixedFee == nil && costIcrm.RecurrentFee == nil || // no cost defined, will be queried via RateS
-		costIcrm.FixedFee != nil && costIcrm.FixedFee.Cmp(decimal.New(0, 0)) != 0 ||
-		costIcrm.RecurrentFee != nil && costIcrm.RecurrentFee.Cmp(decimal.New(0, 0)) != 0 {
+		costIcrm.FixedFee != nil && costIcrm.FixedFee.Compare(utils.NewDecimal(0, 0)) != 0 ||
+		costIcrm.RecurrentFee != nil && costIcrm.RecurrentFee.Compare(utils.NewDecimal(0, 0)) != 0 {
 		// attempt to debit usage with cost
 		if ecCost, err = maxDebitAbstractsFromConcretes(ctx, usage,
 			aB.acntID, aB.cncrtBlncs,
@@ -106,27 +105,27 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 			return ecCost, nil
 		}
 	}
-	var dbtUnits *decimal.Big
+	var dbtUnits *utils.Decimal
 	if ecCost != nil { // abstracts with concretes cost
-		usage = ecCost.Abstracts.Big
-		dbtUnits = ecCost.Abstracts.Big
+		usage = ecCost.Abstracts
+		dbtUnits = ecCost.Abstracts
 	} else { // abstracts without cost
-		dbtUnits = utils.CloneDecimalBig(usage)
+		dbtUnits = usage.Clone()
 	}
 	if hasUF { // convert back what we have divided above
-		dbtUnits = utils.MultiplyBig(dbtUnits, uF.Factor.Big)
+		dbtUnits = utils.MultiplyDecimal(dbtUnits, uF.Factor)
 	}
 
-	if dbtUnits.Cmp(decimal.New(0, 0)) != 0 {
-		aB.blnCfg.Units.Big = utils.SubstractBig(aB.blnCfg.Units.Big, dbtUnits)
+	if dbtUnits.Compare(utils.NewDecimal(0, 0)) != 0 {
+		aB.blnCfg.Units = utils.SubstractDecimal(aB.blnCfg.Units, dbtUnits)
 	}
 	if hasLmt { // put back the limit
-		aB.blnCfg.Units.Big = utils.SumBig(aB.blnCfg.Units.Big, blncLmt.Big)
+		aB.blnCfg.Units = utils.SumDecimal(aB.blnCfg.Units, blncLmt)
 	}
 
 	// EvenCharges building
 	ec = utils.NewEventCharges()
-	ec.Abstracts = &utils.Decimal{Big: usage}
+	ec.Abstracts = usage
 	if ecCost != nil {
 		ec.Concretes = ecCost.Concretes
 	}
@@ -162,7 +161,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID:    aB.acntID,
 		BalanceID:    aB.blnCfg.ID,
-		Units:        &utils.Decimal{Big: usage},
+		Units:        usage,
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 		RatingID:     ratingID,
@@ -191,8 +190,8 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *decimal.B
 }
 
 // debitConcretes implements the balanceOperator interface
-func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *decimal.Big,
-	_ *utils.CGREvent, _ *decimal.Big) (ec *utils.EventCharges, err error) {
+func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *utils.Decimal,
+	_ *utils.CGREvent, _ *utils.Decimal) (ec *utils.EventCharges, err error) {
 	return nil, utils.ErrNotImplemented
 }
 

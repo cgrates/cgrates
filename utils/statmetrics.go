@@ -649,19 +649,19 @@ func (m *Metric) GetValue() (v *Decimal) {
 }
 
 func (m *Metric) addEvent(evID string, ival any) (err error) {
-	var val *decimal.Big
-	if val, err = IfaceAsBig(ival); err != nil {
+	var val *Decimal
+	if val, err = IfaceAsDecimal(ival); err != nil {
 		return
 	}
-	dVal := &Decimal{Big: val}
-	m.Value = SumDecimal(m.Value, dVal)
+
+	m.Value = SumDecimal(m.Value, val)
 	if v, has := m.Events[evID]; !has {
-		m.Events[evID] = &DecimalWithCompress{Stat: dVal, CompressFactor: 1}
+		m.Events[evID] = &DecimalWithCompress{Stat: val, CompressFactor: 1}
 	} else {
 		v.Stat = DivideDecimal(
 			SumDecimal(
 				MultiplyDecimal(v.Stat, NewDecimal(int64(v.CompressFactor), 0)),
-				dVal),
+				val),
 			NewDecimal(int64(v.CompressFactor)+1, 0))
 		v.CompressFactor = v.CompressFactor + 1
 	}
@@ -671,12 +671,11 @@ func (m *Metric) addEvent(evID string, ival any) (err error) {
 
 // Adding aggregated metrics without events
 func (m *Metric) addOneEvent(ival any) (err error) {
-	var val *decimal.Big
-	if val, err = IfaceAsBig(ival); err != nil {
+	var val *Decimal
+	if val, err = IfaceAsDecimal(ival); err != nil {
 		return
 	}
-	dVal := &Decimal{Big: val}
-	m.Value = SumDecimal(m.Value, dVal)
+	m.Value = SumDecimal(m.Value, val)
 	m.Count++
 	return
 }

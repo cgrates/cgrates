@@ -11,7 +11,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // NewAccountS instantiates the AccountS
@@ -184,7 +183,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 		utils.OptsAccountsForceUsage); err != nil {
 		return
 	}
-	dbted := decimal.New(0, 0) // amount debited so far
+	dbted := utils.NewDecimal(0, 0) // amount debited so far
 	acntBkps := make([]utils.AccountBalancesBackup, len(acnts))
 	defer func() { // make sure we revert debits if errors occured
 		if err != nil && store {
@@ -192,13 +191,13 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 		}
 	}()
 	for i, acnt := range acnts {
-		if usage.Cmp(decimal.New(0, 0)) == 0 {
+		if usage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			return // no more debits
 		}
 		acntBkps[i] = acnt.AccountBalancesBackup()
 		var ecDbt *utils.EventCharges
 		if ecDbt, err = aS.accountDebit(ctx, acnt,
-			utils.CloneDecimalBig(usage.Big), cgrEv, concretes, dbted); err != nil {
+			usage.Clone(), cgrEv, concretes, dbted); err != nil {
 			return
 		}
 		if ecDbt == nil { // no balance matched
@@ -209,14 +208,14 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 				return
 			}
 		}
-		var used *decimal.Big
+		var used *utils.Decimal
 		if concretes {
-			used = ecDbt.Concretes.Big
+			used = ecDbt.Concretes
 		} else {
-			used = ecDbt.Abstracts.Big
+			used = ecDbt.Abstracts
 		}
-		usage.Big = utils.SubstractBig(usage.Big, used)
-		dbted = utils.SumBig(dbted, used)
+		usage = utils.SubstractDecimal(usage, used)
+		dbted = utils.SumDecimal(dbted, used)
 		ec.Merge(ecDbt)
 		// check for blockers for every profile
 		var blocker bool
@@ -229,7 +228,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 			break
 		}
 	}
-	if usage.Cmp(decimal.New(0, 0)) == 1 && forceUsage {
+	if usage.Compare(utils.NewDecimal(0, 0)) == 1 && forceUsage {
 		err = utils.ErrInsufficientCredit
 		return
 	}
@@ -237,8 +236,8 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 }
 
 // accountDebit will debit the usage out of an Account
-func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usage *decimal.Big,
-	cgrEv *utils.CGREvent, concretes bool, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
+func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usage *utils.Decimal,
+	cgrEv *utils.CGREvent, concretes bool, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
 	for _, blnCfg := range acnt.Balances {
@@ -271,11 +270,11 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		if concretes {
 			debFunc = blncOper.debitConcretes
 		}
-		if usage.Cmp(decimal.New(0, 0)) == 0 {
+		if usage.Compare(utils.NewDecimal(0, 0)) == 0 {
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges
-		if ecDbt, err = debFunc(ctx, utils.CloneDecimalBig(usage), cgrEv, dbted); err != nil {
+		if ecDbt, err = debFunc(ctx, usage.Clone(), cgrEv, dbted); err != nil {
 			if err == utils.ErrFilterNotPassingNoCaps ||
 				err == utils.ErrNotImplemented {
 				err = nil
@@ -289,14 +288,14 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		if ec == nil { // first debit
 			ec = utils.NewEventCharges()
 		}
-		var used *decimal.Big
+		var used *utils.Decimal
 		if concretes {
-			used = ecDbt.Concretes.Big
+			used = ecDbt.Concretes
 		} else {
-			used = ecDbt.Abstracts.Big
+			used = ecDbt.Abstracts
 		}
-		usage = utils.SubstractBig(usage, used)
-		dbted = utils.SumBig(dbted, used)
+		usage = utils.SubstractDecimal(usage, used)
+		dbted = utils.SumDecimal(dbted, used)
 		ec.Merge(ecDbt)
 		ec.Accounts[acnt.ID] = acnt
 		// check the blocker for every balance in order to continue debiting from balances or not

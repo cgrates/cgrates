@@ -45,7 +45,7 @@ func TestOrderRatesOnIntervals11(t *testing.T) {
 	allRts := []*utils.Rate{rt0, rtChristmas}
 	expOrdered := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 	}
@@ -53,7 +53,7 @@ func TestOrderRatesOnIntervals11(t *testing.T) {
 	sTime := time.Date(2020, time.June, 28, 18, 56, 05, 0, time.UTC)
 	usage := utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
+		allRts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s", utils.ToJSON(expOrdered), utils.ToJSON(ordRts))
@@ -61,18 +61,18 @@ func TestOrderRatesOnIntervals11(t *testing.T) {
 
 	expOrdered = []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(55*time.Second), 0).Big,
+			utils.NewDecimal(int64(55*time.Second), 0),
 			rtChristmas,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
 	usage = utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
+		allRts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
@@ -81,22 +81,22 @@ func TestOrderRatesOnIntervals11(t *testing.T) {
 
 	expOrdered = []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(55*time.Second), 0).Big,
+			utils.NewDecimal(int64(55*time.Second), 0),
 			rtChristmas,
 		},
 		{
-			utils.NewDecimal(int64(86455*time.Second), 0).Big,
+			utils.NewDecimal(int64(86455*time.Second), 0),
 			rt0,
 		},
 	}
 	sTime = time.Date(2020, time.December, 23, 23, 59, 05, 0, time.UTC)
 	usage = utils.NewDecimal(int64(25*time.Hour), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		allRts, wghts, sTime, usage.Big, true, 10); err != nil {
+		allRts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
@@ -108,7 +108,7 @@ func TestOrderRatesOnIntervals11(t *testing.T) {
 	sTime = time.Date(2020, time.December, 25, 23, 59, 05, 0, time.UTC)
 	usage = utils.NewDecimal(int64(2*time.Minute), 0)
 	if ordRts, err := orderRatesOnIntervals(
-		rts, wghts, sTime, usage.Big, true, 10); err != nil {
+		rts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(expOrdered, ordRts) {
 		t.Errorf("expecting: %s\n, received: %s",
@@ -197,31 +197,31 @@ func TestOrderRatesOnIntervalsChristmasDay(t *testing.T) {
 	usage := utils.NewDecimal(int64(31*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour), 0),
 			rtCh1,
 		},
 		{
-			utils.NewDecimal(int64(9*time.Hour), 0).Big,
+			utils.NewDecimal(int64(9*time.Hour), 0),
 			rtCh2,
 		},
 		{
-			utils.NewDecimal(int64(15*time.Hour), 0).Big,
+			utils.NewDecimal(int64(15*time.Hour), 0),
 			rtCh3,
 		},
 		{
-			utils.NewDecimal(int64(22*time.Hour), 0).Big,
+			utils.NewDecimal(int64(22*time.Hour), 0),
 			rtCh4,
 		},
 		{
-			utils.NewDecimal(int64(26*time.Hour), 0).Big,
+			utils.NewDecimal(int64(26*time.Hour), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -281,23 +281,23 @@ func TestOrderRatesOnIntervalsDoubleRates1(t *testing.T) {
 	usage := utils.NewDecimal(int64(31*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour+31*time.Minute+48*time.Second), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour+31*time.Minute+48*time.Second), 0),
 			rtCh1,
 		},
 		{
-			utils.NewDecimal(int64(20*time.Hour+31*time.Minute+48*time.Second), 0).Big,
+			utils.NewDecimal(int64(20*time.Hour+31*time.Minute+48*time.Second), 0),
 			rtCh2,
 		},
 		{
-			utils.NewDecimal(int64(26*time.Hour+31*time.Minute+48*time.Second), 0).Big,
+			utils.NewDecimal(int64(26*time.Hour+31*time.Minute+48*time.Second), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -344,31 +344,31 @@ func TestOrderRatesOnIntervalsEveryTwentyFiveMins(t *testing.T) {
 	usage := utils.NewDecimal(int64(time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtTwentyFiveMins,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(25*time.Minute), 0).Big,
+			utils.NewDecimal(int64(25*time.Minute), 0),
 			rtTwentyFiveMins,
 		},
 		{
-			utils.NewDecimal(int64(26*time.Minute), 0).Big,
+			utils.NewDecimal(int64(26*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(50*time.Minute), 0),
 			rtTwentyFiveMins,
 		},
 		{
-			utils.NewDecimal(int64(51*time.Minute), 0).Big,
+			utils.NewDecimal(int64(51*time.Minute), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -429,19 +429,19 @@ func TestOrderRatesOnIntervalsOneMinutePause(t *testing.T) {
 	usage := utils.NewDecimal(int64(time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtFirstInterval,
 		},
 		{
-			utils.NewDecimal(int64(26*time.Minute), 0).Big,
+			utils.NewDecimal(int64(26*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(27*time.Minute), 0).Big,
+			utils.NewDecimal(int64(27*time.Minute), 0),
 			rtSecondINterval,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -501,31 +501,31 @@ func TestOrderRatesOnIntervalsNewYear(t *testing.T) {
 	usage := utils.NewDecimal(int64(26*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1NewYear,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(21*time.Hour), 0).Big,
+			utils.NewDecimal(int64(21*time.Hour), 0),
 			rt1NewYear,
 		},
 		{
-			utils.NewDecimal(int64(23*time.Hour), 0).Big,
+			utils.NewDecimal(int64(23*time.Hour), 0),
 			rt1NewYear2,
 		},
 		{
-			utils.NewDecimal(int64(23*time.Hour+31*time.Minute), 0).Big,
+			utils.NewDecimal(int64(23*time.Hour+31*time.Minute), 0),
 			rt1NewYear,
 		},
 		{
-			utils.NewDecimal(int64(25*time.Hour), 0).Big,
+			utils.NewDecimal(int64(25*time.Hour), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -572,19 +572,19 @@ func TestOrderRateOnIntervalsEveryHourEveryDay(t *testing.T) {
 	usage := utils.NewDecimal(int64(49*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtEveryHour,
 		},
 		{
-			utils.NewDecimal(int64(13*time.Hour+35*time.Minute+45*time.Second), 0).Big,
+			utils.NewDecimal(int64(13*time.Hour+35*time.Minute+45*time.Second), 0),
 			rtEveryDay,
 		},
 		{
-			utils.NewDecimal(int64(37*time.Hour+35*time.Minute+45*time.Second), 0).Big,
+			utils.NewDecimal(int64(37*time.Hour+35*time.Minute+45*time.Second), 0),
 			rtEveryHour,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -645,35 +645,35 @@ func TestOrderRatesOnIntervalsOneHourInThreeRates(t *testing.T) {
 	usage := utils.NewDecimal(int64(2*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtOneHour3,
 		},
 		{
-			utils.NewDecimal(int64(time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Second), 0),
 			rtOneHour1,
 		},
 		{
-			utils.NewDecimal(int64(20*time.Minute+time.Second), 0).Big,
+			utils.NewDecimal(int64(20*time.Minute+time.Second), 0),
 			rtOneHour2,
 		},
 		{
-			utils.NewDecimal(int64(40*time.Minute+time.Second), 0).Big,
+			utils.NewDecimal(int64(40*time.Minute+time.Second), 0),
 			rtOneHour3,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Hour+time.Second), 0),
 			rtOneHour1,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+20*time.Minute+time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Hour+20*time.Minute+time.Second), 0),
 			rtOneHour2,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+40*time.Minute+time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Hour+40*time.Minute+time.Second), 0),
 			rtOneHour3,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -720,15 +720,15 @@ func TestOrderRateOnIntervalsEveryThreeHours(t *testing.T) {
 	usage := utils.NewDecimal(int64(24*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtEveryThreeH,
 		},
 		{
-			utils.NewDecimal(int64(15*time.Hour), 0).Big,
+			utils.NewDecimal(int64(15*time.Hour), 0),
 			rtByDay,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -803,23 +803,23 @@ func TestOrderRateOnIntervalsTwoRatesInOne(t *testing.T) {
 	usage := utils.NewDecimal(int64(25*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rtHalfDay1,
 		},
 		{
-			utils.NewDecimal(int64(13*time.Hour), 0).Big,
+			utils.NewDecimal(int64(13*time.Hour), 0),
 			rtHalfDay2r1,
 		},
 		{
-			utils.NewDecimal(int64(18*time.Hour), 0).Big,
+			utils.NewDecimal(int64(18*time.Hour), 0),
 			rtHalfDay2,
 		},
 		{
-			utils.NewDecimal(int64(19*time.Hour), 0).Big,
+			utils.NewDecimal(int64(19*time.Hour), 0),
 			rtHalfDay2r2,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -866,27 +866,27 @@ func TestOrderRateOnIntervalsEvery1Hour30Mins(t *testing.T) {
 	usage := utils.NewDecimal(int64(time.Hour+time.Second), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rateEvery30Mins,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rateEvery1H,
 		},
 		{
-			utils.NewDecimal(int64(30*time.Minute), 0).Big,
+			utils.NewDecimal(int64(30*time.Minute), 0),
 			rateEvery30Mins,
 		},
 		{
-			utils.NewDecimal(int64(30*time.Minute+time.Minute), 0).Big,
+			utils.NewDecimal(int64(30*time.Minute+time.Minute), 0),
 			rateEvery1H,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rateEvery30Mins,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -961,23 +961,23 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase1(t *testing.T) {
 	usage := utils.NewDecimal(int64(13*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(5*time.Hour), 0).Big,
+			utils.NewDecimal(int64(5*time.Hour), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(7*time.Hour), 0).Big,
+			utils.NewDecimal(int64(7*time.Hour), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(9*time.Hour), 0).Big,
+			utils.NewDecimal(int64(9*time.Hour), 0),
 			rtPrincipal,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1052,23 +1052,23 @@ func TestOrderRatesOnIntervalsOnePrinciapalRateCase2(t *testing.T) {
 	usage := utils.NewDecimal(int64(13*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtPrincipal,
 		},
 		{
-			utils.NewDecimal(int64(4*time.Hour), 0).Big,
+			utils.NewDecimal(int64(4*time.Hour), 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(6*time.Hour), 0).Big,
+			utils.NewDecimal(int64(6*time.Hour), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(8*time.Hour), 0).Big,
+			utils.NewDecimal(int64(8*time.Hour), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wght, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wght, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1115,31 +1115,31 @@ func TestOrderRatesOnIntervalsEvenOddMinutes(t *testing.T) {
 	usage := utils.NewDecimal(int64(5*time.Minute+time.Second), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtEvenMinutes,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rtOddMInutes,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Minute), 0).Big,
+			utils.NewDecimal(int64(2*time.Minute), 0),
 			rtEvenMinutes,
 		},
 		{
-			utils.NewDecimal(int64(3*time.Minute), 0).Big,
+			utils.NewDecimal(int64(3*time.Minute), 0),
 			rtOddMInutes,
 		},
 		{
-			utils.NewDecimal(int64(4*time.Minute), 0).Big,
+			utils.NewDecimal(int64(4*time.Minute), 0),
 			rtEvenMinutes,
 		},
 		{
-			utils.NewDecimal(int64(5*time.Minute), 0).Big,
+			utils.NewDecimal(int64(5*time.Minute), 0),
 			rtOddMInutes,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1213,35 +1213,35 @@ func TestOrderRatesOnIntervalsDoubleRates2(t *testing.T) {
 	usage := utils.NewDecimal(int64(36*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour), 0),
 			rtCh1,
 		},
 		{
-			utils.NewDecimal(int64(12*time.Hour), 0).Big,
+			utils.NewDecimal(int64(12*time.Hour), 0),
 			rtCh2,
 		},
 		{
-			utils.NewDecimal(int64(15*time.Hour), 0).Big,
+			utils.NewDecimal(int64(15*time.Hour), 0),
 			rtCh1,
 		},
 		{
-			utils.NewDecimal(int64(22*time.Hour), 0).Big,
+			utils.NewDecimal(int64(22*time.Hour), 0),
 			rtCh3,
 		},
 		{
-			utils.NewDecimal(int64(25*time.Hour), 0).Big,
+			utils.NewDecimal(int64(25*time.Hour), 0),
 			rtCh1,
 		},
 		{
-			utils.NewDecimal(int64(26*time.Hour), 0).Big,
+			utils.NewDecimal(int64(26*time.Hour), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1287,27 +1287,27 @@ func TestOrderOnRatesIntervalsEveryTwoHours(t *testing.T) {
 	usage := utils.NewDecimal(int64(4*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtEvTwoHours,
 		},
 		{
-			utils.NewDecimal(int64(50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(50*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Hour+50*time.Minute), 0),
 			rtEvTwoHours,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour+50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour+50*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(3*time.Hour+50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(3*time.Hour+50*time.Minute), 0),
 			rtEvTwoHours,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1353,31 +1353,31 @@ func TestOrderRatesOnIntervalsEveryTwoDays(t *testing.T) {
 	usage := utils.NewDecimal(int64(96*time.Hour+2*time.Second), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rtEveryTwoDays,
 		},
 		{
-			utils.NewDecimal(int64(time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Second), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(24*time.Hour+time.Second), 0).Big,
+			utils.NewDecimal(int64(24*time.Hour+time.Second), 0),
 			rtEveryTwoDays,
 		},
 		{
-			utils.NewDecimal(int64(48*time.Hour+time.Second), 0).Big,
+			utils.NewDecimal(int64(48*time.Hour+time.Second), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(72*time.Hour+time.Second), 0).Big,
+			utils.NewDecimal(int64(72*time.Hour+time.Second), 0),
 			rtEveryTwoDays,
 		},
 		{
-			utils.NewDecimal(int64(96*time.Hour+time.Second), 0).Big,
+			utils.NewDecimal(int64(96*time.Hour+time.Second), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1438,27 +1438,27 @@ func TestOrderRatesOnIntervalsSpecialHour(t *testing.T) {
 	usage := utils.NewDecimal(int64(11*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rtRestricted,
 		},
 		{
-			utils.NewDecimal(int64(3*time.Hour), 0).Big,
+			utils.NewDecimal(int64(3*time.Hour), 0),
 			rtWayRestricted,
 		},
 		{
-			utils.NewDecimal(int64(4*time.Hour), 0).Big,
+			utils.NewDecimal(int64(4*time.Hour), 0),
 			rtSpecialHour,
 		},
 		{
-			utils.NewDecimal(int64(5*time.Hour), 0).Big,
+			utils.NewDecimal(int64(5*time.Hour), 0),
 			rtWayRestricted,
 		},
 		{
-			utils.NewDecimal(int64(6*time.Hour), 0).Big,
+			utils.NewDecimal(int64(6*time.Hour), 0),
 			rtRestricted,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1505,27 +1505,27 @@ func TestOrderRateIntervalsRateEveryTenMinutes(t *testing.T) {
 	usage := utils.NewDecimal(int64(40*time.Minute), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(15*time.Minute), 0).Big,
+			utils.NewDecimal(int64(15*time.Minute), 0),
 			rtEveryTenMin,
 		},
 		{
-			utils.NewDecimal(int64(16*time.Minute), 0).Big,
+			utils.NewDecimal(int64(16*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(35*time.Minute), 0).Big,
+			utils.NewDecimal(int64(35*time.Minute), 0),
 			rtEveryTenMin,
 		},
 		{
-			utils.NewDecimal(int64(36*time.Minute), 0).Big,
+			utils.NewDecimal(int64(36*time.Minute), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRts, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1599,35 +1599,35 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	usage := utils.NewDecimal(int64(30*time.Hour), 0)
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rtDay,
 		},
 		{
-			utils.NewDecimal(int64(16*time.Hour), 0).Big,
+			utils.NewDecimal(int64(16*time.Hour), 0),
 			rtDay1,
 		},
 		{
-			utils.NewDecimal(int64(17*time.Hour), 0).Big,
+			utils.NewDecimal(int64(17*time.Hour), 0),
 			rtDay,
 		},
 		{
-			utils.NewDecimal(int64(19*time.Hour), 0).Big,
+			utils.NewDecimal(int64(19*time.Hour), 0),
 			rtDay2,
 		},
 		{
-			utils.NewDecimal(int64(20*time.Hour), 0).Big,
+			utils.NewDecimal(int64(20*time.Hour), 0),
 			rtDay,
 		},
 		{
-			utils.NewDecimal(int64(25*time.Hour), 0).Big,
+			utils.NewDecimal(int64(25*time.Hour), 0),
 			rt1,
 		},
 	}
-	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if ordRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1668,7 +1668,7 @@ func TestOrderRatesOnIntervalCaseMaxIterations(t *testing.T) {
 	sTime := time.Date(2020, 01, 02, 0, 1, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(96*time.Hour), 0)
 	expectedErr := "maximum iterations reached"
-	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 1); err == nil || err.Error() != expectedErr {
+	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 1); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -1689,7 +1689,7 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -1701,7 +1701,7 @@ func TestOrderRatesOnIntervalIsDirectionFalse(t *testing.T) {
 	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(0001, 02, 27, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(48*time.Hour), 0)
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 5); err != nil {
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 5); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1724,7 +1724,7 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -1736,7 +1736,7 @@ func TestOrderRatesOnIntervalWinnNill(t *testing.T) {
 	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(96*time.Hour), 0)
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, true, 4); err != nil {
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, true, 4); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1759,7 +1759,7 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -1771,7 +1771,7 @@ func TestOrderRatesOnIntervalIntervalStartHigherThanEndIdx(t *testing.T) {
 	aRts := []*utils.Rate{rt1}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(48*time.Hour), 0)
-	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4); err != nil {
+	if _, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 4); err != nil {
 		t.Error(err)
 	}
 }
@@ -1795,7 +1795,7 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	}
 	expected := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -1807,7 +1807,7 @@ func TestOrderRatesOnIntervalStartLowerThanEndIdx(t *testing.T) {
 	wghts := []float64{0}
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(48*time.Hour), 0)
-	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4); err != nil {
+	if ordRts, err := orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 4); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(ordRts, expected) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(ordRts))
@@ -1873,11 +1873,11 @@ func TestComputeRateSIntervals(t *testing.T) {
 
 	rts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(90*time.Second), 0).Big,
+			utils.NewDecimal(int64(90*time.Second), 0),
 			rt1,
 		},
 	}
@@ -1951,8 +1951,8 @@ func TestComputeRateSIntervals(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(130*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(130*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -1964,11 +1964,11 @@ func TestComputeRateSIntervals(t *testing.T) {
 
 	rts = []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(90*time.Second), 0).Big,
+			utils.NewDecimal(int64(90*time.Second), 0),
 			rt1,
 		},
 	}
@@ -2028,8 +2028,8 @@ func TestComputeRateSIntervals(t *testing.T) {
 			Increment:     utils.NewDecimal(int64(1*time.Second), 0),
 		},
 	}
-	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(int64(time.Minute), 0).Big,
-		utils.NewDecimal(int64(70*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(rts, utils.NewDecimal(int64(time.Minute), 0),
+		utils.NewDecimal(int64(70*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -2104,11 +2104,11 @@ func TestComputeRateSIntervals1(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 			rt1,
 		},
 	}
@@ -2169,8 +2169,8 @@ func TestComputeRateSIntervals1(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(30*time.Second), 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(30*time.Second), 0),
+		utils.NewDecimal(int64(3*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -2247,11 +2247,11 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
 			rt1,
 		},
 	}
@@ -2341,8 +2341,8 @@ func TestComputeRateSIntervalsWIthFixedFee(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(3*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -2403,15 +2403,15 @@ func TestComputeRateSIntervals2(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt0,
 		},
 		{
-			utils.NewDecimal(int64(45*time.Minute), 0).Big,
+			utils.NewDecimal(int64(45*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(50*time.Minute), 0).Big,
+			utils.NewDecimal(int64(50*time.Minute), 0),
 			rt0,
 		},
 	}
@@ -2480,12 +2480,12 @@ func TestComputeRateSIntervals2(t *testing.T) {
 	}
 	sTime := time.Date(2020, 7, 21, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimal(int64(time.Hour), 0)
-	if rcvOrdRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage.Big, true, 10); err != nil {
+	if rcvOrdRts, err := orderRatesOnIntervals(allRates, wghts, sTime, usage, true, 10); err != nil {
 		t.Error(eRtIvls)
 	} else if !reflect.DeepEqual(ordRts, rcvOrdRts) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(ordRts), utils.ToJSON(rcvOrdRts))
-	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, utils.NewDecimal(0, 0).Big,
-		usage.Big, cstRts); err != nil {
+	} else if rcveRtIvls, err := computeRateSIntervals(rcvOrdRts, utils.NewDecimal(0, 0),
+		usage, cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rcveRtIvls {
@@ -2568,27 +2568,27 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(30*time.Second), 0).Big,
+			utils.NewDecimal(int64(30*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute+30*time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Minute), 0).Big,
+			utils.NewDecimal(int64(2*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0).Big,
+			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 			rt2,
 		},
 	}
@@ -2712,8 +2712,8 @@ func TestComputeRateSIntervalsEvery30Seconds(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(3*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -2768,14 +2768,14 @@ func TestComputeRateSIntervalsStartHigherThanUsage(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
 	expected := "intervalStart for rate: <cgrates.org:RATE_PROFILE:RATE1> higher than usage: 0"
-	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err == nil || err.Error() != expected {
+	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(3*time.Minute), 0), cstRts); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2804,15 +2804,15 @@ func TestComputeRateSIntervalsZeroIncrement(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(int64(0*time.Second), 0).Big,
+			utils.NewDecimal(int64(0*time.Second), 0),
 			rt1,
 		},
 	}
 
 	cstRts := make(map[string]*utils.IntervalRate)
 	expected := "zero increment to be charged within rate: <>"
-	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(33*time.Second), 0).Big,
-		utils.NewDecimal(int64(3*time.Minute), 0).Big, cstRts); err == nil || err.Error() != expected {
+	if _, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(33*time.Second), 0),
+		utils.NewDecimal(int64(3*time.Minute), 0), cstRts); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, \nreceived %+q", expected, err)
 	}
 }
@@ -2855,7 +2855,7 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -2896,8 +2896,8 @@ func TestComputeRateSIntervalsCeilingCmpFactor(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -3003,19 +3003,19 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(35*time.Second), 0).Big,
+			utils.NewDecimal(int64(35*time.Second), 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(46*time.Second), 0).Big,
+			utils.NewDecimal(int64(46*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rt3,
 		},
 	}
@@ -3127,8 +3127,8 @@ func TestComputeRateSIntervalsSwitchingRates(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -3220,27 +3220,27 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 
 	ordRates := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Minute+30*time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Minute+30*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Minute), 0).Big,
+			utils.NewDecimal(int64(2*time.Minute), 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0).Big,
+			utils.NewDecimal(int64(2*time.Minute+30*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(3*time.Minute), 0).Big,
+			utils.NewDecimal(int64(3*time.Minute), 0),
 			rt1,
 		},
 	}
@@ -3344,8 +3344,8 @@ func TestComputeRatesIntervalsAllInOne(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRates, utils.NewDecimal(int64(time.Minute), 0).Big,
-		utils.NewDecimal(int64(6*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRates, utils.NewDecimal(int64(time.Minute), 0),
+		utils.NewDecimal(int64(6*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -3446,19 +3446,19 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(6*time.Hour), 0).Big,
+			utils.NewDecimal(int64(6*time.Hour), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(12*time.Hour), 0).Big,
+			utils.NewDecimal(int64(12*time.Hour), 0),
 			rtGH,
 		},
 		{
-			utils.NewDecimal(int64(13*time.Hour), 0).Big,
+			utils.NewDecimal(int64(13*time.Hour), 0),
 			rt2,
 		},
 	}
@@ -3577,8 +3577,8 @@ func TestOrderRatesIntervalsFullDay(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(25*time.Hour), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(25*time.Hour), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -3664,27 +3664,27 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Second), 0).Big,
+			utils.NewDecimal(int64(2*time.Second), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(3*time.Second), 0).Big,
+			utils.NewDecimal(int64(3*time.Second), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(5*time.Second), 0).Big,
+			utils.NewDecimal(int64(5*time.Second), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(7*time.Second), 0).Big,
+			utils.NewDecimal(int64(7*time.Second), 0),
 			rt2,
 		},
 	}
@@ -3808,8 +3808,8 @@ func TestComputeRatesIntervalsEveryTwoSeconds(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(10*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(10*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -3897,15 +3897,15 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(20*time.Minute), 0).Big,
+			utils.NewDecimal(int64(20*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 			rt1,
 		},
 	}
@@ -3998,8 +3998,8 @@ func TestComputeRateSIntervalsOneHourRate(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+10*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Hour+10*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4071,11 +4071,11 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(25*time.Minute), 0).Big,
+			utils.NewDecimal(int64(25*time.Minute), 0),
 			rt1,
 		},
 	}
@@ -4130,8 +4130,8 @@ func TestComputeRateSIntervalsCompressIncrements(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Hour), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4242,19 +4242,19 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(int64(20*time.Minute), 0).Big,
+			utils.NewDecimal(int64(20*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(80*time.Minute), 0).Big,
+			utils.NewDecimal(int64(80*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(140*time.Minute), 0).Big,
+			utils.NewDecimal(int64(140*time.Minute), 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(200*time.Minute), 0).Big,
+			utils.NewDecimal(int64(200*time.Minute), 0),
 			rt4,
 		},
 	}
@@ -4341,8 +4341,8 @@ func TestComputeRateSIntervalsStartAfterIntervalStartDifferentRates(t *testing.T
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
-		utils.NewDecimal(int64(210*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0),
+		utils.NewDecimal(int64(210*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4420,19 +4420,19 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(int64(20*time.Minute), 0).Big,
+			utils.NewDecimal(int64(20*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(80*time.Minute), 0).Big,
+			utils.NewDecimal(int64(80*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(140*time.Minute), 0).Big,
+			utils.NewDecimal(int64(140*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(200*time.Minute), 0).Big,
+			utils.NewDecimal(int64(200*time.Minute), 0),
 			rt1,
 		},
 	}
@@ -4538,8 +4538,8 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0).Big,
-		utils.NewDecimal(int64(210*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(20*time.Minute), 0),
+		utils.NewDecimal(int64(210*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4626,8 +4626,8 @@ func TestComputeRateSIntervalsStartAfterIntervalStartSameRate(t *testing.T) {
 		},
 	}
 	cstRts = make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(0*time.Minute), 0).Big,
-		utils.NewDecimal(int64(230*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(0*time.Minute), 0),
+		utils.NewDecimal(int64(230*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4733,23 +4733,23 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0).Big,
+			utils.NewDecimal(int64(4*time.Hour+31*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(12*time.Hour), 0).Big,
+			utils.NewDecimal(int64(12*time.Hour), 0),
 			rt3,
 		},
 		{
-			utils.NewDecimal(int64(13*time.Hour), 0).Big,
+			utils.NewDecimal(int64(13*time.Hour), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(24*time.Hour), 0).Big,
+			utils.NewDecimal(int64(24*time.Hour), 0),
 			rt1,
 		},
 	}
@@ -4887,8 +4887,8 @@ func TestComputeRateSIntervalsHalfDayIntervals(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(25*time.Hour), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(25*time.Hour), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -4974,11 +4974,11 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(45*time.Minute), 0).Big,
+			utils.NewDecimal(int64(45*time.Minute), 0),
 			rt2,
 		},
 	}
@@ -5052,8 +5052,8 @@ func TestComputeRateSIntervalsConsecutiveRates(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(15*time.Minute), 0).Big,
-		utils.NewDecimal(int64(time.Hour+15*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(int64(15*time.Minute), 0),
+		utils.NewDecimal(int64(time.Hour+15*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5130,15 +5130,15 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(39*time.Minute), 0).Big,
+			utils.NewDecimal(int64(39*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0).Big,
+			utils.NewDecimal(int64(time.Hour+37*time.Minute+19*time.Second), 0),
 			rt1,
 		},
 	}
@@ -5218,8 +5218,8 @@ func TestComputeRateSIntervalsRatesByMinutes(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+38*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Hour+38*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5298,39 +5298,39 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(20*time.Minute), 0).Big,
+			utils.NewDecimal(int64(20*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(21*time.Minute), 0).Big,
+			utils.NewDecimal(int64(21*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(40*time.Minute), 0).Big,
+			utils.NewDecimal(int64(40*time.Minute), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(41*time.Minute), 0).Big,
+			utils.NewDecimal(int64(41*time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour+time.Minute), 0).Big,
+			utils.NewDecimal(int64(time.Hour+time.Minute), 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour), 0),
 			rt2,
 		},
 		{
-			utils.NewDecimal(int64(2*time.Hour+time.Minute), 0).Big,
+			utils.NewDecimal(int64(2*time.Hour+time.Minute), 0),
 			rt1,
 		},
 	}
@@ -5487,8 +5487,8 @@ func TestComputeRateSIntervalsSwitchingRates2(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(2*time.Hour+2*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(2*time.Hour+2*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5541,11 +5541,11 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(168*time.Hour), 0).Big,
+			utils.NewDecimal(int64(168*time.Hour), 0),
 			rt2,
 		},
 	}
@@ -5593,8 +5593,8 @@ func TestComputeRateSIntervalsSOneWeekCall(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(169*time.Hour), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(169*time.Hour), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5661,11 +5661,11 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 		{
-			utils.NewDecimal(int64(time.Hour), 0).Big,
+			utils.NewDecimal(int64(time.Hour), 0),
 			rt2,
 		},
 	}
@@ -5726,8 +5726,8 @@ func TestComputeRateSIntervalsPauseBetweenRates(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Hour+20*time.Minute), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Hour+20*time.Minute), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5759,7 +5759,7 @@ func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	sTime := time.Date(2020, 12, 1, 0, 0, 0, 0, time.UTC)
 	usage := utils.NewDecimalFromFloat64(math.Inf(1))
 	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:1 form:2}> increment to Int64"
-	_, err = orderRatesOnIntervals(aRts, wghts, sTime, usage.Big, false, 4)
+	_, err = orderRatesOnIntervals(aRts, wghts, sTime, usage, false, 4)
 	if err == nil || err.Error() != expected {
 		t.Error(err)
 	}
@@ -5789,7 +5789,7 @@ func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
@@ -5817,8 +5817,8 @@ func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
 		},
 	}
 	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0).Big, cstRts); err != nil {
+	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimal(int64(time.Minute+10*time.Second), 0), cstRts); err != nil {
 		t.Error(err)
 	} else {
 		for idx, val := range rtIvls {
@@ -5849,14 +5849,14 @@ func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T)
 
 	ordRts := []*orderedRate{
 		{
-			utils.NewDecimal(0, 0).Big,
+			utils.NewDecimal(0, 0),
 			rt1,
 		},
 	}
 
 	expected := "<RateS> cannot convert <&{Context:{MaxScale:0 MinScale:0 Precision:0 Traps: Conditions: RoundingMode:ToNearestEven OperatingMode:GDA} unscaled:{neg:false abs:[]} compact:0 exp:0 precision:0 form:2}> increment to Int64"
-	_, err = computeRateSIntervals(ordRts, utils.NewDecimal(0, 0).Big,
-		utils.NewDecimalFromFloat64(math.Inf(1)).Big, make(map[string]*utils.IntervalRate))
+	_, err = computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
+		utils.NewDecimalFromFloat64(math.Inf(1)), make(map[string]*utils.IntervalRate))
 	if err == nil || err.Error() != expected {
 		t.Error(err)
 	}

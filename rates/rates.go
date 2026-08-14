@@ -154,7 +154,7 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		return
 	}
 	var ordRts []*orderedRate
-	if ordRts, err = orderRatesOnIntervals(aRates, wghts, sTime, usage.Big, true, verbosity); err != nil {
+	if ordRts, err = orderRatesOnIntervals(aRates, wghts, sTime, usage, true, verbosity); err != nil {
 		return
 	}
 	rpCost = &utils.RateProfileCost{
@@ -173,15 +173,15 @@ func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.Rate
 		return
 	}
 	var costIntervals []*utils.RateSInterval
-	if costIntervals, err = computeRateSIntervals(ordRts, ivalStart.Big, usage.Big, rpCost.Rates); err != nil {
+	if costIntervals, err = computeRateSIntervals(ordRts, ivalStart, usage, rpCost.Rates); err != nil {
 		return nil, err
 	}
 	rpCost.CostIntervals = make([]*utils.RateSIntervalCost, len(costIntervals))
-	finalCost := decimal.WithContext(utils.DecimalContext)
+	finalCost := utils.NewDecimalFromBig(decimal.WithContext(utils.DecimalContext))
 	for idx, costInt := range costIntervals {
-		finalCost = utils.SumBig(finalCost, costInt.Cost(rpCost.Rates)) // sums the costs for all intervals
-		rpCost.CostIntervals[idx] = costInt.AsRatesIntervalsCost()      //this does not contains IncrementStart and IntervalStart so we convert in RatesIntervalCosts
+		finalCost = utils.SumDecimal(finalCost, costInt.Cost(rpCost.Rates)) // sums the costs for all intervals
+		rpCost.CostIntervals[idx] = costInt.AsRatesIntervalsCost()          //this does not contains IncrementStart and IntervalStart so we convert in RatesIntervalCosts
 	}
-	rpCost.Cost = &utils.Decimal{Big: finalCost}
+	rpCost.Cost = finalCost
 	return
 }
