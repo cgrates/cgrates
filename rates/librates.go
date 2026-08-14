@@ -76,13 +76,13 @@ func (rWt *rateWithTimes) id() string {
 }
 
 type orderedRate struct {
-	*decimal.Big
+	*utils.Decimal
 	*utils.Rate
 }
 
 // orderRatesOnIntervals will order the rates based on ActivationInterval and intervalStart of each Rate
 // there can be only one winning Rate for each interval, prioritized by the Weight
-func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time, usage *decimal.Big,
+func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time, usage *utils.Decimal,
 	isDuration bool, verbosity int) (ordRts []*orderedRate, err error) {
 
 	usageInt, ok := usage.Int64()
@@ -153,7 +153,7 @@ func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time,
 	// compute the list of returned rates together with their index interval
 	if isDuration {
 		// add all the possible ActivationTimes from cron expressions
-		usageIndx := decimal.New(0, 0) // the difference between setup and activation time of the rate
+		usageIndx := utils.NewDecimal(0, 0) // the difference between setup and activation time of the rate
 		for _, aTime := range sortedATimes {
 			if !endTime.After(aTime) {
 				break // we are not interested about further rates
@@ -163,14 +163,14 @@ func orderRatesOnIntervals(aRts []*utils.Rate, wghts []float64, sTime time.Time,
 				continue
 			}
 			if sTime.Before(aTime) {
-				usageIndx = decimal.New(int64(aTime.Sub(sTime)), 0)
+				usageIndx = utils.NewDecimal(int64(aTime.Sub(sTime)), 0)
 			}
 			if len(ordRts) == 0 || wnr.rt.ID != ordRts[len(ordRts)-1].Rate.ID { // only add the winner if not already active
 				ordRts = append(ordRts, &orderedRate{usageIndx, rtIdx[aTime].winner().rt})
 			}
 		}
 	} else { // only first rate is considered for units
-		ordRts = []*orderedRate{{decimal.New(0, 0), rtIdx[sortedATimes[0]].winner().rt}}
+		ordRts = []*orderedRate{{utils.NewDecimal(0, 0), rtIdx[sortedATimes[0]].winner().rt}}
 	}
 	return
 }
@@ -187,17 +187,17 @@ func getRateIntervalIDFromIncrement(cstRts map[string]*utils.IntervalRate, intRt
 }
 
 // computeRateSIntervals will give out the cost projection for the given orderedRates and usage
-func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big,
+func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *utils.Decimal,
 	cstRts map[string]*utils.IntervalRate) (rtIvls []*utils.RateSInterval, err error) {
 	totalUsage := usage
-	if intervalStart.Cmp(decimal.New(0, 0)) != 0 {
-		totalUsage = utils.SumBig(usage, intervalStart)
+	if intervalStart.Compare(utils.NewDecimal(0, 0)) != 0 {
+		totalUsage = utils.SumDecimal(usage, intervalStart)
 	}
 	for i, rt := range rts {
 		isLastRt := i == len(rts)-1
-		var rtUsageEIdx *decimal.Big
+		var rtUsageEIdx *utils.Decimal
 		if !isLastRt {
-			rtUsageEIdx = rts[i+1].Big
+			rtUsageEIdx = rts[i+1].Decimal
 		} else {
 			rtUsageEIdx = totalUsage
 		}
@@ -207,24 +207,24 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 		for j, iRt := range rt.IntervalRates {
 			//fmt.Printf("ivalStart: %v, ivalEnd: %v, rtID: %s, increment idx: %d, iRtUsageSIdx: %+v, iRtUsageEIdx: %+v, iRt: %s\n",
 			//	intervalStart, rtUsageEIdx, rt.ID, j, iRtUsageSIdx, iRtUsageEIdx, utils.ToIJSON(iRt))
-			if iRtUsageSIdx.Cmp(rtUsageEIdx) >= 0 { // charged enough for interval
+			if iRtUsageSIdx.Compare(rtUsageEIdx) >= 0 { // charged enough for interval
 				break
 			}
 			// make sure we bill from start
-			if iRt.IntervalStart.Cmp(iRtUsageSIdx) > 0 && j == 0 {
+			if iRt.IntervalStart.Compare(iRtUsageSIdx) > 0 && j == 0 {
 				return nil, fmt.Errorf("intervalStart for rate: <%s> higher than usage: %v",
 					rt.UID(), iRtUsageSIdx)
 			}
 			isLastIRt := j == len(rt.IntervalRates)-1
-			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart.Cmp(iRtUsageSIdx) <= 0 {
+			if !isLastIRt && rt.IntervalRates[j+1].IntervalStart.Compare(iRtUsageSIdx) <= 0 {
 				continue // the next interval changes the rating
 			}
-			if iRt.Increment.Cmp(decimal.New(0, 0)) == 0 {
+			if iRt.Increment.Compare(utils.NewDecimal(0, 0)) == 0 {
 				return nil, fmt.Errorf("zero increment to be charged within rate: <%s>", rt.UID())
 			}
-			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Cmp(decimal.New(0, 0)) != 0 { // Add FixedFee
+			if rt.IntervalRates[j].FixedFee != nil && rt.IntervalRates[j].FixedFee.Compare(utils.NewDecimal(0, 0)) != 0 { // Add FixedFee
 				rIcmts = append(rIcmts, &utils.RateSIncrement{
-					IncrementStart:    &utils.Decimal{Big: iRtUsageSIdx},
+					IncrementStart:    iRtUsageSIdx,
 					RateIntervalIndex: j,
 					RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 					CompressFactor:    1,
@@ -236,16 +236,16 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			}
 			if isLastIRt {
 				iRtUsageEIdx = rtUsageEIdx
-			} else if rt.IntervalRates[j+1].IntervalStart.Cmp(rtUsageEIdx) > 0 {
+			} else if rt.IntervalRates[j+1].IntervalStart.Compare(rtUsageEIdx) > 0 {
 				iRtUsageEIdx = rtUsageEIdx
 			} else {
-				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart.Big
+				iRtUsageEIdx = rt.IntervalRates[j+1].IntervalStart
 			}
 
-			iRtUsage := utils.SubstractBig(iRtUsageEIdx, iRtUsageSIdx)
+			iRtUsage := utils.SubstractDecimal(iRtUsageEIdx, iRtUsageSIdx)
 			intUsage := iRtUsage
-			intIncrm := iRt.Increment.Big
-			cmpFactor, rem := utils.DivideBigWithReminder(intUsage, intIncrm)
+			intIncrm := iRt.Increment
+			cmpFactor, rem := utils.DivideBigWithReminder(intUsage.Big, intIncrm.Big)
 			if rem.Cmp(decimal.New(0, 0)) != 0 {
 				cmpFactor = utils.SumBig(cmpFactor, decimal.New(1, 0)) // int division has used math.Floor, need Ceil
 			}
@@ -254,13 +254,13 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 				return nil, fmt.Errorf("<%s> cannot convert <%+v> increment to Int64", utils.RateS, cmpFactor)
 			}
 			rIcmts = append(rIcmts, &utils.RateSIncrement{
-				IncrementStart:    &utils.Decimal{Big: iRtUsageSIdx},
+				IncrementStart:    iRtUsageSIdx,
 				RateID:            getRateIntervalIDFromIncrement(cstRts, rt.IntervalRates[j]),
 				CompressFactor:    cmpFactorInt,
 				RateIntervalIndex: j,
-				Usage:             &utils.Decimal{Big: iRtUsage},
+				Usage:             iRtUsage,
 			})
-			iRtUsageSIdx = utils.SumBig(iRtUsageSIdx, iRtUsage)
+			iRtUsageSIdx = utils.SumDecimal(iRtUsageSIdx, iRtUsage)
 
 		}
 		usageStart := intervalStart
@@ -269,11 +269,11 @@ func computeRateSIntervals(rts []*orderedRate, intervalStart, usage *decimal.Big
 			continue
 		}
 		rtIvls = append(rtIvls, &utils.RateSInterval{
-			IntervalStart:  &utils.Decimal{Big: usageStart},
+			IntervalStart:  usageStart,
 			Increments:     rIcmts,
 			CompressFactor: 1,
 		})
-		if iRtUsageSIdx.Cmp(totalUsage) >= 0 { // charged enough for the usage
+		if iRtUsageSIdx.Compare(totalUsage) >= 0 { // charged enough for the usage
 			break
 		}
 	}

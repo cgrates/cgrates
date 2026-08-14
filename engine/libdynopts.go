@@ -12,7 +12,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // GetFloat64Opts checks the specified option names in order among the keys in APIOpts returning the first value it finds as float64, otherwise it
@@ -254,7 +253,7 @@ func GetBoolOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch ma
 	return
 }
 
-// GetDecimalOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *decimal.Big, otherwise it
+// GetDecimalOpts checks the specified option names in order among the keys in APIOpts returning the first value it finds as *utils.Decimal, otherwise it
 // returns the config option if at least one filter passes or the default value if none of them do
 func GetDecimalOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch map[string]any, fS *FilterS, dynOpts []*config.DynamicDecimalOpt,
 	optNames ...string) (cfgOpt *utils.Decimal, err error) {
@@ -271,12 +270,12 @@ func GetDecimalOpts(ctx *context.Context, tnt string, dP utils.DataProvider, cch
 		if pass, err = fS.Pass(ctx, tnt, opt.FilterIDs, dP); err != nil { // check if the filter is passing for the DataProvider and return the option if it does
 			return nil, err
 		} else if pass {
-			var decValue *decimal.Big
+			var decValue *utils.Decimal
 			decValue, err = opt.Value(dP)
 			if err != nil {
 				return
 			}
-			return &utils.Decimal{Big: decValue}, nil
+			return decValue, nil
 		}
 	}
 	return

@@ -8,7 +8,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
@@ -113,7 +112,7 @@ func TestAccountSCfgLoadFromJSONCfgOptsErr(t *testing.T) {
 			},
 		},
 		Usage: []*DynamicDecimalOpt{
-			NewDynamicDecimalOpt(nil, "", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+			NewDynamicDecimalOpt(nil, "", utils.NewDecimal(2, 0), nil),
 		},
 		ProfileIgnoreFilters: []*DynamicBoolOpt{
 			{
@@ -280,7 +279,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt(nil, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(1), nil),
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(1, 0), nil),
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{
@@ -313,7 +312,7 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 				},
 			},
 			Usage: []*DynamicDecimalOpt{
-				NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", decimal.WithContext(utils.DecimalContext).SetUint64(2), nil),
+				NewDynamicDecimalOpt([]string{"fld1", "fld2"}, "cgrates.org", utils.NewDecimal(2, 0), nil),
 			},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{
 				{

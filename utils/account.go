@@ -10,8 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 // Account represents one Account on a Tenant
@@ -33,7 +31,7 @@ func (ap *Account) BalancesAltered(abb AccountBalancesBackup) (altred bool) {
 	}
 	for blncID, blnc := range ap.Balances {
 		if bkpVal, has := abb[blncID]; !has ||
-			blnc.Units.Big.Cmp(bkpVal) != 0 {
+			blnc.Units.Compare(bkpVal) != 0 {
 			return true
 		}
 	}
@@ -42,7 +40,7 @@ func (ap *Account) BalancesAltered(abb AccountBalancesBackup) (altred bool) {
 
 func (ap *Account) RestoreFromBackup(abb AccountBalancesBackup) {
 	for blncID, val := range abb {
-		ap.Balances[blncID].Units.Big = val
+		ap.Balances[blncID].Units = val
 	}
 }
 
@@ -51,14 +49,14 @@ func (ap *Account) AccountBalancesBackup() (abb AccountBalancesBackup) {
 	if ap.Balances != nil {
 		abb = make(AccountBalancesBackup)
 		for blncID, blnc := range ap.Balances {
-			abb[blncID] = CloneDecimalBig(blnc.Units.Big)
+			abb[blncID] = blnc.Units.Clone()
 		}
 	}
 	return
 }
 
 // AccountBalanceBackups is used to create balance snapshots as backups
-type AccountBalancesBackup map[string]*decimal.Big
+type AccountBalancesBackup map[string]*Decimal
 
 // NewDefaultBalance returns a balance with default costIncrements
 func NewDefaultBalance(id string) *Balance {
@@ -823,9 +821,9 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 			valA, err = IfaceAsStringSlice(val)
 			bL.RateProfileIDs = append(bL.RateProfileIDs, valA...)
 		case Units:
-			var valB *decimal.Big
-			valB, err = IfaceAsBig(val)
-			bL.Units = &Decimal{valB}
+			var valB *Decimal
+			valB, err = IfaceAsDecimal(val)
+			bL.Units = valB
 		case Weights:
 			if val != EmptyString {
 				bL.Weights, err = NewDynamicWeightsFromString(IfaceAsString(val), InfieldSep, ANDSep)
@@ -846,11 +844,11 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 						uf.FilterIDs = strings.Split(sls[j], ANDSep)
 					}
 
-					var valB *decimal.Big
-					if valB, err = IfaceAsBig(sls[j+1]); err != nil {
+					var valB *Decimal
+					if valB, err = IfaceAsDecimal(sls[j+1]); err != nil {
 						return
 					}
-					uf.Factor = &Decimal{valB}
+					uf.Factor = valB
 					bL.UnitFactors = append(bL.UnitFactors, uf)
 				}
 			}
@@ -904,9 +902,9 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 				uf.FilterIDs = append(uf.FilterIDs, valA...)
 			case Factor:
 				if val != EmptyString {
-					var valB *decimal.Big
-					valB, err = IfaceAsBig(val)
-					uf.Factor = &Decimal{valB}
+					var valB *Decimal
+					valB, err = IfaceAsDecimal(val)
+					uf.Factor = valB
 				}
 			}
 			return
@@ -924,21 +922,21 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 				cI.FilterIDs = append(cI.FilterIDs, valA...)
 			case Increment:
 				if val != EmptyString {
-					var valB *decimal.Big
-					valB, err = IfaceAsBig(val)
-					cI.Increment = &Decimal{valB}
+					var valB *Decimal
+					valB, err = IfaceAsDecimal(val)
+					cI.Increment = valB
 				}
 			case FixedFee:
 				if val != EmptyString {
-					var valB *decimal.Big
-					valB, err = IfaceAsBig(val)
-					cI.FixedFee = &Decimal{valB}
+					var valB *Decimal
+					valB, err = IfaceAsDecimal(val)
+					cI.FixedFee = valB
 				}
 			case RecurrentFee:
 				if val != EmptyString {
-					var valB *decimal.Big
-					valB, err = IfaceAsBig(val)
-					cI.RecurrentFee = &Decimal{valB}
+					var valB *Decimal
+					valB, err = IfaceAsDecimal(val)
+					cI.RecurrentFee = valB
 				}
 			}
 			return

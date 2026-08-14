@@ -1469,7 +1469,7 @@ func TestRateSIncrementCost(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := decimal.WithContext(DecimalContext).SetUint64(15)
+	exp := NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(15))
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %T \n but received \n %T", exp, cost)
 	}
@@ -1482,7 +1482,7 @@ func TestRateSIncrementCostNotNil(t *testing.T) {
 		RateID:            "RI1",
 		CompressFactor:    int64(3),
 		Usage:             NewDecimal(int64(30), 0),
-		cost:              decimal.WithContext(DecimalContext).SetUint64(15),
+		cost:              NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(15)),
 	}
 
 	rts := map[string]*IntervalRate{
@@ -1494,7 +1494,7 @@ func TestRateSIncrementCostNotNil(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := decimal.WithContext(DecimalContext).SetUint64(15)
+	exp := NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(15))
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %T \n but received \n %T", exp, cost)
 	}
@@ -1541,7 +1541,7 @@ func TestRateSIncrementCostFixedFee(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := decimal.WithContext(DecimalContext).SetUint64(10)
+	exp := NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(10))
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, cost)
 	}
@@ -1567,7 +1567,7 @@ func TestRateSIncrementCostDiffUnitIncrement(t *testing.T) {
 	}
 
 	cost := rIc.Cost(rts)
-	exp := decimal.WithContext(DecimalContext).SetUint64(3)
+	exp := NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(3))
 	if !reflect.DeepEqual(cost, exp) {
 		t.Errorf("Expected %v \n but received \n %v", exp, cost)
 	}
@@ -1747,7 +1747,7 @@ func TestRateSIntervalCost(t *testing.T) {
 	}
 
 	rcv := rIv.Cost(rts)
-	exp := decimal.WithContext(DecimalContext).SetUint64(2)
+	exp := NewDecimalFromBig(decimal.WithContext(DecimalContext).SetUint64(2))
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("expected <%v>,\nreceived <%v>", exp, rcv)
 	}
@@ -2192,7 +2192,7 @@ func TestLibratesRateSIntervalClone(t *testing.T) {
 				RateID:            "Rate1",
 				CompressFactor:    1,
 				Usage:             NewDecimalFromFloat64(-321),
-				cost:              decimal.New(4321, 5),
+				cost:              NewDecimal(4321, 5),
 			},
 			{
 				IncrementStart:    NewDecimalFromFloat64(4.321),
@@ -2200,11 +2200,11 @@ func TestLibratesRateSIntervalClone(t *testing.T) {
 				RateID:            "Rate2",
 				CompressFactor:    1,
 				Usage:             NewDecimalFromFloat64(-123),
-				cost:              decimal.New(123, 1),
+				cost:              NewDecimal(123, 1),
 			},
 		},
 		CompressFactor: 1,
-		cost:           decimal.New(4321, 5),
+		cost:           NewDecimal(4321, 5),
 	}
 	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -2227,7 +2227,7 @@ func TestLibratesRateSIncrementClone(t *testing.T) {
 		RateID:            "testRateID",
 		CompressFactor:    1,
 		Usage:             NewDecimalFromFloat64(-321),
-		cost:              decimal.New(4321, 5),
+		cost:              NewDecimal(4321, 5),
 	}
 	if rcv := ri.Clone(); !reflect.DeepEqual(rcv, ri) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",

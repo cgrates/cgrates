@@ -8,7 +8,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 // cloneUnitsFromConcretes returns cloned units from the concrete balances passed as parameters
@@ -26,7 +25,7 @@ func cloneUnitsFromConcretes(cBs []*concreteBalance) (clnedUnts []*utils.Decimal
 // restoreUnitsFromClones will restore the units from the clones
 func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) {
 	for i, clnedUnt := range clnedUnts {
-		cBs[i].blnCfg.Units.Big = clnedUnt.Big
+		cBs[i].blnCfg.Units = clnedUnt
 	}
 }
 
@@ -57,8 +56,8 @@ func (cB *concreteBalance) id() string {
 // debitAbstracts implements the balanceOperator interface
 // it will mainly debit the aUnits out of a single concrete balance
 // the abstract
-func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.Big,
-	cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error) {
+func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *utils.Decimal,
+	cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
@@ -139,8 +138,8 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *decimal.
 
 // debitConcretes implements the balanceOperator interface
 // it will attempt to debit the amount of concrete units out of this single concrete balance
-func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.Big,
-	cgrEv *utils.CGREvent, debited *decimal.Big) (ec *utils.EventCharges, err error) {
+func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *utils.Decimal,
+	cgrEv *utils.CGREvent, debited *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
 	var pass bool
@@ -156,9 +155,9 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 		return
 	}
 	var hasUF bool
-	if uF != nil && uF.Factor.Cmp(decimal.New(1, 0)) != 0 {
+	if uF != nil && uF.Factor.Compare(utils.NewDecimal(1, 0)) != 0 {
 		hasUF = true
-		cUnits = utils.MultiplyBig(cUnits, uF.Factor.Big)
+		cUnits = utils.MultiplyDecimal(cUnits, uF.Factor)
 	}
 
 	// balanceLimit
@@ -167,30 +166,30 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 	if blncLmt, err = balanceLimit(cB.blnCfg.Opts); err != nil {
 		return
 	}
-	if blncLmt != nil && blncLmt.Big.Cmp(decimal.New(0, 0)) != 0 {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, blncLmt.Big)
+	if blncLmt != nil && blncLmt.Compare(utils.NewDecimal(0, 0)) != 0 {
+		cB.blnCfg.Units = utils.SubstractDecimal(cB.blnCfg.Units, blncLmt)
 		hasLmt = true
 	}
-	var dbted *decimal.Big
-	if cB.blnCfg.Units.Big.Cmp(cUnits) <= 0 && blncLmt != nil { // balance smaller than debit and limited
-		dbted = cB.blnCfg.Units.Big
-		cB.blnCfg.Units.Big = blncLmt.Big
+	var dbted *utils.Decimal
+	if cB.blnCfg.Units.Compare(cUnits) <= 0 && blncLmt != nil { // balance smaller than debit and limited
+		dbted = cB.blnCfg.Units
+		cB.blnCfg.Units = blncLmt
 	} else {
-		cB.blnCfg.Units.Big = utils.SubstractBig(cB.blnCfg.Units.Big, cUnits)
+		cB.blnCfg.Units = utils.SubstractDecimal(cB.blnCfg.Units, cUnits)
 		if hasLmt { // put back the limit
-			cB.blnCfg.Units.Big = utils.SumBig(cB.blnCfg.Units.Big, blncLmt.Big)
+			cB.blnCfg.Units = utils.SumDecimal(cB.blnCfg.Units, blncLmt)
 		}
 		dbted = cUnits
 	}
 	if hasUF {
-		dbted = utils.DivideBig(dbted, uF.Factor.Big)
+		dbted = utils.DivideDecimal(dbted, uF.Factor)
 	}
-	if dbted.Cmp(decimal.New(0, 0)) == 0 {
+	if dbted.Compare(utils.NewDecimal(0, 0)) == 0 {
 		return // no event cost for 0 debit
 	}
 	// EventCharges
 	ec = utils.NewEventCharges()
-	ec.Concretes = &utils.Decimal{Big: dbted}
+	ec.Concretes = dbted
 	// UnitFactors
 	var ufID string
 	if hasUF {
@@ -201,7 +200,7 @@ func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *decimal.
 	ec.Accounting[acntID] = &utils.AccountCharge{
 		AccountID:    cB.acntID,
 		BalanceID:    cB.blnCfg.ID,
-		Units:        &utils.Decimal{Big: dbted},
+		Units:        dbted,
 		BalanceLimit: blncLmt,
 		UnitFactorID: ufID,
 	}

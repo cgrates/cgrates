@@ -2563,30 +2563,30 @@ func TestMetricAddOneEvent(t *testing.T) {
 		initialCnt  uint64
 		input       any
 		expectErr   bool
-		expectVal   *decimal.Big
+		expectVal   *Decimal
 		expectCount uint64
 	}{
 		{
 			name:        "Int input",
 			input:       42,
 			expectErr:   false,
-			expectVal:   NewDecimal(42, 0).Big,
+			expectVal:   NewDecimal(42, 0),
 			expectCount: 1,
 		},
 		{
 			name:        "Duration input",
 			input:       time.Duration(5),
 			expectErr:   false,
-			expectVal:   NewDecimal(5, 0).Big,
+			expectVal:   NewDecimal(5, 0),
 			expectCount: 1,
 		},
 		{
 			name:        "Add to existing value",
-			initialVal:  &Decimal{Big: NewDecimal(10, 0).Big},
+			initialVal:  NewDecimal(10, 0),
 			initialCnt:  1,
 			input:       15,
 			expectErr:   false,
-			expectVal:   NewDecimal(25, 0).Big,
+			expectVal:   NewDecimal(25, 0),
 			expectCount: 2,
 		},
 		{
@@ -2619,8 +2619,8 @@ func TestMetricAddOneEvent(t *testing.T) {
 					t.Errorf("Expected nil Value, got: %v", m.Value.Big)
 				}
 			} else {
-				if m.Value == nil || m.Value.Big.Cmp(tt.expectVal) != 0 {
-					t.Errorf("Expected Value: %v, got: %v", tt.expectVal, m.Value.Big)
+				if m.Value == nil || m.Value.Compare(tt.expectVal) != 0 {
+					t.Errorf("Expected Value: %v, got: %v", tt.expectVal, m.Value)
 				}
 			}
 

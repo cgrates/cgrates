@@ -9,13 +9,12 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 var (
 	RatesProfileIDsDftOpt    []string = []string{}
-	RatesUsageDftOpt                  = decimal.New(int64(time.Minute), 0)
-	RatesIntervalStartDftOpt          = decimal.New(0, 0)
+	RatesUsageDftOpt                  = utils.NewDecimal(int64(time.Minute), 0)
+	RatesIntervalStartDftOpt          = utils.NewDecimal(0, 0)
 )
 
 const (

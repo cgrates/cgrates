@@ -62,17 +62,17 @@ func newBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID stri
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	id() string // balance id
-	debitAbstracts(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
-	debitConcretes(ctx *context.Context, usage *decimal.Big, cgrEv *utils.CGREvent, dbted *decimal.Big) (ec *utils.EventCharges, err error)
+	debitAbstracts(ctx *context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
+	debitConcretes(ctx *context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
 	balanceCfg() (bal *utils.Balance)
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
-func roundUnitsWithIncrements(usage, incrm *decimal.Big) *decimal.Big {
+func roundUnitsWithIncrements(usage, incrm *utils.Decimal) *utils.Decimal {
 	usgMaxIncrm := decimal.WithContext(
-		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage,
-		incrm).RoundToInt()
-	return utils.MultiplyBig(usgMaxIncrm, incrm)
+		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage.Big,
+		incrm.Big).RoundToInt()
+	return utils.MultiplyDecimal(utils.NewDecimalFromBig(usgMaxIncrm), incrm)
 }
 
 // processAttributeS will process the event with AttributeS
@@ -163,14 +163,14 @@ func balanceLimit(optsCfg map[string]any) (bL *utils.Decimal, err error) {
 
 // debitConcreteUnits debits concrete units out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debited
-func debitConcreteUnits(ctx *context.Context, cUnits *decimal.Big,
+func debitConcreteUnits(ctx *context.Context, cUnits *utils.Decimal,
 	acntID string, cncrtBlncs []*concreteBalance,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
 	clnedUnts := cloneUnitsFromConcretes(cncrtBlncs)
 	for _, cB := range cncrtBlncs {
 		var ecCncrt *utils.EventCharges
-		if ecCncrt, err = cB.debitConcretes(ctx, utils.CloneDecimalBig(cUnits), cgrEv, nil); err != nil {
+		if ecCncrt, err = cB.debitConcretes(ctx, cUnits.Clone(), cgrEv, nil); err != nil {
 			restoreUnitsFromClones(cncrtBlncs, clnedUnts)
 			return nil, err
 		}
@@ -181,8 +181,8 @@ func debitConcreteUnits(ctx *context.Context, cUnits *decimal.Big,
 			ec = utils.NewEventCharges()
 		}
 		ec.Merge(ecCncrt)
-		cUnits = utils.SubstractBig(cUnits, ecCncrt.Concretes.Big)
-		if cUnits.Cmp(decimal.New(0, 0)) <= 0 {
+		cUnits = utils.SubstractDecimal(cUnits, ecCncrt.Concretes)
+		if cUnits.Compare(utils.NewDecimal(0, 0)) <= 0 {
 			return // have debited all, total is smaller or equal to 0
 		}
 	}
@@ -192,11 +192,11 @@ func debitConcreteUnits(ctx *context.Context, cUnits *decimal.Big,
 }
 
 // maxDebitAbstractsFromConcretes will debit the maximum possible abstract units out of concretes
-func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
+func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
-	costIcrm *utils.CostIncrement, dbtedAUnts *decimal.Big, maxItr int) (ec *utils.EventCharges, err error) {
+	costIcrm *utils.CostIncrement, dbtedAUnts *utils.Decimal, maxItr int) (ec *utils.EventCharges, err error) {
 	// Init EventCharges
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	// process AttributeS if needed
@@ -213,7 +213,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 	}
 	origConcrtUnts := cloneUnitsFromConcretes(cncrtBlncs) // so we can revert on errors
 	paidConcrtUnts := origConcrtUnts                      // so we can revert when higher abstracts are not possible
-	var aPaid, aDenied *decimal.Big
+	var aPaid, aDenied *utils.Decimal
 	ec = utils.NewEventCharges() //
 	for i := 0; i <= maxItr; i++ {
 		if i != 0 {
@@ -239,19 +239,19 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			costIcrm = costIcrm.Clone() // so we don't modify the original
 			costIcrm.FixedFee = rplyCost.Cost
 		}
-		var cUnits *decimal.Big // concrete units to debit
+		var cUnits *utils.Decimal // concrete units to debit
 		if costIcrm.FixedFee != nil {
-			cUnits = costIcrm.FixedFee.Big
+			cUnits = costIcrm.FixedFee
 		}
 		// RecurrentFee is configured, used it with increments
 		if costIcrm.RecurrentFee != nil {
-			rcrntCost := utils.MultiplyBig(
-				utils.DivideBig(aUnits, costIcrm.Increment.Big),
-				costIcrm.RecurrentFee.Big)
+			rcrntCost := utils.MultiplyDecimal(
+				utils.DivideDecimal(aUnits, costIcrm.Increment),
+				costIcrm.RecurrentFee)
 			if cUnits == nil {
 				cUnits = rcrntCost
 			} else {
-				cUnits = utils.SumBig(cUnits, rcrntCost)
+				cUnits = utils.SumDecimal(cUnits, rcrntCost)
 			}
 		}
 		aQried := aUnits // so we can detect loops
@@ -262,20 +262,20 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			}
 			err = nil
 			// ErrInsufficientCredit
-			aDenied = utils.CloneDecimalBig(aUnits)
+			aDenied = aUnits.Clone()
 			if aPaid == nil { // going backwards
-				aUnits = utils.DivideBig( // divide by 2
-					aUnits, decimal.New(2, 0))
-				aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment.Big) // make sure abstracts are multiple of increments
-				if aUnits.Cmp(aDenied) >= 0 ||
-					aUnits.Cmp(decimal.New(0, 0)) == 0 ||
-					aUnits.Cmp(aQried) == 0 { // loop
+				aUnits = utils.DivideDecimal( // divide by 2
+					aUnits, utils.NewDecimal(2, 0))
+				aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment) // make sure abstracts are multiple of increments
+				if aUnits.Compare(aDenied) >= 0 ||
+					aUnits.Compare(utils.NewDecimal(0, 0)) == 0 ||
+					aUnits.Compare(aQried) == 0 { // loop
 					break
 				}
 				continue
 			}
 		} else { // debit for the usage succeeded
-			aPaid = utils.CloneDecimalBig(aUnits)
+			aPaid = aUnits.Clone()
 			paidConcrtUnts = cloneUnitsFromConcretes(cncrtBlncs)
 			ec = utils.NewEventCharges() // so we can keep the record of the last sucessful debit
 			ec.Merge(ecDbt)              // merge the last debit
@@ -284,25 +284,26 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *decimal.Big,
 			}
 		}
 		// going upwards
-		aUnits = utils.SumBig(aPaid,
-			utils.DivideBig(aPaid, decimal.New(2, 0)).RoundToInt())
-		if aUnits.Cmp(aDenied) >= 0 {
-			aUnits = utils.SumBig(aPaid, costIcrm.Increment.Big)
+		aPaidDiv := utils.DivideDecimal(aPaid, utils.NewDecimal(2, 0))
+		aPaidDiv.RoundToInt()
+		aUnits = utils.SumDecimal(aPaid, aPaidDiv)
+		if aUnits.Compare(aDenied) >= 0 {
+			aUnits = utils.SumDecimal(aPaid, costIcrm.Increment)
 		}
-		aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment.Big)
-		if aUnits.Cmp(aPaid) <= 0 ||
-			aUnits.Cmp(aDenied) >= 0 ||
-			aUnits.Cmp(aQried) == 0 { // loop
+		aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment)
+		if aUnits.Compare(aPaid) <= 0 ||
+			aUnits.Compare(aDenied) >= 0 ||
+			aUnits.Compare(aQried) == 0 { // loop
 			break
 		}
 	}
 	// Nothing paid
 	if aPaid == nil {
 		// since we are erroring, we restore the concerete balances
-		aPaid = decimal.New(0, 0)
+		aPaid = utils.NewDecimal(0, 0)
 		ec = utils.NewEventCharges()
 	}
-	ec.Abstracts = &utils.Decimal{Big: aPaid}
+	ec.Abstracts = aPaid
 	restoreUnitsFromClones(cncrtBlncs, paidConcrtUnts)
 	return
 }
@@ -327,8 +328,7 @@ func restoreAccounts(ctx *context.Context, dm *engine.DataManager,
 func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.AccountCharge, uf *utils.UnitFactor) (tU *utils.Decimal) {
 	tU = units
 	if cmprsFctr > 1 {
-		tU = &utils.Decimal{Big: utils.MultiplyBig(tU.Big,
-			decimal.New(int64(cmprsFctr), 0))}
+		tU = utils.MultiplyDecimal(tU, utils.NewDecimal(int64(cmprsFctr), 0))
 	}
 	// check it this has unit factor
 	if uf != nil {
@@ -341,13 +341,10 @@ func uncompressUnits(units *utils.Decimal, cmprsFctr int, acntChrg *utils.Accoun
 // origBlnc is used for both it's ID as well as as a configuration backup in case when the balance is not longer present
 func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *utils.Balance) {
 	if _, has := acnt.Balances[origBlnc.ID]; has {
-		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{
-			Big: utils.SumBig(
-				acnt.Balances[origBlnc.ID].Units.Big,
-				units.Big)}
+		acnt.Balances[origBlnc.ID].Units = utils.SumDecimal(acnt.Balances[origBlnc.ID].Units, units)
 	} else {
 		acnt.Balances[origBlnc.ID] = origBlnc.Clone()
-		acnt.Balances[origBlnc.ID].Units = &utils.Decimal{Big: utils.CloneDecimalBig(units.Big)}
+		acnt.Balances[origBlnc.ID].Units = units.Clone()
 	}
 }
 

@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 func TestECNewEventCharges(t *testing.T) {
@@ -28,19 +26,19 @@ func TestECNewEventCharges(t *testing.T) {
 
 func TestECMergeAbstractsEmpty(t *testing.T) {
 	ec1 := &EventCharges{
-		Abstracts: &Decimal{decimal.New(1, 1)},
-		Concretes: &Decimal{decimal.New(1, 1)},
+		Abstracts: NewDecimal(1, 1),
+		Concretes: NewDecimal(1, 1),
 	}
 
 	ec2 := &EventCharges{
-		Abstracts: &Decimal{decimal.New(2, 1)},
-		Concretes: &Decimal{decimal.New(2, 1)},
+		Abstracts: NewDecimal(2, 1),
+		Concretes: NewDecimal(2, 1),
 	}
 
 	received := &EventCharges{}
 	expected := &EventCharges{
-		Abstracts: &Decimal{decimal.New(3, 1)},
-		Concretes: &Decimal{decimal.New(3, 1)},
+		Abstracts: NewDecimal(3, 1),
+		Concretes: NewDecimal(3, 1),
 	}
 	received.Merge(ec1, ec2)
 
@@ -51,22 +49,22 @@ func TestECMergeAbstractsEmpty(t *testing.T) {
 
 func TestECMergeAbstracts(t *testing.T) {
 	ec1 := &EventCharges{
-		Abstracts: &Decimal{decimal.New(1, 1)},
-		Concretes: &Decimal{decimal.New(1, 1)},
+		Abstracts: NewDecimal(1, 1),
+		Concretes: NewDecimal(1, 1),
 	}
 
 	ec2 := &EventCharges{
-		Abstracts: &Decimal{decimal.New(2, 1)},
-		Concretes: &Decimal{decimal.New(2, 1)},
+		Abstracts: NewDecimal(2, 1),
+		Concretes: NewDecimal(2, 1),
 	}
 
 	received := &EventCharges{
-		Abstracts: &Decimal{decimal.New(3, 1)},
-		Concretes: &Decimal{decimal.New(3, 1)},
+		Abstracts: NewDecimal(3, 1),
+		Concretes: NewDecimal(3, 1),
 	}
 	expected := &EventCharges{
-		Abstracts: &Decimal{decimal.New(6, 1)},
-		Concretes: &Decimal{decimal.New(6, 1)},
+		Abstracts: NewDecimal(6, 1),
+		Concretes: NewDecimal(6, 1),
 	}
 
 	received.Merge(ec1, ec2)
@@ -1413,7 +1411,7 @@ func TestECEventChargesClone(t *testing.T) {
 						RateID:            "Rate1",
 						CompressFactor:    1,
 						Usage:             NewDecimalFromFloat64(-321),
-						cost:              decimal.New(4321, 5),
+						cost:              NewDecimal(4321, 5),
 					},
 					{
 						IncrementStart:    NewDecimalFromFloat64(4.321),
@@ -1421,11 +1419,11 @@ func TestECEventChargesClone(t *testing.T) {
 						RateID:            "Rate2",
 						CompressFactor:    1,
 						Usage:             NewDecimalFromFloat64(-123),
-						cost:              decimal.New(123, 1),
+						cost:              NewDecimal(123, 1),
 					},
 				},
 				CompressFactor: 1,
-				cost:           decimal.New(4321, 5),
+				cost:           NewDecimal(4321, 5),
 			},
 			"RateSInterval2": {
 				IntervalStart: NewDecimalFromFloat64(2.34),
@@ -1436,7 +1434,7 @@ func TestECEventChargesClone(t *testing.T) {
 						RateID:            "Rate1",
 						CompressFactor:    2,
 						Usage:             NewDecimalFromFloat64(-321),
-						cost:              decimal.New(3456, 5),
+						cost:              NewDecimal(3456, 5),
 					},
 					{
 						IncrementStart:    NewDecimalFromFloat64(4.321),
@@ -1444,11 +1442,11 @@ func TestECEventChargesClone(t *testing.T) {
 						RateID:            "Rate2",
 						CompressFactor:    2,
 						Usage:             NewDecimalFromFloat64(-123),
-						cost:              decimal.New(321, 1),
+						cost:              NewDecimal(321, 1),
 					},
 				},
 				CompressFactor: 1,
-				cost:           decimal.New(345, 2),
+				cost:           NewDecimal(345, 2),
 			},
 		},
 		Rates: map[string]*IntervalRate{
@@ -2018,8 +2016,8 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 	// ToDo: Replace the randomly assigned values with ones resulted from a real charge. For
 	// the moment this is enough to test the field retrieval functionality with FieldAsInterface.
 	ec := &EventCharges{
-		Concretes: &Decimal{decimal.New(152, 1)},
-		Abstracts: &Decimal{decimal.New(145, 1)},
+		Concretes: NewDecimal(152, 1),
+		Abstracts: NewDecimal(145, 1),
 		Charges: []*ChargeEntry{
 			{
 				ChargingID:     "*accounting:accounting1",
@@ -2034,8 +2032,8 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 			"accounting1": {
 				AccountID:       "acc1",
 				BalanceID:       "balance1",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "unit_factor1",
 				AttributeIDs:    []string{"attr1", "attr2"},
 				RatingID:        "rating2",
@@ -2044,8 +2042,8 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 			"joined_charge": {
 				AccountID:       "acc2",
 				BalanceID:       "balance2",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "unit_factor2",
 				AttributeIDs:    []string{"attr3", "attr4"},
 				RatingID:        "rating3",
@@ -2056,44 +2054,44 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		UnitFactors: map[string]*UnitFactor{
 			"unit_factor1": {
 				FilterIDs: []string{"fltr1", "fltr2"},
-				Factor:    &Decimal{decimal.New(2, 0)},
+				Factor:    NewDecimal(2, 0),
 			},
 			"unit_factor2": {
 				FilterIDs: []string{"fltr3", "fltr4"},
-				Factor:    &Decimal{decimal.New(3, 0)},
+				Factor:    NewDecimal(3, 0),
 			},
 			"unit_factor3": nil,
 		},
 		Rating: map[string]*RateSInterval{
 			"rating1": {
-				IntervalStart: &Decimal{decimal.New(4, 0)},
+				IntervalStart: NewDecimal(4, 0),
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart:    &Decimal{decimal.New(5, 0)},
+						IncrementStart:    NewDecimal(5, 0),
 						RateIntervalIndex: 1,
 						RateID:            "rate1",
 						CompressFactor:    1,
-						Usage:             &Decimal{decimal.New(6, 0)},
+						Usage:             NewDecimal(6, 0),
 					},
 					{
-						IncrementStart:    &Decimal{decimal.New(7, 0)},
+						IncrementStart:    NewDecimal(7, 0),
 						RateIntervalIndex: 2,
 						RateID:            "rate2",
 						CompressFactor:    1,
-						Usage:             &Decimal{decimal.New(8, 0)},
+						Usage:             NewDecimal(8, 0),
 					},
 				},
 				CompressFactor: 3,
 			},
 			"rating2": {
-				IntervalStart: &Decimal{decimal.New(5, 0)},
+				IntervalStart: NewDecimal(5, 0),
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart:    &Decimal{decimal.New(9, 0)},
+						IncrementStart:    NewDecimal(9, 0),
 						RateIntervalIndex: 3,
 						RateID:            "rate1",
 						CompressFactor:    1,
-						Usage:             &Decimal{decimal.New(10, 0)},
+						Usage:             NewDecimal(10, 0),
 					},
 				},
 				CompressFactor: 3,
@@ -2102,11 +2100,11 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 				IntervalStart: &Decimal{},
 				Increments: []*RateSIncrement{
 					{
-						IncrementStart:    &Decimal{decimal.New(11, 0)},
+						IncrementStart:    NewDecimal(11, 0),
 						RateIntervalIndex: 4,
 						RateID:            "rate2",
 						CompressFactor:    5,
-						Usage:             &Decimal{decimal.New(12, 0)},
+						Usage:             NewDecimal(12, 0),
 					},
 				},
 				CompressFactor: 3,
@@ -2115,18 +2113,18 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		},
 		Rates: map[string]*IntervalRate{
 			"rate1": {
-				IntervalStart: &Decimal{decimal.New(1, 0)},
-				FixedFee:      &Decimal{decimal.New(2, 0)},
-				RecurrentFee:  &Decimal{decimal.New(3, 0)},
-				Unit:          &Decimal{decimal.New(4, 0)},
-				Increment:     &Decimal{decimal.New(5, 0)},
+				IntervalStart: NewDecimal(1, 0),
+				FixedFee:      NewDecimal(2, 0),
+				RecurrentFee:  NewDecimal(3, 0),
+				Unit:          NewDecimal(4, 0),
+				Increment:     NewDecimal(5, 0),
 			},
 			"rate2": {
-				IntervalStart: &Decimal{decimal.New(6, 0)},
-				FixedFee:      &Decimal{decimal.New(7, 0)},
-				RecurrentFee:  &Decimal{decimal.New(8, 0)},
-				Unit:          &Decimal{decimal.New(9, 0)},
-				Increment:     &Decimal{decimal.New(10, 0)},
+				IntervalStart: NewDecimal(6, 0),
+				FixedFee:      NewDecimal(7, 0),
+				RecurrentFee:  NewDecimal(8, 0),
+				Unit:          NewDecimal(9, 0),
+				Increment:     NewDecimal(10, 0),
 			},
 			"rate3": nil,
 		},
@@ -2167,11 +2165,11 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 							},
 						},
 						Type:  MetaMonetary,
-						Units: &Decimal{decimal.New(1, 0)},
+						Units: NewDecimal(1, 0),
 						UnitFactors: []*UnitFactor{
 							{
 								FilterIDs: []string{"fltr1", "fltr2"},
-								Factor:    &Decimal{decimal.New(2, 0)},
+								Factor:    NewDecimal(2, 0),
 							},
 						},
 						Opts: map[string]any{
@@ -2180,9 +2178,9 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"fltr3"},
-								Increment:    &Decimal{decimal.New(3, 0)},
-								FixedFee:     &Decimal{decimal.New(1, 0)},
-								RecurrentFee: &Decimal{decimal.New(2, 0)},
+								Increment:    NewDecimal(3, 0),
+								FixedFee:     NewDecimal(1, 0),
+								RecurrentFee: NewDecimal(2, 0),
 							},
 						},
 						AttributeIDs:   []string{"attr1"},
@@ -2204,11 +2202,11 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 							},
 						},
 						Type:  MetaVoice,
-						Units: &Decimal{decimal.New(5, 0)},
+						Units: NewDecimal(5, 0),
 						UnitFactors: []*UnitFactor{
 							{
 								FilterIDs: []string{"fltr3", "fltr4"},
-								Factor:    &Decimal{decimal.New(1, 0)},
+								Factor:    NewDecimal(1, 0),
 							},
 						},
 						Opts: map[string]any{
@@ -2217,9 +2215,9 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"fltr2"},
-								Increment:    &Decimal{decimal.New(1, 0)},
-								FixedFee:     &Decimal{decimal.New(2, 0)},
-								RecurrentFee: &Decimal{decimal.New(3, 0)},
+								Increment:    NewDecimal(1, 0),
+								FixedFee:     NewDecimal(2, 0),
+								RecurrentFee: NewDecimal(3, 0),
 							},
 						},
 						AttributeIDs:   []string{"attr2"},
@@ -2263,7 +2261,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 							},
 						},
 						Type:  MetaMonetary,
-						Units: &Decimal{decimal.New(11, 0)},
+						Units: NewDecimal(11, 0),
 						UnitFactors: []*UnitFactor{
 							{
 								FilterIDs: []string{"fltr3", "fltr4"},
@@ -2276,9 +2274,9 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"fltr3"},
-								Increment:    &Decimal{decimal.New(12, 0)},
-								FixedFee:     &Decimal{decimal.New(13, 0)},
-								RecurrentFee: &Decimal{decimal.New(14, 0)},
+								Increment:    NewDecimal(12, 0),
+								FixedFee:     NewDecimal(13, 0),
+								RecurrentFee: NewDecimal(14, 0),
 							},
 						},
 						AttributeIDs:   []string{"attr3"},

@@ -10,7 +10,6 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/ericlagergren/decimal"
 )
 
 func TestABDebitUsageFromConcretes1(t *testing.T) {
@@ -70,7 +69,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		Rates:    make(map[string]*utils.IntervalRate),
 		Accounts: make(map[string]*utils.Account),
 	}
-	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(5, 0),
+	if evCh, err := debitConcreteUnits(context.Background(), utils.NewDecimal(5, 0),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
@@ -124,7 +123,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		Accounts: make(map[string]*utils.Account),
 	}
 
-	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(9, 0),
+	if evCh, err := debitConcreteUnits(context.Background(), utils.NewDecimal(9, 0),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {
@@ -145,7 +144,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 	aB.cncrtBlncs[0].blnCfg.Units = utils.NewDecimal(500, 0)
 	aB.cncrtBlncs[1].blnCfg.Units = utils.NewDecimal(125, 2)
 
-	if _, err := debitConcreteUnits(context.Background(), decimal.New(int64(10*time.Minute), 0),
+	if _, err := debitConcreteUnits(context.Background(), utils.NewDecimal(int64(10*time.Minute), 0),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err == nil || err != utils.ErrInsufficientCredit {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(500, 0)) != 0 {
@@ -188,7 +187,7 @@ func TestABDebitUsageFromConcretes1(t *testing.T) {
 		Rates:    make(map[string]*utils.IntervalRate),
 		Accounts: make(map[string]*utils.Account),
 	}
-	if evCh, err := debitConcreteUnits(context.Background(), decimal.New(925, 2),
+	if evCh, err := debitConcreteUnits(context.Background(), utils.NewDecimal(925, 2),
 		utils.EmptyString, aB.cncrtBlncs, new(utils.CGREvent)); err != nil {
 		t.Error(err)
 	} else if aB.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(-200, 0)) != 0 {

@@ -7,8 +7,6 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/ericlagergren/decimal"
 )
 
 func TestCloneBalance(t *testing.T) {
@@ -27,9 +25,9 @@ func TestCloneBalance(t *testing.T) {
 		CostIncrements: []*CostIncrement{
 			{
 				FilterIDs:    []string{"*string:~*req.Account:1001"},
-				Increment:    &Decimal{decimal.New(1, 1)},
-				FixedFee:     &Decimal{decimal.New(75, 1)},
-				RecurrentFee: &Decimal{decimal.New(20, 1)},
+				Increment:    NewDecimal(1, 1),
+				FixedFee:     NewDecimal(75, 1),
+				RecurrentFee: NewDecimal(20, 1),
 			},
 		},
 		AttributeIDs:   []string{"attr1", "attr2"},
@@ -37,10 +35,10 @@ func TestCloneBalance(t *testing.T) {
 		UnitFactors: []*UnitFactor{
 			{
 				FilterIDs: []string{"*string:~*req.Account:1001"},
-				Factor:    &Decimal{decimal.New(20, 2)},
+				Factor:    NewDecimal(20, 2),
 			},
 		},
-		Units: &Decimal{decimal.New(125, 3)},
+		Units: NewDecimal(125, 3),
 	}
 	if rcv := expBlc.Clone(); !reflect.DeepEqual(rcv, expBlc) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expBlc), ToJSON(rcv))
@@ -81,19 +79,19 @@ func TestCloneAccount(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 				},
 				AttributeIDs: []string{"attr1", "attr2"},
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 		},
 		ThresholdIDs: []string{"*none"},
@@ -127,7 +125,7 @@ func TestAccountBalancesAlteredCompareLength(t *testing.T) {
 		},
 	}
 
-	actBk := map[string]*decimal.Big{
+	actBk := map[string]*Decimal{
 		"testString": {},
 	}
 
@@ -145,7 +143,7 @@ func TestAccountBalancesAlteredCheckKeys(t *testing.T) {
 		},
 	}
 
-	actBk := map[string]*decimal.Big{
+	actBk := map[string]*Decimal{
 		"testString2": {},
 	}
 
@@ -160,13 +158,13 @@ func TestAccountBalancesAlteredCompareValues(t *testing.T) {
 	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testString": {
-				Units: &Decimal{decimal.New(1, 1)},
+				Units: NewDecimal(1, 1),
 			},
 		},
 	}
 
-	actBk := map[string]*decimal.Big{
-		"testString": {},
+	actBk := map[string]*Decimal{
+		"testString": NewDecimal(0, 0),
 	}
 
 	result := actPrf.BalancesAltered(actBk)
@@ -198,12 +196,12 @@ func TestAPRestoreFromBackup(t *testing.T) {
 	}
 
 	actBk := AccountBalancesBackup{
-		"testString": decimal.New(1, 1),
+		"testString": NewDecimal(1, 1),
 	}
 
 	actPrf.RestoreFromBackup(actBk)
 	for key, value := range actBk {
-		if actPrf.Balances[key].Units.Big != value {
+		if actPrf.Balances[key].Units != value {
 			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", actPrf.Balances[key].Units.Big, value)
 		}
 	}
@@ -213,14 +211,14 @@ func TestAPAccountBalancesBackup(t *testing.T) {
 	actPrf := &Account{
 		Balances: map[string]*Balance{
 			"testKey": {
-				Units: &Decimal{decimal.New(1234, 3)},
+				Units: NewDecimal(1234, 3),
 			},
 		},
 	}
 
 	actBk := actPrf.AccountBalancesBackup()
 	for key, value := range actBk {
-		if actPrf.Balances[key].Units.Big.Cmp(value) != 0 {
+		if actPrf.Balances[key].Units.Compare(value) != 0 {
 			t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", actPrf.Balances[key].Units.Big, value)
 		}
 	}
@@ -299,7 +297,7 @@ func TestAPBalances(t *testing.T) {
 				ID:        "testID1",
 				FilterIDs: []string{"testFID1", "testFID2"},
 				Type:      MetaAbstract,
-				Units:     &Decimal{decimal.New(1234, 3)},
+				Units:     NewDecimal(1234, 3),
 				Weights:   nil,
 				UnitFactors: []*UnitFactor{
 					{
@@ -325,7 +323,7 @@ func TestAPBalances(t *testing.T) {
 				ID:        "testID2",
 				FilterIDs: []string{"testFID3", "testFID4"},
 				Type:      MetaAbstract,
-				Units:     &Decimal{decimal.New(1234, 3)},
+				Units:     NewDecimal(1234, 3),
 				Weights:   nil,
 				UnitFactors: []*UnitFactor{
 					{
@@ -1762,19 +1760,19 @@ func TestAccountAsMapStringInterface(t *testing.T) {
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"*string:~*req.Account:1001"},
-								Increment:    &Decimal{decimal.New(1, 1)},
-								FixedFee:     &Decimal{decimal.New(75, 1)},
-								RecurrentFee: &Decimal{decimal.New(20, 1)},
+								Increment:    NewDecimal(1, 1),
+								FixedFee:     NewDecimal(75, 1),
+								RecurrentFee: NewDecimal(20, 1),
 							},
 						},
 						AttributeIDs: []string{"attr1", "attr2"},
 						UnitFactors: []*UnitFactor{
 							{
 								FilterIDs: []string{"*string:~*req.Account:1001"},
-								Factor:    &Decimal{decimal.New(20, 2)},
+								Factor:    NewDecimal(20, 2),
 							},
 						},
-						Units: &Decimal{decimal.New(125, 3)},
+						Units: NewDecimal(125, 3),
 					},
 				},
 				ThresholdIDs: []string{"*none"},
@@ -1812,19 +1810,19 @@ func TestAccountAsMapStringInterface(t *testing.T) {
 						CostIncrements: []*CostIncrement{
 							{
 								FilterIDs:    []string{"*string:~*req.Account:1001"},
-								Increment:    &Decimal{decimal.New(1, 1)},
-								FixedFee:     &Decimal{decimal.New(75, 1)},
-								RecurrentFee: &Decimal{decimal.New(20, 1)},
+								Increment:    NewDecimal(1, 1),
+								FixedFee:     NewDecimal(75, 1),
+								RecurrentFee: NewDecimal(20, 1),
 							},
 						},
 						AttributeIDs: []string{"attr1", "attr2"},
 						UnitFactors: []*UnitFactor{
 							{
 								FilterIDs: []string{"*string:~*req.Account:1001"},
-								Factor:    &Decimal{decimal.New(20, 2)},
+								Factor:    NewDecimal(20, 2),
 							},
 						},
-						Units: &Decimal{decimal.New(125, 3)},
+						Units: NewDecimal(125, 3),
 					},
 				},
 				ThresholdIDs: []string{"*none"},
@@ -1868,9 +1866,9 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},
@@ -1878,10 +1876,10 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 			want: &Balance{
 				ID:        "ID1",
@@ -1898,9 +1896,9 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},
@@ -1908,10 +1906,10 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 		},
 		{
@@ -1932,7 +1930,7 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				AttributeIDs:   []string{"attr1", "attr2"},
 				RateProfileIDs: []string{"RATE1", "RATE2"},
 				UnitFactors:    UnitFactor{},
-				Units:          &Decimal{decimal.New(125, 3)},
+				Units:          NewDecimal(125, 3),
 			},
 			want: &Balance{
 				ID:        "ID1",
@@ -1950,7 +1948,7 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				AttributeIDs:   []string{"attr1", "attr2"},
 				RateProfileIDs: []string{"RATE1", "RATE2"},
 				UnitFactors:    nil,
-				Units:          &Decimal{decimal.New(125, 3)},
+				Units:          NewDecimal(125, 3),
 			},
 		},
 		{
@@ -1978,10 +1976,10 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 			want: &Balance{
 				ID:        "ID1",
@@ -2006,10 +2004,10 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 		},
 		{
@@ -2028,15 +2026,15 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				CostIncrements: []any{
 					map[string]any{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 					map[string]any{
 						FilterIDs:    []string{"*string:~*req.Account:1004"},
 						Increment:    2,
-						FixedFee:     &Decimal{decimal.New(75, 2)},
-						RecurrentFee: &Decimal{decimal.New(20, 2)},
+						FixedFee:     NewDecimal(75, 2),
+						RecurrentFee: NewDecimal(20, 2),
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},
@@ -2044,14 +2042,14 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []any{
 					map[string]any{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 					map[string]any{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
 						Factor:    1,
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 			want: &Balance{
 				ID:        "ID1",
@@ -2064,15 +2062,15 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1004"},
 						Increment:    nil,
-						FixedFee:     &Decimal{decimal.New(75, 2)},
-						RecurrentFee: &Decimal{decimal.New(20, 2)},
+						FixedFee:     NewDecimal(75, 2),
+						RecurrentFee: NewDecimal(20, 2),
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},
@@ -2080,14 +2078,14 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
 						Factor:    nil,
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 		},
 	}
@@ -2133,19 +2131,19 @@ func TestAccountCacheClone(t *testing.T) {
 				CostIncrements: []*CostIncrement{
 					{
 						FilterIDs:    []string{"*string:~*req.Account:1001"},
-						Increment:    &Decimal{decimal.New(1, 1)},
-						FixedFee:     &Decimal{decimal.New(75, 1)},
-						RecurrentFee: &Decimal{decimal.New(20, 1)},
+						Increment:    NewDecimal(1, 1),
+						FixedFee:     NewDecimal(75, 1),
+						RecurrentFee: NewDecimal(20, 1),
 					},
 				},
 				AttributeIDs: []string{"attr1", "attr2"},
 				UnitFactors: []*UnitFactor{
 					{
 						FilterIDs: []string{"*string:~*req.Account:1001"},
-						Factor:    &Decimal{decimal.New(20, 2)},
+						Factor:    NewDecimal(20, 2),
 					},
 				},
-				Units: &Decimal{decimal.New(125, 3)},
+				Units: NewDecimal(125, 3),
 			},
 		},
 		ThresholdIDs: []string{"*none"},
