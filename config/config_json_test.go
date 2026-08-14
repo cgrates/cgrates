@@ -688,6 +688,7 @@ func TestFsAgentJsonCfg(t *testing.T) {
 				ReplyTimeout:         utils.StringPointer("1m"),
 				Alias:                utils.StringPointer(""),
 			}},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -756,6 +757,7 @@ func TestAsteriskAgentJsonCfg(t *testing.T) {
 				Reconnects:             utils.IntPointer(5),
 			},
 		},
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

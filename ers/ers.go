@@ -257,11 +257,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	}()
 	// find out reqType
 	var reqType string
-	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
 		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -282,76 +278,6 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		return fmt.Errorf("unsupported reqType: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaAuthorize:
-		rply := new(sessions.V1AuthorizeReply)
-		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1AuthorizeEvent,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateAuthorize
-		}
-	case utils.MetaInitiate:
-		rply := new(sessions.V1InitSessionReply)
-		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1InitiateSession,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateInitiate
-		}
-	case utils.MetaUpdate:
-		rply := new(sessions.V1UpdateSessionReply)
-		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1UpdateSession,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateUpdate
-		}
-	case utils.MetaTerminate:
-		rply := utils.StringPointer("")
-		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1TerminateSession,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateTerminate
-		}
-	case utils.MetaMessage:
-		rply := new(sessions.V1ProcessMessageReply) // need it so rpcclient can clone
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessMessage,
-			cgrEv, rply)
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		if utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage) {
-			if err != nil {
-				replyState = utils.ErrReplyStateMessage
-			}
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionConns []string
@@ -362,31 +288,14 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
-			replyState = utils.ErrReplyStateEvent
+			return
 		}
-	case utils.MetaCDRs: // allow CDR processing
-		sessions.ApplyFlags(reqType, rdrCfg.Flags, cgrEv.APIOpts)
 	}
 	if err != nil {
 		return
 	}
 	if rdrCfg.Flags.Has(utils.MetaDryRun) {
 		return nil
-	}
-
-	// separate request so we can capture the Terminate/Event also here
-	if rdrCfg.Flags.Has(utils.MetaCDRs) {
-		var replyCDRs string
-		var sessionConns []string
-		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
-		if err != nil {
-			return
-		}
-		if err := erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &replyCDRs); err != nil {
-			replyState = utils.ErrReplyStateCDRs
-			return err
-		}
 	}
 	return nil
 }

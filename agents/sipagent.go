@@ -384,11 +384,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
-	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuthorize, /*
-			utils.MetaInitiate, utils.MetaUpdate,
-			utils.MetaTerminate, utils.MetaMessage,
-			utils.MetaCDRs, */utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -412,21 +408,6 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaAuthorize:
-		rply := new(sessions.V1AuthorizeReply)
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sa.fltrS)
-		if err != nil {
-			return
-		}
-		err = sa.connMgr.Call(context.TODO(), sessionsConns, utils.SessionSv1AuthorizeEvent,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateAuthorize
-		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
-		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
@@ -437,14 +418,8 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		err = sa.connMgr.Call(context.TODO(), sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
-			replyState = utils.ErrReplyStateEvent
+			return
 		}
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		// }
 		agReq.setCGRReply(rply, err)
 	}
 

@@ -31,12 +31,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
-	for _, typ := range []string{
-		utils.MetaDryRun,
-		utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
 		if reqProcessor.Flags.Has(typ) {
 			reqType = typ
 			break
@@ -67,13 +62,8 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
-			replyState = utils.ErrReplyStateEvent
+			return
 		}
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		// }
 		agReq.setCGRReply(rply, err)
 
 	}

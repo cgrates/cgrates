@@ -308,10 +308,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
 	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaAuthorize,
-		utils.MetaInitiate, utils.MetaUpdate,
-		utils.MetaTerminate, utils.MetaMessage,
-		utils.MetaCDRs, utils.MetaEvent, utils.MetaNone, utils.MetaRadauth} {
+		utils.MetaDryRun, utils.MetaEvent, utils.MetaNone, utils.MetaRadauth} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -337,85 +334,6 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaAuthorize:
-		rply := new(sessions.V1AuthorizeReply)
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err != nil {
-			return
-		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1AuthorizeEvent,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateAuthorize
-		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaAccounts))
-		agReq.setCGRReply(rply, err)
-	case utils.MetaInitiate:
-		rply := new(sessions.V1InitSessionReply)
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err != nil {
-			return
-		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1InitiateSession,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateInitiate
-		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaInitiate))
-		agReq.setCGRReply(rply, err)
-	case utils.MetaUpdate:
-		rply := new(sessions.V1UpdateSessionReply)
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err != nil {
-			return
-		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1UpdateSession,
-			cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateUpdate
-		}
-		rply.SetMaxUsageNeeded(utils.OptAsBool(cgrEv.APIOpts, utils.MetaUpdate))
-		agReq.setCGRReply(rply, err)
-	case utils.MetaTerminate:
-		var rply string
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err != nil {
-			return
-		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1TerminateSession,
-			cgrEv, &rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateTerminate
-		}
-		agReq.setCGRReply(nil, err)
-	case utils.MetaMessage:
-		rply := new(sessions.V1ProcessMessageReply)
-		var sessionsConns []string
-		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err != nil {
-			return
-		}
-		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessMessage, cgrEv, rply)
-		if err != nil {
-			replyState = utils.ErrReplyStateMessage
-		}
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		messageS := utils.OptAsBool(cgrEv.APIOpts, utils.OptsSesMessage)
-		if messageS {
-			cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		}
-		rply.SetMaxUsageNeeded(messageS)
-		agReq.setCGRReply(rply, err)
 	case utils.MetaEvent:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
@@ -426,17 +344,9 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
-			replyState = utils.ErrReplyStateEvent
+			return
 		}
-		// if utils.ErrHasPrefix(err, utils.RalsErrorPrfx) {
-		// cgrEv.Event[utils.Usage] = 0 // avoid further debits
-		// } else
-		// if needsMaxUsage(reqProcessor.Flags[utils.MetaRALs]) {
-		// cgrEv.Event[utils.Usage] = rply.MaxUsage // make sure the CDR reflects the debit
-		// }
 		agReq.setCGRReply(rply, err)
-	case utils.MetaCDRs: // allow this method
-		sessions.ApplyFlags(reqType, reqProcessor.Flags, cgrEv.APIOpts)
 	case utils.MetaRadauth:
 		var pass bool
 		if pass, err = radauthReq(reqProcessor.Flags, req, agReq, rpl); err != nil {
@@ -446,21 +356,6 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 			// Assume failed auth counts as a failed request.
 			replyState = utils.ErrReplyStateRadauth
 			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(utils.RadauthFailed)
-		}
-	}
-
-	// separate request so we can capture the Terminate/Event also here
-	if reqProcessor.Flags.GetBool(utils.MetaCDRs) {
-		var rplyCDRs string
-		sessConns, _ := engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)
-		if err = ra.cm.Call(ra.ctx, sessConns,
-			utils.SessionSv1ProcessCDR, cgrEv, &rplyCDRs); err != nil {
-			agReq.CGRReply.Map[utils.Error] = utils.NewLeafNode(err.Error())
-			if replyState == utils.OK {
-				replyState = utils.ErrReplyStateCDRs
-			} else {
-				replyState += ";" + utils.ErrReplyStateCDRs
-			}
 		}
 	}
 
