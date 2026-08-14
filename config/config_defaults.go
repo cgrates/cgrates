@@ -1199,7 +1199,8 @@ const CGRATES_CFG_JSON = `
 			"reconnects": 5,
 			"user": "cgrates"
 		}
-	]
+	],
+	"requestProcessors": []					// list of processors to be applied to Asterisk events
 },
 
 
@@ -1224,7 +1225,8 @@ const CGRATES_CFG_JSON = `
 			"reconnects": 5, 		// max reconnect attempts before giving up ("-1" for no limit)
 			"replyTimeout": "1m"		// max wait time for FreeSWITCH replies
 		}
-	]
+	],
+	"requestProcessors": []					// list of processors to be applied to FReeSWITCH events
 },
 
 

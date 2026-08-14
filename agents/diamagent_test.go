@@ -282,7 +282,10 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
+	expAPIOpts = map[string]any{
+		utils.MetaTerminate: "true",
+	}
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -312,7 +315,12 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
-	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, nil, nil, nil, da.fltrS)
+	expAPIOpts = map[string]any{
+		utils.MetaSession:    "true",
+		utils.MetaTerminate:  "true",
+		utils.MetaAttributes: "true",
+	}
+	pr, err = processRequest(da.ctx, clnReq, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
