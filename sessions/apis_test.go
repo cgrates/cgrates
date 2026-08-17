@@ -944,3 +944,88 @@ func TestSessionSBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 		t.Errorf("Expected %v, recieved %v", expect, err)
 	}
 }
+
+func TestSessionSBiRPCv1ProcessEventRefund(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	refundCalls, debitCalls := 0, 0
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AccountSv1RefundCharges: func(_ *context.Context, _ string, args, _ any) error {
+				refundCalls++
+				charges := args.(*utils.APIEventCharges).EventCharges
+				if charges.Concretes.Compare(utils.NewDecimal(1, 0)) != 0 {
+					t.Errorf("Expected Concretes to be 1, got %v", charges.Concretes)
+				}
+				return utils.ErrNotImplemented
+			},
+			utils.AccountSv1DebitAbstracts: func(_ *context.Context, _ string, _, reply any) error {
+				debitCalls++
+				*reply.(*utils.EventCharges) = *utils.NewEventCharges()
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)
+	cfg.SessionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
+		{ConnIDs: []string{connID}},
+	}
+	sessions.connMgr.AddInternalConn(connID, utils.AccountSv1, chanInternal)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:        "refund",
+			utils.MetaRefund:          true,
+			utils.MetaAccountsCost:    map[string]any{utils.Concretes: 1.0},
+			utils.MetaBlockerErrorCfg: true,
+		},
+	}
+	var reply V1ProcessEventReply
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+
+	delete(args.APIOpts, utils.MetaBlockerErrorCfg)
+	args.APIOpts[utils.MetaAccountsDebitCfg] = true
+	args.APIOpts[utils.MetaUsage] = 1
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %v, received %v", utils.ErrPartiallyExecuted, err)
+	}
+
+	delete(args.APIOpts, utils.MetaAccountsCost)
+	args.APIOpts[utils.MetaBlockerErrorCfg] = true
+	errMissing := utils.NewErrMandatoryIeMissing(utils.MetaAccountsCost)
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != errMissing.Error() {
+		t.Errorf("Expected %v, received %v", errMissing, err)
+	}
+
+	delete(args.APIOpts, utils.MetaBlockerErrorCfg)
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != utils.ErrPartiallyExecuted {
+		t.Errorf("Expected %v, received %v", utils.ErrPartiallyExecuted, err)
+	}
+	if refundCalls != 2 {
+		t.Errorf("Expected refund to be called twice, got %d", refundCalls)
+	}
+	if debitCalls != 0 {
+		t.Errorf("Expected debit not to be called, got %d", debitCalls)
+	}
+}

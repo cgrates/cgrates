@@ -181,6 +181,34 @@ func TestIfaceAsTime(t *testing.T) {
 	}
 }
 
+func TestIfaceAsEventCharges(t *testing.T) {
+	eventCharges := NewEventCharges()
+	eventCharges.Concretes = NewDecimal(1, 0)
+	tests := []struct {
+		name     string
+		value    any
+		expected *EventCharges
+		hasError bool
+	}{
+		{name: "typed", value: eventCharges, expected: eventCharges},
+		{name: "map", value: map[string]any{Concretes: 1.0}, expected: &EventCharges{Concretes: NewDecimal(1, 0)}},
+		{name: "nil typed", value: (*EventCharges)(nil), hasError: true},
+		{name: "nil map", value: map[string]any(nil), hasError: true},
+		{name: "unsupported", value: true, hasError: true},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			received, err := IfaceAsEventCharges(test.value)
+			if (err != nil) != test.hasError {
+				t.Fatalf("IfaceAsEventCharges() error = %v, want error %v", err, test.hasError)
+			}
+			if !reflect.DeepEqual(received, test.expected) {
+				t.Errorf("IfaceAsEventCharges() = %+v, want %+v", received, test.expected)
+			}
+		})
+	}
+}
+
 func TestIfaceAsDuration(t *testing.T) {
 	eItm := time.Second
 	if itmConvert, err := IfaceAsDuration(any(time.Second)); err != nil {

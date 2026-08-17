@@ -4,6 +4,7 @@
 package utils
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -124,6 +125,31 @@ func IfaceAsDecimal(itm any) (d *Decimal, err error) {
 		return nil, err
 	}
 	return &Decimal{Big: b}, nil
+}
+
+func IfaceAsEventCharges(value any) (*EventCharges, error) {
+	switch charges := value.(type) {
+	case *EventCharges:
+		if charges == nil {
+			return nil, fmt.Errorf("cannot convert field: %T to EventCharges", value)
+		}
+		return charges, nil
+	case map[string]any:
+		if charges == nil {
+			return nil, fmt.Errorf("cannot convert field: %T to EventCharges", value)
+		}
+		encoded, err := json.Marshal(charges)
+		if err != nil {
+			return nil, err
+		}
+		var eventCharges EventCharges
+		if err := json.Unmarshal(encoded, &eventCharges); err != nil {
+			return nil, err
+		}
+		return &eventCharges, nil
+	default:
+		return nil, fmt.Errorf("cannot convert field: %T to EventCharges", value)
+	}
 }
 
 func IfaceAsDuration(itm any) (d time.Duration, err error) {
