@@ -1366,20 +1366,26 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		}
 		if utils.OptAsBool(cchEv, utils.MetaRefund) ||
 			utils.OptAsBool(cchEv, utils.MetaAccountsRefundCfg) {
-			rfndCharges, has := cgrEv.APIOpts[utils.MetaAccountsCost]
+			var refundCharges *utils.EventCharges
+			var errRefund error
+			accountsCost, has := cgrEv.APIOpts[utils.MetaAccountsCost]
 			if !has {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Missing <%s> processing event: %+v for refund",
-						utils.SessionS, utils.MetaAccountsCost, cgrEv))
+				errRefund = utils.NewErrMandatoryIeMissing(utils.MetaAccountsCost)
+			} else {
+				refundCharges, errRefund = utils.IfaceAsEventCharges(accountsCost)
 			}
-			if errRfnd := sS.accountSRefundCharges(ctx, rfndCharges.(*utils.EventCharges), cgrEv); err != nil {
+			if errRefund == nil {
+				errRefund = sS.accountSRefundCharges(ctx, refundCharges, cgrEv)
+			}
+			if errRefund != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
-					return errRfnd
+					return errRefund
 				}
 				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-						utils.SessionS, errRfnd.Error(), cgrEv, utils.MetaRefund))
+						utils.SessionS, errRefund.Error(), cgrEv, utils.MetaRefund))
+				continue
 			}
 		}
 		// AccountS Debit
