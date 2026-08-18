@@ -59,7 +59,10 @@ func (at *ActionTrigger) Execute(acc *Account, fltrS *FilterS) (err error) {
 		// check action filter
 		if len(act.Filters) > 0 {
 			if pass, err := fltrS.Pass(utils.NewTenantID(act.Id).Tenant, act.Filters,
-				utils.MapStorage{utils.MetaReq: acc}); err != nil {
+				utils.MapStorage{
+					utils.MetaReq: acc,
+					utils.MetaCfg: config.CgrConfig().GetDataProvider(),
+				}); err != nil {
 				return err
 			} else if !pass {
 				continue

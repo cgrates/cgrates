@@ -252,8 +252,11 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdS
 			for i, act := range acts {
 				// check action filter
 				if len(act.Filters) > 0 {
-					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant, act.Filters,
-						utils.MapStorage{utils.MetaReq: acc}); err != nil {
+					if pass, err := fltrS.Pass(utils.NewTenantID(accID).Tenant,
+						act.Filters, utils.MapStorage{
+							utils.MetaReq: acc,
+							utils.MetaCfg: config.CgrConfig().GetDataProvider(),
+						}); err != nil {
 						return err
 					} else if !pass {
 						continue
