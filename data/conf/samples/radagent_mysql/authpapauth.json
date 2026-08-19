@@ -5,8 +5,11 @@
       {
         "id": "CGRPAPAuth",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585361"],
-        "flags": ["*authorize", "*attributes", "*accounts", "*continue"],
+        "flags": ["*event", "*continue"],
         "requestFields":[
+          {"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+          {"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},

@@ -35,8 +35,11 @@
 				"id": "OutboundAUTH",
 				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
-				"flags": [ "*authorize", "*accounts", "*attributes"],
+				"flags": ["*event"],
 				"requestFields":[
+					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
 					{"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
 						"value": "*pseudoprepaid", "mandatory": true},	
@@ -60,8 +63,9 @@
 				"id": "mtcall_cdr",
 				"filters": ["*string:~*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
-				"flags": ["*cdrs"],
+				"flags": ["*event"],
 				"requestFields":[
+					{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
 						"value": "*pseudoprepaid", "mandatory": true},	
 					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
@@ -102,8 +106,9 @@
 			{
 				"id": "cdr_from_xml",
 				"tenant": "cgrates.org",
-				"flags": ["*cdrs"],
+				"flags": ["*event"],
 				"requestFields":[
+					{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant",
 					 "value": "*data", "mandatory": true},
 					{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",

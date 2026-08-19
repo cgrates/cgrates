@@ -10,8 +10,32 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:forceDurationVoice"
 			],
-			"flags": ["*initiate", "*fd", "*accounts", "*attributes"],
+			"flags": ["*event"],
 			"requestFields":[
+				{
+					"tag": "OptSession",
+					"path": "*opts.*session",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptDebit",
+					"path": "*opts.*debit",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAccounts",
+					"path": "*opts.*accounts",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAttributes",
+					"path": "*opts.*attributes",
+					"type": "*constant",
+					"value": "true"
+				},
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -110,8 +134,32 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*initiate", "*accounts", "*attributes", "*continue"],
+			"flags": ["*event", "*continue"],
 			"requestFields":[
+				{
+					"tag": "OptSession",
+					"path": "*opts.*session",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptDebit",
+					"path": "*opts.*debit",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAccounts",
+					"path": "*opts.*accounts",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAttributes",
+					"path": "*opts.*attributes",
+					"type": "*constant",
+					"value": "true"
+				},
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -207,8 +255,13 @@
 			"id": "VoiceTerminateEmulate",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:voice","*eq:~*cgrep.MaxUsage:0"],
-			"flags": ["*terminate", "*accounts", "*attributes"],
+			"flags": ["*event"],
 			"requestFields":[
+				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+				{"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},
+				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+				{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+				{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},
@@ -239,8 +292,32 @@
 				"*string:~*req.CC-Request-Type:2",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*update", "*accounts", "*attributes"],
+			"flags": ["*event"],
 			"requestFields":[
+				{
+					"tag": "OptSession",
+					"path": "*opts.*session",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptDebit",
+					"path": "*opts.*debit",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAccounts",
+					"path": "*opts.*accounts",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAttributes",
+					"path": "*opts.*attributes",
+					"type": "*constant",
+					"value": "true"
+				},
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",
@@ -345,8 +422,44 @@
 				"*string:~*req.CC-Request-Type:3",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*terminate", "*accounts", "*attributes", "*cdrs"],
+			"flags": ["*event"],
 			"requestFields":[
+				{
+					"tag": "OptSession",
+					"path": "*opts.*session",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptTerminate",
+					"path": "*opts.*terminate",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptDebit",
+					"path": "*opts.*debit",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptUsageRecord",
+					"path": "*opts.*ur",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAccounts",
+					"path": "*opts.*accounts",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAttributes",
+					"path": "*opts.*attributes",
+					"type": "*constant",
+					"value": "true"
+				},
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",

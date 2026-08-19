@@ -7,8 +7,11 @@
 			"id": "simpa_event",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:4",
 				"*prefix:~*req.Service-Context-Id:simpa"],
-			"flags": ["*message", "*accounts"],
+			"flags": ["*event"],
 			"requestFields":[
+				{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+				{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*generic"},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
 					"value": "~*req.Session-Id", "mandatory": true},

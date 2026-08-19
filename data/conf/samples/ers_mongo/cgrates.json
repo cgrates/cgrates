@@ -158,9 +158,14 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/init_session/in",
-			"flags": ["*initiate","*accounts","*resources","*attributes","*log"],
+			"flags": ["*event", "*log"],
 			"processedPath": "/tmp/init_session/out",
-			"fields":[									
+			"fields":[
+				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+				{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+				{"tag": "OptResources", "path": "*opts.*resources", "type": "*constant", "value": "true"},
+				{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.Tenant", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.OriginID", "mandatory": true},
@@ -179,9 +184,14 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/terminate_session/in",
-			"flags": ["*terminate","*accounts","*resources","*log"],
+			"flags": ["*event", "*log"],
 			"processedPath": "/tmp/terminate_session/out",
-			"fields":[									
+			"fields":[
+				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+				{"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},
+				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+				{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+				{"tag": "OptResources", "path": "*opts.*resources", "type": "*constant", "value": "true"},									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.3", "mandatory": true},
@@ -193,9 +203,10 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/cdrs/in",
-			"flags": ["*cdrs","*log"],
+			"flags": ["*event", "*log"],
 			"processedPath": "/tmp/cdrs/out",
-			"fields":[									
+			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},									
 				{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable", "value": "~*req.0", "mandatory": true},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.2", "mandatory": true},
@@ -220,9 +231,10 @@
 			},
 			"sourcePath": "/tmp/ers_with_filters/in",
 			"processedPath": "/tmp/ers_with_filters/out",
-			"flags": ["*cdrs","*log"],
+			"flags": ["*event", "*log"],
 			"filters":["*string:~*req.3:1002"],
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
@@ -246,12 +258,13 @@
 			"runDelay":  "-1",
 			"type": "*fileXML",
 			"sourcePath": "/tmp/xmlErs/in",
-			"flags": ["*cdrs","*log"],
+			"flags": ["*event", "*log"],
 			"processedPath": "/tmp/xmlErs/out",
 			"opts": {
 				"xmlRootPath": "broadWorksCDR.cdrData"
 			},
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "*vars.*readerID"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.broadWorksCDR.cdrData.basicModule.localCallId", "mandatory": true},
@@ -295,9 +308,10 @@
 			"runDelay":  "-1",
 			"type": "*fileFWV",
 			"sourcePath": "/tmp/fwvErs/in",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"processedPath": "/tmp/fwvErs/out",
 			"fields": [
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID"},
 				{"tag": "FileName", "path": "*cgreq.CdrFileName", "type": "*variable", "value": "~*hdr.95-135", "padding":"*right"},
 				{"tag": "FileSeqNr", "path": "*cgreq.FileSeqNr", "type": "*variable", "value": "~*hdr.135-141", "padding":"*zeroleft"},
@@ -329,7 +343,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/partErs1/in",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"processedPath": "",
 			"opts": {
 				"partialCacheAction": "*dumpToFile",
@@ -337,6 +351,7 @@
 				"partialPath": "/tmp/partErs1/out"
 			},
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.0"},
 				{"tag": "AccId2", "path": "*cgreq.OriginID", "type": "*composed", "value": "_"},
@@ -375,13 +390,14 @@
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/partErs2/in",
 			"processedPath": "",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"opts": {
 				"partialCacheAction": "*postCDR",
 				"partialOrderField": "~*req.AnswerTime",
 				"partialPath": "/tmp/partErs2/out"
 			},
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "AccId1", "path": "*cgreq.OriginID", "type": "*composed", "value": "~*req.0"},
 				{"tag": "AccId2", "path": "*cgreq.OriginID", "type": "*composed", "value": "_"},
@@ -417,8 +433,9 @@
 			},
 			"sourcePath": "/tmp/flatstoreErs/in",
 			"processedPath": "/tmp/flatstoreErs/out",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStore", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
@@ -472,8 +489,9 @@
 			},
 			"sourcePath": "/tmp/flatstoreACKErs/in",
 			"processedPath": "/tmp/flatstoreACKErs/out",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStoreACK", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.3;~*req.1;~*req.2", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.7", "mandatory": true,"filters": ["*string:~*req.0:INVITE"]},
@@ -519,9 +537,10 @@
 			"runDelay":  "-1",
 			"type": "*fileJSON",
 			"sourcePath": "/tmp/ErsJSON/in",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"processedPath": "/tmp/ErsJSON/out",
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "ReaderId", "path": "*cgreq.ReaderID", "type": "*variable", "value": "~*vars.*readerID" },
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.OriginID", "mandatory": true},
@@ -541,9 +560,10 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/readerWithTemplate/in",
-			"flags": ["*cdrs","*log"],
+			"flags": ["*event", "*log"],
 			"processedPath": "/tmp/readerWithTemplate/out",
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "reqFields","type": "*template", "value": "reqFields"},
 				{"tag": "ExtraInfo1", "path": "*cgreq.ExtraInfo1", "type": "*constant", "value": "ExtraInfo1"},
 				{"tag": "ExtraInfo2", "path": "*cgreq.ExtraInfo2", "type": "*constant", "value": "ExtraInfo2"}
@@ -564,8 +584,9 @@
 			},
 			"sourcePath": "/tmp/flatstoreMMErs/in",
 			"processedPath": "/tmp/flatstoreMMErs/out",
-			"flags": ["*cdrs"],
+			"flags": ["*event"],
 			"fields":[
+				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatstoreMMErs", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable","value":"~*req.4;~*req.2;~*req.3", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*none", "mandatory": true,"filters": ["*string:~*req.1:INVITE"]},
