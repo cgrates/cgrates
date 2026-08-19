@@ -10,8 +10,32 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:testSessionDisconnect"
 			],
-			"flags": ["*initiate", "*accounts","*attributes"],
+			"flags": ["*event"],
 			"requestFields":[
+				{
+					"tag": "OptSession",
+					"path": "*opts.*session",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptDebit",
+					"path": "*opts.*debit",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAccounts",
+					"path": "*opts.*accounts",
+					"type": "*constant",
+					"value": "true"
+				},
+				{
+					"tag": "OptAttributes",
+					"path": "*opts.*attributes",
+					"type": "*constant",
+					"value": "true"
+				},
 				{
 					"tag": "ToR",
 					"path": "*cgreq.ToR",

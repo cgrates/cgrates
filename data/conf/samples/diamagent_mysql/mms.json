@@ -10,8 +10,38 @@
                     "*prefix:~*req.Service-Context-Id:mms",
                     "*string:~*req.CC-Request-Type:4"
                 ],
-                "flags": ["*message", "*accounts", "*cdrs","*attributes"],
+                "flags": ["*event"],
                 "requestFields":[
+                    {
+                        "tag": "OptAuth",
+                        "path": "*opts.*authorize",
+                        "type": "*constant",
+                        "value": "true"
+                    },
+                    {
+                        "tag": "OptDebit",
+                        "path": "*opts.*debit",
+                        "type": "*constant",
+                        "value": "true"
+                    },
+                    {
+                        "tag": "OptUsageRecord",
+                        "path": "*opts.*ur",
+                        "type": "*constant",
+                        "value": "true"
+                    },
+                    {
+                        "tag": "OptAccounts",
+                        "path": "*opts.*accounts",
+                        "type": "*constant",
+                        "value": "true"
+                    },
+                    {
+                        "tag": "OptAttributes",
+                        "path": "*opts.*attributes",
+                        "type": "*constant",
+                        "value": "true"
+                    },
                     {
                         "tag": "ToR",
                         "path": "*cgreq.ToR",

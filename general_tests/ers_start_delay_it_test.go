@@ -94,9 +94,10 @@ func TestErsStartDelay(t *testing.T) {
 					"startDelay":"1s",
 					"type": "*fileCSV",
 					"sourcePath": "%s",
-					"flags": ["*cdrs"],
+					"flags": ["*event"],
 					"processedPath": "%s",
 					"fields":[
+						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
                         {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
                         {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},
@@ -115,9 +116,10 @@ func TestErsStartDelay(t *testing.T) {
 					"startDelay":"2s",
 					"type": "*fileCSV",
 					"sourcePath": "%s",
-					"flags": ["*cdrs"],
+					"flags": ["*event"],
 					"processedPath": "%s",
 					"fields":[
+						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
                         {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
                         {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},

@@ -4,8 +4,20 @@
 		"requestProcessors": [{
 				"id": "RadiusMandatoryFail",
 				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10011"],
-				"flags": ["*log", "*authorize", "*attributes"],
+				"flags": ["*event", "*log"],
 				"requestFields": [
+                    {
+						"tag": "OptAuth",
+						"path": "*opts.*authorize",
+						"type": "*constant",
+						"value": "true"
+                    },
+                    {
+						"tag": "OptAttributes",
+						"path": "*opts.*attributes",
+						"type": "*constant",
+						"value": "true"
+                    },
                     {
 						"tag": "UserName","path": "*cgreq.RadUserName",
 						"type": "*variable","value": "~*req.User-Name"
@@ -40,8 +52,20 @@
 			{
 				"id": "RadiusWithVendor",
 				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10012"],
-				"flags": ["*log", "*authorize", "*attributes"],
+				"flags": ["*event", "*log"],
 				"requestFields": [
+                    {
+						"tag": "OptAuth",
+						"path": "*opts.*authorize",
+						"type": "*constant",
+						"value": "true"
+                    },
+                    {
+						"tag": "OptAttributes",
+						"path": "*opts.*attributes",
+						"type": "*constant",
+						"value": "true"
+                    },
                     {
 						"tag": "UserName","path": "*cgreq.RadUserName",
 						"type": "*variable","value": "~*req.User-Name"

@@ -5,8 +5,13 @@
       {
         "id": "KamailioAccountingStart",
         "filters": ["*string:~*req.Acct-Status-Type:Start"],
-        "flags": ["*initiate", "*attributes", "*resources", "*accounts"],
+        "flags": ["*event"],
         "requestFields":[
+          {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+          {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+          {"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
+          {"tag": "OptResources", "path": "*opts.*resources", "type": "*constant", "value": "true"},
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},
@@ -32,8 +37,14 @@
       {
         "id": "KamailioAccountingStop",
         "filters": ["*string:~*req.Acct-Status-Type:Stop"],
-        "flags": ["*terminate", "*resources", "*accounts", "*cdrs"],
+        "flags": ["*event"],
         "requestFields":[
+          {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+          {"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},
+          {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+          {"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
+          {"tag": "OptResources", "path": "*opts.*resources", "type": "*constant", "value": "true"},
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
           {"tag": "Category", "path": "*cgreq.Category", "type": "*constant", "value": "call"},
           {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant",
             "value": "*prepaid", "mandatory": true},

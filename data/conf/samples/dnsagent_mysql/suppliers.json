@@ -5,8 +5,11 @@
 				"id": "NAPTRRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.QueryName{*e164}:4986517174965"],
-				"flags": ["*message", "*routes","*continue"],
+				"flags": ["*event", "*continue"],
 				"requestFields":[
+					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
 				],
 				"replyFields":[
@@ -62,8 +65,11 @@
 				"id": "ARoutesQuery",
 				"filters": ["*string:~*vars.QueryType:A", 
 					"*string:~*vars.QueryName:go.dev."],
-				"flags": ["*message", "*routes","*continue"],
+				"flags": ["*event", "*continue"],
 				"requestFields":[
+					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1002"}
 				],
 				"replyFields":[
@@ -105,8 +111,11 @@
 				"id": "SRVRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:SRV", 
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org."],
-				"flags": ["*message", "*routes","*continue"],
+				"flags": ["*event", "*continue"],
 				"requestFields":[
+					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1003"}
 				],
 				"replyFields":[
