@@ -1063,19 +1063,6 @@ func (ms *MongoStorage) GetAccountDrv(key string) (*Account, error) {
 }
 
 func (ms *MongoStorage) SetAccountDrv(acc *Account) error {
-	// never override existing account with an empty one
-	// UPDATE: if all balances expired and were cleaned it makes
-	// sense to write empty balance map
-	if len(acc.BalanceMap) == 0 {
-		ac, err := ms.GetAccountDrv(acc.ID)
-		if err == nil && !ac.allBalancesExpired() {
-			ac.ActionTriggers = acc.ActionTriggers
-			ac.UnitCounters = acc.UnitCounters
-			ac.AllowNegative = acc.AllowNegative
-			ac.Disabled = acc.Disabled
-			acc = ac
-		}
-	}
 	acc.UpdateTime = time.Now()
 	return ms.query(func(sctx mongo.SessionContext) error {
 		_, err := ms.getCol(ColAcc).UpdateOne(sctx, bson.M{"id": acc.ID},
@@ -2169,22 +2156,31 @@ func (ms *MongoStorage) SetIndexesDrv(idxItmType, tntCtx string,
 			return err
 		}
 	}
+	deleteKeys := make([]string, 0, len(indexes))
 	var lastErr error
-	for idxKey, itmMp := range indexes {
-		err := ms.query(func(sctx mongo.SessionContext) (qryErr error) {
-			idxDbkey := utils.ConcatenatedKey(dbKey, idxKey)
-			if len(itmMp) == 0 { // remove from DB if we set it with empty indexes
-				_, qryErr = ms.getCol(ColIndx).DeleteOne(sctx,
-					bson.M{"key": idxDbkey})
-			} else {
-				_, qryErr = ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": idxDbkey},
-					bson.M{"$set": bson.M{"key": idxDbkey, "value": itmMp.AsSlice()}},
-					options.Update().SetUpsert(true),
-				)
-			}
+	for idxKey, index := range indexes {
+		indexKey := utils.ConcatenatedKey(dbKey, idxKey)
+		if len(index) == 0 {
+			deleteKeys = append(deleteKeys, indexKey)
+			continue
+		}
+		if err := ms.query(func(sctx mongo.SessionContext) error {
+			_, qryErr := ms.getCol(ColIndx).UpdateOne(sctx, bson.M{"key": indexKey},
+				bson.M{"$set": bson.M{"key": indexKey, "value": index.AsSlice()}},
+				options.Update().SetUpsert(true),
+			)
 			return qryErr
-		})
-		if err != nil {
+		}); err != nil {
+			lastErr = err
+		}
+	}
+	if len(deleteKeys) != 0 {
+		if err := ms.query(func(sctx mongo.SessionContext) error {
+			_, qryErr := ms.getCol(ColIndx).DeleteMany(sctx, bson.M{
+				"key": bson.M{"$in": deleteKeys},
+			})
+			return qryErr
+		}); err != nil {
 			lastErr = err
 		}
 	}

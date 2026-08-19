@@ -9,7 +9,6 @@ import (
 	"fmt"
 	"os"
 	"slices"
-	"strings"
 	"testing"
 	"time"
 
@@ -229,18 +228,34 @@ func TestReplicatorFailedPostsNoInterval(t *testing.T) {
 			Tenant:  "cgrates.org",
 			Account: "1001",
 		},
-		&reply); err == nil || !strings.Contains(err.Error(), "connect: connection refused") {
-		t.Fatal("expected connection refused error")
+		&reply); err != nil {
+		t.Fatal(err)
 	}
 	if err := primaryClient.Call(context.Background(), utils.APIerSv1SetDestination,
 		&utils.AttrSetDestination{
 			Id:       "DST_1001",
 			Prefixes: []string{"+49"},
 		},
-		&reply); err == nil || !strings.Contains(err.Error(), "connect: connection refused") {
-		t.Fatal("expected connection refused error")
+		&reply); err != nil {
+		t.Fatal(err)
 	}
 
+	var primaryAcnt *engine.Account
+	if err := primaryClient.Call(context.Background(), utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{
+			Tenant:  "cgrates.org",
+			Account: "1001",
+		},
+		&primaryAcnt); err != nil {
+		t.Fatalf("account 1001 not found on primary: %v", err)
+	}
+
+	var primaryDst engine.Destination
+	if err := primaryClient.Call(context.Background(), utils.APIerSv1GetDestination,
+		"DST_1001",
+		&primaryDst); err != nil {
+		t.Fatalf("destination DST_1001 not found on primary: %v", err)
+	}
 	entries, err := os.ReadDir(failedDir)
 	if err != nil {
 		t.Fatal(err)
