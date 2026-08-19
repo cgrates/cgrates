@@ -2953,3 +2953,307 @@ func TestSessionSv1ProcessEventDebitConcreteBalanceWithRecurrentFee(t *testing.T
 		t.Errorf("expected 4.00 remaining after 60s debit at 0.10/sec, got: %+v", acnt.Balances["MonetaryBal"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventTTL(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {
+        "level": 7
+},
+"sessions": {
+        "enabled": true,
+        "conns": {
+                "*accounts": [{"connIDs": ["*localhost"]}],
+                "*cdrs": [{"connIDs": ["*localhost"]}]
+        }
+},
+"accounts": {
+        "enabled": true,
+        "indexed_selects": true
+},
+"cdrs": {
+        "enabled": true
+},
+"admins": {
+        "enabled": true 
+        }
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	t.Run("SetAccount", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1001",
+					FilterIDs: []string{"*string:~*req.Account:1001"},
+					Balances: map[string]*utils.Balance{
+						"DATA1": {
+							ID:      "DATA1",
+							Type:    utils.MetaAbstract,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							CostIncrements: []*utils.CostIncrement{
+								{Increment: utils.NewDecimal(1, 0), RecurrentFee: utils.NewDecimal(0, 0)},
+							},
+							Units: utils.NewDecimalFromFloat64(500),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("SetAccount failed: %v", err)
+		}
+	})
+
+	t.Run("SessionProcessEventDebit", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TTLLedgerStart",
+				APIOpts: map[string]any{
+					utils.MetaSession:      true,
+					utils.MetaAccounts:     true,
+					utils.MetaDebit:        true,
+					utils.MetaOriginID:     "sessionTTL",
+					utils.OptsSesTTL:       "300ms",
+					utils.MetaInterimUsage: 10,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session start) failed: %v", err)
+		}
+		var acnt utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+			&acnt); err != nil {
+			t.Fatalf("GetAccount: %v", err)
+		}
+		bal, has := acnt.Balances["DATA1"]
+		if !has {
+			t.Fatalf("balance not found")
+		}
+		if bal.Units.Compare(utils.NewDecimal(490, 0)) != 0 {
+			t.Error("balance debited incorrectly")
+		}
+	})
+
+	t.Run("SessionProcessEventUpdate", func(t *testing.T) {
+
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "TTLLedgerReconcile",
+				APIOpts: map[string]any{
+					utils.MetaSession:         true,
+					utils.MetaAccounts:        true,
+					utils.MetaDebit:           true,
+					utils.MetaOriginID:        "sessionTTL",
+					utils.OptsSesTTL:          "300ms",
+					utils.MetaInterimConsumed: 7,
+				},
+				Event: map[string]any{
+					utils.AccountField: 1001,
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session reconcile) failed: %v", err)
+		}
+		var acnt utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+			&acnt); err != nil {
+			t.Fatalf("GetAccount: %v", err)
+		}
+		bal, has := acnt.Balances["DATA1"]
+		if !has {
+			t.Fatalf("balance not found")
+		}
+		if bal.Units.Compare(utils.NewDecimal(490, 0)) != 0 {
+			t.Error("balance debited incorrectly")
+		}
+	})
+
+	t.Run("SessionTTlExpired", func(t *testing.T) {
+		time.Sleep(500 * time.Millisecond)
+		var sessions []*ExternalSession
+		err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+			new(utils.SessionFilter), &sessions)
+		if err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Fatalf("expected %v error got %v", utils.ErrNotFound,
+				err)
+		}
+	})
+
+	t.Run("CheckBalance", func(t *testing.T) {
+		var acnt utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+			&acnt); err != nil {
+			t.Fatalf("GetAccount: %v", err)
+		}
+		bal, has := acnt.Balances["DATA1"]
+		if !has {
+			t.Fatalf("balance not found")
+		}
+		if bal.Units.Compare(utils.NewDecimal(490, 0)) != 0 {
+			t.Error("balance debited incorrectly")
+		}
+	})
+
+}
+
+func TestSessionSv1ProcessEventDebitMultipleAccounts(t *testing.T) {
+	var dbCfg engine.DBCfg
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		dbCfg = engine.InternalDBCfg
+	case utils.MetaRedis, utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	cfg := `{
+                        "logger": {"level": 7},
+                        "rates": {
+                                "enabled": true
+                        },
+                        "cdrs": {
+                                "enabled": true,
+                                "conns": {
+                                        "*chargers": [{"connIDs": ["*internal"]}],
+                                        "*rates": [{"connIDs": ["*internal"]}]
+                                },
+                        },
+                        "attributes": {
+                                "enabled": true,
+                        },
+                        "chargers": {
+                                "enabled": true,
+                                "conns": {
+                                        "*attributes": [{"connIDs": ["*internal"]}]
+                                },
+                        },
+                        "admins": {
+                                "enabled": true
+                        },
+                        "sessions": {
+                                "enabled": true,
+                                "conns": {
+                                        "*accounts": [{"connIDs": ["*localhost"]}]
+                                }
+                        },
+                        "accounts": {
+                                "enabled": true,
+                                "indexed_selects": true
+                        },
+                        "admins": {"enabled": true}
+                }`
+
+	ng := engine.TestEngine{
+		ConfigJSON: cfg,
+		Encoding:   *utils.Encoding,
+		DBCfg:      dbCfg,
+	}
+	client, _ := ng.Run(t)
+	time.Sleep(100 * time.Millisecond)
+
+	t.Run("SetAccounts", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1001",
+					FilterIDs: []string{"*string:~*req.AccountGroup:GRP1"},
+					Weights:   utils.DynamicWeights{{Weight: 50}},
+					Balances: map[string]*utils.Balance{
+						"DATA1": {
+							ID:      "DATA1",
+							Type:    utils.MetaAbstract,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							CostIncrements: []*utils.CostIncrement{
+								{Increment: utils.NewDecimal(1, 0), RecurrentFee: utils.NewDecimal(0, 0)},
+							},
+							Units: utils.NewDecimalFromFloat64(500),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("SetAccount: %v", err)
+		}
+
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					Tenant:    "cgrates.org",
+					ID:        "1002",
+					FilterIDs: []string{"*string:~*req.AccountGroup:GRP1"},
+					Weights:   utils.DynamicWeights{{Weight: 50}},
+					Balances: map[string]*utils.Balance{
+						"DATA1": {
+							ID:      "DATA1",
+							Type:    utils.MetaAbstract,
+							Weights: utils.DynamicWeights{{Weight: 5}},
+							CostIncrements: []*utils.CostIncrement{
+								{Increment: utils.NewDecimal(1, 0), RecurrentFee: utils.NewDecimal(0, 0)},
+							},
+							Units: utils.NewDecimalFromFloat64(500),
+						},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatalf("SetAccount: %v", err)
+		}
+	})
+
+	t.Run("ProcessEvent", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    1000,
+					utils.MetaOriginID: "testMultipleAccounts",
+				},
+				Event: map[string]any{
+					"AccountGroup": "GRP1",
+				},
+			}, &rply); err != nil {
+			t.Errorf("ProcessEvent failed: %v", err)
+		}
+	})
+
+	t.Run("CheckBalances", func(t *testing.T) {
+		var acnt1, acnt2 utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+			&acnt1); err != nil {
+			t.Fatalf("GetAccount: %v", err)
+		}
+		bal1, has := acnt1.Balances["DATA1"]
+		if !has {
+			t.Fatal("balance not found")
+		}
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1002"}},
+			&acnt2); err != nil {
+			t.Fatalf("GetAccount: %v", err)
+		}
+		bal2, has := acnt2.Balances["DATA1"]
+		if !has {
+			t.Fatal("balance not found")
+		}
+		if bal1.Units.Compare(utils.NewDecimal(0, 0)) != 0 || bal2.Units.Compare(utils.NewDecimal(0, 0)) != 0 {
+			t.Errorf("balances not debited correctly: balance1 = %s, balance2 =%s", bal1.Units.String(), bal2.Units.String())
+		}
+	})
+}
