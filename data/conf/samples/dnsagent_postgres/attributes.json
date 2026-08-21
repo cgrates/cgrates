@@ -4,7 +4,7 @@
 			{
 				"id": "NAPTRAttributes",
 				"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174964"],
-				"flags": ["*event", "*log"],
+				"flags": ["*sessions", "*log"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
@@ -29,7 +29,7 @@
 			{
 				"id": "AAttributes",
 				"filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:dns.google."],
-				"flags": ["*event", "*log"],
+				"flags": ["*sessions", "*log"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
@@ -56,7 +56,7 @@
 			{
 				"id": "SRVAttributes",
 				"filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_ldap._tcp.google.com."],
-				"flags": ["*event", "*log"],
+				"flags": ["*sessions", "*log"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},

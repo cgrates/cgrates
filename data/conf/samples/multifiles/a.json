@@ -34,7 +34,7 @@
 				"id": "OutboundAUTH",
 				"filters": ["*string:~*req.request_type:OutboundAUTH"],
 				"tenant": "cgrates.org",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},

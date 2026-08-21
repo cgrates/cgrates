@@ -158,7 +158,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/init_session/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/init_session/out",
 			"fields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
@@ -184,7 +184,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/terminate_session/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/terminate_session/out",
 			"fields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
@@ -203,7 +203,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/cdrs/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/cdrs/out",
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},									
@@ -231,7 +231,7 @@
 			},
 			"sourcePath": "/tmp/ers_with_filters/in",
 			"processedPath": "/tmp/ers_with_filters/out",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"filters":["*string:~*req.3:1002"],
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
@@ -258,7 +258,7 @@
 			"runDelay":  "-1",
 			"type": "*fileXML",
 			"sourcePath": "/tmp/xmlErs/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/xmlErs/out",
 			"opts": {
 				"xmlRootPath": "broadWorksCDR.cdrData"
@@ -308,7 +308,7 @@
 			"runDelay":  "-1",
 			"type": "*fileFWV",
 			"sourcePath": "/tmp/fwvErs/in",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"processedPath": "/tmp/fwvErs/out",
 			"fields": [
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
@@ -343,7 +343,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/partErs1/in",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"processedPath": "",
 			"opts": {
 				"partialCacheAction": "*dumpToFile",
@@ -390,7 +390,7 @@
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/partErs2/in",
 			"processedPath": "",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"opts": {
 				"partialCacheAction": "*postCDR",
 				"partialOrderField": "~*req.AnswerTime",
@@ -433,7 +433,7 @@
 			},
 			"sourcePath": "/tmp/flatstoreErs/in",
 			"processedPath": "/tmp/flatstoreErs/out",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStore", "mandatory": true},
@@ -489,7 +489,7 @@
 			},
 			"sourcePath": "/tmp/flatstoreACKErs/in",
 			"processedPath": "/tmp/flatstoreACKErs/out",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatStoreACK", "mandatory": true},
@@ -537,7 +537,7 @@
 			"runDelay":  "-1",
 			"type": "*fileJSON",
 			"sourcePath": "/tmp/ErsJSON/in",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"processedPath": "/tmp/ErsJSON/out",
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
@@ -560,7 +560,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/readerWithTemplate/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/readerWithTemplate/out",
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
@@ -584,7 +584,7 @@
 			},
 			"sourcePath": "/tmp/flatstoreMMErs/in",
 			"processedPath": "/tmp/flatstoreMMErs/out",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"fields":[
 				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 				{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*constant","value":"flatstoreMMErs", "mandatory": true},

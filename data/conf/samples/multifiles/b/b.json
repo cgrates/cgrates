@@ -22,7 +22,7 @@
 				"id": "mtcall_cdr",
 				"filters": ["*string:~*req.request_type:MTCALL_CDR"],
 				"tenant": "cgrates.org",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields":[
 					{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 					{"tag": "RequestType", "path": "RequestType", "type": "*constant", 

@@ -384,7 +384,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
-	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaSessionS, utils.MetaNone} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -408,7 +408,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaEvent:
+	case utils.MetaSessionS:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
 		sessionsConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sa.fltrS)

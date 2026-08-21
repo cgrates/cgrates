@@ -191,7 +191,7 @@ func TestERSReRate(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
@@ -596,7 +596,7 @@ func TestERSReRateWithAccounts(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
@@ -1103,7 +1103,7 @@ func TestERSReRateEventOpts(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
@@ -1512,7 +1512,7 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
@@ -2039,7 +2039,7 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
@@ -2556,7 +2556,7 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
         "type": "*cgrcdr",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
-        "flags": ["*log","*event"],
+        "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",

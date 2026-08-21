@@ -92,7 +92,7 @@ func TestUsageRecordsSessionDebit(t *testing.T) {
 		"requestProcessors": [
 			{
 				"id": "usage_record",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields": [
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
 					{"tag": "CGRID", "path": "*opts.*cgrID", "type": "*variable", "value": "~*req.sessionID"},

@@ -308,7 +308,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
 	for _, typ := range []string{
-		utils.MetaDryRun, utils.MetaEvent, utils.MetaNone, utils.MetaRadauth} {
+		utils.MetaDryRun, utils.MetaSessionS, utils.MetaNone, utils.MetaRadauth} {
 		if reqProcessor.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -334,7 +334,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		return false, fmt.Errorf("unknown request type: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaEvent:
+	case utils.MetaSessionS:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionsConns []string
 		sessionsConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)

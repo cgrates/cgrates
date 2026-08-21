@@ -5,7 +5,7 @@
       {
         "id": "KamailioAccountingStart",
         "filters": ["*string:~*req.Acct-Status-Type:Start"],
-        "flags": ["*event"],
+        "flags": ["*sessions"],
         "requestFields":[
           {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
           {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -37,7 +37,7 @@
       {
         "id": "KamailioAccountingStop",
         "filters": ["*string:~*req.Acct-Status-Type:Stop"],
-        "flags": ["*event"],
+        "flags": ["*sessions"],
         "requestFields":[
           {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
           {"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},

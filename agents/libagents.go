@@ -31,7 +31,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
 	var reqType string
-	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaSessionS, utils.MetaNone} {
 		if reqProcessor.Flags.Has(typ) {
 			reqType = typ
 			break
@@ -57,7 +57,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 
-	case utils.MetaEvent:
+	case utils.MetaSessionS:
 		rply := new(sessions.V1ProcessEventReply)
 		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)

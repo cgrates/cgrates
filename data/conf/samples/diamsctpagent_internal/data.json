@@ -7,7 +7,7 @@
 		{
 			"id": "data_init",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1", "*prefix:~*req.Service-Context-Id:gprs"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
 				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -37,7 +37,7 @@
 			"id": "data_update_grp1",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2", 
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group:1", "*prefix:~*req.Service-Context-Id:gprs"],
-			"flags": ["*event", "*continue"],
+			"flags": ["*sessions", "*continue"],
 			"requestFields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
 				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -72,7 +72,7 @@
 			"id": "data_update_grp2",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:2",
 				"*string:~*req.Multiple-Services-Credit-Control.Rating-Group[1]:2", "*prefix:~*req.Service-Context-Id:gprs"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
 				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -107,7 +107,7 @@
 			"id": "data_terminate",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:3",
 				"*prefix:~*req.Service-Context-Id:gprs"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
 				{"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},

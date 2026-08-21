@@ -10,7 +10,7 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:testSessionDisconnect"
 			],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{
 					"tag": "OptSession",

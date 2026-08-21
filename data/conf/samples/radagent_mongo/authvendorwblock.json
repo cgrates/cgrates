@@ -4,7 +4,7 @@
 		"requestProcessors": [{
 				"id": "RadiusMandatoryFail",
 				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10011"],
-				"flags": ["*event", "*log"],
+				"flags": ["*sessions", "*log"],
 				"requestFields": [
                     {
 						"tag": "OptAuth",
@@ -52,7 +52,7 @@
 			{
 				"id": "RadiusWithVendor",
 				"filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.User-Name:10012"],
-				"flags": ["*event", "*log"],
+				"flags": ["*sessions", "*log"],
 				"requestFields": [
                     {
 						"tag": "OptAuth",
