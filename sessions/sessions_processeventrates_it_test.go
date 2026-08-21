@@ -468,3 +468,115 @@ func TestSessionSv1ProcessEventTerminate(t *testing.T) {
 		t.Errorf("expected 170s remaining after terminate (300s - 90s initiate - 40s terminate), got: %+v", acnt.Balances["BAL1"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventDebitTwoBalancesByWeight(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"MonetaryBal": {
+						ID:      "MonetaryBal",
+						Type:    utils.MetaConcrete,
+						Weights: utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimalFromFloat64(float64(time.Second)),
+								RecurrentFee: utils.NewDecimal(1, 1),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(2.0),
+					},
+					"FreeMinutesBal": {
+						ID:      "FreeMinutesBal",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimalFromFloat64(float64(time.Second)),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("debit", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "twoBalancesEvent1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    60 * time.Second,
+					utils.MetaOriginID: "OriginIDTwoBalances",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(debit): %v", err)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else {
+		if want := utils.NewDecimalFromFloat64(0.00); acnt.Balances["MonetaryBal"].Units.Compare(want) != 0 {
+			t.Errorf("expected MonetaryBal fully consumed to 0.00, got: %+v", acnt.Balances["MonetaryBal"].Units)
+		}
+		if want := utils.NewDecimalFromFloat64(float64(260 * time.Second)); acnt.Balances["FreeMinutesBal"].Units.Compare(want) != 0 {
+			t.Errorf("expected FreeMinutesBal at 260s remaining, got: %+v", acnt.Balances["FreeMinutesBal"].Units)
+		}
+	}
+}
