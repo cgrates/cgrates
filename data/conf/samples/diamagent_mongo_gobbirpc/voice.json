@@ -10,7 +10,7 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:forceDurationVoice"
 			],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{
 					"tag": "OptSession",
@@ -134,7 +134,7 @@
 				"*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*event", "*continue"],
+			"flags": ["*sessions", "*continue"],
 			"requestFields":[
 				{
 					"tag": "OptSession",
@@ -255,7 +255,7 @@
 			"id": "VoiceTerminateEmulate",
 			"filters": ["*string:~*vars.*cmd:CCR", "*string:~*req.CC-Request-Type:1",
 				"*prefix:~*req.Service-Context-Id:voice","*eq:~*cgrep.MaxUsage:0"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
 				{"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},
@@ -292,7 +292,7 @@
 				"*string:~*req.CC-Request-Type:2",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{
 					"tag": "OptSession",
@@ -422,7 +422,7 @@
 				"*string:~*req.CC-Request-Type:3",
 				"*prefix:~*req.Service-Context-Id:voice"
 			],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{
 					"tag": "OptSession",

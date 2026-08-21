@@ -98,7 +98,7 @@
 			"id": "file_reader1",
 			"runDelay":  "-1",
 			"type": "*fileCSV",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"sourcePath": "/tmp/ers/in",
 			"processedPath": "/tmp/ers/out",
 		},
@@ -107,7 +107,7 @@
 			"runDelay":  "-1",
 			"type": "*fileCSV",
 			"sourcePath": "/tmp/ers2/in",
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"processedPath": "/tmp/ers2/out",
 			"opts": {
 				"csvFieldSeparator":";"

@@ -99,7 +99,7 @@ func TestFreeSWITCHCall(t *testing.T) {
 		{
 			"id": "Park",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_PARK"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields": [
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},
@@ -129,7 +129,7 @@ func TestFreeSWITCHCall(t *testing.T) {
 		{
 			"id": "Hangup",
 			"filters": ["*string:~*req.Event-Name:CHANNEL_HANGUP_COMPLETE"],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields": [
 				{"tag": "BaseTmpl", "type": "*template", "value": "*fsr"},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*postpaid"},

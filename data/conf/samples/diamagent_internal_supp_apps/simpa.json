@@ -10,7 +10,7 @@
 				"*string:~*req.CC-Request-Type:4",
 				"*prefix:~*req.Service-Context-Id:simpa"
 			],
-			"flags": ["*event", "*log"],
+			"flags": ["*sessions", "*log"],
 			"requestFields":[
 				{
 					"tag": "OptAuth",

@@ -10,7 +10,7 @@
 				"*prefix:~*req.Service-Context-Id:message",
 				"*string:~*req.CC-Request-Type:4"
 			],
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"requestFields":[
 				{
 					"tag": "OptAuth",

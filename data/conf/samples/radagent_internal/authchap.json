@@ -5,7 +5,7 @@
       {
         "id": "CGRCHAPAuth",
         "filters": ["*string:~*vars.*radReqType:*radAuth", "*string:~*req.Sip-From-Tag:51585362"],
-        "flags": ["*event", "*continue"],
+        "flags": ["*sessions", "*continue"],
         "requestFields":[
           {"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
           {"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},

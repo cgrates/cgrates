@@ -6,7 +6,7 @@
 				"id": "NAPTRRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.QueryName{*e164}:4986517174965"],
-				"flags": ["*event", "*continue"],
+				"flags": ["*sessions", "*continue"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -66,7 +66,7 @@
 				"id": "ARoutesQuery",
 				"filters": ["*string:~*vars.QueryType:A", 
 					"*string:~*vars.QueryName:go.dev."],
-				"flags": ["*event", "*continue"],
+				"flags": ["*sessions", "*continue"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
@@ -112,7 +112,7 @@
 				"id": "SRVRoutesQuery",
 				"filters": ["*string:~*vars.QueryType:SRV", 
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org."],
-				"flags": ["*event", "*continue"],
+				"flags": ["*sessions", "*continue"],
 				"requestFields":[
 					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},

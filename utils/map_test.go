@@ -22,9 +22,9 @@ func TestMapStringToInt64(t *testing.T) {
 }
 
 func TestMapSubsystemIDsFromSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*thresholds:*derivedReply", "*attributes:*disabled", "*stats:*IDs:ID"}
+	sls := []string{"*sessions", "*thresholds:*IDs:ID1&ID2&ID3", "*thresholds:*derivedReply", "*attributes:*disabled", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
-		"*event":      map[string][]string{},
+		"*sessions":   map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
 		"*attributes": map[string][]string{"*disabled": {}},
 		"*stats":      map[string][]string{MetaIDs: {"ID"}},
@@ -35,9 +35,9 @@ func TestMapSubsystemIDsFromSlice(t *testing.T) {
 }
 
 func TestMapSubsystemIDsHasKey(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
+	sls := []string{"*sessions", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
-		"*event":      map[string][]string{},
+		"*sessions":   map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
 		"*stats":      map[string][]string{MetaIDs: {"ID"}},
@@ -46,7 +46,7 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 	if !reflect.DeepEqual(mp, eMp) {
 		t.Errorf("Expecting: %+v, received: %+v", eMp, mp)
 	}
-	if has := mp.Has("*event"); !has {
+	if has := mp.Has("*sessions"); !has {
 		t.Errorf("Expecting: true, received: %+v", has)
 	}
 	if has := mp.Has("*thresholds"); !has {
@@ -58,9 +58,9 @@ func TestMapSubsystemIDsHasKey(t *testing.T) {
 }
 
 func TestMapSubsystemIDsGetIDs(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
+	sls := []string{"*sessions", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID"}
 	eMp := FlagsWithParams{
-		"*event":      map[string][]string{},
+		"*sessions":   map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
 		"*stats":      map[string][]string{MetaIDs: {"ID"}},
@@ -74,7 +74,7 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 	eIDs = nil
-	if ids := mp.ParamsSlice("*event", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
+	if ids := mp.ParamsSlice("*sessions", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
 		t.Errorf("Expecting: %+v, received: %+v", eIDs, ids)
 	}
 	if ids := mp.ParamsSlice("*test", MetaIDs); !reflect.DeepEqual(ids, eIDs) {
@@ -83,9 +83,9 @@ func TestMapSubsystemIDsGetIDs(t *testing.T) {
 }
 
 func TestFlagsToSlice(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derivedReply"}
+	sls := []string{"*sessions", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derivedReply"}
 	eMp := FlagsWithParams{
-		"*event":      map[string][]string{},
+		"*sessions":   map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
 		"*stats":      map[string][]string{MetaIDs: {"ID"}},
@@ -182,9 +182,9 @@ func TestFlagParamsAdd(t *testing.T) {
 }
 
 func TestFlagsToSlice2(t *testing.T) {
-	sls := []string{"*event", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derivedReply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
+	sls := []string{"*sessions", "*thresholds:*IDs:ID1&ID2&ID3", "*attributes", "*stats:*IDs:ID", "*routes:*derivedReply", "*cdrs:*attributes", "*cdrs:*stats:ID"}
 	eMp := FlagsWithParams{
-		"*event":      map[string][]string{},
+		"*sessions":   map[string][]string{},
 		"*thresholds": map[string][]string{MetaIDs: {"ID1", "ID2", "ID3"}},
 		"*attributes": map[string][]string{},
 		"*stats":      map[string][]string{MetaIDs: {"ID"}},
@@ -220,7 +220,7 @@ func TestMapStringToInt64Err(t *testing.T) {
 
 func TestFlagsWithParamsClone(t *testing.T) {
 	fWp := FlagsWithParams{
-		MetaEvent:      {},
+		MetaSessionS:   {},
 		MetaRoutes:     nil,
 		MetaThresholds: {MetaIDs: {"ID1", "ID2", "ID3"}, MetaDerivedReply: {}},
 		MetaAttributes: {"*disabled": {}},

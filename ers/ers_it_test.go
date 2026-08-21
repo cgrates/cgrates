@@ -506,7 +506,7 @@ func TestERsProcessEvent3(t *testing.T) {
 	srv := NewERService(nil, cfg, engine.NewCacheS(cfg, nil, nil, nil, locker), fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{
 		Flags: map[string]utils.FlagParams{
-			utils.MetaEvent: map[string][]string{},
+			utils.MetaSessionS: map[string][]string{},
 		},
 	}
 	cgrEvent := &utils.CGREvent{

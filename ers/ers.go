@@ -257,7 +257,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	}()
 	// find out reqType
 	var reqType string
-	for _, typ := range []string{utils.MetaDryRun, utils.MetaEvent, utils.MetaNone} {
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaSessionS, utils.MetaNone} {
 		if rdrCfg.Flags.Has(typ) { // request type is identified through flags
 			reqType = typ
 			break
@@ -278,7 +278,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		return fmt.Errorf("unsupported reqType: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
-	case utils.MetaEvent:
+	case utils.MetaSessionS:
 		rply := new(sessions.V1ProcessEventReply)
 		var sessionConns []string
 		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)

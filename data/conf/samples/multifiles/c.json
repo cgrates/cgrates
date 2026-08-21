@@ -16,7 +16,7 @@
 			{
 				"id": "cdr_from_xml",
 				"tenant": "cgrates.org",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields":[
 					{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "ToR", "type": "*constant",

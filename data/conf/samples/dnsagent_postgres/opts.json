@@ -23,7 +23,7 @@
             {
                 "id": "OptsWithAttributes",
                 "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174967"],
-                "flags": ["*event","*attributes"],
+                "flags": ["*sessions","*attributes"],
                 "requestFields":[
                     {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
                     {"tag": "Domanin", "path": "*cgreq.Domanin", "type": "*variable", "value": "~*vars.QueryName{*e164Domain}"},
@@ -60,7 +60,7 @@
             {
                 "id": "AOptsWithAttributes",
                 "filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:opendns.com."],
-                "flags": ["*event","*attributes"],
+                "flags": ["*sessions","*attributes"],
                 "requestFields":[
                     {"tag": "Origin", "path": "*cgreq.AOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
                     {"tag": "Domain", "path": "*cgreq.ASIPDomain", "type": "*variable", "value": "~*vars.QueryName"},
@@ -96,7 +96,7 @@
             {
                 "id": "SRVOptsWithAttributes",
                 "filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_sip._udp.opensips.org."],
-                "flags": ["*event","*attributes"],
+                "flags": ["*sessions","*attributes"],
                 "requestFields":[
                     {"tag": "Origin", "path": "*cgreq.SRVOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
                     {"tag": "Domain", "path": "*cgreq.SRVDomain", "type": "*variable", "value": "~*vars.QueryName"},

@@ -153,7 +153,7 @@ func TestProcessRequest(t *testing.T) {
 			return nil
 		},
 	}}
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 	agReq := NewAgentRequest(diamDP, reqVars, cgrRplyNM, rply, nil,
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
@@ -194,7 +194,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 
 	tmpls2 := []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
@@ -227,7 +227,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
@@ -259,7 +259,7 @@ func TestProcessRequest(t *testing.T) {
 	} else if len(rply.GetOrder()) != 2 {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaTerminate,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},
@@ -294,7 +294,7 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have one value received: %s", rply.String())
 	}
 
-	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaEvent})
+	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 	tmpls = []*config.FCTemplate{
 		{Type: utils.MetaConstant, Path: utils.MetaOpts + utils.NestingSep + utils.MetaSession,
 			Value: utils.NewRSRParsersMustCompile("true", utils.InfieldSep)},

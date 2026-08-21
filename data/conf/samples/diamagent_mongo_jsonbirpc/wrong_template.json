@@ -11,7 +11,7 @@
 				"*string:~*req.CC-Request-Type:4",
 				"*prefix:~*req.Service-Context-Id:error"
 			],
-			"flags": ["*event", "*accounts"],
+			"flags": ["*sessions", "*accounts"],
 			"requestFields":[
 				{
 					"tag": "ToR",

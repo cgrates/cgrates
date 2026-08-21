@@ -94,7 +94,7 @@ func TestErsStartDelay(t *testing.T) {
 					"startDelay":"1s",
 					"type": "*fileCSV",
 					"sourcePath": "%s",
-					"flags": ["*event"],
+					"flags": ["*sessions"],
 					"processedPath": "%s",
 					"fields":[
 						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
@@ -116,7 +116,7 @@ func TestErsStartDelay(t *testing.T) {
 					"startDelay":"2s",
 					"type": "*fileCSV",
 					"sourcePath": "%s",
-					"flags": ["*event"],
+					"flags": ["*sessions"],
 					"processedPath": "%s",
 					"fields":[
 						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
