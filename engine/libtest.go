@@ -351,6 +351,7 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 	})
 
 	client := NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
+	t.Cleanup(func() { _ = client.Close() })
 	if ng.TpPath == "" {
 		ng.TpPath = ng.cfg.LoaderCfg()[0].TpInDir
 	}
@@ -390,7 +391,9 @@ func (ng *TestEngine) Start(t testing.TB) *birpc.Client {
 		t.Fatal("Start() called before Run()")
 	}
 	ng.start(t)
-	return NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
+	client := NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
+	t.Cleanup(func() { _ = client.Close() })
+	return client
 }
 
 func (ng *TestEngine) logWriter() io.Writer {
@@ -635,6 +638,24 @@ var serviceReceivers = map[string]string{
 	utils.KamailioAgent:   "",
 	utils.RadiusAgent:     "",
 	utils.SIPAgent:        "",
+}
+
+// WaitFor retries check until it returns true or the timeout expires.
+func WaitFor(t testing.TB, check func() bool, msg string, timeout time.Duration) {
+	t.Helper()
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
+	defer cancel()
+	backoff := utils.FibDuration(time.Millisecond, 0)
+	for {
+		if check() {
+			return
+		}
+		select {
+		case <-ctx.Done():
+			t.Fatalf("timed out after %s: %s", timeout, msg)
+		case <-time.After(backoff()):
+		}
+	}
 }
 
 // WaitForServiceStart tries to ping the service until it receives a "Pong"

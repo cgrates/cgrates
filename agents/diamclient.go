@@ -58,11 +58,6 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 		}
 	}
 	dSM := sm.New(cfg)
-	go func() {
-		for err := range dSM.ErrorReports() {
-			utils.Logger.Err(fmt.Sprintf("<DiameterClient> StateMachine error: %+v", err))
-		}
-	}()
 	cli := &sm.Client{
 		Handler:            dSM,
 		MaxRetransmits:     3,
@@ -78,7 +73,26 @@ func NewDiameterClient(addr, originHost, originRealm string, vendorId int, produ
 	if err != nil {
 		return nil, err
 	}
-	dc = &DiameterClient{conn: conn, handlers: dSM, received: make(chan *diam.Message)}
+	dc = &DiameterClient{
+		conn:     conn,
+		handlers: dSM,
+		received: make(chan *diam.Message, 1),
+		pending:  make(map[uint32]chan *diam.Message),
+	}
+	var closed <-chan struct{}
+	if notifier, ok := conn.(diam.CloseNotifier); ok {
+		closed = notifier.CloseNotify()
+	}
+	go func() {
+		for {
+			select {
+			case err := <-dSM.ErrorReports():
+				utils.Logger.Err(fmt.Sprintf("<DiameterClient> StateMachine error: %+v", err))
+			case <-closed:
+				return
+			}
+		}
+	}()
 	dSM.HandleFunc("ALL", dc.handleALL)
 	return dc, nil
 }
@@ -87,6 +101,9 @@ type DiameterClient struct {
 	conn     diam.Conn
 	handlers diam.Handler
 	received chan *diam.Message
+
+	pendingMu sync.Mutex
+	pending   map[uint32]chan *diam.Message
 }
 
 func (dc *DiameterClient) SendMessage(m *diam.Message) error {
@@ -94,12 +111,64 @@ func (dc *DiameterClient) SendMessage(m *diam.Message) error {
 	return err
 }
 
+// RoundTrip sends m and waits for the answer with the same Hop-by-Hop ID.
+func (dc *DiameterClient) RoundTrip(m *diam.Message, replyTimeout time.Duration) (*diam.Message, error) {
+	hopID := m.Header.HopByHopID
+	waiter := make(chan *diam.Message, 1)
+
+	dc.pendingMu.Lock()
+	if _, found := dc.pending[hopID]; found {
+		dc.pendingMu.Unlock()
+		return nil, fmt.Errorf("Diameter Hop-by-Hop ID %d is already pending", hopID)
+	}
+	dc.pending[hopID] = waiter
+	dc.pendingMu.Unlock()
+
+	if err := dc.SendMessage(m); err != nil {
+		dc.removePending(hopID, waiter)
+		return nil, err
+	}
+	timer := time.NewTimer(replyTimeout)
+	defer timer.Stop()
+	select {
+	case reply := <-waiter:
+		return reply, nil
+	case <-timer.C:
+		if dc.removePending(hopID, waiter) {
+			return nil, fmt.Errorf("timeout waiting for Diameter Hop-by-Hop ID %d", hopID)
+		}
+		return <-waiter, nil
+	}
+}
+
+func (dc *DiameterClient) removePending(hopID uint32, waiter chan *diam.Message) bool {
+	dc.pendingMu.Lock()
+	defer dc.pendingMu.Unlock()
+	if dc.pending[hopID] != waiter {
+		return false
+	}
+	delete(dc.pending, hopID)
+	return true
+}
+
 func (dc *DiameterClient) handleALL(c diam.Conn, m *diam.Message) {
+	if m.Header.CommandFlags&diam.RequestFlag == 0 {
+		dc.pendingMu.Lock()
+		waiter, found := dc.pending[m.Header.HopByHopID]
+		if found {
+			delete(dc.pending, m.Header.HopByHopID)
+		}
+		dc.pendingMu.Unlock()
+		if found {
+			waiter <- m
+			return
+		}
+	}
 	utils.Logger.Warning(fmt.Sprintf("<DiameterClient> Received unexpected message from %s:\n%s", c.RemoteAddr(), m))
 	dc.received <- m
 }
 
-// Returns the message out of received buffer
+// ReceivedMessage returns the next unmatched message, or nil after the timeout.
 func (dc *DiameterClient) ReceivedMessage(rplyTimeout time.Duration) *diam.Message {
 	select {
 	case rcv := <-dc.received:
