@@ -2531,6 +2531,7 @@ func TestHttpInlineFilter(t *testing.T) {
 		if len(r.URL.Query()) != 0 {
 			queryVal := r.URL.Query()
 			reply := queryVal.Has("~*req.Account") && queryVal.Get("~*req.Account") == "1002"
+			w.Header().Set("Content-Type", "text/plain")
 			w.WriteHeader(http.StatusOK)
 			fmt.Fprint(w, reply)
 			return
@@ -2542,8 +2543,9 @@ func TestHttpInlineFilter(t *testing.T) {
 			return
 		}
 		_, has := data["*req"]
+		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, has)
+		_ = json.NewEncoder(w).Encode(has)
 
 	}))
 	defer srv.Close()

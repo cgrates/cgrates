@@ -9,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime"
 	"net/http"
 	"net/url"
 	"strings"
@@ -273,7 +274,7 @@ func sentrypeerHasData(itemId, token, url string) (found bool, err error) {
 func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string) (bool, error) {
 	var (
 		parsedURL *url.URL
-		resp      string
+		resp      any
 		err       error
 	)
 	urlS, err := ExtractURLFromHTTPType(httpType)
@@ -300,8 +301,9 @@ func filterHTTP(httpType string, dDP utils.DataProvider, fieldname, value string
 }
 
 // MakeExternalAPIRequest makes an HTTP GET request to the specified URL with
-// the provided request body and returns the response body as a string.
-func MakeExternalAPIRequest(url string, reader io.Reader) (string, error) {
+// the provided request body. It decodes JSON responses and returns other
+// response bodies as strings.
+func MakeExternalAPIRequest(url string, reader io.Reader) (any, error) {
 	headers := map[string]string{
 		"Content-Type": "application/json",
 	}
@@ -322,6 +324,14 @@ func MakeExternalAPIRequest(url string, reader io.Reader) (string, error) {
 			resp.StatusCode, string(body))
 	}
 
+	mediaType, _, err := mime.ParseMediaType(resp.Header.Get("Content-Type"))
+	if err == nil && mediaType == "application/json" {
+		var value any
+		if err := json.Unmarshal(body, &value); err != nil {
+			return nil, err
+		}
+		return value, nil
+	}
 	return string(body), nil
 }
 

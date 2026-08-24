@@ -6,6 +6,8 @@ package engine
 import (
 	"bytes"
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"strings"
 	"testing"
@@ -65,6 +67,75 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 		t.Errorf("Expected error <%+v>, received error <%+v>", expErr, err)
 	}
 
+}
+
+func TestMakeExternalAPIRequest(t *testing.T) {
+	tests := []struct {
+		name        string
+		contentType string
+		body        string
+		want        any
+		wantErr     bool
+	}{
+		{
+			name:        "plain text",
+			contentType: "text/plain",
+			body:        "Account",
+			want:        "Account",
+		},
+		{
+			name:        "JSON with parameters",
+			contentType: "application/json; charset=utf-8",
+			body:        `{"Plan":{"ID":"discount"}}`,
+			want: map[string]any{
+				"Plan": map[string]any{"ID": "discount"},
+			},
+		},
+		{
+			name:        "invalid JSON",
+			contentType: "application/json",
+			body:        `{"Plan":`,
+			wantErr:     true,
+		},
+		{
+			name: "no content type",
+			body: `{"Plan":"discount"}`,
+			want: `{"Plan":"discount"}`,
+		},
+		{
+			name:        "invalid content type parameter",
+			contentType: "application/json; charset",
+			body:        `{"Plan":"discount"}`,
+			want:        `{"Plan":"discount"}`,
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			testServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				if test.contentType != "" {
+					w.Header().Set("Content-Type", test.contentType)
+				} else {
+					w.Header()["Content-Type"] = nil
+				}
+				_, _ = fmt.Fprint(w, test.body)
+			}))
+			defer testServer.Close()
+
+			got, err := MakeExternalAPIRequest(testServer.URL, nil)
+			if test.wantErr {
+				if err == nil {
+					t.Fatalf("MakeExternalAPIRequest() error = nil, want an error")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(got, test.want) {
+				t.Errorf("MakeExternalAPIRequest() = %#v, want %#v", got, test.want)
+			}
+		})
+	}
 }
 
 func TestBlockerFromDynamicsErr(t *testing.T) {

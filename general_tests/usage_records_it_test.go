@@ -220,3 +220,254 @@ func TestUsageRecordsSessionDebit(t *testing.T) {
 		t.Errorf("unexpected *accountsCost.Concretes: %v, want 1", accountsCost.Concretes)
 	}
 }
+
+func TestUsageRecordsHTTPAttribute(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	attributeServer := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		_, _ = io.WriteString(w, `{"ID":"discount"}`)
+	}))
+	defer attributeServer.Close()
+
+	cfgJSON := `{
+"admins": {
+	"enabled": true
+},
+"attributes": {
+	"enabled": true,
+	"opts": {
+		"*profileIDs": [{"values": ["ATTR_PLAN", "ATTR_RATE"]}],
+		"*processRuns": [{"value": "2"}]
+	}
+},
+"rates": {
+	"enabled": true
+},
+"accounts": {
+	"enabled": true,
+	"conns": {
+		"*rates": [{"connIDs": ["*localhost"]}]
+	}
+},
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*attributes": [{"connIDs": ["*localhost"]}],
+		"*accounts": [{"connIDs": ["*localhost"]}],
+		"*rates": [{"connIDs": ["*localhost"]}]
+	}
+},
+"httpAgent": [
+	{
+		"id": "usage_records",
+		"url": "/usage-records",
+		"conns": {
+			"*sessions": [{"connIDs": ["*localhost"]}]
+		},
+		"requestPayload": "*url",
+		"replyPayload": "*text",
+		"requestProcessors": [
+			{
+				"id": "usage_record",
+				"flags": ["*event"],
+				"requestFields": [
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
+					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.answerTime", "mandatory": true},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.recordID", "mandatory": true},
+					{"tag": "Usage", "path": "*opts.*usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
+					{"tag": "Attributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
+					{"tag": "Rates", "path": "*opts.*rates", "type": "*constant", "value": "true"},
+					{"tag": "Accounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+					{"tag": "Debit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+					{"tag": "UR", "path": "*opts.*ur", "type": "*constant", "value": "true"},
+					{"tag": "BlockerError", "path": "*opts.*blockerError", "type": "*constant", "value": "true"}
+				],
+				"replyFields": [
+					{
+						"tag": "Error",
+						"path": "*rep.Error",
+						"type": "*variable",
+						"value": "~*cgrep.Error",
+						"filters": ["*notempty:~*cgrep.Error:"],
+						"blocker": true
+					},
+					{"tag": "OK", "path": "*rep.OK", "type": "*constant", "value": "1"}
+				]
+			}
+		]
+	}
+]
+}`
+
+	testEngine := engine.TestEngine{
+		ConfigJSON: cfgJSON,
+		DBCfg:      engine.InternalDBCfg,
+		Encoding:   *utils.Encoding,
+	}
+	client, cfg := testEngine.Run(t)
+	usageRecordsURL := "http://" + cfg.ListenCfg().HTTPListen + "/usage-records"
+
+	httpAttributeType := utils.MetaHTTP + utils.HashtagSep + utils.IdxStart + attributeServer.URL + utils.IdxEnd
+	attributeProfiles := []*utils.APIAttributeProfile{
+		{
+			ID: "ATTR_PLAN",
+			Attributes: []*utils.ExternalAttribute{
+				{
+					Path:  "*req.Subscriber.Plan",
+					Type:  httpAttributeType,
+					Value: "~*req.Account",
+				},
+			},
+		},
+		{
+			ID:        "ATTR_RATE",
+			FilterIDs: []string{"*string:~*req.Subscriber.Plan.ID:discount"},
+			Attributes: []*utils.ExternalAttribute{
+				{
+					Path:  "*req.RateGroup",
+					Type:  utils.MetaVariable,
+					Value: "~*req.Subscriber.Plan.ID",
+				},
+			},
+		},
+	}
+	for _, profile := range attributeProfiles {
+		if err := client.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+			&utils.APIAttributeProfileWithAPIOpts{APIAttributeProfile: profile}, new(string)); err != nil {
+			t.Fatalf("AdminSv1SetAttributeProfile %s: %v", profile.ID, err)
+		}
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetRateProfile,
+		&utils.APIRateProfile{
+			RateProfile: &utils.RateProfile{
+				ID: "RP_TEST",
+				Rates: map[string]*utils.Rate{
+					"RT_DEFAULT": {
+						ID:      "RT_DEFAULT",
+						Weights: utils.DynamicWeights{{Weight: 0}},
+						IntervalRates: []*utils.IntervalRate{
+							{
+								IntervalStart: utils.NewDecimal(0, 0),
+								RecurrentFee:  utils.NewDecimal(1, 0),
+								Unit:          utils.NewDecimal(int64(time.Minute), 0),
+								Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							},
+						},
+					},
+					"RT_DISCOUNT": {
+						ID:        "RT_DISCOUNT",
+						FilterIDs: []string{"*string:~*req.RateGroup:discount"},
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						IntervalRates: []*utils.IntervalRate{
+							{
+								IntervalStart: utils.NewDecimal(0, 0),
+								RecurrentFee:  utils.NewDecimal(5, 1),
+								Unit:          utils.NewDecimal(int64(time.Minute), 0),
+								Increment:     utils.NewDecimal(int64(time.Minute), 0),
+							},
+						},
+					},
+				},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("AdminSv1SetRateProfile: %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				ID:        "test",
+				FilterIDs: []string{"*string:~*req.Account:test"},
+				Balances: map[string]*utils.Balance{
+					"JAN": {
+						ID:    "JAN",
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(10, 0),
+						FilterIDs: []string{
+							"*string:~*req.Subscriber.Plan.ID:discount",
+							"*ai:~*req.AnswerTime:2026-01-01T00:00:00Z|2026-02-01T00:00:00Z",
+						},
+					},
+					"FEB": {
+						ID:    "FEB",
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(10, 0),
+						FilterIDs: []string{
+							"*string:~*req.Subscriber.Plan.ID:discount",
+							"*ai:~*req.AnswerTime:2026-02-01T00:00:00Z|2026-03-01T00:00:00Z",
+						},
+					},
+				},
+			},
+		}, new(string)); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	records := []struct {
+		id         string
+		answerTime string
+		usage      string
+	}{
+		{
+			id:         "february",
+			answerTime: "2026-02-15T10:00:00Z",
+			usage:      "2m",
+		},
+		{
+			id:         "january",
+			answerTime: "2026-01-15T10:00:00Z",
+			usage:      "1m",
+		},
+	}
+	httpClient := &http.Client{Timeout: 5 * time.Second}
+	for _, record := range records {
+		resp, err := httpClient.PostForm(usageRecordsURL, url.Values{
+			"account":    {"test"},
+			"recordID":   {record.id},
+			"answerTime": {record.answerTime},
+			"usage":      {record.usage},
+		})
+		if err != nil {
+			t.Fatalf("PostForm %s: %v", record.id, err)
+		}
+		body, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("PostForm %s returned %s: %s", record.id, resp.Status, body)
+		}
+		if !strings.Contains(string(body), "OK=1") {
+			t.Fatalf("PostForm %s returned %q", record.id, body)
+		}
+	}
+
+	var account utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{ID: "test"},
+		}, &account); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+	wantBalances := []struct {
+		id    string
+		units *utils.Decimal
+	}{
+		{id: "JAN", units: utils.NewDecimal(95, 1)},
+		{id: "FEB", units: utils.NewDecimal(9, 0)},
+	}
+	for _, want := range wantBalances {
+		balance := account.Balances[want.id]
+		if balance == nil || balance.Units == nil || balance.Units.Compare(want.units) != 0 {
+			t.Errorf("%s balance = %v, want %v", want.id, balance, want.units)
+		}
+	}
+}

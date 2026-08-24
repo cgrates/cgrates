@@ -210,7 +210,11 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 			}
 			substitute = val + substitute
 		}
-		if err = evNm.Set(utils.SplitPath(attribute.Path, utils.NestingSep[0], -1), substitute); err != nil {
+		stored := any(substitute)
+		if strings.HasPrefix(attribute.Type, utils.MetaHTTP) {
+			stored = out
+		}
+		if err = evNm.Set(utils.SplitPath(attribute.Path, utils.NestingSep[0], -1), stored); err != nil {
 			rply = nil
 			return
 		}
