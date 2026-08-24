@@ -3433,6 +3433,139 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 	}
 }
 
+func TestEventChargesFieldAsInterfaceErrors(t *testing.T) {
+	ec := &EventCharges{
+		Concretes: &Decimal{decimal.New(152, 1)},
+		Abstracts: &Decimal{decimal.New(145, 1)},
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 2,
+			},
+		},
+		Accounting:  nil,
+		UnitFactors: nil,
+		Rating:      nil,
+		Rates:       nil,
+		Accounts:    nil,
+	}
+
+	tests := []struct {
+		name   string
+		ec     *EventCharges
+		fields []string
+		expErr string
+	}{
+		{
+			name:   "Abstracts",
+			ec:     ec,
+			fields: []string{"Abstracts", "test"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Concretes",
+			ec:     ec,
+			fields: []string{"Concretes", "test"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Charges",
+			ec:     ec,
+			fields: []string{"Charges", "test"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Charges index out of range",
+			ec:     ec,
+			fields: []string{"Charges[2]"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field prefix",
+			ec:     ec,
+			fields: []string{"Charges[invalid]"},
+			expErr: "unsupported field prefix: <Charges[invalid]>",
+		},
+		{
+			name:   "nil Accounting",
+			ec:     ec,
+			fields: []string{"Accounting", "accounting1"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field: Accounting",
+			ec:     ec,
+			fields: []string{"Accounting[0]"},
+			expErr: "unsupported field prefix: <Accounting>",
+		},
+		{
+			name:   "nil UnitFactors",
+			ec:     ec,
+			fields: []string{"UnitFactor", "unit_factor1"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field: UnitFactor",
+			ec:     ec,
+			fields: []string{"UnitFactor[0]"},
+			expErr: "unsupported field prefix: <UnitFactor>",
+		},
+		{
+			name:   "nil Rating",
+			ec:     ec,
+			fields: []string{"Rating", "rating1"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field: Rating",
+			ec:     ec,
+			fields: []string{"Rating[0]"},
+			expErr: "unsupported field prefix: <Rating>",
+		},
+		{
+			name:   "nil Rates",
+			ec:     ec,
+			fields: []string{"Rate", "rate1"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field: Rates",
+			ec:     ec,
+			fields: []string{"Rates[0]"},
+			expErr: "unsupported field prefix: <Rates>",
+		},
+		{
+			name:   "nil Accounts",
+			ec:     ec,
+			fields: []string{"Account", "acc1"},
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "unsupported field: Account",
+			ec:     ec,
+			fields: []string{"Account[0]"},
+			expErr: "unsupported field prefix: <Account>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := tt.ec.FieldAsInterface(tt.fields)
+			if err == nil || err.Error() != tt.expErr {
+				t.Errorf("Expected error: %s, received: %s", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(rcv, nil) {
+				t.Errorf("Expected nil, got %v", rcv)
+			}
+		})
+	}
+}
+
 func TestTruncateSimpleAbstracts(t *testing.T) {
 	eC := &EventCharges{
 		Abstracts: NewDecimal(300000, 0),
@@ -4283,5 +4416,311 @@ func TestEventChargesCleanup(t *testing.T) {
 	eC.Cleanup()
 	if !reflect.DeepEqual(exp, eC) {
 		t.Errorf("Expected %v, \nrecieved %v", exp, eC)
+	}
+}
+
+func TestGetChargesForPath(t *testing.T) {
+	ec := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"accounting1": {
+				AccountID:       "acc1",
+				BalanceID:       "balance1",
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				UnitFactorID:    "unit_factor1",
+				AttributeIDs:    []string{"attr1", "attr2"},
+				RatingID:        "rating2",
+				JoinedChargeIDs: []string{"joined_charge"},
+			},
+			"joined_charge": {
+				AccountID:       "acc2",
+				BalanceID:       "balance2",
+				Units:           &Decimal{decimal.New(10, 0)},
+				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				UnitFactorID:    "unit_factor2",
+				AttributeIDs:    []string{"attr3", "attr4"},
+				RatingID:        "rating3",
+				JoinedChargeIDs: []string{},
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"rating1": {
+				IntervalStart: NewDecimal(4, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(5, 0),
+						RateIntervalIndex: 1,
+						RateID:            "rate1",
+						CompressFactor:    1,
+						Usage:             NewDecimal(6, 0),
+					},
+				},
+				CompressFactor: 3,
+			},
+		},
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		chr     *ChargeEntry
+		exp     any
+		expErr  string
+	}{
+		{
+			name:    "nil ChargeEntry",
+			fldPath: []string{"ChargingID"},
+			chr:     nil,
+			exp:     nil,
+			expErr:  "NOT_FOUND",
+		},
+		{
+			name:    "empty field",
+			fldPath: []string{},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+		},
+		{
+			name:    "ChargingID",
+			fldPath: []string{"ChargingID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: "*accounting:accounting1",
+		},
+		{
+			name:    "CompressFactor",
+			fldPath: []string{"CompressFactor"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: 1,
+		},
+		{
+			name:    "ChargingID without separator",
+			fldPath: []string{"Charging"},
+			chr: &ChargeEntry{
+				ChargingID:     "accounting1",
+				CompressFactor: 1,
+			},
+			expErr: "expected ChargingID format '*accounting:*' or '*rating:*', got 'accounting1'",
+		},
+		{
+			name:    "error case: unsupported field",
+			fldPath: []string{"accounting1"},
+			chr: &ChargeEntry{
+				ChargingID:     "accounting1",
+				CompressFactor: 1,
+			},
+			expErr: "unsupported field prefix: <accounting1>",
+		},
+		{
+			name:    "Accounting",
+			fldPath: []string{"Charging"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: ec.Accounting["accounting1"],
+		},
+		{
+			name:    "Accounting.AccountID",
+			fldPath: []string{"Charging", "AccountID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: "acc1",
+		},
+		{
+			name:    "Accounting.BalanceID",
+			fldPath: []string{"Charging", "BalanceID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: "balance1",
+		},
+		{
+			name:    "Accounting.Units",
+			fldPath: []string{"Charging", "Units"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: NewDecimal(10, 0),
+		},
+		{
+			name:    "Accounting.BalanceLimit",
+			fldPath: []string{"Charging", "BalanceLimit"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: NewDecimal(0, 0),
+		},
+		{
+			name:    "Accounting.UnitFactorID",
+			fldPath: []string{"Charging", "UnitFactorID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: "unit_factor1",
+		},
+		{
+			name:    "Accounting.AttributeIDs",
+			fldPath: []string{"Charging", "AttributeIDs"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: []string{"attr1", "attr2"},
+		},
+		{
+			name:    "Accounting.RatingID",
+			fldPath: []string{"Charging", "RatingID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: "rating2",
+		},
+		{
+			name:    "Accounting.JoinedChargeIDs",
+			fldPath: []string{"Charging", "JoinedChargeIDs"},
+			chr: &ChargeEntry{
+				ChargingID:     "*accounting:accounting1",
+				CompressFactor: 1,
+			},
+			exp: []string{"joined_charge"},
+		},
+		{
+			name:    "Rating",
+			fldPath: []string{"Charging"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: ec.Rating["rating1"],
+		},
+		{
+			name:    "Rating.IntervalStart",
+			fldPath: []string{"Charging", "IntervalStart"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: NewDecimal(4, 0),
+		},
+		{
+			name:    "Rating.Increments",
+			fldPath: []string{"Charging", "Increments[0]"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: &RateSIncrement{
+				IncrementStart:    NewDecimal(5, 0),
+				RateIntervalIndex: 1,
+				RateID:            "rate1",
+				CompressFactor:    1,
+				Usage:             NewDecimal(6, 0),
+			},
+		},
+		{
+			name:    "Rating.Increments.IncrementStart",
+			fldPath: []string{"Charging", "Increments[0]", "IncrementStart"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: NewDecimal(5, 0),
+		},
+		{
+			name:    "Rating.Increments.RateIntervalIndex",
+			fldPath: []string{"Charging", "Increments[0]", "RateIntervalIndex"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: 1,
+		},
+		{
+			name:    "Rating.Increments.RateID",
+			fldPath: []string{"Charging", "Increments[0]", "RateID"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: "rate1",
+		},
+		{
+			name:    "Rating.Increments.CompressFactor",
+			fldPath: []string{"Charging", "Increments[0]", "CompressFactor"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: int64(1),
+		},
+		{
+			name:    "Rating.Increments.Usage",
+			fldPath: []string{"Charging", "Increments[0]", "Usage"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: NewDecimal(6, 0),
+		},
+		{
+			name:    "Nil Increments",
+			fldPath: []string{"Charging", "Increments[1]"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp:    nil,
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:    "Rating.CompressFactor",
+			fldPath: []string{"Charging", "CompressFactor"},
+			chr: &ChargeEntry{
+				ChargingID:     "*rating:rating1",
+				CompressFactor: 1,
+			},
+			exp: int64(3),
+		},
+		{
+			name:    "unsupported charging type",
+			fldPath: []string{"Charging"},
+			chr: &ChargeEntry{
+				ChargingID:     "*unsupported:id1",
+				CompressFactor: 1,
+			},
+			expErr: "unsupported field prefix: <Charging>",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			val, err := ec.getChargesForPath(tt.fldPath, tt.chr)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected <%v>, received <%v>", tt.expErr, err)
+			}
+
+			if !reflect.DeepEqual(tt.exp, val) {
+				t.Errorf("Expected: <%#v>, \nreceived: <%#v>", tt.exp, val)
+			}
+		})
 	}
 }
