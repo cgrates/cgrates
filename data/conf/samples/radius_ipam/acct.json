@@ -7,11 +7,21 @@
           "*string:~*req.Acct-Status-Type:Start"
         ],
         "flags": [
-          "*initiate",
-          "*chargers",
-          "*ips"
+          "*event"
         ],
         "requestFields": [
+          {
+            "tag": "OptSession",
+            "path": "*opts.*session",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptIPsAllocate",
+            "path": "*opts.*ipsAllocate",
+            "type": "*constant",
+            "value": "true"
+          },
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -173,9 +183,22 @@
           "*string:~*req.Acct-Status-Type:Alive"
         ],
         "flags": [
-          "*update"
+          "*event"
         ],
         "requestFields": [
+          {
+            "tag": "OptSession",
+            "path": "*opts.*session",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptTotalUsage",
+            "path": "*opts.*totalUsage",
+            "type": "*sum",
+            "value": "~*req.Acct-Input-Octets;~*req.Acct-Output-Octets",
+            "mandatory": true
+          },
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -303,11 +326,40 @@
           "*string:~*req.Acct-Status-Type:Stop"
         ],
         "flags": [
-          "*terminate",
-          "*cdrs",
-          "*ips"
+          "*event"
         ],
         "requestFields": [
+          {
+            "tag": "OptSession",
+            "path": "*opts.*session",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptTerminate",
+            "path": "*opts.*terminate",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptIPsRelease",
+            "path": "*opts.*ipsRelease",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptUsageRecord",
+            "path": "*opts.*ur",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "OptTotalUsage",
+            "path": "*opts.*totalUsage",
+            "type": "*sum",
+            "value": "~*req.Acct-Input-Octets;~*req.Acct-Output-Octets",
+            "mandatory": true
+          },
           {
             "tag": "Category",
             "path": "*cgreq.Category",
@@ -352,13 +404,6 @@
           {
             "tag": "SetupTime",
             "path": "*cgreq.SetupTime",
-            "type": "*variable",
-            "value": "~*req.Event-Timestamp",
-            "mandatory": true
-          },
-          {
-            "tag": "Usage",
-            "path": "*cgreq.Usage",
             "type": "*variable",
             "value": "~*req.Event-Timestamp",
             "mandatory": true
