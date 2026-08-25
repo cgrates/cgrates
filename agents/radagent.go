@@ -344,7 +344,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 		err = ra.cm.Call(ra.ctx, sessionsConns, utils.SessionSv1ProcessEvent,
 			cgrEv, rply)
 		if err != nil {
-			return
+			replyState = utils.ErrReplyStateEvent
 		}
 		agReq.setCGRReply(rply, err)
 	case utils.MetaRadauth:
