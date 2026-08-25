@@ -1223,6 +1223,63 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			apiRply.IPsAllocation[runID] = authIP
 		}
 
+		// IPs Allocation
+		if ipsAllocBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsAllocate,
+			utils.MetaIPsAllocateCfg); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaIPsAllocateCfg))
+		} else {
+			cchEv[utils.MetaIPsAllocateCfg] = ipsAllocBool
+		}
+		if utils.OptAsBool(cchEv, utils.MetaIPsAllocateCfg) {
+			var allocatedIP *utils.AllocatedIP
+			if allocatedIP, err = sS.ipsAllocate(ctx, cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return err
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.IPs))
+			}
+			if apiRply.IPsAllocation == nil {
+				apiRply.IPsAllocation = make(map[string]*utils.AllocatedIP)
+			}
+			apiRply.IPsAllocation[runID] = allocatedIP
+		}
+
+		// IPs Release
+		if ipsReleaseBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.IPsRelease,
+			utils.MetaIPsReleaseCfg); errBool != nil {
+			if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+				return errBool
+			}
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, errBool.Error(), cgrEv, utils.MetaIPsReleaseCfg))
+		} else {
+			cchEv[utils.MetaIPsReleaseCfg] = ipsReleaseBool
+		}
+		if utils.OptAsBool(cchEv, utils.MetaIPsReleaseCfg) {
+			if err = sS.ipsRelease(ctx, cgrEv); err != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return err
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.IPs))
+			}
+		}
+
 		// ResourceS Authorization
 		if resAuthBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.ResourcesAuthorize,
