@@ -4724,3 +4724,783 @@ func TestGetChargesForPath(t *testing.T) {
 		})
 	}
 }
+
+func TestEventChargesGetAccountingForPath(t *testing.T) {
+	ec := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"joined_charge": {
+				AccountID:       "2343000000000456",
+				BalanceID:       "DATA2",
+				Units:           &Decimal{decimal.New(10, 0)},
+				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				UnitFactorID:    "UF2",
+				AttributeIDs:    []string{"attr3", "attr4"},
+				RatingID:        "rating3",
+				JoinedChargeIDs: []string{},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF2": {
+				Factor: NewDecimal(100, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"877a74e": {
+				Increments: []*RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "3365d99",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"3365d99": {
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+		Accounts: map[string]*Account{
+			"2343000000000123": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*Balance{
+					"DATA1": {
+						ID: "DATA1",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+			"2343000000000456": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000456",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000456"},
+				Balances: map[string]*Balance{
+					"DATA2": {
+						ID: "DATA2",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name      string
+		fldPath   []string
+		accCharge *AccountCharge
+		want      any
+		wantErr   string
+	}{
+		{
+			name:    "Account",
+			fldPath: []string{"Account"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: &Account{
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*Balance{
+					"DATA1": {
+						ID: "DATA1",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			name:    "Account.Balances.DATA1",
+			fldPath: []string{"Account", "Balances", "DATA1"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: &Balance{
+				ID: "DATA1",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  MetaAbstract,
+				Units: NewDecimal(700*1000, 0),
+				CostIncrements: []*CostIncrement{
+					{
+						Increment: NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+		{
+			name:    "AccountID",
+			fldPath: []string{"AccountID"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: "2343000000000123",
+		},
+		{
+			name:    "BalanceID",
+			fldPath: []string{"BalanceID"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: "DATA1",
+		},
+		{
+			name:    "Units",
+			fldPath: []string{"Units"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: NewDecimal(40000, 0),
+		},
+		{
+			name:    "UnitFactorID",
+			fldPath: []string{"UnitFactorID"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: "UF1",
+		},
+		{
+			name:    "BalanceLimit",
+			fldPath: []string{"BalanceLimit"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: NewDecimal(0, 0),
+		},
+		{
+			name:    "RatingID",
+			fldPath: []string{"RatingID"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: "877a74e",
+		},
+		{
+			name:    "UnitFactor",
+			fldPath: []string{"UnitFactor"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: &UnitFactor{
+				Factor: NewDecimal(100, 0),
+			},
+		},
+		{
+			name:    "UnitFactor.Factor",
+			fldPath: []string{"UnitFactor", "Factor"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: NewDecimal(100, 0),
+		},
+		{
+			name:    "Nil UnitFactorID",
+			fldPath: []string{"UnitFactor"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "JoinedChargeID not found",
+			fldPath: []string{"JoinedChargeIDs[1]"},
+			accCharge: &AccountCharge{
+				AccountID:       "2343000000000123",
+				BalanceID:       "DATA1",
+				UnitFactorID:    "UF1",
+				Units:           NewDecimal(40000, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "877a74e",
+				JoinedChargeIDs: []string{"joined_charge"},
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "JoinedCharge[0]",
+			fldPath: []string{"JoinedCharge[0]"},
+			accCharge: &AccountCharge{
+				AccountID:       "2343000000000123",
+				BalanceID:       "DATA1",
+				UnitFactorID:    "UF1",
+				Units:           NewDecimal(40000, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "877a74e",
+				JoinedChargeIDs: []string{"joined_charge"},
+			},
+			want: &AccountCharge{
+				AccountID:       "2343000000000456",
+				BalanceID:       "DATA2",
+				Units:           &Decimal{decimal.New(10, 0)},
+				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				UnitFactorID:    "UF2",
+				AttributeIDs:    []string{"attr3", "attr4"},
+				RatingID:        "rating3",
+				JoinedChargeIDs: []string{},
+			},
+		},
+		{
+			name:    "Rating",
+			fldPath: []string{"Rating"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: &RateSInterval{
+				Increments: []*RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "3365d99",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		{
+			name:    "Balance",
+			fldPath: []string{"Balance"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: &Balance{
+				ID: "DATA1",
+				Weights: []*DynamicWeight{
+					{
+						Weight: 5,
+					},
+				},
+				Type:  MetaAbstract,
+				Units: NewDecimal(700*1000, 0),
+				CostIncrements: []*CostIncrement{
+					{
+						Increment: NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+		{
+			name:    "Balance.ID",
+			fldPath: []string{"Balance", "ID"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want: "DATA1",
+		},
+		{
+			name:      "Nil accCharge",
+			fldPath:   []string{"RatingID"},
+			accCharge: nil,
+			want:      nil,
+			wantErr:   "NOT_FOUND",
+		},
+		{
+			name:    "Nil AccountID",
+			fldPath: []string{"Account"},
+			accCharge: &AccountCharge{
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "Nil BalanceID",
+			fldPath: []string{"Balance"},
+			accCharge: &AccountCharge{
+				AccountID:    "2343000000000123",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "Nil AccountID for Balance",
+			fldPath: []string{"Balance"},
+			accCharge: &AccountCharge{
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(40000, 0),
+				UnitFactorID: "UF1",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "error case: invalid index",
+			fldPath: []string{"JoinedCharge"},
+			accCharge: &AccountCharge{
+				AccountID:       "2343000000000123",
+				BalanceID:       "DATA1",
+				UnitFactorID:    "UF1",
+				Units:           NewDecimal(40000, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "877a74e",
+				JoinedChargeIDs: []string{},
+			},
+			want:    nil,
+			wantErr: "invalid index for 'JoinedCharge' field",
+		},
+		{
+			name:    "error case: unsupported field",
+			fldPath: []string{"Accounting"},
+			accCharge: &AccountCharge{
+				AccountID:       "2343000000000456",
+				BalanceID:       "DATA2",
+				UnitFactorID:    "UF2",
+				Units:           NewDecimal(40000, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "877a74e",
+				JoinedChargeIDs: []string{"joined_charge"},
+			},
+			want:    nil,
+			wantErr: "unsupported field prefix: <Accounting>",
+		},
+		{
+			name:    "Empty JoinedChargeIDs",
+			fldPath: []string{"JoinedCharge[0]", "AccountID"},
+			accCharge: &AccountCharge{
+				AccountID:       "2343000000000123",
+				BalanceID:       "DATA1",
+				UnitFactorID:    "UF1",
+				Units:           NewDecimal(40000, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				RatingID:        "877a74e",
+				JoinedChargeIDs: []string{},
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.getAccountingForPath(tt.fldPath, tt.accCharge)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected <%v>, received <%v>", tt.wantErr, err)
+			}
+			if !reflect.DeepEqual(rcv, tt.want) {
+				t.Errorf("Expected <%+v>, received <%+v>", tt.want, rcv)
+			}
+		})
+	}
+}
+
+func TestEventChargesGetRatingForPath(t *testing.T) {
+	ec := &EventCharges{
+		Accounting: map[string]*AccountCharge{
+			"accounting1": {
+				AccountID:       "acc1",
+				BalanceID:       "balance1",
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
+				UnitFactorID:    "unit_factor1",
+				AttributeIDs:    []string{"attr1", "attr2"},
+				RatingID:        "rating2",
+				JoinedChargeIDs: []string{"joined_charge"},
+			},
+			"joined_charge": {
+				AccountID:       "acc2",
+				BalanceID:       "balance2",
+				Units:           &Decimal{decimal.New(10, 0)},
+				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				UnitFactorID:    "unit_factor2",
+				AttributeIDs:    []string{"attr3", "attr4"},
+				RatingID:        "rating3",
+				JoinedChargeIDs: []string{},
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				Factor: NewDecimal(100, 0),
+			},
+			"UF2": {
+				Factor: NewDecimal(100, 0),
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"3365d99": {
+				RecurrentFee: NewDecimal(0, 0),
+			},
+			"3365d88": nil,
+		},
+		Accounts: map[string]*Account{
+			"2343000000000123": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*Balance{
+					"DATA1": {
+						ID: "DATA1",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+			"2343000000000456": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000456",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000456"},
+				Balances: map[string]*Balance{
+					"DATA2": {
+						ID: "DATA2",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name       string
+		fldPath    []string
+		rtInterval *RateSInterval
+		want       any
+		wantErr    string
+	}{
+		{
+			name:       "Nil RateSInterval",
+			fldPath:    []string{"RateSInterval"},
+			rtInterval: nil,
+			want:       nil,
+			wantErr:    "NOT_FOUND",
+		},
+		{
+			name:    "fldPath is empty",
+			fldPath: []string{},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		{
+			name:    "Increments",
+			fldPath: []string{"Increments"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: []*RateSIncrement{
+				{
+					IncrementStart:    NewDecimal(0, 0),
+					Usage:             NewDecimal(int64(time.Minute), 0),
+					RateID:            "3365d99",
+					RateIntervalIndex: 0,
+					CompressFactor:    1,
+				},
+			},
+		},
+		{
+			name:    "Increments[0]",
+			fldPath: []string{"Increments[0]"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: &RateSIncrement{
+				IncrementStart:    NewDecimal(0, 0),
+				Usage:             NewDecimal(int64(time.Minute), 0),
+				RateID:            "3365d99",
+				RateIntervalIndex: 0,
+				CompressFactor:    1,
+			},
+		},
+		{
+			name:    "Increments[1]",
+			fldPath: []string{"Increments[1]"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "Increments[0].RateID",
+			fldPath: []string{"Increments[0]", "RateID"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: "3365d99",
+		},
+		{
+			name:    "Increments[0].Rate",
+			fldPath: []string{"Increments[0]", "Rate"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: &IntervalRate{
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+		{
+			name:    "Rate not found",
+			fldPath: []string{"Increments[0]", "Rate"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d88",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "Increments[0].Rate.RecurrentFee",
+			fldPath: []string{"Increments[0]", "Rate", "RecurrentFee"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					{
+						IncrementStart:    NewDecimal(0, 0),
+						Usage:             NewDecimal(int64(time.Minute), 0),
+						RateID:            "3365d99",
+						RateIntervalIndex: 0,
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+			want: NewDecimal(0, 0),
+		},
+		{
+			name:    "Increments[0].Rate with nil Increment",
+			fldPath: []string{"Increments[0]", "Rate"},
+			rtInterval: &RateSInterval{
+				IntervalStart: NewDecimal(0, 0),
+				Increments: []*RateSIncrement{
+					nil,
+				},
+				CompressFactor: 1,
+			},
+			want:    nil,
+			wantErr: "NOT_FOUND",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := ec.getRatingForPath(tt.fldPath, tt.rtInterval)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected <%v>, received <%v>", tt.wantErr, err)
+			}
+			if !reflect.DeepEqual(rcv, tt.want) {
+				t.Errorf("Expected <%+v>, received <%+v>", tt.want, rcv)
+			}
+		})
+	}
+}
