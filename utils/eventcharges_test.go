@@ -3435,8 +3435,8 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 
 func TestEventChargesFieldAsInterfaceErrors(t *testing.T) {
 	ec := &EventCharges{
-		Concretes: &Decimal{decimal.New(152, 1)},
-		Abstracts: &Decimal{decimal.New(145, 1)},
+		Concretes: NewDecimal(152, 1),
+		Abstracts: NewDecimal(145, 1),
 		Charges: []*ChargeEntry{
 			{
 				ChargingID:     "*accounting:accounting1",
@@ -4435,8 +4435,8 @@ func TestGetChargesForPath(t *testing.T) {
 			"joined_charge": {
 				AccountID:       "acc2",
 				BalanceID:       "balance2",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "unit_factor2",
 				AttributeIDs:    []string{"attr3", "attr4"},
 				RatingID:        "rating3",
@@ -4731,8 +4731,8 @@ func TestEventChargesGetAccountingForPath(t *testing.T) {
 			"joined_charge": {
 				AccountID:       "2343000000000456",
 				BalanceID:       "DATA2",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "UF2",
 				AttributeIDs:    []string{"attr3", "attr4"},
 				RatingID:        "rating3",
@@ -5029,8 +5029,8 @@ func TestEventChargesGetAccountingForPath(t *testing.T) {
 			want: &AccountCharge{
 				AccountID:       "2343000000000456",
 				BalanceID:       "DATA2",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "UF2",
 				AttributeIDs:    []string{"attr3", "attr4"},
 				RatingID:        "rating3",
@@ -5220,8 +5220,8 @@ func TestEventChargesGetRatingForPath(t *testing.T) {
 			"joined_charge": {
 				AccountID:       "acc2",
 				BalanceID:       "balance2",
-				Units:           &Decimal{decimal.New(10, 0)},
-				BalanceLimit:    &Decimal{decimal.New(0, 0)},
+				Units:           NewDecimal(10, 0),
+				BalanceLimit:    NewDecimal(0, 0),
 				UnitFactorID:    "unit_factor2",
 				AttributeIDs:    []string{"attr3", "attr4"},
 				RatingID:        "rating3",
