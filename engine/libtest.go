@@ -10,6 +10,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"path"
@@ -294,6 +296,71 @@ func NewRPCClient(t testing.TB, cfg *config.ListenCfg, encoding string) *birpc.C
 		t.Fatalf("unable to connect to cgr-engine: %v", err)
 	}
 	return client
+}
+
+// StartCPUProfile writes cpu.prof under dir on the cgr-engine filesystem.
+// It returns the stop function and also registers it for cleanup.
+func StartCPUProfile(t testing.TB, client *birpc.Client, dir string) func() {
+	t.Helper()
+	var reply string
+	if err := client.Call(context.Background(), utils.CoreSv1StartCPUProfiling,
+		&utils.DirectoryArgs{DirPath: dir}, &reply); err != nil {
+		t.Fatalf("start CPU profile: %v", err)
+	}
+
+	stopped := false
+	stop := func() {
+		t.Helper()
+		if stopped {
+			return
+		}
+		stopped = true
+		if err := client.Call(context.Background(), utils.CoreSv1StopCPUProfiling,
+			new(utils.TenantWithAPIOpts), &reply); err != nil {
+			t.Errorf("stop CPU profile: %v", err)
+		}
+	}
+	t.Cleanup(stop)
+	return stop
+}
+
+// CapturePprofProfile saves the named profile from the configured HTTP pprof endpoint.
+func CapturePprofProfile(t testing.TB, cfg *config.CGRConfig, profile, outputPath string) {
+	t.Helper()
+	pprofPath := cfg.HTTPCfg().PprofPath
+	if pprofPath == "" {
+		t.Fatal("pprof is disabled")
+	}
+	profileURL := url.URL{
+		Scheme: "http",
+		Host:   cfg.ListenCfg().HTTPListen,
+		Path:   path.Join(pprofPath, profile),
+	}
+	resp, err := http.Get(profileURL.String())
+	if err != nil {
+		t.Fatalf("capture pprof profile: %v", err)
+	}
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("close pprof response: %v", err)
+		}
+	}()
+	if resp.StatusCode != http.StatusOK {
+		t.Fatalf("capture pprof profile: HTTP status %s", resp.Status)
+	}
+
+	output, err := os.Create(outputPath)
+	if err != nil {
+		t.Fatalf("create pprof profile: %v", err)
+	}
+	defer func() {
+		if err := output.Close(); err != nil {
+			t.Errorf("close pprof profile: %v", err)
+		}
+	}()
+	if _, err := io.Copy(output, resp.Body); err != nil {
+		t.Fatalf("write pprof profile: %v", err)
+	}
 }
 
 // TestEngine holds the setup parameters and configurations
