@@ -1515,9 +1515,9 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 	if !isInstantEvent {
 		//check if we have replicate connection and close the session there
 		defer func() {
-			sS.replicateSessions(ctx, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaCGRid]), false) // FixMe
+			_ = sS.replicateSessions(ctx, s.ID, false)
 		}()
-		sS.unregisterSession(utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaCGRid]), false)
+		sS.unregisterSession(s.ID, false)
 		s.stopSTerminator()
 		//s.stopDebitLoops()  // TODO: debit loops functionality will be implemented in future versions
 	}
