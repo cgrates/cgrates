@@ -6,6 +6,7 @@ package sessions
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -1028,4 +1029,818 @@ func TestSessionSBiRPCv1ProcessEventRefund(t *testing.T) {
 	if debitCalls != 0 {
 		t.Errorf("Expected debit not to be called, got %d", debitCalls)
 	}
+}
+
+func TestSessionSBiRPCv1InitiateSession(t *testing.T) {
+	ctx := context.TODO()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.ResourceSv1AllocateResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = "OK"
+				return nil
+			},
+			utils.IPsV1AllocateIP: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.AllocatedIP) = utils.AllocatedIP{ProfileID: "prfIP"}
+				return nil
+			},
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"THD1"}
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"STQ1"}
+				return nil
+			},
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				cghrgs := []*chargers.ChrgSProcessEventReply{
+					{
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "TestID",
+							Event: map[string]any{
+								utils.Usage: "10s",
+							},
+						},
+					},
+				}
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
+				return nil
+			},
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				rplCast, canCast := reply.(*attributes.ProcessEventReply)
+				if !canCast {
+					t.Errorf("Wrong argument type : %T", reply)
+					return nil
+				}
+				customEv := &attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "EV",
+						Event: map[string]any{
+							"CustomField2": "CustomValue2",
+						},
+						APIOpts: map[string]any{},
+					},
+				}
+				*rplCast = *customEv
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+
+	for flag, apiPrefix := range map[string]string{
+		utils.MetaAttributes: utils.AttributeSv1,
+		utils.MetaResources:  utils.ResourceSv1,
+		utils.MetaIPs:        utils.IPsV1,
+		utils.MetaThresholds: utils.ThresholdSv1,
+		utils.MetaStats:      utils.StatSv1,
+		utils.MetaChargers:   utils.ChargerSv1,
+	} {
+		connID := utils.ConcatenatedKey(utils.MetaInternal, flag)
+		sessions.cfg.SessionSCfg().Conns[flag] = []*config.DynamicConns{
+			{ConnIDs: []string{connID}},
+		}
+		sessions.connMgr.AddInternalConn(connID, apiPrefix, chanInternal)
+	}
+	tempMaxUsage := time.Duration(utils.InvalidUsage)
+
+	//OriginID
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+		},
+	}
+	var reply V1InitSessionReply
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply); err != nil {
+		t.Error(err)
+	} else if reply.ResourceAllocation != nil || reply.AllocatedIP != nil {
+		t.Errorf("Expected no allocation, recieved %+v", reply)
+	} else if reply.MaxUsage == nil || *reply.MaxUsage != time.Duration(utils.InvalidUsage) {
+		t.Errorf("Expected MaxUsage %v, recieved %v", tempMaxUsage, reply.MaxUsage)
+	}
+
+	//Resources
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:  "originID",
+			utils.MetaResources: true,
+		},
+	}
+	var reply1 V1InitSessionReply
+	exprep := "OK"
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply1); err != nil {
+		t.Error(err)
+	} else if *reply1.ResourceAllocation != exprep {
+		t.Errorf("Expected ResourceAllocation %v, recieved %v", exprep, reply1.ResourceAllocation)
+	} else if reply1.AllocatedIP != nil {
+		t.Errorf("Expected no IP allocation, recieved %v", reply1.AllocatedIP)
+	}
+
+	//IPs
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaIPs:      true,
+		},
+	}
+	var reply2 V1InitSessionReply
+	exp := utils.AllocatedIP{ProfileID: "prfIP"}
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply2); err != nil {
+		t.Error(err)
+	} else if reply2.AllocatedIP == nil || !reflect.DeepEqual(*reply2.AllocatedIP, exp) {
+		t.Errorf("Expected AllocatedIP %v, recieved %v", exp, reply2.AllocatedIP)
+	} else if reply2.ResourceAllocation != nil {
+		t.Errorf("Expected no resource allocation, recieved %v", reply2.ResourceAllocation)
+	}
+
+	//Chargers
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:  "originID",
+			utils.MetaResources: true,
+			utils.MetaChargers:  true,
+		},
+	}
+	var reply3 V1InitSessionReply
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply3); err != nil {
+		t.Error(err)
+	} else if reply3.ResourceAllocation == nil || *reply3.ResourceAllocation != "OK" {
+		t.Errorf("Expected ResourceAllocation OK, recieved %v", reply3.ResourceAllocation)
+	} else if reply3.AllocatedIP != nil {
+		t.Errorf("Expected no IP allocation, recieved %v", reply3.AllocatedIP)
+	} else if reply3.MaxUsage == nil || *reply3.MaxUsage != tempMaxUsage {
+		t.Errorf("Expected the temporary MaxUsage %v, recieved %v", tempMaxUsage, reply3.MaxUsage)
+	}
+
+	//Inits
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Usage:        "10s",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:  "originID",
+			utils.MetaResources: true,
+			utils.MetaInitiate:  true,
+		},
+	}
+	var reply4 V1InitSessionReply
+	expMaxUsage := time.Duration(0 * time.Second)
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply4); err != nil {
+		t.Error(err)
+	} else if reply4.ResourceAllocation == nil || *reply4.ResourceAllocation != "OK" {
+		t.Errorf("Expected ResourceAllocation OK, recieved %v", reply4.ResourceAllocation)
+	} else if reply4.AllocatedIP != nil {
+		t.Errorf("Expected no IP allocation, recieved %v", reply4.AllocatedIP)
+	} else if reply4.MaxUsage == nil || utils.ToJSON(reply4.MaxUsage) != utils.ToJSON(&expMaxUsage) {
+		t.Errorf("Expected MaxUsage %v, recieved %v", expMaxUsage, reply4.MaxUsage)
+	}
+
+	//IPs
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Usage:        "10s",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaIPs:      true,
+			utils.MetaInitiate: true,
+		},
+	}
+	var reply5 V1InitSessionReply
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply5); err == nil || err.Error() != "UNSUPPORTED_SERVICE_METHOD" {
+		t.Error(err)
+	} else if reply5.ResourceAllocation != nil {
+		t.Errorf("Expected no resource allocation, recieved %v", reply5.ResourceAllocation)
+	} else if reply5.AllocatedIP == nil || reply5.AllocatedIP.ProfileID != "prfIP" {
+		t.Errorf("Expected AllocatedIP prfIP, recieved %v", reply5.AllocatedIP)
+	}
+
+	//Attributes
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:   "originID",
+			utils.MetaResources:  true,
+			utils.MetaAttributes: true,
+		},
+	}
+	var reply6 V1InitSessionReply
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply6); err != nil {
+		t.Error(err)
+	} else if reply6.ResourceAllocation == nil || *reply6.ResourceAllocation != "OK" {
+		t.Errorf("Expected ResourceAllocation OK, recieved %v", reply6.ResourceAllocation)
+	} else if reply6.AllocatedIP != nil {
+		t.Errorf("Expected no IP allocation, recieved %v", reply6.AllocatedIP)
+	} else if reply6.MaxUsage == nil || *reply6.MaxUsage != tempMaxUsage {
+		t.Errorf("Expected the temporary MaxUsage %v, recieved %v", tempMaxUsage, reply6.MaxUsage)
+	}
+
+	//Resources, IPs, Thresholds and Stats
+	args = &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:   "originID",
+			utils.MetaResources:  true,
+			utils.MetaIPs:        true,
+			utils.MetaThresholds: true,
+			utils.MetaStats:      true,
+		},
+	}
+	var reply7 V1InitSessionReply
+	repThresholdIDs := []string{"THD1"}
+
+	if err := sessions.BiRPCv1InitiateSession(ctx, args, &reply7); err != nil {
+		t.Error(err)
+	}
+	if reply7.ResourceAllocation == nil || *reply7.ResourceAllocation != "OK" {
+		t.Errorf("Expected ResourceAllocation OK, recieved %v", reply7.ResourceAllocation)
+	}
+	if reply7.AllocatedIP == nil || reply7.AllocatedIP.ProfileID != "prfIP" {
+		t.Errorf("Expected AllocatedIP prfIP, recieved %v", reply7.AllocatedIP)
+	}
+	if reply7.ThresholdIDs == nil || !reflect.DeepEqual(*reply7.ThresholdIDs, repThresholdIDs) {
+		t.Errorf("Expected ThresholdIDs %v, recieved %v", repThresholdIDs, reply7.ThresholdIDs)
+	}
+	if reply7.MaxUsage == nil || *reply7.MaxUsage != tempMaxUsage {
+		t.Errorf("Expected the temporary MaxUsage %v, recieved %v", tempMaxUsage, reply7.MaxUsage)
+	}
+}
+
+func TestSessionSBiRPCv1InitiateSessionError(t *testing.T) {
+	ctx := context.TODO()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("Connected", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.ResourceSv1AllocateResources: func(ctx *context.Context, m string, args, reply any) error {
+					return nil
+				},
+				utils.IPsV1GetIPAllocationForEvent: func(ctx *context.Context, m string, args, reply any) error {
+					*reply.(*utils.AllocatedIP) = utils.AllocatedIP{ProfileID: "prfIP"}
+					return nil
+				},
+				utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+				utils.StatSv1ProcessEvent: func(ctx *context.Context, method string, args, reply any) error {
+					return utils.ErrPartiallyExecuted
+				},
+				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+			},
+		}
+		chanInternal := make(chan birpc.ClientConnector, 1)
+		chanInternal <- clnt
+
+		for flag, apiPrefix := range map[string]string{
+			utils.MetaResources:  utils.ResourceSv1,
+			utils.MetaIPs:        utils.IPsV1,
+			utils.MetaThresholds: utils.ThresholdSv1,
+			utils.MetaStats:      utils.StatSv1,
+			utils.MetaChargers:   utils.ChargerSv1,
+		} {
+			connID := utils.ConcatenatedKey(utils.MetaInternal, flag)
+			sessions.cfg.SessionSCfg().Conns[flag] = []*config.DynamicConns{
+				{
+					ConnIDs: []string{connID},
+				},
+			}
+			sessions.connMgr.AddInternalConn(connID, apiPrefix, chanInternal)
+		}
+
+		tests := []struct {
+			name   string
+			args   *utils.CGREvent
+			expErr string
+		}{
+			{
+				name:   "Nil CGREvent",
+				args:   nil,
+				expErr: "MANDATORY_IE_MISSING: [CGREvent]",
+			},
+			{
+				name: "Nil Event",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event:  nil,
+				},
+				expErr: "MANDATORY_IE_MISSING: [Event]",
+			},
+			{
+				name: "Empty tenant and id",
+				args: &utils.CGREvent{
+					Tenant: "",
+					ID:     "",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{},
+				},
+				expErr: "NOT_FOUND",
+			},
+			{
+				name: "Nil APIOpts",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: nil,
+				},
+				expErr: "NOT_FOUND",
+			},
+			{
+				name: "OriginID not found",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{},
+				},
+				expErr: "NOT_FOUND",
+			},
+			{
+				name: "Missing OriginID",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "",
+					},
+				},
+				expErr: "MANDATORY_IE_MISSING: [OriginID]",
+			},
+			{
+				name: "IPs parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaIPs:      "truee",
+					},
+				},
+				expErr: `strconv.ParseBool: parsing "truee": invalid syntax`,
+			},
+			{
+				name: "Chargers parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaChargers:  "truee",
+					},
+				},
+				expErr: `strconv.ParseBool: parsing "truee": invalid syntax`,
+			},
+			{
+				name: "Initiate parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaInitiate:  "truee",
+					},
+				},
+				expErr: `strconv.ParseBool: parsing "truee": invalid syntax`,
+			},
+			{
+				name: "Initiate: UNSUPPORTED_SERVICE_METHOD",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Usage:        "test",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "err",
+						utils.MetaResources: true,
+						utils.MetaInitiate:  true,
+					},
+				},
+				expErr: "UNSUPPORTED_SERVICE_METHOD",
+			},
+			{
+				name: "Attributes parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:   "originID",
+						utils.MetaResources:  true,
+						utils.MetaAttributes: "truee",
+					},
+				},
+				expErr: `strconv.ParseBool: parsing "truee": invalid syntax`,
+			},
+			{
+				name: "Resources parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: "truee",
+					},
+				},
+				expErr: `strconv.ParseBool: parsing "truee": invalid syntax`,
+			},
+			{
+				name: "Thresholds: UNSUPPORTED_SERVICE_METHOD",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:   "originID",
+						utils.MetaResources:  true,
+						utils.MetaThresholds: "truee",
+					},
+				},
+				expErr: "UNSUPPORTED_SERVICE_METHOD",
+			},
+			{
+				name: "Stats parsing error",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaStats:     "truee",
+					},
+				},
+				expErr: "UNSUPPORTED_SERVICE_METHOD",
+			},
+			{
+				name: "Thresholds: UNSUPPORTED_SERVICE_METHOD",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:   "originID",
+						utils.MetaResources:  true,
+						utils.MetaThresholds: true,
+					},
+				},
+				expErr: "UNSUPPORTED_SERVICE_METHOD",
+			},
+			{
+				name: "Stats: UNSUPPORTED_SERVICE_METHOD",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaStats:     true,
+					},
+				},
+				expErr: "UNSUPPORTED_SERVICE_METHOD",
+			},
+			{
+				name: "IPS: UNSUPPORTED_SERVICE_METHOD",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Usage:        "10s",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaIPs:      true,
+					},
+				},
+				expErr: "IPS_ERROR:UNSUPPORTED_SERVICE_METHOD",
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				var reply V1InitSessionReply
+				err := sessions.BiRPCv1InitiateSession(ctx, tt.args, &reply)
+				if err == nil || err.Error() != tt.expErr {
+					t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+				}
+			})
+		}
+	})
+
+	t.Run("Not Connected", func(t *testing.T) {
+		ctx := context.TODO()
+		cfg := config.NewDefaultCGRConfig()
+		cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+		locker := engine.NewLocker(cfg)
+		data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+		if err != nil {
+			t.Fatal(err)
+		}
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+		tests := []struct {
+			name   string
+			args   *utils.CGREvent
+			expErr string
+		}{
+			{
+				name: "Resources not connected",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+					},
+				},
+				expErr: "NOT_CONNECTED: ResourceS",
+			},
+			{
+				name: "IPs not connected",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaIPs:      true,
+					},
+				},
+				expErr: "NOT_CONNECTED: IPs",
+			},
+			{
+				name: "Attributes not connected",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:   "originID",
+						utils.MetaResources:  true,
+						utils.MetaAttributes: true,
+					},
+				},
+				expErr: "ATTRIBUTES_ERROR:NOT_CONNECTED: AttributeS",
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				var reply V1InitSessionReply
+				err := sessions.BiRPCv1InitiateSession(ctx, tt.args, &reply)
+				if err == nil || err.Error() != tt.expErr {
+					t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+				}
+			})
+		}
+	})
+
+	t.Run("FilterId not found", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.ResourceSv1AllocateResources: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+				utils.IPsV1AllocateIP: func(ctx *context.Context, m string, args, reply any) error {
+					*reply.(*utils.AllocatedIP) = utils.AllocatedIP{ProfileID: "prfIP"}
+					return utils.ErrNotImplemented
+				},
+				utils.ThresholdSv1GetThresholdsForEvent: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+				utils.StatSv1GetStatQueuesForEvent: func(ctx *context.Context, method string, args, reply any) error {
+					return utils.ErrPartiallyExecuted
+				},
+				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+			},
+		}
+		chanInternal := make(chan birpc.ClientConnector, 1)
+		chanInternal <- clnt
+
+		for flag, apiPrefix := range map[string]string{
+			utils.MetaResources:  utils.ResourceSv1,
+			utils.MetaIPs:        utils.IPsV1,
+			utils.MetaThresholds: utils.ThresholdSv1,
+			utils.MetaStats:      utils.StatSv1,
+			utils.MetaChargers:   utils.ChargerSv1,
+		} {
+			connID := utils.ConcatenatedKey(utils.MetaInternal, flag)
+			sessions.cfg.SessionSCfg().Conns[flag] = []*config.DynamicConns{
+				{
+					FilterIDs: []string{"test"},
+					ConnIDs:   []string{connID},
+				},
+			}
+			sessions.connMgr.AddInternalConn(connID, apiPrefix, chanInternal)
+		}
+
+		tests := []struct {
+			name   string
+			args   *utils.CGREvent
+			expErr string
+		}{
+			{
+				name: "IPs",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaIPs:      true,
+					},
+				},
+				expErr: "NOT_FOUND:test",
+			},
+			{
+				name: "Chargers",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaChargers:  true,
+					},
+				},
+				expErr: "NOT_FOUND:test",
+			},
+			{
+				name: "Resources",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ev1",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originNC",
+						utils.MetaResources: true,
+					},
+				},
+				expErr: "NOT_FOUND:test",
+			},
+			{
+				name: "Initiate",
+				args: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evRes",
+					Event: map[string]any{
+						utils.AccountField: "1001",
+						utils.Usage:        "10s",
+					},
+					APIOpts: map[string]any{
+						utils.MetaOriginID:  "originID",
+						utils.MetaResources: true,
+						utils.MetaInitiate:  true,
+					},
+				},
+				expErr: "NOT_FOUND:test",
+			},
+		}
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				var reply V1InitSessionReply
+				err := sessions.BiRPCv1InitiateSession(ctx, tt.args, &reply)
+				if err == nil || err.Error() != tt.expErr {
+					t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+				}
+			})
+		}
+	})
 }
