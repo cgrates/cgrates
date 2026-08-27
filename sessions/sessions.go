@@ -992,15 +992,21 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 	defer s.lk.Unlock()
 	s.stopSTerminator()
 	for _, sRun := range s.sRuns {
-		if sRun.Charges != nil {
-			sRun.CGREvent.APIOpts[utils.MetaAccountsCost] = sRun.Charges
+		if sRun.Charges == nil {
+			continue
 		}
+		sRun.CGREvent.APIOpts[utils.MetaAccountsCost] = sRun.Charges
+
+		// corrections don't make much sense without previous charges
+		if sRun.Charges.Abstracts == nil || sRun.Charges.Abstracts.Compare(utils.NewDecimal(0, 0)) != 1 {
+			continue
+		}
+
 		if sRun.UsageAdjustment != nil && sRun.UsageAdjustment.Compare(utils.NewDecimal(0, 0)) != 0 {
-			eC := sRun.CGREvent.APIOpts[utils.MetaAccountsCost].(*utils.EventCharges)
 			switch sRun.UsageAdjustment.Compare(utils.NewDecimal(0, 0)) {
 			case 1: // refund needs to be performed
 				var rfndEC *utils.EventCharges
-				if rfndEC, err = eC.Truncate(utils.SubstractDecimal(eC.Abstracts, sRun.UsageAdjustment)); err != nil {
+				if rfndEC, err = sRun.Charges.Truncate(utils.SubstractDecimal(sRun.Charges.Abstracts, sRun.UsageAdjustment)); err != nil {
 					return
 				}
 				if err = sS.accountSRefundCharges(ctx, rfndEC, s.OriginCGREvent); err != nil {
@@ -1012,7 +1018,7 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 				if acntCost, err = sS.accountSDebitEvent(ctx, sRun.CGREvent, s); err != nil {
 					return
 				}
-				sRun.CGREvent.APIOpts[utils.MetaAccountsCost].(*utils.EventCharges).Merge(acntCost)
+				sRun.Charges.Merge(acntCost)
 			}
 		}
 	}

@@ -2532,6 +2532,69 @@ func TestSessionSv1ProcessEventSTerminator(t *testing.T) {
 		time.Sleep(500 * time.Millisecond)
 		checkActiveSessions(t, 0)
 	})
+
+	t.Run("terminateEmptyCharges", func(t *testing.T) {
+		originID := "EmptyCharges"
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "createEmptyCharges",
+				APIOpts: map[string]any{
+					utils.MetaSession:  true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    0,
+					utils.MetaOriginID: originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session) failed: %v", err)
+		}
+		checkActiveSessions(t, 1)
+
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "updateEmptyCharges",
+				APIOpts: map[string]any{
+					utils.MetaSession:      true,
+					utils.MetaInterimUsage: 10 * time.Second,
+					utils.MetaOriginID:     originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*session) failed: %v", err)
+		}
+
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "terminateEmptyCharges",
+				APIOpts: map[string]any{
+					utils.MetaSession:    true,
+					utils.MetaTerminate:  true,
+					utils.MetaOriginID:   originID,
+					utils.MetaTotalUsage: 5 * time.Second,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(*terminate) failed: %v", err)
+		}
+		checkActiveSessions(t, 0)
+	})
 }
 
 func TestSessionSv1ProcessEventAuthorizeOnly(t *testing.T) {
