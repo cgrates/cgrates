@@ -1348,7 +1348,11 @@ func TestECAccountChargeClone(t *testing.T) {
 }
 
 func TestECEventChargesCloneEmpty(t *testing.T) {
-	ec := &EventCharges{}
+	var ec *EventCharges
+	if rcv := ec.Clone(); rcv != nil {
+		t.Errorf("expected: <nil>, received: <%+v>", rcv)
+	}
+	ec = &EventCharges{}
 	if rcv := ec.Clone(); !reflect.DeepEqual(rcv, ec) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>",
 			ToJSON(ec), ToJSON(rcv))

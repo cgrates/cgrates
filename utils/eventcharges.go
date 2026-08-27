@@ -37,6 +37,9 @@ type EventCharges struct {
 
 // Clone returns a copy of ec
 func (ec *EventCharges) Clone() *EventCharges {
+	if ec == nil {
+		return nil
+	}
 	cln := new(EventCharges)
 	if ec.Abstracts != nil {
 		cln.Abstracts = ec.Abstracts.Clone()
