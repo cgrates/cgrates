@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"slices"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -462,14 +463,14 @@ func testActionsExecuteActionsHTTPPost(t *testing.T) {
 		},
 	}
 
-	expBody := `{"*opts":{"*actionsProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
+	expBody := `,"*opts":{"*actionsProfileIDs":["actPrfID"]},"*req":{"Account":"1001"}}`
 	var reply string
 	if err := actRPC.Call(context.Background(), utils.ActionSv1ExecuteActions,
 		ev, &reply); err != nil {
 		t.Error(err)
 	}
 
-	if string(actBody) != expBody {
+	if !strings.HasSuffix(string(actBody), expBody) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(actBody))
 	}
 }

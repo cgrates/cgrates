@@ -416,7 +416,9 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 			t.Log(logBuf.String())
 		}
 	})
-
+	if ng.Encoding == utils.EmptyString {
+		ng.Encoding = *utils.Encoding
+	}
 	client := NewRPCClient(t, ng.cfg.ListenCfg(), ng.Encoding)
 	t.Cleanup(func() { _ = client.Close() })
 	if ng.TpPath == "" {
@@ -535,15 +537,16 @@ type DBConnOpts struct {
 
 // DBConn contains database connection parameters.
 type DBConn struct {
-	Type                *string    `json:"dbType,omitempty"`
-	Host                *string    `json:"dbHost,omitempty"`
-	Port                *int       `json:"dbPort,omitempty"`
-	Name                *string    `json:"dbName,omitempty"`
-	User                *string    `json:"dbUser,omitempty"`
-	Password            *string    `json:"dbPassword,omitempty"`
-	ReplicationConns    *[]string  `json:"replicationConns"`
-	ReplicationInterval *string    `json:"replicationInterval,omitempty"`
-	Opts                DBConnOpts `json:"opts"`
+	Type                 *string    `json:"dbType,omitempty"`
+	Host                 *string    `json:"dbHost,omitempty"`
+	Port                 *int       `json:"dbPort,omitempty"`
+	Name                 *string    `json:"dbName,omitempty"`
+	User                 *string    `json:"dbUser,omitempty"`
+	Password             *string    `json:"dbPassword,omitempty"`
+	ReplicationConns     *[]string  `json:"replicationConns"`
+	ReplicationFailedDir *string    `json:"replicationFailedDir"`
+	ReplicationInterval  *string    `json:"replicationInterval,omitempty"`
+	Opts                 DBConnOpts `json:"opts"`
 }
 
 // Item contains db item parameters
