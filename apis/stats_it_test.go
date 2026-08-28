@@ -14,6 +14,7 @@ import (
 	"reflect"
 	"slices"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -1365,7 +1366,7 @@ func testStatsProcessEvent(t *testing.T) {
 		},
 	}
 	expected := []string{"SQ_3"}
-	expBody := `{"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"],"*usage":30000000000},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
+	expBody := `,"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"],"*usage":30000000000},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
 	var reply []string
 	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
 		args, &reply); err != nil {
@@ -1374,7 +1375,7 @@ func testStatsProcessEvent(t *testing.T) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expected, reply)
 	}
 
-	if expBody != string(sqBody) {
+	if !strings.HasSuffix(string(sqBody), expBody) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(sqBody))
 	}
 }

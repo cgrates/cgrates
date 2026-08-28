@@ -1085,6 +1085,7 @@ func TestACScheduledActions(t *testing.T) {
 	mapStorage := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
+		utils.MetaCfg:  cfg.GetDataProvider(),
 	}
 	expectedSChed := []*scheduledActs{
 		{
@@ -1113,7 +1114,7 @@ func TestACScheduledActions(t *testing.T) {
 	schedActs[0].acts = nil
 	schedActs[0].cch = nil
 	if !reflect.DeepEqual(schedActs, expectedSChed) {
-		t.Errorf("Expected %+v, received %+v", expectedSChed, schedActs)
+		t.Errorf("Expected %+v, \nreceived %+v", expectedSChed[0], schedActs[0])
 	}
 }
 
