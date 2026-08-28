@@ -362,3 +362,125 @@ func TestSessionSv1ProcessEventSMSFallbackToMonetary(t *testing.T) {
 		t.Errorf("expected MonetaryBal unchanged at 0.05 after no debit, got: %+v", acnt6.Balances["MonetaryBal"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventSMSData(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    },
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var setReply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"SMS1": {
+						ID:      "SMS1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.ToR:*sms"},
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(10),
+					},
+					"DATA1": {
+						ID:      "DATA1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.ToR:*data"},
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(1000),
+					},
+				},
+			},
+		}, &setReply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("processEventSMS", func(t *testing.T) {
+		var rply sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "smsEvent",
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    1,
+					utils.MetaOriginID: "smsOriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.ToR:          utils.MetaSMS,
+					utils.Destination:  "+40123456789",
+					utils.AnswerTime:   "2024-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed for SMS event: %v", err)
+		}
+	})
+
+	t.Run("processEventData", func(t *testing.T) {
+		var rply sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "dataEvent",
+				APIOpts: map[string]any{
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    400,
+					utils.MetaOriginID: "dataOriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.ToR:          utils.MetaData,
+					utils.Destination:  "+40123456789",
+					utils.AnswerTime:   "2024-01-07T17:01:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent failed for Data event: %v", err)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else {
+		if acnt.Balances["SMS1"].Units.Compare(utils.NewDecimalFromFloat64(9)) != 0 {
+			t.Errorf("expected 9 *sms units remaining, got: %+v", acnt.Balances["SMS1"].Units)
+		}
+		if acnt.Balances["DATA1"].Units.Compare(utils.NewDecimalFromFloat64(600)) != 0 {
+			t.Errorf("expected 600 *data units remaining, got: %+v", acnt.Balances["DATA1"].Units)
+		}
+	}
+}
