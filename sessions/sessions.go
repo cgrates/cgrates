@@ -1950,7 +1950,7 @@ func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent)
 	}
 	var procEEs map[string]map[string]any
 	if err = sS.connMgr.Call(ctx, conns, utils.EeSv1ProcessEvent,
-		cgrEv, &procEEs); err != nil {
+		&utils.CGREventWithEeIDs{CGREvent: cgrEv}, &procEEs); err != nil {
 		return eesIDs, utils.NewErrEEs(err)
 	}
 	eesIDs = make([]string, 0, len(procEEs))
