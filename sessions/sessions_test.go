@@ -12,6 +12,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
+	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/routes"
@@ -2279,4 +2280,173 @@ func TestGetRelocateSession(t *testing.T) {
 	if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
+}
+
+func TestSessionSNewSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("newSession populates SRuns", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+		ctx := context.TODO()
+
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					cghrgs := []*chargers.ChrgSProcessEventReply{
+						{
+							CGREvent: &utils.CGREvent{
+								Tenant: "cgrates.org",
+								ID:     "TestID",
+								Event: map[string]any{
+									utils.Usage: "10s",
+								},
+							},
+						},
+					}
+					*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
+					return nil
+				},
+			},
+		}
+		chanInternal := make(chan birpc.ClientConnector, 1)
+		chanInternal <- clnt
+		connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
+			{ConnIDs: []string{connID}},
+		}
+		sessions.connMgr.AddInternalConn(connID, utils.ChargerSv1, chanInternal)
+
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "evID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "newS",
+				utils.MetaChargers: true,
+			},
+		}
+		expS := &Session{
+			ID: "newS",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "newS",
+					utils.MetaChargers: true,
+				},
+			},
+			ClientConnID:       "*internal:*chargers",
+			AutoChargeInterval: 0,
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "TestID",
+						Event: map[string]any{
+							utils.Usage: "10s",
+						},
+					},
+				},
+			},
+		}
+		if s, err := sessions.newSession(ctx, args, connID); err != nil {
+			t.Error(err)
+		} else if !reflect.DeepEqual(s, expS) {
+			t.Errorf("Expected %v, \nrecieved %v", expS, s)
+		}
+	})
+	t.Run("Error Cases", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+		ctx := context.TODO()
+
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+			},
+		}
+		chanInternal := make(chan birpc.ClientConnector, 1)
+		chanInternal <- clnt
+		connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
+		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
+			{ConnIDs: []string{connID}},
+		}
+		sessions.connMgr.AddInternalConn(connID, utils.ChargerSv1, chanInternal)
+
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "evID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "newS",
+				utils.MetaChargers: "truee",
+			},
+		}
+		expS := &Session{
+			ID: "newS",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "newS",
+					utils.MetaChargers: "truee",
+				},
+			},
+			ClientConnID:       "*internal:*chargers",
+			AutoChargeInterval: 0,
+			SRuns:              nil,
+		}
+		expErr := `strconv.ParseBool: parsing "truee": invalid syntax`
+		if s, err := sessions.newSession(ctx, args, connID); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %v, \nrecieved %v", expErr, err)
+		} else if !reflect.DeepEqual(s, expS) {
+			t.Errorf("Expected %v, \nrecieved %v", expS, s)
+		}
+
+		args.APIOpts = map[string]any{
+			utils.MetaOriginID: "newS",
+			utils.MetaChargers: true,
+		}
+		expS.OriginCGREvent.APIOpts = map[string]any{
+			utils.MetaOriginID: "newS",
+			utils.MetaChargers: true,
+		}
+		expErr = "CHARGERS_ERROR:NOT_IMPLEMENTED"
+		if s, err := sessions.newSession(ctx, args, connID); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %v, \nrecieved %v", expErr, err)
+		} else if !reflect.DeepEqual(s, expS) {
+			t.Errorf("Expected %v, \nrecieved %v", expS, s)
+		}
+	})
 }
