@@ -1413,6 +1413,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s for Debit",
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
+				continue
 			}
 			if s != nil {
 				s.lk.Lock()
