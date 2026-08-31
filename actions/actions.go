@@ -199,6 +199,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	ignoreFilters, forceASAP bool) (schedActs []*scheduledActs, err error) {
 	evNm := cgrEv.AsDataProvider()
+	evNm[utils.MetaCfg] = aS.cfg.GetDataProvider() // add *cfg dataprovider for *cfg filters
 	aPfs, err := aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs, ignoreFilters)
 	if err != nil {
 		return

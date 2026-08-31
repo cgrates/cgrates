@@ -13,6 +13,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strings"
 	"testing"
 	"time"
 
@@ -679,7 +680,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 		},
 	}
 
-	expBody := `{"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventType":"ResourceUpdate","*resourcesUnits":1,"*resourcesUsageID":"RU_1","*thdProfileIDs":["THD_1"]},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":1}}`
+	expBody := `,"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventType":"ResourceUpdate","*resourcesUnits":1,"*resourcesUsageID":"RU_1","*thdProfileIDs":["THD_1"]},"*req":{"EventType":"ResourceUpdate","ResourceID":"RES_1","Usage":1}}`
 	if err := rsRPC.Call(context.Background(), utils.ResourceSv1AllocateResources,
 		argsRU, &reply); err != nil {
 		t.Error(err)
@@ -687,7 +688,7 @@ func testResourceSCheckThresholdAfterResourceAllocate(t *testing.T) {
 		t.Error("Unexpected reply returned", reply)
 	}
 
-	if expBody != string(rsBody) {
+	if !strings.HasSuffix(string(rsBody), expBody) {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", expBody, string(rsBody))
 	}
 
