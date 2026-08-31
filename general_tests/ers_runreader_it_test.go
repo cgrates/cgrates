@@ -135,7 +135,7 @@ func TestERSRunReaderCgrCDR(t *testing.T) {
 		Opts:   map[string]any{utils.MetaURID: urID},
 		Event:  map[string]any{utils.OriginID: "event2"},
 	}
-	db := openTestDB(t, "cgrates_runreader", utils.CDRsTBL, cdr1, cdr2)
+	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2)
 	var buf testBuffer
 	testEngine := engine.TestEngine{
 		ConfigJSON: `{
@@ -150,7 +150,7 @@ func TestERSRunReaderCgrCDR(t *testing.T) {
 			"processedPath": "",
 			"flags": ["*dryRun"],
 			"opts": {
-				"sqlDBName": "cgrates_runreader",
+				"sqlDBName": "cgrates2",
 				"sqlTableName": "cdrs",
 				"sqlBatchSize": 1
 			}

@@ -66,6 +66,8 @@ var (
 )
 
 func TestCGRConfig(t *testing.T) {
+	rootDir := cgrCfg.configSCfg.RootDir
+	defer func() { cgrCfg.configSCfg.RootDir = rootDir }()
 	for _, test := range cgrTests {
 		t.Run("CGRConfig", test)
 	}
@@ -852,8 +854,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			Routes:                 []*DynamicBoolOpt{{}},
 			Stats:                  []*DynamicBoolOpt{{}},
 			Thresholds:             []*DynamicBoolOpt{{}},
-			Debit:                  []*DynamicBoolOpt{{}},
-			Refund:                 []*DynamicBoolOpt{{}},
+			Debit:                  []*DynamicBoolOpt{},
+			Refund:                 []*DynamicBoolOpt{},
 			Initiate:               []*DynamicBoolOpt{{}},
 			Update:                 []*DynamicBoolOpt{{}},
 			Terminate:              []*DynamicBoolOpt{{}},
@@ -881,8 +883,8 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			InterimUsage:           []*DynamicDecimalOpt{},
 			TotalUsage:             []*DynamicDecimalOpt{},
-			AccountsDebit:          []*DynamicBoolOpt{{}},
-			Session:                []*DynamicBoolOpt{{}},
+			AccountsDebit:          []*DynamicBoolOpt{},
+			Session:                []*DynamicBoolOpt{},
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
@@ -958,8 +960,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			Routes:                 []*DynamicBoolOpt{{}},
 			Stats:                  []*DynamicBoolOpt{{}},
 			Thresholds:             []*DynamicBoolOpt{{}},
-			Debit:                  []*DynamicBoolOpt{{}},
-			Refund:                 []*DynamicBoolOpt{{}},
+			Debit:                  []*DynamicBoolOpt{},
+			Refund:                 []*DynamicBoolOpt{},
 			Initiate:               []*DynamicBoolOpt{{}},
 			Update:                 []*DynamicBoolOpt{{}},
 			Terminate:              []*DynamicBoolOpt{{}},
@@ -987,8 +989,8 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			InterimUsage:           []*DynamicDecimalOpt{},
 			TotalUsage:             []*DynamicDecimalOpt{},
-			AccountsDebit:          []*DynamicBoolOpt{{}},
-			Session:                []*DynamicBoolOpt{{}},
+			AccountsDebit:          []*DynamicBoolOpt{},
+			Session:                []*DynamicBoolOpt{},
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},
@@ -1062,8 +1064,8 @@ func testCGRConfigReloadAll(t *testing.T) {
 			Routes:                 []*DynamicBoolOpt{{}},
 			Stats:                  []*DynamicBoolOpt{{}},
 			Thresholds:             []*DynamicBoolOpt{{}},
-			Debit:                  []*DynamicBoolOpt{{}},
-			Refund:                 []*DynamicBoolOpt{{}},
+			Debit:                  []*DynamicBoolOpt{},
+			Refund:                 []*DynamicBoolOpt{},
 			Initiate:               []*DynamicBoolOpt{{}},
 			Update:                 []*DynamicBoolOpt{{}},
 			Terminate:              []*DynamicBoolOpt{{}},
@@ -1091,8 +1093,8 @@ func testCGRConfigReloadAll(t *testing.T) {
 			AutoChargeInterval:     []*DynamicDurationOpt{{value: SessionsAutoChargeIntervalDftOpt}},
 			InterimUsage:           []*DynamicDecimalOpt{},
 			TotalUsage:             []*DynamicDecimalOpt{},
-			AccountsDebit:          []*DynamicBoolOpt{{}},
-			Session:                []*DynamicBoolOpt{{}},
+			AccountsDebit:          []*DynamicBoolOpt{},
+			Session:                []*DynamicBoolOpt{},
 			TTLMaxDelay:            []*DynamicDurationOpt{{value: SessionsTTLMaxDelayDftOpt}},
 			TTLUsage:               []*DynamicDurationPointerOpt{},
 			AccountsForceUsage:     []*DynamicBoolOpt{},

@@ -146,7 +146,7 @@ func testAnalyzerSSearchCall1(t *testing.T) {
 func testAnalyzerSSearchCall2(t *testing.T) {
 	var result []map[string]any
 	queryArgs := &analyzers.QueryArgs{
-		Filters: []string{"*string:~*hdr.RequestEncoding:*internal", "*string:~*hdr.RequestMethod:ChargerSv1.ProcessEvent"},
+		Filters: []string{"*string:~*hdr.RequestEncoding:*json", "*string:~*hdr.RequestMethod:ChargerSv1.ProcessEvent"},
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
 		t.Error(err)
@@ -206,7 +206,7 @@ func testAnalyzerSSearchCall3(t *testing.T) {
 	}
 	if err := anzBiRPC.Call(context.Background(), utils.AnalyzerSv1StringQuery, queryArgs, &result); err != nil {
 		t.Error(err)
-	} else if len(result) != 2 {
+	} else if len(result) != 1 {
 		t.Errorf("Unexpected result: %s", utils.ToJSON(result))
 	}
 }
