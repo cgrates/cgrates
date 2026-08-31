@@ -1,168 +1,89 @@
 {
-"logger": {
-	"level": 7
-},
-"schedulers": {
-	"enabled": true,
-	"conns": {
-		"*cdrs": [{"connIDs": ["*internal"]}]
-	},
-},
-"apiers": {
-	"enabled": true,
-},
-"filters": {
-	"apiers_conns": ["*internal"]
-},
-"attributes": {
-	"enabled": true,
-	"opts": {
-		"*processRuns": 2
-	}
-},
-"sessions": {
-	"enabled": true,
-	"conns":{
-	"*attributes": [
-		 {
-			"tenant": "",
-			"filterIDs": [],
-			"connIDs": ["*internal"]
-		 }
-	],
-	"*chargers": [
-		 {
-			"tenant": "",
-			"filterIDs": [],
-			"connIDs": ["*internal"]
-		 }
-	],
-	"*rals": [
-		 {
-			"tenant": "",
-			"filterIDs": [],
-			"connIDs": ["*internal"]
-		 }
-	],
-	"*cdrs": [
-		 {
-			"tenant": "",
-			"filterIDs": [],
-			"connIDs": ["*internal"]
-		 }
-	]
-			},
-},
-"chargers": {
-	"enabled": true
-},
-"rals": {
-	"enabled": true
-},
-"cdrs": {
-	"enabled": true,
-	"conns": {
-		"*attributes": [{"connIDs": ["*internal"]}],
-		"*chargers": [{"connIDs": ["*internal"]}]
-	},
-	"rals_conns": ["*internal"]
-},
-"diameterAgent": {
-	"enabled": true,
-	"listeners": [
-		{"address": "0.0.0.0:3868", "network": "tcp"}
-	],
-	"conns": {
-		"*sessions": [{"connIDs": ["*birpc_internal"]}]
-	},
-	"requestProcessors": [{
-		"id": "message",
-		"filters": [
-			"*string:~*vars.*cmd:CCR",
-			"*prefix:~*req.Service-Context-Id:message",
-			"*string:~*req.CC-Request-Type:4"
-		],
-		"flags": ["*sessions"],
-		"requestFields": [
-				{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
-				{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
-				{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
-				{"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
-				{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},{
-				"tag": "ToR",
-				"path": "*cgreq.ToR",
-				"type": "*constant",
-				"value": "*sms"
-			},
-			{
-				"tag": "OriginID",
-				"path": "*cgreq.OriginID",
-				"type": "*variable",
-				"value": "~*req.Session-Id",
-				"mandatory": true
-			},
-			{
-				"tag": "Category",
-				"path": "*cgreq.Category",
-				"type": "*constant",
-				"value": "sms"
-			},
-			{
-				"tag": "RequestType",
-				"path": "*cgreq.RequestType",
-				"type": "*constant",
-				"value": "*prepaid"
-			},
-			{
-				"tag": "Account",
-				"path": "*cgreq.Account",
-				"type": "*variable",
-				"mandatory": true,
-				"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"
-			},
-			{
-				"tag": "Destination",
-				"path": "*cgreq.Destination",
-				"type": "*variable",
-				"mandatory": true,
-				"value": "~*req.Service-Information.SMS-Information.Recipient-Address.Address-Data"
-			},
-			{
-				"tag": "SetupTime",
-				"path": "*cgreq.SetupTime",
-				"type": "*variable",
-				"value": "~*req.Event-Timestamp",
-				"mandatory": true
-			},
-			{
-				"tag": "AnswerTime",
-				"path": "*cgreq.AnswerTime",
-				"type": "*variable",
-				"value": "~*req.Event-Timestamp",
-				"mandatory": true
-			},
-			{
-				"tag": "Usage",
-				"path": "*cgreq.Usage",
-				"type": "*variable",
-				"value": "~*req.Requested-Service-Unit.CC-Time",
-				"mandatory": true
-			}
-		],
-		"replyFields": [{
-				"tag": "CCATemplate",
-				"type": "*template",
-				"value": "*cca"
-			},
-			{
-				"tag": "ResultCode",
-				"path": "*rep.Result-Code",
-				"filters": ["*notempty:~*cgrep.Error:"],
-				"type": "*constant",
-				"value": "5030",
-				"blocker": true
-			}
-		]
-	}]
-}
+  "logger": {
+    "level": 7
+  },
+  "admins": {
+    "enabled": true
+  },
+  "rates": {
+    "enabled": true,
+    "stringIndexedFields": ["*req.Account"],
+    "rateStringIndexedFields": ["*req.Account"]
+  },
+  "accounts": {
+    "enabled": true,
+    "stringIndexedFields": ["*req.Account"],
+    "conns": {
+      "*rates": [
+        {"connIDs": ["*internal"]}
+      ]
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "conns": {
+      "*accounts": [
+        {"connIDs": ["*internal"]}
+      ],
+      "*ees": [
+        {"connIDs": ["*localhost"]}
+      ]
+    }
+  },
+  "ees": {
+    "enabled": true,
+    "exporters": [
+      {
+        "id": "usage",
+        "type": "*httpJSONMap",
+        "synchronous": true,
+        "fields": [
+          {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
+          {"tag": "URID", "path": "*exp.*urID", "type": "*variable", "value": "~*opts.*urID"},
+          {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+          {"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*opts.*accountsCost.Concretes"}
+        ]
+      }
+    ]
+  },
+  "diameterAgent": {
+    "enabled": true,
+    "listeners": [
+      {"address": "0.0.0.0:3868", "network": "tcp"}
+    ],
+    "conns": {
+      "*sessions": [
+        {"connIDs": ["*birpc_internal"]}
+      ]
+    },
+    "requestProcessors": [
+      {
+        "id": "authorize_debit",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.Service-Context-Id:voice@diambench",
+          "*string:~*req.CC-Request-Type:4"
+        ],
+        "flags": ["*sessions"],
+        "requestFields": [
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+          {"tag": "OptAuthorize", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+          {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+          {"tag": "OptUR", "path": "*opts.*ur", "type": "*constant", "value": "true"},
+          {"tag": "OptEEs", "path": "*opts.*ees", "type": "*constant", "value": "true"},
+          {"tag": "OptSessionBlockerError", "path": "*opts.*sesBlockerError", "type": "*constant", "value": "true"},
+          {"tag": "OptOriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptURID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptUsage", "path": "*opts.*usage", "type": "*variable", "value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+          {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+          {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]", "mandatory": true},
+          {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true}
+        ],
+        "replyFields": [
+          {"tag": "CCATemplate", "type": "*template", "value": "*cca"}
+        ]
+      }
+    ]
+  }
 }
