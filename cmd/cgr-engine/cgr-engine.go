@@ -222,7 +222,6 @@ func runCGREngine(fs []string) (err error) {
 		services.NewHTTPAgent(cfg),
 		services.NewSIPAgent(cfg),
 		services.NewEventExporterService(cfg),
-		services.NewCDRServer(cfg),
 		services.NewRegistrarCService(cfg),
 		services.NewRateService(cfg),
 		services.NewActionService(cfg),

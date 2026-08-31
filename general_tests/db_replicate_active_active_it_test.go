@@ -115,20 +115,6 @@ func TestDBReplicationActiveActive(t *testing.T) {
 						Name: utils.StringPointer("10"),
 						User: utils.StringPointer(utils.CGRateSLwr),
 					},
-					utils.StorDB: {
-						Type:     utils.StringPointer(utils.MetaMongo),
-						Host:     utils.StringPointer("127.0.0.1"),
-						Port:     utils.IntPointer(27017),
-						Name:     utils.StringPointer(utils.CGRateSLwr),
-						User:     utils.StringPointer(utils.CGRateSLwr),
-						Password: utils.StringPointer(""),
-					},
-				},
-				Items: map[string]engine.Item{
-					utils.MetaCDRs: {
-						Limit:  utils.IntPointer(-1),
-						DbConn: utils.StringPointer(utils.StorDB),
-					},
 				},
 			},
 		}
@@ -141,20 +127,6 @@ func TestDBReplicationActiveActive(t *testing.T) {
 						Port: utils.IntPointer(27017),
 						Name: utils.StringPointer("10"),
 						User: utils.StringPointer(utils.CGRateSLwr),
-					},
-					utils.StorDB: {
-						Type:     utils.StringPointer(utils.MetaMongo),
-						Host:     utils.StringPointer("127.0.0.1"),
-						Port:     utils.IntPointer(27017),
-						Name:     utils.StringPointer(utils.CGRateSLwr),
-						User:     utils.StringPointer(utils.CGRateSLwr),
-						Password: utils.StringPointer(""),
-					},
-				},
-				Items: map[string]engine.Item{
-					utils.MetaCDRs: {
-						Limit:  utils.IntPointer(-1),
-						DbConn: utils.StringPointer(utils.StorDB),
 					},
 				},
 			},
@@ -299,7 +271,6 @@ func TestDBReplicationActiveActive(t *testing.T) {
 		"*actionProfiles":             {Replicate: utils.BoolPointer(true)},
 		"*attributeFilterIndexes":     {Replicate: utils.BoolPointer(true)},
 		"*attributeProfiles":          {Replicate: utils.BoolPointer(true)},
-		"*cdrs":                       {Replicate: utils.BoolPointer(true)},
 		"*chargerFilterIndexes":       {Replicate: utils.BoolPointer(true)},
 		"*chargerProfiles":            {Replicate: utils.BoolPointer(true)},
 		"*filters":                    {Replicate: utils.BoolPointer(true)},

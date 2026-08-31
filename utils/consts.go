@@ -1000,7 +1000,6 @@ const (
 	TPeS            = "TPeS"
 	CacheS          = "CacheS"
 	AnalyzerS       = "AnalyzerS"
-	CDRServer       = "CDRServer"
 	GuardianS       = "GuardianS"
 	ServiceManagerS = "ServiceManager"
 	CommonListenerS = "CommonListenerS"
@@ -2190,7 +2189,6 @@ const (
 	// SessionsCfg
 	MetaAttributesDerivedReplyCfg = "*attributesDerivedReply"
 	MetaBlockerErrorCfg           = "*blockerError"
-	MetaCDRsDerivedReplyCfg       = "*cdrsDerivedReply"
 	MetaResourcesAuthorizeCfg     = "*resourcesAuthorize"
 	MetaResourcesAllocateCfg      = "*resourcesAllocate"
 	MetaResourcesReleaseCfg       = "*resourcesRelease"
