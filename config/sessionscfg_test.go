@@ -65,7 +65,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MetaStats:       {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaRoutes:      {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaAttributes:  {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaCDRs:        {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaActions:     {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaRates:       {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaAccounts:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
@@ -104,18 +103,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 			},
 			BlockerError: []*DynamicInterfaceOpt{
-				{
-					Tenant: "cgrates.net",
-					Value:  true,
-				},
-			},
-			CDRs: []*DynamicInterfaceOpt{
-				{
-					Tenant: "cgrates.net",
-					Value:  true,
-				},
-			},
-			CDRsDerivedReply: []*DynamicInterfaceOpt{
 				{
 					Tenant: "cgrates.net",
 					Value:  true,
@@ -370,7 +357,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 			utils.MetaStats:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaStats), "*conn1"}}},
 			utils.MetaRoutes:      {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes), "*conn1"}}},
 			utils.MetaAttributes:  {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"}}},
-			utils.MetaCDRs:        {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"}}},
 			utils.MetaActions:     {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaActions), "*conn1"}}},
 			utils.MetaRates:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates), "*conn1"}}},
 			utils.MetaAccounts:    {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), "*conn1"}}},
@@ -408,20 +394,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				{},
 			},
 			BlockerError: []*DynamicBoolOpt{
-				{
-					Tenant: "cgrates.net",
-					value:  true,
-				},
-				{},
-			},
-			CDRs: []*DynamicBoolOpt{
-				{
-					Tenant: "cgrates.net",
-					value:  true,
-				},
-				{},
-			},
-			CDRsDerivedReply: []*DynamicBoolOpt{
 				{
 					Tenant: "cgrates.net",
 					value:  true,
@@ -797,19 +769,6 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 	cfgJSON.Opts.Attributes = nil
 
 	/////
-	cfgJSON.Opts.CDRs = []*DynamicInterfaceOpt{
-		{
-			Tenant: "cgrates.org",
-			Value:  utils.DurationPointer(4 * time.Second),
-		},
-	}
-	errExpect = "cannot convert field: 4s to bool"
-	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
-	}
-	cfgJSON.Opts.CDRs = nil
-
-	/////
 	cfgJSON.Opts.Chargers = []*DynamicInterfaceOpt{
 		{
 			Tenant: "cgrates.org",
@@ -1042,19 +1001,6 @@ func TestSessionSCfgloadFromJsonCfgCase13(t *testing.T) {
 		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
 	}
 	cfgJSON.Opts.BlockerError = nil
-
-	/////
-	cfgJSON.Opts.CDRsDerivedReply = []*DynamicInterfaceOpt{
-		{
-			Tenant: "cgrates.org",
-			Value:  utils.DurationPointer(4 * time.Second),
-		},
-	}
-	errExpect = "cannot convert field: 4s to bool"
-	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != errExpect {
-		t.Errorf("Expected %v \n but received \n %v", errExpect, err.Error())
-	}
-	cfgJSON.Opts.CDRsDerivedReply = nil
 
 	/////
 	cfgJSON.Opts.Rates = []*DynamicInterfaceOpt{
@@ -1318,7 +1264,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -1331,7 +1276,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},
@@ -1480,7 +1424,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
 			utils.MetaRates:                     []*DynamicBoolOpt{{}},
 			utils.MetaAttributes:                []*DynamicBoolOpt{{}},
-			utils.MetaCDRs:                      []*DynamicBoolOpt{{}},
 			utils.MetaChargers:                  []*DynamicBoolOpt{{}},
 			utils.MetaResources:                 []*DynamicBoolOpt{{}},
 			utils.MetaIPs:                       []*DynamicBoolOpt{{}},
@@ -1493,7 +1436,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaMessage:                   []*DynamicBoolOpt{{}},
 			utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{{}},
 			utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{{}},
-			utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{{}},
 			utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{{}},
 			utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{{}},
 			utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{{}},
@@ -1537,7 +1479,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			"listenBiJSON": "127.0.0.1:2018",
 			"conns": {
 				"*chargers": [{"connIDs": ["*internal", "*conn1"]}],
-				"*cdrs": [{"connIDs": ["*internal", "*conn1"]}],
 				"*resources": [{"connIDs": ["*internal", "*conn1"]}],
 				"*ips": [{"connIDs": ["*internal", "*conn1"]}],
 				"*thresholds": [{"connIDs": ["*internal", "*conn1"]}],
@@ -1580,7 +1521,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ListenBigobCfg:  "",
 		utils.ConnsCfg: map[string][]*DynamicConns{
 			utils.MetaChargers:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
-			utils.MetaCDRs:        {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaResources:   {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaIPs:         {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaThresholds:  {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
@@ -1616,7 +1556,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
 			utils.MetaRates:                     []*DynamicBoolOpt{{}},
 			utils.MetaAttributes:                []*DynamicBoolOpt{{}},
-			utils.MetaCDRs:                      []*DynamicBoolOpt{{}},
 			utils.MetaChargers:                  []*DynamicBoolOpt{{}},
 			utils.MetaResources:                 []*DynamicBoolOpt{{}},
 			utils.MetaIPs:                       []*DynamicBoolOpt{{}},
@@ -1629,7 +1568,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaMessage:                   []*DynamicBoolOpt{{}},
 			utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{{}},
 			utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{{}},
-			utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{{}},
 			utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{{}},
 			utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{{}},
 			utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{{}},
@@ -2550,11 +2488,6 @@ func TestSessionSCfgClone(t *testing.T) {
 					ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 				},
 			},
-			utils.MetaCDRs: {
-				{
-					ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs), "*conn1"},
-				},
-			},
 			utils.MetaReplication: {
 				{
 					ConnIDs: []string{"*conn1"},
@@ -2673,7 +2606,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaInternal}}},
 			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaInternal}}},
 			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaInternal}}},
-			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaLocalHost, utils.MetaCDRs)}}},
 			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaLocalHost, utils.MetaChargers)}}},
 		},
 		Opts: &SessionsOpts{
@@ -2740,7 +2672,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
 			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
 		},
 		Opts: &SessionsOpts{
@@ -2809,7 +2740,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal)}}},
 			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal)}}},
 		},
 		Opts: &SessionsOptsJson{
@@ -3000,12 +2930,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  false,
 			},
 		},
-		CDRs: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.org",
-				value:  false,
-			},
-		},
 		Chargers: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
@@ -3150,12 +3074,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  false,
 			},
 		},
-		CDRsDerivedReply: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.org",
-				value:  false,
-			},
-		},
 		ResourcesAuthorize: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.org",
@@ -3256,12 +3174,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		Attributes: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.net",
-				value:  true,
-			},
-		},
-		CDRs: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
 				value:  true,
@@ -3411,12 +3323,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 				value:  true,
 			},
 		},
-		CDRsDerivedReply: []*DynamicBoolOpt{
-			{
-				Tenant: "cgrates.net",
-				value:  true,
-			},
-		},
 		ResourcesAuthorize: []*DynamicBoolOpt{
 			{
 				Tenant: "cgrates.net",
@@ -3517,12 +3423,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		Attributes: []*DynamicInterfaceOpt{
-			{
-				Tenant: "cgrates.net",
-				Value:  true,
-			},
-		},
-		CDRs: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  true,
@@ -3667,12 +3567,6 @@ func TestDiffSessionsOptsJsonCfg(t *testing.T) {
 			},
 		},
 		BlockerError: []*DynamicInterfaceOpt{
-			{
-				Tenant: "cgrates.net",
-				Value:  true,
-			},
-		},
-		CDRsDerivedReply: []*DynamicInterfaceOpt{
 			{
 				Tenant: "cgrates.net",
 				Value:  true,

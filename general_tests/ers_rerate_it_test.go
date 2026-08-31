@@ -366,7 +366,7 @@ func TestERSReRate(t *testing.T) {
 				},
 			},
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {
@@ -888,7 +888,7 @@ func TestERSReRateWithAccounts(t *testing.T) {
 				utils.UnitFactors: map[string]any{},
 			},
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {
@@ -1284,7 +1284,7 @@ func TestERSReRateEventOpts(t *testing.T) {
 			},
 			utils.MetaRates: true,
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {
@@ -1812,7 +1812,7 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 			},
 			utils.MetaRates: true,
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {
@@ -2331,7 +2331,7 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 				utils.UnitFactors: map[string]any{},
 			},
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {
@@ -2858,7 +2858,7 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 			},
 			utils.MetaRates: true,
 			utils.MetaRunID: "*default",
-			utils.MetaUsage: "10000000000",
+			utils.MetaUsage: float64(10000000000),
 		},
 	}
 	if !reflect.DeepEqual(ev, exp) {

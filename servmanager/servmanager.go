@@ -245,9 +245,6 @@ func toggleService(id string, status bool, sm *ServiceManager) error {
 	case utils.AttributeS:
 		sm.cfg.AttributeSCfg().Enabled = status
 		sm.cfg.GetReloadChan() <- id
-	case utils.CDRServer:
-		sm.cfg.CdrsCfg().Enabled = status
-		sm.cfg.GetReloadChan() <- id
 	case utils.ChargerS:
 		sm.cfg.ChargerSCfg().Enabled = status
 		sm.cfg.GetReloadChan() <- id

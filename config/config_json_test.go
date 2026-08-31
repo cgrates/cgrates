@@ -601,27 +601,6 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfCdrsJsonCfg(t *testing.T) {
-	eCfg := &CdrsJsonCfg{
-		Enabled:              utils.BoolPointer(false),
-		Extra_fields:         &[]string{},
-		Session_cost_retries: utils.IntPointer(5),
-		Conns:                map[string][]*DynamicConns{},
-		Online_cdr_exports:   &[]string{},
-		Opts:                 &CdrsOptsJson{},
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	cfg := new(CdrsJsonCfg)
-	if err := dfCgrJSONCfg.GetSection(context.Background(), CDRsJSON, cfg); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Errorf("Received: %+v", utils.ToJSON(cfg))
-	}
-}
-
 func TestSmgJsonCfg(t *testing.T) {
 	eCfg := &SessionSJsonCfg{
 		Enabled:             utils.BoolPointer(false),

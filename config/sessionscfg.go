@@ -15,7 +15,6 @@ const (
 	SessionsAccountsDftOpt               = false
 	SessionsRatesDftOpt                  = false
 	SessionsAttributesDftOpt             = false
-	SessionsCDRsDftOpt                   = false
 	SessionsEEsDftOpt                    = false
 	SessionsChargersDftOpt               = false
 	SessionsResourcesDftOpt              = false
@@ -29,7 +28,6 @@ const (
 	SessionsMessageDftOpt                = false
 	SessionsAttributesDerivedReplyDftOpt = false
 	SessionsBlockerErrorDftOpt           = false
-	SessionsCDRsDerivedReplyDftOpt       = false
 	SessionsResourcesAuthorizeDftOpt     = false
 	SessionsResourcesAllocateDftOpt      = false
 	SessionsResourcesReleaseDftOpt       = false
@@ -51,7 +49,6 @@ type SessionsOpts struct {
 	Accounts               []*DynamicBoolOpt
 	Rates                  []*DynamicBoolOpt
 	Attributes             []*DynamicBoolOpt
-	CDRs                   []*DynamicBoolOpt
 	Chargers               []*DynamicBoolOpt
 	Resources              []*DynamicBoolOpt
 	IPs                    []*DynamicBoolOpt
@@ -67,7 +64,6 @@ type SessionsOpts struct {
 	Message                []*DynamicBoolOpt
 	AttributesDerivedReply []*DynamicBoolOpt
 	BlockerError           []*DynamicBoolOpt
-	CDRsDerivedReply       []*DynamicBoolOpt
 	ResourcesAuthorize     []*DynamicBoolOpt
 	ResourcesAllocate      []*DynamicBoolOpt
 	ResourcesRelease       []*DynamicBoolOpt
@@ -160,13 +156,6 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 			return err
 		}
 		sesOpts.Attributes = append(opts, sesOpts.Attributes...)
-	}
-	if jsnCfg.CDRs != nil {
-		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRs)
-		if err != nil {
-			return err
-		}
-		sesOpts.CDRs = append(opts, sesOpts.CDRs...)
 	}
 	if jsnCfg.Chargers != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Chargers)
@@ -265,13 +254,6 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 			return err
 		}
 		sesOpts.BlockerError = append(opts, sesOpts.BlockerError...)
-	}
-	if jsnCfg.CDRsDerivedReply != nil {
-		opts, err := IfaceToBoolDynamicOpts(jsnCfg.CDRsDerivedReply)
-		if err != nil {
-			return err
-		}
-		sesOpts.CDRsDerivedReply = append(opts, sesOpts.CDRsDerivedReply...)
 	}
 	if jsnCfg.ResourcesAuthorize != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ResourcesAuthorize)
@@ -536,7 +518,6 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaAccounts:                  scfg.Opts.Accounts,
 		utils.MetaRates:                     scfg.Opts.Rates,
 		utils.MetaAttributes:                scfg.Opts.Attributes,
-		utils.MetaCDRs:                      scfg.Opts.CDRs,
 		utils.MetaChargers:                  scfg.Opts.Chargers,
 		utils.MetaResources:                 scfg.Opts.Resources,
 		utils.MetaIPs:                       scfg.Opts.IPs,
@@ -551,7 +532,6 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaMessage:                   scfg.Opts.Message,
 		utils.MetaAttributesDerivedReplyCfg: scfg.Opts.AttributesDerivedReply,
 		utils.MetaBlockerErrorCfg:           scfg.Opts.BlockerError,
-		utils.MetaCDRsDerivedReplyCfg:       scfg.Opts.CDRsDerivedReply,
 		utils.MetaResourcesAuthorizeCfg:     scfg.Opts.ResourcesAuthorize,
 		utils.MetaResourcesAllocateCfg:      scfg.Opts.ResourcesAllocate,
 		utils.MetaResourcesReleaseCfg:       scfg.Opts.ResourcesRelease,
@@ -611,7 +591,6 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		Accounts:               CloneDynamicBoolOpt(o.Accounts),
 		Rates:                  CloneDynamicBoolOpt(o.Rates),
 		Attributes:             CloneDynamicBoolOpt(o.Attributes),
-		CDRs:                   CloneDynamicBoolOpt(o.CDRs),
 		Chargers:               CloneDynamicBoolOpt(o.Chargers),
 		Resources:              CloneDynamicBoolOpt(o.Resources),
 		IPs:                    CloneDynamicBoolOpt(o.IPs),
@@ -626,7 +605,6 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		Message:                CloneDynamicBoolOpt(o.Message),
 		AttributesDerivedReply: CloneDynamicBoolOpt(o.AttributesDerivedReply),
 		BlockerError:           CloneDynamicBoolOpt(o.BlockerError),
-		CDRsDerivedReply:       CloneDynamicBoolOpt(o.CDRsDerivedReply),
 		ResourcesAuthorize:     CloneDynamicBoolOpt(o.ResourcesAuthorize),
 		ResourcesAllocate:      CloneDynamicBoolOpt(o.ResourcesAllocate),
 		ResourcesRelease:       CloneDynamicBoolOpt(o.ResourcesRelease),
@@ -779,7 +757,6 @@ type SessionsOptsJson struct {
 	Accounts               []*DynamicInterfaceOpt `json:"*accounts"`
 	Rates                  []*DynamicInterfaceOpt `json:"*rates"`
 	Attributes             []*DynamicInterfaceOpt `json:"*attributes"`
-	CDRs                   []*DynamicInterfaceOpt `json:"*cdrs"`
 	Chargers               []*DynamicInterfaceOpt `json:"*chargers"`
 	Resources              []*DynamicInterfaceOpt `json:"*resources"`
 	IPs                    []*DynamicInterfaceOpt `json:"*ips"`
@@ -794,7 +771,6 @@ type SessionsOptsJson struct {
 	Message                []*DynamicInterfaceOpt `json:"*message"`
 	AttributesDerivedReply []*DynamicInterfaceOpt `json:"*attributesDerivedReply"`
 	BlockerError           []*DynamicInterfaceOpt `json:"*blockerError"`
-	CDRsDerivedReply       []*DynamicInterfaceOpt `json:"*cdrsDerivedReply"`
 	ResourcesAuthorize     []*DynamicInterfaceOpt `json:"*resourcesAuthorize"`
 	ResourcesAllocate      []*DynamicInterfaceOpt `json:"*resourcesAllocate"`
 	ResourcesRelease       []*DynamicInterfaceOpt `json:"*resourcesRelease"`
@@ -853,9 +829,6 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicBoolOptEqual(v1.Attributes, v2.Attributes) {
 		d.Attributes = BoolToIfaceDynamicOpts(v2.Attributes)
 	}
-	if !DynamicBoolOptEqual(v1.CDRs, v2.CDRs) {
-		d.CDRs = BoolToIfaceDynamicOpts(v2.CDRs)
-	}
 	if !DynamicBoolOptEqual(v1.Chargers, v2.Chargers) {
 		d.Chargers = BoolToIfaceDynamicOpts(v2.Chargers)
 	}
@@ -897,9 +870,6 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.BlockerError, v2.BlockerError) {
 		d.BlockerError = BoolToIfaceDynamicOpts(v2.BlockerError)
-	}
-	if !DynamicBoolOptEqual(v1.CDRsDerivedReply, v2.CDRsDerivedReply) {
-		d.CDRsDerivedReply = BoolToIfaceDynamicOpts(v2.CDRsDerivedReply)
 	}
 	if !DynamicBoolOptEqual(v1.ResourcesAuthorize, v2.ResourcesAuthorize) {
 		d.ResourcesAuthorize = BoolToIfaceDynamicOpts(v2.ResourcesAuthorize)

@@ -110,10 +110,6 @@ var serviceMethods = map[string]internalRoute{
 		receiver:     utils.CacheSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches),
 	},
-	utils.CDRServer: {
-		receiver:     utils.CDRsV1,
-		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs),
-	},
 	utils.ChargerS: {
 		receiver:     utils.ChargerSv1,
 		internalPath: utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers),

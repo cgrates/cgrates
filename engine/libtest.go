@@ -675,7 +675,6 @@ var serviceReceivers = map[string]string{
 	utils.AdminS:          utils.AdminSv1,
 	utils.AnalyzerS:       utils.AnalyzerSv1,
 	utils.AttributeS:      utils.AttributeSv1,
-	utils.CDRServer:       utils.CDRsV1,
 	utils.ChargerS:        utils.ChargerSv1,
 	utils.EEs:             utils.EeSv1,
 	utils.EFs:             utils.EfSv1,

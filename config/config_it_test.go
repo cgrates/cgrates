@@ -795,7 +795,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
-	cfg.CdrsCfg().Enabled = true
 	var reply string
 	if err := cfg.V1SetConfig(context.Background(), &SetConfigArgs{
 		Config: map[string]any{
@@ -806,7 +805,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 					"*ips":        []any{map[string]any{"tenant": "", "connIDs": []any{"*localhost"}}},
 					"*routes":     []any{map[string]any{"tenant": "", "connIDs": []any{"*localhost"}}},
 					"*attributes": []any{map[string]any{"tenant": "", "connIDs": []any{"*localhost"}}},
-					"*cdrs":       []any{map[string]any{"tenant": "", "connIDs": []any{"*internal"}}},
 					"*chargers":   []any{map[string]any{"tenant": "", "connIDs": []any{"*internal"}}},
 				},
 				"opts": map[string]any{},
@@ -840,14 +838,12 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
 			utils.MetaChargers:   {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -862,7 +858,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},
@@ -902,7 +897,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
-	cfg.CdrsCfg().Enabled = true
 	var reply string
 	if err := cfg.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{
 		Config: `{
@@ -913,7 +907,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			"*ips": [{"tenant":"","connIDs":["*localhost"]}],
 			"*routes": [{"tenant":"","connIDs":["*localhost"]}],
 			"*attributes": [{"tenant":"","connIDs":["*localhost"]}],
-			"*cdrs": [{"tenant":"","connIDs":["*internal"]}],
 			"*chargers": [{"tenant":"","connIDs":["*localhost"]}]
 		},
 	"opts": {}
@@ -946,14 +939,12 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaRoutes:     {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaAttributes: {{ConnIDs: []string{utils.MetaLocalHost}}},
-			utils.MetaCDRs:       {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}},
 			utils.MetaChargers:   {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
 		Opts: &SessionsOpts{
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -968,7 +959,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},
@@ -1017,7 +1007,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	cfg.ChargerSCfg().Enabled = true
-	cfg.CdrsCfg().Enabled = true
 	var reply string
 	cfg.ConfigPath = path.Join("/usr", "share", "cgrates", "conf", "samples", "tutmongo2")
 	if err := cfg.V1ReloadConfig(context.Background(), &ReloadArgs{
@@ -1057,7 +1046,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -1072,7 +1060,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},

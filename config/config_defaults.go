@@ -164,7 +164,6 @@ const CGRATES_CFG_JSON = `
 		"*actionProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*attributeFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
 		"*attributeProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
-		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*chargerFilterIndexes" : {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate": false, "dbConn": "*default"},
 		"*chargerProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*filters": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
@@ -338,145 +337,6 @@ const CGRATES_CFG_JSON = `
 		// ]
 	}	
 	},
-
-
-
-"cdrs": {
-	"enabled": false,		// start the CDR Server:  <true|false>
-	"extraFields": [],		// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
-	"sessionCostRetries": 5,	// number of queries to session_costs before recalculating CDR
-	"conns": {
-		// "*accounts": [	// connections to AccountS
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*actions": [	// connections to SchedulerS in case of *dynaprepaid request
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*attributes": [		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-	    // "*chargers": [		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*ees": [	// connections to EventExporter
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*rates": [	// connections to RateS
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*stats": [		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],		
-		// "*thresholds": [		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-	},	
-	"onlineCDRExports":[],	// list of CDRE profiles to use for real-time CDR exports
-	"opts": {
-		// "*accounts": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*attributes": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*chargers": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*ees": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*rates": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*refund": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*rerate": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*stats": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*store": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "true"
-		// 	}
-		// ],	
-		// "*thresholds": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ]
-	}
-},
 
 
 "ers": {				// EventReaderService
@@ -842,13 +702,6 @@ const CGRATES_CFG_JSON = `
 		// 		"value": false
 		// 	}
 		// ],
-		// "*cdrs": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
 		// "*ur": [
 		// 	{
 		// 		"tenant": "*any",
@@ -856,13 +709,6 @@ const CGRATES_CFG_JSON = `
 		// 		"value": false
 		// 	}
 		// ],
-		// "*cdrsDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],	
 		// "*chargeable": [
 		// 	{
 		// 		"tenant": "*any",
@@ -1117,13 +963,6 @@ const CGRATES_CFG_JSON = `
 		// 		"connIDs": []
 		// 	}
 		// ],
-		// "*cdrs": [	// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": []
-		// 	}
-		// ],		
 		// "*chargers": [	// connections to ChargerS for session forking <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"tenant": "",
@@ -2584,13 +2423,6 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 		// "*admins": [		// connections to AdminS for *dynamic actions: <""|*internal|$rpc_conns_id>
-		// 	{
-		// 		"tenant": "",
-		// 		"filterIDs": [],
-		// 		"connIDs": ["*internal"]
-		// 	}
-		// ],
-		// "*cdrs": [		// connections to CDRs for CDR posting <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"tenant": "",
 		// 		"filterIDs": [],

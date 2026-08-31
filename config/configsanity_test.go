@@ -9,82 +9,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestConfigSanityCDRServer(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-
-	cfg.cdrsCfg = &CdrsCfg{
-		Enabled: true,
-		Conns:   make(map[string][]*DynamicConns),
-	}
-
-	cfg.cdrsCfg.Conns[utils.MetaEEs] = []*DynamicConns{{ConnIDs: []string{"test"}}}
-	expected := "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+q, received %+q", expected, err)
-	}
-	cfg.cdrsCfg.Conns[utils.MetaEEs] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
-	expected = "<EEs> not enabled but requested by <CDRs> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+q, received %+q", expected, err)
-	}
-	delete(cfg.cdrsCfg.Conns, utils.MetaEEs)
-
-	cfg.cdrsCfg.Conns[utils.MetaChargers] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
-	expected = "<ChargerS> not enabled but requested by <CDRs> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.cdrsCfg.Conns[utils.MetaChargers] = []*DynamicConns{{ConnIDs: []string{"test"}}}
-	expected = "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	delete(cfg.cdrsCfg.Conns, utils.MetaChargers)
-
-	cfg.cdrsCfg.Conns[utils.MetaAttributes] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
-	expected = "<AttributeS> not enabled but requested by <CDRs> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.cdrsCfg.Conns[utils.MetaAttributes] = []*DynamicConns{{ConnIDs: []string{"test"}}}
-	expected = "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	delete(cfg.cdrsCfg.Conns, utils.MetaAttributes)
-
-	cfg.cdrsCfg.Conns[utils.MetaStats] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
-	expected = "<StatS> not enabled but requested by <CDRs> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	cfg.cdrsCfg.Conns[utils.MetaStats] = []*DynamicConns{{ConnIDs: []string{"test"}}}
-	expected = "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	delete(cfg.cdrsCfg.Conns, utils.MetaStats)
-
-	cfg.cdrsCfg.Conns[utils.MetaThresholds] = []*DynamicConns{{ConnIDs: []string{utils.MetaInternal}}}
-	expected = "<ThresholdS> not enabled but requested by <CDRs> component"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-
-	cfg.cdrsCfg.Conns[utils.MetaThresholds] = []*DynamicConns{{ConnIDs: []string{"test"}}}
-	expected = "<CDRs> connection with id: <test> not defined"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-	delete(cfg.cdrsCfg.Conns, utils.MetaThresholds)
-
-	cfg.cdrsCfg.OnlineCDRExports = []string{"*default", "stringy"}
-	expected = "<CDRs> cannot find exporter with ID: <stringy>"
-	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {
-		t.Errorf("Expecting: %+q  received: %+q", expected, err)
-	}
-}
-
 func TestConfigSanityLoaders(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.loaderCfg = LoaderSCfgs{
@@ -1665,9 +1589,6 @@ func TestConfigSanityErs(t *testing.T) {
 
 func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 	cfg := &CGRConfig{
-		cdrsCfg: &CdrsCfg{
-			Enabled: false,
-		},
 		chargerSCfg: &ChargerSCfg{
 			Enabled: false,
 		},

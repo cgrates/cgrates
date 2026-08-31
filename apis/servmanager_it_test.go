@@ -106,7 +106,6 @@ func testSrvMngPing(t *testing.T) {
 		utils.ActionS:    utils.ActionSv1Ping,
 		utils.AnalyzerS:  utils.AnalyzerSv1Ping,
 		utils.AttributeS: utils.AttributeSv1Ping,
-		utils.CDRServer:  utils.CDRsV1Ping,
 		utils.ChargerS:   utils.ChargerSv1Ping,
 		// utils.DispatcherS: utils.DispatcherSv1Ping,
 		utils.EEs:        utils.EeSv1Ping,

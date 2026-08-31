@@ -312,54 +312,6 @@ func TestCgrCfgJSONDefaultsjsnDataDb(t *testing.T) {
 	}
 }
 
-func TestCgrCfgJSONDefaultsCDRS(t *testing.T) {
-	eCdrsCfg := &CdrsCfg{
-		Enabled:       false,
-		SMCostRetries: 5,
-		Conns:         map[string][]*DynamicConns{},
-		ExtraFields:   utils.RSRParsers{},
-		Opts: &CdrsOpts{
-			Accounts:   []*DynamicBoolOpt{{}},
-			Attributes: []*DynamicBoolOpt{{}},
-			Chargers:   []*DynamicBoolOpt{{}},
-			Export:     []*DynamicBoolOpt{{}},
-			Rates:      []*DynamicBoolOpt{{}},
-			Stats:      []*DynamicBoolOpt{{}},
-			Thresholds: []*DynamicBoolOpt{{}},
-			Refund:     []*DynamicBoolOpt{{}},
-			Rerate:     []*DynamicBoolOpt{{}},
-			Store:      []*DynamicBoolOpt{{value: true}},
-		},
-	}
-	if !reflect.DeepEqual(eCdrsCfg, cgrCfg.cdrsCfg) {
-		t.Errorf("Expecting: %+v , received: %+v", utils.ToJSON(eCdrsCfg), utils.ToJSON(cgrCfg.cdrsCfg))
-	}
-}
-
-func TestCgrCfgJSONLoadCDRS(t *testing.T) {
-	jsnCfg := `
-{
-"cdrs": {
-	"enabled": true,
-	"conns": {
-		"*chargers": [{"connIDs": ["*internal"]}]
-	},
-},
-}
-	`
-	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(jsnCfg)
-	if err != nil {
-		t.Error(err)
-	}
-	if !cgrCfg.CdrsCfg().Enabled {
-		t.Errorf("Expecting: true , received: %+v", cgrCfg.CdrsCfg().Enabled)
-	}
-	expected := []*DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}}}
-	if !reflect.DeepEqual(cgrCfg.CdrsCfg().Conns[utils.MetaChargers], expected) {
-		t.Errorf("Expecting: %+v , received: %+v", expected, cgrCfg.CdrsCfg().Conns[utils.MetaChargers])
-	}
-}
-
 func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 	eSessionSCfg := &SessionSCfg{
 		Enabled:             false,
@@ -386,7 +338,6 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -401,7 +352,6 @@ func TestCgrCfgJSONDefaultsSMGenericCfg(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},
@@ -1010,21 +960,6 @@ func TestLoadFilterSCfgError(t *testing.T) {
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
 	} else if err := cgrConfig.filterSCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestLoadCdrsCfgError(t *testing.T) {
-	cfgJSONStr := `{
-	"cdrs": {
-        "sessionCostRetries": "*internal",
-	},
-}`
-	expected := "json: cannot unmarshal string into Go struct field CdrsJsonCfg.sessionCostRetries of type int"
-	cgrConfig := NewDefaultCGRConfig()
-	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
-		t.Error(err)
-	} else if err := cgrConfig.cdrsCfg.Load(context.Background(), cgrCfgJSON, cgrCfg); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
@@ -1773,7 +1708,6 @@ func TestSessionSConfig(t *testing.T) {
 			Accounts:               []*DynamicBoolOpt{{}},
 			Rates:                  []*DynamicBoolOpt{{}},
 			Attributes:             []*DynamicBoolOpt{{}},
-			CDRs:                   []*DynamicBoolOpt{{}},
 			Chargers:               []*DynamicBoolOpt{{}},
 			Resources:              []*DynamicBoolOpt{{}},
 			IPs:                    []*DynamicBoolOpt{{}},
@@ -1792,7 +1726,6 @@ func TestSessionSConfig(t *testing.T) {
 			Message:                []*DynamicBoolOpt{{}},
 			AttributesDerivedReply: []*DynamicBoolOpt{{}},
 			BlockerError:           []*DynamicBoolOpt{{}},
-			CDRsDerivedReply:       []*DynamicBoolOpt{{}},
 			ResourcesAuthorize:     []*DynamicBoolOpt{{}},
 			ResourcesAllocate:      []*DynamicBoolOpt{{}},
 			ResourcesRelease:       []*DynamicBoolOpt{{}},
@@ -3908,7 +3841,6 @@ func TestV1GetConfigSessionS(t *testing.T) {
 				utils.MetaMessage:                   []*DynamicBoolOpt{{}},
 				utils.MetaAttributesDerivedReplyCfg: []*DynamicBoolOpt{{}},
 				utils.MetaBlockerErrorCfg:           []*DynamicBoolOpt{{}},
-				utils.MetaCDRsDerivedReplyCfg:       []*DynamicBoolOpt{{}},
 				utils.MetaResourcesAuthorizeCfg:     []*DynamicBoolOpt{{}},
 				utils.MetaResourcesAllocateCfg:      []*DynamicBoolOpt{{}},
 				utils.MetaResourcesReleaseCfg:       []*DynamicBoolOpt{{}},
@@ -5629,9 +5561,6 @@ func TestCGRConfigClone(t *testing.T) {
 	}
 	if !reflect.DeepEqual(cfg.filterSCfg, rcv.filterSCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.filterSCfg), utils.ToJSON(rcv.filterSCfg))
-	}
-	if !reflect.DeepEqual(cfg.cdrsCfg, rcv.cdrsCfg) {
-		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.cdrsCfg), utils.ToJSON(rcv.cdrsCfg))
 	}
 	if !reflect.DeepEqual(cfg.sessionSCfg, rcv.sessionSCfg) {
 		t.Errorf("Expected: %+v\nReceived: %+v", utils.ToJSON(cfg.sessionSCfg), utils.ToJSON(rcv.sessionSCfg))

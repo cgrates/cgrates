@@ -23,45 +23,6 @@ func (cfg *CGRConfig) CheckConfigSanity() error {
 
 func (cfg *CGRConfig) checkConfigSanity() error {
 
-	// CDRServer checks
-	if cfg.cdrsCfg.Enabled {
-		cdrConnEnabledMap := map[string]struct {
-			name    string
-			enabled bool
-		}{
-			utils.MetaChargers:   {utils.ChargerS, cfg.chargerSCfg.Enabled},
-			utils.MetaAttributes: {utils.AttributeS, cfg.attributeSCfg.Enabled},
-			utils.MetaStats:      {utils.StatService, cfg.statsCfg.Enabled},
-			utils.MetaThresholds: {utils.ThresholdS, cfg.thresholdSCfg.Enabled},
-			utils.MetaEEs:        {utils.EEs, cfg.eesCfg.Enabled},
-		}
-		for connType, opts := range cfg.cdrsCfg.Conns {
-			for _, opt := range opts {
-				for _, connID := range opt.ConnIDs {
-					if connEn, has := cdrConnEnabledMap[connType]; has {
-						if strings.HasPrefix(connID, utils.MetaInternal) && !connEn.enabled {
-							return fmt.Errorf("<%s> not enabled but requested by <%s> component", connEn.name, utils.CDRs)
-						}
-					}
-					if _, has := cfg.rpcConns[connID]; !has && !strings.HasPrefix(connID, utils.MetaInternal) {
-						return fmt.Errorf("<%s> connection with id: <%s> not defined", utils.CDRs, connID)
-					}
-				}
-			}
-		}
-		for _, expID := range cfg.cdrsCfg.OnlineCDRExports {
-			has := false
-			for _, ee := range cfg.eesCfg.Exporters {
-				if ee.ID == expID {
-					has = true
-					break
-				}
-			}
-			if !has {
-				return fmt.Errorf("<%s> cannot find exporter with ID: <%s>", utils.CDRs, expID)
-			}
-		}
-	}
 	// Loaders sanity checks
 	for _, ldrSCfg := range cfg.loaderCfg {
 		if !ldrSCfg.Enabled {
@@ -120,7 +81,6 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			utils.MetaStats:      {utils.StatService, cfg.statsCfg.Enabled},
 			utils.MetaRoutes:     {utils.RouteS, cfg.routeSCfg.Enabled},
 			utils.MetaAttributes: {utils.AttributeS, cfg.attributeSCfg.Enabled},
-			utils.MetaCDRs:       {utils.CDRs, cfg.cdrsCfg.Enabled},
 			utils.MetaActions:    {utils.ActionS, cfg.actionSCfg.Enabled},
 			utils.MetaRates:      {utils.RateS, cfg.rateSCfg.Enabled},
 			utils.MetaAccounts:   {utils.AccountS, cfg.accountSCfg.Enabled},

@@ -101,18 +101,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			dialer:     &net.Dialer{},
 		},
 		filterSCfg: &FilterSCfg{Conns: make(map[string][]*DynamicConns)},
-		cdrsCfg: &CdrsCfg{Conns: make(map[string][]*DynamicConns), Opts: &CdrsOpts{
-			Accounts:   []*DynamicBoolOpt{{value: CDRsAccountsDftOpt}},
-			Attributes: []*DynamicBoolOpt{{value: CDRsAttributesDftOpt}},
-			Chargers:   []*DynamicBoolOpt{{value: CDRsChargersDftOpt}},
-			Export:     []*DynamicBoolOpt{{value: CDRsExportDftOpt}},
-			Rates:      []*DynamicBoolOpt{{value: CDRsRatesDftOpt}},
-			Stats:      []*DynamicBoolOpt{{value: CDRsStatsDftOpt}},
-			Thresholds: []*DynamicBoolOpt{{value: CDRsThresholdsDftOpt}},
-			Refund:     []*DynamicBoolOpt{{value: CDRsRefundDftOpt}},
-			Rerate:     []*DynamicBoolOpt{{value: CDRsRerateDftOpt}},
-			Store:      []*DynamicBoolOpt{{value: CDRsStoreDftOpt}},
-		}},
 		analyzerSCfg: &AnalyzerSCfg{
 			Conns: make(map[string][]*DynamicConns),
 			Opts: &AnalyzerSOpts{
@@ -127,7 +115,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				Accounts:               []*DynamicBoolOpt{{value: SessionsAccountsDftOpt}},
 				Rates:                  []*DynamicBoolOpt{{value: SessionsRatesDftOpt}},
 				Attributes:             []*DynamicBoolOpt{{value: SessionsAttributesDftOpt}},
-				CDRs:                   []*DynamicBoolOpt{{value: SessionsCDRsDftOpt}},
 				Chargers:               []*DynamicBoolOpt{{value: SessionsChargersDftOpt}},
 				Resources:              []*DynamicBoolOpt{{value: SessionsResourcesDftOpt}},
 				IPs:                    []*DynamicBoolOpt{{value: SessionsIPsDftOpt}},
@@ -142,7 +129,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				Message:                []*DynamicBoolOpt{{value: SessionsMessageDftOpt}},
 				AttributesDerivedReply: []*DynamicBoolOpt{{value: SessionsAttributesDerivedReplyDftOpt}},
 				BlockerError:           []*DynamicBoolOpt{{value: SessionsBlockerErrorDftOpt}},
-				CDRsDerivedReply:       []*DynamicBoolOpt{{value: SessionsCDRsDerivedReplyDftOpt}},
 				ResourcesAuthorize:     []*DynamicBoolOpt{{value: SessionsResourcesAuthorizeDftOpt}},
 				ResourcesAllocate:      []*DynamicBoolOpt{{value: SessionsResourcesAllocateDftOpt}},
 				ResourcesRelease:       []*DynamicBoolOpt{{value: SessionsResourcesReleaseDftOpt}},
@@ -357,7 +343,6 @@ type CGRConfig struct {
 	listenCfg          *ListenCfg          // Listen config
 	httpCfg            *HTTPCfg            // HTTP config
 	filterSCfg         *FilterSCfg         // FilterS config
-	cdrsCfg            *CdrsCfg            // Cdrs config
 	sessionSCfg        *SessionSCfg        // SessionS config
 	fsAgentCfg         *FsAgentCfg         // FreeSWITCHAgent config
 	kamAgentCfg        *KamAgentCfg        // KamailioAgent config
@@ -666,13 +651,6 @@ func (cfg *CGRConfig) HTTPCfg() *HTTPCfg {
 	cfg.lks[HTTPJSON].Lock()
 	defer cfg.lks[HTTPJSON].Unlock()
 	return cfg.httpCfg
-}
-
-// CdrsCfg returns the config for CDR Server
-func (cfg *CGRConfig) CdrsCfg() *CdrsCfg {
-	cfg.lks[CDRsJSON].Lock()
-	defer cfg.lks[CDRsJSON].Unlock()
-	return cfg.cdrsCfg
 }
 
 // AnalyzerSCfg returns the config for AnalyzerS
@@ -1053,7 +1031,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		listenCfg:          cfg.listenCfg.Clone(),
 		httpCfg:            cfg.httpCfg.Clone(),
 		filterSCfg:         cfg.filterSCfg.Clone(),
-		cdrsCfg:            cfg.cdrsCfg.Clone(),
 		sessionSCfg:        cfg.sessionSCfg.Clone(),
 		fsAgentCfg:         cfg.fsAgentCfg.Clone(),
 		kamAgentCfg:        cfg.kamAgentCfg.Clone(),

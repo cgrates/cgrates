@@ -202,16 +202,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 			},
 		},
 		{
-			name: utils.CDRsV1,
-			rcvr: apis.NewCdrSv1(nil),
-			consts: map[string]string{
-				"Ping":                utils.CDRsV1Ping,
-				"ProcessEvent":        utils.CDRsV1ProcessEvent,
-				"ProcessEventWithGet": utils.CDRsV1ProcessEventWithGet,
-				"ProcessStoredEvents": utils.CDRsV1ProcessStoredEvents,
-			},
-		},
-		{
 			name: utils.ChargerSv1,
 			rcvr: apis.NewChargerSv1(nil),
 			consts: map[string]string{

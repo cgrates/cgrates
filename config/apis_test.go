@@ -461,20 +461,6 @@ func TestStoreDiffSectionFilterS(t *testing.T) {
 	}
 }
 
-func TestStoreDiffSectionCDRs(t *testing.T) {
-	section := CDRsJSON
-
-	cgrCfgV1 := NewDefaultCGRConfig()
-	cgrCfgV1.cdrsCfg = &CdrsCfg{}
-
-	cgrCfgV2 := NewDefaultCGRConfig()
-	cgrCfgV2.cdrsCfg = &CdrsCfg{}
-
-	if err := storeDiffSection(context.Background(), section, new(mockDb), cgrCfgV1, cgrCfgV2); err != utils.ErrNotImplemented || err == nil {
-		t.Error(err)
-	}
-}
-
 func TestStoreDiffSectionERs(t *testing.T) {
 	section := ERsJSON
 

@@ -1,19 +1,22 @@
-<include>
-  <context name="cgrates">
-    <extension name="cgrates_authorization">
+   <extension name="CGRateS_Auth">
       <condition field="${cgrNotify}" expression="^$">
-        <action application="park"/>
+        <action application="park" />
       </condition>
     </extension>
-
-    <extension name="cgrates_call">
-      <condition field="${cgrNotify}" expression="^AUTH_OK$">
-        <action application="answer"/>
-        <action application="sleep" data="15000"/>
-        <action application="hangup"/>
-        <anti-action application="set" data="proto_specific_hangup_cause=sip:403"/>
-        <anti-action application="hangup"/>
+    <extension name="CGRateS_AuthDenied">
+      <!-- hang up if cgr_notify doesn't contain AUTH_OK -->
+      <condition field="${cgrNotify}" expression="^(?!.*AUTH_OK).*">  
+        <action application="set" data="proto_specific_hangup_cause=sip:503" />
+        <action application="hangup" />
       </condition>
     </extension>
-  </context>
-</include>
+    <extension name="DialOut">
+      <condition field="${cgrRoutes}" expression=".+"> 
+        <action application="set" data="cgr_route=${cgrRoutes[1]}" />
+      </condition>
+      <condition field="${destination_number}" expression="^(10[0-9][0-9])$">
+        <action application="set" data="ringback=${us-ring}" />
+        <action application="set" data="call_timeout=30" />
+        <action application="bridge" data="user/${destination_number}@${domain_name}" />
+      </condition>
+    </extension>

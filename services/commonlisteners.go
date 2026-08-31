@@ -56,7 +56,6 @@ func (s *CommonListenerService) Shutdown(registry *servmanager.Registry) error {
 		utils.AnalyzerS,
 		utils.AttributeS,
 		utils.CacheS,
-		utils.CDRServer,
 		utils.ChargerS,
 		utils.ConfigS,
 		utils.CoreS,
