@@ -1045,6 +1045,49 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 	return &alcIP, err
 }
 
+func (sS *SessionS) ipsAllocate(ctx *context.Context, cgrEv *utils.CGREvent) (*utils.AllocatedIP, error) {
+	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
+	if err != nil {
+		return nil, err
+	}
+	if len(conns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.IPs)
+	}
+	originID, err := cgrEv.OptAsString(utils.MetaOriginID)
+	if err != nil {
+		return nil, err
+	}
+	if originID == "" {
+		return nil, utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
+	}
+	cgrEv.APIOpts[utils.OptsIPsAllocationID] = originID
+	var allocatedIP utils.AllocatedIP
+	if err := sS.connMgr.Call(ctx, conns, utils.IPsV1AllocateIP, cgrEv, &allocatedIP); err != nil {
+		return nil, err
+	}
+	return &allocatedIP, nil
+}
+
+func (sS *SessionS) ipsRelease(ctx *context.Context, cgrEv *utils.CGREvent) error {
+	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
+	if err != nil {
+		return err
+	}
+	if len(conns) == 0 {
+		return utils.NewErrNotConnected(utils.IPs)
+	}
+	originID, err := cgrEv.OptAsString(utils.MetaOriginID)
+	if err != nil {
+		return err
+	}
+	if originID == "" {
+		return utils.NewErrMandatoryIeMissing(utils.MetaOriginID)
+	}
+	cgrEv.APIOpts[utils.OptsIPsAllocationID] = originID
+	var reply string
+	return sS.connMgr.Call(ctx, conns, utils.IPsV1ReleaseIP, cgrEv, &reply)
+}
+
 // resourcesAuthorize will authorize the event with the Resources subsystem
 func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (resID string, err error) {
 	var conns []string

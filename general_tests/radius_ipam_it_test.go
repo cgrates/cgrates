@@ -51,6 +51,7 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		t.Fatal(err)
 	}
 
+	usageRecordKey := "RadiusIPAMUsageRecordOriginID"
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_ipam"),
 		ConfigJSON: fmt.Sprintf(`{
@@ -70,28 +71,36 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		"*default": [
 			%q
 		]
-	}
+	},
+	"requestProcessors": [
+		{
+			"id": "IPSAccountingStop",
+			"replyFields": [
+				{
+					"tag": "ProxyState",
+					"path": "*rep.Proxy-State",
+					"type": "*variable",
+					"value": "~*req.Proxy-State",
+					"mandatory": true
+				},
+				{
+					"tag": "UsageRecordOriginID",
+					"path": "*uch.%s",
+					"type": "*variable",
+					"value": "~*cgrep.UsageRecords[*primary].*opts.*originID",
+					"mandatory": true
+				}
+			]
+		}
+	]
 }
-}`, dictDir+"/"),
+}`, dictDir+"/", usageRecordKey),
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
 		//LogBuffer: &bytes.Buffer{},
 	}
 	//t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	client, cfg := ng.Run(t)
-
-	var replySetCharger string
-	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
-		&utils.ChargerProfileWithAPIOpts{
-			ChargerProfile: &utils.ChargerProfile{
-				Tenant:       "cgrates.org",
-				ID:           "DEFAULT",
-				RunID:        utils.MetaDefault,
-				AttributeIDs: []string{utils.MetaNone},
-			},
-		}, &replySetCharger); err != nil {
-		t.Fatal(err)
-	}
 
 	ippID := "IMSI_123456789012345"
 	var replySet string
@@ -275,6 +284,13 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 		}, radigo.AccountingResponse,
 	)
 	checkAllocs(t, client, ippID, acctSessionID)
+	activeSessions := checkActiveSessions(t, client, 1)
+	if activeSessions[0].TotalUsage == nil {
+		t.Fatal("active session TotalUsage is nil, want 8888888")
+	}
+	if got := *activeSessions[0].TotalUsage; got != 8888888 {
+		t.Errorf("active session TotalUsage = %d, want 8888888", got)
+	}
 
 	// Step 4: Accounting-Request Stop (should release)
 	time.Sleep(100 * time.Millisecond)
@@ -297,9 +313,21 @@ VALUE	Acct-Terminate-Cause	User-Request	1
 			"Proxy-State":          proxyAcctStop,
 		}, radigo.AccountingResponse,
 	)
+	var usageRecordOriginID any
+	if err := client.Call(context.Background(), utils.CacheSv1GetItem,
+		&utils.ArgsGetCacheItemWithAPIOpts{
+			Tenant: "cgrates.org",
+			ArgsGetCacheItem: utils.ArgsGetCacheItem{
+				CacheID: utils.CacheUCH,
+				ItemID:  usageRecordKey,
+			},
+		}, &usageRecordOriginID); err != nil {
+		t.Error(err)
+	} else if usageRecordOriginID != acctSessionID {
+		t.Errorf("UsageRecord origin ID = %v, want %s", usageRecordOriginID, acctSessionID)
+	}
 	checkAllocs(t, client, ippID)
 	checkActiveSessions(t, client, 0)
-	checkCDR(t, client, imsi)
 }
 
 func sendRadReq(t *testing.T, client *radigo.Client, code radigo.PacketCode, id uint8, avps map[string]string, expectedCode radigo.PacketCode) *radigo.Packet {
@@ -398,31 +426,14 @@ func releaseIP(tb testing.TB, client *birpc.Client, id, allocID string) {
 	}
 }
 
-func checkCDR(tb testing.TB, client *birpc.Client, acnt string) {
-	tb.Helper()
-	var cdrs []*utils.CDR
-	if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
-		&utils.CDRFilters{
-			FilterIDs: []string{
-				fmt.Sprintf("*string:~*req.Account:%s", acnt),
-			},
-		}, &cdrs); err != nil {
-		tb.Fatal(err)
-	}
-	if len(cdrs) != 1 {
-		tb.Fatalf("%s received %d cdrs, want exactly one", utils.AdminSv1GetCDRs, len(cdrs))
-	}
-	tb.Logf("CDR contents: %s", utils.ToIJSON(cdrs[0]))
-}
-
-func checkActiveSessions(tb testing.TB, client *birpc.Client, wantCount int) {
+func checkActiveSessions(tb testing.TB, client *birpc.Client, wantCount int) []*sessions.ExternalSession {
 	tb.Helper()
 	var sessions []*sessions.ExternalSession
 	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
 		&utils.SessionFilter{}, &sessions); err != nil {
 		if wantCount == 0 && err.Error() == utils.ErrNotFound.Error() {
 			tb.Logf("no active sessions found (expected)")
-			return
+			return nil
 		}
 		tb.Fatalf("failed to get active sessions: %v", err)
 	}
@@ -431,4 +442,5 @@ func checkActiveSessions(tb testing.TB, client *birpc.Client, wantCount int) {
 			utils.SessionSv1GetActiveSessions, len(sessions), wantCount)
 	}
 	tb.Logf("%s reply: %s", utils.SessionSv1GetActiveSessions, utils.ToIJSON(sessions))
+	return sessions
 }
