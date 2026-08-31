@@ -1235,6 +1235,42 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 		t.Errorf("Expecting \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rply))
 	}
 
+	v1per.UsageRecords = map[string]*utils.CGREvent{
+		utils.MetaDefault: {
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "session1",
+			},
+		},
+	}
+	expected["UsageRecords"] = &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			utils.MetaDefault: {
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					utils.MetaReq: {
+						Type: utils.NMMapType,
+						Map: map[string]*utils.DataNode{
+							utils.AccountField: utils.NewLeafNode("1001"),
+						},
+					},
+					utils.MetaOpts: {
+						Type: utils.NMMapType,
+						Map: map[string]*utils.DataNode{
+							utils.MetaOriginID: utils.NewLeafNode("session1"),
+						},
+					},
+				},
+			},
+		},
+	}
+	if rply := v1per.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
+		t.Errorf("Expecting \n%+v\n, received: \n%+v", utils.ToJSON(expected), utils.ToJSON(rply))
+	}
+
 	//IPsAllocation check
 	v1per.IPsAllocation = map[string]*utils.AllocatedIP{
 		utils.MetaDefault: {

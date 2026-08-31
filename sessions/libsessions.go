@@ -407,6 +407,27 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 		}
 		cgrReply[utils.OptsStirIdentity] = stir
 	}
+	if v1Rply.UsageRecords != nil {
+		usageRecords := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+		for runID, cgrEv := range v1Rply.UsageRecords {
+			event := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+			for k, v := range cgrEv.Event {
+				event.Map[k] = utils.NewLeafNode(v)
+			}
+			opts := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
+			for k, v := range cgrEv.APIOpts {
+				opts.Map[k] = utils.NewLeafNode(v)
+			}
+			usageRecords.Map[runID] = &utils.DataNode{
+				Type: utils.NMMapType,
+				Map: map[string]*utils.DataNode{
+					utils.MetaReq:  event,
+					utils.MetaOpts: opts,
+				},
+			}
+		}
+		cgrReply["UsageRecords"] = usageRecords
+	}
 	return cgrReply
 }
 
