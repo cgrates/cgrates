@@ -954,7 +954,7 @@ func testOnStorITRateProfile(t *testing.T) {
 		Rates: map[string]*utils.Rate{
 			"FIRST_GI": {
 				ID:        "FIRST_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:0"},
+				FilterIDs: []string{"*gte:~*req.Usage:0"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 0,
@@ -964,7 +964,7 @@ func testOnStorITRateProfile(t *testing.T) {
 			},
 			"SECOND_GI": {
 				ID:        "SECOND_GI",
-				FilterIDs: []string{"*gi:~*req.Usage:1m"},
+				FilterIDs: []string{"*gte:~*req.Usage:1m"},
 				Weights: utils.DynamicWeights{
 					{
 						Weight: 10,
