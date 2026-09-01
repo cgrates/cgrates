@@ -228,7 +228,7 @@ func testConfigSReload(t *testing.T) {
 	} else if cfgStr != rpl14 {
 		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl14)
 	}
-	cfgStr = `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"extraFields":[],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
+	cfgStr = `{"freeswitchAgent":{"activeSessionDelimiter":",","conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"emptyBalanceAnnFile":"","emptyBalanceContext":"","enabled":false,"eventSocketConns":[{"address":"127.0.0.1:8021","alias":"127.0.0.1:8021","maxReconnectInterval":"0s","password":"ClueCon","reconnects":5,"replyTimeout":"1m0s"}],"lowBalanceAnnFile":"","maxWaitConnection":"2s","requestProcessors":[],"subscribePark":true}}`
 	var rpl15 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

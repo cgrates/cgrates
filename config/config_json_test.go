@@ -652,7 +652,6 @@ func TestFsAgentJsonCfg(t *testing.T) {
 		},
 
 		SubscribePark:          utils.BoolPointer(true),
-		ExtraFields:            &[]string{},
 		LowBalanceAnnFile:      utils.StringPointer(""),
 		EmptyBalanceContext:    utils.StringPointer(""),
 		EmptyBalanceAnnFile:    utils.StringPointer(""),

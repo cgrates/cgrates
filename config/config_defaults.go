@@ -1049,7 +1049,6 @@ const CGRATES_CFG_JSON = `
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 	},
 	"subscribePark": true,				// subscribe via fsock to receive park events
-	"extraFields": [],				// extra fields to store in auth/CDRs when creating them
 	"lowBalanceAnnFile": "",			// file to be played when low balance is reached for prepaid calls
 	"emptyBalanceContext": "",			// if defined, prepaid calls will be transferred to this context on empty balance
 	"emptyBalanceAnnFile": "",			// file to be played before disconnecting prepaid calls on empty balance (applies only if no context defined)
