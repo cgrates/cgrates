@@ -904,7 +904,6 @@
 // "kamailioAgent": {
 // 	"enabled": false,			// starts Kamailio agent: <true|false>
 // 	"sessions_conns": ["*birpc_internal"],
-// 	"createCDR": false,			// create CDR out of events and sends them to CDRS component
 // 	"timezone": "",				// timezone of the Kamailio server
 // 	"evapiConns":[				// instantiate connections to multiple Kamailio servers
 // 		{

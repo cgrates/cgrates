@@ -229,9 +229,6 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		return
 	}
 	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if ka.kamCfg.CreateCdr {
-		cgrEv.APIOpts[utils.MetaEEs] = true
-	}
 	var reply sessions.V1ProcessEventReply
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)

@@ -18,7 +18,6 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*internal"}}},
 		},
-		Create_cdr: utils.BoolPointer(true),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Alias:      utils.StringPointer("randomAlias"),
@@ -35,7 +34,6 @@ func TestKamAgentCfgloadFromJsonCfg(t *testing.T) {
 				{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}},
 			},
 		},
-		CreateCdr:  true,
 		EvapiConns: []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:   "Local",
 	}
@@ -85,7 +83,6 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 			"conns": {
 				"*sessions": [{"connIDs": ["*birpc_internal", "*conn1", "*conn2", "*internal"]}]
 			},
-			"createCDR": true,
 			"timezone": "UTC",
 			"evapiConns":[
 				{"address": "127.0.0.1:8448", "reconnects": 5, "maxReconnectInterval": "5m", "alias": ""}
@@ -97,8 +94,7 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		utils.ConnsCfg: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2", utils.MetaInternal}}},
 		},
-		utils.CreateCdrCfg: true,
-		utils.TimezoneCfg:  "UTC",
+		utils.TimezoneCfg: "UTC",
 		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
@@ -119,10 +115,9 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 	"kamailioAgent": {},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:   false,
-		utils.ConnsCfg:     map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
-		utils.CreateCdrCfg: false,
-		utils.TimezoneCfg:  "",
+		utils.EnabledCfg:  false,
+		utils.ConnsCfg:    map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
+		utils.TimezoneCfg: "",
 		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
@@ -145,7 +140,6 @@ func TestKamAgentCfgClone(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"}}},
 		},
-		CreateCdr:  true,
 		EvapiConns: []*KamConnCfg{{Address: "127.0.0.1:8448", Reconnects: 10, Alias: "randomAlias"}},
 		Timezone:   "Local",
 	}
@@ -244,7 +238,6 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
-		CreateCdr: false,
 		EvapiConns: []*KamConnCfg{
 			{
 				Alias:      "KAM_2",
@@ -260,7 +253,6 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*birpc"}}},
 		},
-		CreateCdr: true,
 		EvapiConns: []*KamConnCfg{
 			{
 				Alias:      "KAM_1",
@@ -276,7 +268,6 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*birpc"}}},
 		},
-		Create_cdr: utils.BoolPointer(true),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Alias:      utils.StringPointer("KAM_1"),
@@ -307,7 +298,6 @@ func TestKamAgentCloneSection(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
-		CreateCdr: false,
 		EvapiConns: []*KamConnCfg{
 			{
 				Alias:      "KAM_2",
@@ -323,7 +313,6 @@ func TestKamAgentCloneSection(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
-		CreateCdr: false,
 		EvapiConns: []*KamConnCfg{
 			{
 				Alias:      "KAM_2",
