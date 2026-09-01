@@ -589,7 +589,6 @@ func testCGRConfigReloadFreeswitchAgent(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}}},
 		},
 		SubscribePark:          true,
-		ExtraFields:            utils.RSRParsers{},
 		MaxWaitConnection:      2 * time.Second,
 		ActiveSessionDelimiter: ",",
 		EventSocketConns: []*FsConnCfg{

@@ -1659,7 +1659,6 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		EmptyBalanceContext:    utils.StringPointer("randomEmptyContext"),
 		ActiveSessionDelimiter: utils.StringPointer("/"),
 		MaxWaitConnection:      utils.StringPointer("2"),
-		ExtraFields:            &[]string{},
 		EventSocketConns: &[]*FsConnJsonCfg{
 			{
 				Address:      utils.StringPointer("1.2.3.4:8021"),
@@ -1683,7 +1682,6 @@ func TestFsAgentCfgloadFromJsonCfgCase1(t *testing.T) {
 		EmptyBalanceContext:    "randomEmptyContext",
 		ActiveSessionDelimiter: "/",
 		MaxWaitConnection:      2,
-		ExtraFields:            utils.RSRParsers{},
 		EventSocketConns: []*FsConnCfg{
 			{
 				Address:      "1.2.3.4:8021",
@@ -1713,17 +1711,6 @@ func TestFsAgentCfgloadFromJsonCfgCase2(t *testing.T) {
 	}
 }
 
-func TestFsAgentCfgloadFromJsonCfgCase3(t *testing.T) {
-	fsAgentJsnCfg := &FreeswitchAgentJsonCfg{
-		ExtraFields: &[]string{"a{*"},
-	}
-	expected := "invalid converter terminator in rule: <a{*>"
-	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.fsAgentCfg.loadFromJSONCfg(fsAgentJsnCfg); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitchAgent": {},
@@ -1732,7 +1719,6 @@ func TestFsAgentCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.EnabledCfg:                false,
 		utils.ConnsCfg:                  map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
 		utils.SubscribeParkCfg:          true,
-		utils.ExtraFieldsCfg:            []string{},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
 		utils.EmptyBalanceAnnFileCfg:    "",
@@ -1777,7 +1763,6 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 			{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2"}},
 		}},
 		utils.SubscribeParkCfg:          false,
-		utils.ExtraFieldsCfg:            []string{},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
 		utils.EmptyBalanceAnnFileCfg:    "",
@@ -1805,7 +1790,6 @@ func TestFsAgentCfgAsMapInterfaceCase2(t *testing.T) {
 func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 	cfgJSONStr := `{
 	"freeswitchAgent": {
-          "extraFields": ["randomFields"],
           "maxWaitConnection": "0",
 		  "conns": {
 		  	"*sessions": [{"connIDs": ["*internal"]}]
@@ -1818,7 +1802,6 @@ func TestFsAgentCfgAsMapInterfaceCase3(t *testing.T) {
 			{ConnIDs: []string{utils.MetaInternal}},
 		}},
 		utils.SubscribeParkCfg:          true,
-		utils.ExtraFieldsCfg:            []string{"randomFields"},
 		utils.LowBalanceAnnFileCfg:      "",
 		utils.EmptyBalanceContextCfg:    "",
 		utils.EmptyBalanceAnnFileCfg:    "",
@@ -2250,7 +2233,6 @@ func TestFsAgentCfgClone(t *testing.T) {
 		SubscribePark:       true,
 		EmptyBalanceAnnFile: "file",
 		EmptyBalanceContext: "context",
-		ExtraFields:         utils.NewRSRParsersMustCompile("tenant", utils.InfieldSep),
 		LowBalanceAnnFile:   "file2",
 		MaxWaitConnection:   time.Second,
 		Conns: map[string][]*DynamicConns{
@@ -2350,13 +2332,8 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 	var d *FreeswitchAgentJsonCfg
 
 	v1 := &FsAgentCfg{
-		Enabled: false,
-		Conns:   map[string][]*DynamicConns{},
-		ExtraFields: utils.RSRParsers{
-			{
-				Rules: "ExtraField",
-			},
-		},
+		Enabled:             false,
+		Conns:               map[string][]*DynamicConns{},
 		SubscribePark:       false,
 		LowBalanceAnnFile:   "LBAF",
 		EmptyBalanceContext: "EBC",
@@ -2370,12 +2347,7 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 		Conns: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
-		SubscribePark: true,
-		ExtraFields: utils.RSRParsers{
-			{
-				Rules: "ExtraField2",
-			},
-		},
+		SubscribePark:       true,
 		LowBalanceAnnFile:   "LBAF2",
 		EmptyBalanceContext: "EBC2",
 		EmptyBalanceAnnFile: "EBAF2",
@@ -2397,7 +2369,6 @@ func TestDiffFreeswitchAgentJsonCfg(t *testing.T) {
 			utils.MetaSessionS: {{ConnIDs: []string{"*localhost"}}},
 		},
 		SubscribePark:       utils.BoolPointer(true),
-		ExtraFields:         &[]string{"ExtraField2"},
 		LowBalanceAnnFile:   utils.StringPointer("LBAF2"),
 		EmptyBalanceContext: utils.StringPointer("EBC2"),
 		EmptyBalanceAnnFile: utils.StringPointer("EBAF2"),
