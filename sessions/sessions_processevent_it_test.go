@@ -1061,7 +1061,7 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 		}
 	})
 
-	t.Run("terminateEventChargersSkipped", func(t *testing.T) {
+	t.Run("terminateEventChargersRun", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
@@ -1081,8 +1081,8 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
-			t.Errorf("expected RouteProfiles[*default] to be absent when *terminate=true, got: %v", rply.RouteProfiles)
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; !hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be present when ChargerS runs with *terminate=true, got: %v", rply.RouteProfiles)
 		}
 	})
 }
