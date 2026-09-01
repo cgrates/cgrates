@@ -692,7 +692,6 @@ func TestKamAgentJsonCfg(t *testing.T) {
 			},
 		},
 
-		Create_cdr: utils.BoolPointer(false),
 		Evapi_conns: &[]*KamConnJsonCfg{
 			{
 				Address:                utils.StringPointer("127.0.0.1:8448"),

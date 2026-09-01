@@ -2043,7 +2043,6 @@ const (
 // FsAgentCfg
 const (
 	SubscribeParkCfg          = "subscribePark"
-	CreateCdrCfg              = "createCDR"
 	LowBalanceAnnFileCfg      = "lowBalanceAnnFile"
 	EmptyBalanceContextCfg    = "emptyBalanceContext"
 	EmptyBalanceAnnFileCfg    = "emptyBalanceAnnFile"

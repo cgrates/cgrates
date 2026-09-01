@@ -63,7 +63,6 @@ func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 type KamAgentCfg struct {
 	Enabled    bool
 	Conns      map[string][]*DynamicConns
-	CreateCdr  bool
 	EvapiConns []*KamConnCfg
 	Timezone   string
 }
@@ -90,9 +89,6 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 			ka.Conns[connType] = opts
 		}
 	}
-	if jsnCfg.Create_cdr != nil {
-		ka.CreateCdr = *jsnCfg.Create_cdr
-	}
 	if jsnCfg.Evapi_conns != nil {
 		ka.EvapiConns = make([]*KamConnCfg, len(*jsnCfg.Evapi_conns))
 		for idx, jsnConnCfg := range *jsnCfg.Evapi_conns {
@@ -109,9 +105,8 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 // AsMapInterface returns the config as a map[string]any
 func (ka KamAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
-		utils.EnabledCfg:   ka.Enabled,
-		utils.CreateCdrCfg: ka.CreateCdr,
-		utils.TimezoneCfg:  ka.Timezone,
+		utils.EnabledCfg:  ka.Enabled,
+		utils.TimezoneCfg: ka.Timezone,
 	}
 	if ka.EvapiConns != nil {
 		evapiConns := make([]map[string]any, len(ka.EvapiConns))
@@ -130,10 +125,9 @@ func (ka KamAgentCfg) CloneSection() Section { return ka.Clone() }
 // Clone returns a deep copy of KamAgentCfg
 func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 	cln = &KamAgentCfg{
-		Enabled:   ka.Enabled,
-		CreateCdr: ka.CreateCdr,
-		Timezone:  ka.Timezone,
-		Conns:     CloneConnsMap(ka.Conns),
+		Enabled:  ka.Enabled,
+		Timezone: ka.Timezone,
+		Conns:    CloneConnsMap(ka.Conns),
 	}
 	if ka.EvapiConns != nil {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
@@ -173,7 +167,6 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 type KamAgentJsonCfg struct {
 	Enabled     *bool
 	Conns       map[string][]*DynamicConns `json:"conns,omitempty"`
-	Create_cdr  *bool                      `json:"createCDR"`
 	Evapi_conns *[]*KamConnJsonCfg         `json:"evapiConns"`
 	Timezone    *string
 }
@@ -202,9 +195,6 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
-	}
-	if v1.CreateCdr != v2.CreateCdr {
-		d.Create_cdr = utils.BoolPointer(v2.CreateCdr)
 	}
 	if !equalsKamConnsCfg(v1.EvapiConns, v2.EvapiConns) {
 		dft := getDftKamConnCfg()

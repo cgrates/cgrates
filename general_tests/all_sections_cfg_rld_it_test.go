@@ -488,13 +488,13 @@ func testSectConfigSReloadKamailioAgent(t *testing.T) {
 	var reply string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
 		Tenant: "cgrates.org",
-		Config: `{"kamailioAgent":{"createCDR":false,"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""}}`,
+		Config: `{"kamailioAgent":{"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","reconnects":5}],"sessions_conns":["*birpc_internal"],"timezone":""}}`,
 	}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected OK received: %+v", reply)
 	}
-	cfgStr := `{"kamailioAgent":{"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"createCDR":false,"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"timezone":""}}`
+	cfgStr := `{"kamailioAgent":{"conns":{"*sessions":[{"filterIDs":null,"tenant":"","connIDs":["*birpc_internal"]}]},"enabled":false,"evapiConns":[{"address":"127.0.0.1:8448","alias":"","maxReconnectInterval":"0s","reconnects":5}],"timezone":""}}`
 	var rpl string
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",

@@ -1074,7 +1074,6 @@ const CGRATES_CFG_JSON = `
 	"conns": {
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 	},
-	"createCDR": false,			// create CDR out of events and sends them to CDRS component
 	"timezone": "",				// timezone of the Kamailio server
 	"evapiConns":[				// instantiate connections to multiple Kamailio servers
 		{

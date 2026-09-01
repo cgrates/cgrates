@@ -124,7 +124,6 @@
 	"conns": {
 		"*sessions":[{"connIDs":["*birpc_internal"]}]
 	},	
-	"createCDR": true,
 },
 
 
