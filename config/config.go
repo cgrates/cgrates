@@ -218,8 +218,7 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				MaxItems:     []*DynamicIntPointerOpt{},
 				Usage:        []*DynamicDecimalOpt{{value: RoutesUsageDftOpt}},
 			}},
-		tpeSCfg:    new(TpeSCfg),
-		sureTaxCfg: new(SureTaxCfg),
+		tpeSCfg: new(TpeSCfg),
 		registrarCCfg: &RegistrarCCfgs{
 			RPC: &RegistrarCCfg{Hosts: make(map[string][]*RemoteHost)},
 		},
@@ -361,7 +360,6 @@ type CGRConfig struct {
 	routeSCfg          *RouteSCfg          // RouteS config
 	trendSCfg          *TrendSCfg          // TrendS config
 	rankingSCfg        *RankingSCfg        // RankingS config
-	sureTaxCfg         *SureTaxCfg         // SureTax config
 	registrarCCfg      *RegistrarCCfgs     // RegistrarC config
 	loaderCgrCfg       *LoaderCgrCfg       // LoaderCgr config
 	migratorCgrCfg     *MigratorCgrCfg     // MigratorCgr config
@@ -420,13 +418,6 @@ func (cfg *CGRConfig) GetAllSectionIDs() (s []string) {
 		s = append(s, f.SName())
 	}
 	return
-}
-
-// SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
-func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
-	cfg.lks[SureTaxJSON].Lock()
-	defer cfg.lks[SureTaxJSON].Unlock()
-	return cfg.sureTaxCfg
 }
 
 // DiameterAgentCfg returns the config for Diameter Agent
@@ -1049,7 +1040,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		trendSCfg:          cfg.trendSCfg.Clone(),
 		rankingSCfg:        cfg.rankingSCfg.Clone(),
 		routeSCfg:          cfg.routeSCfg.Clone(),
-		sureTaxCfg:         cfg.sureTaxCfg.Clone(),
 		registrarCCfg:      cfg.registrarCCfg.Clone(),
 		loaderCgrCfg:       cfg.loaderCgrCfg.Clone(),
 		migratorCgrCfg:     cfg.migratorCgrCfg.Clone(),

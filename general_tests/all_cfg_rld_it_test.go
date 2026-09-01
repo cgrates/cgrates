@@ -408,17 +408,6 @@ func testConfigSReload(t *testing.T) {
 		}
 	}
 
-	cfgStr = `{"suretax":{"billToNumber":"","businessUnit":"","clientNumber":"","clientTracking":"~*opts.*originID","customerNumber":"~*req.Subject","includeLocalCost":false,"origNumber":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatoryCode":"03","responseGroup":"03","responseType":"D4","returnFileCode":"0","salesTypeCode":"R","taxExemptionCodeList":"","taxIncluded":"0","taxSitusRule":"04","termNumber":"~*req.Destination","timezone":"Local","transTypeCode":"010101","unitType":"00","units":"1","url":"","validationKey":"","zipcode":""}}`
-	var rpl28 string
-	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-		Tenant:   "cgrates.org",
-		Sections: []string{config.SureTaxJSON},
-	}, &rpl28); err != nil {
-		t.Error(err)
-	} else if cfgStr != rpl28 {
-		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl28)
-	}
-
 	cfgStr = `{"loader":{"actionsConns":["*localhost"],"cachesConns":["*localhost"],"dataPath":"./","disableReverse":false,"fieldSeparator":",","gapiCredentials":".gapi/credentials.json","gapiToken":".gapi/token.json","tpid":""}}`
 	var rpl29 string
 	if err := testRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{

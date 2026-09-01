@@ -2248,36 +2248,6 @@ const (
 	MaskLenCfg         = "maskLength"
 )
 
-// SureTax
-const (
-	RootDirCfg              = "rootDir"
-	URLCfg                  = "url"
-	ClientNumberCfg         = "clientNumber"
-	ValidationKeyCfg        = "validationKey"
-	BusinessUnitCfg         = "businessUnit"
-	IncludeLocalCostCfg     = "includeLocalCost"
-	ReturnFileCodeCfg       = "returnFileCode"
-	ResponseGroupCfg        = "responseGroup"
-	ResponseTypeCfg         = "responseType"
-	RegulatoryCodeCfg       = "regulatoryCode"
-	ClientTrackingCfg       = "clientTracking"
-	CustomerNumberCfg       = "customerNumber"
-	OrigNumberCfg           = "origNumber"
-	TermNumberCfg           = "termNumber"
-	BillToNumberCfg         = "billToNumber"
-	ZipcodeCfg              = "zipcode"
-	Plus4Cfg                = "plus4"
-	P2PZipcodeCfg           = "p2pzipcode"
-	P2PPlus4Cfg             = "p2pplus4"
-	UnitsCfg                = "units"
-	UnitTypeCfg             = "unitType"
-	TaxIncludedCfg          = "taxIncluded"
-	TaxSitusRuleCfg         = "taxSitusRule"
-	TransTypeCodeCfg        = "transTypeCode"
-	SalesTypeCodeCfg        = "salesTypeCode"
-	TaxExemptionCodeListCfg = "taxExemptionCodeList"
-)
-
 // LoaderCgrCfg
 const (
 	TpIDCfg            = "tpid"
@@ -2328,6 +2298,12 @@ const (
 	RegistrarsConnsCfg = "registrarsConns"
 	HostsCfg           = "hosts"
 	RefreshIntervalCfg = "refreshInterval"
+)
+
+// Configs
+const (
+	RootDirCfg = "rootDir"
+	URLCfg     = "url"
 )
 
 // APIBanCfg

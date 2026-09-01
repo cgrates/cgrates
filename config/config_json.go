@@ -40,7 +40,6 @@ const (
 	EFsJSON             = "efs"
 	RouteSJSON          = "routes"
 	LoaderSJSON         = "loaders"
-	SureTaxJSON         = "suretax"
 	RegistrarCJSON      = "registrarc"
 	LoaderJSON          = "loader"
 	MigratorJSON        = "migrator"
@@ -210,7 +209,6 @@ func newSections(cfg *CGRConfig) Sections {
 		cfg.apiBanCfg,
 		cfg.sentryPeerCfg,
 		cfg.configDBCfg,
-		cfg.sureTaxCfg,
 		cfg.tpeSCfg,
 	}
 }
