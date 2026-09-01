@@ -54,7 +54,6 @@ var (
 		testSectConfigSReloadThresholds,
 		testSectConfigSReloadRoutes,
 		testSectConfigSReloadLoaders,
-		testSectConfigSReloadSuretax,
 		testSectConfigSReloadLoader,
 		testSectConfigSReloadMigrator,
 		testSectConfigSReloadRegistrarC,
@@ -805,28 +804,6 @@ func testSectConfigSReloadLoaders(t *testing.T) {
 	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
 		Tenant:   "cgrates.org",
 		Sections: []string{config.LoaderSJSON},
-	}, &rpl); err != nil {
-		t.Error(err)
-	} else if cfgStr != rpl {
-		t.Errorf("\nExpected %+v ,\n received: %+v", cfgStr, rpl)
-	}
-}
-
-func testSectConfigSReloadSuretax(t *testing.T) {
-	var reply string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-		Tenant: "cgrates.org",
-		Config: `{"suretax":{"billToNumber":"","businessUnit":"","clientNumber":"","clientTracking":"~*opts.*originID","customerNumber":"~*req.Subject","includeLocalCost":false,"origNumber":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatoryCode":"03","responseGroup":"03","responseType":"D4","returnFileCode":"0","salesTypeCode":"R","taxExemptionCodeList":"","taxIncluded":"0","taxSitusRule":"04","termNumber":"~*req.Destination","timezone":"Local","transTypeCode":"010101","unitType":"00","units":"1","url":"","validationKey":"","zipcode":""}}`,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %+v", reply)
-	}
-	cfgStr := `{"suretax":{"billToNumber":"","businessUnit":"","clientNumber":"","clientTracking":"~*opts.*originID","customerNumber":"~*req.Subject","includeLocalCost":false,"origNumber":"~*req.Subject","p2pplus4":"","p2pzipcode":"","plus4":"","regulatoryCode":"03","responseGroup":"03","responseType":"D4","returnFileCode":"0","salesTypeCode":"R","taxExemptionCodeList":"","taxIncluded":"0","taxSitusRule":"04","termNumber":"~*req.Destination","timezone":"Local","transTypeCode":"010101","unitType":"00","units":"1","url":"","validationKey":"","zipcode":""}}`
-	var rpl string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-		Tenant:   "cgrates.org",
-		Sections: []string{config.SureTaxJSON},
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {

@@ -1975,36 +1975,6 @@ const CGRATES_CFG_JSON = `
 ],
 
 
-"suretax": {
-	"url": "",				// API url
-	"clientNumber": "",			// client number, provided by SureTax
-	"validationKey": "",			// validation key provided by SureTax
-	"businessUnit": "",			// client’s Business Unit
-	"timezone": "Local",			// convert the time of the events to this timezone before sending request out <UTC|Local|$IANA_TZ_DB>
-	"includeLocalCost": false,		// sum local calculated cost with tax one in final cost
-	"returnFileCode": "0",		// default or Quote purposes <0|Q>
-	"responseGroup": "03",			// determines how taxes are grouped for the response <03|13>
-	"responseType": "D4",			// determines the granularity of taxes and (optionally) the decimal precision for the tax calculations and amounts in the response
-	"regulatoryCode": "03",		// provider type
-	"clientTracking": "~*opts.*originID",	// template extracting client information out of StoredCdr; <RSRParsers>
-	"customerNumber": "~*req.Subject",	// template extracting customer number out of StoredCdr; <RSRParsers>
-	"origNumber":  "~*req.Subject", 	// template extracting origination number out of StoredCdr; <RSRParsers>
-	"termNumber": "~*req.Destination",	// template extracting termination number out of StoredCdr; <RSRParsers>
-	"billToNumber": "",			// template extracting billed to number out of StoredCdr; <RSRParsers>
-	"zipcode": "",				// template extracting billing zip code out of StoredCdr; <RSRParsers>
-	"plus4": "",				// template extracting billing zip code extension out of StoredCdr; <RSRParsers>
-	"p2pzipcode": "",			// template extracting secondary zip code out of StoredCdr; <RSRParsers>
-	"p2pplus4": "",				// template extracting secondary zip code extension out of StoredCdr; <RSRParsers>
-	"units": "1",				// template extracting number of “lines” or unique charges contained within the revenue out of StoredCdr; <RSRParsers>
-	"unitType": "00",			// template extracting number of unique access lines out of StoredCdr; <RSRParsers>
-	"taxIncluded": "0",			// template extracting tax included in revenue out of StoredCdr; <RSRParsers>
-	"taxSitusRule": "04",			// template extracting tax situs rule out of StoredCdr; <RSRParsers>
-	"transTypeCode": "010101",		// template extracting transaction type indicator out of StoredCdr; <RSRParsers>
-	"salesTypeCode": "R",			// template extracting sales type code out of StoredCdr; <RSRParsers>
-	"taxExemptionCodeList": "",		// template extracting tax exemption code list out of StoredCdr; <RSRParsers>
-},
-
-
 "loader": {						// loader for tariff plans out of .csv files
 	"tpid": "",					// tariff plan identificator
 	"dataPath": "./",				// path towards tariff plan files
