@@ -2044,3 +2044,321 @@ func TestSessionSBiRPCv1ProcessEventNotConnected(t *testing.T) {
 		})
 	}
 }
+
+func TestSessionSBiRPCv1ProcessEventAttributes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	clnt1 := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				rply := attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{{
+						MatchedProfileID: "attr1",
+					}},
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "cgrEvID",
+						Event: map[string]any{
+							utils.AccountField: "1002",
+						},
+					},
+				}
+				*reply.(*attributes.ProcessEventReply) = rply
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt1
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+	cfg.SessionSCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	sessions.connMgr.AddInternalConn(connID, utils.AttributeSv1, chanInternal)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:   "originID1",
+			utils.MetaAttributes: true,
+		},
+	}
+
+	t.Run("Attributes", func(t *testing.T) {
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := []*attributes.FieldsAltered{{MatchedProfileID: "attr1"}}
+		rcv := reply.Attributes[utils.MetaPrimary].AlteredFields
+		if !reflect.DeepEqual(rcv, expected) {
+			t.Errorf("Expected %v, recieved %v", expected, rcv)
+		}
+	})
+
+	t.Run("error case", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:   "originID2",
+				utils.MetaAttributes: "trueee",
+			},
+		}
+		var reply V1ProcessEventReply
+		expErr := `strconv.ParseBool: parsing "trueee": invalid syntax`
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %v, recieved %v", expErr, err)
+		}
+		if reply.Attributes != nil {
+			t.Errorf("Expected nil Attributes, got %v", reply.Attributes)
+		}
+	})
+}
+
+func TestSessionSBiRPCv1ProcessEventCache(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = -1
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	call := 0
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				call++
+				*reply.(*attributes.ProcessEventReply) = attributes.ProcessEventReply{
+					AlteredFields: []*attributes.FieldsAltered{
+						{MatchedProfileID: "attr1"},
+					},
+					CGREvent: args.(*utils.CGREvent),
+				}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)
+	cfg.SessionSCfg().Conns[utils.MetaAttributes] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	sessions.connMgr.AddInternalConn(connID, utils.AttributeSv1, chanInternal)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evCache",
+		Event:  map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{
+			utils.MetaAttributes: true,
+			utils.MetaOriginID:   "originCache",
+		},
+	}
+	var reply V1ProcessEventReply
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+		t.Error(err)
+	} else if call != 1 {
+		t.Errorf("Expected call to be 1, recieved %d", call)
+	}
+
+	var reply2 V1ProcessEventReply
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply2); err != nil {
+		t.Error(err)
+	} else if call != 1 {
+		t.Errorf("Expected call to still be 1, recieved %d", call)
+	}
+}
+
+func TestSessionSBiRPCv1ProcessEventUsageOptions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{
+					Abstracts: utils.NewDecimal(int64(60*time.Second), 0),
+				}
+				return nil
+			},
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{
+					Abstracts: utils.NewDecimal(int64(90*time.Second), 0),
+				}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)
+	cfg.SessionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	sessions.connMgr.AddInternalConn(connID, utils.AccountSv1, chanInternal)
+
+	t.Run("InterimConsumed", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:        "originID",
+				utils.MetaAccounts:        true,
+				utils.MetaDebit:           true,
+				utils.MetaUsage:           90 * time.Second,
+				utils.MetaInterimConsumed: 7,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := 90 * time.Second
+		rcv := reply.AccountsUsage[utils.MetaPrimary]
+		if !reflect.DeepEqual(rcv, expected) {
+			t.Errorf("Expected %v, recieved %v", expected, rcv)
+		}
+	})
+
+	t.Run("InterimConsumed: parsing error", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:        "originID",
+				utils.MetaAccounts:        true,
+				utils.MetaDebit:           true,
+				utils.MetaUsage:           90 * time.Second,
+				utils.MetaInterimConsumed: "err",
+			},
+		}
+		var reply V1ProcessEventReply
+		expErr := "can't convert <err> to decimal"
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %#v, recieved %#v", expErr, err)
+		}
+		expected := 0 * time.Second
+		if !reflect.DeepEqual(reply.AccountsUsage[utils.MetaPrimary], expected) {
+			t.Errorf("Expected %#v, recieved %#v", expected, reply.AccountsUsage[utils.MetaPrimary])
+		}
+	})
+
+	t.Run("InterimUsage: parsing error", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:     "originID",
+				utils.MetaAccounts:     true,
+				utils.MetaDebit:        true,
+				utils.MetaUsage:        90 * time.Second,
+				utils.MetaInterimUsage: "err",
+			},
+		}
+		var reply V1ProcessEventReply
+		expErr := "can't convert <err> to decimal"
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %#v, recieved %#v", expErr, err)
+		}
+		expected := 0 * time.Second
+		rcv := reply.AccountsUsage[utils.MetaPrimary]
+		if !reflect.DeepEqual(rcv, expected) {
+			t.Errorf("Expected %#v, recieved %#v", expected, rcv)
+		}
+	})
+
+	t.Run("TotalUsage", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:   "originID",
+				utils.MetaAccounts:   true,
+				utils.MetaDebit:      true,
+				utils.MetaUsage:      90 * time.Second,
+				utils.MetaTotalUsage: 50,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := 90 * time.Second
+		rcv := reply.AccountsUsage[utils.MetaPrimary]
+		if !reflect.DeepEqual(rcv, expected) {
+			t.Errorf("Expected %#v, recieved %#v", expected, rcv)
+		}
+	})
+
+	t.Run("TotalUsage: parsing error", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:   "originID",
+				utils.MetaAccounts:   true,
+				utils.MetaDebit:      true,
+				utils.MetaUsage:      90 * time.Second,
+				utils.MetaTotalUsage: "err",
+			},
+		}
+		var reply V1ProcessEventReply
+		expErr := "can't convert <err> to decimal"
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %#v, recieved %#v", expErr, err)
+		}
+		expected := 0 * time.Second
+		rcv := reply.AccountsUsage[utils.MetaPrimary]
+		if !reflect.DeepEqual(rcv, expected) {
+			t.Errorf("Expected %#v, recieved %#v", expected, rcv)
+		}
+	})
+}
