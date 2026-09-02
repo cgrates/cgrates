@@ -277,7 +277,7 @@ func TestUsageRecordsHTTPAttribute(t *testing.T) {
 		"requestProcessors": [
 			{
 				"id": "usage_record",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields": [
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
 					{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.answerTime", "mandatory": true},
@@ -534,7 +534,7 @@ func TestUsageRecordsRerating(t *testing.T) {
 			"type": "*cgrcdr",
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"processedPath": "",
-			"flags": ["*event"],
+			"flags": ["*sessions"],
 			"opts": {
 				"sqlDBName": "cgrates",
 				"sqlTableName": "cdrs"
@@ -558,7 +558,7 @@ func TestUsageRecordsRerating(t *testing.T) {
 		"requestProcessors": [
 			{
 				"id": "usage_record",
-				"flags": ["*event"],
+				"flags": ["*sessions"],
 				"requestFields": [
 					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
 					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.urID", "mandatory": true},

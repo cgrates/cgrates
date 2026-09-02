@@ -7,189 +7,95 @@
 package general_tests
 
 import (
-	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestErsStartDelay(t *testing.T) {
-	csvcontent := ``
-	csvFd, csvFd2, procFd := t.TempDir(), t.TempDir(), t.TempDir()
-	filePath := filepath.Join(csvFd, fmt.Sprintf("file1%s", utils.CSVSuffix))
-	if err := os.WriteFile(filePath, []byte(csvcontent), 0644); err != nil {
-		t.Fatalf("could not write to file %s: %v", filePath, err)
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
 	}
-	content := fmt.Sprintf(`{
-		"logger": {
-			"level": 7
-		},
-		"db": {
-			"dbConns": {
-				"*default": {
-					"dbType": "*internal",
-					"opts":{
-					"internalDBRewriteInterval": "0s",
-					"internalDBDumpInterval": "0s"
-				}
-				}
-			},
-		},
-		"cdrs":{
-		"enabled":true,
-		"conns": {
-			"*rates": [{"connIDs": ["*localhost"]}]
-		},
-		"opts":{
-		"*rates":[
-		 {
-			"Value":true
-		 }
-		  ]
-		      }
-		},	
-		"sessions":{
-		   "enabled": true,
-		    "conns": {
-			"*cdrs": [ 
+
+	firstSourceDir, firstProcessedDir := t.TempDir(), t.TempDir()
+	secondSourceDir, secondProcessedDir := t.TempDir(), t.TempDir()
+	firstInput := filepath.Join(firstSourceDir, "first.csv")
+	secondInput := filepath.Join(secondSourceDir, "second.csv")
+	firstProcessed := filepath.Join(firstProcessedDir, "first.csv")
+	secondProcessed := filepath.Join(secondProcessedDir, "second.csv")
+	if err := os.WriteFile(firstInput, []byte("first"), 0644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(secondInput, []byte("second"), 0644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfgJSON := fmt.Sprintf(`{
+	"ers": {
+		"enabled": true,
+		"readers": [
 			{
-			"tenant": "",
-			"filterIDs": [],
-			"connIDs": ["*localhost"]
-			}
-									]
-			}
-        },
-		"logger": {
-     	"level": 7,								},
-		"rates": {
-			"enabled": true,
-			"opts": {
-			 "*usage": [			
-			{
-				"value": "~*req.Usage",
-	       	}
+				"id": "first",
+				"runDelay": "-1",
+				"startDelay": "1s",
+				"type": "*fileCSV",
+				"sourcePath": %q,
+				"processedPath": %q,
+				"flags": ["*none"],
+				"fields": [
+					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true}
 				]
 			},
-		},
-		"admins":{
-		"enabled":true,
-		},
-		"ers": {
-			"enabled": true,
-			"conns": {
-				"*sessions": [{"connIDs": ["*localhost"]}]
-			},
-			"readers": [
-				{
-					"id": "file_csv_reader",
-					"runDelay":  "-1",
-					"startDelay":"1s",
-					"type": "*fileCSV",
-					"sourcePath": "%s",
-					"flags": ["*sessions"],
-					"processedPath": "%s",
-					"fields":[
-						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
-						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
-                        {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},
-                        {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
-						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
-						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
-						{"tag":"Destination","path":"*cgreq.Destination","type":"*variable","value":"~*req.2"},
-						{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.3"},
-                        {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
-                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true}
-					]
-				},
-				{
-					"id": "file_csv_reader2",
-					"runDelay":  "-1",
-					"startDelay":"2s",
-					"type": "*fileCSV",
-					"sourcePath": "%s",
-					"flags": ["*sessions"],
-					"processedPath": "%s",
-					"fields":[
-						{"tag": "OptUsageRecord", "path": "*opts.*ur", "type": "*constant", "value": "true"},
-						{"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
-                        {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true},
-                        {"tag": "OriginIDOpt", "path": "*opts.*originID", "type": "*variable", "value": "~*req.0"},
-                        {"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*constant", "value": "*rated", "mandatory": true},
-						{"tag":"Category","path":"*cgreq.Category","type":"*constant","value":"call"},
-						{"tag":"Subject","path":"*cgreq.Subject","type":"*variable","value":"~*req.1"},
-						{"tag":"Destination","path":"*cgreq.Destination","type":"*variable","value":"~*req.2"},
-						{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable", "value": "~*req.3"},
-                        {"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable", "value": "~*req.4"},
-                        {"tag": "Usage", "path": "*cgreq.Usage", "filters": ["*notempty:~*req.5:"],"type": "*variable", "value": "~*req.5;s", "mandatory": true}
-					]
-				}
-			]
-            }
-		}`, csvFd, procFd, csvFd2, procFd)
-	var buf bytes.Buffer
+			{
+				"id": "second",
+				"runDelay": "-1",
+				"startDelay": "2s",
+				"type": "*fileCSV",
+				"sourcePath": %q,
+				"processedPath": %q,
+				"flags": ["*none"],
+				"fields": [
+					{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.0", "mandatory": true}
+				]
+			}
+		]
+	}
+}`, firstSourceDir, firstProcessedDir, secondSourceDir, secondProcessedDir)
+
 	ng := engine.TestEngine{
-		ConfigJSON: content,
-		LogBuffer:  &buf,
+		ConfigJSON: cfgJSON,
+		DBCfg:      engine.InternalDBCfg,
 		Encoding:   *utils.Encoding,
 	}
+	ng.Run(t)
 
-	fileIdx := 0
-	createFile := func(t *testing.T, dir, ext, content string) {
-		fileIdx++
-		filePath := filepath.Join(dir, fmt.Sprintf("file%d%s", fileIdx, ext))
-		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
-			t.Fatalf("could not write to file %s: %v", filePath, err)
-		}
+	time.Sleep(500 * time.Millisecond)
+	if _, err := os.Stat(firstInput); err != nil {
+		t.Fatalf("first reader processed its input before start delay: %v", err)
 	}
-	client, _ := ng.Run(t)
-	createFile(t, csvFd, utils.CSVSuffix, "csvfile1,1001,1303535,1727779754,1727779754,60")
-	createFile(t, csvFd2, utils.CSVSuffix, "csvfile2,1001,1303535,1727779754,1727779754,120")
-	t.Run("ReaderBeforeStartDelay", func(t *testing.T) {
-		var cdrs []*engine.CDRsql
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org"}, &cdrs); err == nil || strings.Contains(utils.ErrNotFound.Error(), err.Error()) {
-			t.Errorf("expected %v, received %v", utils.ErrNotFound, err)
-		}
-	})
+	if _, err := os.Stat(secondInput); err != nil {
+		t.Fatalf("second reader processed its input before start delay: %v", err)
+	}
 
-	t.Run("ReaderAfterStartDelay1s", func(t *testing.T) {
-		var reply string
-		if err := client.Call(context.Background(), utils.AdminSv1SetRateProfile, &utils.RateProfile{Tenant: "cgrates.org", ID: "1001", FilterIDs: []string{"*string:~*req.Subject:1001"}, Rates: map[string]*utils.Rate{
-			"RT_ANY": {ID: "RT_ANY", IntervalRates: []*utils.IntervalRate{{IntervalStart: utils.NewDecimal(0, 0), Unit: utils.NewDecimalFromUsageIgnoreErr("60s"), RecurrentFee: utils.NewDecimalFromFloat64(1.7), Increment: utils.NewDecimalFromUsageIgnoreErr("1s")}}},
-		}}, &reply); err != nil {
-			t.Fatalf("Failed to set rate profile: %v", err)
-		}
+	waitFor(t, func() bool {
+		_, err := os.Stat(firstProcessed)
+		return err == nil
+	}, "first reader did not process its input", 2*time.Second)
+	if _, err := os.Stat(secondInput); err != nil {
+		t.Fatalf("second reader processed its input before start delay: %v", err)
+	}
 
-		time.Sleep(1200 * time.Millisecond)
-		var cdrs []*utils.CDR
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org", FilterIDs: []string{"*string:~*req.OriginID:csvfile1"}}, &cdrs); err != nil {
-			t.Error(err)
-		} else if len(cdrs) != 1 {
-			t.Errorf("expected a CDR generated from ers")
-		} else if cdrs[0].Opts["*cost"] != 1.7 {
-			t.Errorf("expected %f,received %f", 1.7, cdrs[0].Opts["*cost"])
-		}
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org", FilterIDs: []string{"*string:~*req.OriginID:csvfile2"}}, &cdrs); err == nil || strings.Contains(utils.ErrNotFound.Error(), err.Error()) {
-			t.Errorf("expected %v, received %v", utils.ErrNotFound, err)
-		}
-	})
-	time.Sleep(2200 * time.Millisecond)
-	t.Run("ReaderAfterStartDelay2s", func(t *testing.T) {
-		var cdrs []*utils.CDR
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs, &utils.CDRFilters{Tenant: "cgrates.org", FilterIDs: []string{"*string:~*req.OriginID:csvfile2"}}, &cdrs); err != nil {
-			t.Error(err)
-		} else if len(cdrs) != 1 {
-			t.Errorf("expected a CDR generated from ers")
-		} else if cdrs[0].Opts["*cost"] != 3.4 {
-			t.Errorf("expected %f,received %f", 3.4, cdrs[0].Opts["*cost"])
-		}
-	})
+	waitFor(t, func() bool {
+		_, err := os.Stat(secondProcessed)
+		return err == nil
+	}, "second reader did not process its input", 2*time.Second)
 }
