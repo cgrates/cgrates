@@ -2450,3 +2450,487 @@ func TestSessionSNewSession(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSSetSession(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sS := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	cgrID := "sID"
+	cgrEv := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      cgrID,
+		Event:   map[string]any{utils.OriginID: cgrID},
+		APIOpts: map[string]any{},
+	}
+	clientConnID := "ccID"
+	t.Run("Creating a new session", func(t *testing.T) {
+		cch := map[string]any{utils.MetaCGRid: cgrID}
+		s, err := sS.setSession(ctx, cgrEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if s == nil {
+			t.Error("Expected the session to be set")
+		}
+		if s.ID != cgrID {
+			t.Errorf("Expected %v, got %v", cgrID, s.ID)
+		}
+		if s.ClientConnID != clientConnID {
+			t.Errorf("Expected %v, recieved %v", clientConnID, s.ClientConnID)
+		}
+		if !sS.isSessionRegistered(cgrID, false) {
+			t.Error("Expected session to be registered as active")
+		}
+	})
+	t.Run("Setting a second session", func(t *testing.T) {
+		cch := map[string]any{utils.MetaCGRid: cgrID}
+		first, err := sS.setSession(ctx, cgrEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		second, err := sS.setSession(ctx, cgrEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if first != second {
+			t.Error("Expected the existing session to be reused instead of creating a new one")
+		}
+	})
+	t.Run("InterimUsage and TotalUsage", func(t *testing.T) {
+		cch := map[string]any{
+			utils.MetaCGRid:           cgrID,
+			utils.MetaInterimConsumed: utils.NewDecimal(10, 0),
+			utils.MetaInterimUsage:    utils.NewDecimal(20, 0),
+			utils.MetaTotalUsage:      utils.NewDecimal(30, 0),
+		}
+		expS := &Session{
+			ID: "sID",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "sID",
+				Event: map[string]any{
+					utils.OriginID: "sID",
+				},
+				APIOpts: map[string]any{
+					utils.MetaUsage: utils.NewDecimal(50, 0),
+				},
+			},
+			ClientConnID: "ccID",
+		}
+		s, err := sS.setSession(ctx, cgrEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(utils.ToJSON(expS), utils.ToJSON(s)) {
+			t.Errorf("Expected %v, recieved %v", expS, s)
+		}
+	})
+
+	t.Run("MissingCGRID", func(t *testing.T) {
+		s, err := sS.setSession(ctx, cgrEv, map[string]any{}, "")
+		expErr := "MANDATORY_IE_MISSING: [*cgrID]"
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected error %v, got %v", expErr, err.Error())
+		}
+		exp := &Session{}
+		exp = nil
+		if !reflect.DeepEqual(s, exp) {
+			t.Errorf("Expected Session to be nil, got %v", s)
+		}
+	})
+	t.Run("EmptyCGRID", func(t *testing.T) {
+		cch := map[string]any{utils.MetaCGRid: ""}
+		s, err := sS.setSession(ctx, cgrEv, cch, "")
+		expErr := "MANDATORY_IE_MISSING: [*cgrID]"
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected error %v, got %v", expErr, err.Error())
+		}
+
+		exp := &Session{}
+		exp = nil
+		if !reflect.DeepEqual(s, exp) {
+			t.Errorf("Expected Session to be nil, got %v", s)
+		}
+	})
+}
+
+func TestSessionSTerminateSessionNew(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sS := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.Background()
+	cgrID := "sID"
+	cgrEv := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      cgrID,
+		Event:   map[string]any{utils.OriginID: cgrID},
+		APIOpts: map[string]any{},
+	}
+
+	t.Run("Charges set with nil UsageAdjustment", func(t *testing.T) {
+		sr := NewSRun(cgrEv)
+		sr.Charges = utils.NewEventCharges()
+		sr.Charges.Abstracts = utils.NewDecimal(500, 0)
+		sr.UsageAdjustment = nil
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		}
+		sS.registerSession(s, false)
+		if err := sS.terminateSessionNew(ctx, s); err != nil {
+			t.Error(err)
+		}
+		if sS.isSessionRegistered(cgrID, false) {
+			t.Error("Expected session to be unregistered after successful termination")
+		}
+	})
+
+	t.Run("Debit: error case", func(t *testing.T) {
+		sr := NewSRun(cgrEv)
+		sr.Charges = utils.NewEventCharges()
+		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
+		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		}
+		sS.registerSession(s, false)
+		err := sS.terminateSessionNew(ctx, s)
+		expErr := "NOT_CONNECTED: Accounts"
+		if err == nil || err.Error() == expErr {
+			t.Errorf("Expected %v, recieved %v", expErr, err)
+		}
+		registered := sS.isSessionRegistered(cgrID, false)
+		if err == nil && registered {
+			t.Error("Expected session to be unregistered after successful termination")
+		}
+		if err != nil && !registered {
+			t.Error("Expected session to remain registered when termination fails")
+		}
+	})
+
+	t.Run("Refund: error case", func(t *testing.T) {
+		sr := NewSRun(cgrEv)
+		sr.Charges = &utils.EventCharges{
+			Abstracts: utils.NewDecimal(100, 0),
+			Charges: []*utils.ChargeEntry{
+				{
+					ChargingID:     "charge1",
+					CompressFactor: 1,
+				},
+			},
+			Accounting: map[string]*utils.AccountCharge{
+				"charge1": {
+					AccountID:       "accID",
+					BalanceID:       "AbstractBalance1",
+					Units:           utils.NewDecimal(int64(27*time.Second), 0),
+					BalanceLimit:    utils.NewDecimal(0, 0),
+					RatingID:        "rating1",
+					JoinedChargeIDs: nil,
+				},
+			},
+			Rating: map[string]*utils.RateSInterval{
+				"rating1": {
+					Increments: []*utils.RateSIncrement{{
+						RateIntervalIndex: 0,
+						RateID:            "rate1",
+						CompressFactor:    1,
+					}},
+					CompressFactor: 1,
+				},
+			},
+			Rates: map[string]*utils.IntervalRate{
+				"rate1": {
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(0, 0),
+				},
+			},
+			Accounts: map[string]*utils.Account{
+				"accID": {
+					Tenant:    "cgrates.org",
+					ID:        "accID",
+					FilterIDs: []string{"*string:~*req.Account:1004"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					Balances: map[string]*utils.Balance{
+						"AbstractBalance1": {
+							ID: "AbstractBalance1",
+							Weights: utils.DynamicWeights{
+								{
+									Weight: 25,
+								},
+							},
+							Type: "*abstract",
+							CostIncrements: []*utils.CostIncrement{
+								{
+									Increment:    utils.NewDecimal(int64(time.Second), 0),
+									FixedFee:     utils.NewDecimal(0, 0),
+									RecurrentFee: utils.NewDecimal(0, 0),
+								},
+							},
+							Units: utils.NewDecimal(int64(13*time.Second), 0),
+						},
+						"ConcreteBalance2": {
+							ID:        "ConcreteBalance2",
+							FilterIDs: nil,
+							Weights: utils.DynamicWeights{
+								{
+									Weight: 20,
+								},
+							},
+							Type:  "*concrete",
+							Units: utils.NewDecimal(213, 0),
+						},
+					},
+				},
+			},
+		}
+		sr.UsageAdjustment = utils.NewDecimal(30, 0)
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		}
+		sS.registerSession(s, false)
+		err = sS.terminateSessionNew(ctx, s)
+		expErr := "NOT_CONNECTED: AccountS"
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected %v, recieved %v", expErr, err)
+		}
+		registered := sS.isSessionRegistered(cgrID, false)
+		if err == nil && registered {
+			t.Error("Expected session to be unregistered after successful termination")
+		}
+		if err != nil && !registered {
+			t.Errorf("Expected session to remain registered when termination fails, got error: %v", err)
+		}
+	})
+}
+
+func TestSessionSTerminateSessionNew2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sS := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.Background()
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AccountSv1RefundCharges: func(_ *context.Context, _ string, args, reply any) error {
+				*reply.(*string) = utils.OK
+				return nil
+			},
+			utils.AccountSv1DebitAbstracts: func(_ *context.Context, _ string, _, reply any) error {
+				*reply.(*utils.EventCharges) = *utils.NewEventCharges()
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)
+	cfg.SessionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{
+		{ConnIDs: []string{connID}},
+	}
+	sS.connMgr.AddInternalConn(connID, utils.AccountSv1, chanInternal)
+	cgrID := "sID"
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     cgrID,
+		Event:  map[string]any{utils.OriginID: cgrID},
+		APIOpts: map[string]any{
+			utils.MetaOriginID:        "refund",
+			utils.MetaRefund:          true,
+			utils.MetaAccountsCost:    map[string]any{utils.Concretes: 1.0},
+			utils.MetaBlockerErrorCfg: true,
+		},
+	}
+
+	t.Run("Refund", func(t *testing.T) {
+		sr := NewSRun(cgrEv)
+		sr.Charges = &utils.EventCharges{
+			Abstracts: utils.NewDecimal(100, 0),
+			Charges: []*utils.ChargeEntry{
+				{
+					ChargingID:     "charge1",
+					CompressFactor: 1,
+				},
+			},
+			Accounting: map[string]*utils.AccountCharge{
+				"charge1": {
+					AccountID:       "accID",
+					BalanceID:       "AbstractBalance1",
+					Units:           utils.NewDecimal(int64(27*time.Second), 0),
+					BalanceLimit:    utils.NewDecimal(0, 0),
+					RatingID:        "rating1",
+					JoinedChargeIDs: nil,
+				},
+			},
+			UnitFactors: map[string]*utils.UnitFactor{},
+			Rating: map[string]*utils.RateSInterval{
+				"rating1": {
+					Increments: []*utils.RateSIncrement{{
+						RateIntervalIndex: 0,
+						RateID:            "rate1",
+						CompressFactor:    1,
+					}},
+					CompressFactor: 1,
+				},
+			},
+			Rates: map[string]*utils.IntervalRate{
+				"rate1": {
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(0, 0),
+				},
+			},
+			Accounts: map[string]*utils.Account{
+				"accID": {
+					Tenant:    "cgrates.org",
+					ID:        "accID",
+					FilterIDs: []string{"*string:~*req.Account:1004"},
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 0,
+						},
+					},
+					Balances: map[string]*utils.Balance{
+						"AbstractBalance1": {
+							ID: "AbstractBalance1",
+							Weights: utils.DynamicWeights{
+								{
+									Weight: 25,
+								},
+							},
+							Type: "*abstract",
+							CostIncrements: []*utils.CostIncrement{
+								{
+									Increment:    utils.NewDecimal(int64(time.Second), 0),
+									FixedFee:     utils.NewDecimal(0, 0),
+									RecurrentFee: utils.NewDecimal(0, 0),
+								},
+							},
+							Units: utils.NewDecimal(int64(13*time.Second), 0),
+						},
+						"ConcreteBalance2": {
+							ID:        "ConcreteBalance2",
+							FilterIDs: nil,
+							Weights: utils.DynamicWeights{
+								{
+									Weight: 20,
+								},
+							},
+							Type:  "*concrete",
+							Units: utils.NewDecimal(213, 0),
+						},
+					},
+				},
+			},
+		}
+		sr.UsageAdjustment = utils.NewDecimal(30, 0)
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		}
+		sS.registerSession(s, false)
+		err = sS.terminateSessionNew(ctx, s)
+		if err != nil {
+			t.Error(err)
+		}
+		registered := sS.isSessionRegistered(cgrID, false)
+		if err == nil && registered {
+			t.Error("Expected session to be unregistered after successful termination")
+		}
+		if err != nil && !registered {
+			t.Errorf("Expected session to remain registered when termination fails, got error: %v", err)
+		}
+	})
+
+	t.Run("Debit", func(t *testing.T) {
+		sr := NewSRun(cgrEv)
+		sr.Charges = utils.NewEventCharges()
+		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
+		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		}
+		sS.registerSession(s, false)
+		err := sS.terminateSessionNew(ctx, s)
+		if err != nil {
+			t.Error(err)
+		}
+		registered := sS.isSessionRegistered(cgrID, false)
+		if err == nil && registered {
+			t.Error("expected session to be unregistered after successful termination")
+		}
+		if err != nil && !registered {
+			t.Error("expected session to remain registered when termination fails")
+		}
+	})
+
+	t.Run("Multiple SRuns all processed", func(t *testing.T) {
+		sr1 := NewSRun(cgrEv)
+		sr1.Charges = utils.NewEventCharges()
+		sr1.Charges.Abstracts = utils.NewDecimal(200, 0)
+		sr2 := NewSRun(cgrEv)
+		sr2.Charges = utils.NewEventCharges()
+		sr2.Charges.Abstracts = utils.NewDecimal(300, 0)
+		s := &Session{
+			ID:             cgrID,
+			OriginCGREvent: cgrEv,
+			sRuns: map[string]*SRun{
+				utils.MetaPrimary: sr1,
+				utils.MetaDefault: sr2,
+			},
+		}
+		sS.registerSession(s, false)
+		if err := sS.terminateSessionNew(ctx, s); err != nil {
+			t.Error(err)
+		}
+		if sS.isSessionRegistered(cgrID, false) {
+			t.Error("expected session to be unregistered after successful termination")
+		}
+	})
+}
