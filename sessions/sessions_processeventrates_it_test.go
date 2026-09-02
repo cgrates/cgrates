@@ -698,3 +698,165 @@ func TestSessionSv1ProcessEventDebitBlockedByBalanceBlocker(t *testing.T) {
 		t.Errorf("expected BalLow 300s (blocked), got: %+v", acnt.Balances["BalLow"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventMultipleUpdates(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"BAL1": {
+						ID:      "BAL1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	originID := "OriginIDMultiUpdate"
+
+	t.Run("Initiate30s", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "initiate1",
+				APIOpts: map[string]any{
+					utils.MetaSession:  true,
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaInitiate: true,
+					utils.MetaUsage:    30 * time.Second,
+					utils.MetaOriginID: originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(initiate): %v", err)
+		}
+	})
+
+	t.Run("Update1Plus20s", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "update1",
+				APIOpts: map[string]any{
+					utils.MetaSession:  true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUpdate:   true,
+					utils.MetaUsage:    20 * time.Second,
+					utils.MetaOriginID: originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(update1): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 20*time.Second {
+			t.Errorf("AccountsUsage[*default] after update1 = %v, want 20s", usage)
+		}
+	})
+
+	t.Run("Update2Plus15s", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "update2",
+				APIOpts: map[string]any{
+					utils.MetaSession:  true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUpdate:   true,
+					utils.MetaUsage:    15 * time.Second,
+					utils.MetaOriginID: originID,
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(update2): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 15*time.Second {
+			t.Errorf("AccountsUsage[*default] after update2 = %v, want 15s", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else if want := utils.NewDecimalFromFloat64(float64(235 * time.Second)); acnt.Balances["BAL1"].Units.Compare(want) != 0 {
+		t.Errorf("expected 235s remaining (300s - 30s initiate - 20s update1 - 15s update2), got: %+v", acnt.Balances["BAL1"].Units)
+	}
+}
