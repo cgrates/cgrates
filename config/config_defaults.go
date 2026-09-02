@@ -108,8 +108,6 @@ const CGRATES_CFG_JSON = `
 			"dbName": "", 		// db database name to connect to
 			"dbUser": "", 		// username to use when connecting to db
 			"dbPassword": "", 		// password to use when connecting to db
-			"stringIndexedFields": [],		// indexes on cdrs table to speed up queries, used in case of *mongo and *internal
-			"prefixIndexedFields": [],		// prefix indexes on cdrs table to speed up queries, used in case of *internal
 			"remoteConns": [],		// the conns that are queried when the items are not found in local DB
 			"remoteConnID": "",		// the ID to be sent to remoteConns to identify the connection
 			"replicationConns": [],		// the conns the items are replicated
@@ -394,7 +392,7 @@ const CGRATES_CFG_JSON = `
 				// "amqpExchange": "",			// name of the primary exchange where messages will be published (0.9.1)
 				// "amqpExchangeType": "",		// type of the primary exchange (direct, topic, fanout, headers) (0.9.1)
 				// "amqpPassword": "",			// password for authentication, exclusive to AMQP 1.0
-				// "amqpQueueID": "cgratesCDRs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
+				// "amqpQueueID": "cgratesURs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
 				// "amqpRoutingKey": "",		// key used for routing messages to the primary queue (0.9.1)
 				// "amqpUsername": "",			// username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
 
@@ -430,8 +428,8 @@ const CGRATES_CFG_JSON = `
 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
 				// "natsQueueID": "",			// the queue id the consumer listen to
 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
-				// "natsStreamName": "cdrs",		// the name of the NATS JetStream stream from which the consumer will read messages
-				"natsSubject": "cgratesCDRs",		// the subject from were the events are read
+				// "natsStreamName": "urs",		// the name of the NATS JetStream stream from which the consumer will read messages
+				"natsSubject": "cgratesURs",		// the subject from were the events are read
 			
 				// Partial
 				// "partialPath": "/",			// the path were the partial events will be sent
@@ -444,22 +442,22 @@ const CGRATES_CFG_JSON = `
 				// "sqlBatchSize: 0, 				// number of SQL rows that can be selected at a time. 0 or lower for unlimited
 				// "sqlDBName": "cgrates", 	// the name of the database from were the events are read
 				// "sqlDeleteIndexedFields": [],   		// list of fields to DELETE from the table
-				// "sqlTableName": "cdrs",	// the name of the table from were the events are read
+				// "sqlTableName": "urs",	// the name of the table from were the events are read
 
 				// SQS
 				// "sqsForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
-				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS readers from were the events are read
+				// "sqsQueueID": "cgratesURs", 	// the queue id for SQS readers from were the events are read
 				// "sqsSkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// S3
-				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from were the events are read
+				// "s3BucketID": "cgratesURs", 	// the bucket id for S3 readers from were the events are read
 				// "s3ForcePathStyle": false,      // when true, force the request to use path-style addressing, i.e., http://s3.amazonaws.com/BUCKET/KEY. If false, (http://BUCKET.s3.amazonaws.com/KEY)
 				// "s3SkipTlsVerify": false, 		// if enabled Http Client will accept any TLS certificate
 
 				// FileXML
-				// "xmlRootPath": "",		// path towards one event in case of XML CDRs
+				// "xmlRootPath": "",		// path towards one event in case of XML URs
 			},
-			"fields":[	// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[	// import fields template, tag will match internally UR field, in case of .csv value will be represented by index of the field value
 				{"tag": "ToR", "path": "*cgreq.ToR", "type": "*variable", "value": "~*req.2", "mandatory": true},
 				{"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.3", "mandatory": true},
 				{"tag": "RequestType", "path": "*cgreq.RequestType", "type": "*variable", "value": "~*req.4", "mandatory": true},
@@ -480,7 +478,7 @@ const CGRATES_CFG_JSON = `
 
 "efs": {
 	"enabled": false,					// starts the EventReader service: <true|false>
-	"posterAttempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, CDR exports)
+	"posterAttempts": 3,					// number of attempts before considering post request failed (eg: *httpPost, UR exports)
 	"failedPostsDir": "/var/spool/cgrates/failed_posts",	// directory where failed export requests are stored
 	"failedPostsTTL": "5s",				// cache ttl for batching failed posts before writing to disk
 	"failedPostsStaticTTL": true				// if false, ttl resets on every cache access
@@ -524,7 +522,7 @@ const CGRATES_CFG_JSON = `
 				// "amqpExchange": "",			// Exchange, amqp 0.9.1 exclusive
 				// "amqpExchangeType": "",		// ExchangeType, amqp 0.9.1 exclusive	
 				// "amqpPassword": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, populated with one of its policy's keys
-				// "amqpQueueID": "cgratesCDRs",	// the queue id for AMQP exporters from were the events are exported
+				// "amqpQueueID": "cgratesURs",	// the queue id for AMQP exporters from were the events are exported
 				// "amqpRoutingKey": "",		// RoutingKey, amqp 0.9.1 exclusive
 				// "amqpUsername": "",			// amqp 1.0 exclusive, used for SASL PLAIN auth, usually represents the policy name
 				
@@ -578,7 +576,7 @@ const CGRATES_CFG_JSON = `
 				// "natsJetStreamMaxWait": "5s",	// the maximum amount of time to wait for a response
 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)				
-				// "natsSubject": "cgratesCDRs",	// the subject were the events are exported
+				// "natsSubject": "cgratesURs",	// the subject were the events are exported
 
 				//RPC
 				// "caPath": "",			// path to CA certificate
@@ -600,16 +598,16 @@ const CGRATES_CFG_JSON = `
 				// "sqlMaxIdleConns": 0,		// SQLMaxIdleConns    
 				// "sqlMaxOpenConns": 0,		// SQLMaxOpenConns
 				// "sqlUpdateIndexedFields": [], // list of field names used for indexing UPDATE queries from the table
-				// "sqlTableName":"cdrs", 		// the name of the table from where the events are exported
+				// "sqlTableName":"urs", 		// the name of the table from where the events are exported
 
 				//SQS
-				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS exporters from were the events are exported
+				// "sqsQueueID": "cgratesURs", 	// the queue id for SQS exporters from were the events are exported
 
 				// S3
-				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from where the events that are  exported
+				// "s3BucketID": "cgratesURs", 	// the bucket id for S3 readers from where the events that are  exported
 				// "s3FolderPath": "",			// S3FolderPath 
 			},
-			"fields":[]					// import fields template, tag will match internally CDR field, in case of .csv value will be represented by index of the field value
+			"fields":[]					// import fields template, tag will match internally UR field, in case of .csv value will be represented by index of the field value
 		}
 	]
 },
@@ -2064,7 +2062,7 @@ const CGRATES_CFG_JSON = `
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
-		// "*attributes": [		// connections to AttributeS for CDRExporter
+		// "*attributes": [		// connections to AttributeS for URExporter
 		// 	{
 		// 		"tenant": "",
 		// 		"filterIDs": [],
@@ -2210,32 +2208,32 @@ const CGRATES_CFG_JSON = `
 		{"tag": "CCRequestNumber", "path": "*rep.CC-Request-Number", "type": "*variable",
 			"value": "~*req.CC-Request-Number", "mandatory": true}
 	],
-	"*cdrLog": [ // cdrLog template is used in ActionS to build the event that is send to CDRs in case of *cdrLog actionType
-		{"tag": "ToR", "path": "*cdr.ToR", "type": "*variable",
+	"*urLog": [ // urLog template is used in ActionS to build the event that is send to URs in case of *urLog actionType
+		{"tag": "ToR", "path": "*ur.ToR", "type": "*variable",
 			"value": "~*req.BalanceType", "mandatory": true},
-		{"tag": "OriginHost", "path": "*cdr.OriginHost", "type": "*constant",
+		{"tag": "OriginHost", "path": "*ur.OriginHost", "type": "*constant",
 			"value": "127.0.0.1", "mandatory": true},
-		{"tag": "RequestType", "path": "*cdr.RequestType", "type": "*constant",
+		{"tag": "RequestType", "path": "*ur.RequestType", "type": "*constant",
 			"value": "*none", "mandatory": true},
-		{"tag": "Tenant", "path": "*cdr.Tenant", "type": "*variable",
+		{"tag": "Tenant", "path": "*ur.Tenant", "type": "*variable",
 			"value": "~*req.Tenant", "mandatory": true},
-		{"tag": "Account", "path": "*cdr.Account", "type": "*variable",
+		{"tag": "Account", "path": "*ur.Account", "type": "*variable",
 			"value": "~*req.Account", "mandatory": true},
-		{"tag": "Subject", "path": "*cdr.Subject", "type": "*variable",
+		{"tag": "Subject", "path": "*ur.Subject", "type": "*variable",
 			"value": "~*req.Account", "mandatory": true},
-		{"tag": "Cost", "path": "*cdr.Cost", "type": "*variable",
+		{"tag": "Cost", "path": "*ur.Cost", "type": "*variable",
 			"value": "~*req.Cost", "mandatory": true},
-		{"tag": "Source", "path": "*cdr.Source", "type": "*constant",
-			"value": "*cdrLog", "mandatory": true},
-		{"tag": "Usage", "path": "*cdr.Usage", "type": "*constant",
+		{"tag": "Source", "path": "*ur.Source", "type": "*constant",
+			"value": "*urLog", "mandatory": true},
+		{"tag": "Usage", "path": "*ur.Usage", "type": "*constant",
 			"value": "1", "mandatory": true},
-		{"tag": "RunID", "path": "*cdr.RunID", "type": "*variable",
+		{"tag": "RunID", "path": "*ur.RunID", "type": "*variable",
 			"value": "~*req.ActionType", "mandatory": true},
-		{"tag": "SetupTime", "path": "*cdr.SetupTime", "type": "*constant",
+		{"tag": "SetupTime", "path": "*ur.SetupTime", "type": "*constant",
 			"value": "*now", "mandatory": true},
-		{"tag": "AnswerTime", "path": "*cdr.AnswerTime", "type": "*constant",
+		{"tag": "AnswerTime", "path": "*ur.AnswerTime", "type": "*constant",
 			"value": "*now", "mandatory": true},
-		{"tag": "PreRated", "path": "*cdr.PreRated", "type": "*constant",
+		{"tag": "PreRated", "path": "*ur.PreRated", "type": "*constant",
 			"value": "true", "mandatory": true}
 	],
 	"*coa": [ // used by RadiusAgent when sending ChangeOfAuthorization message towards the client
@@ -2312,7 +2310,7 @@ const CGRATES_CFG_JSON = `
 		{"tag":"Source","path":"*cgreq.Source", "type":"*composed",
 			"value":"FS_;~*req.Event-Name"},
 		{"tag":"RequestType","path":"*cgreq.RequestType","type":"*constant",
-			"value":"*none","filters":["*string:*req.variable_process_cdr:false"]},
+			"value":"*none","filters":["*string:*req.variable_process_ur:false"]},
 		{"tag":"RequestType","path":"*cgreq.RequestType","type":"*constant",
 			"value":"*none","filters":["*string:*req.Caller-Dialplan:inline"]},
 		{"tag":"RequestType","path": "*cgreq.RequestType","type": "*constant",

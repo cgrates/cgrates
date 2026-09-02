@@ -549,7 +549,7 @@ func newTestEnv(t *testing.T, files map[string][][]string, cfg *config.CGRConfig
 	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cache)
-	internalDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	internalDB, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

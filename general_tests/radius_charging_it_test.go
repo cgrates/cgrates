@@ -140,7 +140,7 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	}
 	checkUnits(t, balanceUnits(t, client, fundedIMSI, "data_allowance"), utils.NewDecimal(gb, 0), "funded allowance after plan")
 	checkUnits(t, balanceUnits(t, client, fundedIMSI, "monetary"), utils.NewDecimalFromFloat64(90), "funded monetary after plan")
-	checkCDRs(t, client, fundedIMSI, planFee)
+	checkURs(t, client, fundedIMSI, planFee)
 
 	const brokeIMSI = "310150000000902"
 	setDataAccount(t, client, brokeIMSI, nil, "RP_GLOBAL_OVERAGE", utils.NewDecimalFromFloat64(5))
@@ -151,7 +151,7 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	}
 	checkUnits(t, balanceUnits(t, client, brokeIMSI, "data_allowance"), utils.NewDecimal(0, 0), "broke allowance unchanged")
 	checkUnits(t, balanceUnits(t, client, brokeIMSI, "monetary"), utils.NewDecimalFromFloat64(5), "broke monetary unchanged")
-	checkCDRs(t, client, brokeIMSI)
+	checkURs(t, client, brokeIMSI)
 
 	ng.Stop(t)
 	checkRadiusUsageRecords(t, exportDir, usIMSI,
@@ -192,7 +192,7 @@ func TestChargingRecurringFee(t *testing.T) {
 
 	checkUnits(t, balanceUnits(t, client, acctID, "monetary"), utils.NewDecimalFromFloat64(5), "monetary floors one fee short")
 	checkUnits(t, balanceUnits(t, client, acctID, "data_allowance"), utils.NewDecimal(2*gb, 0), "allowance granted once per paid fee")
-	checkCDRs(t, client, acctID, fee, fee)
+	checkURs(t, client, acctID, fee, fee)
 }
 
 // TestRadiusChargingActionProvisioning runs the same US plan as
@@ -574,8 +574,8 @@ func setPlanAction(t *testing.T, c *birpc.Client, apID, acctID, schedule string,
 						},
 					},
 					{
-						ID:   "cdr",
-						Type: utils.CDRLog,
+						ID:   "ur",
+						Type: utils.MetaURLog,
 					},
 				},
 			},
@@ -590,7 +590,7 @@ func runPlan(c *birpc.Client, method, apID, acctID string, price float64) error 
 		&utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "plan_" + acctID,
-			// the CDR is built from these fields
+			// the UR is built from these fields
 			Event: map[string]any{
 				utils.AccountField: acctID,
 				"Cost":             price,
@@ -600,7 +600,7 @@ func runPlan(c *birpc.Client, method, apID, acctID string, price float64) error 
 			},
 			APIOpts: map[string]any{
 				utils.OptsActionsProfileIDs: []string{apID},
-				utils.MetaAccounts:          false, // otherwise the CDR debits the account again
+				utils.MetaAccounts:          false, // otherwise the UR debits the account again
 			},
 		}, &reply)
 }
@@ -631,40 +631,40 @@ func checkUnits(t *testing.T, got, want *utils.Decimal, msg string) {
 	}
 }
 
-func cdrCost(t *testing.T, cdr *utils.CDR) float64 {
+func urCost(t *testing.T, ur *utils.UR) float64 {
 	t.Helper()
-	// rated CDRs keep the cost in Opts, *cdrLog ones in Event
-	v, ok := cdr.Opts[utils.MetaCost]
+	// rated URs keep the cost in Opts, *urLog ones in Event
+	v, ok := ur.Opts[utils.MetaCost]
 	if !ok {
-		if v, ok = cdr.Event["Cost"]; !ok {
+		if v, ok = ur.Event["Cost"]; !ok {
 			return 0
 		}
 	}
 	cost, err := utils.IfaceAsFloat64(v)
 	if err != nil {
-		t.Fatalf("CDR cost unreadable: %v, cdr=%s", err, utils.ToJSON(cdr))
+		t.Fatalf("UR cost unreadable: %v, ur=%s", err, utils.ToJSON(ur))
 	}
 	return cost
 }
 
-func checkCDRs(t *testing.T, c *birpc.Client, acctID string, wantCosts ...float64) {
+func checkURs(t *testing.T, c *birpc.Client, acctID string, wantCosts ...float64) {
 	t.Helper()
-	var cdrs []*utils.CDR
-	err := c.Call(context.Background(), utils.AdminSv1GetCDRs,
-		&utils.CDRFilters{
+	var urs []*utils.UR
+	err := c.Call(context.Background(), utils.AdminSv1GetURs,
+		&utils.URFilters{
 			FilterIDs: []string{fmt.Sprintf("*string:~*req.Account:%s", acctID)},
-		}, &cdrs)
+		}, &urs)
 	if err != nil && !strings.Contains(err.Error(), utils.ErrNotFound.Error()) {
-		t.Fatalf("%s: %v", utils.AdminSv1GetCDRs, err)
+		t.Fatalf("%s: %v", utils.AdminSv1GetURs, err)
 	}
-	got := make([]float64, len(cdrs))
-	for i, cdr := range cdrs {
-		got[i] = cdrCost(t, cdr)
+	got := make([]float64, len(urs))
+	for i, ur := range urs {
+		got[i] = urCost(t, ur)
 	}
 	slices.Sort(got)
 	slices.Sort(wantCosts)
 	if !slices.Equal(got, wantCosts) {
-		t.Fatalf("CDR costs for %s: got %v, want %v: %s", acctID, got, wantCosts, utils.ToJSON(cdrs))
+		t.Fatalf("UR costs for %s: got %v, want %v: %s", acctID, got, wantCosts, utils.ToJSON(urs))
 	}
 }
 

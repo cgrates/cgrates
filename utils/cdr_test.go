@@ -11,12 +11,12 @@ import (
 )
 
 func TestTableName(t *testing.T) {
-	cdrSQLTable := CDRSQLTable{}
+	cdrSQLTable := URSQLTable{}
 
 	tableName := cdrSQLTable.TableName()
 
-	if tableName != CDRsTBL {
-		t.Errorf("TableName() = %s, expected %s", tableName, CDRsTBL)
+	if tableName != URsTBL {
+		t.Errorf("TableName() = %s, expected %s", tableName, URsTBL)
 	}
 }
 
@@ -158,7 +158,7 @@ func TestGetUniqueURID(t *testing.T) {
 
 func TestCDR_CGREvent(t *testing.T) {
 	{
-		cdr := &CDR{
+		cdr := &UR{
 			Tenant: "test_tenant",
 			Event:  map[string]interface{}{"key": "value"},
 			Opts:   map[string]interface{}{"opt_key": "opt_value"},
@@ -186,7 +186,7 @@ func TestCDR_CGREvent(t *testing.T) {
 
 func TestCDRsToCGREvents(t *testing.T) {
 	{
-		cdrs := []*CDR{
+		cdrs := []*UR{
 			{
 				Tenant: "tenant1",
 				Event:  map[string]interface{}{"event_key1": "event_value1"},
@@ -227,7 +227,7 @@ func TestCDRsToCGREvents(t *testing.T) {
 	}
 
 	{
-		cdrs := []*CDR{}
+		cdrs := []*UR{}
 
 		cgrEvents := CDRsToCGREvents(cdrs)
 

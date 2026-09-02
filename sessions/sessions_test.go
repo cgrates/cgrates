@@ -56,7 +56,7 @@ var attrs = &attributes.ProcessEventReply{
 func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -90,7 +90,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1376,7 +1376,7 @@ func TestV1ProcessEventReplyAsNavigableMap(t *testing.T) {
 func TestSessionSGetIndexedFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	mpStr, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	mpStr, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: mpStr}, cfg.DbCfg())
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	sS := NewSessionS(cfg, engine.NewDataManager(dbCM, cfg, nil, locker), cacheS, nil, nil)
@@ -1995,7 +1995,7 @@ func (mk *mockConnWarnDisconnect2) Call(method string, args any, rply any) error
 func TestWarnSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().NodeID = "ClientConnIdtest"
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -2099,7 +2099,7 @@ func TestSessionSAsBiRPC(t *testing.T) {
 func TestBiJClntID(t *testing.T) {
 	client := &mockConnWarnDisconnect1{}
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -2129,7 +2129,7 @@ func TestSessionSRatesCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2287,7 +2287,7 @@ func TestGetRelocateSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2324,7 +2324,7 @@ func TestSessionSNewSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2493,7 +2493,7 @@ func TestSessionSSetSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2609,7 +2609,7 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -2779,7 +2779,7 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

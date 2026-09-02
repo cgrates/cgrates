@@ -331,7 +331,7 @@ func TestCBDebitWithUnitFactorWithUnlimited(t *testing.T) {
 
 func TestCBDebitWithUnitFactorWithFilters1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -372,7 +372,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithUnitFactorWithFiltersWithLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -412,7 +412,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithMultipleUnitFactor(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -453,7 +453,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithBalanceFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -485,7 +485,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithBalanceFilterNotPassing(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -513,7 +513,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithBalanceInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -541,7 +541,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithInvalidUnitFactorFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -574,7 +574,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBDebitWithInvalidLimit(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -631,7 +631,7 @@ func TestCBSDebitAbstracts(t *testing.T) {
 
 func TestCBSDebitAbstractsInvalidFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -661,7 +661,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBSDebitAbstractsNoMatchFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -698,7 +698,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBSDebitAbstractsInvalidCostIncrementFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -728,7 +728,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBSDebitAbstractsCoverProcessAttributes(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -775,7 +775,7 @@ dm.SetCache(engine.Cache)
 
 func TestCBSDebitAbstractsCoverProcessAttributes2(t *testing.T) { // coverage purpose
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, true)
+	data , _ := engine.NewInternalDB(nil, true)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, config.CgrConfig().CacheCfg(), nil)
 dm.SetCache(engine.Cache)

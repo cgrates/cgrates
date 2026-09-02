@@ -49,7 +49,7 @@ var sTestsCalls = []func(t *testing.T){
 	testCallLoadTariffPlanFromFolder,
 	testCallInitVoiceBlender,
 	testCallCall1001To1002,
-	testCallGetCDRs,
+	testCallGetURs,
 	testCallCheckBalance,
 	testCallStopVoiceBlender,
 	testCallStopCgrEngine,
@@ -233,42 +233,42 @@ func testCallCall1001To1002(t *testing.T) {
 	time.Sleep(time.Second)
 }
 
-func testCallGetCDRs(t *testing.T) {
-	args := &utils.CDRFilters{
+func testCallGetURs(t *testing.T) {
+	args := &utils.URFilters{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	var cdrs []*utils.CDR
+	var urs []*utils.UR
 	var err error
 	for i := 0; i < 30; i++ {
-		err = tutorialCallsRpc.Call(context.Background(), utils.AdminSv1GetCDRs, args, &cdrs)
-		if err == nil && len(cdrs) == 2 {
+		err = tutorialCallsRpc.Call(context.Background(), utils.AdminSv1GetURs, args, &urs)
+		if err == nil && len(urs) == 2 {
 			break
 		}
 		time.Sleep(time.Second)
 	}
-	if err != nil || len(cdrs) != 2 {
-		t.Fatalf("expected 2 CDRs for account 1001, received %d (err=%v)", len(cdrs), err)
+	if err != nil || len(urs) != 2 {
+		t.Fatalf("expected 2 URs for account 1001, received %d (err=%v)", len(urs), err)
 	}
-	var dfltCdr *utils.CDR
-	for _, cdr := range cdrs {
-		if utils.IfaceAsString(cdr.Event[utils.AccountField]) != "1001" {
-			t.Errorf("unexpected CDR account: %s", utils.ToJSON(cdr))
+	var dfltUr *utils.UR
+	for _, ur := range urs {
+		if utils.IfaceAsString(ur.Event[utils.AccountField]) != "1001" {
+			t.Errorf("unexpected UR account: %s", utils.ToJSON(ur))
 		}
-		if utils.MetaDefault == cdr.Opts[utils.MetaRunID] {
-			dfltCdr = cdr
+		if utils.MetaDefault == ur.Opts[utils.MetaRunID] {
+			dfltUr = ur
 			break
 		}
 	}
-	if dfltCdr == nil {
-		t.Fatalf("missing *default run CDR: %s", utils.ToJSON(cdrs))
+	if dfltUr == nil {
+		t.Fatalf("missing *default run UR: %s", utils.ToJSON(urs))
 	}
-	cost, err := utils.IfaceAsFloat64(dfltCdr.Opts[utils.MetaCost])
+	cost, err := utils.IfaceAsFloat64(dfltUr.Opts[utils.MetaCost])
 	if err != nil {
-		t.Fatalf("retrieving *default run cost: %v, CDR: %s", err, utils.ToJSON(dfltCdr))
+		t.Fatalf("retrieving *default run cost: %v, UR: %s", err, utils.ToJSON(dfltUr))
 	}
 	if cost != 0.005 {
-		t.Errorf("expected *default run cost 0.005, got %v: %s", cost, utils.ToJSON(dfltCdr))
+		t.Errorf("expected *default run cost 0.005, got %v: %s", cost, utils.ToJSON(dfltUr))
 	}
 
 }

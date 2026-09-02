@@ -156,7 +156,7 @@ func testServeBiJSONInvalidPort(t *testing.T) {
 	server = NewCommonListenerS(caps)
 	server.RpcRegister(new(mockRegister))
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil, locker)
@@ -181,7 +181,7 @@ func testServeBiGoBInvalidPort(t *testing.T) {
 	server.RpcRegister(new(mockRegister))
 	server.birpcSrv = birpc.NewBirpcServer()
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfgDflt.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfgDflt.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfgDflt.DbCfg())
 	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	dm := engine.NewDataManager(dbCM, cfgDflt, nil, locker)

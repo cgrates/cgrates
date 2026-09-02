@@ -372,9 +372,10 @@ func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
 	}
 	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
 
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), nil, ka.fltrS)
+	// unfinished , will be replaced by templates using sessions processevent with ees flags
+	// sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), nil, ka.fltrS)
 	var processReply string
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
+	// err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
 	// take the error after calling SessionSv1.ProcessCDR
 	// and send it as parameter to AsKamProcessCDRReply
 	if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {

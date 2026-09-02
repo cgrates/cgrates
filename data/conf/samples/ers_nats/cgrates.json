@@ -21,7 +21,7 @@
 			"attempts": 1,
 			"opts": {
 				"natsJetStream": true,
-				"natsSubject": "cgrates_cdrs_processed"
+				"natsSubject": "cgrates_urs_processed"
 			}
 		}
 	]
@@ -44,13 +44,13 @@
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",
                 "natsStreamName": "stream",
-                "natsSubject": "cgratesCDRs",
+                "natsSubject": "cgratesURs",
                 "natsQueueID": "queue",
                 "natsJetStreamMaxWait": "5s"
             },
             "flags": ["*dryRun"],
             "fields":[
-                {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+                {"tag": "ur_template", "type": "*template", "value": "ur_template"}
             ]
         },
         {
@@ -63,20 +63,20 @@
                 "natsJetStream": true,
                 "natsConsumerName": "cgrates",
                 "natsStreamName": "stream",
-                "natsSubject": "cgratesCDRs",
+                "natsSubject": "cgratesURs",
                 "natsQueueID": "queue",
                 "natsJetStreamMaxWait": "5s"
             },
             "flags": ["*dryRun"],
             "fields":[
-                {"tag": "cdr_template", "type": "*template", "value": "cdr_template"}
+                {"tag": "ur_template", "type": "*template", "value": "ur_template"}
             ]
         }
     ]
 },
 
 "templates": {
-    "cdr_template": [
+    "ur_template": [
         {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Account", "mandatory": true},
         {"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable", "value": "~*req.Subject", "mandatory": true},
         {"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable", "value": "~*req.Destination", "mandatory": true}

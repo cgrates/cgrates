@@ -27,15 +27,14 @@ const ersDryRunMySQL = "<ERs> DRY_RUN, reader: <mysql>"
 var (
 	dbConnString = "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/%s?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'"
 	timeStart    = time.Now().Truncate(time.Second)
-	cdr1         = &utils.CDR{ // sample with values not realisticy calculated
+	ur1          = &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaURID:       utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.OptsCDRsExport: false,
-			utils.MetaChargeID:   utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.MetaChargers:   true,
-			utils.MetaCost:       1.01,
-			utils.MetaOriginID:   "dsafdsaf",
+			utils.MetaURID:     utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaChargeID: utils.Sha1("dsafdsaf", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaChargers: true,
+			utils.MetaCost:     1.01,
+			utils.MetaOriginID: "dsafdsaf",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				Cost: utils.NewDecimalFromFloat64(2.3),
 				CostIntervals: []*utils.RateSIntervalCost{
@@ -94,15 +93,14 @@ var (
 		},
 	}
 	urID = utils.Sha1("oid2", timeStart.String())
-	cdr2 = &utils.CDR{ // sample with values not realisticy calculated
+	ur2  = &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaURID:       urID,
-			utils.OptsCDRsExport: false,
-			utils.MetaChargeID:   urID,
-			utils.MetaChargers:   true,
-			utils.MetaCost:       1.01,
-			utils.MetaOriginID:   "dsafdsaf",
+			utils.MetaURID:     urID,
+			utils.MetaChargeID: urID,
+			utils.MetaChargers: true,
+			utils.MetaCost:     1.01,
+			utils.MetaOriginID: "dsafdsaf",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				Cost: utils.NewDecimalFromFloat64(2.3),
 				CostIntervals: []*utils.RateSIntervalCost{
@@ -160,17 +158,16 @@ var (
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	cdr3 = &utils.CDR{ // sample with values not realisticy calculated
+	ur3 = &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
-			utils.MetaURID:       utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.OptsCDRsExport: false,
-			utils.MetaChargeID:   utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
-			utils.MetaCost:       1.01,
-			utils.MetaOriginID:   "dsafdsaf",
-			utils.MetaRates:      true,
-			utils.MetaRunID:      utils.MetaDefault,
-			utils.MetaUsage:      10 * time.Second,
+			utils.MetaURID:     utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaChargeID: utils.Sha1("oid3", time.Date(2013, 11, 7, 8, 42, 26, 0, time.UTC).String()),
+			utils.MetaCost:     1.01,
+			utils.MetaOriginID: "dsafdsaf",
+			utils.MetaRates:    true,
+			utils.MetaRunID:    utils.MetaDefault,
+			utils.MetaUsage:    10 * time.Second,
 		},
 		Event: map[string]any{
 			utils.OrderID:      123,
@@ -211,7 +208,7 @@ func getDBCfg(t *testing.T) engine.DBCfg {
 	return engine.DBCfg{}
 }
 
-func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.CDR) *gorm.DB {
+func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.UR) *gorm.DB {
 	t.Helper()
 
 	cdb, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
@@ -234,8 +231,8 @@ func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.CDR) *gor
 		t.Fatal(err)
 	}
 	var fileContent string
-	if tableName == utils.CDRsTBL {
-		fileContentByte, err := os.ReadFile("/usr/share/cgrates/storage/mysql/create_cdrs_tables.sql")
+	if tableName == utils.URsTBL {
+		fileContentByte, err := os.ReadFile("/usr/share/cgrates/storage/mysql/create_urs_tables.sql")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -260,7 +257,7 @@ func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.CDR) *gor
 	tx := db.Begin()
 	tx = tx.Table(tableName)
 	for _, cdr := range cdrs {
-		if err := tx.Save(&utils.CDRSQLTable{
+		if err := tx.Save(&utils.URSQLTable{
 			Tenant:    cdr.Tenant,
 			Opts:      cdr.Opts,
 			Event:     cdr.Event,
@@ -362,7 +359,7 @@ func baseExpectedEvent() map[string]any {
 func assertNoRateID2(t *testing.T, db *gorm.DB) {
 	t.Helper()
 	var rows []map[string]any
-	if err := db.Raw("SELECT * FROM " + utils.CDRsTBL).Scan(&rows).Error; err != nil {
+	if err := db.Raw("SELECT * FROM " + utils.URsTBL).Scan(&rows).Error; err != nil {
 		t.Fatalf("failed to query table: %v", err)
 	}
 	for _, row := range rows {
@@ -375,7 +372,7 @@ func assertNoRateID2(t *testing.T, db *gorm.DB) {
 }
 
 func TestERSSQLFilters(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -396,13 +393,13 @@ func TestERSSQLFilters(t *testing.T) {
 	if got, want := utils.ToJSON(ev.Event), utils.ToJSON(baseExpectedEvent()); got != want {
 		t.Errorf("got event\n%s\nwant\n%s", got, want)
 	}
-	if got := countRows(t, db, utils.CDRsTBL); got != 3 {
+	if got := countRows(t, db, utils.URsTBL); got != 3 {
 		t.Fatalf("expected 3 rows, got %d", got)
 	}
 }
 
 func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -430,7 +427,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 	ng.Run(t)
 
 	waitFor(t,
-		func() bool { return countRows(t, db, utils.CDRsTBL) == 2 },
+		func() bool { return countRows(t, db, utils.URsTBL) == 2 },
 		"expected 2 rows in cdrs after delete",
 		2*time.Second,
 	)
@@ -445,7 +442,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 }
 
 func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -472,7 +469,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 	ng.Run(t)
 
 	waitFor(t,
-		func() bool { return countRows(t, db, utils.CDRsTBL) == 2 },
+		func() bool { return countRows(t, db, utils.URsTBL) == 2 },
 		"expected 2 rows in cdrs after delete",
 		2*time.Second,
 	)
@@ -487,7 +484,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 }
 
 func TestERSSQLFiltersMove(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	// Create cdrsProcessed table for the move target.
 	sqlDB, err := db.DB()
@@ -555,7 +552,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 
 	waitFor(t,
 		func() bool {
-			return countRows(t, db, utils.CDRsTBL) == 2 &&
+			return countRows(t, db, utils.URsTBL) == 2 &&
 				countRows(t, db, "cdrsProcessed") == 1
 		},
 		"expected 2 rows in cdrs and 1 row in cdrsProcessed after move",
@@ -591,7 +588,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 }
 
 func TestERSSQLFiltersUpdate(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -659,13 +656,13 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 	waitFor(t,
 		func() bool {
 			var c int64
-			db.Table(utils.CDRsTBL).Where("tenant = ?", "updatedTenant").Count(&c)
+			db.Table(utils.URsTBL).Where("tenant = ?", "updatedTenant").Count(&c)
 			return c == 1
 		},
 		"expected 1 row with tenant=updatedTenant",
 		2*time.Second,
 	)
-	if got := countRows(t, db, utils.CDRsTBL); got != 3 {
+	if got := countRows(t, db, utils.URsTBL); got != 3 {
 		t.Fatalf("expected 3 rows, got %d", got)
 	}
 
@@ -682,7 +679,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
 }
 
 func TestERSSQLFiltersRawUpdate(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -734,13 +731,13 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 	waitFor(t,
 		func() bool {
 			var c int64
-			db.Table(utils.CDRsTBL).Where("tenant = ?", "updatedTenant").Count(&c)
+			db.Table(utils.URsTBL).Where("tenant = ?", "updatedTenant").Count(&c)
 			return c == 1
 		},
 		"expected 1 row with tenant=updatedTenant",
 		2*time.Second,
 	)
-	if got := countRows(t, db, utils.CDRsTBL); got != 3 {
+	if got := countRows(t, db, utils.URsTBL); got != 3 {
 		t.Fatalf("expected 3 rows, got %d", got)
 	}
 
@@ -754,7 +751,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
 }
 
 func TestERSSQLFiltersErr(t *testing.T) {
-	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+	_ = openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	jsonCfg := `{
 "general": {
@@ -830,7 +827,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
 // TestERSSQLFilterUnquote checks that JSON_UNQUOTE wraps only JSON_VALUE,
 // not the whole comparison (which produces invalid SQL on MySQL 8).
 func TestERSSQLFilterUnquote(t *testing.T) {
-	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdr2)
+	_ = openTestDB(t, "cgrates2", utils.URsTBL, ur2)
 
 	jsonCfg := `{
 "general": {
@@ -897,7 +894,7 @@ func TestERSSQLFilterUnquote(t *testing.T) {
 // TestERSSQLFilterMetaEmpty checks that *empty and *exists match JSON
 // fields with empty string values (broken on MariaDB 10.11.14, MDEV-37428).
 func TestERSSQLFilterMetaEmpty(t *testing.T) {
-	cdrWithEmpty := &utils.CDR{
+	cdrWithEmpty := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaRunID: utils.MetaDefault,
@@ -907,7 +904,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 			"EmptyField":       "",
 		},
 	}
-	cdrWithoutEmpty := &utils.CDR{
+	cdrWithoutEmpty := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaRunID: utils.MetaDefault,
@@ -917,7 +914,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 			"EmptyField":       "not_empty",
 		},
 	}
-	_ = openTestDB(t, "cgrates2", utils.CDRsTBL, cdrWithEmpty, cdrWithoutEmpty)
+	_ = openTestDB(t, "cgrates2", utils.URsTBL, cdrWithEmpty, cdrWithoutEmpty)
 
 	jsonCfg := `{
 "general": {

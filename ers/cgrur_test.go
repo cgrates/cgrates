@@ -13,17 +13,17 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-func TestCgrCDRSetURL(t *testing.T) {
-	rdr := new(CgrCDR)
-	exp := &CgrCDR{
+func TestCgrURSetURL(t *testing.T) {
+	rdr := new(CgrUR)
+	exp := &CgrUR{
 		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		connType:   "mysql",
-		tableName:  "cdrs2",
+		tableName:  "urs2",
 	}
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := rdr.setURL(inURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
-		SQLTableName: utils.StringPointer("cdrs2"),
+		SQLTableName: utils.StringPointer("urs2"),
 		PgSSLMode:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
@@ -35,16 +35,16 @@ func TestCgrCDRSetURL(t *testing.T) {
 		t.Errorf("Expected: %q ,received: %q", exp.tableName, rdr.tableName)
 	}
 
-	rdr = new(CgrCDR)
-	exp = &CgrCDR{
+	rdr = new(CgrUR)
+	exp = &CgrUR{
 		connString: "host=127.0.0.1 port=3306 dbname=cgrates2 user=cgrates password=CGRateS.org sslmode=enabled",
 		connType:   "postgres",
-		tableName:  "cdrs2",
+		tableName:  "urs2",
 	}
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := rdr.setURL(inURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
-		SQLTableName: utils.StringPointer("cdrs2"),
+		SQLTableName: utils.StringPointer("urs2"),
 		PgSSLMode:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
@@ -56,11 +56,11 @@ func TestCgrCDRSetURL(t *testing.T) {
 		t.Errorf("Expected: %q ,received: %q", exp.tableName, rdr.tableName)
 	}
 
-	rdr = new(CgrCDR)
-	exp = &CgrCDR{
+	rdr = new(CgrUR)
+	exp = &CgrUR{
 		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		connType:   "mysql",
-		tableName:  utils.CDRsTBL,
+		tableName:  utils.URsTBL,
 	}
 	inURL = "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := rdr.setURL(inURL, &config.EventReaderOpts{}); err != nil {
@@ -73,14 +73,14 @@ func TestCgrCDRSetURL(t *testing.T) {
 		t.Errorf("Expected: %q ,received: %q", exp.tableName, rdr.tableName)
 	}
 
-	rdr = new(CgrCDR)
+	rdr = new(CgrUR)
 	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := rdr.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown dbType postgres2" {
 		t.Errorf("Expected error: 'unknown dbType postgres2' ,received: %v", err)
 	}
 }
 
-func TestCgrCDRProcessMessageFields(t *testing.T) {
+func TestCgrURProcessMessageFields(t *testing.T) {
 	cfg, err := config.NewCGRConfigFromJSONStringWithDefaults(`{
 "ers": {
 	"readers": [
@@ -93,14 +93,14 @@ func TestCgrCDRProcessMessageFields(t *testing.T) {
 		},
 		{
 			"id": "fields",
-			"type": "*cgrcdr",
+			"type": "*cgrur",
 			"runDelay": "0",
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"eesSuccessIDs": ["exporter"]
 		},
 		{
 			"id": "no_fields",
-			"type": "*cgrcdr"
+			"type": "*cgrur"
 		}
 	]
 }
@@ -113,12 +113,12 @@ func TestCgrCDRProcessMessageFields(t *testing.T) {
 	}
 
 	events := make(chan *erEvent, 1)
-	rdr, err := NewCgrCdr(cfg, 1, events, make(chan *erEvent, 1), make(chan error, 1),
+	rdr, err := NewCgrUr(cfg, 1, events, make(chan *erEvent, 1), make(chan error, 1),
 		engine.NewFilterS(cfg, nil, nil), make(chan struct{}, 1), nil)
 	if err != nil {
 		t.Fatalf("reader creation failed: %v", err)
 	}
-	cdrSQL := &utils.CDRSQLTable{
+	urSQL := &utils.URSQLTable{
 		Tenant: "cgrates.org",
 		Opts: utils.JSONB{
 			utils.OriginID:   "usage-record",
@@ -129,7 +129,7 @@ func TestCgrCDRProcessMessageFields(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 	}
-	if err := rdr.(*CgrCDR).processMessage(cdrSQL, nil); err != nil {
+	if err := rdr.(*CgrUR).processMessage(urSQL, nil); err != nil {
 		t.Fatalf("message processing failed: %v", err)
 	}
 	event := <-events
@@ -153,14 +153,14 @@ func TestCgrCDRProcessMessageFields(t *testing.T) {
 	}
 }
 
-func TestCgrCDRServePostgresErr(t *testing.T) {
+func TestCgrURServePostgresErr(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
-	rdr := &CgrCDR{
+	rdr := &CgrUR{
 		connType:   utils.Postgres,
-		connString: "host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=CGRateS.org sslmode=disabled",
+		connString: "host=127.0.0.1 port=9999 dbname=urs user=cgrates password=CGRateS.org sslmode=disabled",
 	}
-	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
+	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=urs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
 	err := rdr.Serve()
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
@@ -168,10 +168,10 @@ func TestCgrCDRServePostgresErr(t *testing.T) {
 	logger.Default = tmp
 }
 
-func TestCgrCDRServeBadType(t *testing.T) {
+func TestCgrURServeBadType(t *testing.T) {
 	tmp := logger.Default
 	logger.Default = logger.Default.LogMode(logger.Silent)
-	rdr := &CgrCDR{
+	rdr := &CgrUR{
 		connType: "sqlite",
 	}
 	expected := "db type <sqlite> not supported"

@@ -92,7 +92,7 @@ func TestACExecuteAccountsRemBalance(t *testing.T) {
 		},
 	}
 
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

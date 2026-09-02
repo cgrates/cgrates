@@ -95,7 +95,7 @@ func main() {
 			d, err := engine.NewDBConn(mgrCfg.ConfigDBCfg().Type,
 				mgrCfg.ConfigDBCfg().Host, mgrCfg.ConfigDBCfg().Port,
 				mgrCfg.ConfigDBCfg().Name, mgrCfg.ConfigDBCfg().User,
-				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding, nil, nil,
+				mgrCfg.ConfigDBCfg().Password, mgrCfg.GeneralCfg().DBDataEncoding,
 				mgrCfg.ConfigDBCfg().Opts, nil)
 			if err != nil { // Cannot configure getter database, show stopper
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))

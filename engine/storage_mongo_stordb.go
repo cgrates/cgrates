@@ -5,8 +5,6 @@ package engine
 
 import (
 	"errors"
-	"fmt"
-	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -90,58 +88,6 @@ func (ms *MongoStorage) GetStorageType() string {
 	return utils.MetaMongo
 }
 
-// SetCDR inserts or updates a CDR in MongoDB.
-// If a CDR with the same urID already exists and allowUpdate is true, it updates the existing CDR.
-// If allowUpdate is false and a CDR with the same urID exists, it returns an EXISTS error.
-func (ms *MongoStorage) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
-	// Assign a new order ID if it's not already set.
-	if val, has := cdr.Event[utils.OrderID]; has && val == 0 {
-		cdr.Event[utils.OrderID] = ms.counter.Next()
-	}
-
-	return ms.query(ctx, func(sctx mongo.SessionContext) error {
-
-		// Capture the current time once to use for both CreatedAt and UpdatedAt.
-		currentTime := time.Now()
-
-		_, err := ms.getCol(ColCDRs).InsertOne(
-			sctx,
-			&utils.CDR{
-				Tenant:    cdr.Tenant,
-				Opts:      cdr.APIOpts,
-				Event:     cdr.Event,
-				CreatedAt: currentTime,
-				UpdatedAt: currentTime,
-			},
-		)
-		if err != nil && isMongoDuplicateError(err) {
-			if !allowUpdate {
-				return utils.ErrExists
-			}
-
-			// Prepare an update operation that excludes the CreatedAt field.
-			update := bson.M{"$set": bson.M{
-				"tenant":    cdr.Tenant,
-				"opts":      cdr.APIOpts,
-				"event":     cdr.Event,
-				"updatedAt": currentTime,
-			}}
-
-			urID := utils.IfaceAsString(cdr.APIOpts[utils.MetaURID])
-			_, err = ms.getCol(ColCDRs).UpdateOne(
-				sctx,
-				bson.M{
-					"opts.*urID": urID,
-				},
-				update,
-				options.Update().SetUpsert(true),
-			)
-			return err
-		}
-		return err
-	})
-}
-
 // isMongoDuplicateError checks if the provided error is a MongoDB duplicate key error.
 func isMongoDuplicateError(err error) bool {
 	var e mongo.WriteException
@@ -153,66 +99,6 @@ func isMongoDuplicateError(err error) bool {
 		}
 	}
 	return false
-}
-
-func (ms *MongoStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
-	fltrs := make(bson.M)
-	for _, fltr := range qryFltr {
-		for _, rule := range fltr.Rules {
-			if !cdrQueryFilterTypes.Has(rule.Type) {
-				continue
-			}
-			var elem string
-			if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq) {
-				elem = "event." + strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+".")
-			} else {
-				elem = "opts." + strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+".")
-			}
-			fltrs[elem] = ms.valueQry(fltrs, elem, rule.Type, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
-		}
-	}
-	ms.cleanEmptyFilters(fltrs)
-
-	fop := options.Find()
-	// cop := options.Count()
-
-	limit, offset, maxItems, err := utils.GetPaginateOpts(opts)
-	if err != nil {
-		return nil, fmt.Errorf("could not retrieve paginator opts: %w", err)
-	}
-	if maxItems < limit+offset {
-		return nil, fmt.Errorf("sum of limit and offset exceeds maxItems")
-	}
-	fop.SetLimit(int64(limit))
-	// cop.SetLimit(int64(limit))
-	fop.SetSkip(int64(offset))
-	// cop.SetSkip(int64(offset))
-
-	// Execute query
-	err = ms.query(ctx, func(sctx mongo.SessionContext) (err error) {
-		cur, err := ms.getCol(ColCDRs).Find(sctx, fltrs, fop)
-		if err != nil {
-			return err
-		}
-		for cur.Next(sctx) {
-			cdr := utils.CDR{}
-			err := cur.Decode(&cdr)
-			if err != nil {
-				return err
-			}
-			clone := cdr
-			cdrs = append(cdrs, &clone)
-		}
-		if len(cdrs) == 0 {
-			return utils.ErrNotFound
-		}
-		return cur.Close(sctx)
-	})
-	if err != nil {
-		return
-	}
-	cdrs, err = utils.Paginate(cdrs, 0, 0, int(maxItems))
-	return
 }
 
 func (ms *MongoStorage) valueQry(fltrs bson.M, elem, ruleType string, values []string, not bool) (m bson.M) {
@@ -311,82 +197,4 @@ func (ms *MongoStorage) cleanEmptyFilters(filters bson.M) {
 			}
 		}
 	}
-}
-
-// RemoveCDRs removes CDRs from MongoDB based on provided query filters.
-func (ms *MongoStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
-	var excludedCdrQueryFilterTypes []*FilterRule
-	filters := make(bson.M)
-
-	// Build MongoDB filters based on the query filters provided.
-	for _, fltr := range qryFltr {
-		for _, rule := range fltr.Rules {
-
-			// Check if the rule type is supported for direct database querying.
-			if !cdrQueryFilterTypes.Has(rule.Type) || checkNestedFields(rule.Element, rule.Values) {
-				excludedCdrQueryFilterTypes = append(excludedCdrQueryFilterTypes, rule)
-				continue
-			}
-
-			// Determine the field to be filtered in MongoDB.
-			var elem string
-			if strings.HasPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq) {
-				elem = "event." + strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaReq+".")
-			} else {
-				elem = "opts." + strings.TrimPrefix(rule.Element, utils.DynamicDataPrefix+utils.MetaOpts+".")
-			}
-
-			// Build a MongoDB filter for the element.
-			filters[elem] = ms.valueQry(filters, elem, rule.Type, rule.Values, strings.HasPrefix(rule.Type, utils.MetaNot))
-		}
-	}
-	ms.cleanEmptyFilters(filters)
-
-	// If there are no excluded filter types, delete all matching documents.
-	if len(excludedCdrQueryFilterTypes) == 0 {
-		return ms.query(ctx, func(sctx mongo.SessionContext) error {
-			_, err := ms.getCol(ColCDRs).DeleteMany(sctx, filters)
-			return err
-		})
-	}
-
-	// Process the filters that cannot be directly queried in the database.
-	err = ms.query(ctx, func(sctx mongo.SessionContext) error {
-		cur, err := ms.getCol(ColCDRs).Find(sctx, filters)
-		if err != nil {
-			return err
-		}
-		defer cur.Close(sctx)
-		for cur.Next(sctx) {
-			cdr := utils.CDR{}
-			if err := cur.Decode(&cdr); err != nil {
-				return err
-			}
-			var pass bool
-			dP := cdr.CGREvent().AsDataProvider()
-
-			// Check the excluded filters against the CDR.
-			for _, fltr := range excludedCdrQueryFilterTypes {
-				pass, err = fltr.Pass(ctx, dP)
-				if err != nil {
-					return err
-				}
-				if !pass {
-					break
-				}
-			}
-
-			// If the CDR passes the filters, remove it.
-			if pass {
-				_, err := ms.getCol(ColCDRs).DeleteOne(sctx, bson.M{
-					"opts.*urID": utils.IfaceAsString(cdr.Opts[utils.MetaURID]),
-				})
-				if err != nil {
-					return err
-				}
-			}
-		}
-		return cur.Err()
-	})
-	return err
 }

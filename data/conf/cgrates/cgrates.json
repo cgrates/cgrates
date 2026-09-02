@@ -275,95 +275,6 @@
 // 	},
 
 
-
-// "cdrs": {
-// 	"enabled": false,		// start the CDR Server:  <true|false>
-// 	"extraFields": [],		// extra fields to store in CDRs for non-generic CDRs (ie: FreeSWITCH JSON)
-// 	"sessionCostRetries": 5,	// number of queries to session_costs before recalculating CDR
-// 	"chargers_conns": [],		// connection to ChargerS for CDR forking, empty to disable billing for CDRs: <""|*internal|$rpc_conns_id>
-// 	"attributes_conns": [],		// connection to AttributeS for altering *raw CDRs, empty to disable attributes functionality: <""|*internal|$rpc_conns_id>
-// 	"thresholds_conns": [],		// connection to ThresholdS for CDR reporting, empty to disable thresholds functionality: <""|*internal|$rpc_conns_id>
-// 	"stats_conns": [],		// connections to StatS for CDR reporting, empty to disable stats functionality: <""|*internal|$rpc_conns_id>
-// 	"onlineCDRExports":[],	// list of CDRE profiles to use for real-time CDR exports
-// 	"actionsConns": [],		// connections to SchedulerS in case of *dynaprepaid request
-// 	"eesConns": [],		// connections to EventExporter
-// 	"rates_conns": [],		// connections to RateS
-// 	"accounts_conns": [],		// connections to AccountS
-// 	"opts": {
-// 		// "*accounts": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*attributes": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": false
-// 		// 	}
-// 		// ],
-// 		// "*chargers": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*ees": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*rates": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*stats": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*thresholds": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*refund": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*rerate": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "false"
-// 		// 	}
-// 		// ],
-// 		// "*store": [
-// 		// 	{
-// 		// 		"tenant": "*any",
-// 		// 		"filterIDs": [],
-// 		// 		"value": "true"
-// 		// 	}
-// 		// ]
-// 	}
-// },
-
-
 // "ers": {				// EventReaderService
 // 	"enabled": false,		// starts the EventReader service: <true|false>
 // 	"sessions_conns":["*internal"],	// RPC Connections IDs
@@ -402,7 +313,7 @@
 // 				// "xmlRootPath": "",		// path towards one event in case of XML CDRs
 
 // 				// AMQP and AMQPv1
-// 				// "amqpQueueID": "cgratesCDRs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
+// 				// "amqpQueueID": "cgratesURs",	// identifier for the primary queue where messages are consumed (0.9.1/1.0)
 // 				// "amqpUsername": "",			// username for SASL PLAIN auth, exclusive to AMQP 1.0, often representing the policy name
 // 				// "amqpPassword": "",			// password for authentication, exclusive to AMQP 1.0
 // 				// "amqpConsumerTag": "cgrates",	// unique tag for the consumer, useful for message tracking and consumer management (0.9.1)
@@ -431,16 +342,16 @@
 // 				// "awsToken": "",
 
 // 				// SQS
-// 				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS readers from were the events are read
+// 				// "sqsQueueID": "cgratesURs", 	// the queue id for SQS readers from were the events are read
 
 // 				// S3
-// 				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from were the events are read
+// 				// "s3BucketID": "cgratesURs", 	// the bucket id for S3 readers from were the events are read
 
 // 				// nats
 // 				// "natsJetStream": false,		// controls if the nats reader uses the JetStream
 // 				// "natsConsumerName": "cgrates",	// in case of JetStream the name of the consumer
 // 				// "natsStreamName": "cdrs",		// the name of the NATS JetStream stream from which the consumer will read messages
-// 				"natsSubject": "cgratesCDRs",		// the subject from were the events are read
+// 				"natsSubject": "cgratesURs",		// the subject from were the events are read
 // 				// "natsQueueID": "",			// the queue id the consumer listen to
 // 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
 // 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
@@ -548,7 +459,7 @@
 
 
 // 				// AMQP
-// 				// "amqpQueueID": "cgratesCDRs",	// the queue id for AMQP exporters from were the events are exported
+// 				// "amqpQueueID": "cgratesURs",	// the queue id for AMQP exporters from were the events are exported
 // 				// "amqpRoutingKey": "",		// RoutingKey, amqp 0.9.1 exclusive
 // 				// "amqpExchange": "",			// Exchange, amqp 0.9.1 exclusive
 // 				// "amqpExchangeType": "",		// ExchangeType, amqp 0.9.1 exclusive
@@ -563,15 +474,15 @@
 // 				// "awsToken": "",			// AWSToken
 
 // 				//SQS
-// 				// "sqsQueueID": "cgratesCDRs", 	// the queue id for SQS exporters from were the events are exported
+// 				// "sqsQueueID": "cgratesURs", 	// the queue id for SQS exporters from were the events are exported
 
 // 				// S3
-// 				// "s3BucketID": "cgratesCDRs", 	// the bucket id for S3 readers from where the events that are  exported
+// 				// "s3BucketID": "cgratesURs", 	// the bucket id for S3 readers from where the events that are  exported
 // 				// "s3FolderPath": "",			// S3FolderPath 
 
 // 				// Nats
 // 				// "natsJetStream": false,		// controls if the nats poster uses the JetStream
-// 				// "natsSubject": "cgratesCDRs",	// the subject were the events are exported
+// 				// "natsSubject": "cgratesURs",	// the subject were the events are exported
 // 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
 // 				// "natsSeedFile": "",			// the path to the seed files( if the JWT file is mention this is used as seedFile for the JWT user mentioned above)
 // 				// "natsCertificateAuthority": "",	// the path to a custom certificate authority file( used by tls)
@@ -1712,32 +1623,32 @@
 // 			{"tag": "Request", "path": "*rep.Request", "type": "*constant",
 // 				"value": "SIP/2.0 500 Internal Server Error", "mandatory": true}
 // 	],
-// 	"*cdrLog": [ // cdrLog template is used in ActionS to build the event that is send to CDRs in case of *cdrLog actionType
-// 		{"tag": "ToR", "path": "*cdr.ToR", "type": "*variable",
+// 	"*urLog": [ // urLog template is used in ActionS to build the event that is send to URs in case of *urLog actionType
+// 		{"tag": "ToR", "path": "*ur.ToR", "type": "*variable",
 // 			"value": "~*req.BalanceType", "mandatory": true},
-// 		{"tag": "OriginHost", "path": "*cdr.OriginHost", "type": "*constant",
+// 		{"tag": "OriginHost", "path": "*ur.OriginHost", "type": "*constant",
 // 			"value": "127.0.0.1", "mandatory": true},
-// 		{"tag": "RequestType", "path": "*cdr.RequestType", "type": "*constant",
+// 		{"tag": "RequestType", "path": "*ur.RequestType", "type": "*constant",
 // 			"value": "*none", "mandatory": true},
-// 		{"tag": "Tenant", "path": "*cdr.Tenant", "type": "*variable",
+// 		{"tag": "Tenant", "path": "*ur.Tenant", "type": "*variable",
 // 			"value": "~*req.Tenant", "mandatory": true},
-// 		{"tag": "Account", "path": "*cdr.Account", "type": "*variable",
+// 		{"tag": "Account", "path": "*ur.Account", "type": "*variable",
 // 			"value": "~*req.Account", "mandatory": true},
-// 		{"tag": "Subject", "path": "*cdr.Subject", "type": "*variable",
+// 		{"tag": "Subject", "path": "*ur.Subject", "type": "*variable",
 // 			"value": "~*req.Account", "mandatory": true},
-// 		{"tag": "Cost", "path": "*cdr.Cost", "type": "*variable",
+// 		{"tag": "Cost", "path": "*ur.Cost", "type": "*variable",
 // 			"value": "~*req.Cost", "mandatory": true},
-// 		{"tag": "Source", "path": "*cdr.Source", "type": "*constant",
-// 			"value": "*cdrLog", "mandatory": true},
-// 		{"tag": "Usage", "path": "*cdr.Usage", "type": "*constant",
+// 		{"tag": "Source", "path": "*ur.Source", "type": "*constant",
+// 			"value": "*urLog", "mandatory": true},
+// 		{"tag": "Usage", "path": "*ur.Usage", "type": "*constant",
 // 			"value": "1", "mandatory": true},
-// 		{"tag": "RunID", "path": "*cdr.RunID", "type": "*variable",
+// 		{"tag": "RunID", "path": "*ur.RunID", "type": "*variable",
 // 			"value": "~*req.ActionType", "mandatory": true},
-// 		{"tag": "SetupTime", "path": "*cdr.SetupTime", "type": "*constant",
+// 		{"tag": "SetupTime", "path": "*ur.SetupTime", "type": "*constant",
 // 			"value": "*now", "mandatory": true},
-// 		{"tag": "AnswerTime", "path": "*cdr.AnswerTime", "type": "*constant",
+// 		{"tag": "AnswerTime", "path": "*ur.AnswerTime", "type": "*constant",
 // 			"value": "*now", "mandatory": true},
-// 		{"tag": "PreRated", "path": "*cdr.PreRated", "type": "*constant",
+// 		{"tag": "PreRated", "path": "*ur.PreRated", "type": "*constant",
 // 			"value": "true", "mandatory": true}
 // 	]
 // },

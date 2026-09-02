@@ -57,7 +57,7 @@ func TestAttrSProcessEvent(t *testing.T) {
 		utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}},
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -90,7 +90,7 @@ func TestAttrSProcessEvent2(t *testing.T) {
 		utils.MetaAttributes: {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes)}}},
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -121,7 +121,7 @@ func TestV1ProcessEvent(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].ExportPath = filePath
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -183,7 +183,7 @@ func TestV1ProcessEvent2(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Filters = []string{"*prefix:~*req.Subject:20"}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -231,7 +231,7 @@ func TestV1ProcessEvent3(t *testing.T) {
 		utils.MetaAttributes: utils.FlagParams{},
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -273,7 +273,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -358,7 +358,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].Synchronous = true
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -417,7 +417,7 @@ func TestV1ProcessEvent5(t *testing.T) {
 		},
 	}
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -441,7 +441,7 @@ func TestV1ProcessEvent6(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].Type = utils.MetaHTTPPost
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -589,7 +589,7 @@ func TestEeSProcessEvent(t *testing.T) {
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cfg.EEsCfg().Exporters[0].ExportPath = filePath
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)
@@ -650,7 +650,7 @@ func TestArchiveEventsInReply(t *testing.T) {
 	// cfg.EEsCfg().Exporters[0].Type = "*fileCSV"
 	cfg.EEsCfg().Exporters[0].ID = "SQLExporterFull"
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(cacheS)

@@ -19,12 +19,12 @@ export PGPASSWORD="CGRateS.org"
 
 psql -U $user -h $host -d cgrates -f "$DIR"/create_db_tables.sql
 acct=$?
-psql -U $user -h $host -d cgrates -f "$DIR"/create_cdrs_tables.sql
-cdrt=$?
+psql -U $user -h $host -d cgrates -f "$DIR"/create_urs_tables.sql
+urt=$?
 psql -U $user -h $host -d cgrates -f "$DIR"/create_tariffplan_tables.sql
 tpt=$?
 
-if [ $cdrt = 0 ] && [ $tpt = 0 ] && [ $acct = 0 ]; then
+if [ $urt = 0 ] && [ $tpt = 0 ] && [ $acct = 0 ]; then
 	echo "\n\t+++ CGR-DB successfully set-up! +++\n"
 	exit 0
 fi

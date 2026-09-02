@@ -20,7 +20,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db, err := NewRedisStorage("127.0.0.1:6379", 10, utils.CGRateSLwr,
 		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts,
-		utils.EmptyString, false, 0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString, 1000, nil, nil)
+		utils.EmptyString, false, 0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString, 1000)
 	if err != nil {
 		t.Error(err)
 	}
@@ -152,7 +152,7 @@ func TestSetGetRemoveConfigSectionsDrvRedis(t *testing.T) {
 func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	db, err := NewMongoStorage(cfg.DbCfg().DBConns[utils.MetaDefault].Opts.MongoConnScheme, cfg.DbCfg().DBConns[utils.MetaDefault].Host, "27017", "10", cfg.DbCfg().DBConns[utils.MetaDefault].User,
-		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, nil, 10*time.Second)
+		cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding, 10*time.Second)
 	if err != nil {
 		t.Error(err)
 	}
@@ -281,7 +281,7 @@ func TestSetGetRemoveConfigSectionsDrvMongo(t *testing.T) {
 }
 
 func TestSetGetRemoveConfigSectionsDrvInternal(t *testing.T) {
-	db, _ := NewInternalDB(nil, nil, nil, nil)
+	db, _ := NewInternalDB(nil, nil)
 
 	defer db.Close()
 	sectionIDs := []string{"thresholds", "resources"}

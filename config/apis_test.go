@@ -95,38 +95,6 @@ func TestConfigV1StoreCfgInDBErr1(t *testing.T) {
 	}
 }
 
-func TestConfigV1StoreCfgInDBErr2(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	cfg.rldCh = make(chan string, 100)
-
-	cfg.db = &mockDb{}
-
-	args := &SectionWithAPIOpts{
-		Sections: []string{CDRsJSON},
-	}
-
-	var reply string
-	expected := utils.ErrNotImplemented
-	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != expected {
-		t.Errorf("Expected %v \n but received \n %v", expected, err)
-	}
-}
-
-func TestConfigV1StoreCfgInDBErr3(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	cfg.rldCh = make(chan string, 100)
-
-	args := &SectionWithAPIOpts{
-		Sections: []string{"cdrs"},
-	}
-
-	cfg.db = new(mockDb)
-	var reply string
-	if err := cfg.V1StoreCfgInDB(context.Background(), args, &reply); err == nil || err != utils.ErrNotImplemented {
-		t.Error(err)
-	}
-}
-
 // func TestConfigV1SetConfigFromJSONWithDB(t *testing.T) {
 // 	cfg := NewDefaultCGRConfig()
 // 	cfg.rldCh = make(chan string, 100)
@@ -995,70 +963,6 @@ func TestV1SetConfigErr1(t *testing.T) {
 	var reply string
 	expected := "json: cannot unmarshal string into Go struct field CoreSJsonCfg.caps of type int"
 	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %v \n but received \n %v", expected, err)
-	}
-}
-
-func TestV1SetConfigErr2(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	args := &SetConfigArgs{
-		Config: map[string]any{
-			"cdrs": map[string]any{
-				"enabled":            false,
-				"extraFields":        []string{},
-				"sessionCostRetries": 5,
-				"conns": map[string][]*DynamicConns{
-					"*chargers":   {},
-					"*attributes": {},
-					"*thresholds": {},
-					"*stats":      {},
-				},
-				"onlineCDRExports": []string{},
-				"actionsConns":     []string{},
-				"eesConns":         []string{},
-			},
-		},
-		DryRun: true,
-	}
-	var reply string
-	cfg.sessionSCfg.Enabled = true
-	cfg.sessionSCfg.TerminateAttempts = 0
-	expected := "<SessionS> 'terminateAttempts' should be at least 1"
-	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err.Error() != expected {
-		t.Errorf("Expected %v \n but received \n %v", expected, err)
-	}
-}
-
-func TestV1SetConfigErr3(t *testing.T) {
-	cfg := NewDefaultCGRConfig()
-	for key := range utils.StatelessDBPartitions {
-		cfg.cacheCfg.Partitions[key].Limit = 0
-	}
-	args := &SetConfigArgs{
-		Config: map[string]any{
-			"cdrs": map[string]any{
-				"enabled":            false,
-				"extraFields":        []string{},
-				"sessionCostRetries": 5,
-				"conns": map[string][]*DynamicConns{
-					"*chargers":   {},
-					"*attributes": {},
-					"*thresholds": {},
-					"*stats":      {},
-				},
-				"onlineCDRExports": []string{},
-				"actionsConns":     []string{},
-				"eesConns":         []string{},
-			},
-		},
-	}
-
-	cfg.rldCh = make(chan string, 100)
-
-	var reply string
-	cfg.db = new(mockDb)
-	expected := utils.ErrNotImplemented
-	if err := cfg.V1SetConfig(context.Background(), args, &reply); err == nil || err != expected {
 		t.Errorf("Expected %v \n but received \n %v", expected, err)
 	}
 }

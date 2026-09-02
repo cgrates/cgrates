@@ -14,10 +14,10 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
-func TestACExecuteCDRLog(t *testing.T) {
+func TestACExecuteURLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -35,7 +35,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 	}
 
 	actCfg = []*utils.APAction{
-		{Type: utils.CDRLog},
+		{Type: utils.MetaURLog},
 		{Type: utils.MetaHTTPPost},
 		{Type: utils.MetaExport},
 		{Type: utils.MetaResetStatQueue},
@@ -56,7 +56,7 @@ func TestACExecuteCDRLog(t *testing.T) {
 	}
 
 	expectedActs := []actioner{
-		&actCDRLog{cfg, cacheS, fltr, nil, &utils.APAction{Type: utils.CDRLog}},
+		&actURLog{cfg, cacheS, fltr, nil, &utils.APAction{Type: utils.MetaURLog}},
 		actHttp,
 		&actExport{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaExport}},
 		&actResetStat{utils.CGRateSorg, cfg, nil, fltr, &utils.APAction{Type: utils.MetaResetStatQueue}},
@@ -198,7 +198,7 @@ func TestActionTarget(t *testing.T) {
 func TestNewActioner(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -225,8 +225,8 @@ func TestNewActioner(t *testing.T) {
 			aCfg: &utils.APAction{Type: utils.MetaLog},
 		},
 		{
-			name: "CDRLog",
-			aCfg: &utils.APAction{Type: utils.CDRLog},
+			name: "URLog",
+			aCfg: &utils.APAction{Type: utils.MetaURLog},
 		},
 		{
 			name: "MetaHTTPPost",

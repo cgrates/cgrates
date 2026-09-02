@@ -75,22 +75,20 @@ type DBOpts struct {
 
 // DBConn the config to establish connection to DB
 type DBConn struct {
-	Type                string
-	Host                string // The host to connect to. Values that start with / are for UNIX domain sockets.
-	Port                string // The port to bind to.
-	Name                string // The name of the database to connect to.
-	User                string // The user to sign in as.
-	Password            string // The user's password.
-	StringIndexedFields []string
-	PrefixIndexedFields []string
-	RmtConns            []string // Remote DB  connIDs
-	RmtConnID           string
-	RplConns            []string // Replication connIDs
-	RplFiltered         bool
-	RplCache            string
-	RplFailedDir        string
-	RplInterval         time.Duration
-	Opts                *DBOpts
+	Type         string
+	Host         string   // The host to connect to. Values that start with / are for UNIX domain sockets.
+	Port         string   // The port to bind to.
+	Name         string   // The name of the database to connect to.
+	User         string   // The user to sign in as.
+	Password     string   // The user's password.
+	RmtConns     []string // Remote DB  connIDs
+	RmtConnID    string
+	RplConns     []string // Replication connIDs
+	RplFiltered  bool
+	RplCache     string
+	RplFailedDir string
+	RplInterval  time.Duration
+	Opts         *DBOpts
 }
 
 // loadFromJSONCfg load the DBConn section of the DBCfg
@@ -123,12 +121,6 @@ func (dbC *DBConn) loadFromJSONCfg(jsnDbConnCfg *DbConnJson) (err error) {
 	}
 	if jsnDbConnCfg.Db_password != nil {
 		dbC.Password = *jsnDbConnCfg.Db_password
-	}
-	if jsnDbConnCfg.String_indexed_fields != nil {
-		dbC.StringIndexedFields = *jsnDbConnCfg.String_indexed_fields
-	}
-	if jsnDbConnCfg.Prefix_indexed_fields != nil {
-		dbC.PrefixIndexedFields = *jsnDbConnCfg.Prefix_indexed_fields
 	}
 	if jsnDbConnCfg.Remote_conns != nil {
 		dbC.RmtConns = make([]string, len(*jsnDbConnCfg.Remote_conns))
@@ -463,12 +455,6 @@ func (dbC *DBConn) Clone() (cln *DBConn) {
 		RplInterval:  dbC.RplInterval,
 		Opts:         dbC.Opts.Clone(),
 	}
-	if dbC.StringIndexedFields != nil {
-		cln.StringIndexedFields = slices.Clone(dbC.StringIndexedFields)
-	}
-	if dbC.PrefixIndexedFields != nil {
-		cln.PrefixIndexedFields = slices.Clone(dbC.PrefixIndexedFields)
-	}
 	if dbC.RmtConns != nil {
 		cln.RmtConns = slices.Clone(dbC.RmtConns)
 	}
@@ -537,8 +523,6 @@ func (dbcfg DbCfg) AsMapInterface() any {
 			utils.DbNameCfg:               dbc.Name,
 			utils.DbUserCfg:               dbc.User,
 			utils.DbPassCfg:               dbc.Password,
-			utils.StringIndexedFieldsCfg:  dbc.StringIndexedFields,
-			utils.PrefixIndexedFieldsCfg:  dbc.PrefixIndexedFields,
 			utils.RemoteConnsCfg:          dbc.RmtConns,
 			utils.RemoteConnIDCfg:         dbc.RmtConnID,
 			utils.ReplicationConnsCfg:     dbc.RplConns,
@@ -755,22 +739,20 @@ type DBOptsJson struct {
 }
 
 type DbConnJson struct {
-	Db_type               *string     `json:"dbType"`
-	Db_host               *string     `json:"dbHost"`
-	Db_port               *int        `json:"dbPort"`
-	Db_name               *string     `json:"dbName"`
-	Db_user               *string     `json:"dbUser"`
-	Db_password           *string     `json:"dbPassword"`
-	String_indexed_fields *[]string   `json:"stringIndexedFields"`
-	Prefix_indexed_fields *[]string   `json:"prefixIndexedFields"`
-	Remote_conns          *[]string   `json:"remoteConns"`
-	Remote_conn_id        *string     `json:"remoteConnID"`
-	Replication_conns     *[]string   `json:"replicationConns"`
-	Replication_filtered  *bool       `json:"replicationFiltered"`
-	Replication_cache     *string     `json:"replicationCache"`
-	RplFailedDir          *string     `json:"replicationFailedDir"`
-	RplInterval           *string     `json:"replicationInterval"`
-	Opts                  *DBOptsJson `json:"opts"`
+	Db_type              *string     `json:"dbType"`
+	Db_host              *string     `json:"dbHost"`
+	Db_port              *int        `json:"dbPort"`
+	Db_name              *string     `json:"dbName"`
+	Db_user              *string     `json:"dbUser"`
+	Db_password          *string     `json:"dbPassword"`
+	Remote_conns         *[]string   `json:"remoteConns"`
+	Remote_conn_id       *string     `json:"remoteConnID"`
+	Replication_conns    *[]string   `json:"replicationConns"`
+	Replication_filtered *bool       `json:"replicationFiltered"`
+	Replication_cache    *string     `json:"replicationCache"`
+	RplFailedDir         *string     `json:"replicationFailedDir"`
+	RplInterval          *string     `json:"replicationInterval"`
+	Opts                 *DBOptsJson `json:"opts"`
 }
 
 type DbConnsJson map[string]*DbConnJson
@@ -918,12 +900,6 @@ func diffDBConnJsonCfg(d *DbConnJson, v1, v2 *DBConn) *DbConnJson {
 	}
 	if v1.Password != v2.Password {
 		d.Db_password = utils.StringPointer(v2.Password)
-	}
-	if !slices.Equal(v1.StringIndexedFields, v2.StringIndexedFields) {
-		d.String_indexed_fields = &v2.StringIndexedFields
-	}
-	if !slices.Equal(v1.PrefixIndexedFields, v2.PrefixIndexedFields) {
-		d.Prefix_indexed_fields = &v2.PrefixIndexedFields
 	}
 	if !slices.Equal(v1.RmtConns, v2.RmtConns) {
 		d.Remote_conns = &v2.RmtConns

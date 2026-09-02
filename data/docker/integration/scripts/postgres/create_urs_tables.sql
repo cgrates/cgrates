@@ -1,9 +1,9 @@
 --
--- Table structure for table `cdrs`
+-- Table structure for table `urs`
 --
 
-DROP TABLE IF EXISTS cdrs;
-CREATE TABLE cdrs (
+DROP TABLE IF EXISTS urs;
+CREATE TABLE urs (
  id SERIAL PRIMARY KEY,
 
  run_id VARCHAR(64) NOT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE cdrs (
 );
 ;
 DROP INDEX IF EXISTS deleted_at_cp_idx;
-CREATE INDEX deleted_at_cp_idx ON cdrs (deleted_at);
+CREATE INDEX deleted_at_cp_idx ON urs (deleted_at);
 
 
 DROP TABLE IF EXISTS session_costs;

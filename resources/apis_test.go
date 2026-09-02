@@ -22,7 +22,7 @@ func TestResourceV1AuthorizeResourceMissingStruct(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmRES = engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -74,7 +74,7 @@ func TestResourceAllocateResourceOtherDB(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -321,7 +321,7 @@ func TestResourcesV1ResourcesForEventCacheReplyExists(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -406,7 +406,7 @@ func TestResourcesV1ResourcesForEventCacheReplySet(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -797,7 +797,7 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+			data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -914,7 +914,7 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 1
-			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+			data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			dm := engine.NewDataManager(dbCM, cfg, nil, locker)
@@ -1180,7 +1180,7 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1384,7 +1384,7 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.ResourceSCfg().StoreInterval = 2
 	cfg.ResourceSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1483,7 +1483,7 @@ func TestResourcesStoreResourceError(t *testing.T) {
 		Conns: []*config.RemoteHost{{}},
 	}
 	cfg.DbCfg().DBConns[utils.MetaDefault].RplConns = []string{"test"}
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	connMgr := engine.NewConnManager(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1617,7 +1617,7 @@ func TestErrRetrieveOpts(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			cfg := config.NewDefaultCGRConfig()
 			tc.setCfg(cfg)
-			data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+			data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 			dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 			locker := engine.NewLocker(config.NewDefaultCGRConfig())
 			dm := engine.NewDataManager(dbCM, cfg, nil, locker)

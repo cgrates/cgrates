@@ -113,24 +113,25 @@ cgrates.org,Threshold1,*string:~*opts.*account:1001;*string:~*req.RequestType:*p
 	client, _ := ng.Run(t)
 	time.Sleep(200 * time.Millisecond)
 	t.Run("ThresholdEES", func(t *testing.T) {
-		ev := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "Event1",
-			Event: map[string]any{
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.Usage:        time.Minute,
-			},
-			APIOpts: map[string]any{
-				utils.MetaAccount:    "1001",
-				utils.MetaThresholds: true,
-			},
-		}
-		var rply string
-		if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
-			t.Error(err)
-		}
+		// unfinished , to be redone using sessions processevent or ees with cgrur
+		// ev := &utils.CGREvent{
+		// 	Tenant: "cgrates.org",
+		// 	ID:     "Event1",
+		// 	Event: map[string]any{
+		// 		utils.RequestType:  utils.MetaPrepaid,
+		// 		utils.AccountField: "1001",
+		// 		utils.Destination:  "1002",
+		// 		utils.Usage:        time.Minute,
+		// 	},
+		// 	APIOpts: map[string]any{
+		// 		utils.MetaAccount:    "1001",
+		// 		utils.MetaThresholds: true,
+		// 	},
+		// }
+		// var rply string
+		// if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
+		// 	t.Error(err)
+		// }
 	})
 
 	t.Run("ThresholdEESCheck", func(t *testing.T) {

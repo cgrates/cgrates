@@ -89,7 +89,7 @@ package engine
 // 	cM := NewConnManager(cfg)
 // 	cM.connCache.Set(connID, nil, nil)
 // 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-// 	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	db, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg, cM)
 // 	Cache = NewCacheS(cfg, dm, cM, nil)
@@ -153,7 +153,7 @@ package engine
 // // 	cM := NewConnManager(cfg)
 // // 	cM.connCache.Set(connID, nil, nil)
 // // 	cM.AddInternalConn(efsConn, utils.EfSv1, rpcInternal)
-// // 	db , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// // 	db , _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg.CacheCfg(), cM)
 // // 	Cache = NewCacheS(cfg, dm, cM, nil)
@@ -183,7 +183,7 @@ package engine
 // 		cfg.CdrsCfg().EEsConns = []string{utils.ConcatenatedKey(utils.MetaInternal,
 // 			utils.MetaEEs)}
 
-// 		data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 		data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // 		cM := NewConnManager(cfg)
 // 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)

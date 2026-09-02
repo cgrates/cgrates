@@ -37,7 +37,7 @@ func (nopCloser) Close() error { return nil }
 func TestFileCsvComposeHeader(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
@@ -103,7 +103,7 @@ func TestFileCsvComposeHeader(t *testing.T) {
 func TestFileCsvComposeTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
@@ -169,7 +169,7 @@ func TestFileCsvComposeTrailer(t *testing.T) {
 func TestFileCsvExportEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
@@ -202,7 +202,7 @@ func TestFileCsvExportEvent(t *testing.T) {
 func TestFileCsvOnEvictedTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
@@ -239,7 +239,7 @@ func TestFileCsvOnEvictedTrailer(t *testing.T) {
 func TestFileCsvOnEvictedClose(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	newIDb, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	newIDb, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: newIDb}, cfg.DbCfg())
 	newDM := engine.NewDataManager(dbCM, cfg, nil, locker)
 	newDM.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))

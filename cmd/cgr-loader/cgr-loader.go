@@ -113,7 +113,7 @@ func loadConfig() (ldrCfg *config.CGRConfig) {
 			d, err := engine.NewDBConn(ldrCfg.ConfigDBCfg().Type,
 				ldrCfg.ConfigDBCfg().Host, ldrCfg.ConfigDBCfg().Port,
 				ldrCfg.ConfigDBCfg().Name, ldrCfg.ConfigDBCfg().User,
-				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding, nil, nil,
+				ldrCfg.ConfigDBCfg().Password, ldrCfg.GeneralCfg().DBDataEncoding,
 				ldrCfg.ConfigDBCfg().Opts, nil)
 			if err != nil { // Cannot configure getter database, show stopper
 				utils.Logger.Crit(fmt.Sprintf("Could not configure configDB: %s exiting!", err))
@@ -298,8 +298,7 @@ func main() {
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].User,
 		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Password,
 		ldrCfg.GeneralCfg().DBDataEncoding,
-		ldrCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields,
-		ldrCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields, ldrCfg.DbCfg().DBConns[utils.MetaDefault].Opts,
+		ldrCfg.DbCfg().DBConns[utils.MetaDefault].Opts,
 		ldrCfg.DbCfg().Items); err != nil {
 		log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 	}

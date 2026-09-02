@@ -187,27 +187,28 @@ func (ja *JanusAgent) acntStopSession(s *janus.Session) (err error) {
 }
 
 func (ja *JanusAgent) cdrSession(s *janus.Session) (err error) {
-	cgrEv := &utils.CGREvent{
-		Tenant: ja.cgrCfg.GeneralCfg().DefaultTenant,
-		ID:     utils.Sha1(),
-		Event: map[string]any{
-			utils.AccountField: s.Data[utils.AccountField],
-			utils.OriginHost:   s.Data[utils.OriginHost],
-			utils.OriginID:     s.Data[utils.OriginID],
-			utils.Destination:  s.Data[utils.Destination],
-			utils.AnswerTime:   s.Data[utils.AnswerTime],
-			utils.Usage:        s.Data[utils.Usage],
-		},
-	}
-	tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
-	sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
+	// unfinished , will be replaced by templates using sessions processevent with ees flags
+	// cgrEv := &utils.CGREvent{
+	// 	Tenant: ja.cgrCfg.GeneralCfg().DefaultTenant,
+	// 	ID:     utils.Sha1(),
+	// 	Event: map[string]any{
+	// 		utils.AccountField: s.Data[utils.AccountField],
+	// 		utils.OriginHost:   s.Data[utils.OriginHost],
+	// 		utils.OriginID:     s.Data[utils.OriginID],
+	// 		utils.Destination:  s.Data[utils.Destination],
+	// 		utils.AnswerTime:   s.Data[utils.AnswerTime],
+	// 		utils.Usage:        s.Data[utils.Usage],
+	// 	},
+	// }
+	// tnt := ja.cgrCfg.GeneralCfg().DefaultTenant
+	// sessConns, err := engine.GetConnIDs(ja.ctx, ja.cgrCfg.JanusAgentCfg().Conns, utils.MetaSessionS, tnt, utils.MapStorage{}, nil, ja.filterS)
 	if err != nil {
 		return
 	}
-	var rply string
-	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1ProcessCDR,
-		cgrEv, &rply)
+	// var rply string
+	// err = ja.connMgr.Call(ja.ctx, sessConns,
+	// 	utils.SessionSv1ProcessCDR,
+	// 	cgrEv, &rply)
 	return
 }
 

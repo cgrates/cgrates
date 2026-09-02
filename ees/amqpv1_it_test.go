@@ -98,7 +98,7 @@ func testAMQPv1ExportEvent(t *testing.T) {
 				utils.OriginHost:   "192.168.1.1",
 				utils.RequestType:  utils.MetaRated,
 				utils.Tenant:       "AnotherTenant",
-				utils.Category:     "call", //for data CDR use different Tenant
+				utils.Category:     "call", //for data UR use different Tenant
 				utils.AccountField: "1001",
 				utils.Subject:      "1001",
 				utils.Destination:  "1002",
@@ -137,7 +137,7 @@ func testAMQPv1VerifyExport(t *testing.T) {
 	}
 
 	// Create a receiver
-	receiver, err := session.NewReceiver(ctx, "/cgrates_cdrs", nil)
+	receiver, err := session.NewReceiver(ctx, "/cgrates_urs", nil)
 	if err != nil {
 		t.Fatal("Creating receiver link:", err)
 	}

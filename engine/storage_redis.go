@@ -8,7 +8,6 @@ import (
 	"crypto/x509"
 	"errors"
 	"os"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -19,11 +18,9 @@ import (
 )
 
 type RedisStorage struct {
-	stringIndexedFields []string // used for CDR indexing
-	prefixIndexedFields []string // used for CDR indexing
-	redisBatchSize      int      // holds the COUNT value used for SCAN queries
-	client              radix.Client
-	ms                  utils.Marshaler
+	redisBatchSize int // holds the COUNT value used for SCAN queries
+	client         radix.Client
+	ms             utils.Marshaler
 }
 
 // Redis commands
@@ -56,8 +53,8 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 	maxConns, attempts int, sentinelName string, isCluster bool, clusterSync,
 	clusterOnDownDelay, connTimeout, readTimeout, writeTimeout time.Duration,
 	pipelineWindow time.Duration, pipelineLimit int,
-	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string, batchSize int,
-	stringIndexedFields, prefixIndexedFields []string) (_ *RedisStorage, err error) {
+	tlsConn bool, tlsClientCert, tlsClientKey, tlsCACert string,
+	batchSize int) (_ *RedisStorage, err error) {
 	var ms utils.Marshaler
 	if ms, err = utils.NewMarshaler(mrshlerStr); err != nil {
 		return
@@ -115,11 +112,9 @@ func NewRedisStorage(address string, db int, user, pass, mrshlerStr string,
 		return
 	}
 	return &RedisStorage{
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		redisBatchSize:      batchSize,
-		ms:                  ms,
-		client:              client,
+		redisBatchSize: batchSize,
+		ms:             ms,
+		client:         client,
 	}, nil
 }
 
@@ -1042,333 +1037,6 @@ func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID str
 		return
 	}
 	return
-}
-
-func (rs *RedisStorage) SetCDR(_ *context.Context, cdr *utils.CGREvent, allowUpdate bool) error {
-	urID := utils.IfaceAsString(cdr.APIOpts[utils.MetaURID])
-	if !allowUpdate {
-		// Check if CDR exists
-		var exists bool
-		if err := rs.Cmd(&exists, redisEXISTS, utils.CDRsPrefix+urID); err != nil {
-			return err
-		}
-		if exists {
-			return utils.ErrExists
-		}
-	}
-
-	// Index the CDR
-	idx := make(utils.StringSet)
-	dp := cdr.AsDataProvider()
-	for _, v := range rs.stringIndexedFields {
-		val, err := dp.FieldAsString(strings.Split(v, utils.NestingSep))
-		if err != nil {
-			if err == utils.ErrNotFound {
-				continue
-			}
-			return err
-		}
-		idx.Add(utils.ConcatenatedKey(v, val))
-	}
-	for _, v := range rs.prefixIndexedFields {
-		val, err := dp.FieldAsString(strings.Split(v, utils.NestingSep))
-		if err != nil {
-			if err == utils.ErrNotFound {
-				continue
-			}
-			return err
-		}
-		idx.Add(utils.ConcatenatedKey(v, val))
-		for i := len(val) - 1; i > 0; i-- {
-			idx.Add(utils.ConcatenatedKey(v, val[:i]))
-		}
-	}
-
-	cdrMs, err := rs.ms.Marshal(cdr)
-	if err != nil {
-		return err
-	}
-
-	// Store the CDR in Redis
-	if err := rs.Cmd(nil, redisSET, utils.CDRsPrefix+urID, string(cdrMs)); err != nil {
-		return err
-	}
-
-	// Store indexes
-	for key := range idx {
-		if err := rs.Cmd(nil, redisSADD, utils.CDRsIndexes+utils.ConcatenatedKey(cdr.Tenant,
-			key), utils.CDRsPrefix+urID); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (rs *RedisStorage) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) (cdrs []*utils.CDR, err error) {
-	pairFltrs := make(map[string][]string)
-	notPairFltrs := make(map[string][]string)
-	notIndexed := []*FilterRule{}
-	for _, fltr := range qryFltr {
-		for _, rule := range fltr.Rules {
-			var elem string
-			if !slices.Contains(rs.stringIndexedFields, strings.TrimPrefix(rule.Element, "~")) ||
-				rule.Type != utils.MetaString && rule.Type != utils.MetaNotString {
-				notIndexed = append(notIndexed, rule)
-				continue
-			}
-			elem = strings.Trim(rule.Element, "~")
-			switch rule.Type {
-			case utils.MetaString:
-				pairFltrs[elem] = rule.Values
-			case utils.MetaNotString:
-				notPairFltrs[elem] = rule.Values
-			}
-		}
-	}
-
-	// Find indexed fields
-	var cdrMpIDs utils.StringSet
-	for keySlice, fltrSlice := range pairFltrs {
-		if len(fltrSlice) == 0 {
-			continue
-		}
-		grpMpIDs := make(utils.StringSet)
-		for _, id := range fltrSlice {
-			var ids []string
-			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
-				return nil, err
-			}
-			grpMpIDs.AddSlice(ids)
-		}
-		if grpMpIDs.Size() == 0 {
-			return nil, utils.ErrNotFound
-		}
-		if cdrMpIDs == nil {
-			cdrMpIDs = grpMpIDs
-			continue
-		}
-		cdrMpIDs.Intersect(grpMpIDs)
-		if cdrMpIDs.Size() == 0 {
-			return nil, utils.ErrNotFound
-		}
-	}
-
-	if cdrMpIDs == nil {
-		// Get all CDR IDs if no filters
-		var allIDs []string
-		if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
-			return nil, err
-		}
-		cdrMpIDs = utils.NewStringSet(allIDs)
-	}
-
-	// Check for Not filters
-	for keySlice, fltrSlice := range notPairFltrs {
-		if len(fltrSlice) == 0 {
-			continue
-		}
-		for _, id := range fltrSlice {
-			var ids []string
-			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
-				return nil, err
-			}
-			for _, cid := range ids {
-				cdrMpIDs.Remove(cid)
-				if cdrMpIDs.Size() == 0 {
-					return nil, utils.ErrNotFound
-				}
-			}
-		}
-	}
-
-	// Retrieve CDRs
-	for key := range cdrMpIDs {
-		var cdrBytes []byte // holds the CDR gotten from redis as []byte
-		if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
-			return nil, err
-		}
-		cgrEv := new(utils.CGREvent)
-		if err := rs.ms.Unmarshal(cdrBytes, &cgrEv); err != nil {
-			return nil, err
-		}
-		cgrEvDP := cgrEv.AsDataProvider()
-		// Apply non-indexed filters
-		var pass bool = true
-		for _, fltr := range notIndexed {
-			if pass, err = fltr.Pass(ctx, cgrEvDP); err != nil {
-				return nil, err
-			} else if !pass {
-				break
-			}
-		}
-		if !pass {
-			continue
-		}
-		cdrs = append(cdrs, &utils.CDR{
-			Tenant:    cgrEv.Tenant,
-			Opts:      cgrEv.APIOpts,
-			Event:     cgrEv.Event,
-			CreatedAt: time.Now(),
-		})
-	}
-
-	if len(cdrs) == 0 {
-		return nil, utils.ErrNotFound
-	}
-
-	// Handle pagination
-	var limit, offset, maxItems int
-	if limit, offset, maxItems, err = utils.GetPaginateOpts(opts); err != nil {
-		return nil, err
-	}
-	cdrs, err = utils.Paginate(cdrs, limit, offset, maxItems)
-	return cdrs, err
-}
-
-func (rs *RedisStorage) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
-	pairFltrs := make(map[string][]string)
-	notPairFltrs := make(map[string][]string)
-	notIndexed := []*FilterRule{}
-
-	for _, fltr := range qryFltr {
-		for _, rule := range fltr.Rules {
-			var elem string
-			if !slices.Contains(rs.stringIndexedFields, strings.TrimPrefix(rule.Element, "~")) ||
-				rule.Type != utils.MetaString && rule.Type != utils.MetaNotString {
-				notIndexed = append(notIndexed, rule)
-				continue
-			}
-			elem = strings.Trim(rule.Element, "~")
-			switch rule.Type {
-			case utils.MetaString:
-				pairFltrs[elem] = rule.Values
-			case utils.MetaNotString:
-				notPairFltrs[elem] = rule.Values
-			}
-		}
-	}
-	// Find indexed fields
-	var cdrMpIDs utils.StringSet
-	for keySlice, fltrSlice := range pairFltrs {
-		if len(fltrSlice) == 0 {
-			continue
-		}
-		grpMpIDs := make(utils.StringSet)
-		for _, id := range fltrSlice {
-			var ids []string
-			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
-				return err
-			}
-			grpMpIDs.AddSlice(ids)
-		}
-		if grpMpIDs.Size() == 0 {
-			return utils.ErrNotFound
-		}
-		if cdrMpIDs == nil {
-			cdrMpIDs = grpMpIDs
-			continue
-		}
-		cdrMpIDs.Intersect(grpMpIDs)
-		if cdrMpIDs.Size() == 0 {
-			return utils.ErrNotFound
-		}
-	}
-
-	if cdrMpIDs == nil {
-		// Get all CDR IDs if no filters
-		var allIDs []string
-		if err := rs.Cmd(&allIDs, redisKEYS, utils.CDRsPrefix+utils.Meta); err != nil {
-			return err
-		}
-		cdrMpIDs = utils.NewStringSet(allIDs)
-	}
-
-	// Check for Not filters
-	for keySlice, fltrSlice := range notPairFltrs {
-		if len(fltrSlice) == 0 {
-			continue
-		}
-		for _, id := range fltrSlice {
-			var ids []string
-			if err := rs.Cmd(&ids, redisSMEMBERS, utils.CDRsIndexes+utils.ConcatenatedKey(qryFltr[0].Tenant, keySlice, id)); err != nil {
-				return err
-			}
-			for _, cid := range ids {
-				cdrMpIDs.Remove(cid)
-				if cdrMpIDs.Size() == 0 {
-					return utils.ErrNotFound
-				}
-			}
-		}
-	}
-
-	// Remove CDRs and their indexes
-	for key := range cdrMpIDs {
-		var cdrBytes []byte
-		// key includes "cdr_" prefix
-		if err := rs.Cmd(&cdrBytes, redisGET, key); err != nil {
-			return err
-		}
-		cgrEv := new(utils.CGREvent)
-		if err := rs.ms.Unmarshal(cdrBytes, &cgrEv); err != nil {
-			return err
-		}
-		// Apply non-indexed filters
-		dp := cgrEv.AsDataProvider()
-		var pass bool = true
-		for _, fltr := range notIndexed {
-			if pass, err = fltr.Pass(ctx, dp); err != nil {
-				return err
-			} else if !pass {
-				cdrMpIDs.Remove(key)
-				break
-			}
-		}
-		if !pass {
-			continue
-		}
-		// Get the CDR to find all indexes
-		idx := make(utils.StringSet)
-		for _, v := range rs.stringIndexedFields {
-			val, err := dp.FieldAsString(strings.Split(v, utils.NestingSep))
-			if err != nil {
-				if err == utils.ErrNotFound {
-					continue
-				}
-				return err
-			}
-			idx.Add(utils.ConcatenatedKey(v, val))
-		}
-		for _, v := range rs.prefixIndexedFields {
-			val, err := dp.FieldAsString(strings.Split(v, utils.NestingSep))
-			if err != nil {
-				if err == utils.ErrNotFound {
-					continue
-				}
-				return err
-			}
-			idx.Add(utils.ConcatenatedKey(v, val))
-			for i := len(val) - 1; i > 0; i-- {
-				idx.Add(utils.ConcatenatedKey(v, val[:i]))
-			}
-		}
-
-		// Remove CDR from all indexes
-		for indexKey := range idx {
-			if err := rs.Cmd(nil, redisSREM, utils.CDRsIndexes+
-				utils.ConcatenatedKey(cgrEv.Tenant, indexKey), key); err != nil {
-				return err
-			}
-		}
-
-		// Remove CDR
-		if err := rs.Cmd(nil, redisDEL, key); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
 
 // DumpDB will dump all of db from memory to a file, only for InternalDB

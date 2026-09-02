@@ -41,7 +41,7 @@ func TestS3ERServe2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	if err := rdr.Serve(); err != nil {
@@ -63,7 +63,7 @@ func TestS3ERProcessMessage(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	expEvent := &utils.CGREvent{
@@ -111,7 +111,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	rdr.Config().Fields = []*config.FCTemplate{
@@ -127,7 +127,7 @@ func TestS3ERProcessMessageError1(t *testing.T) {
 func TestS3ERProcessMessageError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -146,7 +146,7 @@ func TestS3ERProcessMessageError2(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	body := []byte(`{"*originID":"testoriginID"}`)
@@ -177,7 +177,7 @@ func TestS3ERProcessMessageError3(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	body := []byte("invalid_format")
@@ -201,7 +201,7 @@ func TestS3ERParseOpts(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 
@@ -238,7 +238,7 @@ func TestS3ERIsClosed(t *testing.T) {
 		awsID:     "AWSId",
 		awsKey:    "AWSAccessKeyId",
 		awsToken:  "",
-		bucket:    "cgratesCDRs",
+		bucket:    "cgratesURs",
 		session:   nil,
 	}
 	if rcv := rdr.isClosed(); rcv != false {

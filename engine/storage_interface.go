@@ -93,9 +93,6 @@ type DataDB interface {
 	GetConfigSectionsDrv(*context.Context, string, []string) (map[string][]byte, error)
 	SetConfigSectionsDrv(*context.Context, string, map[string][]byte) error
 	RemoveConfigSectionsDrv(*context.Context, string, []string) error
-	SetCDR(*context.Context, *utils.CGREvent, bool) error
-	GetCDRs(*context.Context, []*Filter, map[string]any) ([]*utils.CDR, error)
-	RemoveCDRs(*context.Context, []*Filter) error
 	DumpDB() error
 	RewriteDB() error
 	BackupDB(string, bool) error

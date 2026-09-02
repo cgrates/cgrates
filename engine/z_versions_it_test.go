@@ -61,7 +61,7 @@ func testInitDataDB(t *testing.T) {
 	dbConn, err := NewDBConn(vrsCfg.DbCfg().DBConns[utils.MetaDefault].Type,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Host, vrsCfg.DbCfg().DBConns[utils.MetaDefault].Port,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Name, vrsCfg.DbCfg().DBConns[utils.MetaDefault].User,
-		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Password, vrsCfg.GeneralCfg().DBDataEncoding, vrsCfg.DbCfg().DBConns[utils.MetaDefault].StringIndexedFields, vrsCfg.DbCfg().DBConns[utils.MetaDefault].PrefixIndexedFields,
+		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Password, vrsCfg.GeneralCfg().DBDataEncoding,
 		vrsCfg.DbCfg().DBConns[utils.MetaDefault].Opts, vrsCfg.DbCfg().Items)
 	if err != nil {
 		log.Fatal(err)

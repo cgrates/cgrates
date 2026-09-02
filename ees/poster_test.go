@@ -20,12 +20,12 @@ func TestAMQPeeParseURL(t *testing.T) {
 		queueID:      "q1",
 		exchange:     "E1",
 		exchangeType: "fanout",
-		routingKey:   "CGRCDR",
+		routingKey:   "CGRUR",
 	}
 	opts := &config.EventExporterOpts{
 		AMQPQueueID:      utils.StringPointer("q1"),
 		AMQPExchange:     utils.StringPointer("E1"),
-		AMQPRoutingKey:   utils.StringPointer("CGRCDR"),
+		AMQPRoutingKey:   utils.StringPointer("CGRUR"),
 		AMQPExchangeType: utils.StringPointer("fanout"),
 	}
 	amqp.parseOpts(opts)
@@ -39,7 +39,7 @@ func TestNewKafkaEEParsesOpts(t *testing.T) {
 		ExportPath: "127.0.0.1:9092",
 		Attempts:   10,
 		Opts: &config.EventExporterOpts{
-			KafkaTopic: utils.StringPointer("cdr_billing"),
+			KafkaTopic: utils.StringPointer("ur_billing"),
 		},
 	}
 	got, err := NewKafkaEE(cfg, nil)

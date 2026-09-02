@@ -115,7 +115,7 @@ func TestERSRunReaderFilters(t *testing.T) {
 	}
 }
 
-func TestERSRunReaderCgrCDR(t *testing.T) {
+func TestERSRunReaderCgrUR(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
@@ -125,17 +125,17 @@ func TestERSRunReaderCgrCDR(t *testing.T) {
 	}
 
 	urID := "record's id"
-	cdr1 := &utils.CDR{
+	ur1 := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts:   map[string]any{utils.MetaURID: utils.Sha1("record1")},
 		Event:  map[string]any{utils.OriginID: "event1"},
 	}
-	cdr2 := &utils.CDR{
+	ur2 := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts:   map[string]any{utils.MetaURID: urID},
 		Event:  map[string]any{utils.OriginID: "event2"},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2)
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2)
 	var buf testBuffer
 	testEngine := engine.TestEngine{
 		ConfigJSON: `{
@@ -143,15 +143,15 @@ func TestERSRunReaderCgrCDR(t *testing.T) {
 	"enabled": true,
 	"readers": [
 		{
-			"id": "cgrcdr",
+			"id": "cgrur",
 			"runDelay": "0",
-			"type": "*cgrcdr",
+			"type": "*cgrur",
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"processedPath": "",
 			"flags": ["*dryRun"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs",
+				"sqlTableName": "urs",
 				"sqlBatchSize": 1
 			}
 		}
@@ -168,22 +168,22 @@ func TestERSRunReaderCgrCDR(t *testing.T) {
 	var reply string
 	if err := client.Call(context.Background(), utils.ErSv1RunReader,
 		&ers.V1RunReaderParams{
-			ReaderID: "cgrcdr",
+			ReaderID: "cgrur",
 			Filters:  []string{"*string:~*req.opts.*urID:" + urID},
 		}, &reply); err != nil {
 		t.Fatal(err)
 	}
-	const prefix = "<ERs> DRY_RUN, reader: <cgrcdr>"
+	const prefix = "<ERs> DRY_RUN, reader: <cgrur>"
 	waitFor(t, func() bool { return strings.Contains(buf.String(), prefix) },
-		"cgrcdr run did not process an event", 2*time.Second)
+		"cgrur run did not process an event", 2*time.Second)
 	if got := strings.Count(buf.String(), prefix); got != 1 {
-		t.Fatalf("unexpected number of cgrcdr events: %d", got)
+		t.Fatalf("unexpected number of cgrur events: %d", got)
 	}
 	if output := buf.String(); !strings.Contains(output, `"OriginID": "event2"`) ||
 		strings.Contains(output, `"OriginID": "event1"`) {
-		t.Fatalf("unexpected cgrcdr events:\n%s", output)
+		t.Fatalf("unexpected cgrur events:\n%s", output)
 	}
-	if got := countRows(t, db, utils.CDRsTBL); got != 2 {
+	if got := countRows(t, db, utils.URsTBL); got != 2 {
 		t.Fatalf("unexpected row count after manual run: %d", got)
 	}
 }

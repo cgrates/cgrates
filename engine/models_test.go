@@ -95,8 +95,8 @@ func TestCDRsqlTableName(t *testing.T) {
 		DeletedAt:   utils.TimePointer(time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC)),
 	}
 	rcv := cdrSql.TableName()
-	if !reflect.DeepEqual(rcv, utils.CDRsTBL) {
-		t.Errorf("Expected <%v>, Received <%v>", utils.CDRsTBL, rcv)
+	if !reflect.DeepEqual(rcv, utils.URsTBL) {
+		t.Errorf("Expected <%v>, Received <%v>", utils.URsTBL, rcv)
 	}
 }
 func TestSessionCostsSQLTableName(t *testing.T) {

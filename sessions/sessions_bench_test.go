@@ -49,7 +49,7 @@ func setupBenchSessionS(b *testing.B, enableChargers bool, cfg *config.CGRConfig
 	// Disable RPC caching to avoid guardian lock overhead in benchmark
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		b.Fatal(err)
 	}

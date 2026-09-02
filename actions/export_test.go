@@ -21,7 +21,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 	cfg.EFsCfg().PosterAttempts = 1
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
-		Type: utils.CDRLog,
+		Type: utils.MetaURLog,
 		Diktats: []*utils.APDiktat{
 			{
 				Opts: map[string]any{

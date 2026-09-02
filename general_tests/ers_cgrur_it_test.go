@@ -15,9 +15,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-const ersDryRunCgrCDR = "<ERs> DRY_RUN, reader: <cgrcdr>"
+const ersDryRunCgrUR = "<ERs> DRY_RUN, reader: <cgrur>"
 
-func expectedCDREvent() map[string]any {
+func expectedUREvent() map[string]any {
 	ts := timeStart.Format("2006-01-02T15:04:05Z07:00")
 	return map[string]any{
 		"Account":     "1001",
@@ -37,8 +37,8 @@ func expectedCDREvent() map[string]any {
 		"Usage":       10000000000}
 
 }
-func TestERSCgrCDRFilters(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+func TestERSCgrURFilters(t *testing.T) {
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
 		ConfigJSON: `{
@@ -46,16 +46,16 @@ func TestERSCgrCDRFilters(t *testing.T) {
 "enabled": true,
   "readers": [
     {
-      "id": "cgrcdr",
+      "id": "cgrur",
 		"runDelay": "1m",
-	   "type": "*cgrcdr",
+	   "type": "*cgrur",
 	   "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 		"startDelay": "100ms",
 		"flags": ["*dryRun"],
 		"tenant": "cgrates.org",
 	  	"opts": {
 				"sqlDBName":"cgrates2",
-				"sqlTableName":"cdrs",
+				"sqlTableName":"urs",
 				"sqlBatchSize": 3
 		},
 		"filters": [
@@ -72,22 +72,22 @@ func TestERSCgrCDRFilters(t *testing.T) {
 	}
 	ng.Run(t)
 
-	waitForLog(t, buf, ersDryRunCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersDryRunCgrCDR); got != 1 {
+	waitForLog(t, buf, ersDryRunCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersDryRunCgrUR); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
-	if got, want := utils.ToJSON(ev.Event), utils.ToJSON(expectedCDREvent()); got != want {
+	if got, want := utils.ToJSON(ev.Event), utils.ToJSON(expectedUREvent()); got != want {
 		t.Errorf("got event\n%s\nwant\n%s", got, want)
 	}
-	if got := countRows(t, db, utils.CDRsTBL); got != 3 {
+	if got := countRows(t, db, utils.URsTBL); got != 3 {
 		t.Fatalf("expected 3 rows, got %d", got)
 	}
 
 }
 
-func TestERSCgrCDRFiltersDelete(t *testing.T) {
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr1, cdr2, cdr3)
+func TestERSCgrURFiltersDelete(t *testing.T) {
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -97,9 +97,9 @@ func TestERSCgrCDRFiltersDelete(t *testing.T) {
 "enabled":true,
   "readers": [
 	   {
-      "id": "cgrcdr",
+      "id": "cgrur",
 	  "runDelay": "1m",
-	  "type": "*cgrcdr",
+	  "type": "*cgrur",
 	  "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 	  "processedPath": "*delete",
 	  "startDelay": "250ms",
@@ -107,7 +107,7 @@ func TestERSCgrCDRFiltersDelete(t *testing.T) {
 	  "tenant": "cgrates.org",
 	  "opts": {
 				"sqlDBName":"cgrates2",
-				"sqlTableName":"cdrs",
+				"sqlTableName":"urs",
 				"sqlBatchSize": 2
 		},
 	  "filters": [
@@ -125,15 +125,15 @@ func TestERSCgrCDRFiltersDelete(t *testing.T) {
 	ng.Run(t)
 
 	waitFor(t,
-		func() bool { return countRows(t, db, utils.CDRsTBL) == 2 },
-		"expected 2 rows in cdrs after delete",
+		func() bool { return countRows(t, db, utils.URsTBL) == 2 },
+		"expected 2 rows in urs after delete",
 		2*time.Second,
 	)
-	if got := strings.Count(buf.String(), ersDryRunCgrCDR); got != 1 {
+	if got := strings.Count(buf.String(), ersDryRunCgrUR); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
-	if got, want := utils.ToJSON(ev.Event), utils.ToJSON(expectedCDREvent()); got != want {
+	if got, want := utils.ToJSON(ev.Event), utils.ToJSON(expectedUREvent()); got != want {
 		t.Errorf("got event\n%s\nwant\n%s", got, want)
 	}
 }

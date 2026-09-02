@@ -41,6 +41,8 @@ var (
 
 // Tests starting here
 func TestCDRsPostFailoverIT(t *testing.T) {
+	// unfinished
+	t.Skip("to be redone using new sessions implementation or simply ees with cgrur")
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		cdrsPostFailConfDIR = "cdrsv_failover_internal"
@@ -127,53 +129,53 @@ func testCDRsPostFailoverLoadTariffPlanFromFolder(t *testing.T) {
 }
 
 func testCDRsPostFailoverProcessCDR(t *testing.T) {
-	args := &utils.CGREvent{
-		ID:     "1",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.OriginID:     "testCDRsPostFailoverProcessCDR",
-			utils.OriginHost:   "192.168.1.1",
-			utils.Source:       "testCDRsPostFailoverProcessCDR",
-			utils.RequestType:  utils.MetaRated,
-			utils.Category:     "call",
-			utils.AccountField: "testCDRsPostFailoverProcessCDR",
-			utils.Subject:      "ANY2CNT",
-			utils.Destination:  "+4986517174963",
-			utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
-			utils.Usage:        time.Minute,
-			"field_extr1":      "val_extr1",
-			"fieldextr2":       "valextr2",
-		},
-		APIOpts: map[string]any{
-			utils.OptsCDRsExport: true,
-			utils.MetaAttributes: false,
-			utils.MetaChargers:   false,
-			utils.OptsCDRsStore:  false,
-			utils.MetaThresholds: false,
-			utils.MetaStats:      false,
-		},
-	}
+	// args := &utils.CGREvent{
+	// 	ID:     "1",
+	// 	Tenant: "cgrates.org",
+	// 	Event: map[string]any{
+	// 		utils.OriginID:     "testCDRsPostFailoverProcessCDR",
+	// 		utils.OriginHost:   "192.168.1.1",
+	// 		utils.Source:       "testCDRsPostFailoverProcessCDR",
+	// 		utils.RequestType:  utils.MetaRated,
+	// 		utils.Category:     "call",
+	// 		utils.AccountField: "testCDRsPostFailoverProcessCDR",
+	// 		utils.Subject:      "ANY2CNT",
+	// 		utils.Destination:  "+4986517174963",
+	// 		utils.AnswerTime:   time.Date(2018, 8, 24, 16, 00, 26, 0, time.UTC),
+	// 		utils.Usage:        time.Minute,
+	// 		"field_extr1":      "val_extr1",
+	// 		"fieldextr2":       "valextr2",
+	// 	},
+	// 	APIOpts: map[string]any{
+	// 		utils.OptsCDRsExport: true,
+	// 		utils.MetaAttributes: false,
+	// 		utils.MetaChargers:   false,
+	// 		utils.OptsCDRsStore:  false,
+	// 		utils.MetaThresholds: false,
+	// 		utils.MetaStats:      false,
+	// 	},
+	// }
 
-	var reply string
-	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-	args.ID = "2"
-	args.Event[utils.OriginID] = "2"
-	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
-	args.ID = "3"
-	args.Event[utils.OriginID] = "3"
-	if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
-		t.Error("Unexpected error: ", err.Error())
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply received: ", reply)
-	}
+	// var reply string
+	// if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	// 	t.Error("Unexpected error: ", err.Error())
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply received: ", reply)
+	// }
+	// args.ID = "2"
+	// args.Event[utils.OriginID] = "2"
+	// if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	// 	t.Error("Unexpected error: ", err.Error())
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply received: ", reply)
+	// }
+	// args.ID = "3"
+	// args.Event[utils.OriginID] = "3"
+	// if err := cdrsPostFailRpc.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+	// 	t.Error("Unexpected error: ", err.Error())
+	// } else if reply != utils.OK {
+	// 	t.Error("Unexpected reply received: ", reply)
+	// }
 }
 
 func testCDRsPostFailoverToFile(t *testing.T) {

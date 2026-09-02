@@ -418,7 +418,7 @@ func testCfgDataDBConnStore(t *testing.T) {
 	connDb, err = engine.NewDBConn(cfgCfg.ConfigDBCfg().Type,
 		cfgCfg.ConfigDBCfg().Host, cfgCfg.ConfigDBCfg().Port,
 		cfgCfg.ConfigDBCfg().Name, cfgCfg.ConfigDBCfg().User,
-		cfgCfg.ConfigDBCfg().Password, cfgCfg.GeneralCfg().DBDataEncoding, nil, nil,
+		cfgCfg.ConfigDBCfg().Password, cfgCfg.GeneralCfg().DBDataEncoding,
 		cfgCfg.ConfigDBCfg().Opts, nil)
 	if err != nil {
 		t.Fatal(err)

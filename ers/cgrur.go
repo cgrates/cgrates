@@ -24,12 +24,12 @@ import (
 	"gorm.io/gorm"
 )
 
-// NewCgrCdr returns a new *cgrcdr event reader
-func NewCgrCdr(cfg *config.CGRConfig, cfgIdx int,
+// NewCgrUr returns a new *cgrur event reader
+func NewCgrUr(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
 	fltrS *engine.FilterS, rdrExit chan struct{}, dm *engine.DataManager) (EventReader, error) {
 
-	rdr := &CgrCDR{
+	rdr := &CgrUR{
 		cgrCfg:        cfg,
 		cfgIdx:        cfgIdx,
 		fltrS:         fltrS,
@@ -48,8 +48,8 @@ func NewCgrCdr(cfg *config.CGRConfig, cfgIdx int,
 	return rdr, nil
 }
 
-// Cgrcdr implements EventReader for the *cgrcdr type.
-type CgrCDR struct {
+// Cgrur implements EventReader for the *cgrur type.
+type CgrUR struct {
 	cgrCfg *config.CGRConfig
 	cfgIdx int
 	fltrS  *engine.FilterS
@@ -66,11 +66,11 @@ type CgrCDR struct {
 	cap           chan struct{}
 }
 
-func (rdr *CgrCDR) Config() *config.EventReaderCfg {
+func (rdr *CgrUR) Config() *config.EventReaderCfg {
 	return rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx]
 }
 
-func (rdr *CgrCDR) Serve() error {
+func (rdr *CgrUR) Serve() error {
 	db, sqlDB, err := rdr.openDB()
 	if err != nil {
 		return err
@@ -82,7 +82,7 @@ func (rdr *CgrCDR) Serve() error {
 	return nil
 }
 
-func (rdr *CgrCDR) openDB() (*gorm.DB, *sql.DB, error) {
+func (rdr *CgrUR) openDB() (*gorm.DB, *sql.DB, error) {
 	var dialect gorm.Dialector
 	switch rdr.connType {
 	case utils.MySQL:
@@ -108,7 +108,7 @@ func (rdr *CgrCDR) openDB() (*gorm.DB, *sql.DB, error) {
 	return db, sqlDB, nil
 }
 
-func (rdr *CgrCDR) filtersForQuery(filters []string) (dbFilters []string, dbFilterArgs []any,
+func (rdr *CgrUR) filtersForQuery(filters []string) (dbFilters []string, dbFilterArgs []any,
 	lazyFilters []string, err error) {
 	for _, filterID := range filters {
 		filterObj, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant,
@@ -136,14 +136,14 @@ func (rdr *CgrCDR) filtersForQuery(filters []string) (dbFilters []string, dbFilt
 	return dbFilters, dbFilterArgs, lazyFilters, nil
 }
 
-func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
+func (rdr *CgrUR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	defer sqlDB.Close()
 	if rdr.Config().StartDelay > 0 {
 		select {
 		case <-time.After(rdr.Config().StartDelay):
 		case <-rdr.rdrExit:
 			utils.Logger.Info(
-				fmt.Sprintf("<%s> stop monitoring cgrcdr table <%s>",
+				fmt.Sprintf("<%s> stop monitoring cgrur table <%s>",
 					utils.ERs, rdr.Config().SourcePath))
 			return
 		}
@@ -156,23 +156,23 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	selectWhereQuery := strings.Join(dbFilters, " AND ")
 	tm := time.NewTimer(0)
 	for {
-		var cdrs []*utils.CDRSQLTable
-		tx := db.Table(rdr.tableName).Model(&utils.CDRSQLTable{})
+		var urs []*utils.URSQLTable
+		tx := db.Table(rdr.tableName).Model(&utils.URSQLTable{})
 		if selectWhereQuery != "" {
 			tx = tx.Where(selectWhereQuery, dbFilterArgs...)
 		}
 		if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
 			tx = tx.Limit(*rdr.Config().Opts.SQLBatchSize)
 		}
-		if err := tx.Find(&cdrs).Error; err != nil {
+		if err := tx.Find(&urs).Error; err != nil {
 			rdr.rdrErr <- err
 			return
 		}
-		for _, cdrSql := range cdrs {
+		for _, urSql := range urs {
 			select {
 			case <-rdr.rdrExit:
 				utils.Logger.Info(
-					fmt.Sprintf("<%s> stop monitoring cgrcdr table <%s>",
+					fmt.Sprintf("<%s> stop monitoring cgrur table <%s>",
 						utils.ERs, rdr.Config().SourcePath))
 				return
 			default:
@@ -181,31 +181,31 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				rdr.cap <- struct{}{}
 			}
 			if rdr.Config().ProcessedPath == utils.MetaDelete {
-				if err := db.Table(rdr.tableName).Delete(&utils.CDRSQLTable{}, cdrSql.ID).Error; err != nil {
+				if err := db.Table(rdr.tableName).Delete(&utils.URSQLTable{}, urSql.ID).Error; err != nil {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> deleting CDR id <%d> error: %s",
-							utils.ERs, cdrSql.ID, err.Error()))
+						fmt.Sprintf("<%s> deleting UR id <%d> error: %s",
+							utils.ERs, urSql.ID, err.Error()))
 					rdr.rdrErr <- err
 					return
 				}
 			}
-			go func(cdrSql *utils.CDRSQLTable) {
-				if err := rdr.processMessage(cdrSql, lazyFilters); err != nil {
+			go func(urSql *utils.URSQLTable) {
+				if err := rdr.processMessage(urSql, lazyFilters); err != nil {
 					utils.Logger.Warning(
-						fmt.Sprintf("<%s> processing CDR id <%d> error: %s",
-							utils.ERs, cdrSql.ID, err.Error()))
+						fmt.Sprintf("<%s> processing UR id <%d> error: %s",
+							utils.ERs, urSql.ID, err.Error()))
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					<-rdr.cap
 				}
-			}(cdrSql)
+			}(urSql)
 		}
 		tm.Reset(rdr.Config().RunDelay)
 		select {
 		case <-rdr.rdrExit:
 			tm.Stop()
 			utils.Logger.Info(
-				fmt.Sprintf("<%s> stop monitoring cgr CDR table <%s>",
+				fmt.Sprintf("<%s> stop monitoring cgr UR table <%s>",
 					utils.ERs, rdr.Config().SourcePath))
 			return
 		case <-tm.C:
@@ -213,9 +213,9 @@ func (rdr *CgrCDR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	}
 }
 
-func (rdr *CgrCDR) run(filters []string) error {
+func (rdr *CgrUR) run(filters []string) error {
 	if rdr.connType != utils.MySQL {
-		return errors.New("manual cgrcdr processing supports only mysql")
+		return errors.New("manual cgrur processing supports only mysql")
 	}
 	db, sqlDB, err := rdr.openDB()
 	if err != nil {
@@ -226,40 +226,40 @@ func (rdr *CgrCDR) run(filters []string) error {
 	if err != nil {
 		return err
 	}
-	var cdrs []*utils.CDRSQLTable
-	tx := db.Table(rdr.tableName).Model(&utils.CDRSQLTable{})
+	var urs []*utils.URSQLTable
+	tx := db.Table(rdr.tableName).Model(&utils.URSQLTable{})
 	if selectWhereQuery := strings.Join(dbFilters, " AND "); selectWhereQuery != "" {
 		tx = tx.Where(selectWhereQuery, dbFilterArgs...)
 	}
 	if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
 		tx = tx.Limit(*rdr.Config().Opts.SQLBatchSize)
 	}
-	if err := tx.Find(&cdrs).Error; err != nil {
+	if err := tx.Find(&urs).Error; err != nil {
 		return err
 	}
-	for _, cdrSQL := range cdrs {
+	for _, urSQL := range urs {
 		if rdr.Config().ProcessedPath == utils.MetaDelete {
-			if err := db.Table(rdr.tableName).Delete(&utils.CDRSQLTable{}, cdrSQL.ID).Error; err != nil {
+			if err := db.Table(rdr.tableName).Delete(&utils.URSQLTable{}, urSQL.ID).Error; err != nil {
 				return err
 			}
 		}
-		if err := rdr.processMessage(cdrSQL, lazyFilters); err != nil {
+		if err := rdr.processMessage(urSQL, lazyFilters); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable, lazyFilters []string) error {
-	cdr := &utils.CDR{
-		Tenant:    cdrSql.Tenant,
-		Opts:      cdrSql.Opts,
-		Event:     cdrSql.Event,
-		CreatedAt: cdrSql.CreatedAt,
-		UpdatedAt: cdrSql.UpdatedAt,
-		DeletedAt: cdrSql.DeletedAt,
+func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) error {
+	ur := &utils.UR{
+		Tenant:    urSql.Tenant,
+		Opts:      urSql.Opts,
+		Event:     urSql.Event,
+		CreatedAt: urSql.CreatedAt,
+		UpdatedAt: urSql.UpdatedAt,
+		DeletedAt: urSql.DeletedAt,
 	}
-	cgrEv := cdr.CGREvent()
+	cgrEv := ur.CGREvent()
 	if pass, err := rdr.fltrS.Pass(context.TODO(), cgrEv.Tenant, lazyFilters,
 		cgrEv.AsDataProvider()); err != nil || !pass {
 		return err
@@ -301,10 +301,10 @@ func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable, lazyFilters []strin
 	var rawEvent map[string]any
 	if len(rdr.Config().EEsSuccessIDs) != 0 || len(rdr.Config().EEsFailedIDs) != 0 {
 		rawEvent = map[string]any{
-			utils.ID:           cdrSql.ID,
-			utils.Tenant:       cdrSql.Tenant,
-			utils.OptsCfg:      cdrSql.Opts,
-			utils.EventLowCase: cdrSql.Event,
+			utils.ID:           urSql.ID,
+			utils.Tenant:       urSql.Tenant,
+			utils.OptsCfg:      urSql.Opts,
+			utils.EventLowCase: urSql.Event,
 		}
 	}
 	rdrEv <- &erEvent{
@@ -315,7 +315,7 @@ func (rdr *CgrCDR) processMessage(cdrSql *utils.CDRSQLTable, lazyFilters []strin
 	return nil
 }
 
-func (rdr *CgrCDR) setURL(inURL string, opts *config.EventReaderOpts) error {
+func (rdr *CgrUR) setURL(inURL string, opts *config.EventReaderOpts) error {
 	inURL = strings.TrimPrefix(inURL, utils.Meta)
 	u, err := url.Parse(inURL)
 	if err != nil {
@@ -333,7 +333,7 @@ func (rdr *CgrCDR) setURL(inURL string, opts *config.EventReaderOpts) error {
 		ssl = *opts.PgSSLMode
 	}
 
-	rdr.tableName = utils.CDRsTBL
+	rdr.tableName = utils.URsTBL
 	if opts.SQLTableName != nil {
 		rdr.tableName = *opts.SQLTableName
 	}

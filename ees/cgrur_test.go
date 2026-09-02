@@ -15,9 +15,9 @@ import (
 	"gorm.io/driver/postgres"
 )
 
-func TestCgrCDRInitDialectorUnsupported(t *testing.T) {
+func TestCgrURInitDialectorUnsupported(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
-	cgr := &CgrCDR{
+	cgr := &CgrUR{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
 	}
@@ -27,11 +27,11 @@ func TestCgrCDRInitDialectorUnsupported(t *testing.T) {
 	}
 }
 
-func TestCgrCDRInitDialectorMySQL(t *testing.T) {
+func TestCgrURInitDialectorMySQL(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
-	cgr := &CgrCDR{
+	cgr := &CgrUR{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
 	}
@@ -42,16 +42,16 @@ func TestCgrCDRInitDialectorMySQL(t *testing.T) {
 	} else if !reflect.DeepEqual(cgr.dialect, dialectExpect) {
 		t.Errorf("Expected %v but received %v", utils.ToJSON(dialectExpect), utils.ToJSON(cgr.dialect))
 	}
-	if cgr.tableName != utils.CDRsTBL {
-		t.Errorf("Expected tableName %q but received %q", utils.CDRsTBL, cgr.tableName)
+	if cgr.tableName != utils.URsTBL {
+		t.Errorf("Expected tableName %q but received %q", utils.URsTBL, cgr.tableName)
 	}
 }
 
-func TestCgrCDRInitDialectorPostgres(t *testing.T) {
+func TestCgrURInitDialectorPostgres(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `postgres://cgrates:CGRateS.org@127.0.0.1:5432`
-	cgr := &CgrCDR{
+	cgr := &CgrUR{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
 	}
@@ -64,10 +64,10 @@ func TestCgrCDRInitDialectorPostgres(t *testing.T) {
 	}
 }
 
-func TestCgrCDRInitDialectorURLError(t *testing.T) {
+func TestCgrURInitDialectorURLError(t *testing.T) {
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = ":exportpath"
-	cgr := &CgrCDR{
+	cgr := &CgrUR{
 		cfg:  cgrCfg.EEsCfg().Exporters[0],
 		reqs: newConcReq(0),
 	}
@@ -77,8 +77,8 @@ func TestCgrCDRInitDialectorURLError(t *testing.T) {
 	}
 }
 
-func TestCgrCDRExportEventDisconnected(t *testing.T) {
-	cgr := &CgrCDR{reqs: newConcReq(0)}
+func TestCgrURExportEventDisconnected(t *testing.T) {
+	cgr := &CgrUR{reqs: newConcReq(0)}
 	cgrEv := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "evt1",
