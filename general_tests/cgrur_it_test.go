@@ -17,7 +17,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestCgrCdrEventExporter(t *testing.T) {
+func TestCgrUrEventExporter(t *testing.T) {
 	var dbCfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaMySQL:
@@ -37,12 +37,12 @@ func TestCgrCdrEventExporter(t *testing.T) {
 "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "` + exportPath + `",
 			"opts": {
 				"sqlDBName": "` + *conn.Name + `",
-				"sqlTableName": "cdrs"
+				"sqlTableName": "urs"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -65,9 +65,9 @@ func TestCgrCdrEventExporter(t *testing.T) {
 	client, _ := ng.Run(t)
 	time.Sleep(100 * time.Millisecond)
 
-	t.Run("CDRExportEvent", func(t *testing.T) {
+	t.Run("URExportEvent", func(t *testing.T) {
 		cgrEvID := &utils.CGREventWithEeIDs{
-			EeIDs: []string{"cdr_exporter"},
+			EeIDs: []string{"ur_exporter"},
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "voiceEvent",
@@ -99,16 +99,16 @@ func TestCgrCdrEventExporter(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	t.Run("GetCDR", func(t *testing.T) {
-		var cdrs []*utils.CDR
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
-			&utils.CDRFilters{Tenant: "cgrates.org"}, &cdrs); err != nil {
-			t.Fatalf("retrieving CDRs failed: %v", err)
+	t.Run("GetUR", func(t *testing.T) {
+		var urs []*utils.UR
+		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
+			&utils.URFilters{Tenant: "cgrates.org"}, &urs); err != nil {
+			t.Fatalf("retrieving URs failed: %v", err)
 		}
-		if len(cdrs) != 1 {
-			t.Fatalf("expected 1 CDR, got %d", len(cdrs))
+		if len(urs) != 1 {
+			t.Fatalf("expected 1 UR, got %d", len(urs))
 		}
-		if got := cdrs[0].Event[utils.OriginID]; got != "origin1" {
+		if got := urs[0].Event[utils.OriginID]; got != "origin1" {
 			t.Errorf("unexpected OriginID: got %v, want origin1", got)
 		}
 	})

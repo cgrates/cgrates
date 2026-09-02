@@ -153,8 +153,8 @@ type
 	**\*sql**
 		Reader for generic content out of *SQL* databases. Supported databases are: MySQL_ and PostgreSQL_.
 
-	**\*cgrcdr**
-		Reader for CGRateS-formatted CDRs from a *SQL* table (MySQL_ or PostgreSQL_).
+	**\*cgrur**
+		Reader for CGRateS-formatted URs from a *SQL* table (MySQL_ or PostgreSQL_).
 
 	**\*amqpJSONMap**
 		Reader for AMQP_ v0.9.1 messaging.
@@ -193,7 +193,7 @@ sourcePath
 	Path towards the events source
 
 processedPath
-	Optional path for moving the events source to after processing. For the *\*sql* and *\*cgrcdr* readers it can be set to *\*delete* to remove the processed rows from the table.
+	Optional path for moving the events source to after processing. For the *\*sql* and *\*cgrur* readers it can be set to *\*delete* to remove the processed rows from the table.
 
 tenant
 	Will auto-populate the Tenant within the API calls sent to CGRateS. It has the form of a RSRParser. If undefined, default one from *general* section will be used.

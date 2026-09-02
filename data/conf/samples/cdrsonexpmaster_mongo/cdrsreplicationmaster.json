@@ -86,10 +86,10 @@
 			"type": "*amqpJSONMap",
 			"exportPath": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"amqpQueueID": "cgratesCDRs",
+				"amqpQueueID": "cgratesURs",
 				"amqpExchange": "exchangename",
 				"amqpExchangeType": "fanout",
-				"amqpRoutingKey": "cgr_cdrs",
+				"amqpRoutingKey": "cgr_urs",
 			},
 			"attempts": 3,
 			"fields":[
@@ -124,7 +124,7 @@
 			"type": "*kafkaJSONMap",
 			"exportPath": "localhost:9092",
 			"opts": {
-				"kafkaTopic": "cgratesCDRs",
+				"kafkaTopic": "cgratesURs",
 			},
 			"synchronous": true,
 			"attempts": 1,
@@ -137,7 +137,7 @@
 			"type": "*amqpJSONMap",
 			"exportPath": "amqp://guest:guest@wrongurl:25672/",
 			"opts": {
-				"amqpQueueID": "cgratesCDRs",
+				"amqpQueueID": "cgratesURs",
 			},
 			"filters":["*string:~*ec.Cost:100"],
 			"synchronous": true,

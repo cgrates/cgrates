@@ -57,7 +57,7 @@ func TestOnStorIT(t *testing.T) {
 	locker := NewLocker(cfg)
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+		idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -71,7 +71,7 @@ func TestOnStorIT(t *testing.T) {
 		rdsITdb, err = NewRedisStorage("127.0.0.1:6379",
 			4, utils.CGRateSLwr, cfg.DbCfg().DBConns[utils.MetaDefault].Password, cfg.GeneralCfg().DBDataEncoding,
 			cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisMaxConns, cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts, "", false,
-			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString, 1000, nil, nil)
+			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false, utils.EmptyString, utils.EmptyString, utils.EmptyString, 1000)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}

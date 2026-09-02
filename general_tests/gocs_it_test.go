@@ -399,47 +399,47 @@ func TestGOCSIT(t *testing.T) {
 		}
 	})
 
-	t.Run("process cdr", func(t *testing.T) {
-		args := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestSSv1ItProcessCDR",
-			Event: map[string]any{
-				utils.Tenant:       "cgrates.org",
-				utils.ToR:          utils.MetaVoice,
-				utils.OriginID:     "testGOCS",
-				utils.Category:     "call",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-				utils.Destination:  "1002",
-				utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-				utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-				utils.Usage:        15 * time.Minute,
-			},
-		}
-		var rply string
-		if err := usClient.Call(context.Background(), utils.SessionSv1ProcessCDR,
-			args, &rply); err != nil {
-			t.Error(err)
-		}
-		if rply != utils.OK {
-			t.Errorf("Unexpected reply: %s", rply)
-		}
-		time.Sleep(100 * time.Millisecond)
-		var acnt *utils.Account
-		attrAcc := &utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: "cgrates.org",
-				ID:     "1001",
-			},
-		}
+	// t.Run("process cdr", func(t *testing.T) {
+	// 	args := &utils.CGREvent{
+	// 		Tenant: "cgrates.org",
+	// 		ID:     "TestSSv1ItProcessCDR",
+	// 		Event: map[string]any{
+	// 			utils.Tenant:       "cgrates.org",
+	// 			utils.ToR:          utils.MetaVoice,
+	// 			utils.OriginID:     "testGOCS",
+	// 			utils.Category:     "call",
+	// 			utils.RequestType:  utils.MetaPrepaid,
+	// 			utils.AccountField: "1001",
+	// 			utils.Subject:      "1001",
+	// 			utils.Destination:  "1002",
+	// 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+	// 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+	// 			utils.Usage:        15 * time.Minute,
+	// 		},
+	// 	}
+	// 	var rply string
+	// 	if err := usClient.Call(context.Background(), utils.SessionSv1ProcessCDR,
+	// 		args, &rply); err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	if rply != utils.OK {
+	// 		t.Errorf("Unexpected reply: %s", rply)
+	// 	}
+	// 	time.Sleep(100 * time.Millisecond)
+	// 	var acnt *utils.Account
+	// 	attrAcc := &utils.TenantIDWithAPIOpts{
+	// 		TenantID: &utils.TenantID{
+	// 			Tenant: "cgrates.org",
+	// 			ID:     "1001",
+	// 		},
+	// 	}
 
-		if err := auClient.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
-			t.Error(err)
-		}
+	// 	if err := auClient.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
+	// 		t.Error(err)
+	// 	}
 
-		if err := usClient.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
-			t.Error(err)
-		}
-	})
+	// 	if err := usClient.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
+	// 		t.Error(err)
+	// 	}
+	// })
 }

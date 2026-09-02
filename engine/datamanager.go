@@ -3202,7 +3202,6 @@ func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 		d[dbKey], err = NewDBConn(dbConnCfg.Type,
 			dbConnCfg.Host, dbConnCfg.Port, dbConnCfg.Name, dbConnCfg.User,
 			dbConnCfg.Password, cfg.GeneralCfg().DBDataEncoding,
-			dbConnCfg.StringIndexedFields, dbConnCfg.PrefixIndexedFields,
 			dbConnCfg.Opts, cfg.DbCfg().Items)
 		r[dbKey] = newReplicator(dbConnCfg, dm.connMgr, dm.locker)
 		if err != nil {
@@ -3647,37 +3646,4 @@ func (dm *DataManager) SnapshotDB(backupFolderPath string, zip bool) error {
 		}
 	}
 	return nil
-}
-
-func (dm *DataManager) SetCDR(ctx *context.Context, cdr *utils.CGREvent, allowUpdate bool) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
-	if err != nil {
-		return err
-	}
-	return db.SetCDR(ctx, cdr, allowUpdate)
-}
-
-func (dm *DataManager) GetCDRs(ctx *context.Context, qryFltr []*Filter, opts map[string]any) ([]*utils.CDR, error) {
-	if dm == nil {
-		return nil, utils.ErrNoDatabaseConn
-	}
-	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
-	if err != nil {
-		return nil, err
-	}
-	return db.GetCDRs(ctx, qryFltr, opts)
-}
-
-func (dm *DataManager) RemoveCDRs(ctx *context.Context, qryFltr []*Filter) (err error) {
-	if dm == nil {
-		return utils.ErrNoDatabaseConn
-	}
-	db, _, err := dm.dbConns.GetConn(utils.MetaCDRs)
-	if err != nil {
-		return err
-	}
-	return db.RemoveCDRs(ctx, qryFltr)
 }

@@ -28,7 +28,7 @@ func setTestCache(dm *DataManager, cfg *config.CGRConfig, locker *guardian.Locke
 func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -73,7 +73,7 @@ func TestGetFiltersRateProfilesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -89,7 +89,7 @@ func TestGetFiltersActionProfilesOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -141,7 +141,7 @@ func TestGetFiltersActionProfilesErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -157,7 +157,7 @@ func TestGetFiltersAccountsOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -221,7 +221,7 @@ func TestGetFiltersAccountsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -237,7 +237,7 @@ func TestGetFiltersDefault(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := NewConnManager(cfg)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -254,7 +254,7 @@ func TestGetFilterAsIndexSetDynamicVal(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -284,7 +284,7 @@ func TestGetFilterAsIndexSetElementNotDynamic(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -395,7 +395,7 @@ func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -424,7 +424,7 @@ func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := setTestCache(dm, cfg, locker)
@@ -502,7 +502,7 @@ func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -520,7 +520,7 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := setTestCache(dm, cfg, locker)
@@ -548,7 +548,7 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -578,7 +578,7 @@ func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -596,7 +596,7 @@ func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := setTestCache(dm, cfg, locker)
@@ -649,7 +649,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -667,7 +667,7 @@ func TestGetRatesFromCacheObjValNil(t *testing.T) {
 	useLtcache := ltcache.NewCache(20, 20*time.Second, true, false, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
@@ -706,7 +706,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)

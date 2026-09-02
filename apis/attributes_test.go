@@ -21,7 +21,7 @@ func TestAttributesSetGetAttributeProfile(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -101,7 +101,7 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -185,7 +185,7 @@ func TestAttributesGetAttributeProfileCheckErrors(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -221,7 +221,7 @@ func TestAttributesRemoveAttributeProfileCheckErrors(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -492,7 +492,7 @@ func TestAttributesGetAttributeProfilesOK(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
@@ -637,7 +637,7 @@ func TestAttributesGetAttributeProfilesGetIDsErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
@@ -827,7 +827,7 @@ func TestAttributesSetAttributeProfileAsAttrPrfErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)

@@ -27,7 +27,7 @@ DAEMON=/usr/sbin/asterisk
 ASTVARRUNDIR=$TMP_DIR/run
 LOGDIR=$TMP_DIR/log
 DBDIR=$TMP_DIR/lib
-CDRDIR=$LOGDIR/cdr-custom
+URDIR=$LOGDIR/ur-custom
 SPOOLDIR=$TMP_DIR/spool
 ALTCONF=$TUTDIR/etc/asterisk/asterisk.conf
 TRUE=/bin/true
@@ -66,9 +66,9 @@ if [ ! -d $LOGDIR ]; then
 fi
 
 
-if [ ! -d $CDRDIR ]; then
-  mkdir -p $CDRDIR
-  chown -R $AST_USER:$AST_GROUP $CDRDIR
+if [ ! -d $URDIR ]; then
+  mkdir -p $URDIR
+  chown -R $AST_USER:$AST_GROUP $URDIR
 fi
 
 if [ ! -d $SPOOLDIR ]; then

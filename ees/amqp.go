@@ -14,7 +14,7 @@ import (
 )
 
 // NewAMQPee creates a new amqp poster
-// "amqp://guest:guest@localhost:5672/?queueID=cgrates_cdrs"
+// "amqp://guest:guest@localhost:5672/?queueID=cgrates_urs"
 func NewAMQPee(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *AMQPee {
 	amqp := &AMQPee{
 		cfg:  cfg,
@@ -25,9 +25,9 @@ func NewAMQPee(cfg *config.EventExporterCfg, em *utils.ExporterMetrics) *AMQPee 
 	return amqp
 }
 
-// AMQPee used to post cdrs to amqp
+// AMQPee used to post urs to amqp
 type AMQPee struct {
-	queueID      string // identifier of the CDR queue where we publish
+	queueID      string // identifier of the UR queue where we publish
 	exchange     string
 	exchangeType string
 	routingKey   string

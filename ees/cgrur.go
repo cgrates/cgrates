@@ -21,9 +21,9 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewCgrCDR(cfg *config.EventExporterCfg,
-	em *utils.ExporterMetrics) (cgr *CgrCDR, err error) {
-	cgr = &CgrCDR{
+func NewCgrUR(cfg *config.EventExporterCfg,
+	em *utils.ExporterMetrics) (cgr *CgrUR, err error) {
+	cgr = &CgrUR{
 		cfg:  cfg,
 		em:   em,
 		reqs: newConcReq(cfg.ConcurrentRequests),
@@ -32,7 +32,7 @@ func NewCgrCDR(cfg *config.EventExporterCfg,
 	return
 }
 
-type CgrCDR struct {
+type CgrUR struct {
 	cfg   *config.EventExporterCfg
 	em    *utils.ExporterMetrics
 	db    *gorm.DB
@@ -45,7 +45,7 @@ type CgrCDR struct {
 	sync.RWMutex
 }
 
-func (cgr *CgrCDR) initDialector() (err error) {
+func (cgr *CgrUR) initDialector() (err error) {
 	var u *url.URL
 	if u, err = url.Parse(strings.TrimPrefix(cgr.Cfg().ExportPath, utils.Meta)); err != nil {
 		return
@@ -60,7 +60,7 @@ func (cgr *CgrCDR) initDialector() (err error) {
 	if cgr.Cfg().Opts.PgSSLMode != nil {
 		ssl = *cgr.Cfg().Opts.PgSSLMode
 	}
-	cgr.tableName = utils.CDRsTBL
+	cgr.tableName = utils.URsTBL
 	if cgr.Cfg().Opts.SQLTableName != nil {
 		cgr.tableName = *cgr.Cfg().Opts.SQLTableName
 	}
@@ -79,9 +79,9 @@ func (cgr *CgrCDR) initDialector() (err error) {
 	return
 }
 
-func (cgr *CgrCDR) Cfg() *config.EventExporterCfg { return cgr.cfg }
+func (cgr *CgrUR) Cfg() *config.EventExporterCfg { return cgr.cfg }
 
-func (cgr *CgrCDR) Connect() (err error) {
+func (cgr *CgrUR) Connect() (err error) {
 	cgr.Lock()
 	if cgr.db == nil || cgr.sqldb == nil {
 		cgr.db, cgr.sqldb, err = openDB(cgr.dialect, cgr.Cfg().Opts)
@@ -90,7 +90,7 @@ func (cgr *CgrCDR) Connect() (err error) {
 	return
 }
 
-func (cgr *CgrCDR) Close() (err error) {
+func (cgr *CgrUR) Close() (err error) {
 	cgr.Lock()
 	if cgr.sqldb != nil {
 		err = cgr.sqldb.Close()
@@ -101,16 +101,16 @@ func (cgr *CgrCDR) Close() (err error) {
 	return
 }
 
-func (cgr *CgrCDR) GetMetrics() *utils.ExporterMetrics { return cgr.em }
+func (cgr *CgrUR) GetMetrics() *utils.ExporterMetrics { return cgr.em }
 
-func (cgr *CgrCDR) ExtraData(ev *utils.CGREvent) any { return ev }
+func (cgr *CgrUR) ExtraData(ev *utils.CGREvent) any { return ev }
 
 // PrepareMap is a no-op it doesn't use templates
-func (cgr *CgrCDR) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
+func (cgr *CgrUR) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
 
-func (cgr *CgrCDR) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) { return nil, nil }
+func (cgr *CgrUR) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) { return nil, nil }
 
-func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
+func (cgr *CgrUR) ExportEvent(_ *context.Context, _, extraData any) error {
 	cgrEv, ok := extraData.(*utils.CGREvent)
 	if !ok {
 		return fmt.Errorf("unexpected extraData type %T", extraData)
@@ -132,7 +132,7 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 		return utils.ErrDisconnected
 	}
 
-	cdrTable := &utils.CDRSQLTable{
+	urTable := &utils.URSQLTable{
 		Tenant:    cgrEv.Tenant,
 		Opts:      cgrEv.APIOpts,
 		Event:     cgrEv.Event,
@@ -142,11 +142,11 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 	if tx.Error != nil {
 		return tx.Error
 	}
-	if err := tx.Table(cgr.tableName).Save(cdrTable).Error; err != nil {
+	if err := tx.Table(cgr.tableName).Save(urTable).Error; err != nil {
 		tx.Rollback()
 		if !strings.Contains(err.Error(), "1062") &&
 			!strings.Contains(err.Error(), "duplicate key") {
-			return fmt.Errorf("storing CDR %s failed: %v", utils.ToJSON(cgrEv), err)
+			return fmt.Errorf("storing UR %s failed: %v", utils.ToJSON(cgrEv), err)
 		}
 		urID := utils.IfaceAsString(cgrEv.APIOpts[utils.MetaURID])
 		updTx := cgr.db.Begin()
@@ -154,15 +154,15 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 			return updTx.Error
 		}
 		if uerr := updTx.Table(cgr.tableName).Where(cgr.urIDQuery(urID)).Updates(
-			utils.CDRSQLTable{
+			utils.URSQLTable{
 				Opts:      cgrEv.APIOpts,
 				Event:     cgrEv.Event,
 				UpdatedAt: time.Now(),
 			}).Error; uerr != nil {
 			updTx.Rollback()
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: <%s> updating CDR %s",
-					utils.CDRs, uerr.Error(), utils.ToJSON(cgrEv)))
+				fmt.Sprintf("<%s> error: <%s> updating UR %s",
+					utils.EEs, uerr.Error(), utils.ToJSON(cgrEv)))
 			return utils.ErrPartiallyExecuted
 		}
 		updTx.Commit()
@@ -177,7 +177,7 @@ func (cgr *CgrCDR) ExportEvent(_ *context.Context, _, extraData any) error {
 	return nil
 }
 
-func (cgr *CgrCDR) urIDQuery(urID string) string {
+func (cgr *CgrUR) urIDQuery(urID string) string {
 	switch cgr.dbType {
 	case utils.Postgres:
 		return fmt.Sprintf(" opts ->> '*urID' = '%s'", urID)

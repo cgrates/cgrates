@@ -67,15 +67,15 @@ func TestOpenSIPSCDR(t *testing.T) {
 		uac.Call(t, calltest.CallParams{From: "1001", To: c.dst, HoldTime: 2 * time.Second})
 	}
 
-	filter := &utils.CDRFilters{
+	filter := &utils.URFilters{
 		Tenant:    "cgrates.org",
 		FilterIDs: []string{"*string:~*req.Account:1001"},
 	}
-	var cdrs []*utils.CDR
+	var cdrs []*utils.UR
 	waitForCondition(t,
 		func() bool {
 			cdrs = nil
-			return client.Call(context.Background(), utils.AdminSv1GetCDRs, filter, &cdrs) == nil && len(cdrs) >= len(calls)
+			return client.Call(context.Background(), utils.AdminSv1GetURs, filter, &cdrs) == nil && len(cdrs) >= len(calls)
 		},
 		"opensips CDRs", 10*time.Second,
 	)
@@ -113,7 +113,7 @@ func TestOpenSIPSCDR(t *testing.T) {
 	}
 }
 
-func cdrCostFloat(t testing.TB, cdr *utils.CDR, optKey, field string) float64 {
+func cdrCostFloat(t testing.TB, cdr *utils.UR, optKey, field string) float64 {
 	t.Helper()
 	costMap, ok := cdr.Opts[optKey].(map[string]any)
 	if !ok {

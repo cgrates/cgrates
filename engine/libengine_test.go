@@ -225,7 +225,7 @@ func TestDynamicFiltersConns2(t *testing.T) {
 		t.Fatal(err)
 	}
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+	dataDB, _ := NewInternalDB(nil, nil)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)

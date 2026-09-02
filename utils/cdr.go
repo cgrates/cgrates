@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type CDR struct {
+type UR struct {
 	Tenant    string
 	Opts      map[string]any
 	Event     map[string]any
@@ -20,7 +20,7 @@ type CDR struct {
 	DeletedAt *time.Time `json:",omitempty"`
 }
 
-type CDRSQLTable struct {
+type URSQLTable struct {
 	ID        int64 // this is used for incrementing while seting
 	Tenant    string
 	Opts      JSONB `gorm:"type:jsonb"` //string
@@ -30,8 +30,8 @@ type CDRSQLTable struct {
 	DeletedAt *time.Time `json:",omitempty"`
 }
 
-func (CDRSQLTable) TableName() string {
-	return CDRsTBL
+func (URSQLTable) TableName() string {
+	return URsTBL
 }
 
 // JSONB type for storing maps of events and opts into gorm columns as jsob type
@@ -68,7 +68,7 @@ func GetUniqueURID(cgrEv *CGREvent) string {
 	return UUIDSha1Prefix()
 }
 
-func (cdr *CDR) CGREvent() *CGREvent {
+func (cdr *UR) CGREvent() *CGREvent {
 	return &CGREvent{
 		Tenant:  cdr.Tenant,
 		ID:      Sha1(),
@@ -78,7 +78,7 @@ func (cdr *CDR) CGREvent() *CGREvent {
 }
 
 // CDRsToCGREvents converts a slice of *CDR to a slice of *utils.CGREvent.
-func CDRsToCGREvents(cdrs []*CDR) []*CGREvent {
+func CDRsToCGREvents(cdrs []*UR) []*CGREvent {
 	cgrEvs := make([]*CGREvent, 0, len(cdrs))
 	for _, cdr := range cdrs {
 		cgrEvs = append(cgrEvs, cdr.CGREvent())
@@ -86,7 +86,7 @@ func CDRsToCGREvents(cdrs []*CDR) []*CGREvent {
 	return cgrEvs
 }
 
-type CDRFilters struct {
+type URFilters struct {
 	Tenant    string
 	ID        string
 	FilterIDs []string

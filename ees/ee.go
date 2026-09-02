@@ -62,8 +62,8 @@ func NewEventExporter(cfg *config.EventExporterCfg, cgrCfg *config.CGRConfig,
 		return NewElasticEE(cfg, em)
 	case utils.MetaSQL:
 		return NewSQLEe(cfg, em)
-	case utils.MetaCgrcdr:
-		return NewCgrCDR(cfg, em)
+	case utils.MetaCgrur:
+		return NewCgrUR(cfg, em)
 	case utils.MetaLog:
 		return NewLogEE(cfg, em), nil
 	case utils.MetaRpc:

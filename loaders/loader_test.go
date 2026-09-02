@@ -32,7 +32,7 @@ func TestRemoveFromDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -191,7 +191,7 @@ func TestSetToDB(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -316,7 +316,7 @@ func TestLoaderProcess(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -429,7 +429,7 @@ func TestLoaderStoreRemove(t *testing.T) {
 	cache := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cache)
-	internalDB, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	internalDB, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -500,7 +500,7 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 		utils.CacheSv1Clear:       func(_ *context.Context, args, _ any) error { clearCache = args; return nil },
 	}
 	cM.AddInternalConn(connID, utils.CacheSv1, iCh)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -808,7 +808,7 @@ func TestLoaderProcessData(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -862,7 +862,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -915,7 +915,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -977,7 +977,7 @@ func TestLoaderProcessIFile(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1076,7 +1076,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1205,7 +1205,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1428,7 +1428,7 @@ func TestLoaderProcessZipErrors(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1525,7 +1525,7 @@ func TestSetToDBRateProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1591,7 +1591,7 @@ func TestSetToDBChargerProfileDuplicateSequentialFilterIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

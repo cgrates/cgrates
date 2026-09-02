@@ -17,7 +17,6 @@ func TestAlias(t *testing.T) {
 		{"SessionSv1.ProcessEvent", "sessions.processEvent"},
 		{"IPsV1.AllocateIP", "ips.allocateIP"},
 		{"IPsV1.STIRAuthenticate", "ips.stirAuthenticate"},
-		{"CDRsV1.GetCDRs", "cdrs.getCDRs"},
 		{"ConfigSv1.GetConfigAsJSON", "configs.getConfigAsJSON"},
 		{"AccountSv1.GetAccountIDs", "accounts.getAccountIDs"},
 		{"AgentV1.STIRIdentity", "agent.stirIdentity"},

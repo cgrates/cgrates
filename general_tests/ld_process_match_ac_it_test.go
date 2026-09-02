@@ -9,9 +9,7 @@ package general_tests
 import (
 	"net"
 	"path"
-	"reflect"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -131,99 +129,100 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 }
 
 func testLdPrMatchAcCDRSProcessEvent(t *testing.T) {
-	ev := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TestEv1",
-		Event: map[string]any{
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "TestEv1",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AccountField: "1001",
-			utils.Subject:      "1001",
-			utils.Destination:  "1002",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:      2 * time.Minute,
-			utils.MetaRates:      false,
-			utils.OptsCDRsExport: true,
-			utils.MetaAccounts:   true,
-		},
-	}
-	var rply string
-	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
-		t.Fatal(err)
-	}
-	expected := "OK"
-	if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
-	}
+	// unfinished , to be redone using sessions processevent or ees with cgrur
+	// ev := &utils.CGREvent{
+	// 	Tenant: "cgrates.org",
+	// 	ID:     "TestEv1",
+	// 	Event: map[string]any{
+	// 		utils.ToR:          utils.MetaVoice,
+	// 		utils.OriginID:     "TestEv1",
+	// 		utils.RequestType:  utils.MetaPrepaid,
+	// 		utils.AccountField: "1001",
+	// 		utils.Subject:      "1001",
+	// 		utils.Destination:  "1002",
+	// 	},
+	// 	APIOpts: map[string]any{
+	// 		utils.MetaUsage:      2 * time.Minute,
+	// 		utils.MetaRates:      false,
+	// 		utils.OptsCDRsExport: true,
+	// 		utils.MetaAccounts:   true,
+	// 	},
+	// }
+	// var rply string
+	// if err := testLdPrMatchAcRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
+	// 	t.Fatal(err)
+	// }
+	// expected := "OK"
+	// if !reflect.DeepEqual(utils.ToJSON(&expected), utils.ToJSON(&rply)) {
+	// 	t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(&expected), utils.ToJSON(&rply))
+	// }
 
-	expected2 := &utils.CGREventWithEeIDs{
-		EeIDs: nil,
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "TestEv1",
-			Event: map[string]any{
+	// expected2 := &utils.CGREventWithEeIDs{
+	// 	EeIDs: nil,
+	// 	CGREvent: &utils.CGREvent{
+	// 		Tenant: "cgrates.org",
+	// 		ID:     "TestEv1",
+	// 		Event: map[string]any{
 
-				"Account":     "1001",
-				"Destination": "1002",
-				"OriginID":    "TestEv1",
-				"RequestType": "*prepaid",
-				"Subject":     "1001",
-				"ToR":         "*voice",
-			},
-			APIOpts: map[string]any{
-				utils.MetaAccountsCost: map[string]any{
-					"Abstracts":  0,
-					"Accounting": map[string]any{},
-					"Accounts": map[string]any{
-						"1001": map[string]any{
-							"Balances": map[string]any{
-								"VoiceBalance": map[string]any{
-									"AttributeIDs":   nil,
-									"Blockers":       nil,
-									"CostIncrements": nil,
-									"FilterIDs":      nil,
-									"ID":             "VoiceBalance",
-									"Opts":           map[string]any{},
-									"RateProfileIDs": nil,
-									"Type":           utils.MetaAbstract,
-									"UnitFactors":    nil,
-									"Units":          3600000000000,
-									"Weights": []map[string]any{
-										{
-											"FilterIDs": nil,
-											"Weight":    10,
-										},
-									},
-								},
-							},
-							"Blockers":     nil,
-							"FilterIDs":    nil,
-							"ID":           "1001",
-							"Opts":         map[string]any{},
-							"Tenant":       "cgrates.org",
-							"ThresholdIDs": nil,
-							"Weights":      nil,
-						},
-					},
-					"Charges":     nil,
-					"Concretes":   nil,
-					"Rates":       map[string]any{},
-					"Rating":      map[string]any{},
-					"UnitFactors": map[string]any{},
-				},
-				utils.MetaUsage:      2 * time.Minute,
-				utils.OptsCDRsExport: true,
-				utils.MetaRates:      false,
-				utils.MetaAccounts:   true,
-			},
-		},
-	}
-	delete(testRPC2.Event.APIOpts, utils.MetaURID)
-	if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event)) {
-		t.Errorf("\nExpecting : %+v\n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event))
-	}
+	// 			"Account":     "1001",
+	// 			"Destination": "1002",
+	// 			"OriginID":    "TestEv1",
+	// 			"RequestType": "*prepaid",
+	// 			"Subject":     "1001",
+	// 			"ToR":         "*voice",
+	// 		},
+	// 		APIOpts: map[string]any{
+	// 			utils.MetaAccountsCost: map[string]any{
+	// 				"Abstracts":  0,
+	// 				"Accounting": map[string]any{},
+	// 				"Accounts": map[string]any{
+	// 					"1001": map[string]any{
+	// 						"Balances": map[string]any{
+	// 							"VoiceBalance": map[string]any{
+	// 								"AttributeIDs":   nil,
+	// 								"Blockers":       nil,
+	// 								"CostIncrements": nil,
+	// 								"FilterIDs":      nil,
+	// 								"ID":             "VoiceBalance",
+	// 								"Opts":           map[string]any{},
+	// 								"RateProfileIDs": nil,
+	// 								"Type":           utils.MetaAbstract,
+	// 								"UnitFactors":    nil,
+	// 								"Units":          3600000000000,
+	// 								"Weights": []map[string]any{
+	// 									{
+	// 										"FilterIDs": nil,
+	// 										"Weight":    10,
+	// 									},
+	// 								},
+	// 							},
+	// 						},
+	// 						"Blockers":     nil,
+	// 						"FilterIDs":    nil,
+	// 						"ID":           "1001",
+	// 						"Opts":         map[string]any{},
+	// 						"Tenant":       "cgrates.org",
+	// 						"ThresholdIDs": nil,
+	// 						"Weights":      nil,
+	// 					},
+	// 				},
+	// 				"Charges":     nil,
+	// 				"Concretes":   nil,
+	// 				"Rates":       map[string]any{},
+	// 				"Rating":      map[string]any{},
+	// 				"UnitFactors": map[string]any{},
+	// 			},
+	// 			utils.MetaUsage:      2 * time.Minute,
+	// 			utils.OptsCDRsExport: true,
+	// 			utils.MetaRates:      false,
+	// 			utils.MetaAccounts:   true,
+	// 		},
+	// 	},
+	// }
+	// delete(testRPC2.Event.APIOpts, utils.MetaURID)
+	// if !reflect.DeepEqual(utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event)) {
+	// 	t.Errorf("\nExpecting : %+v\n,received: %+v", utils.ToJSON(expected2), utils.ToJSON(testRPC2.Event))
+	// }
 
 }
 

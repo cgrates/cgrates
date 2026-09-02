@@ -509,11 +509,11 @@ func TestUsageRecordsRerating(t *testing.T) {
 	"exporters": [
 		{
 			"id": "usage_records",
-			"type": "*cgrcdr",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"opts": {
 				"sqlDBName": "cgrates",
-				"sqlTableName": "cdrs"
+				"sqlTableName": "urs"
 			},
 			"synchronous": true,
 			"blocker": true,
@@ -529,15 +529,15 @@ func TestUsageRecordsRerating(t *testing.T) {
 	},
 	"readers": [
 		{
-			"id": "cgrcdr",
+			"id": "cgrur",
 			"runDelay": "0",
-			"type": "*cgrcdr",
+			"type": "*cgrur",
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"processedPath": "",
 			"flags": ["*sessions"],
 			"opts": {
 				"sqlDBName": "cgrates",
-				"sqlTableName": "cdrs"
+				"sqlTableName": "urs"
 			},
 			"fields": [
 				{"tag": "Refund", "path": "*opts.*refund", "type": "*constant", "value": "true"},
@@ -675,28 +675,28 @@ func TestUsageRecordsRerating(t *testing.T) {
 		account string
 		cost    *utils.Decimal
 	}
-	getCDRs := func() map[string]usageRecord {
+	getURs := func() map[string]usageRecord {
 		t.Helper()
-		var rows []*utils.CDR
-		if err := client.Call(context.Background(), utils.AdminSv1GetCDRs,
-			&utils.CDRFilters{Tenant: "cgrates.org"}, &rows); err != nil {
+		var rows []*utils.UR
+		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
+			&utils.URFilters{Tenant: "cgrates.org"}, &rows); err != nil {
 			t.Fatal(err)
 		}
 		if len(rows) != len(records) {
-			t.Fatalf("got %d CDRs, want %d", len(rows), len(records))
+			t.Fatalf("got %d URs, want %d", len(rows), len(records))
 		}
-		cdrs := make(map[string]usageRecord, len(rows))
-		for _, cdr := range rows {
-			urID := utils.IfaceAsString(cdr.Opts[utils.MetaURID])
+		urs := make(map[string]usageRecord, len(rows))
+		for _, ur := range rows {
+			urID := utils.IfaceAsString(ur.Opts[utils.MetaURID])
 			if urID == "" {
-				t.Fatal("CDR has no *urID")
+				t.Fatal("UR has no *urID")
 			}
-			if _, has := cdrs[urID]; has {
+			if _, has := urs[urID]; has {
 				t.Fatalf("duplicate *urID %q", urID)
 			}
-			value, has := cdr.Opts[utils.MetaAccountsCost]
+			value, has := ur.Opts[utils.MetaAccountsCost]
 			if !has {
-				t.Fatalf("CDR %q has no *accountsCost", urID)
+				t.Fatalf("UR %q has no *accountsCost", urID)
 			}
 			b, err := json.Marshal(value)
 			if err != nil {
@@ -706,28 +706,28 @@ func TestUsageRecordsRerating(t *testing.T) {
 			if err := json.Unmarshal(b, &accountsCost); err != nil {
 				t.Fatal(err)
 			}
-			cdrs[urID] = usageRecord{
-				account: utils.IfaceAsString(cdr.Event[utils.AccountField]),
+			urs[urID] = usageRecord{
+				account: utils.IfaceAsString(ur.Event[utils.AccountField]),
 				cost:    accountsCost.Concretes,
 			}
 		}
-		return cdrs
+		return urs
 	}
-	checkCDRs := func(want map[string]int64) {
+	checkURs := func(want map[string]int64) {
 		t.Helper()
-		cdrs := getCDRs()
+		urs := getURs()
 		for _, record := range records {
-			cdr, has := cdrs[record.urID]
+			ur, has := urs[record.urID]
 			if !has {
-				t.Errorf("CDR %q not found", record.urID)
+				t.Errorf("UR %q not found", record.urID)
 				continue
 			}
-			if cdr.account != record.account {
-				t.Errorf("%s Account = %q, want %q", record.urID, cdr.account, record.account)
+			if ur.account != record.account {
+				t.Errorf("%s Account = %q, want %q", record.urID, ur.account, record.account)
 			}
 			cost := want[record.account]
-			if cdr.cost == nil || cdr.cost.Compare(utils.NewDecimal(cost, 0)) != 0 {
-				t.Errorf("%s *accountsCost.Concretes = %v, want %d", record.urID, cdr.cost, cost)
+			if ur.cost == nil || ur.cost.Compare(utils.NewDecimal(cost, 0)) != 0 {
+				t.Errorf("%s *accountsCost.Concretes = %v, want %d", record.urID, ur.cost, cost)
 			}
 		}
 	}
@@ -746,33 +746,33 @@ func TestUsageRecordsRerating(t *testing.T) {
 		}
 	}
 
-	checkCDRs(map[string]int64{"1001": 1, "1002": 1})
+	checkURs(map[string]int64{"1001": 1, "1002": 1})
 	checkBalance("1001", 8)
 	checkBalance("1002", 8)
 
 	setRate(2)
 	if err := client.Call(context.Background(), utils.ErSv1RunReader,
 		&ers.V1RunReaderParams{
-			ReaderID: "cgrcdr",
+			ReaderID: "cgrur",
 			Filters:  []string{"*string:~*req.event.Account:1001"},
 		}, new(string)); err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool {
-		cdrs := getCDRs()
+		urs := getURs()
 		for _, record := range records {
 			if record.account != "1001" {
 				continue
 			}
-			cdr := cdrs[record.urID]
-			if cdr.cost == nil || cdr.cost.Compare(utils.NewDecimal(2, 0)) != 0 {
+			ur := urs[record.urID]
+			if ur.cost == nil || ur.cost.Compare(utils.NewDecimal(2, 0)) != 0 {
 				return false
 			}
 		}
 		return true
-	}, "not all CDRs for 1001 cost 2", 5*time.Second)
+	}, "not all URs for 1001 cost 2", 5*time.Second)
 
-	checkCDRs(map[string]int64{"1001": 2, "1002": 1})
+	checkURs(map[string]int64{"1001": 2, "1002": 1})
 	checkBalance("1001", 6)
 	checkBalance("1002", 8)
 }

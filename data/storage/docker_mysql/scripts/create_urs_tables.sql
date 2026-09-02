@@ -1,9 +1,9 @@
 --
--- Table structure for table `cdrs`
+-- Table structure for table `urs`
 --
 
-DROP TABLE IF EXISTS cdrs;
-CREATE TABLE cdrs (
+DROP TABLE IF EXISTS urs;
+CREATE TABLE urs (
   id int(11) NOT NULL AUTO_INCREMENT,
   run_id  varchar(64) NOT NULL,
   origin_host varchar(64) NOT NULL,
@@ -28,7 +28,7 @@ CREATE TABLE cdrs (
   updated_at TIMESTAMP NULL,
   deleted_at TIMESTAMP NULL,
   PRIMARY KEY (id),
-  UNIQUE KEY cdrrun ( run_id)
+  UNIQUE KEY urrun ( run_id)
 );
 
 DROP TABLE IF EXISTS session_costs;

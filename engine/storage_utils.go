@@ -16,8 +16,8 @@ import (
 
 // NewDBConn creates a DB connection
 func NewDBConn(dbType, host, port, name, user,
-	pass, marshaler string, stringIndexedFields, prefixIndexedFields []string,
-	opts *config.DBOpts, itmsCfg map[string]*config.ItemOpts) (d DBDriver, err error) {
+	pass, marshaler string, opts *config.DBOpts,
+	itmsCfg map[string]*config.ItemOpts) (d DBDriver, err error) {
 	switch dbType {
 	case utils.MetaRedis:
 		var dbNo int
@@ -35,10 +35,10 @@ func NewDBConn(dbType, host, port, name, user,
 			opts.RedisConnectTimeout, opts.RedisReadTimeout, opts.RedisWriteTimeout,
 			opts.RedisPoolPipelineWindow, opts.RedisPoolPipelineLimit,
 			opts.RedisTLS, opts.RedisClientCertificate, opts.RedisClientKey,
-			opts.RedisCACertificate, opts.RedisBatchSize, stringIndexedFields, prefixIndexedFields)
+			opts.RedisCACertificate, opts.RedisBatchSize)
 	case utils.MetaMongo:
 		d, err = NewMongoStorage(opts.MongoConnScheme, host, port, name, user, pass,
-			marshaler, stringIndexedFields, opts.MongoQueryTimeout)
+			marshaler, opts.MongoQueryTimeout)
 	case utils.MetaPostgres:
 		d, err = NewPostgresStorage(host, port, name, user, pass, marshaler, opts.PgSSLMode,
 			opts.PgSSLCert, opts.PgSSLKey, opts.PgSSLPassword, opts.PgSSLCertMode,
@@ -49,8 +49,7 @@ func NewDBConn(dbType, host, port, name, user,
 			opts.SQLMaxIdleConns, opts.SQLLogLevel, opts.SQLConnMaxLifetime,
 			opts.MySQLLocation, opts.SQLDSNParams)
 	case utils.MetaInternal:
-		d, err = NewInternalDB(stringIndexedFields, prefixIndexedFields,
-			opts.ToTransCacheOpts(), itmsCfg)
+		d, err = NewInternalDB(opts.ToTransCacheOpts(), itmsCfg)
 	default:
 		err = fmt.Errorf("unsupported dbType <%s>", dbType)
 	}

@@ -108,8 +108,8 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 	switch aCfg.Type {
 	case utils.MetaLog:
 		return &actLog{aCfg}, nil
-	case utils.CDRLog:
-		return &actCDRLog{cfg, cache, fltrS, connMgr, aCfg}, nil
+	case utils.MetaURLog:
+		return &actURLog{cfg, cache, fltrS, connMgr, aCfg}, nil
 	case utils.MetaHTTPPost:
 		return newActHTTPPost(ctx, tnt, cgrEv, cache, fltrS, cfg, aCfg)
 	case utils.MetaExport:

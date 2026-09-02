@@ -746,41 +746,6 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 	return
 }
 
-// BiRPCv1ProcessCDR sends the CDR to CDRs
-func (sS *SessionS) BiRPCv1ProcessCDR(ctx *context.Context,
-	cgrEv *utils.CGREvent, rply *string) (err error) {
-	if cgrEv.Event == nil {
-		return utils.NewErrMandatoryIeMissing(utils.Event)
-	}
-	if cgrEv.ID == "" {
-		cgrEv.ID = utils.GenUUID()
-	}
-	if cgrEv.Tenant == "" {
-		cgrEv.Tenant = sS.cfg.GeneralCfg().DefaultTenant
-	}
-
-	// RPC caching
-	if sS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessCDR, cgrEv.ID)
-		unlock := sS.cache.LockRPCResponse(cacheKey) // RPC caching needs to be atomic
-		defer unlock()
-
-		if itm, has := sS.cache.Get(utils.CacheRPCResponses, cacheKey); has {
-			cachedResp := itm.(*utils.CachedRPCResponse)
-			if cachedResp.Error == nil {
-				*rply = *cachedResp.Result.(*string)
-			}
-			return cachedResp.Error
-		}
-		defer sS.cache.Set(ctx, utils.CacheRPCResponses, cacheKey,
-			&utils.CachedRPCResponse{Result: rply, Error: err},
-			nil, true, utils.NonTransactional)
-	}
-	// end of RPC caching
-
-	return sS.processCDR(ctx, cgrEv, rply)
-}
-
 // BiRPCv1ProcessEvent processes an CGREvent with various subsystems
 func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	apiArgs *utils.CGREvent, apiRply *V1ProcessEventReply) (err error) {

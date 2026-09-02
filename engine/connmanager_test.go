@@ -26,7 +26,7 @@ func TestCMgetConnNotFound(t *testing.T) {
 		cfg: cfg,
 	}
 
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	cacheS := NewCacheS(cfg, dm, nil, nil, locker)
@@ -307,7 +307,7 @@ func TestCMCallErrgetConn(t *testing.T) {
 		cfg: cfg,
 	}
 
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	cacheS := NewCacheS(cfg, dm, nil, nil, locker)
@@ -473,7 +473,7 @@ func TestCMReload(t *testing.T) {
 	}
 	cM.connCache.Set("itmID1", "value of first item", nil)
 
-	db, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	cacheS := NewCacheS(cfg, dm, nil, nil, locker)
@@ -571,7 +571,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 // 	Cache.Clear(nil)
 // 	cfg := config.NewDefaultCGRConfig()
 // 	cM := NewConnManager(cfg)
-// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)
@@ -612,7 +612,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 // 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)
@@ -659,7 +659,7 @@ func TestCMGetDispInternalChan(t *testing.T) {
 // 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 // 	}
 // 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data , _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
 // 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 // dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
 // 	fltrs := NewFilterS(cfg, nil, dm)

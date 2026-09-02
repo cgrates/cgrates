@@ -279,7 +279,7 @@ func TestComposeURI(t *testing.T) {
 }
 
 func TestInternalDBGetSetSection(t *testing.T) {
-	db, _ := NewInternalDB(nil, nil, nil, nil)
+	db, _ := NewInternalDB(nil, nil)
 	defer db.Close()
 
 	tests := []struct {

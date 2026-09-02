@@ -26,7 +26,7 @@ func TestRatesCostForEventRateIDxSelects(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
@@ -142,7 +142,7 @@ func TestRatesCostForEvent(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
-	dataDB, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
@@ -183,7 +183,7 @@ func TestV1RateProfilesForEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -253,7 +253,7 @@ func TestV1RateProfileRatesForEvent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

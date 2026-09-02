@@ -22,7 +22,7 @@ import (
 func TestRatesCostFiltering(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -69,9 +69,8 @@ func TestRatesCostFiltering(t *testing.T) {
 						},
 					},
 				},
-				utils.MetaRates:      true,
-				utils.OptsCDRsExport: true,
-				utils.MetaAccounts:   false,
+				utils.MetaRates:    true,
+				utils.MetaAccounts: false,
 			},
 		},
 	}
@@ -414,7 +413,7 @@ func TestFilterNewRequestFilter(t *testing.T) {
 func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -668,7 +667,7 @@ func TestInlineFilterPassFiltersForEvent(t *testing.T) {
 func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -779,7 +778,7 @@ func TestPassFiltersForEventWithEmptyFilter(t *testing.T) {
 func TestPassFilterMaxCost(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -834,7 +833,7 @@ func TestPassFilterMaxCost(t *testing.T) {
 func TestPassFilterMissingField(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -935,7 +934,7 @@ func TestVerifyPrefixes(t *testing.T) {
 func TestPassPartial(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -1013,7 +1012,7 @@ func TestNewFilterFromInline(t *testing.T) {
 func TestActivationIntervalPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -1201,7 +1200,7 @@ func TestAPIBan(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
@@ -1274,7 +1273,7 @@ func TestFilterPassRSRFieldsWithMultplieValues(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1303,7 +1302,7 @@ func TestFilterPassCronExpOK(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1329,7 +1328,7 @@ func TestFilterPassCronExpNotActive(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1353,7 +1352,7 @@ func TestFilterPassCronExpParseErrWrongPath(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1376,7 +1375,7 @@ func TestFilterPassCronExpErrNotFound(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1402,7 +1401,7 @@ func TestFilterPassCronExpConvertTimeErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2160,7 +2159,7 @@ func TestFiltersFilterRuleIsValid(t *testing.T) {
 func TestPassPartialErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmFilterPass := NewDataManager(dbCM, cfg, nil, locker)
 	dmFilterPass.SetCache(NewCacheS(cfg, nil, nil, nil, locker))
@@ -2765,7 +2764,7 @@ func TestFilterRanking(t *testing.T) {
 func TestGetFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(NewCacheS(cfg, nil, nil, nil, locker))

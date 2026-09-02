@@ -50,7 +50,7 @@ func TestFilterHelpersWeightFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -150,7 +150,7 @@ func TestBlockerFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -202,7 +202,7 @@ func TestMatchingItemIDsForEventFilterIndexTypeNotNone(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmMatch := NewDataManager(dbCM, cfg, nil, locker)
 	dmMatch.SetCache(cacheS)
@@ -283,7 +283,7 @@ func TestMatchingItemIDsForEventWarningThresholds(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
-	data, dErr := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, dErr := NewInternalDB(nil, cfg.DbCfg().Items)
 	if dErr != nil {
 		t.Fatal(dErr)
 	}

@@ -138,11 +138,10 @@ func mapStringAnyDecoderWithDecimal(dc bsoncodec.DecodeContext, vr bsonrw.ValueR
 // NewMongoStorage initializes a new MongoDB storage instance with provided connection parameters and settings.
 // Returns an error if the setup fails.
 func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string,
-	cdrsIndexes []string, ttl time.Duration) (*MongoStorage, error) {
+	ttl time.Duration) (*MongoStorage, error) {
 	mongoStorage := &MongoStorage{
-		ctxTTL:      ttl,
-		cdrsIndexes: cdrsIndexes,
-		counter:     utils.NewCounter(time.Now().UnixNano(), 0),
+		ctxTTL:  ttl,
+		counter: utils.NewCounter(time.Now().UnixNano(), 0),
 	}
 	uri := composeMongoURI(scheme, host, port, db, user, pass)
 	reg := bson.NewRegistry()
@@ -208,7 +207,6 @@ type MongoStorage struct {
 	ctxTTLMutex sync.RWMutex // used for TTL reload
 	db          string
 	ms          utils.Marshaler
-	cdrsIndexes []string
 	counter     *utils.Counter
 }
 
@@ -279,16 +277,6 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 		err = ms.ensureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
-	case utils.CDRsTBL:
-		err = ms.ensureIndex(col, true, "opts.*urID") // should probably create a constant for the key
-		if err == nil {
-			for _, idxKey := range ms.cdrsIndexes {
-				err = ms.ensureIndex(col, false, idxKey)
-				if err != nil {
-					break
-				}
-			}
-		}
 	}
 	return err
 }
@@ -300,7 +288,7 @@ func (ms *MongoStorage) EnsureIndexes(cols ...string) error {
 			ColAct, ColApl, ColAAp, ColAtr, ColRpl, ColDst, ColRds, ColLht, ColIndx,
 			ColRsP, ColRes, ColIPp, ColIPs, ColSqs, ColSqp, ColTps, ColThs, ColRts,
 			ColAttr, ColFlt, ColCpp, ColRpp, ColApp, ColRpf, ColShg, ColAcc, ColAnp,
-			ColTrd, ColTrs, utils.CDRsTBL,
+			ColTrd, ColTrs, utils.URsTBL,
 		}
 	}
 	for _, col := range cols {
@@ -347,7 +335,7 @@ func (ms *MongoStorage) IsDBEmpty() (isEmpty bool, err error) {
 			return err
 		}
 		for _, col := range cols {
-			if col == utils.CDRsTBL { // ignore cdrs collection
+			if col == utils.URsTBL { // ignore cdrs collection
 				continue
 			}
 			count, err := ms.getCol(col).CountDocuments(sctx, bson.D{}, options.Count().SetLimit(1)) // limiting the count to 1 since we are only checking if the collection is empty

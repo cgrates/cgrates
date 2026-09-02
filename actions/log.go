@@ -32,8 +32,8 @@ func (actLog) execute(_ *context.Context, data utils.MapStorage, _ string) (err 
 	return
 }
 
-// actCDRLog will log data to CGRateS logger
-type actCDRLog struct {
+// actURLog will log data to CGRateS logger
+type actURLog struct {
 	config  *config.CGRConfig
 	cache   *engine.CacheS
 	fltrS   *engine.FilterS
@@ -41,24 +41,24 @@ type actCDRLog struct {
 	aCfg    *utils.APAction
 }
 
-func (aL *actCDRLog) id() string {
+func (aL *actURLog) id() string {
 	return aL.aCfg.ID
 }
 
-func (aL *actCDRLog) cfg() *utils.APAction {
+func (aL *actURLog) cfg() *utils.APAction {
 	return aL.aCfg
 }
 
 // execute implements actioner interface
-func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt string) (err error) {
-	cdrsConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaCDRs, tnt, data, nil, aL.fltrS)
+func (aL *actURLog) execute(ctx *context.Context, data utils.MapStorage, tnt string) (err error) {
+	eesConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaEEs, tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return
 	}
-	if len(cdrsConns) == 0 {
-		return fmt.Errorf("no connection with CDR Server")
+	if len(eesConns) == 0 {
+		return fmt.Errorf("no connection with EEs Server")
 	}
-	template := aL.config.TemplatesCfg()[utils.MetaCdrLog]
+	template := aL.config.TemplatesCfg()[utils.MetaUrLog]
 	if id, has := aL.cfg().Opts[utils.MetaTemplateID]; has { // if templateID is not present we use default template
 		template = aL.config.TemplatesCfg()[utils.IfaceAsString(id)]
 	}
@@ -68,12 +68,12 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt st
 	if optsMS == nil {
 		optsMS = utils.MapStorage{}
 	}
-	optsMS[utils.MetaChargers] = false // do not try to get the chargers for cdrlog
+	optsMS[utils.MetaChargers] = false // do not try to get the chargers for urlog
 	oNm := map[string]*utils.OrderedNavigableMap{
-		utils.MetaCDR: utils.NewOrderedNavigableMap(),
+		utils.MetaUR: utils.NewOrderedNavigableMap(),
 	}
-	// construct an AgentRequest so we can build the reply and send it to CDRServer
-	cdrLogReq := ees.NewExportRequest(map[string]utils.DataStorage{
+	// construct an AgentRequest so we can build the reply and send it to URServer
+	urLogReq := ees.NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaReq:  reqNm,
 		utils.MetaOpts: optsMS,
 		utils.MetaCfg:  aL.config.GetDataProvider(),
@@ -81,13 +81,16 @@ func (aL *actCDRLog) execute(ctx *context.Context, data utils.MapStorage, tnt st
 		aL.cache, aL.fltrS, oNm,
 		aL.config.GeneralCfg().RoundingDecimals, aL.config.GeneralCfg().DefaultTimezone)
 
-	if err = cdrLogReq.SetFields(ctx, template); err != nil {
+	if err = urLogReq.SetFields(ctx, template); err != nil {
 		return
 	}
-	var rply string
-	return aL.connMgr.Call(ctx, cdrsConns,
-		utils.CDRsV1ProcessEvent,
-		utils.NMAsCGREvent(cdrLogReq.ExpData[utils.MetaCDR], aL.config.GeneralCfg().DefaultTenant,
-			utils.NestingSep, optsMS),
-		&rply)
+	var rply map[string]map[string]any
+	if err = aL.connMgr.Call(ctx, eesConns,
+		utils.EeSv1ProcessEvent,
+		&utils.CGREventWithEeIDs{CGREvent: utils.NMAsCGREvent(urLogReq.ExpData[utils.MetaUR], aL.config.GeneralCfg().DefaultTenant,
+			utils.NestingSep, optsMS)},
+		&rply); err != nil {
+		err = utils.NewErrEEs(err)
+	}
+	return
 }

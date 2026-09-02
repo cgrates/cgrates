@@ -74,7 +74,6 @@
 		"*chargers": [{"connIDs": ["conn1"]}],
 		"*ees": [{"connIDs": ["*localhost"]}]
 	},
-	"onlineCDRExports": [],
 },
 
 
@@ -89,7 +88,7 @@
 			"type": "*amqpJSONMap",
 			"exportPath": "amqp://guest:guest@localhost:5672/",
 			"opts": {
-				"amqpQueueID":"cgratesCDRs",
+				"amqpQueueID":"cgratesURs",
 			},
 			"attempts": 1,
 			"fields":[

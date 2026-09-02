@@ -39,7 +39,7 @@ type CDRsql struct {
 }
 
 func (t CDRsql) TableName() string {
-	return utils.CDRsTBL
+	return utils.URsTBL
 }
 
 func (t CDRsql) AsMapStringInterface() (out map[string]any) {

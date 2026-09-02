@@ -20,7 +20,7 @@ func TestUpdateReplicationFilters(t *testing.T) {
 		Limit: 1,
 	}
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	data, _ := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)

@@ -47,8 +47,8 @@ func (db *DBService) Start(shutdown *utils.SyncedChan, registry *servmanager.Reg
 	for dbConnKey, dbconn := range db.cfg.DbCfg().DBConns {
 		dbConn, err := engine.NewDBConn(dbconn.Type,
 			dbconn.Host, dbconn.Port, dbconn.Name, dbconn.User,
-			dbconn.Password, db.cfg.GeneralCfg().DBDataEncoding, dbconn.StringIndexedFields,
-			dbconn.PrefixIndexedFields, dbconn.Opts, db.cfg.DbCfg().Items)
+			dbconn.Password, db.cfg.GeneralCfg().DBDataEncoding,
+			dbconn.Opts, db.cfg.DbCfg().Items)
 		if err != nil { // Cannot configure getter database, show stopper
 			utils.Logger.Crit(fmt.Sprintf("Could not configure DB: %s exiting!", err))
 			return err
@@ -109,14 +109,6 @@ func (db *DBService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err e
 			msql.DB.SetMaxOpenConns(dbConn.Opts.SQLMaxOpenConns)
 			msql.DB.SetMaxIdleConns(dbConn.Opts.SQLMaxIdleConns)
 			msql.DB.SetConnMaxLifetime(dbConn.Opts.SQLConnMaxLifetime)
-		case utils.MetaInternal:
-			idb, canCast := db.dm.DB()[dbKey].(*engine.InternalDB)
-			if !canCast {
-				return fmt.Errorf("can't convert DB of type %s to InternalDB",
-					dbConn.Type)
-			}
-			idb.SetStringIndexedFields(dbConn.StringIndexedFields)
-			idb.SetPrefixIndexedFields(dbConn.PrefixIndexedFields)
 		}
 
 	}
@@ -172,11 +164,7 @@ func (db *DBService) needsConnectionReload() bool {
 			dbConn.Name != db.cfg.DbCfg().DBConns[dbConnKey].Name ||
 			dbConn.Port != db.cfg.DbCfg().DBConns[dbConnKey].Port ||
 			dbConn.User != db.cfg.DbCfg().DBConns[dbConnKey].User ||
-			dbConn.Password != db.cfg.DbCfg().DBConns[dbConnKey].Password ||
-			!utils.EqualUnorderedStringSlices(dbConn.StringIndexedFields,
-				db.cfg.DbCfg().DBConns[dbConnKey].StringIndexedFields) ||
-			!utils.EqualUnorderedStringSlices(dbConn.PrefixIndexedFields,
-				db.cfg.DbCfg().DBConns[dbConnKey].PrefixIndexedFields) {
+			dbConn.Password != db.cfg.DbCfg().DBConns[dbConnKey].Password {
 			return true
 		}
 		if db.cfg.DbCfg().DBConns[dbConnKey].Type == utils.MetaInternal { // in case of internal recreate the db using the new config

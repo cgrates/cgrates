@@ -48,7 +48,7 @@ func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams
 	case *JSONFileER:
 		processReaderDir(rdr.sourceDir, utils.JSONSuffix,
 			func(fileName string) error { return rdr.processFile(fileName, filters) })
-	case *CgrCDR:
+	case *CgrUR:
 		if err := rdr.run(filters); err != nil {
 			return err
 		}

@@ -29,7 +29,7 @@ func TestNewLoaderService(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -116,7 +116,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -196,7 +196,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -312,7 +312,7 @@ func TestLoaderServiceV1ImportZip(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -380,7 +380,7 @@ func TestLoaderServiceV1ImportZipErrors(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -654,7 +654,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM := engine.NewConnManager(cfg)
 	cM.SetCache(cacheS)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}

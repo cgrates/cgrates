@@ -1658,7 +1658,7 @@ func TestLoadersLoad(t *testing.T) {
 	}
 
 	cfg.LoaderCfg()[0] = loaderCfg
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)

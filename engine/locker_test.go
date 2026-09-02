@@ -30,7 +30,7 @@ import (
 func newLockerTestDataManager(t *testing.T, cfg *config.CGRConfig,
 	locker *guardian.Locker) *DataManager {
 	t.Helper()
-	data, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -19,16 +18,13 @@ import (
 
 // InternalDB is used as a DataDB and/or StorDB
 type InternalDB struct {
-	stringIndexedFields []string
-	prefixIndexedFields []string
-	indexedFieldsMutex  sync.RWMutex   // used for reload
-	cnter               *utils.Counter // used for OrderID for cdr
-	db                  *ltcache.TransCache
+	cnter *utils.Counter // used for OrderID for cdr
+	db    *ltcache.TransCache
 }
 
 // NewInternalDB constructs an InternalDB
-func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
-	transCacheOpts *ltcache.TransCacheOpts, itmsCfg map[string]*config.ItemOpts) (iDB *InternalDB,
+func NewInternalDB(transCacheOpts *ltcache.TransCacheOpts,
+	itmsCfg map[string]*config.ItemOpts) (iDB *InternalDB,
 	err error) {
 	tcCfg := make(map[string]*ltcache.CacheConfig, len(itmsCfg))
 	for k, cPcfg := range itmsCfg {
@@ -48,10 +44,8 @@ func NewInternalDB(stringIndexedFields, prefixIndexedFields []string,
 		return nil, err
 	}
 	return &InternalDB{
-		stringIndexedFields: stringIndexedFields,
-		prefixIndexedFields: prefixIndexedFields,
-		cnter:               utils.NewCounter(time.Now().UnixNano(), 0),
-		db:                  tc,
+		cnter: utils.NewCounter(time.Now().UnixNano(), 0),
+		db:    tc,
 	}, nil
 }
 
@@ -68,20 +62,6 @@ func (iDB *InternalDB) RestoreDB(backupPath string) error {
 // intended for offline internal DB
 func (iDB *InternalDB) SnapshotDB(backupFolderPath string, zip bool) error {
 	return iDB.db.Snapshot(backupFolderPath, zip)
-}
-
-// SetStringIndexedFields set the stringIndexedFields, used at StorDB reload (is thread safe)
-func (iDB *InternalDB) SetStringIndexedFields(stringIndexedFields []string) {
-	iDB.indexedFieldsMutex.Lock()
-	iDB.stringIndexedFields = stringIndexedFields
-	iDB.indexedFieldsMutex.Unlock()
-}
-
-// SetPrefixIndexedFields set the prefixIndexedFields, used at StorDB reload (is thread safe)
-func (iDB *InternalDB) SetPrefixIndexedFields(prefixIndexedFields []string) {
-	iDB.indexedFieldsMutex.Lock()
-	iDB.prefixIndexedFields = prefixIndexedFields
-	iDB.indexedFieldsMutex.Unlock()
 }
 
 // Close depending on dump and rewrite intervals, will dump all thats left in

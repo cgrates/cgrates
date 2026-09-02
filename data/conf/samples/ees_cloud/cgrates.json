@@ -85,7 +85,7 @@
             // access-key-name is RootManageSharedAccessKey and access-key is the primary connection string
             "exportPath": "amqps://name-space.servicebus.windows.net",
             "opts": {
-				"amqpQueueID": "cgratesCDRs",
+				"amqpQueueID": "cgratesURs",
                 "amqpUsername": "access-key-name",
                 "amqpPassword": "access-key"
 			},

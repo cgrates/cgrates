@@ -361,7 +361,7 @@ func (rdr *SQLEventReader) setURL(inURL string, opts *config.EventReaderOpts) er
 		ssl = *opts.PgSSLMode
 	}
 
-	rdr.tableName = utils.CDRsTBL
+	rdr.tableName = utils.URsTBL
 	if opts.SQLTableName != nil {
 		rdr.tableName = *opts.SQLTableName
 	}

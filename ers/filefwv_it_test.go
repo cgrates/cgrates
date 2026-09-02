@@ -418,7 +418,7 @@ func TestFileFWVExit(t *testing.T) {
 
 func TestFileFWVProcessTrailer(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -478,7 +478,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVProcessTrailerError1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -516,7 +516,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVProcessTrailerError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -564,7 +564,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVProcessTrailerError3(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -596,7 +596,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVCreateHeaderMap(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -645,7 +645,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVCreateHeaderMapError1(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)
@@ -672,7 +672,7 @@ dm.SetCache(engine.Cache)
 
 func TestFileFWVCreateHeaderMapError2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	data , _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
 dm.SetCache(engine.Cache)

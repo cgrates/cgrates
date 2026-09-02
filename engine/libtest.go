@@ -38,7 +38,6 @@ func InitDB(cfg *config.CGRConfig) error {
 			dbConn.Host, dbConn.Port,
 			dbConn.Name, dbConn.User,
 			dbConn.Password, cfg.GeneralCfg().DBDataEncoding,
-			dbConn.StringIndexedFields, dbConn.PrefixIndexedFields,
 			dbConn.Opts, cfg.DbCfg().Items)
 		if err != nil {
 			return err
@@ -71,7 +70,7 @@ func InitConfigDB(cfg *config.CGRConfig) error {
 	d, err := NewDBConn(cfg.ConfigDBCfg().Type,
 		cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 		cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
+		cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 		cfg.ConfigDBCfg().Opts, nil)
 	if err != nil {
 		return err

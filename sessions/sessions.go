@@ -1881,61 +1881,6 @@ func (sS *SessionS) hasSession(ctx *context.Context, sID string) bool {
 	return false
 }
 
-func (sS *SessionS) processCDR(ctx *context.Context, cgrEv *utils.CGREvent, rply *string) (err error) {
-	var cdrsConns []string
-	if cdrsConns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaCDRs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
-		return
-	}
-	if len(cdrsConns) == 0 {
-		return utils.NewErrNotConnected(utils.CDRs)
-	}
-	ev := engine.MapEvent(cgrEv.Event)
-	originID := GetSetOptsOriginID(ev, cgrEv.APIOpts)
-	s := sS.getRelocateSession(ctx, originID,
-		utils.Sha1(ev.GetStringIgnoreErrors(utils.InitialOriginID),
-			ev.GetStringIgnoreErrors(utils.OriginHost)))
-	if s != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> ProcessCDR called for active session with originID: <%s>",
-				utils.SessionS, originID))
-		s.lk.Lock() // events update session panic
-		defer s.lk.Unlock()
-	} else if sIface, has := sS.cache.Get(utils.CacheClosedSessions, originID); has {
-		// found in cache
-		s = sIface.(*Session)
-	} else { // no cached session, CDR will be handled by CDRs
-		return sS.connMgr.Call(ctx, cdrsConns, utils.CDRsV1ProcessEvent,
-			cgrEv, rply)
-	}
-
-	// Use previously stored Session to generate CDRs
-	s.updateSRuns(ev, sS.cfg.SessionSCfg().AlterableFields)
-	// create one CGREvent for each session run
-	var withErrors bool
-	for _, cgrEv := range s.asCGREvents() {
-		if cgrEv.APIOpts == nil {
-			cgrEv.APIOpts = make(map[string]any)
-		}
-		cgrEv.APIOpts[utils.MetaAttributes] = false
-		cgrEv.APIOpts[utils.MetaChargers] = false
-		if mp := engine.MapEvent(cgrEv.Event); unratedReqs.HasField(mp.GetStringIgnoreErrors(utils.RequestType)) { // order additional rating for unrated request types
-			// argsProc.Flags = append(argsProc.Flags, fmt.Sprintf("%s:true", utils.MetaRALs))
-		}
-		if err = sS.connMgr.Call(ctx, cdrsConns, utils.CDRsV1ProcessEvent,
-			cgrEv, rply); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error <%s> posting CDR with originID: <%s>",
-					utils.SessionS, err.Error(), originID))
-			withErrors = true
-		}
-	}
-	if withErrors {
-		err = utils.ErrPartiallyExecuted
-	}
-	return
-
-}
-
 // processThreshold will receive the event and send it to ThresholdS to be processed
 func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (tIDs []string, err error) {
 	var conns []string

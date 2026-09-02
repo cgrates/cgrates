@@ -21,8 +21,6 @@ func NewMigratorDataDBs(dbConnIDList []string, marshaler string,
 			cfg.DbCfg().DBConns[dbConnID].Host, cfg.DbCfg().DBConns[dbConnID].Port,
 			cfg.DbCfg().DBConns[dbConnID].Name, cfg.DbCfg().DBConns[dbConnID].User,
 			cfg.DbCfg().DBConns[dbConnID].Password, marshaler,
-			cfg.DbCfg().DBConns[dbConnID].StringIndexedFields,
-			cfg.DbCfg().DBConns[dbConnID].PrefixIndexedFields,
 			cfg.MigratorCgrCfg().OutDBOpts, cfg.DbCfg().Items)
 		if err != nil {
 			return nil, err

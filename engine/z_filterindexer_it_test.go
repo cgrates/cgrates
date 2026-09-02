@@ -83,7 +83,7 @@ func TestFilterIndexerIT(t *testing.T) {
 	locker := NewLocker(cfg)
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		idb, err := NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+		idb, err := NewInternalDB(nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -100,7 +100,7 @@ func TestFilterIndexerIT(t *testing.T) {
 			cfg.DbCfg().DBConns[utils.MetaDefault].Opts.RedisConnectAttempts, "", false,
 			0, 0, 0, 0, 0, 150*time.Microsecond, 0, false,
 			utils.EmptyString, utils.EmptyString,
-			utils.EmptyString, 1000, nil, nil)
+			utils.EmptyString, 1000)
 		if err != nil {
 			t.Fatal("Could not connect to Redis", err.Error())
 		}

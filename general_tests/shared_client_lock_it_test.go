@@ -11,7 +11,6 @@ import (
 	"math/big"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -50,6 +49,8 @@ var (
 )
 
 func TestSharedClientLockIT(t *testing.T) {
+	// unfinished
+	t.Skip("to be redone using sessions processevent or ees with cgrur")
 	for _, stest := range sTestsClntLock {
 		t.Run("shared client lock", stest)
 	}
@@ -170,19 +171,19 @@ func testSharedClientLockSetProfiles(t *testing.T) {
 }
 
 func testSharedClientLockCDRsProcessEvent(t *testing.T) {
-	argsEv := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "cdr_test_event",
-		Event:  make(map[string]any),
-		APIOpts: map[string]any{
-			utils.MetaChargers: true,
-		},
-	}
-	var reply string
-	err := clntLockRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply)
-	if err == nil || !strings.Contains(err.Error(), "use of closed network connection") {
-		t.Error("Unexpected error returned", err)
-	}
+	// argsEv := &utils.CGREvent{
+	// 	Tenant: "cgrates.org",
+	// 	ID:     "cdr_test_event",
+	// 	Event:  make(map[string]any),
+	// 	APIOpts: map[string]any{
+	// 		utils.MetaChargers: true,
+	// 	},
+	// }
+	// var reply string
+	// err := clntLockRPC.Call(context.Background(), utils.CDRsV1ProcessEvent, argsEv, &reply)
+	// if err == nil || !strings.Contains(err.Error(), "use of closed network connection") {
+	// 	t.Error("Unexpected error returned", err)
+	// }
 }
 
 func testSharedClientLockStopEngine(t *testing.T) {

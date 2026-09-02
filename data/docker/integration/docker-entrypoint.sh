@@ -47,7 +47,7 @@ if $start_timeout_exceeded; then
 fi
 
 /kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic cgrates
-/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic cgrates_cdrs
+/kafka/bin/kafka-topics.sh --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic cgrates_urs
 
 
 gosu postgres psql  -c "CREATE USER cgrates password 'CGRateS.org';"  
@@ -56,14 +56,14 @@ gosu postgres createdb -e -O cgrates cgrates2
 
 
 
-PGPASSWORD="CGRateS.org" psql -U "cgrates" -h "localhost" -d cgrates -f /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/postgres/create_cdrs_tables.sql 
+PGPASSWORD="CGRateS.org" psql -U "cgrates" -h "localhost" -d cgrates -f /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/postgres/create_urs_tables.sql 
 PGPASSWORD="CGRateS.org" psql -U "cgrates" -h "localhost" -d cgrates -f /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/postgres/create_tariffplan_tables.sql 
 
 
 mongosh --quiet /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mongo/create_user.js
 mysql -u root -pCGRateS.org -h localhost < /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mysql/create_db_with_users.sql 
 mysql -u root -pCGRateS.org -h localhost < /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mysql/create_ers_db.sql
-mysql -u root -pCGRateS.org -h localhost -D cgrates < /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mysql/create_cdrs_tables.sql
+mysql -u root -pCGRateS.org -h localhost -D cgrates < /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mysql/create_urs_tables.sql
 mysql -u root -pCGRateS.org -h localhost -D cgrates < /go/src/github.com/cgrates/cgrates/data/docker/integration/scripts/mysql/create_tariffplan_tables.sql
 
 cp -r /go/src/github.com/cgrates/cgrates/data/. /usr/share/cgrates

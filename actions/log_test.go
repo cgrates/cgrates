@@ -13,12 +13,12 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestACExecuteActCDRLog(t *testing.T) {
+func TestACExecuteActURLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	cfg.ActionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}}}
-	cfg.TemplatesCfg()[utils.MetaCdrLog][0].Filters = []string{"invalid_filter_value"}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
+	cfg.TemplatesCfg()[utils.MetaUrLog][0].Filters = []string{"invalid_filter_value"}
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -26,7 +26,7 @@ func TestACExecuteActCDRLog(t *testing.T) {
 	fltr := engine.NewFilterS(cfg, nil, dm)
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION",
-		Type: utils.CDRLog,
+		Type: utils.MetaURLog,
 	}
 
 	dataStorage := utils.MapStorage{
@@ -38,13 +38,13 @@ func TestACExecuteActCDRLog(t *testing.T) {
 		},
 	}
 
-	actCdrLG := &actCDRLog{
+	actUrLG := &actURLog{
 		config: cfg,
 		fltrS:  fltr,
 		aCfg:   apAction,
 	}
 	expected := "NOT_FOUND:invalid_filter_value"
-	if err := actCdrLG.execute(nil, dataStorage,
+	if err := actUrLG.execute(nil, dataStorage,
 		utils.EmptyString); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -54,7 +54,7 @@ func TestACActLogger(t *testing.T) {
 	actLog := &actLog{
 		aCfg: &utils.APAction{
 			ID:   "TEST_ACTION",
-			Type: utils.CDRLog,
+			Type: utils.MetaURLog,
 		},
 	}
 	if rcv := actLog.id(); rcv != "TEST_ACTION" {
@@ -69,7 +69,7 @@ func TestACResetStatsAndThresholds(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION",
-		Type: utils.CDRLog,
+		Type: utils.MetaURLog,
 	}
 	actResStats := &actResetStat{
 		tnt:    "cgrates.org",

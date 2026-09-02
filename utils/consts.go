@@ -247,7 +247,7 @@ const (
 	TrendPrefix               = "trd_"
 	LoadIDPrefix              = "lid_"
 	LoadInstKey               = "load_history"
-	CreateCDRsTablesSQL       = "create_cdrs_tables.sql"
+	CreateURsTablesSQL        = "create_urs_tables.sql"
 	CreateDBTablesSQL         = "create_db_tables.sql"
 	CreateTariffPlanTablesSQL = "create_tariffplan_tables.sql"
 
@@ -269,7 +269,7 @@ const (
 	MetaKafkajsonMap    = "*kafkaJSONMap"
 	MetaNATSJSONMap     = "*natsJSONMap"
 	MetaSQL             = "*sql"
-	MetaCgrcdr          = "*cgrcdr"
+	MetaCgrur           = "*cgrur"
 	MetaMySQL           = "*mysql"
 	MetaS3jsonMap       = "*s3JSONMap"
 	ConfigPath          = "/etc/cgrates/"
@@ -491,7 +491,6 @@ const (
 	ErrReplyStateTerminate = "ERR_TERMINATE"
 	ErrReplyStateMessage   = "ERR_MESSAGE"
 	ErrReplyStateEvent     = "ERR_EVENT"
-	ErrReplyStateCDRs      = "ERR_CDRS"
 	ErrReplyStateExport    = "ERR_EXPORT"
 	ErrReplyStateRadauth   = "ERR_RADAUTH"
 
@@ -773,7 +772,7 @@ const (
 	MetaBalanceLimit        = "*balanceLimit"
 	MetaBalanceUnlimited    = "*balanceUnlimited"
 	MetaTemplateID          = "*templateID"
-	MetaCdrLog              = "*cdrLog"
+	MetaUrLog               = "*urLog"
 	MetaCDR                 = "*cdr"
 	MetaExporterIDs         = "*exporterIDs"
 	MetaExporterID          = "*exporterID"
@@ -1017,7 +1016,7 @@ const (
 	MetaEnableAccount  = "*enableAccount"
 	MetaDisableAccount = "*disableAccount"
 	MetaUnlimited      = "*unlimited"
-	CDRLog             = "*cdrlog"
+	MetaURLog          = "*urlog"
 	MetaRpc            = "*rpc"
 	MetaResetThreshold = "*resetThreshold"
 	MetaResetStatQueue = "*resetStatQueue"
@@ -1252,7 +1251,6 @@ const (
 
 	// APIerSv1GetDataDBVersions        = "APIerSv1.GetDataDBVersions"
 
-	// APIerSv1GetCDRs                  = "APIerSv1.GetCDRs"
 	// APIerSv1GetTPActions             = "APIerSv1.GetTPActions"
 	// APIerSv1GetTPAttributeProfile    = "APIerSv1.GetTPAttributeProfile"
 	// APIerSv1SetTPAttributeProfile    = "APIerSv1.SetTPAttributeProfile"
@@ -1289,7 +1287,6 @@ const (
 	// APIerSv1SetTPDispatcherProfile    = "APIerSv1.SetTPDispatcherProfile"
 	// APIerSv1RemoveTPDispatcherProfile = "APIerSv1.RemoveTPDispatcherProfile"
 	// APIerSv1GetTPDispatcherProfileIDs = "APIerSv1.GetTPDispatcherProfileIDs"
-	// APIerSv1ExportCDRs                = "APIerSv1.ExportCDRs"
 	// APIerSv1SetTPRatingPlan           = "APIerSv1.SetTPRatingPlan"
 	// APIerSv1SetTPActions              = "APIerSv1.SetTPActions"
 	// APIerSv1GetTPActionIds            = "APIerSv1.GetTPActionIds"
@@ -1317,8 +1314,8 @@ const (
 	AdminSv1GetAccountIDs             = "AdminSv1.GetAccountIDs"
 	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
-	AdminSv1GetCDRs                   = "AdminSv1.GetCDRs"
-	AdminSv1RemoveCDRs                = "AdminSv1.RemoveCDRs"
+	AdminSv1GetURs                    = "AdminSv1.GetURs"
+	AdminSv1RemoveURs                 = "AdminSv1.RemoveURs"
 	AdminSv1DumpDB                    = "AdminSv1.DumpDB"
 	AdminSv1RewriteDB                 = "AdminSv1.RewriteDB"
 	AdminSv1BackupDB                  = "AdminSv1.BackupDB"
@@ -1554,7 +1551,6 @@ const (
 	SessionSv1UpdateSession              = "SessionSv1.UpdateSession"
 	SessionSv1SyncSessions               = "SessionSv1.SyncSessions"
 	SessionSv1TerminateSession           = "SessionSv1.TerminateSession"
-	SessionSv1ProcessCDR                 = "SessionSv1.ProcessCDR"
 	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
 	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"
 	SessionSv1GetActiveSessions          = "SessionSv1.GetActiveSessions"
@@ -1643,16 +1639,6 @@ const (
 	CacheSv1ReplicateRemove   = "CacheSv1.ReplicateRemove"
 )
 
-// Cdrs APIs
-const (
-	CDRsV1                    = "CDRsV1"
-	CDRsV1ProcessExternalCDR  = "CDRsV1.ProcessExternalCDR"
-	CDRsV1ProcessEvent        = "CDRsV1.ProcessEvent"
-	CDRsV1ProcessEventWithGet = "CDRsV1.ProcessEventWithGet"
-	CDRsV1ProcessStoredEvents = "CDRsV1.ProcessStoredEvents"
-	CDRsV1Ping                = "CDRsV1.Ping"
-)
-
 // EEs
 const (
 	EeS                       = "EeS"
@@ -1706,7 +1692,7 @@ const (
 // Table Name
 const (
 	SessionCostsTBL      = "session_costs"
-	CDRsTBL              = "cdrs"
+	URsTBL               = "urs"
 	TBLVersions          = "versions"
 	TBLAccounts          = "accounts"
 	TBLIPProfiles        = "ip_profiles"
@@ -2013,7 +1999,6 @@ const (
 	ExtraFieldsCfg         = "extraFields"
 	SMCostRetriesCfg       = "sessionCostRetries"
 	RetransmissionTimerCfg = "retransmissionTimer"
-	OnlineCDRExportsCfg    = "onlineCDRExports"
 	SessionCostRetires     = "sessionCostRetries"
 )
 
@@ -2360,8 +2345,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceUsage, MetaInitiate, MetaUpdate, MetaTerminate,
-	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
-	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
+	OptsSesMessage, MetaAttributes, MetaChargers, MetaStats, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
 	OptsRoundingDecimals, MetaOriginID, MetaAuthorize, MetaSession, MetaUsage, MetaDebit, MetaEEs, MetaUR})
 
@@ -2407,12 +2391,6 @@ const (
 	OptsAttributesProfileIDs  = "*attributesProfileIDs"
 	OptsAttributesProfileRuns = "*attributesProfileRuns"
 	OptsAttributesProcessRuns = "*attributesProcessRuns"
-
-	// CDRs
-	OptsCDRsExport = "*cdrsExport"
-	OptsCDRsRefund = "*cdrsRefund"
-	OptsCDRsRerate = "*cdrsRerate"
-	OptsCDRsStore  = "*cdrsStore"
 
 	// DispatcherS
 	OptsAPIKey  = "*apiKey"
@@ -2524,7 +2502,7 @@ const (
 // Poster and Event reader constants
 const (
 	// General constants for posters and readers
-	DefaultQueueID = "cgratesCDRs"
+	DefaultQueueID = "cgratesURs"
 
 	// sqs and s3
 	AWSRegion = "awsRegion"

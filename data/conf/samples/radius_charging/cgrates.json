@@ -38,7 +38,7 @@
           ]
         }
       ],
-      "*cdrs": [
+      "*ees": [
         {
           "ConnIDs": [
             "*localhost"

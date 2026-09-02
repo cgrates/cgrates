@@ -199,7 +199,7 @@ func TestAnalyzersV1Search(t *testing.T) {
 	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
 		t.Fatal(err)
 	}
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -487,7 +487,7 @@ func TestAnalyzerSFilteredPagination(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -551,7 +551,7 @@ func TestAnalyzerSQueryOrder(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.AnalyzerSCfg().IndexType = utils.MetaInternal
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

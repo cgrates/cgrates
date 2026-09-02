@@ -19,7 +19,6 @@ const (
 	DBJSON              = "db"
 	StorDBJSON          = "storDB"
 	FilterSJSON         = "filters"
-	CDRsJSON            = "cdrs"
 	SessionSJSON        = "sessions"
 	FreeSWITCHAgentJSON = "freeswitchAgent"
 	KamailioAgentJSON   = "kamailioAgent"

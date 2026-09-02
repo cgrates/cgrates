@@ -55,7 +55,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 			}
 			if _, err := js.CreateStream(context.Background(), jetstream.StreamConfig{
 				Name:     "stream",
-				Subjects: []string{"cgratesCDRs", "cgrates_cdrs_processed"},
+				Subjects: []string{"cgratesURs", "cgrates_urs_processed"},
 			}); err != nil {
 				t.Fatal(err)
 			}
@@ -68,14 +68,14 @@ func TestNatsConcurrentReaders(t *testing.T) {
 	}
 	testEnv.Run(t)
 
-	// Publish CDRs asynchronously to the nats subject.
-	cdr := make(map[string]any)
+	// Publish URs asynchronously to the nats subject.
+	ur := make(map[string]any)
 	for i := 0; i < 10; i++ {
-		cdr[utils.AccountField] = 1001 + i
-		cdr[utils.Subject] = 1001 + i
-		cdr[utils.Destination] = 2001 + i
-		b, _ := json.Marshal(cdr)
-		js.PublishAsync("cgratesCDRs", b)
+		ur[utils.AccountField] = 1001 + i
+		ur[utils.Subject] = 1001 + i
+		ur[utils.Destination] = 2001 + i
+		b, _ := json.Marshal(ur)
+		js.PublishAsync("cgratesURs", b)
 	}
 	select {
 	case <-js.PublishAsyncComplete():
@@ -83,9 +83,9 @@ func TestNatsConcurrentReaders(t *testing.T) {
 		t.Fatal("Did not resolve in time")
 	}
 
-	// Define a consumer for the subject where all the processed cdrs were published.
+	// Define a consumer for the subject where all the processed urs were published.
 	cons, err := js.CreateOrUpdateConsumer(context.Background(), "stream", jetstream.ConsumerConfig{
-		FilterSubject: "cgrates_cdrs_processed",
+		FilterSubject: "cgrates_urs_processed",
 		Durable:       "cgrates_processed",
 		AckPolicy:     jetstream.AckAllPolicy,
 	})
@@ -289,7 +289,7 @@ resolver_preload: {
 			for i := 0; i < 3; i++ {
 				key := fmt.Sprintf("key%d", i+1)
 				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
-				if err := nc.Publish("cgratesCDRs", []byte(expData)); err != nil {
+				if err := nc.Publish("cgratesURs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
 				checkNATSExports(t, client, key)
@@ -432,7 +432,7 @@ resolver_preload: {
 					}
 					if _, err = js.CreateStream(context.Background(), jetstream.StreamConfig{
 						Name:     "stream",
-						Subjects: []string{"cgratesCDRs", "cgrates_cdrs_processed"},
+						Subjects: []string{"cgratesURs", "cgrates_urs_processed"},
 					}); err != nil {
 						t.Fatal(err)
 					}
@@ -448,7 +448,7 @@ resolver_preload: {
 			for i := 0; i < 3; i++ {
 				key := fmt.Sprintf("key%d", i+1)
 				expData := fmt.Sprintf(`{"Key": "%s"}`, key)
-				if _, err := js.Publish(context.Background(), "cgratesCDRs", []byte(expData)); err != nil {
+				if _, err := js.Publish(context.Background(), "cgratesURs", []byte(expData)); err != nil {
 					t.Error(err)
 				}
 				checkNATSExports(t, client, key)

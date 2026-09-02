@@ -708,7 +708,7 @@ func TestDPFilterSConns(t *testing.T) {
 			t.Fatal(err)
 		}
 		locker := NewLocker(cfg)
-		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dataDB, _ := NewInternalDB(nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil, locker)
 		cacheS := NewCacheS(cfg, nil, nil, nil, locker)
@@ -743,7 +743,7 @@ func TestDPFilterSConns(t *testing.T) {
 		}
 
 		locker := NewLocker(cfg)
-		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dataDB, _ := NewInternalDB(nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil, locker)
 		cacheS := NewCacheS(cfg, nil, nil, nil, locker)
@@ -777,7 +777,7 @@ func TestDPFilterSConns(t *testing.T) {
 		}
 
 		locker := NewLocker(cfg)
-		dataDB, _ := NewInternalDB(nil, nil, nil, nil)
+		dataDB, _ := NewInternalDB(nil, nil)
 		dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
 		dm := NewDataManager(dbCM, cfg, nil, locker)
 		cacheS := NewCacheS(cfg, nil, nil, nil, locker)

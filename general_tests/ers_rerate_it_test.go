@@ -35,10 +35,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func assertCDRRow(t *testing.T, db *gorm.DB, table string, want *utils.CDR) {
+func assertURRow(t *testing.T, db *gorm.DB, table string, want *utils.UR) {
 	t.Helper()
 
-	var rows []utils.CDRSQLTable
+	var rows []utils.URSQLTable
 	if err := db.Table(table).Find(&rows).Error; err != nil {
 		t.Fatalf("failed to query %q: %v", table, err)
 	}
@@ -68,13 +68,13 @@ func assertCDRRow(t *testing.T, db *gorm.DB, table string, want *utils.CDR) {
 }
 
 func TestERSReRate(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaCGRid:      urID,
 			utils.MetaURID:       urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -133,8 +133,8 @@ func TestERSReRate(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -163,13 +163,13 @@ func TestERSReRate(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -186,16 +186,16 @@ func TestERSReRate(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -218,9 +218,9 @@ func TestERSReRate(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -248,7 +248,7 @@ func TestERSReRate(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -293,14 +293,14 @@ func TestERSReRate(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -333,7 +333,7 @@ func TestERSReRate(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -372,7 +372,7 @@ func TestERSReRate(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,
@@ -465,13 +465,13 @@ func TestERSReRate(t *testing.T) {
 
 // Test with flag *accountsDebit in the Sessions config opts
 func TestERSReRateWithAccounts(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaCGRid:      urID,
 			utils.MetaURID:       urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -530,8 +530,8 @@ func TestERSReRateWithAccounts(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -568,13 +568,13 @@ func TestERSReRateWithAccounts(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -591,16 +591,16 @@ func TestERSReRateWithAccounts(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -625,9 +625,9 @@ func TestERSReRateWithAccounts(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -655,7 +655,7 @@ func TestERSReRateWithAccounts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -700,14 +700,14 @@ func TestERSReRateWithAccounts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -755,7 +755,7 @@ func TestERSReRateWithAccounts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -894,7 +894,7 @@ func TestERSReRateWithAccounts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,
@@ -982,16 +982,16 @@ func TestERSReRateWithAccounts(t *testing.T) {
 }
 
 func TestERSReRateEventOpts(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaRates:      true,
 			utils.MetaUR:         true, // gives event in proccessevent reply
-			utils.MetaEEs:        true, // to export cdr (either or )
+			utils.MetaEEs:        true, // to export ur (either or )
 			utils.MetaCGRid:      urID,
 			utils.MetaURID:       urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -1050,8 +1050,8 @@ func TestERSReRateEventOpts(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -1075,13 +1075,13 @@ func TestERSReRateEventOpts(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -1098,16 +1098,16 @@ func TestERSReRateEventOpts(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -1130,9 +1130,9 @@ func TestERSReRateEventOpts(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -1162,7 +1162,7 @@ func TestERSReRateEventOpts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -1208,14 +1208,14 @@ func TestERSReRateEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -1250,7 +1250,7 @@ func TestERSReRateEventOpts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -1290,7 +1290,7 @@ func TestERSReRateEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,
@@ -1383,17 +1383,17 @@ func TestERSReRateEventOpts(t *testing.T) {
 
 // Test with flag *accountsDebit in the UR opts
 func TestERSReRateWithAccountsEventOpts(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaAccountsDebitCfg: true,
 			utils.MetaRates:            true,
 			utils.MetaUR:               true, // gives event in proccessevent reply
-			utils.MetaEEs:              true, // to export cdr (either or )
+			utils.MetaEEs:              true, // to export ur (either or )
 			utils.MetaCGRid:            urID,
 			utils.MetaURID:             urID,
 			utils.MetaCost:             1.01,
-			utils.MetaExporterID:       "cdr_exporter",
+			utils.MetaExporterID:       "ur_exporter",
 			utils.MetaOriginID:         "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -1452,8 +1452,8 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -1484,13 +1484,13 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -1507,16 +1507,16 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -1541,9 +1541,9 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -1574,7 +1574,7 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 			utils.MetaURID:             urID,
 			utils.MetaCGRid:            urID,
 			utils.MetaCost:             1.01,
-			utils.MetaExporterID:       "cdr_exporter",
+			utils.MetaExporterID:       "ur_exporter",
 			utils.MetaOriginID:         "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -1620,14 +1620,14 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -1678,7 +1678,7 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 			utils.MetaURID:             urID,
 			utils.MetaCGRid:            urID,
 			utils.MetaCost:             1.01,
-			utils.MetaExporterID:       "cdr_exporter",
+			utils.MetaExporterID:       "ur_exporter",
 			utils.MetaOriginID:         "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -1818,7 +1818,7 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,
@@ -1907,13 +1907,13 @@ func TestERSReRateWithAccountsEventOpts(t *testing.T) {
 
 // Test with flags *accounts and *debit in the Sessions config opts
 func TestERSReRateWithAccountsAndDebit(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaCGRid:      urID,
 			utils.MetaURID:       urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -1972,8 +1972,8 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -2011,13 +2011,13 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -2034,16 +2034,16 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -2068,9 +2068,9 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -2098,7 +2098,7 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -2143,14 +2143,14 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -2198,7 +2198,7 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -2337,7 +2337,7 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,
@@ -2426,18 +2426,18 @@ func TestERSReRateWithAccountsAndDebit(t *testing.T) {
 
 // Test with flags *accounts and *debit in the UR opts
 func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
-	cdr := &utils.CDR{ // sample with values not realisticy calculated
+	ur := &utils.UR{ // sample with values not realisticy calculated
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaAccounts:   true,
 			utils.MetaDebit:      true,
 			utils.MetaRates:      true,
 			utils.MetaUR:         true, // gives event in proccessevent reply
-			utils.MetaEEs:        true, // to export cdr (either or )
+			utils.MetaEEs:        true, // to export ur (either or )
 			utils.MetaCGRid:      urID,
 			utils.MetaURID:       urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: &utils.RateProfileCost{
 				ID:              "RP_1002",
@@ -2496,8 +2496,8 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 			utils.ExtraFields:  map[string]string{"field_extr1": "val_extr1", "fieldextr2": "valextr2"},
 		},
 	}
-	db := openTestDB(t, "cgrates2", utils.CDRsTBL, cdr)
-	db2 := openTestDB(t, "cgrates2", "cdrs2")
+	db := openTestDB(t, "cgrates2", utils.URsTBL, ur)
+	db2 := openTestDB(t, "cgrates2", "urs2")
 
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -2528,13 +2528,13 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
   "ees": {
 	"enabled": true,
 	"exporters": [{
-			"id": "cdr_exporter",
-			"type": "*cgrcdr",
+			"id": "ur_exporter",
+			"type": "*cgrur",
 			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         	"flags": ["*log"],
 			"opts": {
 				"sqlDBName": "cgrates2",
-				"sqlTableName": "cdrs2"
+				"sqlTableName": "urs2"
 			},
 			"synchronous": true,
 			"blocker": false,
@@ -2551,16 +2551,16 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 	},
     "readers": [
       {
-        "id": "cgrcdr",
+        "id": "cgrur",
         "runDelay": "1m",
-        "type": "*cgrcdr",
+        "type": "*cgrur",
         "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
         "startDelay": "100ms",
         "flags": ["*log","*sessions"],
         "tenant": "cgrates.org",
         "opts": {
           "sqlDBName": "cgrates2",
-          "sqlTableName": "cdrs",
+          "sqlTableName": "urs",
           "sqlBatchSize": 1
         },
 		// "fields":[
@@ -2585,9 +2585,9 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 	}
 	client, _ := ng.Run(t)
 
-	ersLogCgrCDR := "<ERs> LOG, reader: <cgrcdr>"
-	waitForLog(t, buf, ersLogCgrCDR, 2*time.Second)
-	if got := strings.Count(buf.String(), ersLogCgrCDR); got != 1 {
+	ersLogCgrUR := "<ERs> LOG, reader: <cgrur>"
+	waitForLog(t, buf, ersLogCgrUR, 2*time.Second)
+	if got := strings.Count(buf.String(), ersLogCgrUR); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	ev := parseCGREvent(t, buf)
@@ -2619,7 +2619,7 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -2665,14 +2665,14 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n<%#v>\nreceived\n<%#v>", exp, ev)
 	}
-	assertCDRRow(t, db, utils.CDRsTBL, cdr)
+	assertURRow(t, db, utils.URsTBL, ur)
 
-	waitForLog(t, buf, "<EEs> LOG, exporter <cdr_exporter>, message:", 2*time.Second)
-	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <cdr_exporter>, message:"); got != 1 {
+	waitForLog(t, buf, "<EEs> LOG, exporter <ur_exporter>, message:", 2*time.Second)
+	if got := strings.Count(buf.String(), "<EEs> LOG, exporter <ur_exporter>, message:"); got != 1 {
 		t.Fatalf("expected 1 LOG record, got %d", got)
 	}
 	logOutput := buf.String()
-	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <cdr_exporter>, message: ")
+	_, after, ok := strings.Cut(logOutput, "<EEs> LOG, exporter <ur_exporter>, message: ")
 	if !ok {
 		t.Fatalf("CGREvent not found in log output:\n%s", logOutput)
 	}
@@ -2724,7 +2724,7 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 			utils.MetaURID:       urID,
 			utils.MetaCGRid:      urID,
 			utils.MetaCost:       1.01,
-			utils.MetaExporterID: "cdr_exporter",
+			utils.MetaExporterID: "ur_exporter",
 			utils.MetaOriginID:   "oid2",
 			utils.MetaRatesCost: map[string]any{
 				utils.Altered: nil,
@@ -2864,7 +2864,7 @@ func TestERSReRateWithAccountsAndDebitEventOpts(t *testing.T) {
 	if !reflect.DeepEqual(ev, exp) {
 		t.Errorf("expected \n%#v\nreceived\n%#v", exp, ev)
 	}
-	assertCDRRow(t, db2, "cdrs2", &utils.CDR{
+	assertURRow(t, db2, "urs2", &utils.UR{
 		Tenant: exp.Tenant,
 		Opts:   exp.APIOpts,
 		Event:  exp.Event,

@@ -100,7 +100,7 @@ func (e *ElasticEE) parseClientOpts() error {
 
 func (e *ElasticEE) parseRequestOpts() {
 	opts := e.cfg.Opts
-	indexName := utils.CDRsTBL
+	indexName := utils.URsTBL
 	if opts.ElsIndex != nil {
 		indexName = *opts.ElsIndex
 	}

@@ -1330,7 +1330,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3332\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                      \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    \r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"test\",\r\n            \"BalanceType\": \"*monetary\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3332\",\r\n            \"BalanceID\": \"WALLET100\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                      \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Urlog\" : true\r\n    }\r\n    \r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1359,7 +1359,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice1\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n            \"BalanceID\": \"BalanceID1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                 \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n   \r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [{\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice1\",\r\n            \"BalanceUUID\": \"883a8cb2-659b-4353-a939-7d90565e3331\",\r\n            \"BalanceID\": \"BalanceID1\",\r\n            \"Directions\": null,\r\n            \"Value\": 100,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                 \"Weight\": 10,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Urlog\" : true\r\n    }\r\n   \r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1388,7 +1388,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n    \t {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"e11ae605-9ca1-402d-930c-581893e54f33\",\r\n            \"BalanceID\": null,\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 30000000000000,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                   \"Weight\": 20,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Cdrlog\" : true\r\n    }\r\n    ],\r\n    \"id\": 6\r\n}"
+							"raw": "{\r\n    \"method\": \"APIerSv1.AddBalance\",\r\n    \"params\": [\r\n    \t {\r\n            \"Tenant\": \"cgrates.org\",\r\n            \"Account\": \"+30xxxxxxxxx\",\r\n            \"BalanceType\": \"*voice\",\r\n            \"BalanceUUID\": \"e11ae605-9ca1-402d-930c-581893e54f33\",\r\n            \"BalanceID\": null,\r\n            \"Directions\": \"*out\",\r\n            \"Value\": 30000000000000,\r\n            \"ExpiryTime\": \"*unlimited\",\r\n            \"RatingSubject\": null,\r\n            \"Categories\": null,\r\n                   \"Weight\": 20,\r\n            \"SharedGroups\": null,\r\n            \"Overwrite\": true,\r\n            \"Blocker\": false,\r\n            \"Disabled\": false,\r\n            \"Urlog\" : true\r\n    }\r\n    ],\r\n    \"id\": 6\r\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",
@@ -1475,7 +1475,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceUuid\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n            \"BalanceId\": \"23456\",\n            \"BalanceType\": \"*monetary\",\n            \"Directions\": null,\n            \"Value\": 8,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n                       \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Overwrite\": false,\n            \"Blocker\": null,\n            \"Disabled\": null,\n            \"Cdrlog\": null,\n        \t\"ExtraData\": null\n        \t\t\n    }],\n    \"id\": 5\n}"
+							"raw": "{\n    \"method\": \"APIerSv1.DebitBalance\",\n    \"params\": [{\n            \"Tenant\": \"cgrates.org\",\n            \"Account\": \"+30xxxxxxxxx\",\n            \"BalanceUuid\": \"e9c0a7f4-8904-481d-8b2d-a08d9a2b311c\",\n            \"BalanceId\": \"23456\",\n            \"BalanceType\": \"*monetary\",\n            \"Directions\": null,\n            \"Value\": 8,\n            \"ExpiryTime\": null,\n            \"RatingSubject\": null,\n            \"Categories\": null,\n                       \"Weight\": null,\n            \"SharedGroups\": null,\n            \"Overwrite\": false,\n            \"Blocker\": null,\n            \"Disabled\": null,\n            \"Urlog\": null,\n        \t\"ExtraData\": null\n        \t\t\n    }],\n    \"id\": 5\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/jsonrpc",

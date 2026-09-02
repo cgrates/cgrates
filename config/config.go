@@ -400,12 +400,12 @@ var possibleLoaderTypes = utils.NewStringSet([]string{utils.MetaAttributes,
 var possibleReaderTypes = utils.NewStringSet([]string{utils.MetaFileCSV,
 	utils.MetaKafkajsonMap, utils.MetaFileXML, utils.MetaSQL, utils.MetaFileFWV,
 	utils.MetaFileJSON, utils.MetaNone, utils.MetaAMQPjsonMap, utils.MetaS3jsonMap,
-	utils.MetaSQSjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaNATSJSONMap, utils.MetaCgrcdr})
+	utils.MetaSQSjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaNATSJSONMap, utils.MetaCgrur})
 
 var possibleExporterTypes = utils.NewStringSet([]string{utils.MetaFileCSV, utils.MetaNone, utils.MetaFileFWV,
 	utils.MetaHTTPPost, utils.MetaHTTPjsonMap, utils.MetaAMQPjsonMap, utils.MetaAMQPV1jsonMap, utils.MetaSQSjsonMap,
 	utils.MetaKafkajsonMap, utils.MetaS3jsonMap, utils.MetaElastic, utils.MetaVirt, utils.MetaSQL, utils.MetaNATSJSONMap,
-	utils.MetaLog, utils.MetaRpc, utils.MetaCgrcdr})
+	utils.MetaLog, utils.MetaRpc, utils.MetaCgrur})
 
 func (cfg *CGRConfig) AddSection(sec Section) {
 	cfg.sections = append(cfg.sections, sec)
@@ -976,10 +976,10 @@ func (cfg *CGRConfig) initChanels() {
 // the list of sections should be always valid because we load the config first with this list
 func (cfg *CGRConfig) reloadSections(sections ...string) {
 	subsystemsThatNeedDB := utils.NewStringSet([]string{DBJSON,
-		CDRsJSON, SessionSJSON, AttributeSJSON,
+		SessionSJSON, AttributeSJSON,
 		ChargerSJSON, ResourceSJSON, IPsJSON, StatSJSON, ThresholdSJSON,
 		RouteSJSON, LoaderSJSON, RateSJSON, AdminSJSON, AccountSJSON,
-		ActionSJSON, CDRsJSON})
+		ActionSJSON})
 	needsDB := false
 	for _, section := range sections {
 		if !needsDB && subsystemsThatNeedDB.Has(section) {

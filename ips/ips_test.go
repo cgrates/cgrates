@@ -172,7 +172,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 		locker := engine.NewLocker(cfg)
 		cfg.IPsCfg().StoreInterval = -1
 
-		db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+		db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -226,7 +226,7 @@ func TestStoreMatchedIPAllocations(t *testing.T) {
 func TestNewIPService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -266,7 +266,7 @@ func TestNewIPService(t *testing.T) {
 func TestFilterAndSortPools(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	db, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -600,7 +600,7 @@ func TestIPsStartLoop(t *testing.T) {
 func TestStoreIPAllocationsList(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -883,7 +883,7 @@ func TestMatchedIPAllocsAllocateIPOnPoolNoTTL(t *testing.T) {
 func TestIPsV1ReleaseIPNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)

@@ -309,7 +309,7 @@ func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logL
 		if d, err = engine.NewDBConn(cfg.ConfigDBCfg().Type,
 			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
 			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding, nil, nil,
+			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
 			cfg.ConfigDBCfg().Opts, nil); err != nil { // Cannot configure getter database, show stopper
 			err = fmt.Errorf("could not configure configDB: <%s>", err)
 			return

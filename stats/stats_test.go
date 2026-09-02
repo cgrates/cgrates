@@ -252,7 +252,7 @@ func prepareStatsData(t *testing.T, dm *engine.DataManager) {
 func TestNewStatService(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -282,7 +282,7 @@ func TestNewStatService(t *testing.T) {
 func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -335,7 +335,7 @@ func TestStatQueuesMatchingStatQueuesForEvent(t *testing.T) {
 func TestStatQueuesProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -392,7 +392,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -447,7 +447,7 @@ func TestStatQueuesMatchWithIndexFalse(t *testing.T) {
 func TestStatQueuesV1ProcessEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -513,7 +513,7 @@ func TestStatQueuesV1ProcessEvent(t *testing.T) {
 func TestStatQueuesUpdateStatQueue(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	idb, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Error(err)
 	}
@@ -717,7 +717,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -760,7 +760,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	db, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	db, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
@@ -914,7 +914,7 @@ func TestStatQueueStartLoop(t *testing.T) {
 func TestStatQueueStoreStatsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -995,7 +995,7 @@ func TestStatQueueStoreStatsCacheGetErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1034,7 +1034,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{"test"}
 	cfg.CacheCfg().Partitions[utils.CacheStatQueues].Replicate = true
 	cfg.RPCConns()["test"] = &config.RPCConn{Conns: []*config.RemoteHost{{}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	cM := engine.NewConnManager(cfg)
 	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
@@ -1062,7 +1062,7 @@ func TestStatQueueStoreStatQueueCacheSetErr(t *testing.T) {
 func TestStatQueueStoreStatQueueOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1083,7 +1083,7 @@ func TestStatQueueStoreStatQueueOK(t *testing.T) {
 func TestStatQueueProcessEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1157,7 +1157,7 @@ func TestStatQueueProcessEventOK(t *testing.T) {
 func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -1214,7 +1214,7 @@ func TestStatQueueProcessEventProcessThPartExec(t *testing.T) {
 func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1303,7 +1303,7 @@ func TestStatQueueV1ProcessEventMissingArgs(t *testing.T) {
 func TestStatQueueV1GetQueueIDsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1400,7 +1400,7 @@ func TestStatQueueV1GetQueueIDsGetKeysForPrefixErr(t *testing.T) {
 func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1463,7 +1463,7 @@ func TestStatQueueV1GetStatQueueOK(t *testing.T) {
 func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1484,7 +1484,7 @@ func TestStatQueueV1GetStatQueueNotFound(t *testing.T) {
 func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1543,7 +1543,7 @@ func TestStatQueueV1GetStatQueueMissingArgs(t *testing.T) {
 func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1620,7 +1620,7 @@ func TestStatQueueV1GetStatQueuesForEventOK(t *testing.T) {
 func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1669,7 +1669,7 @@ func TestStatQueueV1GetStatQueuesForEventNotFoundErr(t *testing.T) {
 func TestStatQueueV1GetStatQueuesForEventMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1739,7 +1739,7 @@ func TestStatQueueV1ResetStatQueueOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1810,7 +1810,7 @@ func TestStatQueueV1ResetStatQueueNotFoundErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1855,7 +1855,7 @@ func TestStatQueueV1ResetStatQueueMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1898,7 +1898,7 @@ func TestStatQueueV1ResetStatQueueUnsupportedMetricType(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -1945,7 +1945,7 @@ func TestStatQueueProcessThresholdsOKNoThIDs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2007,7 +2007,7 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2108,7 +2108,7 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)}}}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2187,7 +2187,7 @@ func TestStatQueueV1GetQueueFloatMetricsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2235,7 +2235,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2278,7 +2278,7 @@ func TestStatQueueV1GetQueueFloatMetricsMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2344,7 +2344,7 @@ func TestStatQueueV1GetQueueStringMetricsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2392,7 +2392,7 @@ func TestStatQueueV1GetQueueStringMetricsErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2433,7 +2433,7 @@ func TestStatQueueV1GetQueueStringMetricsMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2499,7 +2499,7 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2555,7 +2555,7 @@ func TestStatQueueGetStatQueueOK(t *testing.T) {
 func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -2630,7 +2630,7 @@ func TestStatQueueProcessEventProfileIgnoreFilters(t *testing.T) {
 func TestStatQueueProcessEventProfileIgnoreFiltersError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -2687,7 +2687,7 @@ func TestStatQueueV1GetStatQueuesForEventProfileIgnoreFilters(t *testing.T) {
 	cfg.StatSCfg().Opts.ProfileIgnoreFilters = []*config.DynamicBoolOpt{
 		config.NewDynamicBoolOpt(nil, "", true, nil),
 	}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2746,7 +2746,7 @@ func TestStatSV1GetQueueDecimalMetricsOK(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2794,7 +2794,7 @@ func TestStatSV1GetQueueDecimalMetricsErrNotFound(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2837,7 +2837,7 @@ func TestStatV1GetQueueDecimalMetricsMissingArgs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.StatSCfg().StoreInterval = 1
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -2902,7 +2902,7 @@ func TestStatV1GetQueueDecimalMetricsErrGetStats(t *testing.T) {
 func TestStatSV1GetQueueStringMetricsIntOptsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -2942,7 +2942,7 @@ func TestStatSV1GetStatQueuesForEventsqIDsErr(t *testing.T) {
 			Values:    []string{"value2"},
 		},
 	}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -3018,7 +3018,7 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 		// function will return error after trying to parse the filter
 		config.NewDynamicBoolOpt([]string{"*string.invalid:filter"}, "cgrates.org", false, nil),
 	}
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
@@ -3090,7 +3090,7 @@ func TestStatSV1GetStatQueuesForEventignFiltersErr(t *testing.T) {
 func TestStatQueuesProcessEventidsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3121,7 +3121,7 @@ func TestStatQueuesProcessEventidsErr(t *testing.T) {
 func TestStatSMatchingStatQueuesForEventNoSqs(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3145,7 +3145,7 @@ func TestStatSMatchingStatQueuesForEventNoSqs(t *testing.T) {
 func TestStatQueuesMatchingStatQueuesForEventWeightErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dmSTS := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3195,7 +3195,7 @@ func TestStatQueuesMatchingStatQueuesForEventWeightErr(t *testing.T) {
 func TestStatQueueProcessEventProfileIDsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3240,7 +3240,7 @@ func TestStatQueueProcessEventExpiredErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3321,7 +3321,7 @@ func TestStatQueueProcessEventBlockerErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -3844,7 +3844,7 @@ func TestStatQueueaddStatEventNoPass(t *testing.T) {
 	tnt, evID := "cgrates.org", "eventID"
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -3899,7 +3899,7 @@ func TestStatQAddStatEventFilterPassErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
@@ -3951,7 +3951,7 @@ func TestStatQAddStatEventBlockerFromDynamicsErr(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
@@ -4008,7 +4008,7 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	cM := engine.NewConnManager(cfg)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
