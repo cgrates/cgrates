@@ -1844,3 +1844,203 @@ func TestSessionSBiRPCv1InitiateSessionError(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSBiRPCv1ProcessEventNotConnected(t *testing.T) {
+	ctx := context.TODO()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+
+	tests := []struct {
+		name   string
+		args   *utils.CGREvent
+		expErr string
+	}{
+		{
+			name:   "Nil CGREvent",
+			args:   nil,
+			expErr: "MANDATORY_IE_MISSING: [CGREvent]",
+		},
+		{
+			name: "Nil fields",
+			args: &utils.CGREvent{
+				Tenant:  "",
+				ID:      "",
+				Event:   map[string]any{utils.AccountField: "1001"},
+				APIOpts: nil,
+			},
+			expErr: "MANDATORY_IE_MISSING: [*originID]",
+		},
+		{
+			name: "Nil Event",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evAttr",
+				Event:  nil,
+				APIOpts: map[string]any{
+					utils.MetaAttributes: true,
+					utils.MetaOriginID:   "originAttr",
+				},
+			},
+			expErr: "MANDATORY_IE_MISSING: [Event]",
+		},
+		{
+			name: "Attributes",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evAttr",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaAttributes: true,
+					utils.MetaOriginID:   "originAttr",
+				},
+			},
+			expErr: "ATTRIBUTES_ERROR:NOT_CONNECTED: AttributeS",
+		},
+		{
+			name: "Attributes: parsing error",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evAttr",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaAttributes: "trueee",
+					utils.MetaOriginID:   "originAttr",
+				},
+			},
+			expErr: `strconv.ParseBool: parsing "trueee": invalid syntax`,
+		},
+		{
+			name: "Chargers",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evChrg",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaOriginID: "originChrg",
+				},
+			},
+			expErr: "NOT_CONNECTED: ChargerS",
+		},
+		{
+			name: "Routes",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evRoutes",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaRoutes:          true,
+					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "originRoutes",
+				},
+			},
+			expErr: "NOT_CONNECTED: RouteS",
+		},
+		{
+			name: "Stats",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evStats",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaStats:           true,
+					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "originStats",
+				},
+			},
+			expErr: "NOT_CONNECTED: StatS",
+		},
+		{
+			name: "Thresholds",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evThresholds",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaThresholds:      true,
+					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "originThresholds",
+				},
+			},
+			expErr: "NOT_CONNECTED: ThresholdS",
+		},
+		{
+			name: "IPsAuthorize",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evIPs",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaIPsAuthorizeCfg: true,
+					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "originIPs",
+				},
+			},
+			expErr: "NOT_CONNECTED: IPs",
+		},
+		{
+			name: "Rates",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evRates",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaRates:           true,
+					utils.OptsSesBlockerError: true,
+					utils.MetaOriginID:        "originRates",
+				},
+			},
+			expErr: "NOT_CONNECTED: RateS",
+		},
+		{
+			name: "AccountsAuthorize",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evAccountsAuth",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaAccountsAuthorizeCfg: true,
+					utils.MetaUsage:                1 * time.Minute,
+					utils.OptsSesBlockerError:      true,
+					utils.MetaOriginID:             "originAccountsAuth",
+				},
+			},
+			expErr: "NOT_CONNECTED: AccountS",
+		},
+		{
+			name: "ResourcesAuthorize",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evResourcesAuth",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaResourcesAuthorizeCfg: true,
+					utils.OptsSesBlockerError:       true,
+					utils.MetaOriginID:              "originResourcesAuth",
+				},
+			},
+			expErr: "NOT_CONNECTED: ResourceS",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var reply V1ProcessEventReply
+			if err := sessions.BiRPCv1ProcessEvent(ctx, tt.args, &reply); err == nil || err.Error() != tt.expErr {
+				t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+			}
+		})
+	}
+}
