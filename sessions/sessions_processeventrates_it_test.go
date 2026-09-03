@@ -860,3 +860,106 @@ func TestSessionSv1ProcessEventMultipleUpdates(t *testing.T) {
 		t.Errorf("expected 235s remaining (300s - 30s initiate - 20s update1 - 15s update2), got: %+v", acnt.Balances["BAL1"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventAuthorizeMaxUsage(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"BAL1": {
+						ID:      "BAL1",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(50 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("authorizeRequestingMoreThanAvailable", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "authorizeOnly",
+				APIOpts: map[string]any{
+					utils.MetaChargers:  true,
+					utils.MetaAccounts:  true,
+					utils.MetaAuthorize: true,
+					utils.MetaUsage:     100 * time.Second,
+					utils.MetaOriginID:  "OriginIDAuthorizeOnly",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(authorize): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 50*time.Second {
+			t.Errorf("AccountsUsage[*default] = %v, want 50s", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else if want := utils.NewDecimalFromFloat64(float64(50 * time.Second)); acnt.Balances["BAL1"].Units.Compare(want) != 0 {
+		t.Errorf("balance should remain same after *authorize (no *debit flag), got: %+v, want 50s", acnt.Balances["BAL1"].Units)
+	}
+}
