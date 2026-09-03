@@ -2362,3 +2362,347 @@ func TestSessionSBiRPCv1ProcessEventUsageOptions(t *testing.T) {
 		}
 	})
 }
+
+func addInternalConn(sessions *SessionS, cfg *config.CGRConfig, flag, apiPrefix string, clnt *testMockClients) {
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	connID := utils.ConcatenatedKey(utils.MetaInternal, flag)
+	cfg.SessionSCfg().Conns[flag] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	sessions.connMgr.AddInternalConn(connID, apiPrefix, chanInternal)
+}
+
+func TestSessionSBiRPCv1ProcessEventChargers(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{
+					{
+						ChargerSProfile: "CHRG1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "run1Ev",
+							Event:  map[string]any{utils.AccountField: "1001"},
+							APIOpts: map[string]any{
+								utils.MetaOriginID: "originID",
+								utils.MetaRunID:    "CHRG1",
+							},
+						},
+					},
+				}
+				return nil
+			},
+		},
+	}
+	addInternalConn(sessions, cfg, utils.MetaChargers, utils.ChargerSv1, clnt)
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event:  map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaSession:  true,
+			utils.MetaChargers: true,
+			utils.MetaUR:       true,
+		},
+	}
+	var reply V1ProcessEventReply
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+		t.Error(err)
+	}
+	if len(reply.UsageRecords) != 1 {
+		t.Errorf("Expected 1 UsageRecords, recieved %d", len(reply.UsageRecords))
+	}
+	if _, ok := reply.UsageRecords["CHRG1"]; !ok {
+		t.Errorf("Expected UsageRecord for CHRG1, recieved %v", reply.UsageRecords)
+	}
+}
+
+func TestSessionSBiRPCv1ProcessEventRouting(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{Routes: []*routes.SortedRoute{{RouteID: "RouteID"}}}}
+				return nil
+			},
+			utils.StatSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"STQ1"}
+				return nil
+			},
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]string) = []string{"THD1"}
+				return nil
+			},
+			utils.IPsV1AuthorizeIP: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.AllocatedIP) = utils.AllocatedIP{ProfileID: "prfIP"}
+				return nil
+			},
+		},
+	}
+	addInternalConn(sessions, cfg, utils.MetaRoutes, utils.RouteSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaStats, utils.StatSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaThresholds, utils.ThresholdSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaIPs, utils.IPsV1, clnt)
+	t.Run("Routes", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originID",
+				utils.MetaRoutes:   true,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := routes.SortedRoutesList{{Routes: []*routes.SortedRoute{{RouteID: "RouteID"}}}}
+		if !reflect.DeepEqual(reply.RouteProfiles[utils.MetaPrimary], expected) {
+			t.Errorf("Expected %v, recieved %v", expected, reply.RouteProfiles[utils.MetaPrimary])
+		}
+	})
+	t.Run("Stats", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originID",
+				utils.MetaStats:    true,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(reply.StatQueueIDs[utils.MetaPrimary], []string{"STQ1"}) {
+			t.Errorf("Expected [STQ1], recieved %#v", reply.StatQueueIDs[utils.MetaPrimary])
+		}
+	})
+	t.Run("Thresholds", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:   "originID",
+				utils.MetaThresholds: true,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		if !reflect.DeepEqual(reply.ThresholdIDs[utils.MetaPrimary], []string{"THD1"}) {
+			t.Errorf("Expected [THD1], recieved %#v", reply.ThresholdIDs[utils.MetaPrimary])
+		}
+	})
+
+	t.Run("IPs", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:        "originID",
+				utils.MetaIPsAuthorizeCfg: true,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := &utils.AllocatedIP{ProfileID: "prfIP"}
+		if !reflect.DeepEqual(reply.IPsAllocation[utils.MetaPrimary], expected) {
+			t.Errorf("Expected %#v, recieved %#v", expected, reply.IPsAllocation[utils.MetaPrimary])
+		}
+	})
+}
+
+func TestSessionSBiRPCv1ProcessEventResources(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.ResourceSv1AuthorizeResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = "OK"
+				return nil
+			},
+			utils.ResourceSv1AllocateResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = "OK"
+				return nil
+			},
+			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = "OK"
+				return nil
+			},
+		},
+	}
+	addInternalConn(sessions, cfg, utils.MetaResources, utils.ResourceSv1, clnt)
+	t.Run("Authorize", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:              "originResAuth",
+				utils.MetaResources:             true,
+				utils.MetaResourcesAuthorizeCfg: true,
+			}}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		if rcv := reply.ResourceAllocation[utils.MetaPrimary]; rcv != "OK" {
+			t.Errorf("Expected OK, recieved %v", rcv)
+		}
+	})
+	t.Run("Allocate", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:             "originResAlloc",
+				utils.MetaResources:            true,
+				utils.MetaResourcesAllocateCfg: true,
+			}}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		if rcv := reply.ResourceAllocation[utils.MetaPrimary]; rcv != "OK" {
+			t.Errorf("Expected OK, recieved %v", rcv)
+		}
+	})
+	t.Run("Release", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:            "originResRelease",
+				utils.MetaResources:           true,
+				utils.MetaResourcesReleaseCfg: true,
+			}}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+func TestSessionSBiRPCv1ProcessEventEEs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.TODO()
+	t.Run("ees", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+					*reply.(*map[string]map[string]any) = map[string]map[string]any{"EXPORTER1": {}}
+					return nil
+				},
+			},
+		}
+		addInternalConn(sessions, cfg, utils.MetaEEs, utils.EeSv1, clnt)
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originEEs",
+				utils.MetaEEs:      true,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		exp := []string{"EXPORTER1"}
+		if !reflect.DeepEqual(reply.EventExporters[utils.MetaPrimary], exp) {
+			t.Errorf("Expected %v, recieved %v", exp, reply.EventExporters[utils.MetaPrimary])
+		}
+	})
+	t.Run("Call returns error", func(t *testing.T) {
+		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+		dm.SetCache(cacheS)
+		fltrS := engine.NewFilterS(cfg, nil, dm)
+		connMgr := engine.NewConnManager(cfg)
+		connMgr.SetCache(cacheS)
+		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+		clnt := &testMockClients{calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				return utils.ErrNotImplemented
+			},
+		}}
+		addInternalConn(sessions, cfg, utils.MetaEEs, utils.EeSv1, clnt)
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:        "originEEsWrap",
+				utils.OptsSesBlockerError: true,
+				utils.MetaEEs:             true,
+			},
+		}
+		var reply2 V1ProcessEventReply
+		expErr := "EES_ERROR:NOT_IMPLEMENTED"
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply2); err == nil || err.Error() != expErr {
+			t.Errorf("Expected %v, received %v", expErr, err)
+		}
+	})
+}
