@@ -6,20 +6,25 @@
 package general_tests
 
 import (
+	"bytes"
+	"encoding/csv"
+	"encoding/json"
+	"fmt"
+	"os"
 	"path/filepath"
-	"slices"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/general_tests/calltest"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // TestKamailioLCR routes two calls through kamailio, letting cgrates authorize
-// and pick the vendor route, and checks each CDR carries the matching rate
-// profile and cost.
+// and pick the vendor route, and checks each CSV export carries the matching
+// rate profile and cost.
 func TestKamailioLCR(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -43,6 +48,35 @@ func TestKamailioLCR(t *testing.T) {
 		},
 	}
 
+	exportDir := t.TempDir()
+	cfgJSON := fmt.Sprintf(`{
+"sessions": {
+	"conns": {
+		"*ees": [{"connIDs": ["*localhost"]}]
+	}
+},
+"ees": {
+	"enabled": true,
+	"cache": {
+		"*fileCSV": {"limit": 0}
+	},
+	"exporters": [
+		{
+			"id": "kamailio_lcr",
+			"type": "*fileCSV",
+			"exportPath": %q,
+			"attempts": 1,
+			"synchronous": true,
+			"fields": [
+				{"tag": "Destination", "path": "*exp.Destination", "type": "*variable", "value": "~*req.Destination"},
+				{"tag": "AccountsCost", "path": "*exp.*accountsCost", "type": "*variable", "value": "~*opts.*accountsCost"},
+				{"tag": "RatesCost", "path": "*exp.*ratesCost", "type": "*variable", "value": "~*opts.*ratesCost"}
+			]
+		}
+	]
+}
+}`, exportDir)
+
 	tutorialDir := filepath.Join(*utils.DataDir, "tutorials", "kamailio_lcr")
 	kam := calltest.Kamailio{
 		ConfigFile: filepath.Join(tutorialDir, "kamailio/etc/kamailio/kamailio.cfg"),
@@ -55,6 +89,7 @@ func TestKamailioLCR(t *testing.T) {
 
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(tutorialDir, "cgrates/etc/cgrates"),
+		ConfigJSON: cfgJSON,
 		DBCfg:      engine.InternalDBCfg,
 		TpPath:     filepath.Join(tutorialDir, "cgrates/tariffplans"),
 		Encoding:   *utils.Encoding,
@@ -64,55 +99,117 @@ func TestKamailioLCR(t *testing.T) {
 	calltest.SipgoUAS{Port: 5070}.Start(t)
 	calltest.SipgoUAS{Port: 5071}.Start(t)
 
-	uac := calltest.SipgoUAC{Addr: "127.0.0.1:5060"}
 	wantRateProfiles := make(map[string]string, len(calls))
 	for _, call := range calls {
-		wantRateProfiles[call.params.To] = call.rateProfileID
+		destination := call.params.To
+		wantRateProfiles[destination] = call.rateProfileID
+		uac := calltest.SipgoUAC{
+			Addr: "127.0.0.1:5060",
+			AfterACK: func() {
+				waitForCondition(t, func() bool {
+					var activeSessions []*sessions.ExternalSession
+					if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+						&utils.SessionFilter{}, &activeSessions); err != nil || len(activeSessions) != 1 {
+						return false
+					}
+					activeSession := activeSessions[0]
+					return activeSession.CGREvent != nil &&
+						utils.IfaceAsString(activeSession.CGREvent.Event[utils.Destination]) == destination
+				}, "active SessionS session for "+destination, 5*time.Second)
+			},
+		}
 		uac.Call(t, call.params)
 	}
 
-	filter := &utils.CDRFilters{
-		Tenant:    "cgrates.org",
-		FilterIDs: []string{"*string:~*req.Account:1001"},
-	}
-	var cdrs []*utils.CDR
-	waitForCondition(t,
-		func() bool {
-			cdrs = nil
-			return client.Call(context.Background(), utils.AdminSv1GetCDRs, filter, &cdrs) == nil && len(cdrs) >= len(calls)
-		},
-		"kamailio lcr CDRs", 5*time.Second,
-	)
-	if len(cdrs) != len(calls) {
-		t.Fatalf("got %d CDRs, want %d: %s", len(cdrs), len(calls), utils.ToJSON(cdrs))
+	var exportRows [][]string
+	exportPattern := filepath.Join(exportDir, "kamailio_lcr_*.csv")
+	waitForCondition(t, func() bool {
+		exportFiles, err := filepath.Glob(exportPattern)
+		if err != nil {
+			t.Fatalf("glob EEs exports: %v", err)
+		}
+		if len(exportFiles) < len(calls) {
+			return false
+		}
+		exportRows = exportRows[:0]
+		for _, exportFile := range exportFiles {
+			content, err := os.ReadFile(exportFile)
+			if err != nil {
+				return false
+			}
+			rows, err := csv.NewReader(bytes.NewReader(content)).ReadAll()
+			if err != nil || len(rows) != 1 || len(rows[0]) != 3 {
+				return false
+			}
+			exportRows = append(exportRows, rows[0])
+		}
+		return true
+	}, "kamailio lcr CSV exports", 5*time.Second)
+	if len(exportRows) != len(calls) {
+		t.Fatalf("got %d CSV exports, want %d", len(exportRows), len(calls))
 	}
 
-	for _, cdr := range cdrs {
-		dst, ok := cdr.Event[utils.Destination].(string)
-		if !ok || dst == "" {
-			t.Errorf("cdr missing destination: %s", utils.ToJSON(cdr))
+	seen := make(map[string]bool, len(calls))
+	zero := utils.NewDecimal(0, 0)
+	totalAccountsCost := utils.NewDecimal(0, 0)
+	for _, export := range exportRows {
+		dst := export[0]
+		wantRateProfile, has := wantRateProfiles[dst]
+		if !has {
+			t.Errorf("unexpected destination %q: %s", dst, utils.ToJSON(export))
 			continue
 		}
-		wantRateProfile, ok := wantRateProfiles[dst]
-		if !ok {
-			t.Errorf("unexpected destination %q: %s", dst, utils.ToJSON(cdr))
+		if seen[dst] {
+			t.Errorf("duplicate export for destination %q", dst)
 			continue
 		}
-		rateProfileIDs, err := utils.IfaceAsStringSlice(cdr.Opts[utils.OptsRatesProfileIDs])
-		if err != nil {
-			t.Errorf("cdr %s rate profiles: %v", dst, err)
-		} else if !slices.Contains(rateProfileIDs, wantRateProfile) {
-			t.Errorf("cdr %s rate profiles = %v, want %s", dst, rateProfileIDs, wantRateProfile)
-		}
-		accountCost := cdrCostFloat(t, cdr, utils.MetaAccountsCost, "Concretes")
-		rateCost := cdrCostFloat(t, cdr, utils.MetaRatesCost, "Cost")
-		if accountCost <= 0 || rateCost <= 0 {
-			t.Errorf("cdr %s missing cost: accountsCost=%v ratesCost=%v", dst, accountCost, rateCost)
+		seen[dst] = true
+
+		var accountsCost utils.EventCharges
+		if err := json.Unmarshal([]byte(export[1]), &accountsCost); err != nil {
+			t.Errorf("decode %s for %s: %v", utils.MetaAccountsCost, dst, err)
 			continue
 		}
-		if accountCost <= rateCost {
-			t.Errorf("cdr %s account cost %v <= rates cost %v", dst, accountCost, rateCost)
+		var ratesCost utils.RateProfileCost
+		if err := json.Unmarshal([]byte(export[2]), &ratesCost); err != nil {
+			t.Errorf("decode %s for %s: %v", utils.MetaRatesCost, dst, err)
+			continue
 		}
+		if ratesCost.ID != wantRateProfile {
+			t.Errorf("export %s rate profile = %q, want %q", dst, ratesCost.ID, wantRateProfile)
+		}
+		if accountsCost.Concretes == nil || accountsCost.Concretes.Compare(zero) <= 0 ||
+			ratesCost.Cost == nil || ratesCost.Cost.Compare(zero) <= 0 {
+			t.Errorf("export %s missing cost: accountsCost=%v ratesCost=%v", dst, accountsCost.Concretes, ratesCost.Cost)
+			continue
+		}
+		totalAccountsCost = utils.SumDecimal(totalAccountsCost, accountsCost.Concretes)
+		if accountsCost.Concretes.Compare(ratesCost.Cost) <= 0 {
+			t.Errorf("export %s account cost %v <= rates cost %v", dst, accountsCost.Concretes, ratesCost.Cost)
+		}
+	}
+	if len(seen) != len(calls) {
+		t.Errorf("got exports for %d destinations, want %d", len(seen), len(calls))
+	}
+
+	var account utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&account); err != nil {
+		t.Fatalf("get account: %v", err)
+	}
+	balance := account.Balances["Concrete1"]
+	wantBalance := utils.SubstractDecimal(utils.NewDecimal(10, 0), totalAccountsCost)
+	if balance == nil || balance.Units == nil || balance.Units.Compare(wantBalance) != 0 {
+		t.Errorf("account balance = %v, want %v", balance, wantBalance)
+	}
+
+	var activeSessions []*sessions.ExternalSession
+	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+		&utils.SessionFilter{}, &activeSessions); err == nil {
+		t.Errorf("active SessionS sessions remain: %s", utils.ToJSON(activeSessions))
+	} else if err.Error() != utils.ErrNotFound.Error() {
+		t.Fatalf("get active sessions: %v", err)
 	}
 }
 
@@ -131,19 +228,4 @@ func waitForCondition(t *testing.T, check func() bool, msg string, timeout time.
 		case <-time.After(backoff()):
 		}
 	}
-}
-
-func cdrCostFloat(t testing.TB, cdr *utils.CDR, optKey, field string) float64 {
-	t.Helper()
-	costMap, ok := cdr.Opts[optKey].(map[string]any)
-	if !ok {
-		t.Errorf("cdr opts %s missing or not a map: %T", optKey, cdr.Opts[optKey])
-		return 0
-	}
-	v, ok := costMap[field].(float64)
-	if !ok {
-		t.Errorf("cdr opts %s.%s not a float64: %T", optKey, field, costMap[field])
-		return 0
-	}
-	return v
 }

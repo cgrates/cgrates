@@ -2615,7 +2615,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesMessage, MetaAttributes, MetaChargers, OptsCDRsExport, OptsCDRsRefund,
 	OptsCDRsRerate, MetaStats, OptsCDRsStore, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
-	OptsRoundingDecimals})
+	OptsRoundingDecimals, MetaOriginID, MetaAuthorize, MetaSession, MetaUsage, MetaDebit, MetaEEs, MetaUR})
 
 // Event Opts
 const (
