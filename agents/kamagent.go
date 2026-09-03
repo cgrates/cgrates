@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
-	"strings"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -139,12 +138,12 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 		return
 	}
 	authArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
-	var authReply sessions.V1AuthorizeReply
-	// take the error after calling SessionSv1.AuthorizeEvent
+	var reply sessions.V1ProcessEventReply
+	// take the error after calling SessionSv1.ProcessEvent
 	// and send it as parameter to AsKamAuthReply
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, ka.fltrS)
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1AuthorizeEvent, authArgs, &authReply)
-	if kar, err := kev.AsKamAuthReply(authArgs, &authReply, err); err != nil {
+	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent, authArgs, &reply)
+	if kar, err := kev.AsKamAuthReply(authArgs, &reply, err); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
 			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
@@ -184,15 +183,12 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 		return
 	}
 	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]any{utils.MetaInitiate: true}
-	}
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
 
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
-	var initReply sessions.V1InitSessionReply
-	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1InitiateSession,
-		cgrEv, &initReply); err != nil {
+	var reply sessions.V1ProcessEventReply
+	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent,
+		cgrEv, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
@@ -233,25 +229,17 @@ func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
 		return
 	}
 	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if cgrEv.APIOpts == nil {
-		cgrEv.APIOpts = map[string]any{utils.MetaTerminate: true}
+	if ka.kamCfg.CreateCdr {
+		cgrEv.APIOpts[utils.MetaEEs] = true
 	}
-	var reply string
+	var reply sessions.V1ProcessEventReply
 	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
-	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1TerminateSession,
+	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent,
 		cgrEv, &reply); err != nil {
 		utils.Logger.Err(
 			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		// no return here since we want CDR anyhow
-	}
-	if ka.kamCfg.CreateCdr || strings.Contains(kev[utils.CGRFlags], utils.MetaCDRs) {
-		if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR,
-			cgrEv, &reply); err != nil {
-			utils.Logger.Err(fmt.Sprintf("%s> failed processing CGREvent: %s, error: %s",
-				utils.KamailioAgent, utils.ToJSON(cgrEv), err.Error()))
-		}
 	}
 }
 

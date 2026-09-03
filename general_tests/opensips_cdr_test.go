@@ -113,6 +113,21 @@ func TestOpenSIPSCDR(t *testing.T) {
 	}
 }
 
+func cdrCostFloat(t testing.TB, cdr *utils.CDR, optKey, field string) float64 {
+	t.Helper()
+	costMap, ok := cdr.Opts[optKey].(map[string]any)
+	if !ok {
+		t.Errorf("cdr opts %s missing or not a map: %T", optKey, cdr.Opts[optKey])
+		return 0
+	}
+	v, ok := costMap[field].(float64)
+	if !ok {
+		t.Errorf("cdr opts %s.%s not a float64: %T", optKey, field, costMap[field])
+		return 0
+	}
+	return v
+}
+
 func httpGet(t *testing.T, url string) string {
 	t.Helper()
 	resp, err := http.Get(url)

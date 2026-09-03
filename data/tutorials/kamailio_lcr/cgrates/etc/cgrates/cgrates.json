@@ -5,23 +5,10 @@
   "sessions": {
     "enabled": true,
     "conns": {
-      "*accounts":    [ { "connIDs": [ "*localhost" ] } ],
-      "*attributes":  [ { "connIDs": [ "*localhost" ] } ],
-      "*cdrs":        [ { "connIDs": [ "*localhost" ] } ],
-      "*routes":      [ { "connIDs": [ "*localhost" ] } ]
-    }
-  },
-  "cdrs": {
-    "enabled": true,
-    "conns": {
       "*accounts":   [ { "connIDs": [ "*localhost" ] } ],
       "*attributes": [ { "connIDs": [ "*localhost" ] } ],
-      "*rates":      [ { "connIDs": [ "*localhost" ] } ]
-    },
-    "opts": {
-      "*attributes": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
-      "*rates": [ { "tenant": "*any", "filterIDs": [], "value": true } ],
-      "*store": [ { "tenant": "*any", "filterIDs": [], "value": true } ]
+      "*rates":      [ { "connIDs": [ "*localhost" ] } ],
+      "*routes":     [ { "connIDs": [ "*localhost" ] } ]
     }
   },
   "attributes": {
