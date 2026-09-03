@@ -76,7 +76,15 @@ func TestKamEvAsMapStringInterface(t *testing.T) {
 		"cgrDestination": "1002", "cgrAnswertime": "1419839310",
 		"cgrDuration": "3", "cgrPdd": "4",
 		utils.CGRRoute:           "supplier2",
-		utils.CGRDisconnectCause: "200"}
+		utils.CGRDisconnectCause: "200",
+		utils.MetaOriginID:       "origin-id",
+		utils.MetaAuthorize:      "true",
+		utils.MetaSession:        "false",
+		utils.MetaUsage:          "true",
+		utils.MetaDebit:          "false",
+		utils.MetaAccounts:       "true",
+		utils.MetaEEs:            "true",
+		utils.MetaUR:             "true"}
 	expMp := make(map[string]any)
 	expMp["cgrAccount"] = "1001"
 	expMp["cgrDuration"] = "3"
@@ -107,17 +115,37 @@ func TestKamEvAsCGREvent(t *testing.T) {
 		"cgrDestination": "1002", "cgrAnswertime": "1419839310",
 		"cgrDuration": "3", "cgrPdd": "4",
 		utils.CGRRoute:           "supplier2",
-		utils.CGRDisconnectCause: "200"}
+		utils.CGRDisconnectCause: "200",
+		utils.MetaOriginID:       "origin-id",
+		utils.MetaAuthorize:      "true",
+		utils.MetaSession:        "false",
+		utils.MetaUsage:          "true",
+		utils.MetaDebit:          "false",
+		utils.MetaAccounts:       "true",
+		utils.MetaEEs:            "true",
+		utils.MetaUR:             "true"}
 	expected := &utils.CGREvent{
 		Tenant: utils.FirstNonEmpty(kamEv[utils.Tenant],
 			cfg.GeneralCfg().DefaultTenant),
 		ID:    utils.UUIDSha1Prefix(),
 		Event: kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
+		APIOpts: map[string]any{
+			utils.MetaOriginID:  "origin-id",
+			utils.MetaAuthorize: "true",
+			utils.MetaSession:   "false",
+			utils.MetaUsage:     "true",
+			utils.MetaDebit:     "false",
+			utils.MetaAccounts:  "true",
+			utils.MetaEEs:       "true",
+			utils.MetaUR:        "true",
+		},
 	}
 	if rcv := kamEv.AsCGREvent(timezone, cfg.GeneralCfg().DefaultTenant, cfg.GeneralCfg().DefaultReqType); !reflect.DeepEqual(expected.Tenant, rcv.Tenant) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Tenant, rcv.Tenant)
 	} else if !reflect.DeepEqual(expected.Event, rcv.Event) {
 		t.Errorf("Expecting: %+v, received: %+v", expected.Event, rcv.Event)
+	} else if !reflect.DeepEqual(expected.APIOpts, rcv.APIOpts) {
+		t.Errorf("Expecting: %+v, received: %+v", expected.APIOpts, rcv.APIOpts)
 	}
 }
 
@@ -139,12 +167,15 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
-	authRply := &sessions.V1AuthorizeReply{
-		MaxUsage: utils.NewDecimalFromFloat64(5 * float64(time.Second)),
+	authRply := &sessions.V1ProcessEventReply{
+		AccountsUsage: map[string]time.Duration{
+			utils.MetaPrimary: 5 * time.Second,
+			"secondary":       3 * time.Second,
+		},
 	}
 	expected := &KamReply{
 		Event:    CGR_AUTH_REPLY,
-		MaxUsage: 5,
+		MaxUsage: 3,
 	}
 	if rcv, err := kamEv.AsKamAuthReply(authArgs, authRply, nil); err != nil {
 		t.Error(err)
@@ -162,22 +193,24 @@ func TestKamEvAsKamAuthReply(t *testing.T) {
 		Event:   kamEv.AsMapStringInterface(cfg.GeneralCfg().DefaultReqType),
 		APIOpts: kamEv.GetOptions(),
 	}
-	authRply = &sessions.V1AuthorizeReply{
-		Attributes: &attributes.ProcessEventReply{
-			AlteredFields: []*attributes.FieldsAltered{
-				{
-					MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
-					Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+	authRply = &sessions.V1ProcessEventReply{
+		Attributes: map[string]*attributes.ProcessEventReply{
+			utils.MetaPrimary: {
+				AlteredFields: []*attributes.FieldsAltered{
+					{
+						MatchedProfileID: "ATTR_1001_ACCOUNT_PROFILE",
+						Fields:           []string{"*req.Password", utils.MetaReq + utils.NestingSep + utils.RequestType},
+					},
 				},
-			},
-			CGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "TestKamEvAsKamAuthReply",
-				Event: map[string]any{
-					utils.Tenant:       "cgrates.org",
-					utils.AccountField: "1001",
-					"Password":         "check123",
-					utils.RequestType:  utils.MetaPrepaid,
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "TestKamEvAsKamAuthReply",
+					Event: map[string]any{
+						utils.Tenant:       "cgrates.org",
+						utils.AccountField: "1001",
+						"Password":         "check123",
+						utils.RequestType:  utils.MetaPrepaid,
+					},
 				},
 			},
 		},
