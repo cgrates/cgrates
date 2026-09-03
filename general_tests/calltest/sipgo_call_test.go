@@ -12,9 +12,18 @@ import (
 
 func TestSipgoUACBasicCall(t *testing.T) {
 	SipgoUAS{Port: 5094}.Start(t)
-	SipgoUAC{Addr: "127.0.0.1:5094"}.Call(t, CallParams{
+	var called bool
+	SipgoUAC{
+		Addr: "127.0.0.1:5094",
+		AfterACK: func() {
+			called = true
+		},
+	}.Call(t, CallParams{
 		To:       "test",
 		From:     "1001",
 		HoldTime: time.Second,
 	})
+	if !called {
+		t.Error("AfterACK was not called")
+	}
 }
