@@ -6,7 +6,9 @@
 package general_tests
 
 import (
+	"encoding/csv"
 	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -42,13 +44,16 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	exportDir := t.TempDir()
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
 		ConfigJSON: fmt.Sprintf(`{
+"ees": {"exporters": [{"id": "radius_usage", "exportPath": %q}]},
 "radiusAgent": {"clientDictionaries": {"*default": [%q]}}
-}`, dictDir+"/"),
-		DBCfg:    engine.InternalDBCfg,
-		Encoding: *utils.Encoding,
+}`, exportDir, dictDir+"/"),
+		DBCfg:            engine.InternalDBCfg,
+		Encoding:         *utils.Encoding,
+		GracefulShutdown: true,
 		// TpPath: filepath.Join(*utils.DataDir, "tariffplans", "radius_charging"),
 	}
 	client, cfg := ng.Run(t)
@@ -78,7 +83,7 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-1", usULIHex, radigo.AccessAccept)
 	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-2", euULIHex, radigo.AccessReject)
 
-	// auth is a dry run, it must not charge
+	// authorization must not debit the account
 	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(gb, 0), "US allowance after auth")
 	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(100), "US monetary after auth")
 
@@ -92,8 +97,6 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	sendAcct(t, cfg, radiusDict, usIMSI, "us-sess-2", "Stop", usULIHex, gb)
 	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(0, 0), "US allowance after overage")
 	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(92.5), "US monetary after 0.5GB overage")
-
-	checkCDRs(t, client, usIMSI, 0, 7.5) // us-sess-1 free, us-sess-2 overage
 
 	// EU plan.
 	setFilter(t, client, "FLTR_EU", []*engine.FilterRule{
@@ -149,9 +152,14 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	checkUnits(t, balanceUnits(t, client, brokeIMSI, "data_allowance"), utils.NewDecimal(0, 0), "broke allowance unchanged")
 	checkUnits(t, balanceUnits(t, client, brokeIMSI, "monetary"), utils.NewDecimalFromFloat64(5), "broke monetary unchanged")
 	checkCDRs(t, client, brokeIMSI)
+
+	ng.Stop(t)
+	checkRadiusUsageRecords(t, exportDir, usIMSI,
+		radiusUsageRecord{originID: "us-sess-1", usage: gb / 2, cost: 0},
+		radiusUsageRecord{originID: "us-sess-2", usage: gb, cost: 7.5})
 }
 
-func TestRadiusChargingRecurringFee(t *testing.T) {
+func TestChargingRecurringFee(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
@@ -160,15 +168,12 @@ func TestRadiusChargingRecurringFee(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	dictDir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dictDir, "dictionary.test"), []byte(radiusDict), 0644); err != nil {
-		t.Fatal(err)
-	}
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
-		ConfigJSON: fmt.Sprintf(`{
-"radiusAgent": {"clientDictionaries": {"*default": [%q]}}
-}`, dictDir+"/"),
+		ConfigJSON: `{
+"ees": {"enabled": false},
+"radiusAgent": {"enabled": false}
+}`,
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
 		// TpPath: filepath.Join(*utils.DataDir, "tariffplans", "radius_charging"),
@@ -206,13 +211,16 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dictDir, "dictionary.test"), []byte(radiusDict), 0644); err != nil {
 		t.Fatal(err)
 	}
+	exportDir := t.TempDir()
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
 		ConfigJSON: fmt.Sprintf(`{
+"ees": {"exporters": [{"id": "radius_usage", "exportPath": %q}]},
 "radiusAgent": {"clientDictionaries": {"*default": [%q]}}
-}`, dictDir+"/"),
-		DBCfg:    engine.InternalDBCfg,
-		Encoding: *utils.Encoding,
+}`, exportDir, dictDir+"/"),
+		DBCfg:            engine.InternalDBCfg,
+		Encoding:         *utils.Encoding,
+		GracefulShutdown: true,
 	}
 	client, cfg := ng.Run(t)
 
@@ -304,7 +312,7 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-1", usULIHex, radigo.AccessAccept)
 	sendAccessReqULI(t, cfg, radiusDict, usIMSI, "us-auth-2", euULIHex, radigo.AccessReject)
 
-	// auth is a dry run, it must not charge
+	// authorization must not debit the account
 	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(gb, 0), "allowance after auth")
 	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(100), "monetary after auth")
 
@@ -317,7 +325,10 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 	checkUnits(t, balanceUnits(t, client, usIMSI, "data_allowance"), utils.NewDecimal(0, 0), "allowance after overage")
 	checkUnits(t, balanceUnits(t, client, usIMSI, "monetary"), utils.NewDecimalFromFloat64(92.5), "monetary after overage")
 
-	checkCDRs(t, client, usIMSI, 0, 7.5)
+	ng.Stop(t)
+	checkRadiusUsageRecords(t, exportDir, usIMSI,
+		radiusUsageRecord{originID: "us-sess-1", usage: gb / 2, cost: 0},
+		radiusUsageRecord{originID: "us-sess-2", usage: gb, cost: 7.5})
 }
 
 const radiusDict = `
@@ -654,5 +665,89 @@ func checkCDRs(t *testing.T, c *birpc.Client, acctID string, wantCosts ...float6
 	slices.Sort(wantCosts)
 	if !slices.Equal(got, wantCosts) {
 		t.Fatalf("CDR costs for %s: got %v, want %v: %s", acctID, got, wantCosts, utils.ToJSON(cdrs))
+	}
+}
+
+type radiusUsageRecord struct {
+	originID string
+	usage    int64
+	cost     float64
+}
+
+func checkRadiusUsageRecords(t *testing.T, exportDir, account string, want ...radiusUsageRecord) {
+	t.Helper()
+	wantByOriginID := make(map[string]radiusUsageRecord, len(want))
+	for _, wantRecord := range want {
+		wantByOriginID[wantRecord.originID] = wantRecord
+	}
+	wantHeader := []string{"Account", "OriginID", "URID", "Usage", "AccountsCost"}
+	files, err := os.ReadDir(exportDir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, file := range files {
+		if file.IsDir() || filepath.Ext(file.Name()) != ".csv" {
+			continue
+		}
+		f, err := os.Open(filepath.Join(exportDir, file.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		rows, readErr := csv.NewReader(f).ReadAll()
+		closeErr := f.Close()
+		if readErr != nil {
+			t.Fatal(readErr)
+		}
+		if closeErr != nil {
+			t.Fatal(closeErr)
+		}
+		if len(rows) == 0 {
+			continue
+		}
+		if !slices.Equal(rows[0], wantHeader) {
+			t.Fatalf("usage record header: got %v, want %v", rows[0], wantHeader)
+		}
+		for _, row := range rows[1:] {
+			if len(row) != len(wantHeader) {
+				t.Fatalf("usage record has %d fields, want %d: %v", len(row), len(wantHeader), row)
+			}
+			if row[0] != account {
+				continue
+			}
+			wantRecord, ok := wantByOriginID[row[1]]
+			if !ok {
+				t.Fatalf("usage record for %s has unknown OriginID %q", account, row[1])
+			}
+			if row[2] != wantRecord.originID {
+				t.Errorf("usage record %s URID: got %q, want %q", wantRecord.originID, row[2], wantRecord.originID)
+			}
+			if row[3] != fmt.Sprint(wantRecord.usage) {
+				t.Errorf("usage record %s usage: got %q, want %d", wantRecord.originID, row[3], wantRecord.usage)
+			}
+			var accountsCost utils.EventCharges
+			if err := json.Unmarshal([]byte(row[4]), &accountsCost); err != nil {
+				t.Fatalf("usage record %s accounts cost: %v", wantRecord.originID, err)
+			}
+			if accountsCost.Abstracts == nil && accountsCost.Concretes == nil {
+				t.Fatalf("usage record %s has empty accounts cost", wantRecord.originID)
+			}
+			gotCost := accountsCost.Concretes
+			if gotCost == nil {
+				gotCost = utils.NewDecimal(0, 0)
+			}
+			wantCost := utils.NewDecimalFromFloat64(wantRecord.cost)
+			if gotCost.Compare(wantCost) != 0 {
+				t.Errorf("usage record %s cost: got %s, want %s", wantRecord.originID, gotCost, wantCost)
+			}
+			delete(wantByOriginID, wantRecord.originID)
+		}
+	}
+	if len(wantByOriginID) != 0 {
+		missing := make([]string, 0, len(wantByOriginID))
+		for originID := range wantByOriginID {
+			missing = append(missing, originID)
+		}
+		slices.Sort(missing)
+		t.Fatalf("missing usage records for %s: %v", account, missing)
 	}
 }

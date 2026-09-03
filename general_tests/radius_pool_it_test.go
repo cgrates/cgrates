@@ -32,13 +32,16 @@ func TestRadiusChargingPool(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dictDir, "dictionary.test"), []byte(radiusDict), 0644); err != nil {
 		t.Fatal(err)
 	}
+	exportDir := t.TempDir()
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
 		ConfigJSON: fmt.Sprintf(`{
+"ees": {"exporters": [{"id": "radius_usage", "exportPath": %q}]},
 "radiusAgent": {"clientDictionaries": {"*default": [%q]}}
-}`, dictDir+"/"),
-		DBCfg:    engine.InternalDBCfg,
-		Encoding: *utils.Encoding,
+}`, exportDir, dictDir+"/"),
+		DBCfg:            engine.InternalDBCfg,
+		Encoding:         *utils.Encoding,
+		GracefulShutdown: true,
 	}
 	client, cfg := ng.Run(t)
 
@@ -73,6 +76,14 @@ func TestRadiusChargingPool(t *testing.T) {
 	sendAcct(t, cfg, radiusDict, sim3, "pool-3", "Start", usULIHex, 0)
 	sendAcct(t, cfg, radiusDict, sim3, "pool-3", "Stop", usULIHex, 300*mb)
 	checkUnits(t, balanceUnits(t, client, sim3, "data"), utils.NewDecimal(gb-300*mb, 0), "sim3 own balance after pool empty")
+
+	ng.Stop(t)
+	checkRadiusUsageRecords(t, exportDir, sim1,
+		radiusUsageRecord{originID: "pool-1", usage: 600 * mb, cost: 0})
+	checkRadiusUsageRecords(t, exportDir, sim2,
+		radiusUsageRecord{originID: "pool-2", usage: 600 * mb, cost: 0})
+	checkRadiusUsageRecords(t, exportDir, sim3,
+		radiusUsageRecord{originID: "pool-3", usage: 300 * mb, cost: 0})
 }
 
 func setPoolAccount(t *testing.T, c *birpc.Client, id string, filterIDs []string, weight float64, units int64) {

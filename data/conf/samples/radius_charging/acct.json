@@ -19,10 +19,34 @@
           "*string:~*req.Acct-Status-Type:Stop"
         ],
         "flags": [
-          "*cdrs",
+          "*event",
           "*continue"
         ],
         "requestFields": [
+          {
+            "tag": "Accounts",
+            "path": "*opts.*accounts",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "Debit",
+            "path": "*opts.*debit",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "BlockerError",
+            "path": "*opts.*blockerError",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "tag": "EEs",
+            "path": "*opts.*ees",
+            "type": "*constant",
+            "value": "true"
+          },
           {
             "tag": "Account",
             "path": "*cgreq.Account",
@@ -46,6 +70,13 @@
           {
             "tag": "OriginID",
             "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "tag": "URID",
+            "path": "*opts.*urID",
             "type": "*variable",
             "value": "~*req.Acct-Session-Id",
             "mandatory": true
