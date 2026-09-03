@@ -1189,6 +1189,38 @@ func TestConfigSanityEventReader(t *testing.T) {
 	}
 }
 
+func TestConfigSanityFileExporterCacheTTL(t *testing.T) {
+	for _, test := range []struct {
+		name         string
+		exporterType string
+		limit        int
+	}{
+		{name: "disabled file CSV", exporterType: utils.MetaFileCSV},
+		{name: "disabled file FWV", exporterType: utils.MetaFileFWV},
+		{name: "enabled file CSV", exporterType: utils.MetaFileCSV, limit: -1},
+		{name: "enabled file FWV", exporterType: utils.MetaFileFWV, limit: -1},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			cfg := NewDefaultCGRConfig()
+			cfg.eesCfg.Enabled = true
+			cfg.eesCfg.Cache = map[string]*CacheParamCfg{
+				test.exporterType: {Limit: test.limit},
+			}
+			err := cfg.checkConfigSanity()
+			if test.limit == 0 {
+				if err != nil {
+					t.Error(err)
+				}
+				return
+			}
+			expectedErr := `<EEs> exporter type "` + test.exporterType + `" requires positive cache TTL, got 0s`
+			if err == nil || err.Error() != expectedErr {
+				t.Errorf("Expecting: %+q received: %+q", expectedErr, err)
+			}
+		})
+	}
+}
+
 func TestConfigSanityEventExporter(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 

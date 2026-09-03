@@ -911,11 +911,11 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 		}
 
-		// Check cache TTL for file exporters which require positive TTL as
-		// content is flushed only upon cache expiration.
+		// Check cache TTL for enabled file exporter caches since content is
+		// flushed only upon cache expiration.
 		for eeType, cacheCfg := range cfg.eesCfg.Cache {
 			if slices.Contains([]string{utils.MetaFileCSV, utils.MetaFileFWV}, eeType) {
-				if cacheCfg.TTL <= 0 {
+				if cacheCfg.Limit != 0 && cacheCfg.TTL <= 0 {
 					return fmt.Errorf("<%s> exporter type %q requires positive cache TTL, got %v",
 						utils.EEs, eeType, cacheCfg.TTL)
 				}
