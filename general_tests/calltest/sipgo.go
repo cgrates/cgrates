@@ -32,6 +32,7 @@ type SipgoUAC struct {
 	Addr     string            // proxy address, host:port
 	Headers  map[string]string // extra headers appended to the INVITE
 	OfferSDP bool              // send an inactive PCMU offer
+	AfterACK func()            // called after ACK while the dialog is active
 }
 
 func (u SipgoUAC) headers() []sip.Header {
@@ -94,6 +95,9 @@ func (u SipgoUAC) Call(t testing.TB, c CallParams) {
 	}
 	if err := dialog.Ack(ctx); err != nil {
 		t.Fatalf("sipgo uac %s->%s: ack: %v", fromUser, c.To, err)
+	}
+	if u.AfterACK != nil {
+		u.AfterACK()
 	}
 	select {
 	case <-time.After(c.HoldTime):
