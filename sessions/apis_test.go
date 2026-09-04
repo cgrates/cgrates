@@ -2034,6 +2034,188 @@ func TestSessionSBiRPCv1ProcessEventNotConnected(t *testing.T) {
 			},
 			expErr: "NOT_CONNECTED: ResourceS",
 		},
+		{
+			name: "ResourcesAllocate",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:             "originResAlloc",
+					utils.OptsSesBlockerError:      true,
+					utils.MetaResourcesAllocateCfg: true,
+				}},
+			expErr: "NOT_CONNECTED: ResourceS",
+		},
+		{
+			name: "ResourcesRelease",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:            "originResRelease",
+					utils.OptsSesBlockerError:     true,
+					utils.MetaResourcesReleaseCfg: true,
+				}},
+			expErr: "NOT_CONNECTED: ResourceS",
+		},
+		{
+			name: "AccountsDebit",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:         "originAcntDebit",
+					utils.OptsSesBlockerError:  true,
+					utils.MetaAccountsDebitCfg: true,
+					utils.MetaUsage:            1 * time.Minute,
+				}},
+			expErr: "NOT_CONNECTED: AccountS",
+		},
+		{
+			name: "Routes: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaRoutes:          true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "Stats: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaStats:           true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "Thresholds: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaThresholds:      true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "IPsAuthorize: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaIPsAuthorizeCfg: true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "Rates: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaRates:           true,
+					utils.MetaUsage:           time.Minute,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "ResourcesAllocate: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:             "originID",
+					utils.OptsSesBlockerError:      false,
+					utils.MetaResourcesAllocateCfg: true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "ResourcesRelease: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:            "originID",
+					utils.OptsSesBlockerError:     false,
+					utils.MetaResourcesReleaseCfg: true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "AccountsAuthorizeMaxAbstracts: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:             "originID",
+					utils.OptsSesBlockerError:      false,
+					utils.MetaAccountsAuthorizeCfg: true,
+					utils.MetaUsage:                time.Minute,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "AccountsRefund: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:          "originID",
+					utils.OptsSesBlockerError:   false,
+					utils.MetaAccountsRefundCfg: true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "EEs: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaEEs:             true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -2705,4 +2887,473 @@ func TestSessionSBiRPCv1ProcessEventEEs(t *testing.T) {
 			t.Errorf("Expected %v, received %v", expErr, err)
 		}
 	})
+}
+
+func TestSessionSBiRPCv1ProcessEventAccounting(t *testing.T) {
+	ctx := context.TODO()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.RateSv1CostForEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.RateProfileCost) = utils.RateProfileCost{Cost: utils.NewDecimalFromFloat64(1.0)}
+				return nil
+			},
+			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(60*time.Second), 0)}
+				return nil
+			},
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(90*time.Second), 0)}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	addInternalConn(sessions, cfg, utils.MetaRates, utils.RateSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaAccounts, utils.AccountSv1, clnt)
+	t.Run("Rates", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originID",
+				utils.MetaRunID:    "run1",
+				utils.MetaRates:    true,
+				utils.MetaUsage:    1 * time.Minute,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		if _, ok := reply.RatesCost["run1"]; !ok {
+			t.Error("Expected RatesCost for run1")
+		}
+	})
+	t.Run("Authorize", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:  "originID",
+				utils.MetaAccounts:  true,
+				utils.MetaAuthorize: true,
+				utils.MetaUsage:     60 * time.Second,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := 60 * time.Second
+		if !reflect.DeepEqual(reply.AccountsUsage[utils.MetaPrimary], expected) {
+			t.Errorf("Expected %#v, got %#v", expected, reply.AccountsUsage[utils.MetaPrimary])
+		}
+	})
+	t.Run("Debit", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originID",
+				utils.MetaAccounts: true,
+				utils.MetaDebit:    true,
+				utils.MetaUsage:    90 * time.Second,
+			},
+		}
+		var reply V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+		expected := 90 * time.Second
+		if !reflect.DeepEqual(reply.AccountsUsage[utils.MetaPrimary], expected) {
+			t.Errorf("Expected %#v, got %#v", expected, reply.AccountsUsage[utils.MetaPrimary])
+		}
+
+		args.APIOpts = map[string]any{
+			utils.MetaOriginID:         "originID",
+			utils.OptsSesBlockerError:  false,
+			utils.MetaAccountsDebitCfg: true,
+			utils.MetaUsage:            0 * time.Minute,
+		}
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+}
+
+func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
+	ctx := context.TODO()
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(90*time.Second), 0)}
+				return nil
+			},
+			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{
+					{
+						ChargerSProfile: "CHRG1",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "run1Ev",
+							Event:  map[string]any{utils.AccountField: "1001"},
+							APIOpts: map[string]any{
+								utils.MetaOriginID: "originID",
+								utils.MetaRunID:    "CHRG1",
+							},
+						},
+					},
+					{
+						ChargerSProfile: "CHRG2",
+						CGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "run1Ev",
+							Event:  map[string]any{utils.AccountField: "1001"},
+							APIOpts: map[string]any{
+								utils.MetaOriginID: "originID",
+								utils.MetaRunID:    "CHRG2",
+							},
+						},
+					},
+				}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- clnt
+	addInternalConn(sessions, cfg, utils.MetaAccounts, utils.AccountSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaChargers, utils.ChargerSv1, clnt)
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "sessInit",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaSession:  true,
+			utils.MetaChargers: true,
+		},
+	}
+
+	expS := &Session{
+		ID: "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+		OriginCGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "sessInit",
+			Event: map[string]any{
+				"Account": "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaCGRid:    "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+				utils.MetaChargers: true,
+				utils.MetaOriginID: "originID",
+				utils.MetaRunID:    "*primary",
+				utils.MetaSession:  true,
+				utils.MetaUsage:    0,
+			},
+		},
+		AutoChargeInterval: 0,
+	}
+	var reply V1ProcessEventReply
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+		t.Error(err)
+	}
+	cgrId := args.APIOpts[utils.MetaCGRid].(string)
+	sS := sessions.getActivateSession(cgrId)
+	if !reflect.DeepEqual(utils.ToJSON(sS), utils.ToJSON(expS)) {
+		t.Errorf("Expected %#+v, \nrecieved %#+v", expS, sS)
+	}
+	if got := len(sS.sRuns); got != 2 {
+		t.Errorf("Expected 2 sRuns, got %d", got)
+	}
+	args.APIOpts[utils.MetaTerminate] = true
+	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
+		t.Error(err)
+	}
+	if got := len(sessions.getSessions("originID", false)); got != 0 {
+		t.Errorf("Expected 0 active sessions, got %d", got)
+	}
+}
+
+func TestSessionSBiRPCv1ProcessEventNonBlockingParseErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	tests := []struct {
+		flag        string
+		blockerErr  any
+		expectedErr string
+	}{
+		{
+			flag:        utils.MetaChargers,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaSession,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaRoutes,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaStats,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaThresholds,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaIPs,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaRates,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaAccounts,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaResources,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaAuthorize,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaRefund,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaDebit,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaIPsAuthorizeCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaResourcesAuthorizeCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaResourcesAllocateCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaResourcesReleaseCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaAccountsAuthorizeCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaAccountsRefundCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaAccountsDebitCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaUR,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaEEs,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaRoutes,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaStats,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaThresholds,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaIPs,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaRates,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaAccounts,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaResources,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaAuthorize,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaRefund,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaDebit,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaIPsAuthorizeCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaResourcesAuthorizeCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaResourcesAllocateCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaResourcesReleaseCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaAccountsAuthorizeCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaAccountsRefundCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaAccountsDebitCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaUR,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaEEs,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.flag, func(t *testing.T) {
+			args := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: tt.blockerErr,
+					tt.flag:                   "test",
+				},
+			}
+			var reply V1ProcessEventReply
+			if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err == nil || err.Error() != tt.expectedErr {
+				t.Fatalf("Expected %v, received %v", tt.expectedErr, err)
+			}
+		})
+	}
 }
