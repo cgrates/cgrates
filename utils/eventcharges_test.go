@@ -3904,6 +3904,108 @@ func TestTruncateSimpleAbstracts(t *testing.T) {
 		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(59000, 0)) != 0 {
 		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
 	}
+
+	eC = &EventCharges{
+		Abstracts: NewDecimal(100, 0),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "chrg1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"chrg1": {
+				AccountID: "acc1",
+				BalanceID: "bal1",
+				Units:     NewDecimal(100, 0),
+				RatingID:  "rating1",
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"rating1": {
+				CompressFactor: 1,
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{},
+		Rates:       map[string]*IntervalRate{},
+		Accounts: map[string]*Account{
+			"acc1": {
+				Tenant: CGRateSorg,
+				ID:     "acc1",
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:    "bal1",
+						Type:  MetaAbstract,
+						Units: NewDecimal(100, 0),
+					},
+				},
+			},
+		},
+	}
+	atIdx = NewDecimal(60, 0)
+	if rstEc, err := eC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if eC.Abstracts.Compare(atIdx) != 0 ||
+		len(eC.Charges) != 1 ||
+		eC.Accounting[eC.Charges[0].ChargingID].Units.Compare(atIdx) != 0 {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", eC, atIdx)
+	} else if rstEc.Abstracts.Compare(NewDecimal(40, 0)) != 0 ||
+		len(rstEc.Charges) != 1 ||
+		rstEc.Accounting[rstEc.Charges[0].ChargingID].Units.Compare(NewDecimal(40, 0)) != 0 {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
+
+	eC = &EventCharges{
+		Abstracts: NewDecimal(30, 0),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "chrg1",
+				CompressFactor: 3,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"chrg1": {
+				AccountID: "acc1",
+				BalanceID: "bal1",
+				Units:     NewDecimal(10, 0),
+				RatingID:  "rating1",
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"rating1": {
+				CompressFactor: 1,
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{},
+		Rates:       map[string]*IntervalRate{},
+		Accounts: map[string]*Account{
+			"acc1": {
+				Tenant: CGRateSorg,
+				ID:     "acc1",
+				Balances: map[string]*Balance{
+					"bal1": {
+						ID:    "bal1",
+						Type:  MetaAbstract,
+						Units: NewDecimal(10, 0),
+					},
+				},
+			},
+		},
+	}
+	atIdx = NewDecimal(20, 0)
+	if rstEc, err := eC.Truncate(atIdx); err != nil {
+		t.Error(err)
+	} else if eC.Abstracts.Compare(atIdx) != 0 ||
+		len(eC.Charges) != 1 ||
+		eC.Charges[0].CompressFactor != 2 ||
+		eC.Charges[0].ChargingID != "chrg1" {
+		t.Errorf("Initial eC: %+v, atIndex: %s\n", eC, atIdx)
+	} else if rstEc.Abstracts.Compare(NewDecimal(10, 0)) != 0 ||
+		len(rstEc.Charges) != 1 ||
+		rstEc.Charges[0].CompressFactor != 1 ||
+		rstEc.Charges[0].ChargingID != "chrg1" {
+		t.Errorf("Rest eC: %+v, atIndex: %s\n", rstEc, atIdx)
+	}
 }
 
 func TestEventChargesAbstractConcretes(t *testing.T) {
