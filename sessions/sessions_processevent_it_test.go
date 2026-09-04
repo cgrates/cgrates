@@ -1061,7 +1061,7 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 		}
 	})
 
-	t.Run("terminateEventChargersSkipped", func(t *testing.T) {
+	t.Run("terminateEventChargersRun", func(t *testing.T) {
 		var rply V1ProcessEventReply
 		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
 			&utils.CGREvent{
@@ -1081,8 +1081,8 @@ func TestSessionSv1ProcessEventChargerSSessionTerminate(t *testing.T) {
 			}, &rply); err != nil {
 			t.Fatalf("ProcessEvent failed: %v", err)
 		}
-		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; hasDefault {
-			t.Errorf("expected RouteProfiles[*default] to be absent when *terminate=true, got: %v", rply.RouteProfiles)
+		if _, hasDefault := rply.RouteProfiles[utils.MetaDefault]; !hasDefault {
+			t.Errorf("expected RouteProfiles[*default] to be present when ChargerS runs with *terminate=true, got: %v", rply.RouteProfiles)
 		}
 	})
 }
@@ -3256,4 +3256,123 @@ func TestSessionSv1ProcessEventDebitMultipleAccounts(t *testing.T) {
 			t.Errorf("balances not debited correctly: balance1 = %s, balance2 =%s", bal1.Units.String(), bal2.Units.String())
 		}
 	})
+}
+
+func TestSessionSv1ProcessEventDebitBalanceFallback(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"Primary": {
+						ID:      "Primary",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(30 * time.Second)),
+					},
+					"Secondary": {
+						ID:      "Secondary",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(200 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("debit", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "fallbackEvent1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    90 * time.Second,
+					utils.MetaOriginID: "OriginIDFallback",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(debit): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 90*time.Second {
+			t.Errorf("AccountsUsage[*default] = %v, want 90s", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	} else {
+		if want := utils.NewDecimal(0, 0); acnt.Balances["Primary"].Units.Compare(want) != 0 {
+			t.Errorf("expected Primary fully consumed (0s), got: %+v", acnt.Balances["Primary"].Units)
+		}
+		if want := utils.NewDecimalFromFloat64(float64(140 * time.Second)); acnt.Balances["Secondary"].Units.Compare(want) != 0 {
+			t.Errorf("expected Secondary at 140s remaining, got: %+v", acnt.Balances["Secondary"].Units)
+		}
+	}
 }
