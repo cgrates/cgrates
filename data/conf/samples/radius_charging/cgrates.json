@@ -68,13 +68,6 @@
   },
   "sessions": {
     "enabled": true,
-    "opts": {
-      "*accounts": [
-        {
-          "Value": true
-        }
-      ]
-    },
     "conns": {
       "*accounts": [
         {
@@ -83,7 +76,7 @@
           ]
         }
       ],
-      "*cdrs": [
+      "*ees": [
         {
           "ConnIDs": [
             "*localhost"
@@ -91,6 +84,78 @@
         }
       ]
     }
+  },
+  "ees": {
+    "enabled": true,
+    "exporters": [
+      {
+        "id": "radius_usage",
+        "type": "*fileCSV",
+        "synchronous": true,
+        "fields": [
+          {
+            "tag": "Account",
+            "path": "*hdr.Account",
+            "type": "*constant",
+            "value": "Account"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*hdr.OriginID",
+            "type": "*constant",
+            "value": "OriginID"
+          },
+          {
+            "tag": "URID",
+            "path": "*hdr.URID",
+            "type": "*constant",
+            "value": "URID"
+          },
+          {
+            "tag": "Usage",
+            "path": "*hdr.Usage",
+            "type": "*constant",
+            "value": "Usage"
+          },
+          {
+            "tag": "AccountsCost",
+            "path": "*hdr.AccountsCost",
+            "type": "*constant",
+            "value": "AccountsCost"
+          },
+          {
+            "tag": "Account",
+            "path": "*exp.Account",
+            "type": "*variable",
+            "value": "~*req.Account"
+          },
+          {
+            "tag": "OriginID",
+            "path": "*exp.OriginID",
+            "type": "*variable",
+            "value": "~*opts.*originID"
+          },
+          {
+            "tag": "URID",
+            "path": "*exp.URID",
+            "type": "*variable",
+            "value": "~*opts.*urID"
+          },
+          {
+            "tag": "Usage",
+            "path": "*exp.Usage",
+            "type": "*variable",
+            "value": "~*req.Usage"
+          },
+          {
+            "tag": "AccountsCost",
+            "path": "*exp.AccountsCost",
+            "type": "*variable",
+            "value": "~*opts.*accountsCost"
+          }
+        ]
+      }
+    ]
   },
   "radiusAgent": {
     "enabled": true,
