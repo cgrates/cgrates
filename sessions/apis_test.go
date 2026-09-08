@@ -3001,6 +3001,56 @@ func TestSessionSBiRPCv1ProcessEventAccounting(t *testing.T) {
 			t.Error(err)
 		}
 	})
+
+	t.Run("Debit - MetaSession true", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Usage:        "10s",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originID",
+				utils.MetaSession:  true,
+				utils.MetaAccounts: true,
+				utils.MetaDebit:    true,
+			},
+		}
+		var reply2 V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply2); err != nil {
+			t.Error(err)
+		}
+		args.APIOpts[utils.MetaTerminate] = true
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply2); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("Debit - lclDebit", func(t *testing.T) {
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:     "originID",
+				utils.MetaSession:      true,
+				utils.MetaInterimUsage: 10 * time.Second,
+			},
+		}
+
+		var reply1 V1ProcessEventReply
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply1); err != nil {
+			t.Error(err)
+		}
+
+		args.APIOpts[utils.MetaAccounts] = true
+		args.APIOpts[utils.MetaDebit] = true
+		args.APIOpts[utils.MetaInterimConsumed] = 6 * time.Second
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply1); err != nil {
+			t.Error(err)
+		}
+	})
 }
 
 func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {

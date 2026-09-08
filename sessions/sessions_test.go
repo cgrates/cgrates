@@ -4,8 +4,10 @@
 package sessions
 
 import (
+	"bytes"
 	"net/netip"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
@@ -2967,6 +2969,252 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 		}
 		if sS.isSessionRegistered(cgrID, false) {
 			t.Error("expected session to be unregistered after successful termination")
+		}
+	})
+}
+
+func TestSetSTerminator(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	connMgr := engine.NewConnManager(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, connMgr, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	dm.SetCache(cacheS)
+	ctx := context.TODO()
+	sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
+	t.Run("Duration Errors", func(t *testing.T) {
+
+		tests := []struct {
+			name    string
+			opts    engine.MapEvent
+			optName string
+		}{
+			{
+				name: "TTL",
+				opts: engine.MapEvent{
+					utils.OptsSesTTL: "invalid",
+				},
+				optName: utils.OptsSesTTL,
+			},
+			{
+				name: "TTLMaxDelay",
+				opts: engine.MapEvent{
+					utils.OptsSesTTL:         "1s",
+					utils.OptsSesTTLMaxDelay: "invalid",
+				},
+				optName: utils.OptsSesTTLMaxDelay,
+			},
+			{
+				name: "TTLLastUsed",
+				opts: engine.MapEvent{
+					utils.OptsSesTTL:         "1s",
+					utils.OptsSesTTLMaxDelay: "0s",
+					utils.OptsSesTTLLastUsed: "invalid",
+				},
+				optName: utils.OptsSesTTLLastUsed,
+			},
+			{
+				name: "TTLLastUsage",
+				opts: engine.MapEvent{
+					utils.OptsSesTTL:          "1s",
+					utils.OptsSesTTLMaxDelay:  "0s",
+					utils.OptsSesTTLLastUsed:  "1s",
+					utils.OptsSesTTLLastUsage: "invalid",
+				},
+				optName: utils.OptsSesTTLLastUsage,
+			},
+			{
+				name: "TTLUsage",
+				opts: engine.MapEvent{
+					utils.OptsSesTTL:          "1s",
+					utils.OptsSesTTLMaxDelay:  "0s",
+					utils.OptsSesTTLLastUsed:  "1s",
+					utils.OptsSesTTLLastUsage: "1s",
+					utils.OptsSesTTLUsage:     "invalid",
+				},
+				optName: utils.OptsSesTTLUsage,
+			},
+		}
+
+		for _, tt := range tests {
+			t.Run(tt.name, func(t *testing.T) {
+				tmpLogger := utils.Logger
+				defer func() {
+					utils.Logger = tmpLogger
+				}()
+				var buf bytes.Buffer
+				utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
+				ss := &Session{
+					ID: "id",
+					OriginCGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "id1",
+						Event:  map[string]any{},
+						APIOpts: map[string]any{
+							utils.MetaOriginID: "id2",
+						},
+					},
+					SRuns: []*SRun{
+						{
+							CGREvent: &utils.CGREvent{
+								Event:   map[string]any{},
+								APIOpts: map[string]any{},
+							},
+							TotalUsage: utils.NewDecimal(90, 0),
+						},
+					},
+				}
+
+				sessions.setSTerminator(ctx, ss, tt.opts)
+				if ss.sTerminator != nil {
+					t.Errorf("Expected no sTerminator to be set, received %+v", ss.sTerminator)
+				}
+
+				expected := "cannot extract <" + tt.optName + ">"
+				if rcv := buf.String(); !strings.Contains(rcv, expected) {
+					t.Errorf("Expected log to contain %v, \nreceived %v", expected, rcv)
+				}
+			})
+		}
+	})
+
+	t.Run("Empty engine.MapEvent", func(t *testing.T) {
+		ss := &Session{
+			ID: "ssID",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ssID",
+				Event:  map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "ssID",
+				},
+			},
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Event:   map[string]any{},
+						APIOpts: map[string]any{},
+					},
+					TotalUsage: utils.NewDecimal(90, 0),
+				},
+			},
+		}
+
+		sessions.setSTerminator(ctx, ss, engine.MapEvent{})
+		if ss.sTerminator != nil {
+			t.Errorf("Expected no sTerminator to be set, received %+v", ss.sTerminator)
+		}
+	})
+
+	t.Run("OptsSesTTLMaxDelay not nil", func(t *testing.T) {
+		ss := &Session{
+			ID: "ssID",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ssID1",
+				Event:  map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "ssID2",
+				},
+			},
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Event:   map[string]any{},
+						APIOpts: map[string]any{},
+					},
+					TotalUsage: utils.NewDecimal(90, 0),
+				},
+			},
+		}
+		opts := engine.MapEvent{
+			utils.OptsSesTTL:          "1s",
+			utils.OptsSesTTLMaxDelay:  "1s",
+			utils.OptsSesTTLLastUsed:  "2s",
+			utils.OptsSesTTLLastUsage: "3s",
+			utils.OptsSesTTLUsage:     "4s",
+		}
+
+		sessions.setSTerminator(ctx, ss, opts)
+
+		if ss.sTerminator == nil {
+			t.Fatal("Expected sTerminator to be set")
+		}
+		if ss.sTerminator.timer == nil {
+			t.Error("Expected timer to be set")
+		}
+		if ss.sTerminator.endChan == nil {
+			t.Error("Expected endChan to be set")
+		}
+		if ss.sTerminator.ttl < 1*time.Second || ss.sTerminator.ttl >= 2*time.Second {
+			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.sTerminator.ttl)
+		}
+		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 2*time.Second {
+			t.Errorf("Expected ttlLastUsed 2s, received %+v", ss.sTerminator.ttlLastUsed)
+		}
+		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 3*time.Second {
+			t.Errorf("Expected ttlLastUsage 3s, received %+v", ss.sTerminator.ttlLastUsage)
+		}
+		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 4*time.Second {
+			t.Errorf("Expected ttlUsage 4s, received %+v", ss.sTerminator.ttlUsage)
+		}
+	})
+
+	t.Run("reset an existing terminator", func(t *testing.T) {
+		ss := &Session{
+			ID: "idS1",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "idS2",
+				Event:  map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "idS3",
+				},
+			},
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Event:   map[string]any{},
+						APIOpts: map[string]any{},
+					},
+					TotalUsage: utils.NewDecimal(90, 0),
+				},
+			},
+		}
+		ss.sTerminator = &sTerminator{
+			timer:        time.NewTimer(time.Hour),
+			endChan:      make(chan struct{}),
+			ttl:          time.Hour,
+			ttlLastUsed:  utils.DurationPointer(time.Second),
+			ttlUsage:     utils.DurationPointer(time.Second),
+			ttlLastUsage: utils.DurationPointer(time.Second),
+		}
+
+		sessions.setSTerminator(ctx, ss, engine.MapEvent{
+			utils.OptsSesTTL:          "5s",
+			utils.OptsSesTTLLastUsed:  "6s",
+			utils.OptsSesTTLLastUsage: "7s",
+			utils.OptsSesTTLUsage:     "8s",
+		})
+
+		if ss.sTerminator.ttl != 5*time.Second {
+			t.Errorf("Expected ttl 5s, received %s", ss.sTerminator.ttl)
+		}
+		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 6*time.Second {
+			t.Errorf("Expected ttlLastUsed 6s, received %+v", ss.sTerminator.ttlLastUsed)
+		}
+		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 7*time.Second {
+			t.Errorf("Expected ttlLastUsage 7s, received %+v", ss.sTerminator.ttlLastUsage)
+		}
+		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 8*time.Second {
+			t.Errorf("Expected ttlUsage 8s, received %+v", ss.sTerminator.ttlUsage)
 		}
 	})
 }
