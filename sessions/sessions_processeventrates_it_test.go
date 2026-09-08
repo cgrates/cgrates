@@ -1129,3 +1129,143 @@ func TestSessionSv1ProcessEventFilteredBalances(t *testing.T) {
 		}
 	}
 }
+
+func TestSessionSv1ProcessEventActivationIntervalBalance(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrActivationInterval",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaActivationInterval,
+						Element: "~*req.AnswerTime",
+						Values:  []string{"2027-01-01T00:00:00Z"},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"ActIntervalBal": {
+						ID:        "ActIntervalBal",
+						FilterIDs: []string{"FltrActivationInterval"},
+						Type:      utils.MetaAbstract,
+						Weights:   utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+					"FallbackBal": {
+						ID:      "FallbackBal",
+						Type:    utils.MetaConcrete,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimalFromFloat64(float64(time.Second)),
+								RecurrentFee: utils.NewDecimal(10, 2),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(100.0),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("BalanceDebit", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "skipActIntervalBal",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    10 * time.Second,
+					utils.MetaOriginID: "OriginIDActIntervalBalSkip",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(debit): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 10*time.Second {
+			t.Errorf("AccountsUsage[*default] = %v, want 10s", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+	wantActIntervalBal := utils.NewDecimalFromFloat64(float64(300 * time.Second))
+	if acnt.Balances["ActIntervalBal"].Units.Compare(wantActIntervalBal) != 0 {
+		t.Errorf("expected ActIntervalBal not consumed (not yet active), got: %+v", acnt.Balances["ActIntervalBal"].Units)
+	}
+	wantFallBackBal := utils.NewDecimalFromFloat64(99.0)
+	if acnt.Balances["FallbackBal"].Units.Compare(wantFallBackBal) != 0 {
+		t.Errorf("expected FallbackBal 99.0 after debit (100 - 10s*0.10), got: %+v", acnt.Balances["FallbackBal"].Units)
+	}
+
+}
