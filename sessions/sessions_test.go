@@ -2976,7 +2976,7 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 func TestSetSTerminator(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, nil, nil, cfg.DbCfg().Items)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	if err != nil {
 		t.Fatal(err)
 	}

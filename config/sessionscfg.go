@@ -110,7 +110,6 @@ type SessionSCfg struct {
 	Enabled             bool
 	ListenBiJSON        string
 	ListenBiGob         string
-	StoreSCosts         bool
 	SessionIndexes      utils.StringSet
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
@@ -446,9 +445,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.ListenBiGob != nil {
 		scfg.ListenBiGob = *jsnCfg.ListenBiGob
 	}
-	if jsnCfg.StoreSCosts != nil {
-		scfg.StoreSCosts = *jsnCfg.StoreSCosts
-	}
 	if jsnCfg.SessionIndexes != nil {
 		scfg.SessionIndexes = utils.NewStringSet(*jsnCfg.SessionIndexes)
 	}
@@ -562,7 +558,6 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.EnabledCfg:             scfg.Enabled,
 		utils.ListenBijsonCfg:        scfg.ListenBiJSON,
 		utils.ListenBigobCfg:         scfg.ListenBiGob,
-		utils.StoreSCostsCfg:         scfg.StoreSCosts,
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
 		utils.ClientProtocolCfg:      scfg.ClientProtocol,
 		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
@@ -641,7 +636,6 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:             scfg.Enabled,
 		ListenBiJSON:        scfg.ListenBiJSON,
-		StoreSCosts:         scfg.StoreSCosts,
 		ClientProtocol:      scfg.ClientProtocol,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
@@ -803,7 +797,6 @@ type SessionSJsonCfg struct {
 	Enabled             *bool                      `json:"enabled"`
 	ListenBiJSON        *string                    `json:"listenBiJSON"`
 	ListenBiGob         *string                    `json:"listenBiGob"`
-	StoreSCosts         *bool                      `json:"storeSessionCosts"`
 	SessionIndexes      *[]string                  `json:"sessionIndexes"`
 	ClientProtocol      *float64                   `json:"clientProtocol"`
 	ChannelSyncInterval *string                    `json:"channelSyncInterval"`
@@ -961,9 +954,6 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if v1.ListenBiGob != v2.ListenBiGob {
 		d.ListenBiGob = utils.StringPointer(v2.ListenBiGob)
-	}
-	if v1.StoreSCosts != v2.StoreSCosts {
-		d.StoreSCosts = utils.BoolPointer(v2.StoreSCosts)
 	}
 	if !v1.SessionIndexes.Equals(v2.SessionIndexes) {
 		d.SessionIndexes = utils.SliceStringPointer(v2.SessionIndexes.AsSlice())

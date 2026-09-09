@@ -618,7 +618,6 @@ const CGRATES_CFG_JSON = `
 	"listenBiJSON": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
 	"listenBiGob": "",			// address where to listen for bidirectional GOB-RPC requests
 	"debitInterval": "0s",			// interval to perform debits on.
-	"storeSessionCosts": false,		// enable storing of the session costs within CDRs
 	"defaultUsage":{			// the usage if the event is missing the usage field
 			"*any": "3h",
 			"*voice": "3h",

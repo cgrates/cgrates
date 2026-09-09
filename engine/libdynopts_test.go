@@ -2088,7 +2088,6 @@ func TestSessionDynamicOptsFromJson(t *testing.T) {
 			"enabled": true,
 			"listenBiJSON": "127.0.0.1:2018",
 			"replicationConns": ["*localhost"],
-			"storeSessionCosts": true,
             "minDurLowBalance": "1s",
 			"clientProtocol": 2.0,
 			"terminateAttempts": 10,

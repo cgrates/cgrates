@@ -320,29 +320,25 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 	}
 	tenant := s.OriginCGREvent.Tenant
 	dP := s.OriginCGREvent.AsDataProvider()
-	// post the CDRs
-	if cdrsConns, errC := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaCDRs, tenant, dP, nil, sS.fltrS); errC != nil {
+	// post the URs using ees
+	if ees, errEEs := engine.GetBoolOpts(ctx, tenant, dP, nil,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.EEs,
+		utils.MetaEEs); errEEs != nil {
 		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error resolving CDRs connections: %s", utils.SessionS, errC.Error()))
-	} else if len(cdrsConns) != 0 {
-		var reply string
+			fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+				utils.SessionS, errEEs.Error(), s.asCGREvents(), utils.EEs))
+	} else if ees {
 		for _, cgrEv := range s.asCGREvents() {
 			if cgrEv.APIOpts == nil {
 				cgrEv.APIOpts = make(map[string]any)
 			}
 			cgrEv.APIOpts[utils.MetaAttributes] = false
 			cgrEv.APIOpts[utils.MetaChargers] = false
-			if unratedReqs.HasField( // order additional rating for unrated request types
-				engine.MapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.RequestType)) {
-				// argsProc.Flags = append(argsProc.Flags, utils.MetaRALs)
-			}
 			cgrEv.SetCloneable(true)
-			if err = sS.connMgr.Call(ctx, cdrsConns,
-				utils.CDRsV1ProcessEvent, cgrEv, &reply); err != nil {
+			if _, err = sS.eesProcessEvent(ctx, cgrEv); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf(
-						"<%s> could not post CDR for event %s, err: %s",
-						utils.SessionS, utils.ToJSON(cgrEv), err.Error()))
+					fmt.Sprintf("<%s> error: %s processing event: %+v with %s",
+						utils.SessionS, err.Error(), cgrEv, utils.EEs))
 			}
 		}
 	}
@@ -1620,13 +1616,6 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 		// 	// compute the event cost before saving the SessionCost
 		// 	// add here to be applied for messages also
 		// 	sr.EventCost.Compute()
-		// 	if sS.cgrCfg.SessionSCfg().StoreSCosts {
-		// 		if err := sS.storeSCost(s, sRunIdx); err != nil {
-		// 			utils.Logger.Warning(
-		// 				fmt.Sprintf("<%s> failed storing session cost for <%s>, srIdx: <%d>, error: <%s>",
-		// 					utils.SessionS, s.OptsStart[utils.MetaOriginID], sRunIdx, err.Error()))
-		// 		}
-		// 	}
 
 		// 	// set cost fields
 		// 	sr.Event[utils.Cost] = sr.EventCost.GetCost()

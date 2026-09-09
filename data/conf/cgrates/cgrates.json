@@ -521,7 +521,6 @@
 // 	"attributes_conns": [],			// connections to AttributeS for altering event fields <""|*internal|$rpc_conns_id>
 // 	"replicationConns": [],		// replicate sessions towards these session services
 // 	"debitInterval": "0s",			// interval to perform debits on.
-// 	"storeSessionCosts": false,		// enable storing of the session costs within CDRs
 // 	"defaultUsage":{			// the usage if the event is missing the usage field
 // 			"*any": "3h",
 // 			"*voice": "3h",
