@@ -29,6 +29,11 @@ type erEvent struct {
 	rawEvent map[string]any
 	cgrEvent *utils.CGREvent
 	rdrCfg   *config.EventReaderCfg
+	// onDone, when set, is called with the result of processEvent. Readers whose
+	// transport acknowledges messages attach it here instead of settling when their
+	// own read returns: a reader hands the event to this channel and returns
+	// immediately, so anything it decides locally describes PARSING, not processing.
+	onDone func(error)
 }
 
 // NewERService instantiates the ERService
@@ -97,6 +102,12 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> reading event: <%s> from reader: <%s> got error: <%v>",
 					utils.ERs, utils.ToJSON(erEv.cgrEvent), erEv.rdrCfg.ID, err))
+			}
+			// Settle the transport on the outcome of the work. Deliberately before
+			// exportRawEvent: an export failure is a side-channel problem and must not
+			// cause redelivery of an event that was processed.
+			if erEv.onDone != nil {
+				erEv.onDone(err)
 			}
 			if err = erS.exportRawEvent(erEv, err != nil); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(

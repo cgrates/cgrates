@@ -21,6 +21,10 @@ import (
 	"github.com/nats-io/nats.go/jetstream"
 )
 
+// natsMaxDeliver bounds how many times JetStream redelivers a message this reader
+// failed to process, instead of the server default of unlimited.
+const natsMaxDeliver = 3
+
 // NewNatsER return a new amqp event reader
 func NewNatsER(cfg *config.CGRConfig, cfgIdx int,
 	rdrEvents, partialEvents chan *erEvent, rdrErr chan error,
@@ -81,16 +85,26 @@ func (rdr *NatsER) Serve() error {
 		return err
 	}
 
-	handleMessage := func(msgData []byte) {
+	// onDone, when non-nil, settles the transport for one message. Only the JetStream
+	// path supplies it; a core NATS subscription has nothing to acknowledge.
+	handleMessage := func(msgData []byte, onDone func(error)) {
 		if rdr.Config().ConcurrentReqs != -1 {
 			rdr.cap <- struct{}{}
 		}
 		go func() {
-			handlerErr := rdr.processMessage(msgData)
+			queued, handlerErr := rdr.processMessage(msgData, onDone)
 			if handlerErr != nil {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> processing message %s error: %s",
 						utils.ERs, string(msgData), handlerErr.Error()))
+			}
+			// Exactly one settlement per message. If the event reached the events
+			// channel the drain loop owns it; otherwise settle here. A message the
+			// reader's own filters reject arrives with queued=false and a nil error and
+			// is ACKED: it was consumed deliberately, and leaving it unsettled would
+			// redeliver it until MaxDeliver.
+			if !queued && onDone != nil {
+				onDone(handlerErr)
 			}
 
 			if rdr.Config().ConcurrentReqs != -1 {
@@ -111,7 +125,7 @@ func (rdr *NatsER) Serve() error {
 		// Subscribe to the appropriate NATS subject.
 		if !rdr.jetStream {
 			_, err = nc.QueueSubscribe(rdr.subject, rdr.queueID, func(msg *nats.Msg) {
-				handleMessage(msg.Data)
+				handleMessage(msg.Data, nil)
 			})
 			if err != nil {
 				nc.Drain()
@@ -135,7 +149,15 @@ func (rdr *NatsER) Serve() error {
 			cons, err = js.CreateOrUpdateConsumer(ctx, rdr.streamName, jetstream.ConsumerConfig{
 				FilterSubject: rdr.subject,
 				Durable:       rdr.consumerName,
-				AckPolicy:     jetstream.AckAllPolicy,
+				// AckExplicit rather than AckAll: handlers run concurrently and finish
+				// out of order, and under AckAll acknowledging sequence N acknowledges
+				// every message up to N, so one late success would silently acknowledge
+				// earlier failures.
+				AckPolicy: jetstream.AckExplicitPolicy,
+				// Bound redelivery: many reader errors are terminal (no profile matches
+				// the event), so an unbounded Nak loop would be no better than never
+				// acknowledging at all.
+				MaxDeliver: natsMaxDeliver,
 			})
 			if err != nil {
 				nc.Drain()
@@ -144,7 +166,17 @@ func (rdr *NatsER) Serve() error {
 			}
 
 			_, err = cons.Consume(func(msg jetstream.Msg) {
-				handleMessage(msg.Data())
+				handleMessage(msg.Data(), func(handlerErr error) {
+					settle, verb := msg.Ack, "ack"
+					if handlerErr != nil {
+						settle, verb = msg.Nak, "nak"
+					}
+					if settleErr := settle(); settleErr != nil {
+						utils.Logger.Warning(
+							fmt.Sprintf("<%s> failed to %s message: %s",
+								utils.ERs, verb, settleErr.Error()))
+					}
+				})
 			})
 			if err != nil {
 				nc.Drain()
@@ -167,7 +199,11 @@ func (rdr *NatsER) Serve() error {
 	return nil
 }
 
-func (rdr *NatsER) processMessage(msg []byte) (err error) {
+// processMessage builds the event and hands it to the events channel. queued reports
+// whether it got that far: only then does the drain loop own onDone. Every other exit —
+// a decode error, a filter error, or a filter that legitimately rejects the message —
+// leaves the caller to settle, because nothing downstream will ever see the event.
+func (rdr *NatsER) processMessage(msg []byte, onDone func(error)) (queued bool, err error) {
 	var decodedMessage map[string]any
 	if err = json.Unmarshal(msg, &decodedMessage); err != nil {
 		return
@@ -201,8 +237,9 @@ func (rdr *NatsER) processMessage(msg []byte) (err error) {
 		cgrEvent: cgrEv,
 		rawEvent: rawEvent,
 		rdrCfg:   rdr.Config(),
+		onDone:   onDone,
 	}
-	return
+	return true, nil
 }
 
 func (rdr *NatsER) processOpts() error {
