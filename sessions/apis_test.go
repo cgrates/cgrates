@@ -3189,6 +3189,16 @@ func TestSessionSBiRPCv1ProcessEventNonBlockingParseErrors(t *testing.T) {
 		expectedErr string
 	}{
 		{
+			flag:        utils.OptsSesBlockerError,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaTerminate,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
 			flag:        utils.MetaChargers,
 			blockerErr:  true,
 			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,

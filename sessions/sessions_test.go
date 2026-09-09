@@ -3217,4 +3217,78 @@ func TestSetSTerminator(t *testing.T) {
 			t.Errorf("Expected ttlUsage 8s, received %+v", ss.sTerminator.ttlUsage)
 		}
 	})
+
+	t.Run("Manual termination", func(t *testing.T) {
+		sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
+		ss := &Session{
+			ID: "sessionID",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "sessionID",
+				Event:  map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "sessionID",
+				},
+			},
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Event:   map[string]any{},
+						APIOpts: map[string]any{},
+					},
+					TotalUsage: utils.NewDecimal(90, 0),
+				},
+			},
+		}
+		opts := engine.MapEvent{
+			utils.OptsSesTTL: "1s",
+		}
+		sessions.registerSession(ss, false)
+		sessions.setSTerminator(ctx, ss, opts)
+		ss.sTerminator.endChan <- struct{}{}
+
+		if !sessions.isSessionRegistered(ss.ID, false) {
+			t.Error("Expected session to remain registered since termination was manual")
+		}
+	})
+
+	t.Run("Automatic termination", func(t *testing.T) {
+		sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
+		ss := &Session{
+			ID: "ssID",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "ssID",
+				Event:  map[string]any{},
+				APIOpts: map[string]any{
+					utils.MetaOriginID: "ssID",
+				},
+			},
+			SRuns: []*SRun{
+				{
+					CGREvent: &utils.CGREvent{
+						Event:   map[string]any{},
+						APIOpts: map[string]any{},
+					},
+					TotalUsage: utils.NewDecimal(90, 0),
+				},
+			},
+		}
+		opts := engine.MapEvent{
+			utils.OptsSesTTL:          "1s",
+			utils.OptsSesTTLLastUsage: "0s",
+		}
+		sessions.registerSession(ss, false)
+		sessions.setSTerminator(ctx, ss, opts)
+
+		select {
+		case <-time.After(3 * time.Second):
+			t.Fatal("timeout")
+		case <-ss.sTerminator.endChan:
+		}
+
+		if sessions.isSessionRegistered(ss.ID, false) {
+			t.Error("Expected session to be unregistered after automatic termination")
+		}
+	})
 }
