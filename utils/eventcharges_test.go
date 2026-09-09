@@ -47,6 +47,22 @@ func TestECMergeAbstractsEmpty(t *testing.T) {
 	}
 }
 
+func TestECMergeAbstractsNil(t *testing.T) {
+	ec := &EventCharges{
+		Abstracts: NewDecimal(1, 1),
+		Concretes: NewDecimal(1, 1),
+	}
+	expected := &EventCharges{
+		Abstracts: NewDecimal(1, 1),
+		Concretes: NewDecimal(1, 1),
+	}
+
+	ec.Merge(nil, nil)
+	if !reflect.DeepEqual(expected, ec) {
+		t.Errorf("\nExpected: <%+v>, \nReceived: <%+v>", expected, ec)
+	}
+}
+
 func TestECMergeAbstracts(t *testing.T) {
 	ec1 := &EventCharges{
 		Abstracts: NewDecimal(1, 1),
@@ -5608,5 +5624,166 @@ func TestEventChargesGetRatingForPath(t *testing.T) {
 				t.Errorf("Expected <%+v>, received <%+v>", tt.want, rcv)
 			}
 		})
+	}
+}
+
+func TestAccountChargeFieldAsInterface(t *testing.T) {
+	accCharge := &AccountCharge{
+		AccountID:       "2343000000000123",
+		BalanceID:       "DATA1",
+		Units:           NewDecimal(40000, 0),
+		UnitFactorID:    "UF1",
+		BalanceLimit:    NewDecimal(0, 0),
+		RatingID:        "877a74e",
+		JoinedChargeIDs: []string{"JC1"},
+	}
+
+	tests := []struct {
+		name    string
+		fldPath []string
+		want    any
+		wantErr string
+	}{
+		{
+			name:    "AccountID",
+			fldPath: []string{"AccountID"},
+			want:    "2343000000000123",
+		},
+		{
+			name:    "BalanceID",
+			fldPath: []string{"BalanceID"},
+			want:    "DATA1",
+		},
+		{
+			name:    "Units",
+			fldPath: []string{"Units"},
+			want:    NewDecimal(40000, 0),
+		},
+		{
+			name:    "UnitFactorID",
+			fldPath: []string{"UnitFactorID"},
+			want:    "UF1",
+		},
+		{
+			name:    "BalanceLimit",
+			fldPath: []string{"BalanceLimit"},
+			want:    NewDecimal(0, 0),
+		},
+		{
+			name:    "RatingID",
+			fldPath: []string{"RatingID"},
+			want:    "877a74e",
+		},
+		{
+			name:    "JoinedChargeIDs",
+			fldPath: []string{"JoinedChargeIDs"},
+			want:    []string{"JC1"},
+		},
+		{
+			name:    "JoinedChargeIDs[0]",
+			fldPath: []string{"JoinedChargeIDs[0]"},
+			want:    "JC1",
+		},
+		{
+			name:    "Empty field",
+			fldPath: []string{""},
+			wantErr: "unsupported field prefix: <>",
+		},
+		{
+			name:    "No fields",
+			fldPath: []string{},
+			wantErr: "NOT_FOUND",
+		},
+		{
+			name:    "Nil fieldPath",
+			fldPath: nil,
+			wantErr: "NOT_FOUND",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := accCharge.FieldAsInterface(tt.fldPath)
+			if err != nil && err.Error() != tt.wantErr {
+				t.Errorf("Expected %v, recieved %v", tt.wantErr, err)
+			}
+
+			if !reflect.DeepEqual(rcv, tt.want) {
+				t.Errorf("Expected %v, recieved %v", tt.want, rcv)
+			}
+		})
+	}
+}
+
+func TestEventChargesString(t *testing.T) {
+	ec := &EventCharges{
+		Abstracts: NewDecimal(300000, 0),
+		Charges: []*ChargeEntry{
+			{
+				ChargingID:     "97aa08e",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*AccountCharge{
+			"97aa08e": {
+				AccountID:    "2343000000000123",
+				BalanceID:    "DATA1",
+				Units:        NewDecimal(50000, 0),
+				UnitFactorID: "UF2",
+				BalanceLimit: NewDecimal(0, 0),
+				RatingID:     "877a74e",
+			},
+		},
+		UnitFactors: map[string]*UnitFactor{
+			"UF1": {
+				Factor: NewDecimal(100, 0),
+			},
+		},
+		Rating: map[string]*RateSInterval{
+			"877a74e": {
+				Increments: []*RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "3365d99",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*IntervalRate{
+			"3365d99": {
+				RecurrentFee: NewDecimal(0, 0),
+			},
+		},
+		Accounts: map[string]*Account{
+			"2343000000000123": {
+				Tenant:    CGRateSorg,
+				ID:        "2343000000000123",
+				FilterIDs: []string{"*string:~*req.IMSI:2343000000000123"},
+				Balances: map[string]*Balance{
+					"DATA1": {
+						ID: "DATA1",
+						Weights: []*DynamicWeight{
+							{
+								Weight: 5,
+							},
+						},
+						Type:  MetaAbstract,
+						Units: NewDecimal(700*1000, 0),
+						CostIncrements: []*CostIncrement{
+							{
+								Increment: NewDecimal(1, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	exp := `{"Abstracts":300000,"Concretes":null,"Charges":[{"ChargingID":"97aa08e","CompressFactor":1}],"Accounting":{"97aa08e":{"AccountID":"2343000000000123","BalanceID":"DATA1","Units":50000,"BalanceLimit":0,"UnitFactorID":"UF2","AttributeIDs":null,"RatingID":"877a74e","JoinedChargeIDs":null}},"UnitFactors":{"UF1":{"FilterIDs":null,"Factor":100}},"Rating":{"877a74e":{"IntervalStart":null,"Increments":[{"IncrementStart":null,"RateIntervalIndex":0,"RateID":"3365d99","CompressFactor":1,"Usage":null}],"CompressFactor":1}},"Rates":{"3365d99":{"IntervalStart":null,"FixedFee":null,"RecurrentFee":0,"Unit":null,"Increment":null}},"Accounts":{"2343000000000123":{"Tenant":"cgrates.org","ID":"2343000000000123","FilterIDs":["*string:~*req.IMSI:2343000000000123"],"Weights":null,"Blockers":null,"Opts":null,"Balances":{"DATA1":{"ID":"DATA1","FilterIDs":null,"Weights":[{"FilterIDs":null,"Weight":5}],"Blockers":null,"Type":"*abstract","Units":700000,"UnitFactors":null,"Opts":null,"CostIncrements":[{"FilterIDs":null,"Increment":1,"FixedFee":null,"RecurrentFee":null}],"AttributeIDs":null,"RateProfileIDs":null}},"ThresholdIDs":null}}}`
+	rcv := ec.String()
+	if !reflect.DeepEqual(rcv, exp) {
+		t.Errorf("Expected %v, \n recieved %v", exp, rcv)
 	}
 }
