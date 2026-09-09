@@ -596,7 +596,6 @@ func TestSmgJsonCfg(t *testing.T) {
 		Enabled:             utils.BoolPointer(false),
 		ListenBiJSON:        utils.StringPointer("127.0.0.1:2014"),
 		ListenBiGob:         utils.StringPointer(""),
-		StoreSCosts:         utils.BoolPointer(false),
 		SessionIndexes:      &[]string{},
 		ClientProtocol:      utils.Float64Pointer(1.0),
 		ChannelSyncInterval: utils.StringPointer("0"),

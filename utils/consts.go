@@ -2008,7 +2008,6 @@ const (
 	ListenBigobCfg         = "listenBiGob"
 	ReplicationConnsCfg    = "replicationConns"
 	RemoteConnsCfg         = "remoteConns"
-	StoreSCostsCfg         = "storeSessionCosts"
 	SessionIndexesCfg      = "sessionIndexes"
 	ClientProtocolCfg      = "clientProtocol"
 	ChannelSyncIntervalCfg = "channelSyncInterval"

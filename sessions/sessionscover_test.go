@@ -1054,59 +1054,6 @@ dm.SetCache(engine.Cache)
 	ss.debitStop <- struct{}{}
 }
 
-func TestStoreSCost(t *testing.T) {
-	log.SetOutput(io.Discard)
-	engine.Cache.Clear(nil)
-	testMock1 := &testMockClients{
-		calls: map[string]func(args any, reply any) error{
-			utils.CDRsV1StoreSessionCost: func(args any, reply any) error {
-				return utils.ErrExists
-			},
-		},
-	}
-
-	sMock := make(chan birpc.ClientConnector, 1)
-	sMock <- testMock1
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Conns[utils.MetaCDRs] = []*config.DynamicConns{
-		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs)}},
-	}
-	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
-dm.SetCache(engine.Cache)
-	connMgr := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCDRs): sMock})
-	connMgr.SetCache(engine.Cache)
-
-	sessions := NewSessionS(cfg, dm, connMgr)
-
-	ss := &Session{
-		CGRID:  "CGRID",
-		Tenant: "cgrates.org",
-		SRuns: []*SRun{
-			{
-				Event: engine.NewMapEvent(nil),
-				CD: &engine.CallDescriptor{
-					TimeStart: time.Date(2020, 07, 21, 10, 0, 0, 0, time.UTC),
-					TimeEnd:   time.Date(2020, 07, 21, 12, 0, 0, 0, time.UTC),
-				},
-				EventCost: &engine.EventCost{
-					Usage:          utils.DurationPointer(5 * time.Hour),
-					Charges:        []*engine.ChargingInterval{},
-					AccountSummary: &engine.AccountSummary{},
-				},
-			},
-		},
-		chargeable: true,
-	}
-
-	expected := "cannot find last active ChargingInterval"
-	if err := sessions.storeSCost(ss, 0); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestRefundSession(t *testing.T) {
 	log.SetOutput(io.Discard)
 	engine.Cache.Clear(nil)
@@ -2176,7 +2123,6 @@ dm.SetCache(engine.Cache)
 
 	engine.Cache.Clear(nil)
 	//totalUsage will be empty
-	sessions.cgrCfg.SessionSCfg().StoreSCosts = true
 	if err := sessions.endSession(ss, nil, utils.DurationPointer(time.Hour),
 		utils.TimePointer(activationTime), false); err != nil {
 		t.Error(err)
