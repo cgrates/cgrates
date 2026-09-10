@@ -1022,3 +1022,127 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 			ToJSON(expected), ToJSON(apAct))
 	}
 }
+
+func TestAPDiktatFieldAsInterface(t *testing.T) {
+	apd := &APDiktat{
+		ID:        "d1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: DynamicWeights{
+			&DynamicWeight{
+				Weight: 10.0,
+			},
+		},
+		Blockers: DynamicBlockers{
+			{
+				Blocker: false,
+			},
+		},
+		Opts: map[string]any{
+			"*balancePath": "~*balance.TestBalance.Value",
+		},
+	}
+
+	testcases := []struct {
+		name   string
+		fields []string
+		exp    any
+		expErr string
+	}{
+		{
+			name:   "empty",
+			fields: []string{},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "nil",
+			fields: nil,
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "ID",
+			fields: []string{"ID"},
+			exp:    "d1",
+		},
+		{
+			name:   "FilterIDs",
+			fields: []string{"FilterIDs"},
+			exp:    `["*string:~*req.Account:1001"]`,
+		},
+		{
+			name:   "FilterIDs[0]",
+			fields: []string{"FilterIDs[0]"},
+			exp:    "*string:~*req.Account:1001",
+		},
+		{
+			name:   "FilterIDs[err]: parsing error",
+			fields: []string{"FilterIDs[err]"},
+			exp:    "",
+			expErr: `strconv.Atoi: parsing "err": invalid syntax`,
+		},
+		{
+			name:   "Opts[0]",
+			fields: []string{"Opts[0]"},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "FilterIDs[1]",
+			fields: []string{"FilterIDs[1]"},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Weights",
+			fields: []string{"Weights"},
+			exp:    `[{"FilterIDs":null,"Weight":10}]`,
+		},
+		{
+			name:   "Weights: Error case",
+			fields: []string{"Weights", "*Weight", "test"},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Opts",
+			fields: []string{"Opts"},
+			exp:    `{"*balancePath":"~*balance.TestBalance.Value"}`,
+		},
+		{
+			name:   "Opts.*balancePath",
+			fields: []string{"Opts", "*balancePath"},
+			exp:    "~*balance.TestBalance.Value",
+		},
+		{
+			name:   "Opts: Error case",
+			fields: []string{"Opts", "*balancePath", "test"},
+			exp:    "",
+			expErr: "WRONG_PATH",
+		},
+		{
+			name:   "Opts[1]: NOT_FOUND",
+			fields: []string{"Opts[1]", "*balancePath", "test"},
+			exp:    "",
+			expErr: "NOT_FOUND",
+		},
+		{
+			name:   "Blockers",
+			fields: []string{"Blockers"},
+			exp:    `[{"FilterIDs":null,"Blocker":false}]`,
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			val, err := apd.FieldAsString(tc.fields)
+			if err != nil && err.Error() != tc.expErr {
+				t.Errorf("Expected %v \n, recieved %v", tc.expErr, err)
+			}
+
+			if !reflect.DeepEqual(tc.exp, val) {
+				t.Errorf("Expected: %v,\nreceived: %v", tc.exp, val)
+			}
+		})
+	}
+}
