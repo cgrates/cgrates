@@ -1544,8 +1544,6 @@ const (
 
 // SessionS APIs
 const (
-	SessionSv1AuthorizeEvent             = "SessionSv1.AuthorizeEvent"
-	SessionSv1AuthorizeEventWithDigest   = "SessionSv1.AuthorizeEventWithDigest"
 	SessionSv1InitiateSession            = "SessionSv1.InitiateSession"
 	SessionSv1InitiateSessionWithDigest  = "SessionSv1.InitiateSessionWithDigest"
 	SessionSv1UpdateSession              = "SessionSv1.UpdateSession"
