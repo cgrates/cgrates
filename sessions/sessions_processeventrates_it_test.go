@@ -1269,3 +1269,283 @@ func TestSessionSv1ProcessEventActivationIntervalBalance(t *testing.T) {
 	}
 
 }
+
+func TestSessionSv1ProcessEventBlockerBalanceStopsDebit(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		// LogBuffer: new(bytes.Buffer),
+	}
+
+	client, _ := ng.Run(t)
+
+	// t.Cleanup(func() {
+	// 	if ng.LogBuffer != nil {
+	// 		fmt.Println(ng.LogBuffer)
+	// 	}
+	// })
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"BalBlocker": {
+						ID:      "BalBlocker",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						Blockers: utils.DynamicBlockers{
+							{Blocker: true},
+						},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(5 * time.Second)),
+					},
+					"BalFallback": {
+						ID:      "BalFallback",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("DebitWithBlockedBalance", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "debitBlocker",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    20 * time.Second,
+					utils.MetaOriginID: "OriginIDBlocker",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+
+		if err == nil {
+			usage, ok := rply.AccountsUsage[utils.MetaDefault]
+			if !ok {
+				t.Fatal("AccountsUsage missing *default")
+			}
+			if usage != 5*time.Second {
+				t.Errorf("expected debit stopped at 5s due to Blocker, got %v debited", usage)
+			}
+		} else {
+			t.Logf("err): %v", err)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	if want := utils.NewDecimalFromFloat64(0); acnt.Balances["BalBlocker"].Units.Compare(want) != 0 {
+		t.Errorf("expected BalBlocker fully consumed (0s), got: %+v", acnt.Balances["BalBlocker"].Units)
+	}
+
+	if want := utils.NewDecimalFromFloat64(float64(300 * time.Second)); acnt.Balances["BalFallback"].Units.Compare(want) != 0 {
+		t.Errorf("BalFallback  used despite Blocker, expected 300s, got: %+v",
+			acnt.Balances["BalFallback"].Units)
+	}
+}
+
+func TestSessionSv1ProcessEventBlockerBalanceWeights(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"BalFirst": {
+						ID:      "BalFirst",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(5 * time.Second)),
+					},
+					"BalSecondBlocked": {
+						ID:      "BalSecondBlocked",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 5}},
+						Blockers: utils.DynamicBlockers{
+							{Blocker: true},
+						},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(5 * time.Second)),
+					},
+					"BalThirdFallback": {
+						ID:      "BalThirdFallback",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 1}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("DebitWithThreeBalancesStopsAtBlocker", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "debitMidBlocker",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    20 * time.Second,
+					utils.MetaOriginID: "OriginIDMidBlocker",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply)
+		if err != nil {
+			t.Fatalf("ProcessEvent: %v", err)
+		}
+
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 10*time.Second {
+			t.Errorf("expected total debit stopped at 10s (5s+5s with the two usable balances), got %v", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	if want := utils.NewDecimalFromFloat64(0); acnt.Balances["BalFirst"].Units.Compare(want) != 0 {
+		t.Errorf("expected BalFirst fully consumed (0s) due to weight order, got: %+v",
+			acnt.Balances["BalFirst"].Units)
+	}
+
+	if want := utils.NewDecimalFromFloat64(0); acnt.Balances["BalSecondBlocked"].Units.Compare(want) != 0 {
+		t.Errorf("expected BalSecondBlocked fully consumed (0s), got: %+v",
+			acnt.Balances["BalSecondBlocked"].Units)
+	}
+
+	if want := utils.NewDecimalFromFloat64(float64(300 * time.Second)); acnt.Balances["BalThirdFallback"].Units.Compare(want) != 0 {
+		t.Errorf("BalThirdFallback was used despite Blocker on BalSecondBlocked, expected at 300s, got: %+v",
+			acnt.Balances["BalThirdFallback"].Units)
+	}
+}
