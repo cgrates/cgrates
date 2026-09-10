@@ -420,8 +420,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 			consts: map[string]string{
 				"ActivateSessions":           utils.SessionSv1ActivateSessions,
 				"AlterSession":               utils.SessionSv1AlterSession,
-				"AuthorizeEvent":             utils.SessionSv1AuthorizeEvent,
-				"AuthorizeEventWithDigest":   utils.SessionSv1AuthorizeEventWithDigest,
 				"DeactivateSessions":         utils.SessionSv1DeactivateSessions,
 				"DisconnectPeer":             utils.SessionSv1DisconnectPeer,
 				"ForceDisconnect":            utils.SessionSv1ForceDisconnect,
