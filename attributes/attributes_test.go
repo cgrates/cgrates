@@ -1580,6 +1580,44 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 	}
 }
 
+func TestAttributeEventReplyDigestSkipOptions(t *testing.T) {
+	for _, tc := range []struct {
+		name          string
+		alteredFields []*FieldsAltered
+	}{
+		{
+			name: "same profile",
+			alteredFields: []*FieldsAltered{{
+				Fields: []string{"*opts.*originID", "*opts.*usage", "*req.attr1", "*req.attr2"},
+			}},
+		},
+		{
+			name: "previous profile",
+			alteredFields: []*FieldsAltered{
+				{Fields: []string{"*opts.*originID", "*opts.*usage"}},
+				{Fields: []string{"*req.attr1", "*req.attr2"}},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			reply := &ProcessEventReply{
+				AlteredFields: tc.alteredFields,
+				CGREvent: &utils.CGREvent{
+					Event: map[string]any{"attr1": "value1", "attr2": "value2"},
+					APIOpts: map[string]any{
+						"*originID": "call1",
+						"*usage":    "60s",
+					},
+				},
+			}
+			want := "attr1:value1,attr2:value2"
+			if got := reply.Digest(); got != want {
+				t.Errorf("Digest() = %q, want %q", got, want)
+			}
+		})
+	}
+}
+
 func TestAttributeIndexer(t *testing.T) {
 	//refresh the DM
 	if err := dmAtr.DB()[utils.MetaDefault].Flush(""); err != nil {

@@ -113,13 +113,13 @@ type FieldsAltered struct {
 // Digest returns the altered fields serialized as
 // fldName1:fldVal1,fldName2:fldVal2.
 func (r *ProcessEventReply) Digest() (rplyDigest string) {
-	for idx, altered := range r.AlteredFields {
-		for idxFlds, fldName := range altered.Fields {
+	for _, altered := range r.AlteredFields {
+		for _, fldName := range altered.Fields {
 			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
 			if _, has := r.CGREvent.Event[fldName]; !has {
 				continue //maybe removed
 			}
-			if idx != 0 || idxFlds != 0 {
+			if rplyDigest != "" {
 				rplyDigest += utils.FieldsSep
 			}
 			fldStrVal, _ := r.CGREvent.FieldAsString(fldName)
