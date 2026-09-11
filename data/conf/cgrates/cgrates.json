@@ -820,7 +820,8 @@
 // 			"reconnects": 5,
 // 			"maxReconnectInterval": ""
 // 		}
-// 	]
+// 	],
+// 	"requestProcessors": []			// generic request processors, mapping the Kamailio events via templates
 // },
 
 

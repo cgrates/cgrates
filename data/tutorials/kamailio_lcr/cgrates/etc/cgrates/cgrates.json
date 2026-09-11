@@ -44,7 +44,69 @@
     "conns": {
       "*sessions": [ { "connIDs": [ "*bijsonLocalhost" ] } ]
     },
-    "createCDR": false
+    "createCDR": false,
+    "requestProcessors": [
+      {
+        "id": "Authorize",
+        "filters": [ "*string:~*req.event:CGR_AUTH_REQUEST" ],
+        "flags": [ "*sessions" ],
+        "requestFields": [
+          { "tag": "TransactionIndex", "path": "*cgreq.trIndex", "type": "*variable",
+            "value": "~*req.trIndex" },
+          { "tag": "TransactionLabel", "path": "*cgreq.trLabel", "type": "*variable",
+            "value": "~*req.trLabel" },
+          { "tag": "ReplyRoute", "path": "*cgreq.replyRoute", "type": "*variable",
+            "value": "~*req.replyRoute" },
+          { "tag": "OptOriginID", "path": "*opts.*originID", "type": "*variable",
+            "value": "~*req.*originID" },
+          { "tag": "OptAuthorize", "path": "*opts.*authorize", "type": "*variable",
+            "value": "~*req.*authorize" },
+          { "tag": "OptAttributes", "path": "*opts.*attributes", "type": "*variable",
+            "value": "~*req.*attributes" },
+          { "tag": "OptRoutes", "path": "*opts.*routes", "type": "*variable",
+            "value": "~*req.*routes" },
+          { "tag": "OptAccounts", "path": "*opts.*accounts", "type": "*variable",
+            "value": "~*req.*accounts" },
+          { "tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+            "value": "~*req.OriginID" },
+          { "tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+            "value": "~*vars.OriginHost" },
+          { "tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+            "value": "~*req.Account" },
+          { "tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+            "value": "~*req.Destination" },
+          { "tag": "Usage", "path": "*cgreq.Usage", "type": "*composed",
+            "value": "~*req.Usage;s" }
+        ],
+        "replyFields": [
+          { "tag": "Event", "path": "*rep.Event", "type": "*variable",
+            "value": "~*req.replyRoute" },
+          { "tag": "TransactionIndex", "path": "*rep.TransactionIndex", "type": "*variable",
+            "value": "~*req.trIndex" },
+          { "tag": "TransactionLabel", "path": "*rep.TransactionLabel", "type": "*variable",
+            "value": "~*req.trLabel" },
+          { "tag": "Error", "path": "*rep.Error", "type": "*variable",
+            "value": "~*cgrep.Error" },
+          { "tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
+            "value": "~*vars.MaxUsage{*durationSeconds}" },
+          { "tag": "RouteID", "path": "*rep.Routes", "type": "*variable",
+            "value": "~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteID" },
+          { "tag": "RouteParameters", "path": "*rep.Routes", "type": "*composed",
+            "filters": [ "*notempty:~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteParameters:" ],
+            "value": ":;~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteParameters" }
+        ]
+      },
+      {
+        "id": "CallStart",
+        "filters": [ "*string:~*req.event:CGR_CALL_START" ],
+        "flags": [ "*sessions" ]
+      },
+      {
+        "id": "CallEnd",
+        "filters": [ "*string:~*req.event:CGR_CALL_END" ],
+        "flags": [ "*sessions" ]
+      }
+    ]
   },
   "admins": {
     "enabled": true
