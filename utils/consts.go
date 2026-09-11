@@ -1544,7 +1544,6 @@ const (
 
 // SessionS APIs
 const (
-	SessionSv1InitiateSessionWithDigest  = "SessionSv1.InitiateSessionWithDigest"
 	SessionSv1SyncSessions               = "SessionSv1.SyncSessions"
 	SessionSv1ProcessMessage             = "SessionSv1.ProcessMessage"
 	SessionSv1ProcessEvent               = "SessionSv1.ProcessEvent"

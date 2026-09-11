@@ -20,11 +20,6 @@ type SessionSv1 struct {
 	sS *sessions.SessionS
 }
 
-func (ssv1 *SessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1InitReplyWithDigest) error {
-	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(ctx, args, rply)
-}
-
 func (ssv1 *SessionSv1) SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	rply *string) error {
 	return ssv1.sS.BiRPCv1SyncSessions(ctx, &utils.TenantWithAPIOpts{}, rply)
