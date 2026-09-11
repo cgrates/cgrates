@@ -34,7 +34,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	// RPC caching
 	if sS.cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit != 0 {
-		cacheKey := utils.ConcatenatedKey(utils.SessionSv1AuthorizeEvent, apiArgs.ID)
+		cacheKey := utils.ConcatenatedKey(utils.SessionSv1ProcessEvent, apiArgs.ID)
 		unlock := sS.cache.LockRPCResponse(cacheKey) // RPC caching needs to be atomic
 		defer unlock()
 
