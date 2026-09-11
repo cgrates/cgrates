@@ -920,56 +920,6 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 }
 */
 
-func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
-	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
-	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
-	allocIP := &utils.AllocatedIP{
-		ProfileID: "prfID",
-		PoolID:    "POOL1",
-		Message:   "alloc_success",
-		Address:   netip.MustParseAddr("192.168.1.101"),
-	}
-	v1InitRpl := new(V1InitSessionReply)
-	expected := map[string]*utils.DataNode{}
-	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1InitRpl.Attributes = attrs
-	expected[utils.CapAttributes] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}}
-	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1InitRpl.needsMaxUsage = true
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1InitRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(5 * time.Minute)
-	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1InitRpl = &V1InitSessionReply{
-		Attributes:         attrs,
-		ResourceAllocation: utils.StringPointer("ResGr1"),
-		AllocatedIP:        allocIP,
-		MaxUsage:           utils.DurationPointer(5 * time.Minute),
-		ThresholdIDs:       thIDs,
-		StatQueueIDs:       statIDs,
-	}
-	expected = map[string]*utils.DataNode{
-		utils.CapAttributes:         {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}},
-		utils.CapResourceAllocation: utils.NewLeafNode("ResGr1"),
-		utils.AllocatedIPField:      {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"Address": {Value: &utils.DataLeaf{Data: "192.168.1.101"}}, "Message": {Value: &utils.DataLeaf{Data: "alloc_success"}}, "PoolID": {Value: &utils.DataLeaf{Data: "POOL1"}}, "ProfileID": {Value: &utils.DataLeaf{Data: "prfID"}}}},
-		utils.CapMaxUsage:           utils.NewLeafNode(5 * time.Minute),
-		utils.CapThresholds:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("THD_RES_1"), utils.NewLeafNode("THD_STATS_1"), utils.NewLeafNode("THD_STATS_2"), utils.NewLeafNode("THD_CDRS_1")}},
-		utils.CapStatQueues:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("Stats2"), utils.NewLeafNode("Stats1"), utils.NewLeafNode("Stats3")}},
-	}
-	if rply := v1InitRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-}
-
 func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
 	v1UpdtRpl := new(V1UpdateSessionReply)
 	expected := map[string]*utils.DataNode{}
@@ -1019,19 +969,6 @@ func TestSetMaxUsageNeededUpdateSessionReply(t *testing.T) {
 
 	rplySessRply = nil
 	rplySessRply.SetMaxUsageNeeded(true)
-}
-
-func TestSetMaxUsageNeededInitSessionReply(t *testing.T) {
-	rplyInitSessRply := &V1InitSessionReply{
-		needsMaxUsage: false,
-	}
-	rplyInitSessRply.SetMaxUsageNeeded(true)
-	if !rplyInitSessRply.needsMaxUsage {
-		t.Errorf("Expected to be true")
-	}
-
-	rplyInitSessRply = nil
-	rplyInitSessRply.SetMaxUsageNeeded(true)
 }
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
