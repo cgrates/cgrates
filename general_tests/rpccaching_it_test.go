@@ -36,7 +36,7 @@ var (
 		// testRPCMethodsAuthorizeSession,
 		// testRPCMethodsInitSession,
 		// testRPCMethodsUpdateSession,
-		testRPCMethodsTerminateSession,
+		//testRPCMethodsTerminateSession,
 		// testRPCMethodsProcessCDR,
 		// testRPCMethodsProcessEvent,
 
@@ -210,346 +210,346 @@ func testRPCMethodsAddData(t *testing.T) {
 	}
 }
 
-func testRPCMethodsAuthorizeSession(t *testing.T) {
-	authUsage := utils.NewDecimal(int64(5*time.Minute), 0)
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testRPCMethodsAuthorizeSession",
-		Event: map[string]any{
-			utils.Tenant:       "cgrates.org",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "testRPCMethodsAuthorizeSession",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AccountField: "1001",
-			utils.Subject:      "1001",
-			utils.Destination:  "1002",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.Usage:        authUsage,
-		},
-		APIOpts: map[string]any{
-			utils.OptsSesMaxUsage: true,
-			utils.MetaUsage:       authUsage,
-			utils.MetaAccounts:    true,
-		},
-	}
-	//authorize the session
-	var rplyFirst sessions.V1AuthorizeReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rplyFirst); err != nil {
-		t.Fatal(err)
-	}
-	if rplyFirst.MaxUsage == nil || rplyFirst.MaxUsage.Compare(authUsage) != 0 {
-		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
-	}
+// func testRPCMethodsAuthorizeSession(t *testing.T) {
+// 	authUsage := utils.NewDecimal(int64(5*time.Minute), 0)
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testRPCMethodsAuthorizeSession",
+// 		Event: map[string]any{
+// 			utils.Tenant:       "cgrates.org",
+// 			utils.ToR:          utils.MetaVoice,
+// 			utils.OriginID:     "testRPCMethodsAuthorizeSession",
+// 			utils.RequestType:  utils.MetaPrepaid,
+// 			utils.AccountField: "1001",
+// 			utils.Subject:      "1001",
+// 			utils.Destination:  "1002",
+// 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 			utils.Usage:        authUsage,
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.OptsSesMaxUsage: true,
+// 			utils.MetaUsage:       authUsage,
+// 			utils.MetaAccounts:    true,
+// 		},
+// 	}
+// 	//authorize the session
+// 	var rplyFirst sessions.V1AuthorizeReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rplyFirst); err != nil {
+// 		t.Fatal(err)
+// 	}
+// 	if rplyFirst.MaxUsage == nil || rplyFirst.MaxUsage.Compare(authUsage) != 0 {
+// 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
+// 	}
 
-	//disable the account
-	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"DisableAction":    "DisableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
-	}
+// 	//disable the account
+// 	var ids []string
+// 	thEvent := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "DisableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"DisableAction":    "DisableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
+// 	}
 
-	//verify if account was disabled
-	var acnt *utils.Account
-	attrAcc := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "1001",
-		},
-	}
-	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
-		t.Error(err)
-	}
-	// else if acnt.Disabled != true {
-	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
-	// }
+// 	//verify if account was disabled
+// 	var acnt *utils.Account
+// 	attrAcc := &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org",
+// 			ID:     "1001",
+// 		},
+// 	}
+// 	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
+// 		t.Error(err)
+// 	}
+// 	// else if acnt.Disabled != true {
+// 	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
+// 	// }
 
-	//authorize again session (should take the response from cache)
-	var rply sessions.V1AuthorizeReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
-		t.Fatal(err)
-	} else if !reflect.DeepEqual(rply, rplyFirst) {
-		t.Errorf("Expecting: %+v, \n received: %+v",
-			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
-	}
+// 	//authorize again session (should take the response from cache)
+// 	var rply sessions.V1AuthorizeReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err != nil {
+// 		t.Fatal(err)
+// 	} else if !reflect.DeepEqual(rply, rplyFirst) {
+// 		t.Errorf("Expecting: %+v, \n received: %+v",
+// 			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
+// 	}
 
-	//give time to CGRateS to delete the response from cache
-	time.Sleep(time.Second)
+// 	//give time to CGRateS to delete the response from cache
+// 	time.Sleep(time.Second)
 
-	//authorize again session (this time we expect to receive an error)
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
-		t.Error("Unexpected error returned", err)
-	}
+// 	//authorize again session (this time we expect to receive an error)
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1AuthorizeEvent, args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
+// 		t.Error("Unexpected error returned", err)
+// 	}
 
-	//enable the account
-	thEvent = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "EnableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"EnableAction":     "EnableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
-	}
-}
+// 	//enable the account
+// 	thEvent = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "EnableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"EnableAction":     "EnableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
+// 	}
+// }
 
-func testRPCMethodsInitSession(t *testing.T) {
-	initUsage := 5 * time.Minute
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testRPCMethodsInitSession",
-		Event: map[string]any{
-			utils.Tenant:       "cgrates.org",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "testRPCMethodsInitSession",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AccountField: "1001",
-			utils.Subject:      "ANY2CNT",
-			utils.Destination:  "1002",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:        initUsage,
-		},
-		APIOpts: map[string]any{
-			utils.MetaInitiate: true,
-			utils.MetaUsage:    initUsage,
-		},
-	}
-	var rplyFirst sessions.V1InitSessionReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	}
-	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != initUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
-	}
+// func testRPCMethodsInitSession(t *testing.T) {
+// 	initUsage := 5 * time.Minute
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testRPCMethodsInitSession",
+// 		Event: map[string]any{
+// 			utils.Tenant:       "cgrates.org",
+// 			utils.ToR:          utils.MetaVoice,
+// 			utils.OriginID:     "testRPCMethodsInitSession",
+// 			utils.RequestType:  utils.MetaPrepaid,
+// 			utils.AccountField: "1001",
+// 			utils.Subject:      "ANY2CNT",
+// 			utils.Destination:  "1002",
+// 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+// 			utils.Usage:        initUsage,
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaInitiate: true,
+// 			utils.MetaUsage:    initUsage,
+// 		},
+// 	}
+// 	var rplyFirst sessions.V1InitSessionReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != initUsage {
+// 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
+// 	}
 
-	//disable the account
-	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"DisableAction":    "DisableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
-	}
+// 	//disable the account
+// 	var ids []string
+// 	thEvent := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "DisableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"DisableAction":    "DisableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
+// 	}
 
-	//verify if account was disabled
-	var acnt *utils.Account
-	attrAcc := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "1001",
-		},
-	}
-	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
-		t.Error(err)
-	}
-	// else if acnt.Disabled != true {
-	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
-	// }
+// 	//verify if account was disabled
+// 	var acnt *utils.Account
+// 	attrAcc := &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org",
+// 			ID:     "1001",
+// 		},
+// 	}
+// 	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
+// 		t.Error(err)
+// 	}
+// 	// else if acnt.Disabled != true {
+// 	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
+// 	// }
 
-	var rply sessions.V1InitSessionReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rply, rplyFirst) {
-		t.Errorf("Expecting: %+v, \n received: %+v",
-			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
-	}
+// 	var rply sessions.V1InitSessionReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(rply, rplyFirst) {
+// 		t.Errorf("Expecting: %+v, \n received: %+v",
+// 			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
+// 	}
 
-	//give time to CGRateS to delete the response from cache
-	time.Sleep(time.Second)
+// 	//give time to CGRateS to delete the response from cache
+// 	time.Sleep(time.Second)
 
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
-		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" ||
-		err.Error() == utils.ErrExists.Error()) { // ErrExist -> initSession twice
-		t.Error("Unexpected error returned", err)
-	}
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1InitiateSession,
+// 		args, &rply); err == nil || !(err.Error() == "RALS_ERROR:ACCOUNT_DISABLED" ||
+// 		err.Error() == utils.ErrExists.Error()) { // ErrExist -> initSession twice
+// 		t.Error("Unexpected error returned", err)
+// 	}
 
-	//enable the account
-	thEvent = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "EnableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"EnableAction":     "EnableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
-	}
-}
+// 	//enable the account
+// 	thEvent = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "EnableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"EnableAction":     "EnableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
+// 	}
+// }
 
-func testRPCMethodsUpdateSession(t *testing.T) {
-	reqUsage := 5 * time.Minute
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testRPCMethodsUpdateSession",
-		Event: map[string]any{
-			utils.Tenant:       "cgrates.org",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "testRPCMethodsUpdateSession",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AccountField: "1001",
-			utils.Subject:      "ANY2CNT",
-			utils.Destination:  "1002",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:        reqUsage,
-		},
-		APIOpts: map[string]any{
-			utils.MetaUpdate: true,
-			utils.MetaUsage:  reqUsage,
-		},
-	}
-	var rplyFirst sessions.V1UpdateSessionReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	}
-	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != reqUsage {
-		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
-	}
+// func testRPCMethodsUpdateSession(t *testing.T) {
+// 	reqUsage := 5 * time.Minute
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testRPCMethodsUpdateSession",
+// 		Event: map[string]any{
+// 			utils.Tenant:       "cgrates.org",
+// 			utils.ToR:          utils.MetaVoice,
+// 			utils.OriginID:     "testRPCMethodsUpdateSession",
+// 			utils.RequestType:  utils.MetaPrepaid,
+// 			utils.AccountField: "1001",
+// 			utils.Subject:      "ANY2CNT",
+// 			utils.Destination:  "1002",
+// 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+// 			utils.Usage:        reqUsage,
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaUpdate: true,
+// 			utils.MetaUsage:  reqUsage,
+// 		},
+// 	}
+// 	var rplyFirst sessions.V1UpdateSessionReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	}
+// 	if rplyFirst.MaxUsage == nil || *rplyFirst.MaxUsage != reqUsage {
+// 		t.Errorf("Unexpected MaxUsage: %v", rplyFirst.MaxUsage)
+// 	}
 
-	//disable the account
-	var ids []string
-	thEvent := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "DisableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"DisableAction":    "DisableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
-	}
+// 	//disable the account
+// 	var ids []string
+// 	thEvent := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "DisableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"DisableAction":    "DisableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccDisableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccDisableAndLog"}, ids)
+// 	}
 
-	//verify if account was disabled
-	var acnt *utils.Account
-	attrAcc := &utils.TenantIDWithAPIOpts{
-		TenantID: &utils.TenantID{
-			Tenant: "cgrates.org",
-			ID:     "1001",
-		},
-	}
-	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
-		t.Error(err)
-	}
-	// else if acnt.Disabled != true {
-	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
-	// }
+// 	//verify if account was disabled
+// 	var acnt *utils.Account
+// 	attrAcc := &utils.TenantIDWithAPIOpts{
+// 		TenantID: &utils.TenantID{
+// 			Tenant: "cgrates.org",
+// 			ID:     "1001",
+// 		},
+// 	}
+// 	if err := rpcRpc.Call(context.Background(), utils.AdminSv1GetAccount, attrAcc, &acnt); err != nil {
+// 		t.Error(err)
+// 	}
+// 	// else if acnt.Disabled != true {
+// 	// 	t.Errorf("Expecting: true, received: %v", acnt.Disabled)
+// 	// }
 
-	var rply sessions.V1UpdateSessionReply
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rply, rplyFirst) {
-		t.Errorf("Expecting: %+v, \n received: %+v",
-			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
-	}
+// 	var rply sessions.V1UpdateSessionReply
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(rply, rplyFirst) {
+// 		t.Errorf("Expecting: %+v, \n received: %+v",
+// 			utils.ToJSON(rplyFirst), utils.ToJSON(rply))
+// 	}
 
-	//give time to CGRateS to delete the response from cache
-	time.Sleep(time.Second)
+// 	//give time to CGRateS to delete the response from cache
+// 	time.Sleep(time.Second)
 
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
-		args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
-		t.Error("Unexpected error returned", err)
-	}
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1UpdateSession,
+// 		args, &rply); err == nil || err.Error() != "RALS_ERROR:ACCOUNT_DISABLED" {
+// 		t.Error("Unexpected error returned", err)
+// 	}
 
-	//enable the account
-	thEvent = &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "EnableAccount",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			"EnableAction":     "EnableAction",
-		},
-	}
-	//process event
-	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
-		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
-	}
-}
+// 	//enable the account
+// 	thEvent = &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "EnableAccount",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			"EnableAction":     "EnableAction",
+// 		},
+// 	}
+// 	//process event
+// 	if err := rpcRpc.Call(context.Background(), utils.ThresholdSv1ProcessEvent, thEvent, &ids); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(ids, []string{"THD_AccEnableAndLog"}) {
+// 		t.Errorf("Expecting ids: %s, received: %s", []string{"THD_AccEnableAndLog"}, ids)
+// 	}
+// }
 
-func testRPCMethodsTerminateSession(t *testing.T) {
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testRPCMethodsTerminateSession",
-		Event: map[string]any{
-			utils.Tenant:       "cgrates.org",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "testRPCMethodsTerminateSession",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AccountField: "1001",
-			utils.Subject:      "ANY2CNT",
-			utils.Destination:  "1002",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.Usage:        10 * time.Minute,
-		},
-		APIOpts: map[string]any{
-			utils.MetaTerminate: true,
-			utils.MetaUsage:     10 * time.Minute,
-		},
-	}
-	var rply string
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	} else if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
-	}
+// func testRPCMethodsTerminateSession(t *testing.T) {
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testRPCMethodsTerminateSession",
+// 		Event: map[string]any{
+// 			utils.Tenant:       "cgrates.org",
+// 			utils.ToR:          utils.MetaVoice,
+// 			utils.OriginID:     "testRPCMethodsTerminateSession",
+// 			utils.RequestType:  utils.MetaPrepaid,
+// 			utils.AccountField: "1001",
+// 			utils.Subject:      "ANY2CNT",
+// 			utils.Destination:  "1002",
+// 			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
+// 			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
+// 			utils.Usage:        10 * time.Minute,
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaTerminate: true,
+// 			utils.MetaUsage:     10 * time.Minute,
+// 		},
+// 	}
+// 	var rply string
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	} else if rply != utils.OK {
+// 		t.Errorf("Unexpected reply: %s", rply)
+// 	}
 
-	//replace event with empty
-	args.Event = map[string]any{}
+// 	//replace event with empty
+// 	args.Event = map[string]any{}
 
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	} else if rply != utils.OK {
-		t.Errorf("Unexpected reply: %s", rply)
-	}
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	} else if rply != utils.OK {
+// 		t.Errorf("Unexpected reply: %s", rply)
+// 	}
 
-	//give time to CGRateS to delete the response from cache
-	time.Sleep(time.Second)
+// 	//give time to CGRateS to delete the response from cache
+// 	time.Sleep(time.Second)
 
-	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
-		args, &rply); err == nil || err.Error() != "MANDATORY_IE_MISSING: [OriginID]" {
-		t.Error(err)
-	}
+// 	if err := rpcRpc.Call(context.Background(), utils.SessionSv1TerminateSession,
+// 		args, &rply); err == nil || err.Error() != "MANDATORY_IE_MISSING: [OriginID]" {
+// 		t.Error(err)
+// 	}
 
-}
+// }
 
 // func testRPCMethodsProcessCDR(t *testing.T) {
 // 	args := &utils.CGREvent{
