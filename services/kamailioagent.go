@@ -43,8 +43,11 @@ func (kam *KamailioAgent) Start(shutdown *utils.SyncedChan, registry *servmanage
 	kam.Lock()
 	defer kam.Unlock()
 
-	kam.kam = agents.NewKamailioAgent(kam.cfg, cm,
-		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone), caps, fs)
+	if kam.kam, err = agents.NewKamailioAgent(kam.cfg, cm,
+		utils.FirstNonEmpty(kam.cfg.KamAgentCfg().Timezone, kam.cfg.GeneralCfg().DefaultTimezone),
+		caps, fs); err != nil {
+		return
+	}
 
 	go kam.connect(kam.kam, shutdown)
 	return

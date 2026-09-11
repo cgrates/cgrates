@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -20,16 +21,12 @@ import (
 )
 
 var (
-	kamAuthReqRegexp       = regexp.MustCompile(CGR_AUTH_REQUEST)
-	kamCallStartRegexp     = regexp.MustCompile(CGR_CALL_START)
-	kamCallEndRegexp       = regexp.MustCompile(CGR_CALL_END)
-	kamDlgListRegexp       = regexp.MustCompile(CGR_DLG_LIST)
-	kamProcessMessageRegex = regexp.MustCompile(CGR_PROCESS_MESSAGE)
-	kamProcessCDRRegex     = regexp.MustCompile(CGR_PROCESS_CDR)
+	kamAllEvents     = regexp.MustCompile(".*")
+	kamDlgListRegexp = regexp.MustCompile(CGR_DLG_LIST)
 )
 
 func NewKamailioAgent(cfg *config.CGRConfig,
-	connMgr *engine.ConnManager, timezone string, caps *engine.Caps, fltrS *engine.FilterS) (ka *KamailioAgent) {
+	connMgr *engine.ConnManager, timezone string, caps *engine.Caps, fltrS *engine.FilterS) (ka *KamailioAgent, err error) {
 	ka = &KamailioAgent{
 		cfg:              cfg,
 		kamCfg:           cfg.KamAgentCfg(),
@@ -42,6 +39,20 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 	}
 	srv, _ := birpc.NewService(ka, "", false)
 	ka.ctx = context.WithClient(context.TODO(), srv)
+	msgTemplates := cfg.TemplatesCfg()
+	for _, procsr := range ka.kamCfg.RequestProcessors {
+		var tpls []*config.FCTemplate
+		if tpls, err = config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.RequestFields = tpls
+		}
+		if tpls, err = config.InflateTemplates(procsr.ReplyFields, msgTemplates); err != nil {
+			return nil, err
+		} else if tpls != nil {
+			procsr.ReplyFields = tpls
+		}
+	}
 	return
 }
 
@@ -59,12 +70,8 @@ type KamailioAgent struct {
 
 func (self *KamailioAgent) Connect() (err error) {
 	eventHandlers := map[*regexp.Regexp][]func([]byte, int){
-		kamAuthReqRegexp:       {self.onCgrAuth},
-		kamCallStartRegexp:     {self.onCallStart},
-		kamCallEndRegexp:       {self.onCallEnd},
-		kamDlgListRegexp:       {self.onDlgList},
-		kamProcessMessageRegex: {self.onCgrProcessMessage},
-		kamProcessCDRRegex:     {self.onCgrProcessCDR},
+		kamAllEvents:     {self.onKamEvent},
+		kamDlgListRegexp: {self.onDlgList},
 	}
 	errChan := make(chan error)
 	for connIdx, connCfg := range self.kamCfg.EvapiConns {
@@ -96,147 +103,124 @@ func (self *KamailioAgent) Shutdown() (err error) {
 	return
 }
 
-// onCgrAuth is called when new event of type CGR_AUTH_REQUEST is coming
-func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
+func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
+	if kamDlgListRegexp.Match(evData) {
+		return
+	}
 	if ka.caps.IsLimited() {
 		if err := ka.caps.Allocate(); err != nil {
 			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting auth request: %v",
+				fmt.Sprintf("<%s> caps limit reached, rejecting event: %v",
 					utils.KamailioAgent, err))
 			return
 		}
 		defer ka.caps.Deallocate()
 	}
-	if connIdx >= len(ka.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
+	if connIdx >= len(ka.conns) {
+		utils.Logger.Err(fmt.Sprintf("<%s> Index out of range[0,%v): %v ",
+			utils.KamailioAgent, len(ka.conns), connIdx))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
+	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias,
+		ka.conns[connIdx].RemoteAddr().String())
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
 		return
 	}
-	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
-		return
+	dP := utils.MapStringDP(kev)
+	reqVars := &utils.DataNode{
+		Type: utils.NMMapType,
+		Map: map[string]*utils.DataNode{
+			EVENT:            utils.NewLeafNode(kev[EVENT]),
+			EvapiConnID:      utils.NewLeafNode(connIdx),
+			KamTRIndex:       utils.NewLeafNode(kev[KamTRIndex]),
+			KamTRLabel:       utils.NewLeafNode(kev[KamTRLabel]),
+			utils.OriginHost: utils.NewLeafNode(kev[utils.OriginHost]),
+		},
 	}
-	if kev.MissingParameter() {
-		if kRply, err := kev.AsKamAuthReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+	var processed bool
+	opts := utils.MapStorage(kev.GetOptions())
+	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
+	rply := utils.NewOrderedNavigableMap()
+	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS,
+		ka.cfg.GeneralCfg().DefaultTenant, dP, nil, ka.fltrS)
+	for _, reqProcessor := range ka.kamCfg.RequestProcessors {
+		agReq := NewAgentRequest(
+			dP, reqVars, cgrRplyNM, rply, opts,
+			reqProcessor.Tenant, ka.cfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone, ka.timezone,
+				ka.cfg.GeneralCfg().DefaultTimezone),
+			ka.cfg, nil, ka.fltrS, nil)
+		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it came from Kamailio
+			if err = kev.setCGRRequest(agReq.CGRRequest, connIdx); err != nil {
+				break
+			}
 		}
+		var lclProcessed bool
+		lclProcessed, err = processAgRequest(
+			ka.ctx, reqProcessor, agReq,
+			utils.KamailioAgent, ka.connMgr,
+			sessConns, ka.fltrS)
+		if lclProcessed {
+			processed = lclProcessed
+		}
+		if err != nil ||
+			(lclProcessed && !reqProcessor.Flags.GetBool(utils.MetaContinue)) {
+			break
+		}
+	}
+	if err == nil && !processed {
+		err = errors.New("no request processor enabled")
+	}
+	if err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %v processing event %s with OriginID: %s",
+				utils.KamailioAgent, err, kev[EVENT], kev[utils.OriginID]))
+		ka.sendReply(kev, connIdx, rply, err)
 		return
 	}
-	authArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if authArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate auth session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
-	}
-	authArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
-	var reply sessions.V1ProcessEventReply
-	// take the error after calling SessionSv1.ProcessEvent
-	// and send it as parameter to AsKamAuthReply
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, authArgs.Tenant, authArgs.AsDataProvider(), nil, ka.fltrS)
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent, authArgs, &reply)
-	if kar, err := kev.AsKamAuthReply(authArgs, &reply, err); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed building auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	}
+	ka.sendReply(kev, connIdx, rply, nil)
 }
 
-func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting call start: %v",
-					utils.KamailioAgent, err))
-			return
+func (ka *KamailioAgent) sendReply(kev KamEvent, connIdx int,
+	rplyNM *utils.OrderedNavigableMap, rplyErr error) {
+	var rply map[string]any
+	if rplyErr != nil && kev[KamHashEntry] != utils.EmptyString {
+		rply = map[string]any{
+			KamReplyEvent: utils.FirstNonEmpty(kev[KamReplyRoute], kev[EVENT]),
+			KamHashEntry:  kev[KamHashEntry],
+			KamHashID:     kev[KamHashID],
 		}
-		defer ka.caps.Deallocate()
-	}
-	if connIdx >= len(ka.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
-		return
-	}
-	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event: %s, error: %s",
-			utils.KamailioAgent, evData, err.Error()))
-		return
-	}
-	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
-		return
-	}
-	if kev.MissingParameter() {
-		ka.disconnectSession(connIdx,
-			NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID],
-				utils.ErrMandatoryIeMissing.Error()))
-		return
-	}
-	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID so we can properly disconnect later
-
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
-	var reply sessions.V1ProcessEventReply
-	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent,
-		cgrEv, &reply); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> could not process answer for event %s, error: %s",
+		if err := ka.conns[connIdx].Send(utils.ToJSON(rply)); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> failed sending reply for event: %s, error: %s",
 				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		ka.disconnectSession(connIdx,
-			NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID],
-				utils.ErrServerError.Error()))
-		return
-	}
-}
-
-func (ka *KamailioAgent) onCallEnd(evData []byte, connIdx int) {
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting call end: %v",
-					utils.KamailioAgent, err))
-			return
 		}
-		defer ka.caps.Deallocate()
-	}
-	if connIdx >= len(ka.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
 		return
 	}
-	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event: %s, error: %s",
-			utils.KamailioAgent, evData, err.Error()))
+	if rplyNM.Empty() {
 		return
 	}
-	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
-		return
+	rply = map[string]any{
+		KamReplyEvent:   utils.FirstNonEmpty(kev[KamReplyRoute], kev[EVENT]),
+		KamReplyTRIndex: kev[KamTRIndex],
+		KamReplyTRLabel: kev[KamTRLabel],
 	}
-	if kev.MissingParameter() {
-		utils.Logger.Err(fmt.Sprintf("<%s> mandatory IE missing out from event: %s",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
+
+	for el := rplyNM.GetFirstElement(); el != nil; el = el.Next() {
+		path := el.Value
+		itm, _ := rplyNM.Field(path)
+		if itm == nil {
+			continue
+		}
+		rply[strings.Join(utils.StripTrailingIndex(path), utils.NestingSep)] = itm.Data
 	}
-	cgrEv := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	var reply sessions.V1ProcessEventReply
-	cgrEv.Event[EvapiConnID] = connIdx // Attach the connection ID in case we need to create a session and disconnect it
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ka.fltrS)
-	if err := ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessEvent,
-		cgrEv, &reply); err != nil {
-		utils.Logger.Err(
-			fmt.Sprintf("<%s> could not terminate session with event %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+	if rplyErr != nil {
+		rply[utils.Error] = rplyErr.Error()
+	}
+	if err := ka.conns[connIdx].Send(utils.ToJSON(rply)); err != nil {
+		utils.Logger.Err(fmt.Sprintf("<%s> failed sending reply for event: %s, error: %s",
+			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
 	}
 }
 
@@ -265,126 +249,6 @@ func (ka *KamailioAgent) onDlgList(evData []byte, connIdx int) {
 		})
 	}
 	ka.activeSessionIDs <- sIDs
-}
-
-func (ka *KamailioAgent) onCgrProcessMessage(evData []byte, connIdx int) {
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting process message: %v",
-					utils.KamailioAgent, err))
-			return
-		}
-		defer ka.caps.Deallocate()
-	}
-	if connIdx >= len(ka.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
-		return
-	}
-	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
-			utils.KamailioAgent, evData, err.Error()))
-		return
-	}
-
-	if kev.MissingParameter() {
-		if kRply, err := kev.AsKamProcessMessageReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending process session event reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		}
-		return
-	}
-
-	//in case that we don't receive cgrFlags from kamailio
-	//we consider this as ping-pong event
-	if _, has := kev[utils.CGRFlags]; !has {
-		if err = ka.conns[connIdx].Send(kev.AsKamProcessMessageEmptyReply().String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending empty process message reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		}
-	}
-
-	procEvArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if procEvArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process message session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
-	}
-	procEvArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
-
-	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procEvArgs.Tenant, procEvArgs.AsDataProvider(), nil, ka.fltrS)
-	var processReply sessions.V1ProcessMessageReply
-	err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessMessage, procEvArgs, &processReply)
-	// take the error after calling SessionSv1.ProcessMessage
-	// and send it as parameter to AsKamProcessMessageReply
-	if kar, err := kev.AsKamProcessMessageReply(procEvArgs, &processReply, err); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	}
-}
-
-func (ka *KamailioAgent) onCgrProcessCDR(evData []byte, connIdx int) {
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting process CDR: %v",
-					utils.KamailioAgent, err))
-			return
-		}
-		defer ka.caps.Deallocate()
-	}
-	if connIdx >= len(ka.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
-		return
-	}
-	kev, err := NewKamEvent(evData, ka.kamCfg.EvapiConns[connIdx].Alias, ka.conns[connIdx].RemoteAddr().String())
-	if err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
-			utils.KamailioAgent, evData, err.Error()))
-		return
-	}
-
-	if kev.MissingParameter() {
-		if kRply, err := kev.AsKamProcessCDRReply(nil, nil, utils.ErrMandatoryIeMissing); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		} else if err = ka.conns[connIdx].Send(kRply.String()); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending process session event reply for event: %s, error %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-		}
-		return
-	}
-
-	procCDRArgs := kev.AsCGREvent(ka.timezone, ka.cfg.GeneralCfg().DefaultTenant, ka.cfg.GeneralCfg().DefaultReqType)
-	if procCDRArgs == nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> event: %s cannot generate process cdr session arguments",
-			utils.KamailioAgent, kev[utils.OriginID]))
-		return
-	}
-	procCDRArgs.Event[EvapiConnID] = connIdx // Attach the connection ID
-
-	// unfinished , will be replaced by templates using sessions processevent with ees flags
-	// sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS, procCDRArgs.Tenant, procCDRArgs.AsDataProvider(), nil, ka.fltrS)
-	var processReply string
-	// err = ka.connMgr.Call(ka.ctx, sessConns, utils.SessionSv1ProcessCDR, procCDRArgs, &processReply)
-	// take the error after calling SessionSv1.ProcessCDR
-	// and send it as parameter to AsKamProcessCDRReply
-	if kar, err := kev.AsKamProcessCDRReply(procCDRArgs, &processReply, err); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed building process session event reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	} else if err = ka.conns[connIdx].Send(kar.String()); err != nil {
-		utils.Logger.Err(fmt.Sprintf("<%s> failed sending auth reply for event: %s, error: %s",
-			utils.KamailioAgent, kev[utils.OriginID], err.Error()))
-	}
 }
 
 func (self *KamailioAgent) disconnectSession(connIdx int, dscEv *KamSessionDisconnect) (err error) {

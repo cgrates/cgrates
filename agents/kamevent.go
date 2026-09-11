@@ -5,35 +5,23 @@ package agents
 
 import (
 	"encoding/json"
-	"slices"
-	"strings"
-	"time"
 
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 const (
 	EVENT                  = "event"
-	CGR_AUTH_REQUEST       = "CGR_AUTH_REQUEST"
-	CGR_AUTH_REPLY         = "CGR_AUTH_REPLY"
 	CGR_SESSION_DISCONNECT = "CGR_SESSION_DISCONNECT"
-	CGR_CALL_START         = "CGR_CALL_START"
-	CGR_CALL_END           = "CGR_CALL_END"
-	CGR_PROCESS_MESSAGE    = "CGR_PROCESS_MESSAGE"
-	CGR_PROCESS_CDR        = "CGR_PROCESS_CDR"
 	KamTRIndex             = "trIndex"
 	KamTRLabel             = "trLabel"
 	KamHashEntry           = "hEntry"
 	KamHashID              = "hID"
 	KamReplyRoute          = "replyRoute"
-	EvapiConnID            = "evapiConnID" // used to share connID info in event for remote disconnects
+	KamReplyEvent          = "Event"
+	KamReplyTRIndex        = "TransactionIndex"
+	KamReplyTRLabel        = "TransactionLabel"
+	EvapiConnID            = "evapiConnID"
 	CGR_DLG_LIST           = "CGR_DLG_LIST"
-)
-
-var (
-	kamReservedEventFields = utils.NewStringSet([]string{EVENT, KamTRIndex, KamTRLabel, utils.CGRFlags, KamReplyRoute})
-	// kamReservedCDRFields   = append(kamReservedEventFields, KamHashEntry, KamHashID) // HashEntry and id are needed in events for disconnects
 )
 
 func NewKamSessionDisconnect(hEntry, hID, reason string) *KamSessionDisconnect {
@@ -68,221 +56,9 @@ func NewKamEvent(kamEvData []byte, alias, adress string) (KamEvent, error) {
 // KamEvent represents one event received from Kamailio
 type KamEvent map[string]string
 
-func (kev KamEvent) MissingParameter() bool {
-	switch kev[EVENT] {
-	case CGR_AUTH_REQUEST:
-		return slices.Contains([]string{
-			kev[KamTRIndex],
-			kev[KamTRLabel],
-		}, "")
-	case CGR_CALL_START:
-		return slices.Contains([]string{
-			kev[KamHashEntry],
-			kev[KamHashID],
-			kev[utils.OriginID],
-			kev[utils.AnswerTime],
-			kev[utils.AccountField],
-			kev[utils.Destination],
-		}, "")
-	case CGR_CALL_END:
-		return slices.Contains([]string{
-			kev[utils.OriginID],
-			kev[utils.AnswerTime],
-			kev[utils.AccountField],
-			kev[utils.Destination],
-		}, "")
-	case CGR_PROCESS_MESSAGE:
-		// TRIndex and TRLabel must exist in order to know where to send back the response
-		mndPrm := []string{kev[KamTRIndex], kev[KamTRLabel]}
-		_, has := kev[utils.CGRFlags]
-		// in case that the user populate cgrFlags we treat it like a ProcessEvent
-		// and expect to have the required fields
-		if has {
-			mndPrm = append(mndPrm, kev[utils.OriginID],
-				kev[utils.AnswerTime],
-				kev[utils.AccountField],
-				kev[utils.Destination])
-		}
-		return slices.Contains(mndPrm, "")
-	case CGR_PROCESS_CDR:
-		// TRIndex and TRLabel must exist in order to know where to send back the response
-		return slices.Contains([]string{
-			kev[KamTRIndex],
-			kev[KamTRLabel],
-			kev[utils.OriginID],
-		}, "")
-	default: // no/unsupported event
-		return true
-	}
-
-}
-
-// AsMapStringInterface converts KamEvent into event used by other subsystems
-func (kev KamEvent) AsMapStringInterface(dfltReqType string) (mp map[string]any) {
-	mp = make(map[string]any)
-	for k, v := range kev {
-		if k == utils.Usage {
-			v += "s" // mark the Usage as seconds
-		}
-		if !kamReservedEventFields.Has(k) && // reserved attributes not getting into event
-			!utils.CGROptionsSet.Has(k) { // also omit the options
-			mp[k] = v
-		}
-	}
-	if _, has := mp[utils.Source]; !has {
-		mp[utils.Source] = utils.KamailioAgent
-	}
-	if _, has := mp[utils.RequestType]; !has {
-		mp[utils.RequestType] = dfltReqType
-	}
-	return
-}
-
-// AsCGREvent converts KamEvent into CGREvent
-func (kev KamEvent) AsCGREvent(timezone, dfltTenant, dfltReqType string) *utils.CGREvent {
-	return &utils.CGREvent{
-		Tenant: utils.FirstNonEmpty(kev[utils.Tenant],
-			dfltTenant),
-		ID:      utils.UUIDSha1Prefix(),
-		Event:   kev.AsMapStringInterface(dfltReqType),
-		APIOpts: kev.GetOptions(),
-	}
-}
-
 // String is used for pretty printing event in logs
 func (kev KamEvent) String() string {
 	return utils.ToJSON(kev)
-}
-
-// AsKamAuthReply builds up a Kamailio AuthReply based on arguments and reply from SessionS
-func (kev KamEvent) AsKamAuthReply(authArgs *utils.CGREvent,
-	authReply *sessions.V1ProcessEventReply, rplyErr error) (kar *KamReply, err error) {
-	evName := CGR_AUTH_REPLY
-	if kamRouReply, has := kev[KamReplyRoute]; has {
-		evName = kamRouReply
-	}
-	kar = &KamReply{Event: evName,
-		TransactionIndex: kev[KamTRIndex],
-		TransactionLabel: kev[KamTRLabel],
-	}
-	if rplyErr != nil {
-		kar.Error = rplyErr.Error()
-		return
-	}
-	if attrs, has := authReply.Attributes[utils.MetaPrimary]; has {
-		kar.Attributes = attrs.Digest()
-	}
-	if resAlloc, has := authReply.ResourceAllocation[utils.MetaPrimary]; has {
-		kar.ResourceAllocation = resAlloc
-	}
-	if utils.OptAsBool(authArgs.APIOpts, utils.MetaAccounts) {
-		var minUsage time.Duration
-		var minUsageSet bool
-		for _, usage := range authReply.AccountsUsage {
-			if !minUsageSet || usage < minUsage {
-				minUsage = usage
-				minUsageSet = true
-			}
-		}
-		if minUsageSet {
-			kar.MaxUsage = minUsage.Seconds()
-		}
-	}
-	if routeProfiles, has := authReply.RouteProfiles[utils.MetaPrimary]; has {
-		kar.Routes = routeProfiles.Digest()
-	}
-	if thIDs, has := authReply.ThresholdIDs[utils.MetaPrimary]; has {
-		kar.Thresholds = strings.Join(thIDs, utils.FieldsSep)
-	}
-	if sqIDs, has := authReply.StatQueueIDs[utils.MetaPrimary]; has {
-		kar.StatQueues = strings.Join(sqIDs, utils.FieldsSep)
-	}
-	return
-}
-
-// AsKamProcessMessageReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessMessageReply(procEvArgs *utils.CGREvent,
-	procEvReply *sessions.V1ProcessMessageReply, rplyErr error) (kar *KamReply, err error) {
-	evName := CGR_PROCESS_MESSAGE
-	if kamRouReply, has := kev[KamReplyRoute]; has {
-		evName = kamRouReply
-	}
-	kar = &KamReply{Event: evName,
-		TransactionIndex: kev[KamTRIndex],
-		TransactionLabel: kev[KamTRLabel],
-	}
-	if rplyErr != nil {
-		kar.Error = rplyErr.Error()
-		return
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaAttributes) && procEvReply.Attributes != nil {
-		kar.Attributes = procEvReply.Attributes.Digest()
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesResourceSAllocate) {
-		kar.ResourceAllocation = *procEvReply.ResourceAllocation
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.OptsSesMessage) {
-		kar.MaxUsage = procEvReply.MaxUsage.Seconds()
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaRoutes) && procEvReply.RouteProfiles != nil {
-		kar.Routes = procEvReply.RouteProfiles.Digest()
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaThresholds) {
-		kar.Thresholds = strings.Join(*procEvReply.ThresholdIDs, utils.FieldsSep)
-	}
-	if utils.OptAsBool(procEvArgs.APIOpts, utils.MetaStats) {
-		kar.StatQueues = strings.Join(*procEvReply.StatQueueIDs, utils.FieldsSep)
-	}
-	return
-}
-
-// AsKamProcessCDRReply builds up a Kamailio ProcessEvent based on arguments and reply from SessionS
-func (kev KamEvent) AsKamProcessCDRReply(cgrEvWithArgDisp *utils.CGREvent,
-	rply *string, rplyErr error) (kar *KamReply, err error) {
-	evName := CGR_PROCESS_CDR
-	if kamRouReply, has := kev[KamReplyRoute]; has {
-		evName = kamRouReply
-	}
-	kar = &KamReply{Event: evName,
-		TransactionIndex: kev[KamTRIndex],
-		TransactionLabel: kev[KamTRLabel],
-	}
-	if rplyErr != nil {
-		kar.Error = rplyErr.Error()
-	}
-	return
-}
-
-// AsKamProcessMessageEmptyReply builds up a Kamailio ProcessEventEmpty
-func (kev KamEvent) AsKamProcessMessageEmptyReply() (kar *KamReply) {
-	evName := CGR_PROCESS_MESSAGE
-	if kamRouReply, has := kev[KamReplyRoute]; has {
-		evName = kamRouReply
-	}
-	kar = &KamReply{Event: evName,
-		TransactionIndex: kev[KamTRIndex],
-		TransactionLabel: kev[KamTRLabel],
-	}
-	return
-}
-
-// KamReply will be used to send back to kamailio from
-// Authrization,ProcessEvent and ProcessEvent empty (pingPong)
-type KamReply struct {
-	Event              string // Kamailio will use this to differentiate between requests and replies
-	TransactionIndex   string // Original transaction index
-	TransactionLabel   string // Original transaction label
-	Attributes         string
-	ResourceAllocation string
-	MaxUsage           float64 // Maximum session time in case of success, -1 for unlimited
-	Routes             string  // List of routes, comma separated
-	Thresholds         string
-	StatQueues         string
-	Error              string // Reply in case of error
-}
-
-func (krply *KamReply) String() string {
-	return utils.ToJSON(krply)
 }
 
 type KamDlgReply struct {
@@ -330,4 +106,16 @@ func (kev KamEvent) GetOptions() (mp map[string]any) {
 		}
 	}
 	return
+}
+
+func (kev KamEvent) setCGRRequest(nm *utils.OrderedNavigableMap, connIdx int) (err error) {
+	for k, v := range kev {
+		if utils.CGROptionsSet.Has(k) {
+			continue
+		}
+		if err = nm.Set(&utils.FullPath{Path: k, PathSlice: []string{k}}, v); err != nil {
+			return
+		}
+	}
+	return nm.Set(&utils.FullPath{Path: EvapiConnID, PathSlice: []string{EvapiConnID}}, connIdx)
 }
