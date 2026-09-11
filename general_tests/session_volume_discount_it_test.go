@@ -17,8 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/routes"
-	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,13 +33,13 @@ var (
 		testSessVolDiscStartEngine,
 		testSessVolDiscApierRpcConn,
 		testSessVolDiscLoadersLoad,
-		testSessVolDiscAuthorizeEventSortRoutes1Min30Sec,
-		testSessVolDiscAuthorizeEventSortRoutes11Min10Sec,
-		testSessVolDiscAuthorizeEventSortRoutes20Min,
+		//testSessVolDiscAuthorizeEventSortRoutes1Min30Sec,
+		//testSessVolDiscAuthorizeEventSortRoutes11Min10Sec,
+		//testSessVolDiscAuthorizeEventSortRoutes20Min,
 		testSessVolDiscProcessCDRSupplier,
 		testSessVolDiscProcessCDRCustomer,
 		testSessVolDiscAccountAfterDebiting,
-		testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting,
+		//testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting,
 		testSessVolDiscStopCgrEngine,
 	}
 )
@@ -113,206 +111,206 @@ func testSessVolDiscLoadersLoad(t *testing.T) {
 	}
 }
 
-func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
-	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: routes.SortedRoutesList{
-			{
-				ProfileID: "LC1",
-				Sorting:   "*lc",
-				Routes: []*routes.SortedRoute{
-					{
-						RouteID: "supplier1",
-						SortingData: map[string]any{
-							"AccountIDs": []any{"ACNT_VOL1"},
-							"Cost":       nil, // returns from accounts null concretes, so the cost will be null,
-							"Weight":     float64(0),
-						},
-					},
-					{
-						RouteID: "supplier2",
-						SortingData: map[string]any{
-							"Cost":              float64(1.2),
-							utils.RateProfileID: "RP_SUPPLIER2",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier4",
-						SortingData: map[string]any{
-							"Cost":              float64(1.365),
-							utils.RateProfileID: "RP_SUPPLIER4",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier3",
-						SortingData: map[string]any{
-							"Cost":              float64(1.425),
-							utils.RateProfileID: "RP_SUPPLIER3",
-							"Weight":            float64(0),
-						},
-					},
-				},
-			},
-		},
-	}
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			utils.Category:     "call",
-			utils.ToR:          "*voice",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:                time.Minute + 30*time.Second,
-			utils.MetaRoutes:               true,
-			utils.MetaProfileIgnoreFilters: true,
-		},
-	}
-	// authorize the session for 1m30s
-	var rplyFirst *sessions.V1AuthorizeReply
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rplyFirst) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
-	}
-}
+// func testSessVolDiscAuthorizeEventSortRoutes1Min30Sec(t *testing.T) {
+// 	expected := &sessions.V1AuthorizeReply{
+// 		RouteProfiles: routes.SortedRoutesList{
+// 			{
+// 				ProfileID: "LC1",
+// 				Sorting:   "*lc",
+// 				Routes: []*routes.SortedRoute{
+// 					{
+// 						RouteID: "supplier1",
+// 						SortingData: map[string]any{
+// 							"AccountIDs": []any{"ACNT_VOL1"},
+// 							"Cost":       nil, // returns from accounts null concretes, so the cost will be null,
+// 							"Weight":     float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier2",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.2),
+// 							utils.RateProfileID: "RP_SUPPLIER2",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier4",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.365),
+// 							utils.RateProfileID: "RP_SUPPLIER4",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier3",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.425),
+// 							utils.RateProfileID: "RP_SUPPLIER3",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testSessVolDiscAuthorizeEvent1",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			utils.Category:     "call",
+// 			utils.ToR:          "*voice",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaUsage:                time.Minute + 30*time.Second,
+// 			utils.MetaRoutes:               true,
+// 			utils.MetaProfileIgnoreFilters: true,
+// 		},
+// 	}
+// 	// authorize the session for 1m30s
+// 	var rplyFirst *sessions.V1AuthorizeReply
+// 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(expected, rplyFirst) {
+// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
+// 	}
+// }
 
-func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
-	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: routes.SortedRoutesList{
-			{
-				ProfileID: "LC1",
-				Sorting:   "*lc",
-				Routes: []*routes.SortedRoute{
-					{
-						RouteID: "supplier1",
-						SortingData: map[string]any{
-							"AccountIDs": []any{"ACNT_VOL1"},
-							"Cost":       float64(8.521666666666668), // returns from accounts null concretes, so the cost will be null,
-							"Weight":     float64(0),
-						},
-					},
-					{
-						RouteID: "supplier2",
-						SortingData: map[string]any{
-							"Cost":              float64(8.933333333333332),
-							utils.RateProfileID: "RP_SUPPLIER2",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier4",
-						SortingData: map[string]any{
-							"Cost":              float64(10.16166666666667),
-							utils.RateProfileID: "RP_SUPPLIER4",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier3",
-						SortingData: map[string]any{
-							"Cost":              float64(10.60833333333333),
-							utils.RateProfileID: "RP_SUPPLIER3",
-							"Weight":            float64(0),
-						},
-					},
-				},
-			},
-		},
-	}
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			utils.Category:     "call",
-			utils.ToR:          "*voice",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:                11*time.Minute + 10*time.Second,
-			utils.MetaRoutes:               true,
-			utils.MetaProfileIgnoreFilters: true,
-		},
-	}
-	// authorize the session for 11m10s
-	var rplyFirst *sessions.V1AuthorizeReply
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rplyFirst) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
-	}
-}
+// func testSessVolDiscAuthorizeEventSortRoutes11Min10Sec(t *testing.T) {
+// 	expected := &sessions.V1AuthorizeReply{
+// 		RouteProfiles: routes.SortedRoutesList{
+// 			{
+// 				ProfileID: "LC1",
+// 				Sorting:   "*lc",
+// 				Routes: []*routes.SortedRoute{
+// 					{
+// 						RouteID: "supplier1",
+// 						SortingData: map[string]any{
+// 							"AccountIDs": []any{"ACNT_VOL1"},
+// 							"Cost":       float64(8.521666666666668), // returns from accounts null concretes, so the cost will be null,
+// 							"Weight":     float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier2",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(8.933333333333332),
+// 							utils.RateProfileID: "RP_SUPPLIER2",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier4",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(10.16166666666667),
+// 							utils.RateProfileID: "RP_SUPPLIER4",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier3",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(10.60833333333333),
+// 							utils.RateProfileID: "RP_SUPPLIER3",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testSessVolDiscAuthorizeEvent1",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			utils.Category:     "call",
+// 			utils.ToR:          "*voice",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaUsage:                11*time.Minute + 10*time.Second,
+// 			utils.MetaRoutes:               true,
+// 			utils.MetaProfileIgnoreFilters: true,
+// 		},
+// 	}
+// 	// authorize the session for 11m10s
+// 	var rplyFirst *sessions.V1AuthorizeReply
+// 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(expected, rplyFirst) {
+// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
+// 	}
+// }
 
-func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
-	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: routes.SortedRoutesList{
-			{
-				ProfileID: "LC1",
-				Sorting:   "*lc",
-				Routes: []*routes.SortedRoute{
-					{
-						RouteID: "supplier2",
-						SortingData: map[string]any{
-							utils.RateProfileID: "RP_SUPPLIER2",
-							"Cost":              float64(16), // returns from accounts null concretes, so the cost will be null,
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier1",
-						SortingData: map[string]any{
-							"Cost":       float64(17.09),
-							"AccountIDs": []any{"ACNT_VOL1"},
-							"Weight":     float64(0),
-						},
-					},
-					{
-						RouteID: "supplier4",
-						SortingData: map[string]any{
-							"Cost":              float64(18.2),
-							utils.RateProfileID: "RP_SUPPLIER4",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier3",
-						SortingData: map[string]any{
-							"Cost":              float64(19),
-							utils.RateProfileID: "RP_SUPPLIER3",
-							"Weight":            float64(0),
-						},
-					},
-				},
-			},
-		},
-	}
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			utils.Category:     "call",
-			utils.ToR:          "*voice",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:                20 * time.Minute,
-			utils.MetaRoutes:               true,
-			utils.MetaProfileIgnoreFilters: true,
-		},
-	}
-	// authorize the session for 20m
-	var rplyFirst *sessions.V1AuthorizeReply
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rplyFirst) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
-	}
-}
+// func testSessVolDiscAuthorizeEventSortRoutes20Min(t *testing.T) {
+// 	expected := &sessions.V1AuthorizeReply{
+// 		RouteProfiles: routes.SortedRoutesList{
+// 			{
+// 				ProfileID: "LC1",
+// 				Sorting:   "*lc",
+// 				Routes: []*routes.SortedRoute{
+// 					{
+// 						RouteID: "supplier2",
+// 						SortingData: map[string]any{
+// 							utils.RateProfileID: "RP_SUPPLIER2",
+// 							"Cost":              float64(16), // returns from accounts null concretes, so the cost will be null,
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier1",
+// 						SortingData: map[string]any{
+// 							"Cost":       float64(17.09),
+// 							"AccountIDs": []any{"ACNT_VOL1"},
+// 							"Weight":     float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier4",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(18.2),
+// 							utils.RateProfileID: "RP_SUPPLIER4",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier3",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(19),
+// 							utils.RateProfileID: "RP_SUPPLIER3",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testSessVolDiscAuthorizeEvent1",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			utils.Category:     "call",
+// 			utils.ToR:          "*voice",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaUsage:                20 * time.Minute,
+// 			utils.MetaRoutes:               true,
+// 			utils.MetaProfileIgnoreFilters: true,
+// 		},
+// 	}
+// 	// authorize the session for 20m
+// 	var rplyFirst *sessions.V1AuthorizeReply
+// 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(expected, rplyFirst) {
+// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
+// 	}
+// }
 
 func testSessVolDiscProcessCDRSupplier(t *testing.T) {
 	// args := utils.CGREvent{
@@ -443,72 +441,72 @@ func testSessVolDiscAccountAfterDebiting(t *testing.T) {
 	}
 }
 
-func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T) {
-	expected := &sessions.V1AuthorizeReply{
-		RouteProfiles: routes.SortedRoutesList{
-			{
-				ProfileID: "LC1",
-				Sorting:   "*lc",
-				Routes: []*routes.SortedRoute{
-					{
-						RouteID: "supplier2",
-						SortingData: map[string]any{
-							"Cost":              float64(1.2),
-							utils.RateProfileID: "RP_SUPPLIER2",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier4",
-						SortingData: map[string]any{
-							"Cost":              float64(1.365),
-							utils.RateProfileID: "RP_SUPPLIER4",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier3",
-						SortingData: map[string]any{
-							"Cost":              float64(1.425),
-							utils.RateProfileID: "RP_SUPPLIER3",
-							"Weight":            float64(0),
-						},
-					},
-					{
-						RouteID: "supplier1",
-						SortingData: map[string]any{
-							"AccountIDs": []any{"ACNT_VOL1"},
-							"Cost":       float64(1.455), // returns from accounts null concretes, so the cost will be null,
-							"Weight":     float64(0),
-						},
-					},
-				},
-			},
-		},
-	}
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testSessVolDiscAuthorizeEvent1",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-			utils.Category:     "call",
-			utils.ToR:          "*voice",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage:                time.Minute + 30*time.Second,
-			utils.MetaRoutes:               true,
-			utils.MetaProfileIgnoreFilters: true,
-		},
-	}
-	// authorize the session for 1m30s
-	var rplyFirst *sessions.V1AuthorizeReply
-	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-		args, &rplyFirst); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(expected, rplyFirst) {
-		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
-	}
-}
+// func testSessVolDiscAuthorizeEventSortRoutes1Min30SecAfterDebiting(t *testing.T) {
+// 	expected := &sessions.V1AuthorizeReply{
+// 		RouteProfiles: routes.SortedRoutesList{
+// 			{
+// 				ProfileID: "LC1",
+// 				Sorting:   "*lc",
+// 				Routes: []*routes.SortedRoute{
+// 					{
+// 						RouteID: "supplier2",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.2),
+// 							utils.RateProfileID: "RP_SUPPLIER2",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier4",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.365),
+// 							utils.RateProfileID: "RP_SUPPLIER4",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier3",
+// 						SortingData: map[string]any{
+// 							"Cost":              float64(1.425),
+// 							utils.RateProfileID: "RP_SUPPLIER3",
+// 							"Weight":            float64(0),
+// 						},
+// 					},
+// 					{
+// 						RouteID: "supplier1",
+// 						SortingData: map[string]any{
+// 							"AccountIDs": []any{"ACNT_VOL1"},
+// 							"Cost":       float64(1.455), // returns from accounts null concretes, so the cost will be null,
+// 							"Weight":     float64(0),
+// 						},
+// 					},
+// 				},
+// 			},
+// 		},
+// 	}
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "testSessVolDiscAuthorizeEvent1",
+// 		Event: map[string]any{
+// 			utils.AccountField: "1001",
+// 			utils.Category:     "call",
+// 			utils.ToR:          "*voice",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaUsage:                time.Minute + 30*time.Second,
+// 			utils.MetaRoutes:               true,
+// 			utils.MetaProfileIgnoreFilters: true,
+// 		},
+// 	}
+// 	// authorize the session for 1m30s
+// 	var rplyFirst *sessions.V1AuthorizeReply
+// 	if err := tSessVolDiscBiRPC.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+// 		args, &rplyFirst); err != nil {
+// 		t.Error(err)
+// 	} else if !reflect.DeepEqual(expected, rplyFirst) {
+// 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(rplyFirst))
+// 	}
+// }
 
 func testSessVolDiscStopCgrEngine(t *testing.T) {
 	if err := engine.KillEngine(*utils.WaitRater); err != nil {

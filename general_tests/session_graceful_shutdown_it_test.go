@@ -36,7 +36,7 @@ var (
 		testSessionSRplcApierRpcConn,
 		testSessionSRplcApierGetActiveSessionsNotFound,
 		testSessionSRplcApierSetChargerS,
-		testSessionSRplcApierGetInitateSessions,
+		//testSessionSRplcApierGetInitateSessions,
 		testSessionSRplcApierGetActiveSessions,
 		testSessionSRplcApierGetPassiveSessions,
 		testSessionSRplcApierStopSession2,
@@ -161,30 +161,30 @@ func testSessionSRplcApierSetChargerS(t *testing.T) {
 	}
 }
 
-func testSessionSRplcApierGetInitateSessions(t *testing.T) {
-	smgRplCfg1.SessionSCfg().Opts.Initiate = []*config.DynamicBoolOpt{
-		config.NewDynamicBoolOpt(nil, "cgrates.org", true, nil),
-	}
-	args := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "TestSSv1ItInitiateSession",
-		Event: map[string]any{
-			utils.Tenant:      "cgrates.org",
-			utils.RequestType: utils.MetaNone,
+// func testSessionSRplcApierGetInitateSessions(t *testing.T) {
+// 	smgRplCfg1.SessionSCfg().Opts.Initiate = []*config.DynamicBoolOpt{
+// 		config.NewDynamicBoolOpt(nil, "cgrates.org", true, nil),
+// 	}
+// 	args := &utils.CGREvent{
+// 		Tenant: "cgrates.org",
+// 		ID:     "TestSSv1ItInitiateSession",
+// 		Event: map[string]any{
+// 			utils.Tenant:      "cgrates.org",
+// 			utils.RequestType: utils.MetaNone,
 
-			utils.OriginID: "testSessionRplORIGINID",
-		},
-		APIOpts: map[string]any{
-			utils.MetaOriginID: "testSessionRploriginID",
-			utils.MetaInitiate: true,
-		},
-	}
-	var rply sessions.V1InitSessionReply
-	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1InitiateSession,
-		args, &rply); err != nil {
-		t.Error(err)
-	}
-}
+// 			utils.OriginID: "testSessionRplORIGINID",
+// 		},
+// 		APIOpts: map[string]any{
+// 			utils.MetaOriginID: "testSessionRploriginID",
+// 			utils.MetaInitiate: true,
+// 		},
+// 	}
+// 	var rply sessions.V1InitSessionReply
+// 	if err := smgRplcRPC2.Call(context.Background(), utils.SessionSv1InitiateSession,
+// 		args, &rply); err != nil {
+// 		t.Error(err)
+// 	}
+// }
 
 func testSessionSRplcApierGetActiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{

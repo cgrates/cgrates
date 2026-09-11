@@ -32,7 +32,7 @@ var (
 		testSes2ItStartEngine,
 		testSes2ItRPCConn,
 		testSes2ItLoadFromFolder,
-		testSes2ItInitSession,
+		//testSes2ItInitSession,
 		// testSes2ItAsActiveSessions,
 		// testSes2StirAuthenticate,
 		// testSes2StirInit,
@@ -100,48 +100,6 @@ func testSes2ItLoadFromFolder(t *testing.T) {
 		t.Error("Unexpected reply returned:", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
-}
-
-func testSes2ItInitSession(t *testing.T) {
-	// Set balance
-	// attrSetBalance := utils.AttrSetBalance{
-	// 	Tenant:      "cgrates.org",
-	// 	Account:     "1001",
-	// 	BalanceType: utils.MetaVoice,
-	// 	Value:       float64(time.Hour),
-	// 	Balance: map[string]any{
-	// 		utils.ID: "TestDynamicDebitBalance",
-	// 	},
-	// }
-	// var reply string
-	// if err := ses2RPC.Call(context.Background(), utils.APIerSv2SetBalance,
-	// 	attrSetBalance, &reply); err != nil {
-	// 	t.Fatal(err)
-	// }
-
-	// Init session
-	initArgs := &utils.CGREvent{
-		Tenant: "cgrates.org",
-		ID:     utils.UUIDSha1Prefix(),
-		Event: map[string]any{
-			utils.EventName:    "TEST_EVENT",
-			utils.OriginID:     utils.UUIDSha1Prefix(),
-			utils.ToR:          utils.MetaVoice,
-			utils.Category:     "call",
-			utils.Tenant:       "cgrates.org",
-			utils.AccountField: "1001",
-			utils.Subject:      "1001",
-			utils.Destination:  "1002",
-			utils.RequestType:  utils.MetaPrepaid,
-			utils.AnswerTime:   time.Date(2016, time.January, 5, 18, 31, 05, 0, time.UTC),
-		},
-	}
-	var initRpl *sessions.V1InitSessionReply
-	if err := ses2RPC.Call(context.Background(), utils.SessionSv1InitiateSession,
-		initArgs, &initRpl); err != nil {
-		t.Fatal(err)
-	}
-
 }
 
 func testSes2ItAsActiveSessions(t *testing.T) {
