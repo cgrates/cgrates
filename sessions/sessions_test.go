@@ -920,31 +920,6 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 }
 */
 
-func TestSessionSV1UpdateSessionReplyAsNavigableMap(t *testing.T) {
-	v1UpdtRpl := new(V1UpdateSessionReply)
-	expected := map[string]*utils.DataNode{}
-	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1UpdtRpl.Attributes = attrs
-	expected[utils.CapAttributes] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}}
-	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-
-	v1UpdtRpl.needsMaxUsage = true
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-
-	v1UpdtRpl.MaxUsage = utils.DurationPointer(5 * time.Minute)
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(5 * time.Minute)
-	if rply := v1UpdtRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-}
-
 func TestSetMaxUsageNeededProcessMessage(t *testing.T) {
 	rplyPocMess := &V1ProcessMessageReply{
 		needsMaxUsage: false,
@@ -956,19 +931,6 @@ func TestSetMaxUsageNeededProcessMessage(t *testing.T) {
 
 	rplyPocMess = nil
 	rplyPocMess.SetMaxUsageNeeded(true)
-}
-
-func TestSetMaxUsageNeededUpdateSessionReply(t *testing.T) {
-	rplySessRply := &V1UpdateSessionReply{
-		needsMaxUsage: false,
-	}
-	rplySessRply.SetMaxUsageNeeded(true)
-	if !rplySessRply.needsMaxUsage {
-		t.Errorf("Expected to be true")
-	}
-
-	rplySessRply = nil
-	rplySessRply.SetMaxUsageNeeded(true)
 }
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {

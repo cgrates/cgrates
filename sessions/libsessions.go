@@ -450,46 +450,6 @@ func (v1Rply *V1ProcessMessageReply) AsNavigableMap() map[string]*utils.DataNode
 	return cgrReply
 }
 
-// V1UpdateSessionReply contains options for session update reply
-type V1UpdateSessionReply struct {
-	Attributes *attributes.ProcessEventReply `json:",omitempty"`
-	MaxUsage   *time.Duration                `json:",omitempty"`
-
-	needsMaxUsage bool // for gob encoding only
-}
-
-// SetMaxUsageNeeded used by agent that use the reply as NavigableMapper
-// only used for gob encoding
-func (v1Rply *V1UpdateSessionReply) SetMaxUsageNeeded(getMaxUsage bool) {
-	if v1Rply == nil {
-		return
-	}
-	v1Rply.needsMaxUsage = getMaxUsage
-}
-
-// AsNavigableMap is part of engine.NavigableMapper interface
-func (v1Rply *V1UpdateSessionReply) AsNavigableMap() map[string]*utils.DataNode {
-	cgrReply := make(map[string]*utils.DataNode)
-	if v1Rply.Attributes != nil {
-		attrs := &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
-		for _, altered := range v1Rply.Attributes.AlteredFields {
-			for _, fldName := range altered.Fields {
-				fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-				if v1Rply.Attributes.CGREvent.HasField(fldName) {
-					attrs.Map[fldName] = utils.NewLeafNode(v1Rply.Attributes.CGREvent.Event[fldName])
-				}
-			}
-		}
-		cgrReply[utils.CapAttributes] = attrs
-	}
-	if v1Rply.MaxUsage != nil {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(*v1Rply.MaxUsage)
-	} else if v1Rply.needsMaxUsage {
-		cgrReply[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	}
-	return cgrReply
-}
-
 // ArgsReplicateSessions used to specify wich Session to replicate over the given connections
 type ArgsReplicateSessions struct {
 	Passive bool
