@@ -427,7 +427,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"GetActiveSessionsCount":     utils.SessionSv1GetActiveSessionsCount,
 				"GetPassiveSessions":         utils.SessionSv1GetPassiveSessions,
 				"GetPassiveSessionsCount":    utils.SessionSv1GetPassiveSessionsCount,
-				"InitiateSession":            utils.SessionSv1InitiateSession,
 				"InitiateSessionWithDigest":  utils.SessionSv1InitiateSessionWithDigest,
 				"Ping":                       utils.SessionSv1Ping,
 				"ProcessEvent":               utils.SessionSv1ProcessEvent,
@@ -437,8 +436,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"STIRIdentity":               utils.SessionSv1STIRIdentity,
 				"SetPassiveSession":          utils.SessionSv1SetPassiveSession,
 				"SyncSessions":               utils.SessionSv1SyncSessions,
-				"TerminateSession":           utils.SessionSv1TerminateSession,
-				"UpdateSession":              utils.SessionSv1UpdateSession,
 			},
 		},
 		{
