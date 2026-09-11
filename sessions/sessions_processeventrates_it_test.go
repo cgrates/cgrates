@@ -1549,3 +1549,258 @@ func TestSessionSv1ProcessEventBlockerBalanceWeights(t *testing.T) {
 			acnt.Balances["BalThirdFallback"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventVoiceSMSData(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrVoiceToR",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.ToR",
+						Values:  []string{utils.MetaVoice},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(voice): %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrSMSToR",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.ToR",
+						Values:  []string{utils.MetaSMS},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(sms): %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrDataToR",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.ToR",
+						Values:  []string{utils.MetaData},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(data): %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"VoiceBal": {
+						ID:        "VoiceBal",
+						FilterIDs: []string{"FltrVoiceToR"},
+						Type:      utils.MetaAbstract,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(300 * time.Second)),
+					},
+					"SMSBal": {
+						ID:        "SMSBal",
+						FilterIDs: []string{"FltrSMSToR"},
+						Type:      utils.MetaConcrete,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(5, 2),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(50.0),
+					},
+					"DataBal": {
+						ID:        "DataBal",
+						FilterIDs: []string{"FltrDataToR"},
+						Type:      utils.MetaConcrete,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(1, 2),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(500.0),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	t.Run("VoiceCallDebitsOnlyVoiceBal", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "voiceCall1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    10 * time.Second,
+					utils.MetaOriginID: "OriginIDVoice1",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.ToR:          utils.MetaVoice,
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:00:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(voice): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 10*time.Second {
+			t.Errorf("AccountsUsage[*default] = %v, want 10s (VoiceBal)", usage)
+		}
+	})
+
+	t.Run("SMSDebitsOnlySMSBal", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "smsMsg1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    1,
+					utils.MetaOriginID: "OriginIDSMS1",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.ToR:          utils.MetaSMS,
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:05:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(sms): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 1 {
+			t.Errorf("AccountsUsage[*default] = %v, want 1 (SMSBal)", usage)
+		}
+	})
+
+	t.Run("DataDebitsOnlyDataBal", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "dataSession1",
+				APIOpts: map[string]any{
+					utils.MetaChargers: true,
+					utils.MetaAccounts: true,
+					utils.MetaDebit:    true,
+					utils.MetaUsage:    100,
+					utils.MetaOriginID: "OriginIDData1",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.ToR:          utils.MetaData,
+					utils.Destination:  "1002",
+					utils.AnswerTime:   "2018-01-07T17:10:00Z",
+				},
+			}, &rply); err != nil {
+			t.Fatalf("ProcessEvent(data): %v", err)
+		}
+		usage, ok := rply.AccountsUsage[utils.MetaDefault]
+		if !ok {
+			t.Fatal("AccountsUsage missing *default")
+		}
+		if usage != 100 {
+			t.Errorf("AccountsUsage[*default] = %v, want 100 (DataBal)", usage)
+		}
+	})
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	wantVoiceBal := utils.NewDecimalFromFloat64(float64(290 * time.Second))
+	if acnt.Balances["VoiceBal"].Units.Compare(wantVoiceBal) != 0 {
+		t.Errorf("VoiceBal = %+v, want 290s", acnt.Balances["VoiceBal"].Units)
+	}
+
+	wantSMSBal := utils.NewDecimalFromFloat64(49.95)
+	if acnt.Balances["SMSBal"].Units.Compare(wantSMSBal) != 0 {
+		t.Errorf("SMSBal = %+v, want 49.95", acnt.Balances["SMSBal"].Units)
+	}
+
+	wantDataBal := utils.NewDecimalFromFloat64(499.0)
+	if acnt.Balances["DataBal"].Units.Compare(wantDataBal) != 0 {
+		t.Errorf("DataBal = %+v, want 499", acnt.Balances["DataBal"].Units)
+	}
+}
