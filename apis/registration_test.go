@@ -427,7 +427,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"GetActiveSessionsCount":     utils.SessionSv1GetActiveSessionsCount,
 				"GetPassiveSessions":         utils.SessionSv1GetPassiveSessions,
 				"GetPassiveSessionsCount":    utils.SessionSv1GetPassiveSessionsCount,
-				"InitiateSessionWithDigest":  utils.SessionSv1InitiateSessionWithDigest,
 				"Ping":                       utils.SessionSv1Ping,
 				"ProcessEvent":               utils.SessionSv1ProcessEvent,
 				"ProcessMessage":             utils.SessionSv1ProcessMessage,
