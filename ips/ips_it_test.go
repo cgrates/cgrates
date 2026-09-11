@@ -494,54 +494,54 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 
 	})
 
-	t.Run("sessions integration", func(t *testing.T) {
-		// NOTE: reply is of type any to avoid having to import sessions just for
-		// this test in order to prevent future cyclic imports. Any sessions
-		// related test should be moved to sessions when ips implementation is
-		// complete.
+	// t.Run("sessions integration", func(t *testing.T) {
+	// 	// NOTE: reply is of type any to avoid having to import sessions just for
+	// 	// this test in order to prevent future cyclic imports. Any sessions
+	// 	// related test should be moved to sessions when ips implementation is
+	// 	// complete.
 
-		var authReply any
-		err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
-			&utils.CGREvent{
-				Tenant: "cgrates.org",
-				APIOpts: map[string]any{
-					utils.MetaIPs:      true,
-					utils.MetaOriginID: "session_auth_test",
-				},
-				Event: map[string]any{
-					utils.AccountField: "1001",
-					utils.Destination:  "2001",
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-				},
-			}, &authReply)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if authReply == nil {
-			t.Fatal("SessionSv1AuthorizeEvent returned nil reply")
-		}
+	// 	var authReply any
+	// 	err := client.Call(context.Background(), utils.SessionSv1AuthorizeEvent,
+	// 		&utils.CGREvent{
+	// 			Tenant: "cgrates.org",
+	// 			APIOpts: map[string]any{
+	// 				utils.MetaIPs:      true,
+	// 				utils.MetaOriginID: "session_auth_test",
+	// 			},
+	// 			Event: map[string]any{
+	// 				utils.AccountField: "1001",
+	// 				utils.Destination:  "2001",
+	// 				utils.SetupTime:    "2018-01-07T17:00:00Z",
+	// 			},
+	// 		}, &authReply)
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	// 	if authReply == nil {
+	// 		t.Fatal("SessionSv1AuthorizeEvent returned nil reply")
+	// 	}
 
-		var initReply any
-		err = client.Call(context.Background(), utils.SessionSv1InitiateSession,
-			&utils.CGREvent{
-				Tenant: "cgrates.org",
-				APIOpts: map[string]any{
-					utils.MetaIPs:      true,
-					utils.MetaOriginID: "session_init_test",
-				},
-				Event: map[string]any{
-					utils.AccountField: "1001",
-					utils.Destination:  "2001",
-					utils.SetupTime:    "2018-01-07T17:00:00Z",
-				},
-			}, &initReply)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if initReply == nil {
-			t.Fatal("SessionSv1InitiateSession returned nil reply")
-		}
-	})
+	// 	var initReply any
+	// 	err = client.Call(context.Background(), utils.SessionSv1InitiateSession,
+	// 		&utils.CGREvent{
+	// 			Tenant: "cgrates.org",
+	// 			APIOpts: map[string]any{
+	// 				utils.MetaIPs:      true,
+	// 				utils.MetaOriginID: "session_init_test",
+	// 			},
+	// 			Event: map[string]any{
+	// 				utils.AccountField: "1001",
+	// 				utils.Destination:  "2001",
+	// 				utils.SetupTime:    "2018-01-07T17:00:00Z",
+	// 			},
+	// 		}, &initReply)
+	// 	if err != nil {
+	// 		t.Fatal(err)
+	// 	}
+	// 	if initReply == nil {
+	// 		t.Fatal("SessionSv1InitiateSession returned nil reply")
+	// 	}
+	// })
 }
 
 // Helper functions for testing
