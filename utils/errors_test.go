@@ -59,27 +59,6 @@ func TestNewErrChargerS(t *testing.T) {
 	}
 }
 
-func TestNewErrStatS(t *testing.T) {
-	expected := "STATS_ERROR:NOT_FOUND"
-	if rcv := NewErrStatS(ErrNotFound); rcv.Error() != expected {
-		t.Errorf("Expected %+q, receiveed %+q", expected, rcv.Error())
-	}
-}
-
-func TestNewErrCDRS(t *testing.T) {
-	expected := "CDRS_ERROR:NOT_FOUND"
-	if rcv := NewErrCDRS(ErrNotFound); rcv.Error() != expected {
-		t.Errorf("Expected %+q, received %+q", expected, rcv.Error())
-	}
-}
-
-func TestNewErrThresholdS(t *testing.T) {
-	expected := "THRESHOLDS_ERROR:NOT_FOUND"
-	if rcv := NewErrThresholdS(ErrNotFound); rcv.Error() != expected {
-		t.Errorf("Expected %+q, received %+q", expected, rcv.Error())
-	}
-}
-
 func TestNewSTIRError(t *testing.T) {
 	expected := `*stirAuthenticate: wrong header`
 	if rcv := NewSTIRError("wrong header"); rcv.Error() != expected {

@@ -238,14 +238,13 @@ func replicateMultipleIDs(ctx *context.Context, connMgr *ConnManager, connIDs []
 // ReplicationTask represents a replication operation that can be saved to disk
 // and executed later, typically used for failed replications.
 type ReplicationTask struct {
-	ConnIDs   []string
-	Filtered  bool
-	Path      string
-	ObjType   string
-	ObjID     string
-	Method    string
-	Args      any
-	failedDir string
+	ConnIDs  []string
+	Filtered bool
+	Path     string
+	ObjType  string
+	ObjID    string
+	Method   string
+	Args     any
 }
 
 // NewReplicationTaskFromFile loads a replication task from the specified file.

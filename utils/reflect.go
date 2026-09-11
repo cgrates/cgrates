@@ -817,15 +817,6 @@ func OptAsBool(opts map[string]any, name string) (b bool) {
 	return
 }
 
-func OptAsBoolOrDef(opts map[string]any, name string, def bool) (b bool) {
-	val, has := opts[name]
-	if !has {
-		return def
-	}
-	b, _ = IfaceAsBool(val)
-	return
-}
-
 func OptAsStringSlice(opts map[string]any, name string) (b []string, err error) {
 	val, has := opts[name]
 	if !has {

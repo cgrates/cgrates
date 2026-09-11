@@ -1634,21 +1634,6 @@ func TestOrderRatesOnIntervalsDayOfTheWeek(t *testing.T) {
 	}
 }
 
-func TestNewRatesWithWinner(t *testing.T) {
-	rt := &rateWithTimes{
-		uId: "randomID",
-	}
-	expected := &ratesWithWinner{
-		rts: map[string]*rateWithTimes{
-			"randomID": rt,
-		},
-		wnr: rt,
-	}
-	if !reflect.DeepEqual(expected, newRatesWithWinner(rt)) {
-		t.Errorf("Expected %+v, received %+v", expected, newRatesWithWinner(rt))
-	}
-}
-
 func TestOrderRatesOnIntervalCaseMaxIterations(t *testing.T) {
 	rt1 := &utils.Rate{
 		ID:              "RT_1",

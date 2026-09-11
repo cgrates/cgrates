@@ -535,38 +535,6 @@ func TestParseTimeDetectLayout(t *testing.T) {
 
 }
 
-func TestRoundStatDuration(t *testing.T) {
-	result := RoundStatDuration(time.Second+14565876*time.Nanosecond, 5)
-	expected := time.Second + 14570000*time.Nanosecond
-	if result != expected {
-		t.Errorf("Expected %+v, received %+v", expected, result)
-	}
-
-	result = RoundStatDuration(time.Second+14565876*time.Nanosecond, 1)
-	expected = time.Second
-	if result != expected {
-		t.Errorf("Expected %+v, received %+v", expected, result)
-	}
-
-	result = RoundStatDuration(time.Second+14565876*time.Nanosecond, 9)
-	expected = time.Second + 14565876*time.Nanosecond
-	if result != expected {
-		t.Errorf("Expected %+v, received %+v", expected, result)
-	}
-
-	result = RoundStatDuration(24*time.Second+14565876*time.Nanosecond, -1)
-	expected = 20 * time.Second
-	if result != expected {
-		t.Errorf("Expected %+v, received %+v", expected, result)
-	}
-
-	result = RoundStatDuration(24*time.Second+14565876*time.Nanosecond, 0)
-	expected = 24 * time.Second
-	if result != expected {
-		t.Errorf("Expected %+v, received %+v", expected, result)
-	}
-}
-
 func TestSplitPrefix(t *testing.T) {
 	exp := []string{"0123456789", "012345678", "01234567", "0123456", "012345", "01234", "0123", "012", "01", "0"}
 	if a := SplitPrefix("0123456789", 1); len(a) != 10 {

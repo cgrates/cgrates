@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
-	"sync"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -20,7 +19,6 @@ import (
 type EfS struct {
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
-	eesMux  sync.RWMutex
 }
 
 // NewEfs is the constructor for the Efs

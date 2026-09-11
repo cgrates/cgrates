@@ -2580,23 +2580,6 @@ func BenchmarkAgReqSetField(b *testing.B) {
 	}
 }
 
-func TestNeedsMaxUsage(t *testing.T) {
-	if needsMaxUsage(nil) {
-		t.Error("Expected empty flag to not need maxUsage")
-	}
-
-	if needsMaxUsage(utils.FlagParams{}) {
-		t.Error("Expected empty flag to not need maxUsage")
-	}
-
-	if needsMaxUsage(utils.FlagParams{utils.MetaIDs: {"ID1", "ID2"}}) {
-		t.Error("Expected flag to not need maxUsage")
-	}
-	if !needsMaxUsage(utils.FlagParams{utils.MetaIDs: {"ID1", "ID2"}, utils.MetaInitiate: {}}) {
-		t.Error("Expected flag to need maxUsage")
-	}
-}
-
 func TestAgReqSetFieldsFromCfg(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)

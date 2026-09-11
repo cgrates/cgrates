@@ -19,11 +19,10 @@ import (
 )
 
 var (
-	tpCfgPath  string
-	tpCfgDIR   string
-	tpCfg      *config.CGRConfig
-	tpRPC      *birpc.Client
-	tpLoadInst utils.LoadInstance // Share load information between tests
+	tpCfgPath string
+	tpCfgDIR  string
+	tpCfg     *config.CGRConfig
+	tpRPC     *birpc.Client
 
 	sTestTp = []func(t *testing.T){
 		testTpInitCfg,

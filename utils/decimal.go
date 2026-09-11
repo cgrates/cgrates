@@ -286,10 +286,6 @@ func (d *Decimal) Duration() (time.Duration, bool) {
 	return time.Duration(v), true
 }
 
-func CloneDecimalBig(in *decimal.Big) *decimal.Big {
-	return decimal.WithContext(DecimalContext).Copy(in)
-}
-
 // QuoRemDecimal is a wrapper on top of QuoRem of decimal.Big
 // Returns Quotinent and Reminder of x/y
 func QuoRemDecimal(x, y *Decimal) (q *Decimal, r *Decimal) {

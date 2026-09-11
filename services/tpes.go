@@ -23,11 +23,10 @@ func NewTPeService(cfg *config.CGRConfig) *TPeService {
 
 // TypeService implements Service interface
 type TPeService struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	tpes     *tpes.TPeS
-	srv      *birpc.Service
-	stopChan chan struct{}
+	mu   sync.RWMutex
+	cfg  *config.CGRConfig
+	tpes *tpes.TPeS
+	srv  *birpc.Service
 }
 
 // Start should handle the service start
@@ -50,7 +49,6 @@ func (ts *TPeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	defer ts.mu.Unlock()
 
 	ts.tpes = tpes.NewTPeS(ts.cfg, dbs, cm)
-	ts.stopChan = make(chan struct{})
 	ts.srv, err = newRPCService(apis.NewTPeSv1(ts.tpes), utils.TPeSv1)
 	if err != nil {
 		return err
@@ -69,7 +67,6 @@ func (ts *TPeService) Shutdown(registry *servmanager.Registry) (err error) {
 	ts.mu.Lock()
 	defer ts.mu.Unlock()
 	ts.srv = nil
-	close(ts.stopChan)
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.TPeSv1)
 	return

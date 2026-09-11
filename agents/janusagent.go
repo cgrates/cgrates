@@ -70,6 +70,15 @@ func (ja *JanusAgent) Shutdown() (err error) {
 	return
 }
 
+// janusAccessControlHeaders will add the necessary access control headers
+func janusAccessControlHeaders(w http.ResponseWriter, req *http.Request) {
+	if origin := req.Header.Get("Origin"); origin != "" {
+		w.Header().Set("Access-Control-Allow-Origin", origin)
+		w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Accept-Language, Content-Type")
+	}
+}
+
 // ServeHTTP implements http.Handler interface
 func (ja *JanusAgent) CORSOptions(w http.ResponseWriter, req *http.Request) {
 	janusAccessControlHeaders(w, req)

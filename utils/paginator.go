@@ -7,11 +7,6 @@ import (
 	"fmt"
 )
 
-type PaginatorWithSearch struct {
-	*Paginator
-	Search string // Global matching pattern in items returned, partially used in some APIs
-}
-
 // Paginate stuff around items returned
 type Paginator struct {
 	Limit    *int // Limit the number of items returned

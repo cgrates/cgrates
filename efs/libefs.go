@@ -85,13 +85,11 @@ func NewFailoverPosterFromFile(filePath, provider string, efs *EfS) (FailoverPos
 			return nil, err
 		}
 		return &FailedExportersEEs{
-			cfg:            efs.cfg,
-			module:         expEv.Module,
-			failedPostsDir: expEv.FailedPostsDir,
-			Path:           expEv.Path,
-			Opts:           opts,
-			Events:         expEv.Events,
-			Format:         expEv.Format,
+			cfg:    efs.cfg,
+			Path:   expEv.Path,
+			Opts:   opts,
+			Events: expEv.Events,
+			Format: expEv.Format,
 
 			connMngr: efs.connMgr,
 		}, nil

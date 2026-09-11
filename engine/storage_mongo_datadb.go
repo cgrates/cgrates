@@ -33,7 +33,6 @@ const (
 	ColAct  = "actions"
 	ColApl  = "actionPlans"
 	ColAAp  = "accountActionPlans"
-	ColTsk  = "tasks"
 	ColAtr  = "actionTriggers"
 	ColRpl  = "ratingPlans"
 	ColRpf  = "ratingProfiles"
@@ -63,30 +62,6 @@ const (
 	ColApp  = "actionProfiles"
 	ColLID  = "loadIDs"
 	ColAnp  = "accountProfiles"
-)
-
-var (
-	MetaOriginLow  = strings.ToLower(utils.MetaOriginID)
-	RunIDLow       = strings.ToLower(utils.RunID)
-	OrderIDLow     = strings.ToLower(utils.OrderID)
-	OriginHostLow  = strings.ToLower(utils.OriginHost)
-	OriginIDLow    = strings.ToLower(utils.OriginID)
-	ToRLow         = strings.ToLower(utils.ToR)
-	CDRHostLow     = strings.ToLower(utils.OriginHost)
-	CDRSourceLow   = strings.ToLower(utils.Source)
-	RequestTypeLow = strings.ToLower(utils.RequestType)
-	TenantLow      = strings.ToLower(utils.Tenant)
-	CategoryLow    = strings.ToLower(utils.Category)
-	AccountLow     = strings.ToLower(utils.AccountField)
-	SubjectLow     = strings.ToLower(utils.Subject)
-	SetupTimeLow   = strings.ToLower(utils.SetupTime)
-	AnswerTimeLow  = strings.ToLower(utils.AnswerTime)
-	CreatedAtLow   = strings.ToLower(utils.CreatedAt)
-	UpdatedAtLow   = strings.ToLower(utils.UpdatedAt)
-	UsageLow       = strings.ToLower(utils.Usage)
-	DestinationLow = strings.ToLower(utils.Destination)
-	CostLow        = strings.ToLower(utils.Cost)
-	CostSourceLow  = strings.ToLower(utils.CostSource)
 )
 
 func decimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
@@ -278,11 +253,6 @@ func (ms *MongoStorage) dropAllIndexesForCol(colName string) error {
 
 func (ms *MongoStorage) getCol(col string) *mongo.Collection {
 	return ms.client.Database(ms.db).Collection(col)
-}
-
-// GetContext returns the context used for the current database.
-func (ms *MongoStorage) GetContext() *context.Context {
-	return context.TODO()
 }
 
 func isNotFound(err error) bool {

@@ -30,7 +30,6 @@ var (
 	httpSsCfg     *config.CGRConfig
 	httpSsRPC     *birpc.Client
 	httpSsClnt    *http.Client // so we can cache the connection
-	err           error
 
 	httpSsTests = []func(t *testing.T){
 		testHttpSsInitCfg,

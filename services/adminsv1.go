@@ -21,10 +21,9 @@ func NewAdminSv1Service(cfg *config.CGRConfig) *AdminSv1Service {
 
 // AdminSv1Service implements Service interface
 type AdminSv1Service struct {
-	mu       sync.RWMutex
-	cfg      *config.CGRConfig
-	api      *apis.AdminSv1
-	stopChan chan struct{}
+	mu  sync.RWMutex
+	cfg *config.CGRConfig
+	api *apis.AdminSv1
 }
 
 // Start should handle the sercive start
@@ -76,7 +75,6 @@ func (s *AdminSv1Service) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (
 func (s *AdminSv1Service) Shutdown(registry *servmanager.Registry) (err error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	// close(s.stopChan)
 	s.api = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.AdminSv1)

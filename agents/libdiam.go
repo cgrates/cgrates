@@ -177,23 +177,6 @@ func newDiamDataType(typ datatype.TypeID, valStr,
 	}
 }
 
-func headerLen(a *diam.AVP) int {
-	if a.Flags&avp.Vbit == avp.Vbit {
-		return 12
-	}
-	return 8
-}
-
-func updateAVPLength(avps []*diam.AVP) (l int) {
-	for _, avp := range avps {
-		if v, ok := avp.Data.(*diam.GroupedAVP); ok {
-			avp.Length = headerLen(avp) + updateAVPLength(v.AVP)
-		}
-		l += avp.Length
-	}
-	return
-}
-
 // messageAddAVPsWithPath will dynamically add AVPs into the message
 //
 //	append:	append to the message, on false overwrite if AVP is single or add to group if AVP is Grouped
@@ -239,7 +222,6 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 				if ok {
 					prevGrpData.AVP = append(prevGrpData.AVP, msgAVP)
 					m.Header.MessageLength += uint32(msgAVP.Len())
-					// updateAVPLenght(m.AVP)
 					return nil
 				}
 			}
@@ -254,13 +236,11 @@ func messageSetAVPsWithPath(m *diam.Message, pathStr []string,
 			m.Header.MessageLength -= uint32(avps[len(avps)-1].Len()) // decrease message length since we overwrite
 			*avps[len(avps)-1] = *msgAVP
 			m.Header.MessageLength += uint32(msgAVP.Len())
-			// updateAVPLenght(m.AVP)
 			return nil
 		}
 	}
 	m.AVP = append(m.AVP, msgAVP)
 	m.Header.MessageLength += uint32(msgAVP.Len())
-	// updateAVPLenght(m.AVP)
 	return nil
 }
 
@@ -475,19 +455,6 @@ func diamErrMsg(m *diam.Message, resCode uint32, msg string) *diam.Message {
 		ans.NewAVP(avp.ErrorMessage, 0, 0, datatype.UTF8String(msg))
 	}
 	return ans
-}
-
-func disectDiamListen(addrs string) (ipAddrs []net.IP) {
-	ipPort := strings.Split(addrs, utils.InInFieldSep)
-	if ipPort[0] == "" {
-		return
-	}
-	ips := strings.Split(ipPort[0], utils.HDRValSep)
-	ipAddrs = make([]net.IP, len(ips))
-	for i, ip := range ips {
-		ipAddrs[i] = net.ParseIP(ip)
-	}
-	return
 }
 
 // diamMessageData is cached when data is needed (ie. )

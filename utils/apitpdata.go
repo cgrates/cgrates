@@ -22,58 +22,11 @@ type ArgsSubItemIDs struct {
 	ItemsPrefix string
 }
 
-type AttrGetCdrs struct {
-	//CgrIds          []string // If provided, it will filter based on the cgrids present in list
-	MediationRunIds []string // If provided, it will filter on mediation runid
-
-	TORs                []string // If provided, filter on TypeOfRecord
-	CdrHosts            []string // If provided, it will filter cdrhost
-	CdrSources          []string // If provided, it will filter cdrsource
-	ReqTypes            []string // If provided, it will fiter reqtype
-	Tenants             []string // If provided, it will filter tenant
-	Categories          []string // If provided, it will filter çategory
-	Accounts            []string // If provided, it will filter account
-	Subjects            []string // If provided, it will filter the rating subject
-	DestinationPrefixes []string // If provided, it will filter on destination prefix
-	RatedAccounts       []string // If provided, it will filter ratedaccount
-	RatedSubjects       []string // If provided, it will filter the ratedsubject
-	OrderIdStart        *int64   // Export from this order identifier
-	OrderIdEnd          *int64   // Export smaller than this order identifier
-	TimeStart           string   // If provided, it will represent the starting of the CDRs interval (>=)
-	TimeEnd             string   // If provided, it will represent the end of the CDRs interval (<)
-	SkipErrors          bool     // Do not export errored CDRs
-	SkipRated           bool     // Do not export rated CDRs
-	OrderBy             string   // Ascendent/Descendent
-	Paginator
-}
-
 type AttrLoadTpFromFolder struct {
 	FolderPath string // Take files from folder absolute path
 	DryRun     bool   // Do not write to database but parse only
 	APIOpts    map[string]any
 	Caching    *string
-}
-
-type AttrImportTPFromFolder struct {
-	TPid         string
-	FolderPath   string
-	RunId        string
-	CsvSeparator string
-	APIOpts      map[string]any
-}
-
-type AttrDirExportTP struct {
-	TPid           *string
-	FileFormat     *string // Format of the exported file <csv>
-	FieldSeparator *string // Separator used between fields
-	ExportPath     *string // If provided it overwrites the configured export path
-	Compress       *bool   // If true the folder will be compressed after export performed
-}
-
-type ExportedTPStats struct {
-	ExportPath    string   // Full path to the newly generated export file
-	ExportedFiles []string // List of exported files
-	Compressed    bool
 }
 
 // RPCCDRsFilter is a filter used in Rpc calls
@@ -147,16 +100,6 @@ type TPIPPool struct {
 	Blockers  string
 }
 
-type TPIPProfile struct {
-	TPid      string
-	Tenant    string
-	ID        string
-	FilterIDs []string
-	TTL       string
-	Stored    bool
-	Weights   string
-	Pools     []*TPIPPool
-}
 type ArgsComputeFilterIndexIDs struct {
 	Tenant           string
 	APIOpts          map[string]any
@@ -377,24 +320,6 @@ type TPChargerProfile struct {
 	AttributeIDs []string
 }
 
-type TPTntID struct {
-	TPid   string
-	Tenant string
-	ID     string
-}
-
-type AttrRemoteLock struct {
-	ReferenceID string        // reference ID for this lock if available
-	LockIDs     []string      // List of IDs to obtain lock for
-	Timeout     time.Duration // Automatically unlock on timeout
-}
-
-type RPCCDRsFilterWithAPIOpts struct {
-	*RPCCDRsFilter
-	APIOpts map[string]any
-	Tenant  string
-}
-
 type ArgsGetCacheItemIDsWithAPIOpts struct {
 	APIOpts map[string]any
 	Tenant  string
@@ -603,11 +528,6 @@ type SessionIDsWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
-type ArgExportToFolder struct {
-	Path  string
-	Items []string
-}
-
 // DPRArgs are the arguments used by dispatcher to send a Disconnect-Peer-Request
 type DPRArgs struct {
 	OriginHost      string
@@ -637,18 +557,6 @@ type ArgCacheReplicateRemove struct {
 	Tenant  string
 }
 
-type TPRateProfile struct {
-	TPid            string
-	Tenant          string
-	ID              string
-	FilterIDs       []string
-	Weights         string
-	MinCost         float64
-	MaxCost         float64
-	MaxCostStrategy string
-	Rates           map[string]*TPRate
-}
-
 type TPRate struct {
 	ID              string   // RateID
 	FilterIDs       []string // RateFilterIDs
@@ -664,24 +572,6 @@ type TPIntervalRate struct {
 	RecurrentFee  float64 // RateValue
 	Unit          string
 	Increment     string
-}
-
-type ArgExportCDRs struct {
-	ExporterIDs []string // exporterIDs is used to said which exporter are using to export the cdrs
-	Verbose     bool     // verbose is used to inform the user about the positive and negative exported cdrs
-	RPCCDRsFilter
-}
-
-type TPActionProfile struct {
-	TPid      string
-	Tenant    string
-	ID        string
-	FilterIDs []string
-	Weights   string
-	Blockers  string
-	Schedule  string
-	Targets   []*TPActionTarget
-	Actions   []*TPAPAction
 }
 
 type TPActionTarget struct {
@@ -706,17 +596,6 @@ type TPAPDiktat struct {
 	Opts      string
 	Weights   string
 	Blockers  string
-}
-
-type TPAccount struct {
-	TPid         string
-	Tenant       string
-	ID           string
-	FilterIDs    []string
-	Weights      string
-	Blockers     string
-	Balances     map[string]*TPAccountBalance
-	ThresholdIDs []string
 }
 
 type TPAccountBalance struct {

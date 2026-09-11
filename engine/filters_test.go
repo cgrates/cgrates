@@ -1010,15 +1010,6 @@ func TestNewFilterFromInline(t *testing.T) {
 	}
 }
 
-func TestVerifyInlineFilterS(t *testing.T) {
-	if err := verifyInlineFilterS([]string{"ATTR", "*string:~*req,Acoount:1001"}); err != nil {
-		t.Error(err)
-	}
-	if err := verifyInlineFilterS([]string{"ATTR", "*string:~*req,Acoount1001"}); err == nil {
-		t.Errorf("Expected error received nil")
-	}
-}
-
 func TestActivationIntervalPass(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)

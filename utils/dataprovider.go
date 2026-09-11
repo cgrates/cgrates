@@ -26,14 +26,6 @@ type DataProvider interface {
 	FieldAsString(fldPath []string) (string, error) // remove this
 }
 
-// RWDataProvider is a DataProvider with write methods on it
-type RWDataProvider interface {
-	DataProvider
-
-	Set(fldPath []string, val any) (err error)
-	Remove(fldPath []string) (err error)
-}
-
 type MapStringDP map[string]string
 
 func (me MapStringDP) String() string {

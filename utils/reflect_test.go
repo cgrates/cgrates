@@ -1831,21 +1831,6 @@ func TestOptAsBool(t *testing.T) {
 	}
 }
 
-func TestOptAsBoolOrDef(t *testing.T) {
-	opts := map[string]any{
-		"field1": 2,
-	}
-	rcv := OptAsBoolOrDef(opts, "field1", false)
-	if !rcv {
-		t.Error("Output should've been true")
-	}
-
-	rcv = OptAsBoolOrDef(opts, "field2", false)
-	if rcv {
-		t.Error("Output should've been false")
-	}
-}
-
 func TestOptAsStringSlice(t *testing.T) {
 	opts := map[string]any{
 		"field1": []string{"val1", "val2"},

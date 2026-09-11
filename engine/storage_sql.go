@@ -17,10 +17,6 @@ import (
 )
 
 type SQLImpl interface {
-	extraFieldsExistsQry(string) string
-	extraFieldsValueQry(string, string) string
-	notExtraFieldsExistsQry(string) string
-	notExtraFieldsValueQry(string, string) string
 	valueQry(string, string, string, []string, bool) []string // will query for every type of filtering in case of needed
 	urIDQuery(string) string                                  // will get the unique *urID for every CDR
 	existField(string, string) string                         // will query for every element on json type if the field exists
@@ -37,10 +33,6 @@ type SQLStorage struct {
 func (sqls *SQLStorage) Close() {
 	sqls.DB.Close()
 	// sqls.db
-}
-
-func (sqls *SQLStorage) ExportGormDB() *gorm.DB {
-	return sqls.db
 }
 
 func (sqls *SQLStorage) Flush(scriptsPath string) (err error) {

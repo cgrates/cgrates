@@ -15,14 +15,12 @@ import (
 
 // FailedExportersEEs used to save the failed post to file
 type FailedExportersEEs struct {
-	cfg            *config.CGRConfig
-	lk             sync.RWMutex
-	Path           string
-	Opts           *config.EventExporterOpts
-	Format         string
-	Events         []any
-	failedPostsDir string
-	module         string
+	cfg    *config.CGRConfig
+	lk     sync.RWMutex
+	Path   string
+	Opts   *config.EventExporterOpts
+	Format string
+	Events []any
 
 	connMngr *engine.ConnManager
 }

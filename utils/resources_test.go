@@ -166,17 +166,6 @@ func TestResourcesAvailable(t *testing.T) {
 	}
 }
 
-type mockWriter struct {
-	WriteF func(p []byte) (n int, err error)
-}
-
-func (mW *mockWriter) Write(p []byte) (n int, err error) {
-	if mW.WriteF != nil {
-		return mW.WriteF(p)
-	}
-	return 0, nil
-}
-
 func TestResourceProfileSet(t *testing.T) {
 	cp := ResourceProfile{}
 	exp := ResourceProfile{

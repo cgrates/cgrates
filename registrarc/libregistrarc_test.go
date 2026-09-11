@@ -6,7 +6,6 @@ package registrarc
 import (
 	"bytes"
 	"encoding/json"
-	"io"
 	"net/http"
 	"reflect"
 	"testing"
@@ -209,12 +208,6 @@ func TestGetConnPort(t *testing.T) {
 // 	}
 // 	engine.Cache = engine.NewCacheS(cfg, nil, nil, nil)
 // }
-
-type errRecorder struct{}
-
-func (*errRecorder) Header() http.Header        { return make(http.Header) }
-func (*errRecorder) Write([]byte) (int, error)  { return 0, io.EOF }
-func (*errRecorder) WriteHeader(statusCode int) {}
 
 // func TestRegistrar(t *testing.T) {
 // 	w := httptest.NewRecorder()

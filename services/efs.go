@@ -16,11 +16,10 @@ import (
 
 // ExportFailoverService is the service structure for ExportFailover
 type ExportFailoverService struct {
-	mu       sync.Mutex
-	efS      *efs.EfS
-	srv      *birpc.Service
-	stopChan chan struct{}
-	cfg      *config.CGRConfig
+	mu  sync.Mutex
+	efS *efs.EfS
+	srv *birpc.Service
+	cfg *config.CGRConfig
 }
 
 // NewExportFailoverService is the constructor for the TpeService
@@ -48,7 +47,6 @@ func (s *ExportFailoverService) Start(shutdown *utils.SyncedChan, registry *serv
 	defer s.mu.Unlock()
 
 	s.efS = efs.NewEfs(s.cfg, cms.ConnManager())
-	s.stopChan = make(chan struct{})
 	s.srv, err = newRPCService(apis.NewEfSv1(s.efS), utils.EfSv1)
 	if err != nil {
 		return err
@@ -69,7 +67,6 @@ func (s *ExportFailoverService) Shutdown(registry *servmanager.Registry) (err er
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.srv = nil
-	close(s.stopChan)
 
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.EfSv1)

@@ -7,17 +7,6 @@ import (
 	"strings"
 )
 
-// PrefixSliceItems iterates through slice and add a prefix before every element
-func PrefixSliceItems(prfx string, slc []string) (out []string) {
-	out = make([]string, 0, len(slc))
-	for _, itm := range slc {
-		if itm != EmptyString {
-			out = append(out, prfx+itm)
-		}
-	}
-	return
-}
-
 // SliceStringToIface converts slice of strings into a slice of interfaces
 func SliceStringToIface(slc []string) (ifc []any) {
 	ifc = make([]any, len(slc))

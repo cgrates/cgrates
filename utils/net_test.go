@@ -12,6 +12,64 @@ import (
 	"testing"
 )
 
+func TestLocalAddr(t *testing.T) {
+	eOut := &NetAddr{network: Local, ip: Local}
+	if rcv := LocalAddr(); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestNewNetAddr(t *testing.T) {
+	eOut := &NetAddr{}
+	if rcv := NewNetAddr(EmptyString, EmptyString); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{network: "network"}
+	if rcv := NewNetAddr("network", EmptyString); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{ip: "127.0.0.1", port: 2012}
+	if rcv := NewNetAddr(EmptyString, "127.0.0.1:2012"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+	eOut = &NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := NewNetAddr("network", "127.0.0.1:2012"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expected: %+v, received: %+v ", ToJSON(eOut), ToJSON(rcv))
+	}
+}
+
+func TestNetAddrNetwork(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Network(); !reflect.DeepEqual(rcv, lc.network) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.network, rcv)
+	}
+}
+
+func TestNetAddrString(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.String(); !reflect.DeepEqual(rcv, lc.ip) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.ip, rcv)
+	}
+}
+
+func TestNetAddrPort(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Port(); !reflect.DeepEqual(rcv, lc.port) {
+		t.Errorf("Expected: %+v, received: %+v ", lc.port, rcv)
+	}
+}
+
+func TestNetAddrHost(t *testing.T) {
+	lc := NetAddr{network: "network", ip: "127.0.0.1", port: 2012}
+	if rcv := lc.Host(); !reflect.DeepEqual(rcv, "127.0.0.1:2012") {
+		t.Errorf("Expected: '127.0.0.1:2012', received: %+v ", rcv)
+	}
+	lc = NetAddr{network: "network", ip: Local, port: 2012}
+	if rcv := lc.Host(); !reflect.DeepEqual(rcv, Local) {
+		t.Errorf("Expected: %+v, received: %+v ", Local, rcv)
+	}
+}
+
 func TestGetRemoteIP(t *testing.T) {
 	req, err := http.NewRequest(http.MethodGet, "http://127.0.0.1:2080/json_rpc", bytes.NewBuffer(nil))
 	if err != nil {

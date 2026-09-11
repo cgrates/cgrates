@@ -82,22 +82,6 @@ func (msqlS *MySQLStorage) SetVersions(vrs Versions, overwrite bool) (err error)
 	return
 }
 
-func (msqlS *MySQLStorage) extraFieldsExistsQry(field string) string {
-	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":%%'", field)
-}
-
-func (msqlS *MySQLStorage) extraFieldsValueQry(field, value string) string {
-	return fmt.Sprintf(" extra_fields LIKE '%%\"%s\":\"%s\"%%'", field, value)
-}
-
-func (msqlS *MySQLStorage) notExtraFieldsExistsQry(field string) string {
-	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":%%'", field)
-}
-
-func (msqlS *MySQLStorage) notExtraFieldsValueQry(field, value string) string {
-	return fmt.Sprintf(" extra_fields NOT LIKE '%%\"%s\":\"%s\"%%'", field, value)
-}
-
 // urIDQuery will query the CDR by its unique urID
 func (msqlS *MySQLStorage) urIDQuery(urID string) string {
 	return fmt.Sprintf(" JSON_VALUE(opts, '$.\"*urID\"') = '%s'", urID)

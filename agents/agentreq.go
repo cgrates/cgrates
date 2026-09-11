@@ -396,13 +396,6 @@ func (ar *AgentRequest) setCGRReply(rply utils.NavigableMapper, err error) {
 	ar.CGRReply.Map[utils.Error] = utils.NewLeafNode(errMsg)
 }
 
-func needsMaxUsage(ralsFlags utils.FlagParams) bool {
-	return len(ralsFlags) != 0 &&
-		(ralsFlags.Has(utils.MetaAuthorize) ||
-			ralsFlags.Has(utils.MetaInitiate) ||
-			ralsFlags.Has(utils.MetaUpdate))
-}
-
 // Append sets the value at the given path
 // this used with full path and the processed path to not calculate them for every set
 func (ar *AgentRequest) Append(fullPath *utils.FullPath, val *utils.DataLeaf) (err error) {

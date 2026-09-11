@@ -363,25 +363,6 @@ func TestMessageSetAVPsWithPath6(t *testing.T) {
 }
 */
 
-func TestDisectDiamListen(t *testing.T) {
-	expIPs := []net.IP{net.ParseIP("192.168.56.203"), net.ParseIP("192.168.57.203")}
-	rvc := disectDiamListen("192.168.56.203/192.168.57.203:3869")
-	if !reflect.DeepEqual(expIPs, rvc) {
-		t.Errorf("Expecting: %+v \n, received: %+v \n ", expIPs, rvc)
-	}
-	expIPs = []net.IP{net.ParseIP("192.168.56.203")}
-	rvc = disectDiamListen("192.168.56.203:3869")
-	if !reflect.DeepEqual(expIPs, rvc) {
-		t.Errorf("Expecting: %+v \n, received: %+v \n ", expIPs, rvc)
-	}
-	expIPs = []net.IP{}
-	rvc = disectDiamListen(":3869")
-	if len(rvc) != 0 {
-		t.Errorf("Expecting: %+v \n, received: %+q \n ", expIPs, rvc)
-	}
-
-}
-
 func TestUpdateDiamMsgFromNavMap1(t *testing.T) {
 	eMessage := diam.NewRequest(diam.CreditControl, 4, nil)
 	eMessage.NewAVP("Multiple-Services-Credit-Control", avp.Mbit, 0, &diam.GroupedAVP{

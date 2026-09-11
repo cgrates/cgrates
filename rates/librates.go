@@ -13,20 +13,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-type rpWithWeight struct {
-	*utils.RateProfile
-	weight float64
-}
-
-func newRatesWithWinner(rIt *rateWithTimes) *ratesWithWinner {
-	return &ratesWithWinner{
-		rts: map[string]*rateWithTimes{
-			rIt.id(): rIt,
-		},
-		wnr: rIt,
-	}
-}
-
 func initRatesWithWinner() *ratesWithWinner {
 	return &ratesWithWinner{
 		rts: make(map[string]*rateWithTimes),

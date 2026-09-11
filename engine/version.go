@@ -91,23 +91,6 @@ func CurrentDataDBVersions() Versions {
 	}
 }
 
-func CurrentStorDBVersions() Versions {
-	return Versions{
-		utils.CostDetails:      1,
-		utils.SessionSCosts:    1,
-		utils.CDRs:             1,
-		utils.TpFilters:        1,
-		utils.TpThresholds:     1,
-		utils.TpRoutes:         1,
-		utils.TpStats:          1,
-		utils.TpResources:      1,
-		utils.TpResource:       1,
-		utils.TpChargers:       1,
-		utils.TpRateProfiles:   1,
-		utils.TpActionProfiles: 1,
-	}
-}
-
 // CurrentAllDBVersions returns the both DataDB
 func CurrentAllDBVersions() Versions {
 	dataDBVersions := CurrentDataDBVersions()

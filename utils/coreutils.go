@@ -178,11 +178,6 @@ func Round(x float64, prec int, method string) float64 {
 	return rounder / pow
 }
 
-// RoundStatDuration is used in engine package for stat metrics that has duration (e.g acd metric, tcd metric, etc...)
-func RoundStatDuration(x time.Duration, prec int) time.Duration {
-	return x.Round(time.Duration(math.Pow10(9 - prec)))
-}
-
 func getAddDuration(tmStr string) (addDur time.Duration, err error) {
 	eDurIdx := strings.Index(tmStr, "+")
 	if eDurIdx == -1 {
@@ -470,10 +465,6 @@ func BoolPointer(b bool) *bool {
 func MapStringStringPointer(mp map[string]string) *map[string]string {
 	return &mp
 }
-func MapStringSlicePointer(mp map[string][]string) *map[string][]string {
-	return &mp
-}
-
 func TimePointer(t time.Time) *time.Time {
 	return &t
 }
@@ -975,16 +966,6 @@ func SplitPath(rule string, sep byte, n int) []string {
 	}
 	splt = append(splt, rule[pos:]) // add last element
 	return splt
-}
-
-// StructChanTimeout will return true if timeout occurs before struct is received
-func StructChanTimeout(chn chan struct{}, timeout time.Duration) bool {
-	select {
-	case <-chn:
-		return false
-	case <-time.After(timeout):
-		return true
-	}
 }
 
 // ParseBinarySize converts string byte sizes (b, kb, mb, gb) to byte int64

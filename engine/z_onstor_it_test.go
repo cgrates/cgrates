@@ -20,7 +20,6 @@ import (
 
 var (
 	rdsITdb     *RedisStorage
-	mgoITdb     *MongoStorage
 	onStor      *DataManager
 	onStorCache *CacheS
 	onStorCfg   string

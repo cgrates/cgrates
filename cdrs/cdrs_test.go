@@ -4,8 +4,6 @@
 package cdrs
 
 import (
-	"net/http"
-	"net/url"
 	"reflect"
 	"testing"
 	"time"
@@ -328,25 +326,6 @@ func TestCDRsEESProcessEventErrMsnConnIDs(t *testing.T) {
 		t.Errorf("\nExpected <MANDATORY_IE_MISSING: [connIDs]> \n, received <%+v>", err)
 	}
 
-}
-
-func TestCDRsNewMapEventFromReqForm(t *testing.T) {
-	httpReq := &http.Request{
-		Form: url.Values{
-			"value1": {"value2"},
-		},
-	}
-	result, err := newMapEventFromReqForm(httpReq)
-	if err != nil {
-		t.Errorf("\nExpected <nil> \n, received <%+v>", err)
-	}
-	expected := engine.MapEvent{
-		"value1": "value2",
-		"Source": "",
-	}
-	if !reflect.DeepEqual(expected, result) {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", expected, result)
-	}
 }
 
 type ccMock struct {
@@ -1188,20 +1167,6 @@ func TestCDRsProcessEventMockSkipOpts(t *testing.T) {
 	if !reflect.DeepEqual(expected, cgrEv) {
 		t.Errorf("\nExpected <%+v> \n,received <%+v>", expected, cgrEv)
 	}
-}
-
-func TestCDRsNewMapEventFromReqFormErr(t *testing.T) {
-	httpReq := &http.Request{
-		URL: &url.URL{
-			RawQuery: "%0x",
-		},
-	}
-	_, err := newMapEventFromReqForm(httpReq)
-	errExpect := `invalid URL escape "%0x"`
-	if err == nil || err.Error() != errExpect {
-		t.Errorf("\nExpected <%+v> \n, received <%+v>", errExpect, err)
-	}
-
 }
 
 func TestCDRsProcessEventMockAttrsErr(t *testing.T) {

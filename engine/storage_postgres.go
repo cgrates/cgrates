@@ -91,22 +91,6 @@ func (poS *PostgresStorage) SetVersions(vrs Versions, overwrite bool) (err error
 	return
 }
 
-func (poS *PostgresStorage) extraFieldsExistsQry(field string) string {
-	return fmt.Sprintf(" extra_fields ?'%s'", field)
-}
-
-func (poS *PostgresStorage) extraFieldsValueQry(field, value string) string {
-	return fmt.Sprintf(" (extra_fields ->> '%s') = '%s'", field, value)
-}
-
-func (poS *PostgresStorage) notExtraFieldsExistsQry(field string) string {
-	return fmt.Sprintf(" NOT extra_fields ?'%s'", field)
-}
-
-func (poS *PostgresStorage) notExtraFieldsValueQry(field, value string) string {
-	return fmt.Sprintf(" NOT (extra_fields ?'%s' AND (extra_fields ->> '%s') = '%s')", field, field, value)
-}
-
 // urIDQuery will query the CDR by its unique urID
 func (poS *PostgresStorage) urIDQuery(urID string) string {
 	return fmt.Sprintf(" opts ->> '*urID' = '%s'", urID)

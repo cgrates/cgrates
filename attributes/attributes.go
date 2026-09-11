@@ -110,15 +110,6 @@ type FieldsAltered struct {
 	Fields           []string
 }
 
-// UniqueAlteredFields returns all altered fields without duplicates.
-func (r *ProcessEventReply) UniqueAlteredFields() utils.StringSet {
-	unique := make(utils.StringSet)
-	for _, altered := range r.AlteredFields {
-		unique.AddSlice(altered.Fields)
-	}
-	return unique
-}
-
 // Digest returns the altered fields serialized as
 // fldName1:fldVal1,fldName2:fldVal2.
 func (r *ProcessEventReply) Digest() (rplyDigest string) {

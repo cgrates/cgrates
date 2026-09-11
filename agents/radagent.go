@@ -91,7 +91,6 @@ func NewRadiusAgent(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.F
 }
 
 type RadiusAgent struct {
-	mu     sync.RWMutex
 	wg     sync.WaitGroup
 	cfg    *config.CGRConfig // reference for future config reloads
 	cache  *engine.CacheS

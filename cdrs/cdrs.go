@@ -6,7 +6,6 @@ package cdrs
 import (
 	"encoding/json"
 	"fmt"
-	"net/http"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
@@ -15,19 +14,6 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
-
-func newMapEventFromReqForm(r *http.Request) (mp engine.MapEvent, err error) {
-	if r.Form == nil {
-		if err = r.ParseForm(); err != nil {
-			return
-		}
-	}
-	mp = engine.MapEvent{utils.Source: r.RemoteAddr}
-	for k, vals := range r.Form {
-		mp[k] = vals[0] // We only support the first value for now, if more are provided it is considered remote's fault
-	}
-	return
-}
 
 // NewCDRServer is a constructor for CDRServer
 func NewCDRServer(cfg *config.CGRConfig, dm *engine.DataManager, cache *engine.CacheS, filterS *engine.FilterS, connMgr *engine.ConnManager) *CDRServer {

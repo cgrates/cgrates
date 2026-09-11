@@ -4,9 +4,6 @@
 package efs
 
 import (
-	"bytes"
-	"encoding/gob"
-	"os"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -34,24 +31,6 @@ func (expEv *FailedExportersLog) AddEvent(ev any) {
 	expEv.lk.Lock()
 	defer expEv.lk.Unlock()
 	expEv.Events = append(expEv.Events, ev)
-}
-
-// NewExportEventsFromFile returns ExportEvents from the file
-// used only on replay failed post
-func NewExportEventsFromFile(filePath string) (*FailedExportersLog, error) {
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-	if err := os.Remove(filePath); err != nil {
-		return nil, err
-	}
-	var expEv FailedExportersLog
-	dec := gob.NewDecoder(bytes.NewBuffer(content))
-	if err := dec.Decode(&expEv); err != nil {
-		return nil, err
-	}
-	return &expEv, nil
 }
 
 // ReplayFailedPosts tries to repost failed cdrs.

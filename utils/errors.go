@@ -6,7 +6,6 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"strings"
 )
 
 var (
@@ -27,7 +26,6 @@ var (
 	ErrUnauthorizedDestination       = errors.New("UNAUTHORIZED_DESTINATION")
 	ErrRatingPlanNotFound            = errors.New("RATING_PLAN_NOT_FOUND")
 	ErrAccountNotFound               = errors.New("ACCOUNT_NOT_FOUND")
-	ErrAccountDisabled               = errors.New("ACCOUNT_DISABLED")
 	ErrInsufficientCredit            = errors.New("INSUFFICIENT_CREDIT")
 	ErrNotConvertible                = errors.New("NOT_CONVERTIBLE")
 	ErrResourceUnavailable           = errors.New("RESOURCE_UNAVAILABLE")
@@ -35,7 +33,6 @@ var (
 	ErrNoActiveSession               = errors.New("NO_ACTIVE_SESSION")
 	ErrPartiallyExecuted             = errors.New("PARTIALLY_EXECUTED")
 	ErrMaxUsageExceeded              = errors.New("MAX_USAGE_EXCEEDED")
-	ErrMaxCostExceeded               = errors.New("MAX_COST_EXCEEDED")
 	ErrFilterNotPassingNoCaps        = errors.New("filter not passing")
 	ErrNotConvertibleNoCaps          = errors.New("not convertible")
 	ErrMandatoryIeMissingNoCaps      = errors.New("mandatory information missing")
@@ -48,8 +45,6 @@ var (
 	ErrSessionNotFound               = errors.New("SESSION_NOT_FOUND")
 	ErrJsonIncompleteComment         = errors.New("JSON_INCOMPLETE_COMMENT")
 	ErrNotEnoughParameters           = errors.New("NotEnoughParameters")
-	ErrNotConnected                  = errors.New("NOT_CONNECTED")
-	DispatcherErrorPrefix            = "DISPATCHER_ERROR"
 	RateSErrPrfx                     = "RATES_ERROR"
 	ErrNotAuthorized                 = errors.New("NOT_AUTHORIZED")
 	AccountSErrPrfx                  = "ACCOUNTS_ERROR"
@@ -187,22 +182,6 @@ func NewErrEEs(err error) error {
 	return fmt.Errorf("EES_ERROR:%s", err)
 }
 
-func NewErrStatS(err error) error {
-	return fmt.Errorf("STATS_ERROR:%s", err)
-}
-
-func NewErrCDRS(err error) error {
-	return fmt.Errorf("CDRS_ERROR:%s", err)
-}
-
-func NewErrThresholdS(err error) error {
-	return fmt.Errorf("THRESHOLDS_ERROR:%s", err)
-}
-
-func NewErrDispatcherS(err error) error {
-	return fmt.Errorf("%s:%s", DispatcherErrorPrefix, err.Error())
-}
-
 func NewErrRateS(err error) error {
 	return fmt.Errorf("%s:%s", RateSErrPrfx, err.Error())
 }
@@ -230,25 +209,6 @@ func ErrPrefix(err error, reason string) error {
 	return fmt.Errorf("%s%s%s", err.Error(), ConcatenatedKeySep, reason)
 }
 
-// NewErrPrefix constructs a new error from prefix and reason
-func NewErrPrefix(prfx, reason string) error {
-	return fmt.Errorf("%s%s%s", prfx, ConcatenatedKeySep, reason)
-}
-
-// GetErrPrefix extracts the prefix out of errWithPrefix
-func GetErrPrefix(err error) string {
-	return strings.Split(err.Error(), ConcatenatedKeySep)[0]
-}
-
-// GetErrReason extracts the reason out of errWithPrefix
-func GetErrReason(err error) (rsn string) {
-	splt := strings.Split(err.Error(), ConcatenatedKeySep)
-	if len(splt) < 1 {
-		return
-	}
-	return splt[1]
-}
-
 func ErrPrefixNotFound(reason string) error {
 	return ErrPrefix(ErrNotFound, reason)
 }
@@ -268,9 +228,4 @@ func ErrPathNotReachable(path string) error {
 // NewSTIRError returns a error with a *stir_authorize prefix
 func NewSTIRError(reason string) error {
 	return fmt.Errorf("%s: %s", MetaSTIRAuthenticate, reason)
-}
-
-// NewServiceTimeoutError is called when waiting
-func NewServiceStateTimeoutError(sourceID, srvID, stateID string) error {
-	return fmt.Errorf("%s: service <%s> state <%s> timeout", sourceID, srvID, stateID)
 }

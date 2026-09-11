@@ -826,17 +826,6 @@ func (fltr *FilterRule) passActivationInterval(dDp utils.DataProvider) (bool, er
 	return startTime.Before(timeVal), nil
 }
 
-func verifyInlineFilterS(fltrs []string) (err error) {
-	for _, fl := range fltrs {
-		if strings.HasPrefix(fl, utils.Meta) {
-			if _, err = NewFilterFromInline(utils.EmptyString, fl); err != nil {
-				return
-			}
-		}
-	}
-	return
-}
-
 func CheckFilter(fltr *Filter) (err error) {
 	for _, rls := range fltr.Rules {
 		valFunc := utils.IsPathValid

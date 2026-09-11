@@ -515,21 +515,6 @@ func TestParseAtributeCCUsageNoErr(t *testing.T) {
 	}
 }
 
-func TestUniqueAlteredFields(t *testing.T) {
-	flds := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
-			{Fields: []string{"field1"}},
-		},
-	}
-	exp := make(utils.StringSet)
-	for _, altered := range flds.AlteredFields {
-		exp.AddSlice(altered.Fields)
-	}
-	if rcv := flds.UniqueAlteredFields(); !reflect.DeepEqual(exp, rcv) {
-		t.Errorf("Expected <%+v>, Received <%+v>", exp, rcv)
-	}
-}
-
 func TestAttributeProfileForEventWeightFromDynamicsErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)

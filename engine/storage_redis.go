@@ -28,7 +28,6 @@ type RedisStorage struct {
 
 // Redis commands
 const (
-	redisAUTH     = "AUTH"
 	redisSELECT   = "SELECT"
 	redisFLUSHDB  = "FLUSHDB"
 	redisDEL      = "DEL"
@@ -41,10 +40,6 @@ const (
 	redisGET      = "GET"
 	redisSET      = "SET"
 	redisSCAN     = "SCAN"
-	redisLRANGE   = "LRANGE"
-	redisLLEN     = "LLEN"
-	redisRPOP     = "RPOP"
-	redisLPUSH    = "LPUSH"
 	redisHMGET    = "HMGET"
 	redisHDEL     = "HDEL"
 	redisHGET     = "HGET"
