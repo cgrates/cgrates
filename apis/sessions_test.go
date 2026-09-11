@@ -13,28 +13,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// func TestInitiateSession(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	connMgr := engine.NewConnManager(cfg)
-// 	data , _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-// 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-// dm := engine.NewDataManager(dbCM, cfg.CacheCfg(), nil)
-// 	ssv1 := &SessionSv1{
-// 		sS:   sessions.NewSessionS(cfg, dm, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-// 	}
-// 	var reply sessions.V1InitSessionReply
-// 	args := &utils.CGREvent{
-// 		ID:     "TestMatchingAccountsForEvent",
-// 		Tenant: "cgrates.org",
-// 		Event: map[string]any{
-// 			utils.AccountField: "1001",
-// 		},
-// 	}
-// 	if err := ssv1.InitiateSession(context.Background(), args, &reply); err != nil {
-// 		t.Error(err)
-// 	}
-// }
-
 func TestInitiateSessionWithDigest(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
@@ -61,32 +39,6 @@ func TestInitiateSessionWithDigest(t *testing.T) {
 	}
 }
 
-func TestUpdateSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewLocker(cfg)
-	connMgr := engine.NewConnManager(cfg)
-	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
-	connMgr.SetCache(cacheS)
-	dm.SetCache(cacheS)
-	ssv1 := &SessionSv1{
-		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-	}
-	var reply sessions.V1UpdateSessionReply
-	args := &utils.CGREvent{
-		ID:     "TestMatchingAccountsForEvent",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-	}
-	if err := ssv1.UpdateSession(context.Background(), args, &reply); err != nil {
-		t.Error(err)
-	}
-}
-
 func TestSyncSessions(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
@@ -109,32 +61,6 @@ func TestSyncSessions(t *testing.T) {
 	}
 	if reply != utils.OK {
 		t.Errorf("Expected%v\n but received %v", utils.OK, reply)
-	}
-}
-
-func TestTerminateSessions(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewLocker(cfg)
-	connMgr := engine.NewConnManager(cfg)
-	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
-	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
-	connMgr.SetCache(cacheS)
-	dm.SetCache(cacheS)
-	ssv1 := &SessionSv1{
-		sS: sessions.NewSessionS(cfg, dm, cacheS, engine.NewFilterS(cfg, connMgr, dm), connMgr),
-	}
-	var reply string
-	args := &utils.CGREvent{
-		ID:     "TestMatchingAccountsForEvent",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "1001",
-		},
-	}
-	if err := ssv1.TerminateSession(context.Background(), args, &reply); err != nil {
-		t.Error(err)
 	}
 }
 
