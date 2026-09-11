@@ -1678,12 +1678,6 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	return
 }
 
-// BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
-func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
-	args *utils.CGREvent, initReply *V1InitReplyWithDigest) (err error) {
-	return
-}
-
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
 func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
 	args *utils.CGREvent, rply *V1ProcessMessageReply) (err error) {
