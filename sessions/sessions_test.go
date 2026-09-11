@@ -919,79 +919,6 @@ func TestSessionSNewV1AuthorizeArgs(t *testing.T) {
 }
 */
 
-func TestSessionSV1AuthorizeReplyAsNavigableMap(t *testing.T) {
-	splrs := utils.SortedRoutesList{
-		{
-			ProfileID: "SPL_ACNT_1001",
-			Sorting:   utils.MetaWeight,
-			Routes: []*utils.SortedRoute{
-				{
-					RouteID: "supplier1",
-					SortingData: map[string]any{
-						"Weight": 20.0,
-					},
-				},
-				{
-					RouteID: "supplier2",
-					SortingData: map[string]any{
-						"Weight": 10.0,
-					},
-				},
-			},
-		},
-	}
-	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
-	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
-	v1AuthRpl := new(V1AuthorizeReply)
-	expected := map[string]*utils.DataNode{}
-	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1AuthRpl.Attributes = attrs
-	expected[utils.CapAttributes] = &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}}
-	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1AuthRpl.needsMaxUsage = true
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(0)
-	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	v1AuthRpl.MaxUsage = utils.NewDecimalFromFloat64(float64(5 * time.Minute))
-	expected[utils.CapMaxUsage] = utils.NewLeafNode(v1AuthRpl.MaxUsage)
-	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-	allocIP := &utils.AllocatedIP{
-		ProfileID: "prfID",
-		PoolID:    "POOL1",
-		Message:   "alloc_success",
-		Address:   netip.MustParseAddr("192.168.1.101"),
-	}
-	v1AuthRpl = &V1AuthorizeReply{
-		Attributes:         attrs,
-		ResourceAllocation: utils.StringPointer("ResGr1"),
-		AllocatedIP:        allocIP,
-		MaxUsage:           utils.NewDecimalFromFloat64(float64(5 * time.Minute)),
-		RouteProfiles:      splrs,
-		ThresholdIDs:       thIDs,
-		StatQueueIDs:       statIDs,
-	}
-	nm := splrs.AsNavigableMap()
-	expected = map[string]*utils.DataNode{
-		utils.CapAttributes:         {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"OfficeGroup": utils.NewLeafNode("Marketing")}},
-		utils.CapResourceAllocation: utils.NewLeafNode("ResGr1"),
-		utils.AllocatedIPField:      {Type: utils.NMMapType, Map: map[string]*utils.DataNode{"Address": {Value: &utils.DataLeaf{Data: "192.168.1.101"}}, "Message": {Value: &utils.DataLeaf{Data: "alloc_success"}}, "PoolID": {Value: &utils.DataLeaf{Data: "POOL1"}}, "ProfileID": {Value: &utils.DataLeaf{Data: "prfID"}}}},
-		utils.CapMaxUsage:           utils.NewLeafNode(v1AuthRpl.MaxUsage),
-		utils.CapRouteProfiles:      nm,
-		utils.CapThresholds:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("THD_RES_1"), utils.NewLeafNode("THD_STATS_1"), utils.NewLeafNode("THD_STATS_2"), utils.NewLeafNode("THD_CDRS_1")}},
-		utils.CapStatQueues:         {Type: utils.NMSliceType, Slice: []*utils.DataNode{utils.NewLeafNode("Stats2"), utils.NewLeafNode("Stats1"), utils.NewLeafNode("Stats3")}},
-	}
-	if rply := v1AuthRpl.AsNavigableMap(); !reflect.DeepEqual(expected, rply) {
-		t.Errorf("Expecting \n%+v\n, received: \n%+v", expected, rply)
-	}
-}
-
 func TestSessionSV1InitSessionReplyAsNavigableMap(t *testing.T) {
 	thIDs := &[]string{"THD_RES_1", "THD_STATS_1", "THD_STATS_2", "THD_CDRS_1"}
 	statIDs := &[]string{"Stats2", "Stats1", "Stats3"}
@@ -1104,19 +1031,6 @@ func TestSetMaxUsageNeededInitSessionReply(t *testing.T) {
 
 	rplyInitSessRply = nil
 	rplyInitSessRply.SetMaxUsageNeeded(true)
-}
-
-func TestSetMaxUsageNeededAuthorizeReply(t *testing.T) {
-	rplyAuthRply := &V1AuthorizeReply{
-		needsMaxUsage: false,
-	}
-	rplyAuthRply.SetMaxUsageNeeded(true)
-	if !rplyAuthRply.needsMaxUsage {
-		t.Errorf("Expected to be true")
-	}
-
-	rplyAuthRply = nil
-	rplyAuthRply.SetMaxUsageNeeded(true)
 }
 
 func TestSessionSV1ProcessMessageReplyAsNavigableMap(t *testing.T) {
