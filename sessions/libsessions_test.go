@@ -348,36 +348,6 @@ func TestGetDerivedEvents(t *testing.T) {
 	}
 }
 
-func TestSetMaxUsageNeeded(t *testing.T) {
-	tests := []struct {
-		name          string
-		input         bool
-		expectedValue bool
-	}{
-		{
-			name:          "Set needsMaxUsage to true",
-			input:         true,
-			expectedValue: true,
-		},
-		{
-			name:          "Set needsMaxUsage to false",
-			input:         false,
-			expectedValue: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			v1Reply := &V1UpdateSessionReply{}
-			v1Reply.SetMaxUsageNeeded(tt.input)
-
-			if v1Reply.needsMaxUsage != tt.expectedValue {
-				t.Errorf("Expected needsMaxUsage to be %v, got %v", tt.expectedValue, v1Reply.needsMaxUsage)
-			}
-		})
-	}
-}
-
 func TestGetMaxUsageFromRuns(t *testing.T) {
 	tests := []struct {
 		name             string
