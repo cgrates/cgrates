@@ -139,12 +139,12 @@ type AttrSProcessEventReply struct {
 // Digest returns serialized version of alteredFields in AttrSProcessEventReply
 // format fldName1:fldVal1,fldName2:fldVal2
 func (attrReply *AttrSProcessEventReply) Digest() (rplyDigest string) {
-	for i, fld := range attrReply.AlteredFields {
+	for _, fld := range attrReply.AlteredFields {
 		fld = strings.TrimPrefix(fld, utils.MetaReq+utils.NestingSep)
 		if _, has := attrReply.CGREvent.Event[fld]; !has {
 			continue //maybe removed
 		}
-		if i != 0 {
+		if rplyDigest != "" {
 			rplyDigest += utils.FieldsSep
 		}
 		fldStrVal, _ := attrReply.CGREvent.FieldAsString(fld)
