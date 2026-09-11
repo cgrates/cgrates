@@ -431,6 +431,23 @@ func TestAttributeEventReplyDigest4(t *testing.T) {
 	}
 }
 
+func TestAttributeEventReplyDigestSkipOptions(t *testing.T) {
+	reply := &AttrSProcessEventReply{
+		AlteredFields: []string{"*opts.*originID", "*opts.*usage", "*req.attr1", "*req.attr2"},
+		CGREvent: &utils.CGREvent{
+			Event: map[string]any{"attr1": "value1", "attr2": "value2"},
+			APIOpts: map[string]any{
+				"*originID": "call1",
+				"*usage":    "60s",
+			},
+		},
+	}
+	want := "attr1:value1,attr2:value2"
+	if got := reply.Digest(); got != want {
+		t.Errorf("Digest() = %q, want %q", got, want)
+	}
+}
+
 func TestAttributeIndexer(t *testing.T) {
 	//refresh the DM
 	if err := dmAtr.DataDB().Flush(""); err != nil {
