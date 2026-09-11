@@ -65,7 +65,6 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			return
 		}
 		agReq.setCGRReply(rply, err)
-
 	}
 	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
 		return
@@ -139,6 +138,71 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 			return false, fmt.Errorf("failed to process %s event in %s: %v",
 				agentName, utils.ThresholdS, err)
 		}
+	}
+	return true, nil
+}
+
+func processAgRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
+	agReq *AgentRequest, agentName string, connMgr *engine.ConnManager,
+	sessionsConns []string, filterS *engine.FilterS) (_ bool, err error) {
+	if pass, err := filterS.Pass(ctx, agReq.Tenant,
+		reqProcessor.Filters, agReq); err != nil || !pass {
+		return pass, err
+
+	}
+	if err = agReq.SetFields(reqProcessor.RequestFields); err != nil {
+		return
+	}
+	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+	var reqType string
+	for _, typ := range []string{utils.MetaDryRun, utils.MetaSessionS, utils.MetaNone} {
+		if reqProcessor.Flags.Has(typ) {
+			reqType = typ
+			break
+		}
+	}
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: <%s>, %s request: %s",
+				agentName, logPrefix, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Request.String()))
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: <%s>, CGREvent: %s",
+				agentName, logPrefix, reqProcessor.ID, utils.ToIJSON(cgrEv)))
+	}
+
+	switch reqType {
+	default:
+		return false, fmt.Errorf("unknown request type: <%s>", reqType)
+	case utils.MetaNone: // do nothing on CGRateS side
+	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
+
+	case utils.MetaSessionS:
+		rply := new(sessions.V1ProcessEventReply)
+		err = connMgr.Call(ctx, sessionsConns, utils.SessionSv1ProcessEvent,
+			cgrEv, rply)
+		if err != nil {
+			return
+		}
+		agReq.setCGRReply(rply, err)
+		if maxUsage, has := minAccountUsage(agReq.CGRReply); has {
+			agReq.Vars.Map[utils.CapMaxUsage] = utils.NewLeafNode(maxUsage)
+		}
+	}
+	if err = agReq.SetFields(reqProcessor.ReplyFields); err != nil {
+		return
+	}
+	if reqProcessor.Flags.Has(utils.MetaLog) || reqType == utils.MetaDryRun {
+		logPrefix := "LOG"
+		if reqType == utils.MetaDryRun {
+			logPrefix = "DRY_RUN"
+		}
+		utils.Logger.Info(
+			fmt.Sprintf("<%s> %s, processorID: <%s>, %s reply: %s",
+				agentName, logPrefix, reqProcessor.ID, agentName[:len(agentName)-5], agReq.Reply))
 	}
 	return true, nil
 }
