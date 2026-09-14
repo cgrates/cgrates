@@ -1470,27 +1470,28 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s for Debit",
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
-			}
-			if s != nil {
-				s.lk.Lock()
-				if s.sRuns[runID].Charges == nil {
-					s.sRuns[runID].Charges = acntCost
-				} else {
-					s.sRuns[runID].Charges.Merge(acntCost)
+			} else {
+				if s != nil {
+					s.lk.Lock()
+					if s.sRuns[runID].Charges == nil {
+						s.sRuns[runID].Charges = acntCost
+					} else {
+						s.sRuns[runID].Charges.Merge(acntCost)
+					}
+					s.lk.Unlock()
 				}
-				s.lk.Unlock()
-			}
-			acntDbt := acntCost.Abstracts
-			if s != nil && s.sRuns[runID] != nil && s.sRuns[runID].lclDebit != nil {
-				acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
-			}
-			maxDur, _ := acntDbt.Duration()
-			if apiRply.AccountsUsage == nil {
-				apiRply.AccountsUsage = make(map[string]time.Duration)
-			}
-			apiRply.AccountsUsage[runID] = maxDur
-			if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
-				cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
+				acntDbt := acntCost.Abstracts
+				if s != nil && s.sRuns[runID] != nil && s.sRuns[runID].lclDebit != nil {
+					acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
+				}
+				maxDur, _ := acntDbt.Duration()
+				if apiRply.AccountsUsage == nil {
+					apiRply.AccountsUsage = make(map[string]time.Duration)
+				}
+				apiRply.AccountsUsage[runID] = maxDur
+				if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
+					cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
+				}
 			}
 		}
 
