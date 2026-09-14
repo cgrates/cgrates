@@ -835,31 +835,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		cch[utils.MetaInterimConsumed] = interimConsumed
 	}
 
-	// Set *interimUsage
-	if interimUsage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
-		sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage, utils.MetaUsage); errUsage != nil {
-		return errUsage
-	} else if interimUsage != nil {
-		cch[utils.MetaInterimUsage] = interimUsage
-	}
-
-	// Set *usage
-	if usage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
-		sS.fltrS, sS.cfg.SessionSCfg().Opts.Usage, utils.MetaUsage); errUsage != nil {
-		return errUsage
-	} else if usage != nil {
-		cch[utils.MetaUsage] = usage
-		apiArgs.APIOpts[utils.MetaUsage] = usage // populated for Event at least
-	}
-
-	// Set *totalUsage
-	if totalUsage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
-		sS.fltrS, sS.cfg.SessionSCfg().Opts.TotalUsage, utils.MetaTotalUsage); errUsage != nil {
-		return errUsage
-	} else if totalUsage != nil {
-		cch[utils.MetaTotalUsage] = totalUsage
-	}
-
 	// *session will set/add a session
 	if sesBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.Session,
@@ -870,16 +845,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	}
 	var s *Session
 	if utils.OptAsBool(cch, utils.MetaSession) {
-		if _, has := cch[utils.MetaInterimUsage]; !has {
-			if usg, has := cch[utils.MetaUsage]; has {
-				cch[utils.MetaInterimUsage] = usg // *usage can be used as general in events and be auto-converted to *interimUsage if missing
-			}
-		}
 		if s, err = sS.setSession(ctx, apiArgs, cch,
 			sS.biJClntID(ctx.Client)); err != nil {
 			return
 		}
-		cgrEvs = s.asCGREventsMap() // inherit session events to process
 	}
 	// extracting *terminate
 	if terminateBool, errBool := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
@@ -901,7 +870,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	// Apply ChargerS, but only if *primary *runID
 	if utils.OptAsBool(cch, utils.MetaChargers) &&
 		utils.IfaceAsString(cch[utils.MetaRunID]) == utils.MetaPrimary &&
-		len(cgrEvs) < 2 { // initial event, not inherited from Session
+		(s == nil || len(s.sRuns) == 0) { // initial event, sRuns not yet initialized
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
 			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
@@ -912,12 +881,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		if s != nil {
 			s.lk.Lock()
 			delete(s.sRuns, utils.MetaPrimary) // overwrite the primary event, empty chargers will mean no further charging applied
+			s.lk.Unlock()
 		}
 		for _, chrgr := range chrgrs {
 			runID := utils.IfaceAsString(chrgr.CGREvent.APIOpts[utils.MetaRunID]) // should be prepopulated always with check above
-			if s != nil {                                                         // Append the SRuns
-				s.sRuns[runID] = NewSRun(chrgr.CGREvent)
-			}
 			cgrEvs[runID] = chrgr.CGREvent
 			if len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields) {
 				if apiRply.Attributes == nil {
@@ -928,9 +895,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 					CGREvent:      chrgr.CGREvent,
 				}
 			}
-		}
-		if s != nil {
-			s.lk.Unlock()
 		}
 	}
 
@@ -946,7 +910,61 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 
 	// same processing for each event
 	for runID, cgrEv := range cgrEvs {
+
 		cchEv := make(map[string]any)
+
+		// Set *usage
+		if usage, errUsage := engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.Usage, utils.MetaUsage); errUsage != nil {
+			return errUsage
+		} else if usage != nil {
+			apiArgs.APIOpts[utils.MetaUsage] = usage // populated for Event at least
+			cchEv[utils.MetaUsage] = usage
+			cchEv[utils.MetaInterimUsage] = usage // interimUsage defaults to usage from event
+		}
+
+		// Set *interimConsumed
+		var interimConsumed *utils.Decimal
+		if interimConsumed, err = engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimConsumed, utils.MetaInterimConsumed); err != nil {
+			return
+		} else if interimConsumed != nil {
+			cch[utils.MetaInterimConsumed] = interimConsumed
+		}
+
+		// Set *interimUsage
+		var interimUsage *utils.Decimal
+		if interimUsage, err = engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.InterimUsage, utils.MetaInterimUsage, utils.MetaUsage); err != nil {
+			return
+		} else if interimUsage != nil {
+			cchEv[utils.MetaInterimUsage] = interimUsage
+		}
+
+		// Set *totalUsage
+		var totalUsage *utils.Decimal
+		if totalUsage, err = engine.GetDecimalOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.TotalUsage, utils.MetaTotalUsage); err != nil {
+			return
+		} else if totalUsage != nil {
+			cchEv[utils.MetaTotalUsage] = totalUsage
+		}
+
+		// setSRun
+		if s != nil {
+			s.lk.Lock()
+			if errSet := s.setSRun(runID, cgrEv, sS.cfg.SessionSCfg().AlterableFields, cchEv,
+				interimConsumed, interimUsage, totalUsage); errSet != nil {
+				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					return errSet
+				}
+				withErrors = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v for SRun set",
+						utils.SessionS, errSet.Error(), cgrEv))
+			}
+			s.lk.Unlock()
+		}
 
 		// RouteS Enabled
 		if rous, errRous := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
@@ -1426,8 +1444,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		}
 		if utils.OptAsBool(cchEv, utils.MetaAccountsDebitCfg) ||
 			(utils.OptAsBool(cchEv, utils.MetaAccounts) && utils.OptAsBool(cchEv, utils.MetaDebit)) {
+			if s != nil {
+				cgrEv.APIOpts[utils.MetaUsage] = s.sRuns[runID].nextDebit
+			}
 			var acntCost *utils.EventCharges
-			if acntCost, err = sS.accountSDebitEvent(ctx, cgrEv, s); err != nil {
+			if acntCost, err = sS.accountSDebitEvent(ctx, cgrEv); err != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
 				}
@@ -1435,31 +1456,32 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v with %s for Debit",
 						utils.SessionS, err.Error(), cgrEv, utils.AccountS))
-			}
-			if s != nil {
-				s.lk.Lock()
-				if s.sRuns[runID].Charges == nil {
-					s.sRuns[runID].Charges = acntCost
-				} else {
+			} else {
+				acntDbt := acntCost.Abstracts
+				if s != nil {
+					s.lk.Lock()
+					if s.sRuns[runID].Charges == nil {
+						s.sRuns[runID].Charges = utils.NewEventCharges()
+					}
 					s.sRuns[runID].Charges.Merge(acntCost)
+					if s.sRuns[runID].lclDebit != nil {
+						acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
+					}
+					s.lk.Unlock()
+				} else { // add it for export or ur, only for non session since sessions are written in terminate method
+					cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
 				}
-				s.lk.Unlock()
-			}
-			acntDbt := acntCost.Abstracts
-			if s != nil && s.sRuns[runID] != nil && s.sRuns[runID].lclDebit != nil {
-				acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
-			}
-			maxDur, _ := acntDbt.Duration()
-			if apiRply.AccountsUsage == nil {
-				apiRply.AccountsUsage = make(map[string]time.Duration)
-			}
-			apiRply.AccountsUsage[runID] = maxDur
-			if s == nil { // add it for export or ur, only for non session since sessions are written in terminate method
-				cgrEv.APIOpts[utils.MetaAccountsCost] = acntCost
+				if apiRply.AccountsUsage == nil {
+					apiRply.AccountsUsage = make(map[string]time.Duration)
+				}
+				maxDur, _ := acntDbt.Duration()
+				apiRply.AccountsUsage[runID] = maxDur
 			}
 		}
 
 	}
+
+	// TerminateSession
 	if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil {
 		if errTerminate := sS.terminateSessionNew(ctx, s); errTerminate != nil {
 			return errTerminate

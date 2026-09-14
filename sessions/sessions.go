@@ -105,6 +105,12 @@ func (sS *SessionS) Shutdown() (err error) {
 			if err = sS.terminateSession(context.TODO(), s, nil, nil, nil, false); err != nil {
 				hasErr = true
 			}
+			if err = sS.terminateSessionNew(context.TODO(), s); err != nil {
+				hasErr = true
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s terminating session: %+v",
+						utils.SessionS, err.Error(), s))
+			}
 		}
 		if hasErr {
 			return utils.ErrPartiallyExecuted
@@ -931,7 +937,8 @@ func (sS *SessionS) newSessionOutEvent(ctx *context.Context, sID string, cgrEv *
 		ID:             sID,
 		OriginCGREvent: cgrEv,
 		ClientConnID:   clntConnID,
-		sRuns:          map[string]*SRun{utils.MetaPrimary: NewSRun(cgrEv)}, // enforced to one SRun, will be modified from outside if chargers is also activated
+
+		sRuns: make(map[string]*SRun),
 	}
 	return
 }
@@ -949,35 +956,37 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 			return
 		}
 		sS.registerSession(s, false)
-	} else {
-		s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
 	}
-	var interimConsumed *utils.Decimal
-	if iCsmd, has := cch[utils.MetaInterimConsumed]; has {
-		t, canCast := iCsmd.(*utils.Decimal)
-		if canCast {
-			interimConsumed = t
+	/*
+			s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
 		}
-	}
-	var interimUsage *utils.Decimal
-	if iU, has := cch[utils.MetaInterimUsage]; has {
-		t, canCast := iU.(*utils.Decimal)
-		if canCast {
-			interimUsage = t
+		var interimConsumed *utils.Decimal
+		if iCsmd, has := cch[utils.MetaInterimConsumed]; has {
+			t, canCast := iCsmd.(*utils.Decimal)
+			if canCast {
+				interimConsumed = t
+			}
 		}
-	}
-	var totalUsage *utils.Decimal
-	if tU, has := cch[utils.MetaTotalUsage]; has {
-		t, canCast := tU.(*utils.Decimal)
-		if canCast {
-			totalUsage = t
+		var interimUsage *utils.Decimal
+		if iU, has := cch[utils.MetaInterimUsage]; has {
+			t, canCast := iU.(*utils.Decimal)
+			if canCast {
+				interimUsage = t
+			}
 		}
-	}
-	for _, sr := range s.sRuns { // FixMe: pass this from outside, so we can select individual debits per SRun
-		if err = sr.updateUsages(interimConsumed, interimUsage, totalUsage); err != nil {
-			return
+		var totalUsage *utils.Decimal
+		if tU, has := cch[utils.MetaTotalUsage]; has {
+			t, canCast := tU.(*utils.Decimal)
+			if canCast {
+				totalUsage = t
+			}
 		}
-	}
+		for _, sr := range s.sRuns { // FixMe: pass this from outside, so we can select individual debits per SRun
+			if err = sr.updateUsages(interimConsumed, interimUsage, totalUsage); err != nil {
+				return
+			}
+		}
+	*/
 	sS.setSTerminator(ctx, s, cgrEv.APIOpts) // start termination timer
 	return
 }
@@ -987,6 +996,7 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 	s.lk.Lock()
 	defer s.lk.Unlock()
 	s.stopSTerminator()
+	//s.stopDebitLoops()
 	for _, sRun := range s.sRuns {
 		if sRun.Charges == nil {
 			continue
@@ -1011,7 +1021,7 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 			case -1: // debit more
 				sRun.CGREvent.APIOpts[utils.MetaUsage] = utils.AbsoluteDecimal(sRun.UsageAdjustment)
 				var acntCost *utils.EventCharges
-				if acntCost, err = sS.accountSDebitEvent(ctx, sRun.CGREvent, s); err != nil {
+				if acntCost, err = sS.accountSDebitEvent(ctx, sRun.CGREvent); err != nil {
 					return
 				}
 				sRun.Charges.Merge(acntCost)
@@ -1214,7 +1224,7 @@ func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (*uti
 
 // accountSDebitEvent will debit the abstracts for the provided event
 // if session is provided, it will try to debit first out of reserved balance
-func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent, s *Session) (eEc *utils.EventCharges, err error) {
+func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eEc *utils.EventCharges, err error) {
 	if usageIface, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaUsage)
 	} else if usage, _ := utils.IfaceAsDuration(usageIface); usage == time.Duration(0) {
@@ -1323,10 +1333,10 @@ func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
 	sS.unregisterSession(sID, !psv)
 	sS.registerSession(s, psv)
 	if !psv {
-		sS.initSessionDebitLoops(s)
+		//sS.initSessionDebitLoops(s)
 	} else { // transit from active with possible STerminator and DebitLoops
 		s.stopSTerminator()
-		s.stopDebitLoops()
+		//s.stopDebitLoops()
 	}
 	s.lk.Unlock()
 	return
@@ -1442,25 +1452,26 @@ func (sS *SessionS) terminateSyncSessions(ctx *context.Context, toBeRemoved []st
 	*/
 }
 
+/*
 // initSessionDebitLoops will init the debit loops for a session
 // not thread-safe, it should be protected in another layer
 func (sS *SessionS) initSessionDebitLoops(s *Session) {
-	/*
-		if s.debitStop != nil { // already initialized
-			return
-		}
-		for i, sr := range s.SRuns {
-			if s.DebitInterval > 0 &&
-				sr.Event.GetStringIgnoreErrors(utils.RequestType) == utils.MetaPrepaid {
-				if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaid
-					s.debitStop = make(chan struct{})
-				}
-				go sS.debitLoopSession(s, i, s.DebitInterval)
-				runtime.Gosched() // allow the goroutine to be executed
+
+	if s.debitStop != nil { // already initialized
+		return
+	}
+	for i, sr := range s.SRuns {
+		if s.AutoChargeInterval > 0 && sr.AutoCharge {
+			if s.debitStop == nil { // init the debitStop only for the first sRun with DebitInterval and RequestType MetaPrepaid
+				s.debitStop = make(chan struct{})
 			}
+			go sS.debitLoopSession(s, i, s.AutoChargeInterval)
+			runtime.Gosched() // allow the goroutine to be executed
 		}
-	*/
+	}
+
 }
+*/
 
 // initSession handles a new session
 // not thread-safe for Session since it is constructed here

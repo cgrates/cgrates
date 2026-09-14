@@ -34,10 +34,8 @@ var (
 	httpSsTests = []func(t *testing.T){
 		testHttpSsInitCfg,
 		testHttpSsHttpClnt,
-		// 		testHAitResetDB,
 		testHttpSsStartEngine,
 		testHttpSsRPC,
-		//testHttpSsLoadTPFromFolder,
 		testHttpSsProvisionData,
 		testHttpSsAuth,
 		testHttpSsSessionStart,
@@ -235,7 +233,7 @@ func testHttpSsSessionUpdate1(t *testing.T) {
 		t.Errorf("Unexpected number of sessions received: %+v", aSessions)
 	} else if *aSessions[0].InterimUsage != 50 {
 		t.Errorf("Unexpected InterimUsage in session: %+v", aSessions[0])
-	} else if *aSessions[0].UsageAdjustment != 0 {
+	} else if aSessions[0].UsageAdjustment != nil && *aSessions[0].UsageAdjustment != 0 {
 		t.Errorf("Unexpected UsageAdjustment in session: %+v", aSessions[0])
 	} else if *aSessions[0].TotalUsage != 90 {
 		t.Errorf("Unexpected TotalUsage in session: %+v", aSessions[0])
