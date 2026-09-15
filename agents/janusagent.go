@@ -128,9 +128,9 @@ func (ja *JanusAgent) authSession(origIP string) (err error) {
 	if err != nil {
 		return
 	}
-	rply := new(sessions.V1AuthorizeReply)
+	rply := new(sessions.V1ProcessEventReply)
 	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1AuthorizeEvent,
+		utils.SessionSv1ProcessEvent,
 		authArgs, rply)
 	return
 }
@@ -153,9 +153,9 @@ func (ja *JanusAgent) acntStartSession(s *janus.Session) (err error) {
 	if err != nil {
 		return
 	}
-	rply := new(sessions.V1InitSessionReply)
+	rply := new(sessions.V1ProcessEventReply)
 	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1InitiateSession,
+		utils.SessionSv1ProcessEvent,
 		initArgs, rply)
 	return
 }
@@ -179,9 +179,9 @@ func (ja *JanusAgent) acntStopSession(s *janus.Session) (err error) {
 	if err != nil {
 		return
 	}
-	var rply string
+	rply := new(sessions.V1ProcessEventReply)
 	err = ja.connMgr.Call(ja.ctx, sessConns,
-		utils.SessionSv1TerminateSession,
+		utils.SessionSv1ProcessEvent,
 		terminateArgs, &rply)
 	return
 }

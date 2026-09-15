@@ -420,8 +420,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 			consts: map[string]string{
 				"ActivateSessions":           utils.SessionSv1ActivateSessions,
 				"AlterSession":               utils.SessionSv1AlterSession,
-				"AuthorizeEvent":             utils.SessionSv1AuthorizeEvent,
-				"AuthorizeEventWithDigest":   utils.SessionSv1AuthorizeEventWithDigest,
 				"DeactivateSessions":         utils.SessionSv1DeactivateSessions,
 				"DisconnectPeer":             utils.SessionSv1DisconnectPeer,
 				"ForceDisconnect":            utils.SessionSv1ForceDisconnect,
@@ -429,8 +427,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"GetActiveSessionsCount":     utils.SessionSv1GetActiveSessionsCount,
 				"GetPassiveSessions":         utils.SessionSv1GetPassiveSessions,
 				"GetPassiveSessionsCount":    utils.SessionSv1GetPassiveSessionsCount,
-				"InitiateSession":            utils.SessionSv1InitiateSession,
-				"InitiateSessionWithDigest":  utils.SessionSv1InitiateSessionWithDigest,
 				"Ping":                       utils.SessionSv1Ping,
 				"ProcessEvent":               utils.SessionSv1ProcessEvent,
 				"ProcessMessage":             utils.SessionSv1ProcessMessage,
@@ -439,8 +435,6 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"STIRIdentity":               utils.SessionSv1STIRIdentity,
 				"SetPassiveSession":          utils.SessionSv1SetPassiveSession,
 				"SyncSessions":               utils.SessionSv1SyncSessions,
-				"TerminateSession":           utils.SessionSv1TerminateSession,
-				"UpdateSession":              utils.SessionSv1UpdateSession,
 			},
 		},
 		{

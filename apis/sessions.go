@@ -20,39 +20,9 @@ type SessionSv1 struct {
 	sS *sessions.SessionS
 }
 
-func (ssv1 *SessionSv1) AuthorizeEvent(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1AuthorizeReply) error {
-	return ssv1.sS.BiRPCv1AuthorizeEvent(ctx, args, rply)
-}
-
-func (ssv1 *SessionSv1) AuthorizeEventWithDigest(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1AuthorizeReplyWithDigest) error {
-	return ssv1.sS.BiRPCv1AuthorizeEventWithDigest(ctx, args, rply)
-}
-
-func (ssv1 *SessionSv1) InitiateSession(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1InitSessionReply) error {
-	return ssv1.sS.BiRPCv1InitiateSession(ctx, args, rply)
-}
-
-func (ssv1 *SessionSv1) InitiateSessionWithDigest(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1InitReplyWithDigest) error {
-	return ssv1.sS.BiRPCv1InitiateSessionWithDigest(ctx, args, rply)
-}
-
-func (ssv1 *SessionSv1) UpdateSession(ctx *context.Context, args *utils.CGREvent,
-	rply *sessions.V1UpdateSessionReply) error {
-	return ssv1.sS.BiRPCv1UpdateSession(ctx, args, rply)
-}
-
 func (ssv1 *SessionSv1) SyncSessions(ctx *context.Context, args *utils.TenantWithAPIOpts,
 	rply *string) error {
 	return ssv1.sS.BiRPCv1SyncSessions(ctx, &utils.TenantWithAPIOpts{}, rply)
-}
-
-func (ssv1 *SessionSv1) TerminateSession(ctx *context.Context, args *utils.CGREvent,
-	rply *string) error {
-	return ssv1.sS.BiRPCv1TerminateSession(ctx, args, rply)
 }
 
 func (ssv1 *SessionSv1) ProcessMessage(ctx *context.Context, args *utils.CGREvent,

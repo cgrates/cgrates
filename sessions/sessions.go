@@ -102,9 +102,6 @@ func (sS *SessionS) Shutdown() (err error) {
 	if len(replConns) == 0 {
 		var hasErr bool
 		for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-			if err = sS.terminateSession(context.TODO(), s, nil, nil, nil, false); err != nil {
-				hasErr = true
-			}
 			if err = sS.terminateSessionNew(context.TODO(), s); err != nil {
 				hasErr = true
 				utils.Logger.Warning(
@@ -1473,97 +1470,6 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 }
 */
 
-// initSession handles a new session
-// not thread-safe for Session since it is constructed here
-func (sS *SessionS) initSession(ctx *context.Context, cgrEv *utils.CGREvent,
-	clntConnID string, isInstantEvent bool) (s *Session, err error) {
-	sID := utils.IfaceAsString(cgrEv.APIOpts[utils.MetaOriginID])
-	if !isInstantEvent && sS.isSessionRegistered(sID, false) { // check if already exists
-		return nil, utils.ErrExists
-	}
-	if s, err = sS.newSession(ctx, cgrEv, clntConnID); err != nil {
-		return
-	}
-	if !isInstantEvent {
-		s.lk.Lock() // avoid endsession before initialising
-		sS.registerSession(s, false)
-		s.lk.Unlock()
-	}
-	return
-}
-
-// updateSession will reset terminator, perform debits and replicate sessions
-func (sS *SessionS) updateSession(ctx *context.Context, s *Session, updtEv, opts engine.MapEvent,
-	dbtItvl time.Duration) (maxUsage map[string]time.Duration, err error) {
-	defer func() {
-		sS.replicateSessions(ctx, s.ID, false)
-	}()
-	s.lk.Lock()
-	defer s.lk.Unlock()
-
-	// update fields from new event
-	for k, v := range updtEv {
-		if utils.ProtectedSFlds.Has(k) {
-			continue
-		}
-		s.OriginCGREvent.Event[k] = v // update previoius field with new one
-	}
-	s.updateSRuns(updtEv, sS.cfg.SessionSCfg().AlterableFields)
-	sS.setSTerminator(ctx, s, opts) // reset the terminator
-
-	// TODO: Chargeable functionality not yet available in Session struct
-	// event := &utils.CGREvent{
-	//	Tenant:  s.OriginCGREvent.Tenant,
-	//	Event:   updtEv,
-	//	APIOpts: opts,
-	// }
-	// if s.Chargeable, err = engine.GetBoolOpts(ctx, event.Tenant, event.AsDataProvider(), nil, sS.fltrS, sS.cfg.SessionSCfg().Opts.Chargeable,
-	//	utils.MetaChargeable); err != nil {
-	//	return
-	// }
-	//init has no updtEv
-	if updtEv == nil {
-		updtEv = engine.MapEvent(s.OriginCGREvent.Event).Clone()
-	}
-
-	var reqMaxUsage time.Duration
-	if _, err = updtEv.GetDuration(utils.Usage); err != nil {
-		if err != utils.ErrNotFound {
-			return
-		}
-		err = nil
-		reqMaxUsage = sS.cfg.SessionSCfg().GetDefaultUsage(updtEv.GetStringIgnoreErrors(utils.ToR))
-		updtEv[utils.Usage] = reqMaxUsage
-	}
-	maxUsage = make(map[string]time.Duration)
-	for _, sr := range s.SRuns {
-		reqType := engine.MapEvent(sr.CGREvent.Event).GetStringIgnoreErrors(utils.RequestType)
-		if reqType == utils.MetaNone {
-			//	maxUsage[sr.CD.RunID] = reqMaxUsage
-			continue
-		}
-		// var rplyMaxUsage time.Duration
-		// if reqType != utils.MetaPrepaid || s.debitStop != nil {
-		// 	rplyMaxUsage = reqMaxUsage
-		// } else if rplyMaxUsage, err = sS.debitSession(s, i, reqMaxUsage,
-		// 	updtEv.GetDurationPtrIgnoreErrors(utils.LastUsed)); err != nil {
-		// 	return
-		// }
-		// maxUsage[sr.CD.RunID] = rplyMaxUsage
-	}
-	return
-}
-
-// terminateSession will end a session from outside
-// calls endSession thread safe
-func (sS *SessionS) terminateSession(ctx *context.Context, s *Session, tUsage, lastUsage *time.Duration,
-	aTime *time.Time, isInstantEvent bool) (err error) {
-	s.lk.Lock()
-	err = sS.endSession(ctx, s, tUsage, lastUsage, aTime, isInstantEvent)
-	s.lk.Unlock()
-	return
-}
-
 // endSession will end a session from outside
 // this function is not thread safe
 func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsage *time.Duration,
@@ -1757,12 +1663,6 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 	args ArgsReplicateSessions, reply *string) (err error) {
 	sS.replicateSessions(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCGRid]), args.Passive)
 	*reply = utils.OK
-	return
-}
-
-// BiRPCv1InitiateSessionWithDigest returns the formated result of InitiateSession
-func (sS *SessionS) BiRPCv1InitiateSessionWithDigest(ctx *context.Context,
-	args *utils.CGREvent, initReply *V1InitReplyWithDigest) (err error) {
 	return
 }
 
