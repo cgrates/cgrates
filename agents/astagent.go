@@ -6,7 +6,6 @@ package agents
 import (
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/cgrates/aringo"
@@ -21,7 +20,6 @@ import (
 // constants used by AsteriskAgent
 const (
 	CGRAuthAPP            = "cgratesAuth"
-	CGRMaxSessionTime     = "CGRMaxSessionTime"
 	ARIStasisStart        = "StasisStart"
 	ARIChannelStateChange = "ChannelStateChange"
 	ARIChannelDestroyed   = "ChannelDestroyed"
@@ -164,7 +162,7 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 	var err error
 	for _, reqProcessor := range sma.cgrCfg.AsteriskAgentCfg().RequestProcessors {
 		var lclProcessed bool
-		lclProcessed, err = processRequest(
+		lclProcessed, err = processAgRequest(
 			sma.ctx, reqProcessor,
 			NewAgentRequest(
 				ev, reqVars, cgrRplyNM, rply, opts,
@@ -173,7 +171,7 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 					sma.cgrCfg.GeneralCfg().DefaultTimezone),
 				sma.cgrCfg, nil, sma.fltrS, nil),
 			utils.AsteriskAgent, sma.connMgr,
-			sessConns, nil, nil, sma.fltrS)
+			sessConns, sma.fltrS)
 		if lclProcessed {
 			processed = lclProcessed
 		}
@@ -201,7 +199,9 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %v applying reply variables for event %s for channelID: %s",
 				utils.AsteriskAgent, err, evType, chID))
-		sma.dispatchErr(chID, evType)
+		if evType == ARIStasisStart {
+			sma.hangupChannel(chID, utils.EmptyString)
+		}
 		return
 	}
 	if evType == ARIStasisStart {
@@ -221,12 +221,6 @@ func (sma *AsteriskAgent) authorizeStasis(chID string, cgrRply *utils.DataNode) 
 	if hasUsage && maxDur == 0 {
 		sma.hangupChannel(chID, "")
 		return
-	}
-	if hasUsage {
-		if !sma.setChannelVar(chID, CGRMaxSessionTime,
-			strconv.Itoa(int(maxDur.Milliseconds()))) {
-			return
-		}
 	}
 	sma.continueChannel(chID)
 }

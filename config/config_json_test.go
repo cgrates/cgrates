@@ -687,7 +687,8 @@ func TestKamAgentJsonCfg(t *testing.T) {
 				Max_reconnect_interval: utils.StringPointer(utils.EmptyString),
 			},
 		},
-		Timezone: utils.StringPointer(utils.EmptyString),
+		Timezone:           utils.StringPointer(utils.EmptyString),
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {
@@ -2362,6 +2363,79 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Type:    utils.StringPointer(utils.MetaVariable),
 				Filters: &[]string{"*notempty:*req.Hangup-Cause:"},
 				Value:   utils.StringPointer("~*req.Hangup-Cause")},
+		},
+		"*kamr": {
+			{
+				Tag:   utils.StringPointer("originID"),
+				Path:  utils.StringPointer("*opts.*originID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.OriginID")},
+			{
+				Tag:   utils.StringPointer("OriginHost"),
+				Path:  utils.StringPointer("*cgreq.OriginHost"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*vars.OriginHost")},
+			{
+				Tag:   utils.StringPointer("Source"),
+				Path:  utils.StringPointer("*cgreq.Source"),
+				Type:  utils.StringPointer(utils.MetaConstant),
+				Value: utils.StringPointer("KamailioAgent")},
+			{
+				Tag:   utils.StringPointer("EvapiConnID"),
+				Path:  utils.StringPointer("*cgreq.evapiConnID"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*vars.evapiConnID")},
+			{
+				Tag:     utils.StringPointer("HashEntry"),
+				Path:    utils.StringPointer("*cgreq.hEntry"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.hEntry:"},
+				Value:   utils.StringPointer("~*req.hEntry")},
+			{
+				Tag:     utils.StringPointer("HashID"),
+				Path:    utils.StringPointer("*cgreq.hID"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.hID:"},
+				Value:   utils.StringPointer("~*req.hID")},
+			{
+				Tag:     utils.StringPointer("Tenant"),
+				Path:    utils.StringPointer("*cgreq.Tenant"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.Tenant:"},
+				Value:   utils.StringPointer("~*req.Tenant")},
+			{
+				Tag:   utils.StringPointer("Account"),
+				Path:  utils.StringPointer("*cgreq.Account"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Account")},
+			{
+				Tag:   utils.StringPointer("Subject"),
+				Path:  utils.StringPointer("*cgreq.Subject"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Account")},
+			{
+				Tag:   utils.StringPointer("Destination"),
+				Path:  utils.StringPointer("*cgreq.Destination"),
+				Type:  utils.StringPointer(utils.MetaVariable),
+				Value: utils.StringPointer("~*req.Destination")},
+			{
+				Tag:     utils.StringPointer("SetupTime"),
+				Path:    utils.StringPointer("*cgreq.SetupTime"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.SetupTime:"},
+				Value:   utils.StringPointer("~*req.SetupTime")},
+			{
+				Tag:     utils.StringPointer("AnswerTime"),
+				Path:    utils.StringPointer("*cgreq.AnswerTime"),
+				Type:    utils.StringPointer(utils.MetaVariable),
+				Filters: &[]string{"*notempty:*req.AnswerTime:"},
+				Value:   utils.StringPointer("~*req.AnswerTime")},
+			{
+				Tag:     utils.StringPointer("Usage"),
+				Path:    utils.StringPointer("*cgreq.Usage"),
+				Type:    utils.StringPointer(utils.MetaComposed),
+				Filters: &[]string{"*notempty:*req.Usage:"},
+				Value:   utils.StringPointer("~*req.Usage;s")},
 		},
 		"*errSip": {
 			{

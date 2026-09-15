@@ -61,10 +61,11 @@ func (kamCfg KamConnCfg) Clone() *KamConnCfg {
 
 // KamAgentCfg is the Kamailio config section
 type KamAgentCfg struct {
-	Enabled    bool
-	Conns      map[string][]*DynamicConns
-	EvapiConns []*KamConnCfg
-	Timezone   string
+	Enabled           bool
+	Conns             map[string][]*DynamicConns
+	EvapiConns        []*KamConnCfg
+	Timezone          string
+	RequestProcessors []*RequestProcessor
 }
 
 // loadKamAgentCfg loads the KamAgent section of the configuration
@@ -99,6 +100,11 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 	if jsnCfg.Timezone != nil {
 		ka.Timezone = *jsnCfg.Timezone
 	}
+	var err error
+	if ka.RequestProcessors, err = appendRequestProcessors(ka.RequestProcessors,
+		jsnCfg.Request_processors); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -116,6 +122,11 @@ func (ka KamAgentCfg) AsMapInterface() any {
 		mp[utils.EvapiConnsCfg] = evapiConns
 	}
 	mp[utils.ConnsCfg] = stripConns(ka.Conns)
+	requestProcessors := make([]map[string]any, len(ka.RequestProcessors))
+	for i, item := range ka.RequestProcessors {
+		requestProcessors[i] = item.AsMapInterface()
+	}
+	mp[utils.RequestProcessorsCfg] = requestProcessors
 	return mp
 }
 
@@ -133,6 +144,12 @@ func (ka KamAgentCfg) Clone() (cln *KamAgentCfg) {
 		cln.EvapiConns = make([]*KamConnCfg, len(ka.EvapiConns))
 		for i, req := range ka.EvapiConns {
 			cln.EvapiConns[i] = req.Clone()
+		}
+	}
+	if ka.RequestProcessors != nil {
+		cln.RequestProcessors = make([]*RequestProcessor, len(ka.RequestProcessors))
+		for i, req := range ka.RequestProcessors {
+			cln.RequestProcessors[i] = req.Clone()
 		}
 	}
 	return
@@ -165,10 +182,11 @@ func diffKamConnJsonCfg(v1, v2 *KamConnCfg) (d *KamConnJsonCfg) {
 
 // KamAgentJsonCfg kamailio config section
 type KamAgentJsonCfg struct {
-	Enabled     *bool
-	Conns       map[string][]*DynamicConns `json:"conns,omitempty"`
-	Evapi_conns *[]*KamConnJsonCfg         `json:"evapiConns"`
-	Timezone    *string
+	Enabled            *bool
+	Conns              map[string][]*DynamicConns `json:"conns,omitempty"`
+	Evapi_conns        *[]*KamConnJsonCfg         `json:"evapiConns"`
+	Timezone           *string
+	Request_processors *[]*ReqProcessorJsnCfg `json:"requestProcessors"`
 }
 
 func equalsKamConnsCfg(v1, v2 []*KamConnCfg) bool {
@@ -207,5 +225,6 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)
 	}
+	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	return d
 }

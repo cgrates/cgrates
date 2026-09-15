@@ -94,7 +94,8 @@ func TestKamAgentCfgAsMapInterface(t *testing.T) {
 		utils.ConnsCfg: map[string][]*DynamicConns{
 			utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal, "*conn1", "*conn2", utils.MetaInternal}}},
 		},
-		utils.TimezoneCfg: "UTC",
+		utils.TimezoneCfg:          "UTC",
+		utils.RequestProcessorsCfg: []map[string]any{},
 		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
@@ -115,9 +116,10 @@ func TestKamAgentCfgAsMapInterface1(t *testing.T) {
 	"kamailioAgent": {},
 }`
 	eMap := map[string]any{
-		utils.EnabledCfg:  false,
-		utils.ConnsCfg:    map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
-		utils.TimezoneCfg: "",
+		utils.EnabledCfg:           false,
+		utils.ConnsCfg:             map[string][]*DynamicConns{utils.MetaSessionS: {{ConnIDs: []string{rpcclient.BiRPCInternal}}}},
+		utils.TimezoneCfg:          "",
+		utils.RequestProcessorsCfg: []map[string]any{},
 		utils.EvapiConnsCfg: []map[string]any{
 			{
 				utils.AddressCfg:              "127.0.0.1:8448",
@@ -275,7 +277,8 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 				Reconnects: utils.IntPointer(2),
 			},
 		},
-		Timezone: utils.StringPointer("EEST"),
+		Timezone:           utils.StringPointer("EEST"),
+		Request_processors: &[]*ReqProcessorJsnCfg{},
 	}
 
 	rcv := diffKamAgentJsonCfg(d, v1, v2)
@@ -284,7 +287,7 @@ func TestDiffKamAgentJsonCfg(t *testing.T) {
 	}
 
 	v1 = v2
-	expected = &KamAgentJsonCfg{}
+	expected = &KamAgentJsonCfg{Request_processors: &[]*ReqProcessorJsnCfg{}}
 
 	rcv = diffKamAgentJsonCfg(d, v1, v2)
 	if !reflect.DeepEqual(rcv, expected) {

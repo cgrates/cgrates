@@ -173,6 +173,10 @@
 			"flags": ["*authorize","*accounts","*attributes"],
 			"requestFields":[
 				{"tag": "BaseTmpl", "type": "*template", "value": "*astr"}
+			],
+			"replyFields":[
+				{"tag": "MaxUsage", "path": "*rep.CGRMaxSessionTime", "type": "*variable",
+					"value": "~*vars.MaxUsage"}
 			]
 		},
 		{
