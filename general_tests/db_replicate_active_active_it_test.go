@@ -77,7 +77,7 @@ func TestDBReplicationActiveActive(t *testing.T) {
 				},
 			},
 		}
-	case utils.Redis:
+	case utils.MetaRedis:
 		dbcfg = engine.DBCfg{
 			DB: &engine.DBParams{
 				DBConns: map[string]engine.DBConn{

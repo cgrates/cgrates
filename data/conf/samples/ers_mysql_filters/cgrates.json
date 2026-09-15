@@ -35,13 +35,13 @@
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"opts": {
 				"sqlDBName":"cgrates2",
-				"sqlTableName":"cdrs"
+				"sqlTableName":"urs"
 			},
 			"startDelay": "100ms",
 			"flags": ["*dryRun"],
 			"tenant": "cgrates.org",
 			"filters": [
-					"*gt:~*req.event.AnswerTime:-168h", // dont process cdrs with answer_time older than 7 days ago
+					"*gt:~*req.event.AnswerTime:-168h", // dont process urs with answer_time older than 7 days ago
 					"FLTR_SQL_RatingID", // "*eq:~*req.opts.*ratesCost.CostIntervals[0].Increments[0].RateID:RateID",
 					"*string:~*vars.*readerID:mysql",
 					"FLTR_VARS", // "*string:~*vars.*readerID:mysql",
