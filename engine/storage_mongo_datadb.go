@@ -277,6 +277,17 @@ func (ms *MongoStorage) ensureIndexesForCol(col string) error { // exported for 
 		err = ms.ensureIndex(col, true, "tenant", "id")
 	case ColRpf, ColShg, ColAcc:
 		err = ms.ensureIndex(col, true, "id")
+	case utils.URsTBL:
+		err = ms.ensureIndex(col, true, "opts.*urID") // should probably create a constant for the key
+		// unfinished , could add back in the future *cgrURStringIndexedFields and *cgrURPrefixIndexedFields
+		// if err == nil {
+		// 	for _, idxKey := range ms.cdrsIndexes {
+		// 		err = ms.ensureIndex(col, false, idxKey)
+		// 		if err != nil {
+		// 			break
+		// 		}
+		// 	}
+		// }
 	}
 	return err
 }

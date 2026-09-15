@@ -208,7 +208,7 @@ func getDBCfg(t *testing.T) engine.DBCfg {
 	return engine.DBCfg{}
 }
 
-func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.UR) *gorm.DB {
+func openTestDB(t *testing.T, dbName, tableName string, urs ...*utils.UR) *gorm.DB {
 	t.Helper()
 
 	cdb, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")),
@@ -256,11 +256,11 @@ func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.UR) *gorm
 
 	tx := db.Begin()
 	tx = tx.Table(tableName)
-	for _, cdr := range cdrs {
+	for _, ur := range urs {
 		if err := tx.Save(&utils.URSQLTable{
-			Tenant:    cdr.Tenant,
-			Opts:      cdr.Opts,
-			Event:     cdr.Event,
+			Tenant:    ur.Tenant,
+			Opts:      ur.Opts,
+			Event:     ur.Event,
 			CreatedAt: time.Now(),
 		}).Error; err != nil {
 			tx.Rollback()
@@ -274,12 +274,12 @@ func openTestDB(t *testing.T, dbName, tableName string, cdrs ...*utils.UR) *gorm
 
 	var count int64
 	db.Table(tableName).Count(&count)
-	if count != int64(len(cdrs)) {
-		t.Fatalf("expected %d rows in cdrs, got %d", len(cdrs), count)
+	if count != int64(len(urs)) {
+		t.Fatalf("expected %d rows in urs, got %d", len(urs), count)
 	}
 
 	t.Cleanup(func() {
-		_ = db.Migrator().DropTable("cdrs")
+		_ = db.Migrator().DropTable("urs")
 		_ = db.Exec(`DROP DATABASE IF EXISTS ` + dbName + `;`).Error
 		if d, err := db.DB(); err == nil {
 			_ = d.Close()
@@ -365,7 +365,7 @@ func assertNoRateID2(t *testing.T, db *gorm.DB) {
 	for _, row := range rows {
 		for col, val := range row {
 			if strings.Contains(fmt.Sprint(val), "RateID2") {
-				t.Fatalf("expected CDR with RateID2 to be deleted, found in column %q", col)
+				t.Fatalf("expected UR with RateID2 to be deleted, found in column %q", col)
 			}
 		}
 	}
@@ -428,7 +428,7 @@ func TestERSSQLFiltersDeleteIndexedFields(t *testing.T) {
 
 	waitFor(t,
 		func() bool { return countRows(t, db, utils.URsTBL) == 2 },
-		"expected 2 rows in cdrs after delete",
+		"expected 2 rows in urs after delete",
 		2*time.Second,
 	)
 	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
@@ -470,7 +470,7 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 
 	waitFor(t,
 		func() bool { return countRows(t, db, utils.URsTBL) == 2 },
-		"expected 2 rows in cdrs after delete",
+		"expected 2 rows in urs after delete",
 		2*time.Second,
 	)
 	if got := strings.Count(buf.String(), ersDryRunMySQL); got != 1 {
@@ -486,13 +486,13 @@ func TestERSSQLFiltersWithMetaDelete(t *testing.T) {
 func TestERSSQLFiltersMove(t *testing.T) {
 	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
-	// Create cdrsProcessed table for the move target.
+	// Create ursProcessed table for the move target.
 	sqlDB, err := db.DB()
 	if err != nil {
 		t.Fatal(err)
 	}
-	cdrsProcessedSchema := "DROP TABLE IF EXISTS cdrsProcessed; CREATE TABLE cdrsProcessed ( `id` int(11) NOT NULL AUTO_INCREMENT, `tenant` VARCHAR(40) NOT NULL, `opts` JSON NOT NULL, `event` JSON NOT NULL, `created_at` TIMESTAMP NULL, `updated_at` TIMESTAMP NULL, `deleted_at` TIMESTAMP NULL,  PRIMARY KEY (`id`));ALTER TABLE cdrsProcessed ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$.\"*urID\"') );CREATE UNIQUE INDEX opts_urid_idx ON cdrsProcessed (urid);"
-	for qry := range strings.SplitSeq(cdrsProcessedSchema, ";") {
+	ursProcessedSchema := "DROP TABLE IF EXISTS ursProcessed; CREATE TABLE ursProcessed ( `id` int(11) NOT NULL AUTO_INCREMENT, `tenant` VARCHAR(40) NOT NULL, `opts` JSON NOT NULL, `event` JSON NOT NULL, `created_at` TIMESTAMP NULL, `updated_at` TIMESTAMP NULL, `deleted_at` TIMESTAMP NULL,  PRIMARY KEY (`id`));ALTER TABLE ursProcessed ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$.\"*urID\"') );CREATE UNIQUE INDEX opts_urid_idx ON ursProcessed (urid);"
+	for qry := range strings.SplitSeq(ursProcessedSchema, ";") {
 		qry = strings.TrimSpace(qry)
 		if len(qry) == 0 {
 			continue
@@ -502,7 +502,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
 		}
 	}
 	t.Cleanup(func() {
-		_ = db.Migrator().DropTable("cdrsProcessed")
+		_ = db.Migrator().DropTable("ursProcessed")
 	})
 
 	buf := &bytes.Buffer{}
@@ -519,7 +519,7 @@ func TestERSSQLFiltersMove(t *testing.T) {
       "attempts": 1,
       "opts": {
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrsProcessed"
+        "sqlTableName": "ursProcessed"
       },
       "flags": ["*log"]
     }
@@ -553,9 +553,9 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	waitFor(t,
 		func() bool {
 			return countRows(t, db, utils.URsTBL) == 2 &&
-				countRows(t, db, "cdrsProcessed") == 1
+				countRows(t, db, "ursProcessed") == 1
 		},
-		"expected 2 rows in cdrs and 1 row in cdrsProcessed after move",
+		"expected 2 rows in urs and 1 row in ursProcessed after move",
 		2*time.Second,
 	)
 	assertNoRateID2(t, db)
@@ -569,8 +569,8 @@ func TestERSSQLFiltersMove(t *testing.T) {
 	}
 
 	var movedRows []map[string]any
-	if err := db.Raw("SELECT * FROM cdrsProcessed").Scan(&movedRows).Error; err != nil {
-		t.Fatalf("failed to query cdrsProcessed: %v", err)
+	if err := db.Raw("SELECT * FROM ursProcessed").Scan(&movedRows).Error; err != nil {
+		t.Fatalf("failed to query ursProcessed: %v", err)
 	}
 	if got := movedRows[0]["tenant"]; got != "cgrates.org" {
 		t.Errorf("moved row tenant = %v, want cgrates.org", got)
@@ -604,7 +604,7 @@ func TestERSSQLFiltersUpdate(t *testing.T) {
       "attempts": 1,
       "opts": {
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrs",
+        "sqlTableName": "urs",
         "sqlUpdateIndexedFields": ["id"]
       },
       "flags": ["*log"],
@@ -696,7 +696,7 @@ func TestERSSQLFiltersRawUpdate(t *testing.T) {
       "opts": {
         "sqlConnMaxLifetime": "5s",
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrs",
+        "sqlTableName": "urs",
         "sqlBatchSize": -1,
         "sqlUpdateIndexedFields": ["id"]
       },
@@ -775,7 +775,7 @@ func TestERSSQLFiltersErr(t *testing.T) {
       "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrs",
+        "sqlTableName": "urs",
         "sqlBatchSize": 2,
         "sqlDeleteIndexedFields": ["id"]
       },
@@ -851,7 +851,7 @@ func TestERSSQLFilterUnquote(t *testing.T) {
       "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrs",
+        "sqlTableName": "urs",
         "sqlBatchSize": 10
       },
       "tenant": "cgrates.org",
@@ -894,7 +894,7 @@ func TestERSSQLFilterUnquote(t *testing.T) {
 // TestERSSQLFilterMetaEmpty checks that *empty and *exists match JSON
 // fields with empty string values (broken on MariaDB 10.11.14, MDEV-37428).
 func TestERSSQLFilterMetaEmpty(t *testing.T) {
-	cdrWithEmpty := &utils.UR{
+	urWithEmpty := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaRunID: utils.MetaDefault,
@@ -904,7 +904,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 			"EmptyField":       "",
 		},
 	}
-	cdrWithoutEmpty := &utils.UR{
+	urWithoutEmpty := &utils.UR{
 		Tenant: "cgrates.org",
 		Opts: map[string]any{
 			utils.MetaRunID: utils.MetaDefault,
@@ -914,7 +914,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
 			"EmptyField":       "not_empty",
 		},
 	}
-	_ = openTestDB(t, "cgrates2", utils.URsTBL, cdrWithEmpty, cdrWithoutEmpty)
+	_ = openTestDB(t, "cgrates2", utils.URsTBL, urWithEmpty, urWithoutEmpty)
 
 	jsonCfg := `{
 "general": {
@@ -938,7 +938,7 @@ func TestERSSQLFilterMetaEmpty(t *testing.T) {
       "sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
       "opts": {
         "sqlDBName": "cgrates2",
-        "sqlTableName": "cdrs",
+        "sqlTableName": "urs",
         "sqlBatchSize": 10
       },
       "tenant": "cgrates.org",

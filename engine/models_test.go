@@ -12,7 +12,7 @@ import (
 )
 
 func TestModelsAsMapStringInterface(t *testing.T) {
-	testCdrSql := CDRsql{
+	testUrSql := URsql{
 		ID: 1,
 		// Cgrid:       "testCgrID1",
 		RunID:       "testRunID",
@@ -39,37 +39,37 @@ func TestModelsAsMapStringInterface(t *testing.T) {
 		DeletedAt:   utils.TimePointer(time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC)),
 	}
 	expected := map[string]any{
-		// "cgrid":        testCdrSql.Cgrid,
-		"run_id":       testCdrSql.RunID,
-		"originHost":   testCdrSql.OriginHost,
-		"source":       testCdrSql.Source,
-		"origin_id":    testCdrSql.OriginID,
-		"tor":          testCdrSql.TOR,
-		"request_type": testCdrSql.RequestType,
-		"tenant":       testCdrSql.Tenant,
-		"category":     testCdrSql.Category,
-		"account":      testCdrSql.Account,
-		"subject":      testCdrSql.Subject,
-		"destination":  testCdrSql.Destination,
-		"setup_time":   testCdrSql.SetupTime,
-		"answer_time":  testCdrSql.AnswerTime,
-		"usage":        testCdrSql.Usage,
-		"extraFields":  testCdrSql.ExtraFields,
-		"cost_source":  testCdrSql.CostSource,
-		"cost":         testCdrSql.Cost,
-		"cost_details": testCdrSql.CostDetails,
-		"extra_info":   testCdrSql.ExtraInfo,
-		"created_at":   testCdrSql.CreatedAt,
-		"updated_at":   testCdrSql.UpdatedAt,
+		// "cgrid":        testUrSql.Cgrid,
+		"run_id":       testUrSql.RunID,
+		"originHost":   testUrSql.OriginHost,
+		"source":       testUrSql.Source,
+		"origin_id":    testUrSql.OriginID,
+		"tor":          testUrSql.TOR,
+		"request_type": testUrSql.RequestType,
+		"tenant":       testUrSql.Tenant,
+		"category":     testUrSql.Category,
+		"account":      testUrSql.Account,
+		"subject":      testUrSql.Subject,
+		"destination":  testUrSql.Destination,
+		"setup_time":   testUrSql.SetupTime,
+		"answer_time":  testUrSql.AnswerTime,
+		"usage":        testUrSql.Usage,
+		"extraFields":  testUrSql.ExtraFields,
+		"cost_source":  testUrSql.CostSource,
+		"cost":         testUrSql.Cost,
+		"cost_details": testUrSql.CostDetails,
+		"extra_info":   testUrSql.ExtraInfo,
+		"created_at":   testUrSql.CreatedAt,
+		"updated_at":   testUrSql.UpdatedAt,
 	}
-	result := testCdrSql.AsMapStringInterface()
+	result := testUrSql.AsMapStringInterface()
 	if !reflect.DeepEqual(expected, result) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", expected, result)
 	}
 }
 
-func TestCDRsqlTableName(t *testing.T) {
-	cdrSql := &CDRsql{
+func TestURsqlTableName(t *testing.T) {
+	urSql := &URsql{
 		ID:          1,
 		RunID:       "testRunID",
 		OriginHost:  "testOriginHost",
@@ -94,7 +94,7 @@ func TestCDRsqlTableName(t *testing.T) {
 		UpdatedAt:   time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC),
 		DeletedAt:   utils.TimePointer(time.Date(2021, 3, 3, 3, 3, 3, 3, time.UTC)),
 	}
-	rcv := cdrSql.TableName()
+	rcv := urSql.TableName()
 	if !reflect.DeepEqual(rcv, utils.URsTBL) {
 		t.Errorf("Expected <%v>, Received <%v>", utils.URsTBL, rcv)
 	}

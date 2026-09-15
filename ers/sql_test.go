@@ -17,12 +17,12 @@ func TestSQLSetURL(t *testing.T) {
 	expsql := &SQLEventReader{
 		connString: "cgrates:CGRateS.org@tcp(127.0.0.1:3306)/cgrates2?charset=utf8&loc=Local&parseTime=true&sql_mode='ALLOW_INVALID_DATES'",
 		connType:   "mysql",
-		tableName:  "cdrs2",
+		tableName:  "urs2",
 	}
 	inURL := "*mysql://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
-		SQLTableName: utils.StringPointer("cdrs2"),
+		SQLTableName: utils.StringPointer("urs2"),
 		PgSSLMode:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
@@ -37,12 +37,12 @@ func TestSQLSetURL(t *testing.T) {
 	expsql = &SQLEventReader{
 		connString: "host=127.0.0.1 port=3306 dbname=cgrates2 user=cgrates password=CGRateS.org sslmode=enabled",
 		connType:   "postgres",
-		tableName:  "cdrs2",
+		tableName:  "urs2",
 	}
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
-		SQLTableName: utils.StringPointer("cdrs2"),
+		SQLTableName: utils.StringPointer("urs2"),
 		PgSSLMode:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
@@ -57,12 +57,12 @@ func TestSQLSetURL(t *testing.T) {
 	expsql = &SQLEventReader{
 		connString: "host=127.0.0.1 port=3306 dbname=cgrates2 user=cgrates password=CGRateS.org sslmode=enabled",
 		connType:   "postgres",
-		tableName:  "cdrs2",
+		tableName:  "urs2",
 	}
 	inURL = "*postgres://cgrates:CGRateS.org@127.0.0.1:3306"
 	if err := sql.setURL(inURL, &config.EventReaderOpts{
 		SQLDBName:    utils.StringPointer("cgrates2"),
-		SQLTableName: utils.StringPointer("cdrs2"),
+		SQLTableName: utils.StringPointer("urs2"),
 		PgSSLMode:    utils.StringPointer("enabled"),
 	}); err != nil {
 		t.Fatal(err)
@@ -73,7 +73,7 @@ func TestSQLSetURL(t *testing.T) {
 	} else if expsql.tableName != sql.tableName {
 		t.Errorf("Expected: %q ,received: %q", expsql.tableName, sql.tableName)
 	}
-	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=cdrs2&sslmode=enabled"
+	inURL = "*postgres2://cgrates:CGRateS.org@127.0.0.1:3306?dbName=cgrates2&tableName=urs2&sslmode=enabled"
 	if err := sql.setURL(inURL, &config.EventReaderOpts{}); err == nil || err.Error() != "unknown dbType postgres2" {
 		t.Errorf("Expected error: 'unknown dbType postgres2' ,received: %v", err)
 	}
@@ -84,9 +84,9 @@ func TestSQLReaderServePostgresErr(t *testing.T) {
 	logger.Default = logger.Default.LogMode(logger.Silent)
 	rdr := &SQLEventReader{
 		connType:   utils.Postgres,
-		connString: "host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=CGRateS.org sslmode=disabled",
+		connString: "host=127.0.0.1 port=9999 dbname=urs user=cgrates password=CGRateS.org sslmode=disabled",
 	}
-	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
+	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=urs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
 	err := rdr.Serve()
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
@@ -99,9 +99,9 @@ func TestSQLReaderServeBadType(t *testing.T) {
 	logger.Default = logger.Default.LogMode(logger.Silent)
 	rdr := &SQLEventReader{
 		connType:   utils.Postgres,
-		connString: "host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=CGRateS.org sslmode=disabled",
+		connString: "host=127.0.0.1 port=9999 dbname=urs user=cgrates password=CGRateS.org sslmode=disabled",
 	}
-	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=cdrs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
+	expected := "cannot parse `host=127.0.0.1 port=9999 dbname=urs user=cgrates password=xxxxx sslmode=disabled`: failed to configure TLS (sslmode is invalid)"
 	err := rdr.Serve()
 	if err == nil || err.Error() != expected {
 		t.Errorf("\nExpected: <%+v>, \nreceived: <%+v>", expected, err)
