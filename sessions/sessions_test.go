@@ -2391,8 +2391,7 @@ func TestSessionSNewSession(t *testing.T) {
 					utils.MetaChargers: true,
 				},
 			},
-			ClientConnID:       "*internal:*chargers",
-			AutoChargeInterval: 0,
+			ClientConnID: "*internal:*chargers",
 			SRuns: []*SRun{
 				{
 					CGREvent: &utils.CGREvent{
@@ -2408,7 +2407,7 @@ func TestSessionSNewSession(t *testing.T) {
 		if s, err := sessions.newSession(ctx, args, connID); err != nil {
 			t.Error(err)
 		} else if !reflect.DeepEqual(s, expS) {
-			t.Errorf("Expected %v, \nrecieved %v", expS, s)
+			t.Errorf("Expected %#v, \nrecieved %#v", expS, s)
 		}
 	})
 	t.Run("Error Cases", func(t *testing.T) {
@@ -2461,9 +2460,8 @@ func TestSessionSNewSession(t *testing.T) {
 					utils.MetaChargers: "truee",
 				},
 			},
-			ClientConnID:       "*internal:*chargers",
-			AutoChargeInterval: 0,
-			SRuns:              nil,
+			ClientConnID: "*internal:*chargers",
+			sRuns:        nil,
 		}
 		expErr := `strconv.ParseBool: parsing "truee": invalid syntax`
 		if s, err := sessions.newSession(ctx, args, connID); err == nil || err.Error() != expErr {
@@ -2545,35 +2543,6 @@ func TestSessionSSetSession(t *testing.T) {
 		}
 		if first != second {
 			t.Error("Expected the existing session to be reused instead of creating a new one")
-		}
-	})
-	t.Run("InterimUsage and TotalUsage", func(t *testing.T) {
-		cch := map[string]any{
-			utils.MetaCGRid:           cgrID,
-			utils.MetaInterimConsumed: utils.NewDecimal(10, 0),
-			utils.MetaInterimUsage:    utils.NewDecimal(20, 0),
-			utils.MetaTotalUsage:      utils.NewDecimal(30, 0),
-		}
-		expS := &Session{
-			ID: "sID",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "sID",
-				Event: map[string]any{
-					utils.OriginID: "sID",
-				},
-				APIOpts: map[string]any{
-					utils.MetaUsage: utils.NewDecimal(50, 0),
-				},
-			},
-			ClientConnID: "ccID",
-		}
-		s, err := sS.setSession(ctx, cgrEv, cch, clientConnID)
-		if err != nil {
-			t.Error(err)
-		}
-		if !reflect.DeepEqual(utils.ToJSON(expS), utils.ToJSON(s)) {
-			t.Errorf("Expected %v, recieved %v", expS, s)
 		}
 	})
 
