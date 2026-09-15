@@ -332,7 +332,7 @@
 
 // 				// SQL
 // 				// "sqlDBName": "cgrates", 	// the name of the database from were the events are read
-// 				// "sqlTableName": "cdrs",	// the name of the table from were the events are read
+// 				// "sqlTableName": "urs",	// the name of the table from were the events are read
 // 				// "pgSSLMode": "disable",	// the ssl mode for postgres db
 
 // 				// SQS and S3
@@ -350,7 +350,7 @@
 // 				// nats
 // 				// "natsJetStream": false,		// controls if the nats reader uses the JetStream
 // 				// "natsConsumerName": "cgrates",	// in case of JetStream the name of the consumer
-// 				// "natsStreamName": "cdrs",		// the name of the NATS JetStream stream from which the consumer will read messages
+// 				// "natsStreamName": "urs",		// the name of the NATS JetStream stream from which the consumer will read messages
 // 				"natsSubject": "cgratesURs",		// the subject from were the events are read
 // 				// "natsQueueID": "",			// the queue id the consumer listen to
 // 				// "natsJWTFile": "",			// the path to the JWT file( can be the chained file or the user file)
@@ -446,7 +446,7 @@
 // 				// "mysqlDSNParams": {},                // DSN params
 
 
-// 				// "sqlTableName":"cdrs", 		// the name of the table from where the events are exported
+// 				// "sqlTableName":"urs", 		// the name of the table from where the events are exported
 // 				// "sqlDBName": "cgrates",		// the name of the database from where the events are exported
 // 				// "pgSSLMode": "disable",		// the postgresSSLMode for postgres            				
 
