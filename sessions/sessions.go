@@ -102,9 +102,6 @@ func (sS *SessionS) Shutdown() (err error) {
 	if len(replConns) == 0 {
 		var hasErr bool
 		for _, s := range sS.getSessions("", false) { // Force sessions shutdown
-			if err = sS.terminateSession(context.TODO(), s, nil, nil, nil, false); err != nil {
-				hasErr = true
-			}
 			if err = sS.terminateSessionNew(context.TODO(), s); err != nil {
 				hasErr = true
 				utils.Logger.Warning(
@@ -1472,16 +1469,6 @@ func (sS *SessionS) initSessionDebitLoops(s *Session) {
 
 }
 */
-
-// terminateSession will end a session from outside
-// calls endSession thread safe
-func (sS *SessionS) terminateSession(ctx *context.Context, s *Session, tUsage, lastUsage *time.Duration,
-	aTime *time.Time, isInstantEvent bool) (err error) {
-	s.lk.Lock()
-	err = sS.endSession(ctx, s, tUsage, lastUsage, aTime, isInstantEvent)
-	s.lk.Unlock()
-	return
-}
 
 // endSession will end a session from outside
 // this function is not thread safe
