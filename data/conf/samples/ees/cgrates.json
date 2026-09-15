@@ -457,7 +457,7 @@
 			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
-				"sqlTableName": "cdrs", // tableName is mandatory in opts for sql exporter
+				"sqlTableName": "urs", // tableName is mandatory in opts for sql exporter
 			},
 			"fields":[
 				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},

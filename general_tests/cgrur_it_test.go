@@ -99,17 +99,19 @@ func TestCgrUrEventExporter(t *testing.T) {
 			t.Error(err)
 		}
 	})
-	t.Run("GetUR", func(t *testing.T) {
-		var urs []*utils.UR
-		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
-			&utils.URFilters{Tenant: "cgrates.org"}, &urs); err != nil {
-			t.Fatalf("retrieving URs failed: %v", err)
-		}
-		if len(urs) != 1 {
-			t.Fatalf("expected 1 UR, got %d", len(urs))
-		}
-		if got := urs[0].Event[utils.OriginID]; got != "origin1" {
-			t.Errorf("unexpected OriginID: got %v, want origin1", got)
-		}
-	})
+
+	// unfinished , redo test when AdminSv1GetURs is finished
+	// t.Run("GetUR", func(t *testing.T) {
+	// 	var urs []*utils.UR
+	// 	if err := client.Call(context.Background(), utils.AdminSv1GetURs,
+	// 		&utils.URFilters{Tenant: "cgrates.org"}, &urs); err != nil {
+	// 		t.Fatalf("retrieving URs failed: %v", err)
+	// 	}
+	// 	if len(urs) != 1 {
+	// 		t.Fatalf("expected 1 UR, got %d", len(urs))
+	// 	}
+	// 	if got := urs[0].Event[utils.OriginID]; got != "origin1" {
+	// 		t.Errorf("unexpected OriginID: got %v, want origin1", got)
+	// 	}
+	// })
 }

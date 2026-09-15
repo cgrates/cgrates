@@ -12,7 +12,7 @@ import (
 // Structs here are one to one mapping of the tables and fields
 // to be used by gorm orm
 
-type CDRsql struct {
+type URsql struct {
 	ID          int64
 	RunID       string
 	OriginHost  string
@@ -38,11 +38,11 @@ type CDRsql struct {
 	DeletedAt   *time.Time
 }
 
-func (t CDRsql) TableName() string {
+func (t URsql) TableName() string {
 	return utils.URsTBL
 }
 
-func (t CDRsql) AsMapStringInterface() (out map[string]any) {
+func (t URsql) AsMapStringInterface() (out map[string]any) {
 	out = make(map[string]any)
 	// out["id"] = t.ID // ignore ID
 

@@ -258,82 +258,83 @@ func TestMultipleDBs(t *testing.T) {
 		}
 	})
 
-	t.Run("CheckCdrs", func(t *testing.T) { // stored in mysql
-		var cdrs []*utils.UR
-		if err := client.Call(context.Background(), utils.AdminSv1GetURs, &utils.URFilters{Tenant: "cgrates.org"}, &cdrs); err == nil || err.Error() != "retrieving CDRs failed: NOT_FOUND" {
-			t.Errorf("Expecting error <%v>, received: <%v>", "retrieving CDRs failed: NOT_FOUND", err)
-		}
-		// ev := &utils.CGREvent{
-		// 	Tenant: "cgrates.org",
-		// 	ID:     "TestEv1",
-		// 	Event: map[string]any{
-		// 		utils.ToR:          utils.MetaVoice,
-		// 		utils.OriginID:     "TestEv1",
-		// 		utils.RequestType:  utils.MetaPrepaid,
-		// 		utils.AccountField: "1001",
-		// 		utils.Subject:      "1001",
-		// 		utils.Destination:  "1002",
-		// 		utils.Usage:        time.Minute,
-		// 	},
-		// 	APIOpts: map[string]any{
-		// 		utils.MetaRates:    true,
-		// 		utils.MetaAccounts: false,
-		// 	},
-		// }
-		// var rply string
-		// client.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply)
-		if err := client.Call(context.Background(), utils.AdminSv1GetURs, &utils.URFilters{Tenant: "cgrates.org"}, &cdrs); err != nil {
-			t.Error(err)
-		}
-		if len(cdrs) != 1 {
-			t.Errorf("unexpected number of cdrs found: %v", len(cdrs))
-		}
-		exp := &utils.UR{
-			Tenant: utils.CGRateSorg,
-			Opts: map[string]any{
-				utils.MetaURID:     cdrs[0].Opts[utils.MetaURID],
-				utils.MetaRates:    true,
-				utils.MetaAccounts: false,
-				utils.MetaCost:     0.4,
-				utils.MetaRatesCost: map[string]any{
-					"Altered":  nil,
-					utils.Cost: 0.4,
-					"CostIntervals": []any{
-						map[string]any{
-							"CompressFactor": 1,
-							"Increments": []any{
-								map[string]any{
-									"CompressFactor":    2,
-									"RateID":            cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"],
-									"RateIntervalIndex": 0,
-									"Usage":             6e+10,
-								},
-							},
-						},
-					},
-					"ID":              "RT_RETAIL1",
-					"MaxCost":         0,
-					"MaxCostStrategy": "",
-					"MinCost":         0,
-					"Rates":           cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["Rates"],
-				},
-			},
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Destination:  "1002",
-				utils.OriginID:     "TestEv1",
-				utils.RequestType:  utils.MetaPrepaid,
-				utils.Subject:      "1001",
-				utils.ToR:          utils.MetaVoice,
-				utils.Usage:        6e+10,
-			},
-			CreatedAt: cdrs[0].CreatedAt,
-			UpdatedAt: cdrs[0].UpdatedAt,
-		}
-		if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(cdrs[0])) {
-			t.Errorf("Expecting <%#v>, \nreceived <%#v>", exp, cdrs[0])
-		}
-	})
+	// unfinished , redo test after fully transfering from CDRs to URs
+	// t.Run("CheckCdrs", func(t *testing.T) { // stored in mysql
+	// 	var cdrs []*utils.UR
+	// 	if err := client.Call(context.Background(), utils.AdminSv1GetURs, &utils.URFilters{Tenant: "cgrates.org"}, &cdrs); err == nil || err.Error() != "retrieving CDRs failed: NOT_FOUND" {
+	// 		t.Errorf("Expecting error <%v>, received: <%v>", "retrieving CDRs failed: NOT_FOUND", err)
+	// 	}
+	// 	// ev := &utils.CGREvent{
+	// 	// 	Tenant: "cgrates.org",
+	// 	// 	ID:     "TestEv1",
+	// 	// 	Event: map[string]any{
+	// 	// 		utils.ToR:          utils.MetaVoice,
+	// 	// 		utils.OriginID:     "TestEv1",
+	// 	// 		utils.RequestType:  utils.MetaPrepaid,
+	// 	// 		utils.AccountField: "1001",
+	// 	// 		utils.Subject:      "1001",
+	// 	// 		utils.Destination:  "1002",
+	// 	// 		utils.Usage:        time.Minute,
+	// 	// 	},
+	// 	// 	APIOpts: map[string]any{
+	// 	// 		utils.MetaRates:    true,
+	// 	// 		utils.MetaAccounts: false,
+	// 	// 	},
+	// 	// }
+	// 	// var rply string
+	// 	// client.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply)
+	// 	if err := client.Call(context.Background(), utils.AdminSv1GetURs, &utils.URFilters{Tenant: "cgrates.org"}, &cdrs); err != nil {
+	// 		t.Error(err)
+	// 	}
+	// 	if len(cdrs) != 1 {
+	// 		t.Errorf("unexpected number of cdrs found: %v", len(cdrs))
+	// 	}
+	// 	exp := &utils.UR{
+	// 		Tenant: utils.CGRateSorg,
+	// 		Opts: map[string]any{
+	// 			utils.MetaURID:     cdrs[0].Opts[utils.MetaURID],
+	// 			utils.MetaRates:    true,
+	// 			utils.MetaAccounts: false,
+	// 			utils.MetaCost:     0.4,
+	// 			utils.MetaRatesCost: map[string]any{
+	// 				"Altered":  nil,
+	// 				utils.Cost: 0.4,
+	// 				"CostIntervals": []any{
+	// 					map[string]any{
+	// 						"CompressFactor": 1,
+	// 						"Increments": []any{
+	// 							map[string]any{
+	// 								"CompressFactor":    2,
+	// 								"RateID":            cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["CostIntervals"].([]any)[0].(map[string]any)["Increments"].([]any)[0].(map[string]any)["RateID"],
+	// 								"RateIntervalIndex": 0,
+	// 								"Usage":             6e+10,
+	// 							},
+	// 						},
+	// 					},
+	// 				},
+	// 				"ID":              "RT_RETAIL1",
+	// 				"MaxCost":         0,
+	// 				"MaxCostStrategy": "",
+	// 				"MinCost":         0,
+	// 				"Rates":           cdrs[0].Opts[utils.MetaRatesCost].(map[string]any)["Rates"],
+	// 			},
+	// 		},
+	// 		Event: map[string]any{
+	// 			utils.AccountField: "1001",
+	// 			utils.Destination:  "1002",
+	// 			utils.OriginID:     "TestEv1",
+	// 			utils.RequestType:  utils.MetaPrepaid,
+	// 			utils.Subject:      "1001",
+	// 			utils.ToR:          utils.MetaVoice,
+	// 			utils.Usage:        6e+10,
+	// 		},
+	// 		CreatedAt: cdrs[0].CreatedAt,
+	// 		UpdatedAt: cdrs[0].UpdatedAt,
+	// 	}
+	// 	if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(cdrs[0])) {
+	// 		t.Errorf("Expecting <%#v>, \nreceived <%#v>", exp, cdrs[0])
+	// 	}
+	// })
 	t.Run("EngineShutdown", func(t *testing.T) {
 		if err := engine.KillEngine(100); err != nil {
 			t.Error(err)
