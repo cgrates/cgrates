@@ -3139,10 +3139,36 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 				utils.MetaOriginID: "originID",
 				utils.MetaRunID:    "*primary",
 				utils.MetaSession:  true,
-				utils.MetaUsage:    0,
 			},
 		},
-		AutoChargeInterval: 0,
+		sRuns: map[string]*SRun{
+			"CHRG1": {
+				ID: "CHRG1",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "run1Ev",
+					Event:  map[string]any{utils.AccountField: "1001"},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaRunID:    "CHRG1",
+					},
+				},
+				nextDebit: utils.NewDecimal(0, 0),
+			},
+			"CHRG2": {
+				ID: "CHRG2",
+				CGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "run1Ev",
+					Event:  map[string]any{utils.AccountField: "1001"},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "originID",
+						utils.MetaRunID:    "CHRG2",
+					},
+				},
+				nextDebit: utils.NewDecimal(0, 0),
+			},
+		},
 	}
 	var reply V1ProcessEventReply
 	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
@@ -3150,8 +3176,8 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 	}
 	cgrId := args.APIOpts[utils.MetaCGRid].(string)
 	sS := sessions.getActivateSession(cgrId)
-	if !reflect.DeepEqual(utils.ToJSON(sS), utils.ToJSON(expS)) {
-		t.Errorf("Expected %#+v, \nrecieved %#+v", expS, sS)
+	if !reflect.DeepEqual(sS, expS) {
+		t.Errorf("Expected %#v, \nrecieved %#v", expS, sS)
 	}
 	if got := len(sS.sRuns); got != 2 {
 		t.Errorf("Expected 2 sRuns, got %d", got)

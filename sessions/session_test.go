@@ -342,16 +342,6 @@ func TestSessionstopSTerminator(t *testing.T) {
 	}
 }
 
-func TestSessionstopDebitLoops(t *testing.T) {
-	session := &Session{
-		debitStop: make(chan struct{}),
-	}
-	session.stopDebitLoops()
-	if session.debitStop != nil {
-		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.debitStop))
-	}
-}
-
 func TestUnindexSession(t *testing.T) {
 	sessionService := &SessionS{
 		aSIMux: sync.RWMutex{},
@@ -581,13 +571,19 @@ func TestUpdateSRuns(t *testing.T) {
 }
 
 func TestCloneSession(t *testing.T) {
-	originEvent := &utils.CGREvent{Event: map[string]any{"origin": "event"}}
-
 	session := &Session{
-		ID:                 "session1",
-		OriginCGREvent:     originEvent,
-		ClientConnID:       "conn1",
-		AutoChargeInterval: time.Duration(5),
+		ID:             "session1",
+		OriginCGREvent: &utils.CGREvent{Event: map[string]any{"origin": "event"}},
+		ClientConnID:   "conn1",
+		sRuns: map[string]*SRun{
+			"run1": {
+				ID: "run1",
+				CGREvent: &utils.CGREvent{
+					Event: map[string]any{"tor": "voice"},
+				},
+				AutoChargeInterval: utils.DurationPointer(5),
+			},
+		},
 		SRuns: []*SRun{
 			{ID: "run1", CGREvent: &utils.CGREvent{Event: map[string]any{"tor": "voice"}}},
 		},
@@ -599,14 +595,16 @@ func TestCloneSession(t *testing.T) {
 		t.Errorf("Expected ClientConnID to be 'conn1', got %s", clonedSession.ClientConnID)
 	}
 
-	if clonedSession.AutoChargeInterval != time.Duration(5) {
-		t.Errorf("Expected AutoChargeInterval to be 5, got %v", clonedSession.AutoChargeInterval)
+	if clonedSession.sRuns["run1"].AutoChargeInterval.String() != "5ns" {
+		t.Errorf("Expected AutoChargeInterval to be 5ns, got %#v", clonedSession.sRuns["run1"].AutoChargeInterval)
 	}
 
 	if clonedSession.OriginCGREvent.Event["origin"] != "event" {
 		t.Errorf("Expected OriginCGREvent to have origin=event, got %s", clonedSession.OriginCGREvent.Event["origin"])
 	}
-
+	if len(clonedSession.sRuns) != 1 || clonedSession.sRuns["run1"].ID != "run1" {
+		t.Errorf("Expected cloned session to have 1 sRuns with ID 'run1', got %v", clonedSession.sRuns)
+	}
 	if len(clonedSession.SRuns) != 1 || clonedSession.SRuns[0].ID != "run1" {
 		t.Errorf("Expected cloned session to have 1 SRuns with ID 'run1', got %v", clonedSession.SRuns)
 	}
@@ -872,18 +870,18 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	})
 	t.Run("sRuns only", func(t *testing.T) {
 		session := &Session{
-			ID:                 "sessionID",
-			AutoChargeInterval: 10 * time.Second,
-			NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+			ID: "sessionID",
 			sRuns: map[string]*SRun{
 				"run1": {
-					ID:              "runid",
-					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
-					Charges:         utils.NewEventCharges(),
-					UsageAdjustment: utils.NewDecimal(5, 0),
-					InterimUsage:    utils.NewDecimal(30, 0),
-					TotalUsage:      utils.NewDecimal(60, 0),
-					lclDebit:        utils.NewDecimal(30, 0),
+					ID:                 "runid",
+					CGREvent:           &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
+					Charges:            utils.NewEventCharges(),
+					UsageAdjustment:    utils.NewDecimal(5, 0),
+					InterimUsage:       utils.NewDecimal(30, 0),
+					TotalUsage:         utils.NewDecimal(60, 0),
+					lclDebit:           utils.NewDecimal(30, 0),
+					AutoChargeInterval: utils.DurationPointer(10 * time.Second),
+					NextAutoCharge:     utils.TimePointer(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
 				},
 			},
 		}
@@ -896,13 +894,11 @@ func TestSessionAsExternalSessions(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "event3",
 				},
-				NodeID:             "",
-				UsageAdjustment:    utils.Int64Pointer(5),
-				InterimUsage:       utils.Int64Pointer(30),
-				TotalUsage:         utils.Int64Pointer(60),
-				TotalCost:          0,
-				AutoChargeInterval: 10000000000,
-				NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+				NodeID:          "",
+				UsageAdjustment: utils.Int64Pointer(5),
+				InterimUsage:    utils.Int64Pointer(30),
+				TotalUsage:      utils.Int64Pointer(60),
+				TotalCost:       0,
 				Charges: &utils.EventCharges{
 					Accounting:  map[string]*utils.AccountCharge{},
 					UnitFactors: map[string]*utils.UnitFactor{},
@@ -962,18 +958,18 @@ func TestSessionAsExternalSessions(t *testing.T) {
 	})
 	t.Run("sRuns only, empty parameters", func(t *testing.T) {
 		session := &Session{
-			ID:                 "sessionID",
-			AutoChargeInterval: 10 * time.Second,
-			NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+			ID: "sessionID",
 			sRuns: map[string]*SRun{
 				"run1": {
-					ID:              "runid",
-					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
-					Charges:         utils.NewEventCharges(),
-					UsageAdjustment: utils.NewDecimal(5, 0),
-					InterimUsage:    utils.NewDecimal(30, 0),
-					TotalUsage:      utils.NewDecimal(60, 0),
-					lclDebit:        utils.NewDecimal(30, 0),
+					ID:                 "runid",
+					CGREvent:           &utils.CGREvent{Tenant: "cgrates.org", ID: "event3"},
+					Charges:            utils.NewEventCharges(),
+					UsageAdjustment:    utils.NewDecimal(5, 0),
+					InterimUsage:       utils.NewDecimal(30, 0),
+					TotalUsage:         utils.NewDecimal(60, 0),
+					lclDebit:           utils.NewDecimal(30, 0),
+					AutoChargeInterval: utils.DurationPointer(10 * time.Second),
+					NextAutoCharge:     utils.TimePointer(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
 				},
 			},
 		}
@@ -986,13 +982,11 @@ func TestSessionAsExternalSessions(t *testing.T) {
 					Tenant: "cgrates.org",
 					ID:     "event3",
 				},
-				NodeID:             "",
-				UsageAdjustment:    utils.Int64Pointer(5),
-				InterimUsage:       utils.Int64Pointer(30),
-				TotalUsage:         utils.Int64Pointer(60),
-				TotalCost:          0,
-				AutoChargeInterval: 10000000000,
-				NextAutoCharge:     new(time.Date(2026, time.August, 2, 12, 0, 0, 0, time.UTC)),
+				NodeID:          "",
+				UsageAdjustment: utils.Int64Pointer(5),
+				InterimUsage:    utils.Int64Pointer(30),
+				TotalUsage:      utils.Int64Pointer(60),
+				TotalCost:       0,
 				Charges: &utils.EventCharges{
 					Accounting:  map[string]*utils.AccountCharge{},
 					UnitFactors: map[string]*utils.UnitFactor{},
@@ -1008,7 +1002,7 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			t.Errorf("Expected 1 external sessions, got %d", len(rcv))
 		}
 		if !reflect.DeepEqual(expect, rcv) {
-			t.Errorf("Expected %v, recieved %v", utils.ToJSON(expect), utils.ToJSON(rcv))
+			t.Errorf("Expected %v, \nrecieved %v", utils.ToJSON(expect), utils.ToJSON(rcv))
 		}
 		for _, s := range rcv {
 			if s.NodeID != utils.EmptyString {
@@ -1075,10 +1069,9 @@ func TestSRunUpdateUsages(t *testing.T) {
 			},
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(0, 0),
-					},
+					APIOpts: map[string]any{},
 				},
+				nextDebit: utils.NewDecimal(0, 0),
 			},
 		},
 		{
@@ -1092,12 +1085,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(30, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(30, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(30, 0),
 				TotalUsage:   utils.NewDecimal(30, 0),
+				nextDebit:    utils.NewDecimal(30, 0),
 			},
 		},
 		{
@@ -1112,12 +1104,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(20, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(20, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(20, 0),
 				TotalUsage:   utils.NewDecimal(50, 0),
+				nextDebit:    utils.NewDecimal(20, 0),
 			},
 		},
 		{
@@ -1131,12 +1122,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimConsumed: utils.NewDecimal(25, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(10, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(10, 0),
 				TotalUsage:   utils.NewDecimal(10, 0),
+				nextDebit:    utils.NewDecimal(10, 0),
 			},
 		},
 		{
@@ -1152,12 +1142,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimConsumed: utils.NewDecimal(30, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(10, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(10, 0),
 				TotalUsage:   utils.NewDecimal(40, 0),
+				nextDebit:    utils.NewDecimal(10, 0),
 			},
 		},
 		{
@@ -1173,14 +1162,13 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimConsumed: utils.NewDecimal(10, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(0, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage:    utils.NewDecimal(10, 0),
 				UsageAdjustment: utils.NewDecimal(10, 0),
 				TotalUsage:      utils.NewDecimal(20, 0),
 				lclDebit:        utils.NewDecimal(10, 0),
+				nextDebit:       utils.NewDecimal(0, 0),
 			},
 		},
 		{
@@ -1196,14 +1184,13 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimConsumed: utils.NewDecimal(30, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(30, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage:    utils.NewDecimal(10, 0),
 				UsageAdjustment: utils.NewDecimal(0, 0),
 				TotalUsage:      utils.NewDecimal(60, 0),
 				lclDebit:        utils.NewDecimal(-20, 0),
+				nextDebit:       utils.NewDecimal(30, 0),
 			},
 		},
 		{
@@ -1217,12 +1204,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			totalUsage: utils.NewDecimal(20, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(10, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(10, 0),
 				TotalUsage:   utils.NewDecimal(20, 0),
+				nextDebit:    utils.NewDecimal(10, 0),
 			},
 		},
 		{
@@ -1237,12 +1223,11 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(5, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(45, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				InterimUsage: utils.NewDecimal(45, 0),
 				TotalUsage:   utils.NewDecimal(55, 0),
+				nextDebit:    utils.NewDecimal(45, 0),
 			},
 		},
 		{
@@ -1258,14 +1243,13 @@ func TestSRunUpdateUsages(t *testing.T) {
 			totalUsage:      utils.NewDecimal(100, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(70, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				UsageAdjustment: utils.NewDecimal(0, 0),
 				InterimUsage:    utils.NewDecimal(80, 0),
 				TotalUsage:      utils.NewDecimal(100, 0),
 				lclDebit:        utils.NewDecimal(10, 0),
+				nextDebit:       utils.NewDecimal(70, 0),
 			},
 		},
 		{
@@ -1279,14 +1263,13 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(15, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(0, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				UsageAdjustment: utils.NewDecimal(85, 0),
 				InterimUsage:    utils.NewDecimal(15, 0),
 				TotalUsage:      utils.NewDecimal(15, 0),
 				lclDebit:        utils.NewDecimal(15, 0),
+				nextDebit:       utils.NewDecimal(0, 0),
 			},
 		},
 		{
@@ -1300,14 +1283,13 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(15, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(0, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				UsageAdjustment: utils.NewDecimal(0, 0),
 				InterimUsage:    utils.NewDecimal(15, 0),
 				TotalUsage:      utils.NewDecimal(15, 0),
 				lclDebit:        utils.NewDecimal(15, 0),
+				nextDebit:       utils.NewDecimal(0, 0),
 			},
 		},
 		{
@@ -1320,25 +1302,31 @@ func TestSRunUpdateUsages(t *testing.T) {
 			interimUsage: utils.NewDecimal(-15, 0),
 			expSRun: &SRun{
 				CGREvent: &utils.CGREvent{
-					APIOpts: map[string]any{
-						utils.MetaUsage: utils.NewDecimal(0, 0),
-					},
+					APIOpts: map[string]any{},
 				},
 				UsageAdjustment: utils.NewDecimal(15, 0),
 				InterimUsage:    utils.NewDecimal(-15, 0),
 				TotalUsage:      utils.NewDecimal(-15, 0),
 				lclDebit:        utils.NewDecimal(-15, 0),
+				nextDebit:       utils.NewDecimal(0, 0),
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := tt.sr.updateUsages(tt.interimConsumed, tt.interimUsage, tt.totalUsage)
-			if err != nil {
-				t.Error(err)
-			}
+			tt.sr.computeUsages(tt.interimConsumed, tt.interimUsage, tt.totalUsage)
 			if !reflect.DeepEqual(tt.sr, tt.expSRun) {
-				t.Errorf("Expected %#v, recieved %#v", tt.expSRun, tt.sr)
+				t.Errorf("Expected %#v, \nrecieved %#v", tt.expSRun, tt.sr)
+				t.Errorf("Expected %v, \nrecieved %v", utils.ToJSON(tt.expSRun), utils.ToJSON(tt.sr))
+			}
+			if !reflect.DeepEqual(tt.sr.CGREvent, tt.expSRun.CGREvent) {
+				t.Errorf("Expected %#v, \nrecieved %#v", tt.expSRun.CGREvent, tt.sr.CGREvent)
+			}
+			if !reflect.DeepEqual(tt.sr.lclDebit, tt.expSRun.lclDebit) {
+				t.Errorf("Expected %#v, \nrecieved %#v", utils.ToJSON(tt.expSRun.lclDebit), utils.ToJSON(tt.sr.lclDebit))
+			}
+			if !reflect.DeepEqual(tt.sr.nextDebit, tt.expSRun.nextDebit) {
+				t.Errorf("Expected %#v, \nrecieved %#v", utils.ToJSON(tt.expSRun.nextDebit), utils.ToJSON(tt.sr.nextDebit))
 			}
 		})
 	}
