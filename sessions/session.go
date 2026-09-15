@@ -83,6 +83,12 @@ func (s *Session) Clone() (cln *Session) {
 			cln.SRuns[i] = sR.Clone()
 		}
 	}
+	if s.sRuns != nil {
+		cln.sRuns = make(map[string]*SRun)
+		for rID, sR := range s.sRuns {
+			cln.sRuns[rID] = sR.Clone()
+		}
+	}
 	s.lk.RUnlock()
 	return
 }
@@ -204,9 +210,24 @@ type SRun struct {
 
 // Clone returns the cloned version of SRun
 func (sr *SRun) Clone() (clsr *SRun) {
+	if sr == nil {
+		return nil
+	}
 	clsr = &SRun{
-		ID:       sr.ID,
-		CGREvent: sr.CGREvent.Clone(),
+		ID:              sr.ID,
+		CGREvent:        sr.CGREvent.Clone(),
+		InterimUsage:    sr.InterimUsage.Clone(),
+		UsageAdjustment: sr.UsageAdjustment.Clone(),
+		TotalUsage:      sr.TotalUsage.Clone(),
+		Charges:         sr.Charges.Clone(),
+	}
+	if sr.AutoChargeInterval != nil {
+		d := *sr.AutoChargeInterval
+		clsr.AutoChargeInterval = &d
+	}
+	if sr.NextAutoCharge != nil {
+		d := *sr.NextAutoCharge
+		clsr.NextAutoCharge = &d
 	}
 	return
 }

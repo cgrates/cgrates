@@ -231,6 +231,9 @@ func (d *Decimal) MarshalJSON() ([]byte, error) {
 
 // Clone returns a copy of the Decimal
 func (d *Decimal) Clone() *Decimal {
+	if d == nil {
+		return nil
+	}
 	return &Decimal{decimal.WithContext(DecimalContext).Copy(d.Big)}
 }
 
