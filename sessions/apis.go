@@ -12,7 +12,6 @@ import (
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -978,7 +977,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
 					utils.SessionS, errRous.Error(), cgrEv, utils.RouteS))
 		} else if rous {
-			var rous routes.SortedRoutesList
+			var rous utils.SortedRoutesList
 			if rous, err = sS.getRoutes(ctx, cgrEv); err != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					return
@@ -989,7 +988,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 						utils.SessionS, err.Error(), cgrEv, utils.RouteS))
 			}
 			if apiRply.RouteProfiles == nil {
-				apiRply.RouteProfiles = make(map[string]routes.SortedRoutesList)
+				apiRply.RouteProfiles = make(map[string]utils.SortedRoutesList)
 			}
 			apiRply.RouteProfiles[runID] = rous
 		}

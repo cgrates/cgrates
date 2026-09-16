@@ -14,7 +14,6 @@ import (
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -89,8 +88,8 @@ func TestSessionSBiRPCv1AuthorizeEvent(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
-				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{
-					Routes: []*routes.SortedRoute{
+				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{
+					Routes: []*utils.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
@@ -216,8 +215,8 @@ func TestSessionSBiRPCv1AuthorizeEvent(t *testing.T) {
 	args.APIOpts = map[string]any{
 		utils.MetaRoutes: true,
 	}
-	expect := routes.SortedRoutesList{{
-		Routes: []*routes.SortedRoute{
+	expect := utils.SortedRoutesList{{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "RouteID",
 			},
@@ -510,8 +509,8 @@ func TestSessionSBiRPCv1AuthorizeEventErrors(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRouteProfilesForEvent: func(ctx *context.Context, m string, args, reply any) error {
-				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{
-					Routes: []*routes.SortedRoute{
+				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{
+					Routes: []*utils.SortedRoute{
 						{
 							RouteID: "RouteID",
 						},
@@ -615,8 +614,8 @@ func TestSessionSBiRPCv1AuthorizeEventErrors(t *testing.T) {
 
 		//Thresholds
 		clnt.calls[utils.RouteSv1GetRoutes] = func(ctx *context.Context, m string, args, reply any) error {
-			*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{
-				Routes: []*routes.SortedRoute{
+			*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{
+				Routes: []*utils.SortedRoute{
 					{
 						RouteID: "RouteID",
 					},
@@ -844,8 +843,8 @@ func TestSessionSBiRPCv1AuthorizeEventWithDigest(t *testing.T) {
 				return nil
 			},
 			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
-				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{
-					Routes: []*routes.SortedRoute{
+				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{
+					Routes: []*utils.SortedRoute{
 						{RouteID: "RouteID"},
 					},
 				}}
@@ -2635,7 +2634,7 @@ func TestSessionSBiRPCv1ProcessEventRouting(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
 			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
-				*reply.(*routes.SortedRoutesList) = routes.SortedRoutesList{{Routes: []*routes.SortedRoute{{RouteID: "RouteID"}}}}
+				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{Routes: []*utils.SortedRoute{{RouteID: "RouteID"}}}}
 				return nil
 			},
 			utils.StatSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
@@ -2669,7 +2668,7 @@ func TestSessionSBiRPCv1ProcessEventRouting(t *testing.T) {
 		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
 			t.Error(err)
 		}
-		expected := routes.SortedRoutesList{{Routes: []*routes.SortedRoute{{RouteID: "RouteID"}}}}
+		expected := utils.SortedRoutesList{{Routes: []*utils.SortedRoute{{RouteID: "RouteID"}}}}
 		if !reflect.DeepEqual(reply.RouteProfiles[utils.MetaPrimary], expected) {
 			t.Errorf("Expected %v, recieved %v", expected, reply.RouteProfiles[utils.MetaPrimary])
 		}

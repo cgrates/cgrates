@@ -178,7 +178,7 @@ type RouteSv1 struct {
 }
 
 // V1GetRoutes returns the list of valid routes.
-func (rpS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *routes.SortedRoutesList) (err error) {
+func (rpS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
 	return rpS.rpS.V1GetRoutes(ctx, args, reply)
 }
 

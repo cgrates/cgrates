@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/routes"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -1913,7 +1912,7 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 }
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
-func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply routes.SortedRoutesList, err error) {
+func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply utils.SortedRoutesList, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaRoutes,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {

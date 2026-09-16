@@ -12,7 +12,6 @@ import (
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
 )
@@ -271,7 +270,7 @@ type V1ProcessEventReply struct {
 	ResourceAllocation map[string]string                        `json:",omitempty"`
 	IPsAllocation      map[string]*utils.AllocatedIP            `json:",omitempty"`
 	Attributes         map[string]*attributes.ProcessEventReply `json:",omitempty"`
-	RouteProfiles      map[string]routes.SortedRoutesList       `json:",omitempty"`
+	RouteProfiles      map[string]utils.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       map[string][]string                      `json:",omitempty"`
 	StatQueueIDs       map[string][]string                      `json:",omitempty"`
 	STIRIdentity       map[string]string                        `json:",omitempty"`
@@ -390,7 +389,7 @@ type V1ProcessMessageReply struct {
 	MaxUsage           *time.Duration                `json:",omitempty"`
 	ResourceAllocation *string                       `json:",omitempty"`
 	Attributes         *attributes.ProcessEventReply `json:",omitempty"`
-	RouteProfiles      routes.SortedRoutesList       `json:",omitempty"`
+	RouteProfiles      utils.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                     `json:",omitempty"`
 	StatQueueIDs       *[]string                     `json:",omitempty"`
 
@@ -456,7 +455,7 @@ type V1AuthorizeReply struct {
 	ResourceAllocation *string                       `json:",omitempty"`
 	AllocatedIP        *utils.AllocatedIP            `json:",omitempty"`
 	MaxUsage           *utils.Decimal                `json:",omitempty"`
-	RouteProfiles      routes.SortedRoutesList       `json:",omitempty"`
+	RouteProfiles      utils.SortedRoutesList        `json:",omitempty"`
 	ThresholdIDs       *[]string                     `json:",omitempty"`
 	StatQueueIDs       *[]string                     `json:",omitempty"`
 

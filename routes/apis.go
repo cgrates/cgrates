@@ -11,7 +11,7 @@ import (
 )
 
 // V1GetRoutes returns the list of valid routes.
-func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *SortedRoutesList) (err error) {
+func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	} else if args.Event == nil {
@@ -45,7 +45,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 			return utils.NewErrRouteS(err)
 		}
 	}
-	var sSps SortedRoutesList
+	var sSps utils.SortedRoutesList
 	if sSps, err = rpS.sortedRoutesForEvent(ctx, tnt, args); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -80,7 +80,7 @@ func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.
 
 // V1GetRoutesList returns the list of valid routes.
 func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
-	sR := new(SortedRoutesList)
+	sR := new(utils.SortedRoutesList)
 	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return
 	}

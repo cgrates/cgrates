@@ -728,7 +728,6 @@ const (
 	SortingData             = "SortingData"
 	ProfileID               = "ProfileID"
 	PoolID                  = "PoolID"
-	SortedRoutes            = "SortedRoutes"
 	MetaDaily               = "*daily"
 	RateS                   = "RateS"
 	Underline               = "_"

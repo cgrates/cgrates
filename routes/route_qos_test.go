@@ -158,10 +158,10 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 		sortingParameters: []string{"param1", utils.MetaTCD, utils.MetaPDD},
 	}
 
-	exp := &SortedRoutes{
+	exp := &utils.SortedRoutes{
 		ProfileID: "prfId",
 		Sorting:   "*qos",
-		Routes: []*SortedRoute{{
+		Routes: []*utils.SortedRoute{{
 			RouteID:         "local",
 			RouteParameters: "",
 			SortingData: map[string]any{
@@ -295,10 +295,10 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 		ignoreErrors: true,
 	}
 
-	exp := &SortedRoutes{
+	exp := &utils.SortedRoutes{
 		ProfileID: "prfId",
 		Sorting:   "*qos",
-		Routes:    []*SortedRoute{},
+		Routes:    []*utils.SortedRoute{},
 	}
 
 	if rcv, err := qos.SortRoutes(ctx, prflID, routes, cgrEv, extraOpts); err != nil {

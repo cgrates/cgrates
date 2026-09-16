@@ -180,7 +180,7 @@ var lazyRouteFltrPrfxs = []string{utils.DynamicDataPrefix + utils.MetaReq,
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
 func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrfl *utils.RouteProfile, ev *utils.CGREvent,
-	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
 	//construct the DP and pass it to filterS
@@ -243,7 +243,7 @@ func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrf
 
 // sortedRoutesForEvent will return the list of sortedRoutes
 // for event based on filters and sorting algorithms
-func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (sortedRoutes SortedRoutesList, err error) {
+func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (sortedRoutes utils.SortedRoutesList, err error) {
 	rPrfs, err := rpS.matchingRouteProfilesForEvent(ctx, tnt, args)
 	if err != nil {
 		return
@@ -273,7 +273,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 			return nil, fmt.Errorf("SERVER_ERROR: maximum number of items exceeded")
 		}
 	}
-	sortedRoutes = make(SortedRoutesList, 0, prfCount)
+	sortedRoutes = make(utils.SortedRoutesList, 0, prfCount)
 	for _, rPrfl := range rPrfs {
 		var prfPag utils.Paginator
 		if extraOpts.paginator.Limit != nil { // we have a limit
@@ -295,7 +295,7 @@ func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *
 			startIdx = 0       // set it to 0 for the following loop
 			prfPag.Offset = &offset
 		}
-		var sr *SortedRoutes
+		var sr *utils.SortedRoutes
 		if sr, err = rpS.sortedRoutesForProfile(ctx, tnt, rPrfl, args, prfPag, extraOpts); err != nil {
 			return
 		}
