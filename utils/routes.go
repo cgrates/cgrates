@@ -5,6 +5,7 @@ package utils
 
 import (
 	"maps"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -527,4 +528,239 @@ func (r *Route) FieldAsInterface(fldPath []string) (_ any, err error) {
 	case RouteParameters:
 		return r.RouteParameters, nil
 	}
+}
+
+// SortedRoute represents one route in SortedRoutes
+type SortedRoute struct {
+	RouteID            string
+	RouteParameters    string
+	SortingData        map[string]any      // store here extra info like cost or stats (can contain the data that we do not use to sort after)
+	sortingDataDecimal map[string]*Decimal // only the data we sort after
+}
+
+func (sr *SortedRoute) SetSortingDataDecimal(sortingDataDecimal map[string]*Decimal) {
+	sr.sortingDataDecimal = sortingDataDecimal
+}
+
+func (sr *SortedRoute) AddToSortingDataDecimalMap(key string, val *Decimal) {
+	if sr.sortingDataDecimal == nil {
+		sr.sortingDataDecimal = make(map[string]*Decimal)
+	}
+	sr.sortingDataDecimal[key] = val
+}
+
+// getSortedData returns the data from map or a 0( in case it was not populated)
+func (s *SortedRoute) getSortedData(field string) *Decimal {
+	if v, has := s.sortingDataDecimal[field]; has {
+		return v
+	}
+	return NewDecimalFromFloat64(0)
+}
+
+// SortedRoutes represents all viable routes inside one routing profile
+type SortedRoutes struct {
+	ProfileID string         // Profile matched
+	Sorting   string         // Sorting algorithm
+	Routes    []*SortedRoute // list of route IDs and SortingData data
+}
+
+// RouteIDs returns a list of route IDs
+func (sRoutes *SortedRoutes) RouteIDs() (rIDs []string) {
+	rIDs = make([]string, len(sRoutes.Routes))
+	for i, sRoute := range sRoutes.Routes {
+		rIDs[i] = sRoute.RouteID
+	}
+	return
+}
+
+// RoutesWithParams returns a list of routes IDs with Parameters
+func (sRoutes *SortedRoutes) RoutesWithParams() (sPs []string) {
+	sPs = make([]string, len(sRoutes.Routes))
+	for i, spl := range sRoutes.Routes {
+		sPs[i] = spl.RouteID
+		if spl.RouteParameters != "" {
+			sPs[i] += InInFieldSep + spl.RouteParameters
+		}
+	}
+	return
+}
+
+func (sRoutes *SortedRoutes) compareWeight(i, j int) bool {
+	cmp := sRoutes.Routes[i].getSortedData(Weight).Compare(sRoutes.Routes[j].getSortedData(Weight))
+	if cmp == 0 {
+		return BoolGenerator().RandomBool()
+	}
+	return cmp > 0
+}
+
+// SortWeight is part of sort interface, sort based on Weight
+func (sRoutes *SortedRoutes) SortWeight() {
+	sort.Slice(sRoutes.Routes, sRoutes.compareWeight)
+}
+
+// SortLeastCost is part of sort interface,
+// sort ascendent based on Cost with fallback on Weight
+func (sRoutes *SortedRoutes) SortLeastCost() {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		cmp := sRoutes.Routes[i].getSortedData(Cost).Compare(sRoutes.Routes[j].getSortedData(Cost))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
+		}
+		return cmp < 0
+	})
+}
+
+// SortHighestCost is part of sort interface,
+// sort descendent based on Cost with fallback on Weight
+func (sRoutes *SortedRoutes) SortHighestCost() {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		cmp := sRoutes.Routes[i].getSortedData(Cost).Compare(sRoutes.Routes[j].getSortedData(Cost))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
+		}
+		return cmp > 0
+	})
+}
+
+// SortQOS is part of sort interface,
+// sort based on Stats
+func (sRoutes *SortedRoutes) SortQOS(params []string) {
+	//sort routes
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		for _, param := range params {
+			//in case we have the same value for the current param we skip to the next one
+			cmp := sRoutes.Routes[i].getSortedData(param).Compare(sRoutes.Routes[j].getSortedData(param))
+			if cmp == 0 {
+				continue
+			}
+			if param == MetaPDD {
+				return cmp < 0
+			}
+			return cmp > 0
+		}
+		//in case that we have the same value for all params we sort base on weight
+		return sRoutes.compareWeight(i, j)
+	})
+}
+
+// SortResourceAscendent is part of sort interface,
+// sort ascendent based on ResourceUsage with fallback on Weight
+func (sRoutes *SortedRoutes) SortResourceAscendent() {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		cmp := sRoutes.Routes[i].getSortedData(ResourceUsageStr).Compare(sRoutes.Routes[j].getSortedData(ResourceUsageStr))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
+		}
+		return cmp < 0
+	})
+}
+
+// SortResourceDescendent is part of sort interface,
+// sort descendent based on ResourceUsage with fallback on Weight
+func (sRoutes *SortedRoutes) SortResourceDescendent() {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		cmp := sRoutes.Routes[i].getSortedData(ResourceUsageStr).Compare(sRoutes.Routes[j].getSortedData(ResourceUsageStr))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
+		}
+		return cmp > 0
+	})
+}
+
+// SortLoadDistribution is part of sort interface,
+// sort based on the following formula float64(metricVal/ratio) with fallback on Weight
+func (sRoutes *SortedRoutes) SortLoadDistribution() {
+	sort.Slice(sRoutes.Routes, func(i, j int) bool {
+		// ((ratio + metricVal) / (ratio)) -1 = ((ratio+metricVal)/ratio) - (ratio/ratio) = (ratio+metricVal-ratio)/ratio = metricVal/ratio
+		cmp := DivideDecimal(sRoutes.Routes[i].getSortedData(Load), sRoutes.Routes[i].getSortedData(Ratio)).Compare(
+			DivideDecimal(sRoutes.Routes[j].getSortedData(Load), sRoutes.Routes[j].getSortedData(Ratio)))
+		if cmp == 0 {
+			return sRoutes.compareWeight(i, j)
+		}
+		return cmp < 0
+	})
+}
+
+// Digest returns list of routeIDs + parameters for easier outside access
+// format route1:route1params,route2:route2params
+func (sRoutes *SortedRoutes) Digest() string {
+	return strings.Join(sRoutes.RoutesWithParams(), FieldsSep)
+}
+
+func (ss *SortedRoute) AsNavigableMap() (nm *DataNode) {
+	nm = &DataNode{
+		Type: NMMapType,
+		Map: map[string]*DataNode{
+			RouteID:         NewLeafNode(ss.RouteID),
+			RouteParameters: NewLeafNode(ss.RouteParameters),
+		},
+	}
+	sd := &DataNode{Type: NMMapType, Map: map[string]*DataNode{}}
+	for k, d := range ss.SortingData {
+		sd.Map[k] = NewLeafNode(d)
+	}
+	nm.Map[SortingData] = sd
+	return
+}
+
+func (sRoutes *SortedRoutes) AsNavigableMap() (nm *DataNode) {
+	nm = &DataNode{
+		Type: NMMapType,
+		Map: map[string]*DataNode{
+			ProfileID: NewLeafNode(sRoutes.ProfileID),
+			Sorting:   NewLeafNode(sRoutes.Sorting),
+		},
+	}
+	sr := make([]*DataNode, len(sRoutes.Routes))
+	for i, ss := range sRoutes.Routes {
+		sr[i] = ss.AsNavigableMap()
+	}
+	nm.Map[CapRoutes] = &DataNode{Type: NMSliceType, Slice: sr}
+	return
+}
+
+// SortedRoutesList represents the list of matched routes grouped based of profile
+type SortedRoutesList []*SortedRoutes
+
+// RouteIDs returns a list of route IDs
+func (sRs SortedRoutesList) RouteIDs() (rIDs []string) {
+	for _, sR := range sRs {
+		for _, r := range sR.Routes {
+			rIDs = append(rIDs, r.RouteID)
+		}
+	}
+	return
+}
+
+// RoutesWithParams returns a list of routes IDs with Parameters
+func (sRs SortedRoutesList) RoutesWithParams() (sPs []string) {
+	routeIDs := make(StringSet)
+	for _, sR := range sRs {
+		for _, spl := range sR.Routes {
+			route := spl.RouteID
+			if spl.RouteParameters != EmptyString {
+				route += InInFieldSep + spl.RouteParameters
+			}
+			if !routeIDs.Has(route) {
+				routeIDs.Add(route)
+				sPs = append(sPs, route)
+			}
+		}
+	}
+	return
+}
+
+// Digest returns list of routeIDs + parameters for easier outside access
+// format route1:route1params,route2:route2params
+func (sRs SortedRoutesList) Digest() string {
+	return strings.Join(sRs.RoutesWithParams(), FieldsSep)
+}
+
+// AsNavigableMap returns the SortedRoutesSet as NMInterface object
+func (sRs SortedRoutesList) AsNavigableMap() (nm *DataNode) {
+	nm = &DataNode{Type: NMSliceType, Slice: make([]*DataNode, len(sRs))}
+	for i, ss := range sRs {
+		nm.Slice[i] = ss.AsNavigableMap()
+	}
+	return
 }

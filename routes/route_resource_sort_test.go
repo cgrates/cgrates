@@ -113,7 +113,7 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 
-	exp := []*SortedRoute{
+	exp := []*utils.SortedRoute{
 		{
 			RouteID:         "Route1",
 			RouteParameters: "param1",
@@ -174,7 +174,7 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 
-	exp := []*SortedRoute{
+	exp := []*utils.SortedRoute{
 		{
 			RouteID:         "Route1",
 			RouteParameters: "param1",
@@ -545,10 +545,10 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	exp := &SortedRoutes{
+	exp := &utils.SortedRoutes{
 		ProfileID: "PROFILE1",
 		Sorting:   utils.MetaReds,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID:         "Route1",
 				RouteParameters: "param1",

@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -180,7 +179,7 @@ func testV1SplSSetSupplierProfilesWithoutRateProfileIDs(t *testing.T) {
 		},
 	}
 	experr := `SERVER_ERROR: ACCOUNTS_ERROR:NOT_FOUND`
-	var suplsReply routes.SortedRoutesList
+	var suplsReply utils.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err == nil || err.Error() != experr {
 		t.Errorf("expected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -473,7 +472,7 @@ func testV1SplSGetSortedSuppliers(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route3", "route2", "route1"}
-	var suplsReply routes.SortedRoutesList
+	var suplsReply utils.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -583,7 +582,7 @@ func testV1SplSGetSortedSuppliers2(t *testing.T) {
 		},
 	}
 	expSupplierIDs := []string{"route1", "route3", "route2"}
-	var suplsReply routes.SortedRoutesList
+	var suplsReply utils.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)
@@ -754,7 +753,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	expSuppliers := []*routes.SortedRoute{
+	expSuppliers := []*utils.SortedRoute{
 		{
 			RouteID:         "route2",
 			RouteParameters: "",
@@ -781,7 +780,7 @@ func testV1SplSGetSoredSuppliersWithLoad(t *testing.T) {
 		},
 	}
 
-	var suplsReply routes.SortedRoutesList
+	var suplsReply utils.SortedRoutesList
 	if err := splSv1Rpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &suplsReply); err != nil {
 		t.Error(err)

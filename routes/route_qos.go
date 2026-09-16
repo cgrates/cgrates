@@ -25,7 +25,7 @@ type QOSRouteSorter struct {
 }
 
 func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	statSConns, err := engine.GetConnIDs(ctx, qos.cfg.RouteSCfg().Conns, utils.MetaStats, ev.Tenant, ev.AsDataProvider(), nil, qos.fltrS)
 	if err != nil {
 		return nil, err
@@ -33,22 +33,20 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 	if len(statSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
-	sortedRoutes = &SortedRoutes{
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaQOS,
-		Routes:    make([]*SortedRoute, 0, len(routes)),
+		Routes:    make([]*utils.SortedRoute, 0, len(routes)),
 	}
 	for _, route := range routes {
-		srtRoute := &SortedRoute{
+		srtRoute := &utils.SortedRoute{
 			RouteID: route.ID,
 			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
-			},
 			RouteParameters: route.RouteParameters,
 		}
+		srtRoute.SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(route.Weight)})
 		if route.blocker {
 			srtRoute.SortingData[utils.Blocker] = true
 		}
@@ -66,7 +64,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 		// add metrics from statIDs in SortingData
 		for key, val := range metricSupp {
 			srtRoute.SortingData[key] = val
-			srtRoute.sortingDataDecimal[key] = val
+			srtRoute.AddToSortingDataDecimalMap(key, val)
 		}
 		// check if the route have the metric from sortingParameters
 		// in case that the metric don't exist
@@ -75,10 +73,10 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 			if _, hasMetric := metricSupp[metric]; !hasMetric {
 				if metric == utils.MetaPDD {
 					srtRoute.SortingData[metric] = math.MaxFloat64
-					srtRoute.sortingDataDecimal[metric] = utils.NewDecimalFromFloat64(math.MaxFloat64)
+					srtRoute.AddToSortingDataDecimalMap(metric, utils.NewDecimalFromFloat64(math.MaxFloat64))
 				} else {
 					srtRoute.SortingData[metric] = -1.0
-					srtRoute.sortingDataDecimal[metric] = utils.NewDecimalFromFloat64(-1.0)
+					srtRoute.AddToSortingDataDecimalMap(metric, utils.NewDecimalFromFloat64(-1.0))
 				}
 			}
 		}

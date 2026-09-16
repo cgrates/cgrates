@@ -266,16 +266,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP, cfg)
-
-	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile := utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(10.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
@@ -283,6 +279,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(10.0)})
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[0].Tenant, testRoutesArgs[0])
 	if err != nil {
 		t.Errorf("Error: %+v", err)
@@ -291,15 +288,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 
-	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile = utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(30.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
@@ -307,9 +301,6 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(20.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
@@ -317,9 +308,6 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 			{
 				RouteID: "route3",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(10.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
@@ -327,6 +315,9 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(30.0)})
+	eFirstRouteProfile[0].Routes[1].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(20.0)})
+	eFirstRouteProfile[0].Routes[2].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(10.0)})
 
 	sprf, err = routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[1].Tenant, testRoutesArgs[1])
 	if err != nil {
@@ -336,15 +327,12 @@ func TestRoutesSortedForEvent(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eFirstRouteProfile), utils.ToJSON(sprf))
 	}
 
-	eFirstRouteProfile = SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile = utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfilePrefix",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(10.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
@@ -352,6 +340,7 @@ func TestRoutesSortedForEvent(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(10.0)})
 
 	sprf, err = routeService.sortedRoutesForEvent(context.Background(), testRoutesArgs[2].Tenant, testRoutesArgs[2])
 	if err != nil {
@@ -379,15 +368,12 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP, cfg)
 
-	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile := utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route1",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(30.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 30.0,
 				},
@@ -395,9 +381,6 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 			{
 				RouteID: "route2",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(20.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
@@ -405,6 +388,9 @@ func TestRoutesSortedForEventWithLimit(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(30.0)})
+	eFirstRouteProfile[0].Routes[1].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(20.0)})
+
 	args := testRoutesArgs[1].Clone()
 	args.APIOpts[utils.OptsRoutesLimit] = 2
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
@@ -435,15 +421,12 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 
 	prepareRoutesData(t, dmSPP, cfg)
 
-	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile := utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route3",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(10.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 10.0,
 				},
@@ -451,6 +434,8 @@ func TestRoutesSortedForEventWithOffset(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(10.0)})
+
 	args := testRoutesArgs[1].Clone()
 	args.APIOpts[utils.OptsRoutesOffset] = 2
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
@@ -480,15 +465,12 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
 	prepareRoutesData(t, dmSPP, cfg)
 
-	eFirstRouteProfile := SortedRoutesList{&SortedRoutes{
+	eFirstRouteProfile := utils.SortedRoutesList{&utils.SortedRoutes{
 		ProfileID: "RouteProfile2",
 		Sorting:   utils.MetaWeight,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID: "route2",
-				sortingDataDecimal: map[string]*utils.Decimal{
-					utils.Weight: utils.NewDecimalFromFloat64(20.0),
-				},
 				SortingData: map[string]any{
 					utils.Weight: 20.0,
 				},
@@ -496,6 +478,8 @@ func TestRoutesSortedForEventWithLimitAndOffset(t *testing.T) {
 			},
 		},
 	}}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(20.0)})
+
 	args := testRoutesArgs[1].Clone()
 	args.APIOpts[utils.OptsRoutesLimit] = 1
 	args.APIOpts[utils.OptsRoutesOffset] = 1
@@ -699,16 +683,13 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		}
 	}
 
-	eFirstRouteProfile := SortedRoutesList{
+	eFirstRouteProfile := utils.SortedRoutesList{
 		{
 			ProfileID: "RouteProfile1",
 			Sorting:   utils.MetaWeight,
-			Routes: []*SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route2",
-					sortingDataDecimal: map[string]*utils.Decimal{
-						utils.Weight: utils.NewDecimalFromFloat64(10.),
-					},
 					SortingData: map[string]any{
 						utils.Weight: 10.,
 					},
@@ -719,12 +700,9 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 		{
 			ProfileID: "RouteProfile2",
 			Sorting:   utils.MetaWeight,
-			Routes: []*SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route1",
-					sortingDataDecimal: map[string]*utils.Decimal{
-						utils.Weight: utils.NewDecimalFromFloat64(30.),
-					},
 					SortingData: map[string]any{
 						utils.Weight: 30.,
 					},
@@ -733,6 +711,8 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 			},
 		},
 	}
+	eFirstRouteProfile[0].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(10.0)})
+	eFirstRouteProfile[1].Routes[0].SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(30.0)})
 	args.APIOpts[utils.OptsRoutesLimit] = 2
 	args.APIOpts[utils.OptsRoutesOffset] = 1
 	sprf, err := routeService.sortedRoutesForEvent(context.Background(), args.Tenant, args)
@@ -758,7 +738,7 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 	dmSPP.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		Event:  map[string]any{},
@@ -783,7 +763,7 @@ func TestRoutesV1GetRoutesMsnStructFieldEventError(t *testing.T) {
 	dmSPP.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
@@ -808,7 +788,7 @@ func TestRoutesV1GetRoutesNotFoundError(t *testing.T) {
 	dmSPP.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
@@ -834,7 +814,7 @@ func TestRoutesV1GetRoutesNoTenantNotFoundError(t *testing.T) {
 	dmSPP.SetCache(cacheS)
 	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
 	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	args := &utils.CGREvent{
 		ID:    "CGREvent1",
 		Event: map[string]any{},
@@ -862,7 +842,7 @@ func TestRoutesV1GetRoutesAttrConnError(t *testing.T) {
 	dmSPP := engine.NewDataManager(dbCM, cfg, connMng, locker)
 	dmSPP.SetCache(cacheS)
 	routeService := NewRouteService(dmSPP, nil, cfg, connMng)
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "CGREvent1",
@@ -1932,7 +1912,7 @@ func TestRouteSV1GetRoutesGetStringOptsErr(t *testing.T) {
 		APIOpts: map[string]any{},
 	}
 
-	var reply *SortedRoutesList
+	var reply *utils.SortedRoutesList
 	expErr := `inline parse error for string: <*string.invalid:filter>`
 	err := routeService.V1GetRoutes(context.Background(), ev, reply)
 	if err == nil ||
@@ -2027,13 +2007,13 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 
-	exp := SortedRoutesList{
+	exp := utils.SortedRoutesList{
 		{
 			ProfileID: "RouteProfile1",
 			Sorting:   utils.MetaWeight,
-			Routes: []*SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID:         "route1",
 					RouteParameters: "param1",
@@ -2110,7 +2090,7 @@ func TestRoutesV1GetRoutesSortedRoutesForEventErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 
 	expErr := `SERVER_ERROR: unsupported sorting strategy: *weight`
 	err = routeService.V1GetRoutes(context.Background(), args, &reply)
@@ -2367,10 +2347,10 @@ func TestRoutessortedRoutesForProfileLazyPassFalse(t *testing.T) {
 
 	pag := utils.Paginator{}
 	extraOpts := &optsGetRoutes{}
-	exp := SortedRoutes{
+	exp := utils.SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   "*weight",
-		Routes:    []*SortedRoute{},
+		Routes:    []*utils.SortedRoute{},
 	}
 	if rcv, err := routeService.sortedRoutesForProfile(context.Background(), "cgrates.org", rp, args, pag, extraOpts); err != nil {
 		t.Error(err)
@@ -2561,10 +2541,10 @@ func TestRoutessortedRoutesForProfileSortHasBlocker(t *testing.T) {
 
 	pag := utils.Paginator{}
 	extraOpts := &optsGetRoutes{}
-	exp := SortedRoutes{
+	exp := utils.SortedRoutes{
 		ProfileID: "RouteProfile1",
 		Sorting:   "*weight",
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID:         "route1",
 				RouteParameters: "param1",

@@ -18,7 +18,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -266,11 +265,11 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 			utils.Destination:  "+33426654",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_QOS_STATS",
 			Sorting:   "*qos",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route1",
 					SortingData: map[string]any{
@@ -290,7 +289,7 @@ func testV1RtStatsGetRoutesQOSStrategy(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -308,11 +307,11 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 			utils.Destination:  "+2273676400",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_LCR",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route3",
 					SortingData: map[string]any{
@@ -340,7 +339,7 @@ func testV1RtStatsGetRoutesLowestCostStrategy(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := RtStatsSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)

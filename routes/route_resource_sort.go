@@ -15,7 +15,7 @@ import (
 
 func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, routes map[string]*RouteWithWeight,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*utils.SortedRoute, err error) {
 	resSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaResources, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
 	if err != nil {
 		return nil, err
@@ -23,7 +23,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 	if len(resSConns) == 0 {
 		return nil, utils.NewErrMandatoryIeMissing("connIDs")
 	}
-	sortedRoutes = make([]*SortedRoute, 0, len(routes))
+	sortedRoutes = make([]*utils.SortedRoute, 0, len(routes))
 	for _, route := range routes {
 		if len(route.ResourceIDs) == 0 {
 			utils.Logger.Warning(
@@ -31,16 +31,14 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("ResourceIDs")
 		}
-		srtRoute := &SortedRoute{
+		srtRoute := &utils.SortedRoute{
 			RouteID: route.ID,
 			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
-			},
 			RouteParameters: route.RouteParameters,
 		}
+		srtRoute.SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(route.Weight)})
 		if route.blocker {
 			srtRoute.SortingData[utils.Blocker] = true
 		}
@@ -58,7 +56,7 @@ func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
 			tUsage += res.TotalUsage()
 		}
 		srtRoute.SortingData[utils.ResourceUsageStr] = tUsage
-		srtRoute.sortingDataDecimal[utils.ResourceUsageStr] = utils.NewDecimalFromFloat64(tUsage)
+		srtRoute.AddToSortingDataDecimalMap(utils.ResourceUsageStr, utils.NewDecimalFromFloat64(tUsage))
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			cfg, fltrS); err != nil {
@@ -82,12 +80,12 @@ type ResourceAscendentSorter struct {
 }
 
 func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID string,
-	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	var sRoutes []*SortedRoute
+	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
-	sortedRoutes = &SortedRoutes{
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaReas,
 		Routes:    sRoutes,
@@ -108,12 +106,12 @@ type ResourceDescendentSorter struct {
 }
 
 func (ws *ResourceDescendentSorter) SortRoutes(ctx *context.Context, prflID string,
-	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	var sRoutes []*SortedRoute
+	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
-	sortedRoutes = &SortedRoutes{
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaReds,
 		Routes:    sRoutes,

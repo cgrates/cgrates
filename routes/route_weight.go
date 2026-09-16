@@ -21,23 +21,21 @@ type WeightSorter struct {
 }
 
 func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
-	routes map[string]*RouteWithWeight, ev *utils.CGREvent, _ *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	sortedRoutes = &SortedRoutes{
+	routes map[string]*RouteWithWeight, ev *utils.CGREvent, _ *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaWeight,
-		Routes:    make([]*SortedRoute, 0, len(routes)),
+		Routes:    make([]*utils.SortedRoute, 0, len(routes)),
 	}
 	for _, route := range routes {
-		srtRoute := &SortedRoute{
+		srtRoute := &utils.SortedRoute{
 			RouteID: route.ID,
 			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
-			},
 			RouteParameters: route.RouteParameters,
 		}
+		srtRoute.SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(route.Weight)})
 		if route.blocker {
 			srtRoute.SortingData[utils.Blocker] = true
 		}

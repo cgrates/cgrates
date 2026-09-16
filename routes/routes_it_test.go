@@ -986,11 +986,11 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 		},
 		APIOpts: map[string]any{},
 	}
-	expected := SortedRoutesList{
+	expected := utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_BLOCKER_TEST",
 			Sorting:   utils.MetaWeight,
-			Routes: []*SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID:         "route3",
 					RouteParameters: utils.EmptyString,
@@ -1017,7 +1017,7 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 		},
 	}
 
-	var reply SortedRoutesList
+	var reply utils.SortedRoutesList
 	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(reply, expected) {

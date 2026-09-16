@@ -132,10 +132,10 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 
-	exp := &SortedRoutes{
+	exp := &utils.SortedRoutes{
 		ProfileID: "profID1",
 		Sorting:   utils.MetaLC,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID:         "RouteId2",
 				RouteParameters: "RouteParam2",
@@ -248,10 +248,10 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 		},
 	}
 
-	exp := &SortedRoutes{
+	exp := &utils.SortedRoutes{
 		ProfileID: "profID1",
 		Sorting:   utils.MetaHC,
-		Routes: []*SortedRoute{
+		Routes: []*utils.SortedRoute{
 			{
 				RouteID:         "RouteId",
 				RouteParameters: "RouteParam",
@@ -433,7 +433,7 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, []*SortedRoute{}) {
+	} else if !reflect.DeepEqual(rcv, []*utils.SortedRoute{}) {
 		t.Errorf("Received <%+v>", rcv)
 	}
 
@@ -563,8 +563,8 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err != nil {
 		t.Error(err)
-	} else if !reflect.DeepEqual(rcv, []*SortedRoute{}) {
-		t.Errorf("Expected \n<%v>,\n received \n<%v>", []*SortedRoute{}, rcv)
+	} else if !reflect.DeepEqual(rcv, []*utils.SortedRoute{}) {
+		t.Errorf("Expected \n<%v>,\n received \n<%v>", []*utils.SortedRoute{}, rcv)
 	}
 
 }
@@ -648,7 +648,7 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	}
 	extraOpts := &optsGetRoutes{}
 
-	exp := []*SortedRoute{
+	exp := []*utils.SortedRoute{
 		{
 			RouteID:         "local",
 			RouteParameters: "",
@@ -716,7 +716,7 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 		ignoreErrors: true,
 	}
 
-	exp := []*SortedRoute{}
+	exp := []*utils.SortedRoute{}
 
 	rcv, err := populateCostForRoutes(context.Background(), cfg, cM, fltrS, routes, ev, extraOpts)
 	if err != nil {

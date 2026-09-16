@@ -17,7 +17,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/loaders"
-	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -545,11 +544,11 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1001",
 			Sorting:   "*weight",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor4",
 					SortingData: map[string]any{
@@ -565,7 +564,7 @@ func testV1RtsCasesSortingRoutesWeightAccountValue(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -583,11 +582,11 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 			utils.Destination:  "1003",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1001",
 			Sorting:   "*weight",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -615,7 +614,7 @@ func testV1RtsCasesSortingRoutesWeightAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -653,11 +652,11 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 			utils.Destination:  "1003",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1001",
 			Sorting:   "*weight",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -679,7 +678,7 @@ func testV1RtsCasesSortingRoutesWeightNotMatchingValue(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -700,11 +699,11 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 			utils.MetaUsage: "2m30s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1002",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -724,7 +723,7 @@ func testV1RtsCasesSortingRoutesLowestCost(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
@@ -747,11 +746,11 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 			utils.MetaStartTime: "2013-06-01T05:00:00Z",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1002",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -779,7 +778,7 @@ func testV1RtsCasesSortingRoutesLowestCostDefaultUsage(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
@@ -851,11 +850,11 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 			utils.MetaUsage:     "2m30s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1002",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -883,7 +882,7 @@ func testV1RtsCasesSortingRoutesLowestCostStats(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
@@ -926,11 +925,11 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 			utils.MetaUsage:     "2m30s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1002",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -966,7 +965,7 @@ func testV1RtsCasesSortingRoutesLowestCosMatchingAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -989,11 +988,11 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 			utils.MetaUsage:         "2m30s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1002",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -1021,7 +1020,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCost(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1044,7 +1043,7 @@ func testV1RtsCasesSortingRoutesLowestCosMaxCostNotMatch(t *testing.T) {
 			utils.MetaUsage:         "2m30s",
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -1137,11 +1136,11 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 			utils.MetaUsage:     "50s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1003",
 			Sorting:   "*qos",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor2",
 					SortingData: map[string]any{
@@ -1168,7 +1167,7 @@ func testV1RtsCasesSortingRoutesQOS(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1210,11 +1209,11 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 			utils.MetaUsage:     "50s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1003",
 			Sorting:   "*qos",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -1252,7 +1251,7 @@ func testV1RtsCasesSortingRoutesQOSAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1274,7 +1273,7 @@ func testV1RtsCasesSortingRoutesQOSNotFound(t *testing.T) {
 			utils.MetaUsage:     "50s",
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
@@ -1329,11 +1328,11 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 			utils.Destination:  "1007",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1004",
 			Sorting:   "*reas",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor1",
 					SortingData: map[string]any{
@@ -1351,7 +1350,7 @@ func testV1RtsCasesSortingRoutesReasNotAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1388,11 +1387,11 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 			utils.Destination:  "1007",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1004",
 			Sorting:   "*reas",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -1417,7 +1416,7 @@ func testV1RtsCasesSortingRoutesReasAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1512,11 +1511,11 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 			//utils.Destination:  "1007",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_ACNT_1005",
 			Sorting:   "*load",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "vendor3",
 					SortingData: map[string]any{
@@ -1544,7 +1543,7 @@ func testV1RtsCasesRoutesLoadRtsSorting(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1565,11 +1564,11 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 			utils.MetaUsage: "3m25s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_HC1",
 			Sorting:   "*hc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route2",
 					SortingData: map[string]any{
@@ -1589,7 +1588,7 @@ func testV1RtsCasesSortRoutesHigherCostV2V3(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1688,11 +1687,11 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 			utils.MetaUsage: "3m25s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_HC1",
 			Sorting:   "*hc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route3",
 					SortingData: map[string]any{
@@ -1712,7 +1711,7 @@ func testV1RtsCasesSortRoutesHigherCostV1V3(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1752,11 +1751,11 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 			utils.MetaUsage: "3m25s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_HC1",
 			Sorting:   "*hc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route2",
 					SortingData: map[string]any{
@@ -1784,7 +1783,7 @@ func testV1RtsCasesSortRoutesHigherCostAllRoutes(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {
 		t.Error(err)
@@ -1807,11 +1806,11 @@ func testV1RtsCasesSortingRoutesLowestCostAccounts(t *testing.T) {
 			utils.MetaUsage:     "50s",
 		},
 	}
-	expSrtdRoutes := &routes.SortedRoutesList{
+	expSrtdRoutes := &utils.SortedRoutesList{
 		{
 			ProfileID: "ROUTE_LCR_ACCOUNTS",
 			Sorting:   "*lc",
-			Routes: []*routes.SortedRoute{
+			Routes: []*utils.SortedRoute{
 				{
 					RouteID: "route4",
 					SortingData: map[string]any{
@@ -1847,7 +1846,7 @@ func testV1RtsCasesSortingRoutesLowestCostAccounts(t *testing.T) {
 			},
 		},
 	}
-	var reply *routes.SortedRoutesList
+	var reply *utils.SortedRoutesList
 	//gonna match one route because the totalUsage by ne-allocated resources is 0
 	if err := rtsCaseSv1BiRpc.Call(context.Background(), utils.RouteSv1GetRoutes,
 		ev, &reply); err != nil {

@@ -28,11 +28,11 @@ type LoadDistributionSorter struct {
 
 // SortRoutes .
 func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string,
-	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	sortedRoutes = &SortedRoutes{
+	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaLoad,
-		Routes:    make([]*SortedRoute, 0, len(routes)),
+		Routes:    make([]*utils.SortedRoute, 0, len(routes)),
 	}
 	for _, route := range routes {
 		// we should have at least 1 statID defined for counting CDR (a.k.a *sum:1)
@@ -42,16 +42,14 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("StatIDs")
 		}
-		srtRoute := &SortedRoute{
+		srtRoute := &utils.SortedRoute{
 			RouteID: route.ID,
 			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
-			},
 			RouteParameters: route.RouteParameters,
 		}
+		srtRoute.SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(route.Weight)})
 		if route.blocker {
 			srtRoute.SortingData[utils.Blocker] = true
 		}
@@ -67,7 +65,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 			return
 		}
 		srtRoute.SortingData[utils.Load] = metricSum
-		srtRoute.sortingDataDecimal[utils.Load] = metricSum
+		srtRoute.AddToSortingDataDecimalMap(utils.Load, metricSum)
 		var pass bool
 		if pass, err = routeLazyPass(ctx, route.lazyCheckRules, ev, srtRoute.SortingData,
 			ws.cfg, ws.fltrS); err != nil {
@@ -81,7 +79,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 						utils.RouteS, route.Ratio(), route.ID))
 			}
 			srtRoute.SortingData[utils.Ratio] = floatRatio
-			srtRoute.sortingDataDecimal[utils.Ratio] = &utils.Decimal{Big: floatRatio}
+			srtRoute.AddToSortingDataDecimalMap(utils.Ratio, &utils.Decimal{Big: floatRatio})
 			sortedRoutes.Routes = append(sortedRoutes.Routes, srtRoute)
 		}
 	}

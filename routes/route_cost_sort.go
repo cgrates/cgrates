@@ -16,7 +16,7 @@ import (
 
 func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	fltrS *engine.FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
-	extraOpts *optsGetRoutes) (sortedRoutes []*SortedRoute, err error) {
+	extraOpts *optsGetRoutes) (sortedRoutes []*utils.SortedRoute, err error) {
 	rateSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaRates, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 		return
 	}
 	ev.APIOpts[utils.MetaUsage] = usage
-	sortedRoutes = make([]*SortedRoute, 0, len(routes))
+	sortedRoutes = make([]*utils.SortedRoute, 0, len(routes))
 	for _, route := range routes {
 		if len(route.RateProfileIDs) == 0 && len(route.AccountIDs) == 0 {
 			utils.Logger.Warning(
@@ -38,16 +38,14 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 					utils.RouteS, route.ID))
 			return nil, utils.NewErrMandatoryIeMissing("RateProfileIDs or AccountIDs")
 		}
-		srtRoute := &SortedRoute{
+		srtRoute := &utils.SortedRoute{
 			RouteID: route.ID,
 			SortingData: map[string]any{
 				utils.Weight: route.Weight,
 			},
-			sortingDataDecimal: map[string]*utils.Decimal{
-				utils.Weight: utils.NewDecimalFromFloat64(route.Weight),
-			},
 			RouteParameters: route.RouteParameters,
 		}
+		srtRoute.SetSortingDataDecimal(map[string]*utils.Decimal{utils.Weight: utils.NewDecimalFromFloat64(route.Weight)})
 		if route.blocker {
 			srtRoute.SortingData[utils.Blocker] = true
 		}
@@ -106,7 +104,7 @@ func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr 
 			srtRoute.SortingData[utils.RateProfileID] = rpCost.ID
 		}
 		if cost != nil {
-			srtRoute.sortingDataDecimal[utils.Cost] = cost
+			srtRoute.AddToSortingDataDecimalMap(utils.Cost, cost)
 		}
 		srtRoute.SortingData[utils.Cost] = cost
 		var pass bool
@@ -132,13 +130,13 @@ type HightCostSorter struct {
 }
 
 func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	var sRoutes []*SortedRoute
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateCostForRoutes(ctx, hcs.cfg, hcs.connMgr, hcs.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
 
-	sortedRoutes = &SortedRoutes{
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaHC,
 		Routes:    sRoutes,
@@ -159,12 +157,12 @@ type LeastCostSorter struct {
 }
 
 func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
-	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *SortedRoutes, err error) {
-	var sRoutes []*SortedRoute
+	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
+	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateCostForRoutes(ctx, lcs.cfg, lcs.connMgr, lcs.fltrS, routes, ev, extraOpts); err != nil {
 		return
 	}
-	sortedRoutes = &SortedRoutes{
+	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
 		Sorting:   utils.MetaLC,
 		Routes:    sRoutes,
