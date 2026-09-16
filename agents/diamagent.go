@@ -456,6 +456,12 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	}
 	m := diam.NewRequest(dmd.m.Header.CommandCode,
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	// RFC 6733 section 6.1.9: an agent only relays a request that carries the P
+	// bit. ASR is defined "< Diameter Header: 274, REQ, PXY >" (section 8.5.1),
+	// so the bit has to be set here -- diam.NewRequest sets only R. Without it,
+	// any relay or proxy between us and the client answers 3001 and the session
+	// is never disconnected.
+	m.Header.CommandFlags |= diam.ProxiableFlag
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
@@ -503,6 +509,10 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 	}
 	m := diam.NewRequest(diam.ReAuth,
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	// RAR is defined "< Diameter Header: 258, REQ, PXY >" (RFC 6733 section
+	// 8.3.1). See the note on ASR above: the P bit is what makes an agent relay
+	// it instead of rejecting it.
+	m.Header.CommandFlags |= diam.ProxiableFlag
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
@@ -813,6 +823,9 @@ func (da *DiameterAgent) sendSNR(originID string, reply *string) (err error) {
 	}
 	m := diam.NewRequest(SSN, // SSN is Spending Status Notification command code
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	// SNR is defined "< Diameter Header: 8388636, REQ, PXY >" (TS 29.219
+	// section 5.6.3). Same reasoning as ASR and RAR above.
+	m.Header.CommandFlags |= diam.ProxiableFlag
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
