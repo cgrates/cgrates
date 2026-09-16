@@ -3654,183 +3654,288 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 	}
 }
 
-// func TestLibIndex_prepareFilterIndexMap(t *testing.T) {
-// 	cfg := config.NewDefaultCGRConfig()
-// 	dataDB := NewInternalDB(true, true, cfg.DataDbCfg().Items)
-// 	dm := NewDataManager(dataDB, cfg.CacheCfg(), nil)
-//
-// 	var flt *Filter // to be used as newFlt
-// 	for i := range 2 {
-// 		idx := strconv.Itoa(i + 1)
-// 		flt = &Filter{
-// 			Tenant: "cgrates.org",
-// 			ID:     "FLTR_" + idx,
-// 			Rules: []*FilterRule{
-// 				{
-// 					Type:    utils.MetaString,
-// 					Element: "~*req.Field" + idx,
-// 					Values:  []string{"val" + idx},
-// 				},
-// 				{
-// 					Type:    utils.MetaPrefix,
-// 					Element: "~*req.Field" + idx,
-// 					Values:  []string{"val"},
-// 				},
-// 				{
-// 					Type:    utils.MetaSuffix,
-// 					Element: "~*req.Field" + idx,
-// 					Values:  []string{idx},
-// 				},
-// 				{
-// 					Type:    utils.MetaExists,
-// 					Element: "~*req.Field" + idx,
-// 				},
-// 			},
-// 		}
-// 		if err := dm.SetFilter(flt, true); err != nil {
-// 			t.Fatal(err)
-// 		}
-// 	}
-//
-// 	filterIDsList := [][]string{
-// 		{"*prefix:~*req.Field2:val", "FLTR_1"},
-// 		{"*suffix:~*req.Field1:1", "FLTR_2"},
-// 		{"*exists:~*req.Field2:", "*suffix:~*req.Field1:1", "FLTR_1"},
-// 	}
-//
-// 	for i, filterIDs := range filterIDsList {
-// 		idx := strconv.Itoa(i + 1)
-// 		if err := dm.SetChargerProfile(&ChargerProfile{
-// 			Tenant:       "cgrates.org",
-// 			ID:           "CP_" + idx,
-// 			FilterIDs:    filterIDs,
-// 			RunID:        "DEFAULT" + idx,
-// 			AttributeIDs: []string{"*none"},
-// 		}, true); err != nil {
-// 			t.Fatal(err)
-// 		}
-// 		if err := dm.SetAttributeProfile(&AttributeProfile{
-// 			Tenant:    "cgrates.org",
-// 			ID:        "ATTR_CDRS_" + idx,
-// 			FilterIDs: filterIDs,
-// 			Contexts:  []string{utils.MetaCDRs},
-// 		}, true); err != nil {
-// 			t.Fatal(err)
-// 		}
-// 		if err := dm.SetAttributeProfile(&AttributeProfile{
-// 			Tenant:    "cgrates.org",
-// 			ID:        "ATTR_SESSIONS_" + idx,
-// 			FilterIDs: filterIDs,
-// 			Contexts:  []string{utils.MetaSessionS},
-// 		}, true); err != nil {
-// 			t.Fatal(err)
-// 		}
-// 	}
-//
-// 	wantTemplate := func(prefix string) map[string]utils.StringSet {
-// 		return map[string]utils.StringSet{
-// 			"*prefix:*req.Field1:val": {
-// 				prefix + "_1": {},
-// 				prefix + "_3": {},
-// 			},
-// 			"*prefix:*req.Field2:val": {
-// 				prefix + "_1": {},
-// 				prefix + "_2": {},
-// 			},
-// 			"*string:*req.Field1:val1": {
-// 				prefix + "_1": {},
-// 				prefix + "_3": {},
-// 			},
-// 			"*string:*req.Field2:val2": {
-// 				prefix + "_2": {},
-// 			},
-// 			"*suffix:*req.Field1:1": {
-// 				prefix + "_1": {},
-// 				prefix + "_2": {},
-// 				prefix + "_3": {},
-// 			},
-// 			"*suffix:*req.Field2:2": {
-// 				prefix + "_2": {},
-// 			},
-// 		}
-// 	}
-//
-// 	argsList := []struct {
-// 		itemType string
-// 		ctx      string
-// 		prefix   string // of the profile (CP, ATTR_CDRS, ATTR_SESSIONS)
-// 	}{
-// 		{
-// 			itemType: utils.CacheChargerFilterIndexes,
-// 			ctx:      "",
-// 			prefix:   "CP",
-// 		},
-// 		{
-// 			itemType: utils.CacheAttributeFilterIndexes,
-// 			ctx:      utils.MetaCDRs,
-// 			prefix:   "ATTR_CDRS",
-// 		},
-// 		{
-// 			itemType: utils.CacheAttributeFilterIndexes,
-// 			ctx:      utils.MetaSessionS,
-// 			prefix:   "ATTR_SESSIONS",
-// 		},
-// 	}
-//
-// 	for _, args := range argsList {
-// 		wantIndexes := wantTemplate(args.prefix)
-// 		tntCtx := "cgrates.org"
-// 		if args.ctx != "" {
-// 			tntCtx = utils.ConcatenatedKey(tntCtx, args.ctx)
-// 		}
-// 		gotIndexes, err := dm.GetIndexes(args.itemType, tntCtx, "", false, false)
-// 		if err != nil {
-// 			t.Fatal(err)
-// 		}
-// 		if !reflect.DeepEqual(gotIndexes, wantIndexes) {
-// 			t.Errorf("dm.GetIndexes() = %s, want %s", utils.ToJSON(gotIndexes), utils.ToJSON(wantIndexes))
-// 		}
-//
-// 	}
-//
-// 	tests := []struct {
-// 		name       string
-// 		idxItmType string
-// 		tnt        string
-// 		ctx        string
-// 		itemID     string
-// 		filterIDs  []string
-// 		newFlt     *Filter
-// 		want       map[string]utils.StringSet
-// 		wantErr    bool
-// 	}{
-// 		{
-// 			name:       "test1",
-// 			idxItmType: utils.CacheAttributeFilterIndexes,
-// 			tnt:        "cgrates.org",
-// 			ctx:        "*cdrs",
-// 			itemID:     "ATTR_CDRS",
-// 			filterIDs:  []string{"FLTR_1"},
-// 			newFlt:     flt,
-// 			want:       map[string]utils.StringSet{},
-// 		},
-// 	}
-//
-// 	for _, tt := range tests {
-// 		t.Run(tt.name, func(t *testing.T) {
-// 			got, gotErr := prepareFilterIndexMap(dm, tt.idxItmType, tt.tnt, tt.ctx, tt.itemID, tt.filterIDs, tt.newFlt)
-// 			if gotErr != nil {
-// 				if !tt.wantErr {
-// 					t.Errorf("prepareFilterIndexMap() failed: %v", gotErr)
-// 				}
-// 				return
-// 			}
-// 			if tt.wantErr {
-// 				t.Fatal("prepareFilterIndexMap() succeeded unexpectedly")
-// 			}
-// 			if !reflect.DeepEqual(got, tt.want) {
-// 				t.Errorf("prepareFilterIndexMap() = %s, want %s", utils.ToJSON(got), utils.ToJSON(tt.want))
-// 			}
-// 		})
-// 	}
-// }
+func TestFilterIndexes(t *testing.T) {
+	t.SkipNow()
+	const (
+		str1 = "*string:~*req.Account:1001"
+		pfx1 = "*prefix:~*req.Destination:+341"
+		str2 = "*string:~*req.Account:1002"
+		rgx2 = "*regex:~*req.Subject:^10"
+		pfx2 = "*prefix:~*req.Destination:+442"
+		rgx3 = "*regex:~*req.Subject:^20"
+		str3 = "*string:~*req.Account:1003"
+		pfx3 = "*prefix:~*req.Destination:+40"
+	)
+	cfg := config.NewDefaultCGRConfig()
+	locker := NewLocker(cfg)
+	dataDB, err := NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, nil, locker)
+	setTestCache(dm, cfg, locker)
+	ctx := context.Background()
+
+	rates := make(map[string][]string)
+	storeRates := func() error {
+		rp := &utils.RateProfile{
+			Tenant: "rates.org",
+			ID:     "RP1",
+			Rates:  make(map[string]*utils.Rate, len(rates)),
+		}
+		for id, fltrIDs := range rates {
+			rp.Rates[id] = &utils.Rate{ID: id, FilterIDs: fltrIDs}
+		}
+		return dm.SetRateProfile(ctx, rp, true, true)
+	}
+
+	testCases := []struct {
+		name          string
+		indxType      string
+		tntCtx        string
+		id, id2, id3  string
+		setProfile    func(id string, filters ...string) error
+		removeProfile func(id string) error
+	}{
+		{
+			name:     "Rates",
+			indxType: utils.CacheRateFilterIndexes,
+			tntCtx:   "rates.org:RP1",
+			id:       "Rate1", id2: "Rate2", id3: "Rate3",
+			setProfile: func(id string, filters ...string) error {
+				rates[id] = filters
+				return storeRates()
+			},
+			removeProfile: func(id string) error {
+				delete(rates, id)
+				return storeRates()
+			},
+		},
+		{
+			name:     "RateProfiles",
+			indxType: utils.CacheRateProfilesFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "RP_1", id2: "RP_2", id3: "RP_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetRateProfile(ctx, &utils.RateProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters,
+					Rates: map[string]*utils.Rate{}}, true, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveRateProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Accounts",
+			indxType: utils.CacheAccountsFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "ACC_1", id2: "ACC_2", id3: "ACC_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetAccount(ctx, &utils.Account{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveAccount(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "ActionProfiles",
+			indxType: utils.CacheActionProfilesFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "ACT_1", id2: "ACT_2", id3: "ACT_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetActionProfile(ctx, &utils.ActionProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveActionProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Attributes",
+			indxType: utils.CacheAttributeFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "ATTR_1", id2: "ATTR_2", id3: "ATTR_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetAttributeProfile(ctx, &utils.AttributeProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveAttributeProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Resources",
+			indxType: utils.CacheResourceFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "RES_1", id2: "RES_2", id3: "RES_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetResourceProfile(ctx, &utils.ResourceProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveResourceProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "IPs",
+			indxType: utils.CacheIPFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "IP_1", id2: "IP_2", id3: "IP_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetIPProfile(ctx, &utils.IPProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveIPProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Stats",
+			indxType: utils.CacheStatFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "STAT_1", id2: "STAT_2", id3: "STAT_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetStatQueueProfile(ctx, &utils.StatQueueProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveStatQueueProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Thresholds",
+			indxType: utils.CacheThresholdFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "THD_1", id2: "THD_2", id3: "THD_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetThresholdProfile(ctx, &utils.ThresholdProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveThresholdProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Routes",
+			indxType: utils.CacheRouteFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "ROUTE_1", id2: "ROUTE_2", id3: "ROUTE_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetRouteProfile(ctx, &utils.RouteProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveRouteProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+		{
+			name:     "Chargers",
+			indxType: utils.CacheChargerFilterIndexes,
+			tntCtx:   "cgrates.org",
+			id:       "CHRG_1", id2: "CHRG_2", id3: "CHRG_3",
+			setProfile: func(id string, filters ...string) error {
+				return dm.SetChargerProfile(ctx, &utils.ChargerProfile{Tenant: "cgrates.org", ID: id, FilterIDs: filters}, true)
+			},
+			removeProfile: func(id string) error {
+				return dm.RemoveChargerProfile(ctx, "cgrates.org", id, true)
+			},
+		},
+	}
+	checkIndexes := func(t *testing.T, step, indxtype, tntCtx string, expIdx map[string]utils.StringSet) {
+		t.Helper()
+		rcvIdx, err := dm.GetIndexes(ctx, indxtype, tntCtx,
+			utils.NonTransactional, false, false)
+		if err != nil && !errors.Is(err, utils.ErrNotFound) {
+			t.Fatalf("%s: %v", step, err)
+		}
+		if len(rcvIdx) != len(expIdx) {
+			t.Errorf("%s: expected %d indexes, received %d", step, len(expIdx), len(rcvIdx))
+		}
+		if len(expIdx) == 0 {
+			return
+		}
+		if diff := cmp.Diff(expIdx, rcvIdx); diff != "" {
+			t.Errorf("%s: indexes mismatch (-want +got):\n%s", step, diff)
+		}
+	}
+	for _, tt := range testCases {
+		t.Run(tt.name, func(t *testing.T) {
+
+			// 1. start with empty
+			checkIndexes(t, "1. empty", tt.indxType, tt.tntCtx, nil)
+
+			// 2. add element 1 with string and prefix
+			if err := tt.setProfile(tt.id, str1, pfx1); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "2. add element 1 with string and prefix", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*string:*req.Account:1001":     {tt.id: {}},
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+			})
+
+			// 3. add element 2 with string and regex
+			if err := tt.setProfile(tt.id2, str2, rgx2); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "3. add element 2 with string and regex", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*string:*req.Account:1001":     {tt.id: {}},
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*string:*req.Account:1002":     {tt.id2: {}},
+			})
+
+			// 4. modify element 1 by removing the string
+			if err := tt.setProfile(tt.id, pfx1); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "4. remove string from element 1", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*string:*req.Account:1002":     {tt.id2: {}},
+			})
+
+			// 5. add one prefix and remove string for element 2
+			if err := tt.setProfile(tt.id2, rgx2, pfx2); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "5. add prefix and remove string from element 2", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*prefix:*req.Destination:+442": {tt.id2: {}},
+			})
+
+			// 6. add element 3 with no indexed filters (regex)
+			if err := tt.setProfile(tt.id3, rgx3); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "6. add element 3 with regex", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*prefix:*req.Destination:+442": {tt.id2: {}},
+			})
+
+			// 7. add string and prefix to element 3
+			if err := tt.setProfile(tt.id3, rgx3, str3, pfx3); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "7. add string and prefix to element 3", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*prefix:*req.Destination:+442": {tt.id2: {}},
+				"*string:*req.Account:1003":     {tt.id3: {}},
+				"*prefix:*req.Destination:+40":  {tt.id3: {}},
+			})
+
+			// 8. remove element 3
+			if err := tt.removeProfile(tt.id3); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "8. remove element 3", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+				"*prefix:*req.Destination:+442": {tt.id2: {}},
+			})
+
+			// 9. remove element 2
+			if err := tt.removeProfile(tt.id2); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "9. remove element 2", tt.indxType, tt.tntCtx, map[string]utils.StringSet{
+				"*prefix:*req.Destination:+341": {tt.id: {}},
+			})
+
+			// 10. remove element 1, no indexes left
+			if err := tt.removeProfile(tt.id); err != nil {
+				t.Fatal(err)
+			}
+			checkIndexes(t, "10. remove element 1", tt.indxType, tt.tntCtx, nil)
+		})
+	}
+}
