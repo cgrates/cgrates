@@ -3655,7 +3655,7 @@ func TestLibIndex_newFilterIndex(t *testing.T) {
 }
 
 func TestFilterIndexes(t *testing.T) {
-	t.SkipNow()
+
 	const (
 		str1 = "*string:~*req.Account:1001"
 		pfx1 = "*prefix:~*req.Destination:+341"
