@@ -2899,6 +2899,22 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 			utils.EmptyString, rpp.ID, oldRpFltrs, rpp.FilterIDs, false); err != nil {
 			return err
 		}
+		// remove indexes for old rates that are removed by the overwrite
+		if optOverwrite && oldRpp != nil {
+			for key, oldRate := range oldRpp.Rates {
+				if _, has := rpp.Rates[key]; has {
+					continue
+				}
+				if err := removeIndexFiltersItem(ctx, dm, utils.CacheRateFilterIndexes, rpp.Tenant,
+					utils.ConcatenatedKey(key, rpp.ID), oldRate.FilterIDs); err != nil {
+					return err
+				}
+				if err := removeItemFromFilterIndex(ctx, dm, utils.CacheRateFilterIndexes,
+					rpp.Tenant, rpp.ID, key, oldRate.FilterIDs); err != nil {
+					return err
+				}
+			}
+		}
 		// create index for each rate
 		for key, rate := range rpp.Rates {
 			var oldRateFiltersIDs *[]string
