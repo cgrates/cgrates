@@ -1804,3 +1804,125 @@ func TestSessionSv1ProcessEventVoiceSMSData(t *testing.T) {
 		t.Errorf("DataBal = %+v, want 499", acnt.Balances["DataBal"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventAccountsForceUsage(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrVoiceToR",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.ToR",
+						Values:  []string{utils.MetaVoice},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(voice): %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"VoiceBal": {
+						ID:        "VoiceBal",
+						FilterIDs: []string{"FltrVoiceToR"},
+						Type:      utils.MetaAbstract,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(2 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	var rply V1ProcessEventReply
+	err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ForceUsageFlag",
+			APIOpts: map[string]any{
+				utils.MetaChargers:           true,
+				utils.MetaAccounts:           true,
+				utils.MetaDebit:              true,
+				utils.MetaUsage:              5 * time.Minute,
+				utils.OptsAccountsForceUsage: true,
+				utils.MetaOriginID:           "OriginIDForceUsage",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.ToR:          utils.MetaVoice,
+				utils.Destination:  "1002",
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply)
+
+	if err == nil {
+		t.Fatal("expected an err got nil")
+	}
+	if err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("ProcessEvent error = %q, want %q", err.Error(), utils.ErrPartiallyExecuted.Error())
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	wantVoiceBal := utils.NewDecimalFromFloat64(float64(2 * time.Second))
+	if acnt.Balances["VoiceBal"].Units.Compare(wantVoiceBal) != 0 {
+		t.Errorf("VoiceBal = %+v, want 2s", acnt.Balances["VoiceBal"].Units)
+	}
+}
