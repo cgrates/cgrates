@@ -670,6 +670,7 @@ const (
 	MetaGigawords       = "*gigawords"
 	Meta3GPPULI         = "*3gppULI"
 	MetaUnits           = "*units"
+	MetaRoutesDigest    = "*routesDigest"
 	LoadIDs             = "loadIDs"
 	DNSAgent            = "DNSAgent"
 	TLSNoCaps           = "tls"
