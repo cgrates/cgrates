@@ -16,6 +16,8 @@ import (
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/go-diameter/diam"
+	"github.com/cgrates/go-diameter/diam/avp"
+	"github.com/cgrates/go-diameter/diam/datatype"
 	"github.com/cgrates/rpcclient"
 )
 
@@ -595,5 +597,62 @@ func TestV1DisconnectPeer(t *testing.T) {
 	err = agent.V1DisconnectPeer(nil, args, nil)
 	if err != utils.ErrNotFound {
 		t.Errorf("Expected ErrNotFound, got: %v", err)
+	}
+}
+
+type capturingConn struct {
+	diam.Conn
+	written [][]byte
+}
+
+func (c *capturingConn) Write(b []byte) (int, error) {
+	c.written = append(c.written, append([]byte(nil), b...))
+	return len(b), nil
+}
+
+func (c *capturingConn) WriteStream(b []byte, _ uint) (int, error) { return c.Write(b) }
+
+// Test to check the flags of RAR where REQ and PXY flags are present
+func TestServerInitiatedRequestsAreProxiable(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	conn := &capturingConn{}
+
+	// The cached CCR the agent builds the RAR from.
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("sess1"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("pgw.example.org"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("example.org"))
+
+	engine.Cache.Set(utils.CacheDiameterMessages, utils.MetaRAR+"sess1",
+		&diamMsgData{c: conn, m: ccr, vars: &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}}, nil, true, utils.NonTransactional)
+	defer engine.Cache.Remove(utils.CacheDiameterMessages, utils.MetaRAR+"sess1",
+		true, utils.NonTransactional)
+
+	da := &DiameterAgent{
+		cgrCfg: cfg,
+		raa:    make(map[string]chan *diam.Message),
+	}
+	cgrEv := utils.CGREvent{Event: map[string]any{utils.OriginID: "sess1"}}
+	var reply string
+	if err := da.V1AlterSession(nil, cgrEv, &reply); err != utils.ErrTimedOut {
+		t.Fatalf("expected ErrTimedOut waiting for the RAA, got: %v", err)
+	}
+
+	if len(conn.written) != 1 {
+		t.Fatalf("expected exactly one request on the wire, got %d", len(conn.written))
+	}
+
+	var hdr diam.Header
+	if err := hdr.DecodeFromBytes(conn.written[0]); err != nil {
+		t.Fatalf("could not decode the request we wrote: %v", err)
+	}
+	if hdr.CommandCode != diam.ReAuth {
+		t.Errorf("expected a RAR (258), got command code %d", hdr.CommandCode)
+	}
+	if hdr.CommandFlags&diam.RequestFlag == 0 {
+		t.Error("the R bit is not set; this is not a request")
+	}
+	if hdr.CommandFlags&diam.ProxiableFlag == 0 {
+		t.Error("the P bit is not set: a relay agent answers 3001 and the RAR never reaches the gateway")
 	}
 }
