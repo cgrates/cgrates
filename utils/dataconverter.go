@@ -137,6 +137,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return NewULIConverter(params)
 	case params == MetaUnits:
 		return new(UnitsConverter), nil
+	case params == MetaRoutesDigest:
+		return new(RoutesDigestConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -913,4 +915,15 @@ func (c *UnitsConverter) Convert(in any) (out any, err error) {
 	}
 	out = int64(inDur)
 	return
+}
+
+type RoutesDigestConverter struct{}
+
+func (*RoutesDigestConverter) Convert(in any) (any, error) {
+	switch s := in.(type) {
+	case SortedRoutesList:
+		return s.Digest(), nil
+	default:
+		return nil, fmt.Errorf("*routesDigest converter: failed to convert %T to string", in)
+	}
 }

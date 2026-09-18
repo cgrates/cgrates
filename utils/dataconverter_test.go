@@ -157,6 +157,15 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
 
+	rcv, err := NewDataConverter(MetaRoutesDigest)
+	if err != nil {
+		t.Error(err)
+	}
+	expRes := new(RoutesDigestConverter)
+	if !reflect.DeepEqual(rcv, expRes) {
+		t.Errorf("Expected %+v received: %+v", expRes, rcv)
+	}
+
 	uc, err := NewDataConverter(MetaUnits)
 	if err != nil {
 		t.Error(err)
@@ -2020,6 +2029,158 @@ func TestUnitsConverter(t *testing.T) {
 
 			if !reflect.DeepEqual(tt.expOut, rcv) {
 				t.Errorf("Expected %+v received: %+v", tt.expOut, rcv)
+			}
+		})
+	}
+}
+
+func TestRoutesDigestConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		exp    any
+		expErr string
+	}{
+		{
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1001",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route1",
+							RouteParameters: "param1",
+						},
+						{
+							RouteID:         "route2",
+							RouteParameters: "param2",
+						},
+					},
+				},
+			},
+			exp: "route1:param1,route2:param2",
+		},
+		{
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1002",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route1",
+							RouteParameters: "params1",
+						},
+						{
+							RouteID:         "route2",
+							RouteParameters: "params2",
+						},
+					},
+				},
+				{
+					ProfileID: "ROUTE_ACNT_1003",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route3",
+							RouteParameters: "params3",
+						},
+						{
+							RouteID:         "route4",
+							RouteParameters: "params4",
+						},
+					},
+				},
+			},
+			exp: "route1:params1,route2:params2,route3:params3,route4:params4",
+		},
+		{
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1004",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteID: "route1",
+						},
+						{
+							RouteID: "route2",
+						},
+						{
+							RouteID: "route5",
+						},
+						{
+							RouteID: "route2",
+						},
+						{
+							RouteID: "route3",
+						},
+						{
+							RouteID: "route0",
+						},
+						{
+							RouteID: "route1",
+						},
+					},
+				},
+			},
+			exp: "route1,route2,route5,route3,route0",
+		},
+		{
+			name: "only RouteID",
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1005",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteID: "route3",
+						},
+					},
+				},
+			},
+			exp: "route3",
+		},
+		{
+			name: "only RouteParameters",
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1006",
+					Sorting:   MetaWeight,
+					Routes: []*SortedRoute{
+						{
+							RouteParameters: "params1",
+						},
+					},
+				},
+			},
+			exp: ":params1",
+		},
+		{
+			name: "Empty Routes",
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_ACNT_1007",
+					Sorting:   MetaWeight,
+					Routes:    []*SortedRoute{},
+				},
+			},
+			exp: "",
+		},
+		{
+			name:   "Error case",
+			in:     []any{},
+			expErr: "*routesDigest converter: failed to convert []interface {} to string",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rdc := new(RoutesDigestConverter)
+			rcv, err := rdc.Convert(tt.in)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
+			}
+			if rcv != tt.exp {
+				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
 			}
 		})
 	}
