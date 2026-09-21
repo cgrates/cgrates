@@ -166,6 +166,15 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expRes, rcv)
 	}
 
+	adconv, err := NewDataConverter(MetaAttributesDigest)
+	if err != nil {
+		t.Error(err)
+	}
+	expResult := new(AttributesDigestConverter)
+	if !reflect.DeepEqual(adconv, expResult) {
+		t.Errorf("Expected %+v received: %+v", expResult, adconv)
+	}
+
 	uc, err := NewDataConverter(MetaUnits)
 	if err != nil {
 		t.Error(err)
@@ -2181,6 +2190,144 @@ func TestRoutesDigestConverter(t *testing.T) {
 			}
 			if rcv != tt.exp {
 				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestAttributesDigestConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		want   any
+		expErr string
+	}{
+		{
+			name: "Empty AttributesProcessEventReply",
+			in:   &AttributesProcessEventReply{},
+			want: "",
+		},
+		{
+			name: "Fields: AccountField, Subject",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{"*req.Account", "*req.Subject"},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						AccountField: "1001",
+						Subject:      "1002",
+					},
+				},
+			},
+			want: "Account:1001,Subject:1002",
+		},
+		{
+			name: "Fields: AccountField",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{"*req.Account"},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						AccountField: "1001",
+						Subject:      "1002",
+					},
+				},
+			},
+			want: "Account:1001",
+		},
+		{
+			name: "Fields: Subject",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{"*req.Subject"},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						AccountField: "1001",
+						Subject:      "1002",
+					},
+				},
+			},
+			want: "Subject:1002",
+		},
+		{
+			name: "Empty Fields",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						AccountField: "1001",
+						Subject:      "1002",
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			name: "Nil Subject",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{"*req.Subject"},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						AccountField: "1001",
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			name: "Nil AccountField",
+			in: &AttributesProcessEventReply{
+				AlteredFields: []*FieldsAltered{{
+					MatchedProfileID: "cgrates.org:ATTR_1",
+					Fields:           []string{"*req.Account"},
+				}},
+				CGREvent: &CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "evID",
+					Event: map[string]any{
+						Subject: "1002",
+					},
+				},
+			},
+			want: "",
+		},
+		{
+			name:   "Error case",
+			in:     []any{},
+			expErr: "*attributesDigest converter: failed to convert []interface {} to string",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			adc := new(AttributesDigestConverter)
+			rcv, err := adc.Convert(tt.in)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
+			}
+			if rcv != tt.want {
+				t.Errorf("Expected %v, \nreceived %v", tt.want, rcv)
 			}
 		})
 	}

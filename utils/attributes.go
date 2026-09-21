@@ -463,3 +463,35 @@ func InterfaceToAttributes(v any) []*Attribute {
 	}
 	return attributes
 }
+
+// ProcessEventReply is the reply to processEvent.
+type AttributesProcessEventReply struct {
+	AlteredFields []*FieldsAltered
+	CGREvent      *CGREvent
+	Blocker       bool `json:"-"` // internally used to stop further processRuns
+}
+
+// FieldsAltered holds the fields altered by a matched profile.
+type FieldsAltered struct {
+	MatchedProfileID string
+	Fields           []string
+}
+
+// Digest returns the altered fields serialized as
+// fldName1:fldVal1,fldName2:fldVal2.
+func (r *AttributesProcessEventReply) Digest() (rplyDigest string) {
+	for _, altered := range r.AlteredFields {
+		for _, fldName := range altered.Fields {
+			fldName = strings.TrimPrefix(fldName, MetaReq+NestingSep)
+			if _, has := r.CGREvent.Event[fldName]; !has {
+				continue //maybe removed
+			}
+			if rplyDigest != "" {
+				rplyDigest += FieldsSep
+			}
+			fldStrVal, _ := r.CGREvent.FieldAsString(fldName)
+			rplyDigest += fldName + InInFieldSep + fldStrVal
+		}
+	}
+	return
+}

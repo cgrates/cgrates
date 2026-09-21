@@ -10,7 +10,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -517,8 +516,8 @@ func TestSessionSBiRPCv1ProcessEventAttributes(t *testing.T) {
 	clnt1 := &testMockClients{
 		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
-				rply := attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{{
+				rply := utils.AttributesProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{{
 						MatchedProfileID: "attr1",
 					}},
 					CGREvent: &utils.CGREvent{
@@ -529,7 +528,7 @@ func TestSessionSBiRPCv1ProcessEventAttributes(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*attributes.ProcessEventReply) = rply
+				*reply.(*utils.AttributesProcessEventReply) = rply
 				return nil
 			},
 		},
@@ -556,7 +555,7 @@ func TestSessionSBiRPCv1ProcessEventAttributes(t *testing.T) {
 		if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {
 			t.Error(err)
 		}
-		expected := []*attributes.FieldsAltered{{MatchedProfileID: "attr1"}}
+		expected := []*utils.FieldsAltered{{MatchedProfileID: "attr1"}}
 		rcv := reply.Attributes[utils.MetaPrimary].AlteredFields
 		if !reflect.DeepEqual(rcv, expected) {
 			t.Errorf("Expected %v, recieved %v", expected, rcv)
@@ -607,8 +606,8 @@ func TestSessionSBiRPCv1ProcessEventCache(t *testing.T) {
 		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
 				call++
-				*reply.(*attributes.ProcessEventReply) = attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{
+				*reply.(*utils.AttributesProcessEventReply) = utils.AttributesProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{
 						{MatchedProfileID: "attr1"},
 					},
 					CGREvent: args.(*utils.CGREvent),

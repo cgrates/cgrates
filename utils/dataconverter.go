@@ -139,6 +139,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(UnitsConverter), nil
 	case params == MetaRoutesDigest:
 		return new(RoutesDigestConverter), nil
+	case params == MetaAttributesDigest:
+		return new(AttributesDigestConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -925,5 +927,16 @@ func (*RoutesDigestConverter) Convert(in any) (any, error) {
 		return s.Digest(), nil
 	default:
 		return nil, fmt.Errorf("*routesDigest converter: failed to convert %T to string", in)
+	}
+}
+
+type AttributesDigestConverter struct{}
+
+func (AttributesDigestConverter) Convert(in any) (any, error) {
+	switch val := in.(type) {
+	case *AttributesProcessEventReply:
+		return val.Digest(), nil
+	default:
+		return nil, fmt.Errorf("*attributesDigest converter: failed to convert %T to string", in)
 	}
 }
