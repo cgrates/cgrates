@@ -918,6 +918,7 @@ type ApierJsonCfg struct {
 	Scheduler_conns  *[]string
 	Attributes_conns *[]string
 	Ees_conns        *[]string
+	Sessions_conns   *[]string
 }
 
 type STIRJsonCfg struct {
