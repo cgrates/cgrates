@@ -2409,7 +2409,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 				return nil
 			},
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				attrs := attributes.ProcessEventReply{
+				attrs := utils.AttributesProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "TEST_ID",
@@ -2419,7 +2419,7 @@ func TestBiRPCv1ProcessEvent(t *testing.T) {
 					},
 				}
 				if args.(*engine.AttrArgsProcessEvent).ID == "CHANGED_ID" {
-					*reply.(*attributes.ProcessEventReply) = attrs
+					*reply.(*utils.AttributesProcessEventReply) = attrs
 					return nil
 				}
 				return utils.ErrNotImplemented
@@ -3110,7 +3110,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 	clnt := &testMockClients{
 		calls: map[string]func(args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(args any, reply any) error {
-				attr := &attributes.ProcessEventReply{
+				attr := &utils.AttributesProcessEventReply{
 					CGREvent: &utils.CGREvent{
 						Tenant: "cgrates.org",
 						ID:     "ATTRIBUTES",
@@ -3119,7 +3119,7 @@ func TestBiRPCv1GetCost(t *testing.T) {
 						},
 					},
 				}
-				*reply.(*attributes.ProcessEventReply) = *attr
+				*reply.(*utils.AttributesProcessEventReply) = *attr
 				return nil
 			},
 			utils.ResponderGetCost: func(args any, reply any) error {
@@ -3197,7 +3197,7 @@ dm.SetCache(engine.Cache)
 	// RALsConns removed - no longer part of SessionSCfg
 
 	expectedVal := V1GetCostReply{
-		Attributes: &attributes.ProcessEventReply{
+		Attributes: &utils.AttributesProcessEventReply{
 			CGREvent: &utils.CGREvent{
 				Tenant: "cgrates.org",
 				ID:     "ATTRIBUTES",

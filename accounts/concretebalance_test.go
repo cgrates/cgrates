@@ -786,12 +786,12 @@ dm.SetCache(engine.Cache)
 	sTestMock := &testMockCall{
 		calls: map[string]func(_ *context.Context, _, _ any) error{
 			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
-				rplCast, canCast := reply.(*attributes.ProcessEventReply)
+				rplCast, canCast := reply.(*utils.AttributesProcessEventReply)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
 					return nil
 				}
-				customEv := &attributes.ProcessEventReply{
+				customEv := &utils.AttributesProcessEventReply{
 					MatchedProfiles: nil,
 					AlteredFields:   []string{"CustomField2"},
 					CGREvent: &utils.CGREvent{

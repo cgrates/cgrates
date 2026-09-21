@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -265,17 +264,17 @@ func getDerivedEvents(events map[string]*utils.CGREvent, derivedReply bool) map[
 
 // V1ProcessEventReply is the reply for the ProcessEvent API
 type V1ProcessEventReply struct {
-	AccountsUsage      map[string]time.Duration                 `json:",omitempty"`
-	RatesCost          map[string]float64                       `json:",omitempty"`
-	ResourceAllocation map[string]string                        `json:",omitempty"`
-	IPsAllocation      map[string]*utils.AllocatedIP            `json:",omitempty"`
-	Attributes         map[string]*attributes.ProcessEventReply `json:",omitempty"`
-	RouteProfiles      map[string]utils.SortedRoutesList        `json:",omitempty"`
-	ThresholdIDs       map[string][]string                      `json:",omitempty"`
-	StatQueueIDs       map[string][]string                      `json:",omitempty"`
-	STIRIdentity       map[string]string                        `json:",omitempty"`
-	EventExporters     map[string][]string                      `json:",omitempty"`
-	UsageRecords       map[string]*utils.CGREvent               `json:",omitempty"`
+	AccountsUsage      map[string]time.Duration                      `json:",omitempty"`
+	RatesCost          map[string]float64                            `json:",omitempty"`
+	ResourceAllocation map[string]string                             `json:",omitempty"`
+	IPsAllocation      map[string]*utils.AllocatedIP                 `json:",omitempty"`
+	Attributes         map[string]*utils.AttributesProcessEventReply `json:",omitempty"`
+	RouteProfiles      map[string]utils.SortedRoutesList             `json:",omitempty"`
+	ThresholdIDs       map[string][]string                           `json:",omitempty"`
+	StatQueueIDs       map[string][]string                           `json:",omitempty"`
+	STIRIdentity       map[string]string                             `json:",omitempty"`
+	EventExporters     map[string][]string                           `json:",omitempty"`
+	UsageRecords       map[string]*utils.CGREvent                    `json:",omitempty"`
 }
 
 // AsNavigableMap is part of engine.NavigableMapper interface
@@ -386,12 +385,12 @@ func (v1Rply *V1ProcessEventReply) AsNavigableMap() map[string]*utils.DataNode {
 
 // V1ProcessMessageReply is the reply for the ProcessMessage API
 type V1ProcessMessageReply struct {
-	MaxUsage           *time.Duration                `json:",omitempty"`
-	ResourceAllocation *string                       `json:",omitempty"`
-	Attributes         *attributes.ProcessEventReply `json:",omitempty"`
-	RouteProfiles      utils.SortedRoutesList        `json:",omitempty"`
-	ThresholdIDs       *[]string                     `json:",omitempty"`
-	StatQueueIDs       *[]string                     `json:",omitempty"`
+	MaxUsage           *time.Duration                     `json:",omitempty"`
+	ResourceAllocation *string                            `json:",omitempty"`
+	Attributes         *utils.AttributesProcessEventReply `json:",omitempty"`
+	RouteProfiles      utils.SortedRoutesList             `json:",omitempty"`
+	ThresholdIDs       *[]string                          `json:",omitempty"`
+	StatQueueIDs       *[]string                          `json:",omitempty"`
 
 	needsMaxUsage bool // for gob encoding only
 }

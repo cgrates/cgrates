@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -371,7 +370,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 }
 
 // processAttributeS will process the event with AttributeS
-func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*attributes.ProcessEventReply, error) {
+func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttributesProcessEventReply, error) {
 	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns, utils.MetaAttributes, tnt, cgrEv.AsDataProvider(), nil, s.filters)
 	if err != nil {
 		return nil, err
@@ -381,7 +380,7 @@ func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *mat
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaThresholds)
-	var rplyAttr attributes.ProcessEventReply
+	var rplyAttr utils.AttributesProcessEventReply
 	if err = s.cm.Call(ctx, attrConns, utils.AttributeSv1ProcessEvent, cgrEv, &rplyAttr); err != nil {
 		if err.Error() != utils.ErrNotFound.Error() {
 			return nil, err

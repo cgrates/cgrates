@@ -9,7 +9,6 @@ import (
 	"slices"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -77,7 +76,7 @@ func roundUnitsWithIncrements(usage, incrm *utils.Decimal) *utils.Decimal {
 
 // processAttributeS will process the event with AttributeS
 func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
-	attrSConns, attrIDs []string) (rplyEv *attributes.ProcessEventReply, err error) {
+	attrSConns, attrIDs []string) (rplyEv *utils.AttributesProcessEventReply, err error) {
 	if len(attrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
 	}
@@ -85,7 +84,7 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaAccounts)
-	var tmpReply attributes.ProcessEventReply
+	var tmpReply utils.AttributesProcessEventReply
 	if err = connMgr.Call(ctx, attrSConns, utils.AttributeSv1ProcessEvent,
 		cgrEv, &tmpReply); err != nil {
 		return
@@ -202,7 +201,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 	// process AttributeS if needed
 	if calculateCost &&
 		len(attributeIDs) != 0 && attributeIDs[0] != utils.MetaNone { // cost unknown, apply AttributeS to query from RateS
-		var rplyAttrS *attributes.ProcessEventReply
+		var rplyAttrS *utils.AttributesProcessEventReply
 		if rplyAttrS, err = processAttributeS(ctx, connMgr, cgrEv, attrSConns,
 			attributeIDs); err != nil {
 			return

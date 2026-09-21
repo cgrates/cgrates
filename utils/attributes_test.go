@@ -908,3 +908,128 @@ func TestAttributeClone(t *testing.T) {
 		})
 	}
 }
+
+func TestAttributeEventReplyDigest(t *testing.T) {
+	eRpl := &AttributesProcessEventReply{
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: "cgrates.org:ATTR_1",
+			Fields:           []string{AccountField, Subject},
+		}},
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]any{
+				AccountField: "1001",
+				Subject:      "1001",
+			},
+		},
+	}
+	expRpl := "Account:1001,Subject:1001"
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", ToJSON(expRpl), ToJSON(val))
+	}
+}
+
+func TestAttributeEventReplyDigest2(t *testing.T) {
+	eRpl := &AttributesProcessEventReply{
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: "cgrates.org:ATTR_1",
+			Fields:           []string{},
+		}},
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]any{
+				AccountField: "1001",
+				Subject:      "1001",
+			},
+		},
+	}
+	expRpl := ""
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", ToJSON(expRpl), ToJSON(val))
+	}
+}
+
+func TestAttributeEventReplyDigest3(t *testing.T) {
+	eRpl := &AttributesProcessEventReply{
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: "cgrates.org:ATTR_1",
+			Fields:           []string{"*req.Subject"},
+		}},
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]any{
+				AccountField: "1001",
+				Subject:      "1001",
+			},
+		},
+	}
+	expRpl := "Subject:1001"
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", ToJSON(expRpl), ToJSON(val))
+	}
+}
+
+func TestAttributeEventReplyDigest4(t *testing.T) {
+	eRpl := &AttributesProcessEventReply{
+		AlteredFields: []*FieldsAltered{{
+			MatchedProfileID: "cgrates.org:ATTR_1",
+			Fields:           []string{"*req.Subject"},
+		}},
+		CGREvent: &CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "testAttributeSProcessEvent",
+			Event: map[string]any{
+				AccountField: "1001",
+			},
+		},
+	}
+	expRpl := ""
+	val := eRpl.Digest()
+	if !reflect.DeepEqual(val, expRpl) {
+		t.Errorf("Expecting : %+v, received: %+v", ToJSON(expRpl), ToJSON(val))
+	}
+}
+
+func TestAttributeEventReplyDigestSkipOptions(t *testing.T) {
+	for _, tc := range []struct {
+		name          string
+		alteredFields []*FieldsAltered
+	}{
+		{
+			name: "same profile",
+			alteredFields: []*FieldsAltered{{
+				Fields: []string{"*opts.*originID", "*opts.*usage", "*req.attr1", "*req.attr2"},
+			}},
+		},
+		{
+			name: "previous profile",
+			alteredFields: []*FieldsAltered{
+				{Fields: []string{"*opts.*originID", "*opts.*usage"}},
+				{Fields: []string{"*req.attr1", "*req.attr2"}},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			reply := &AttributesProcessEventReply{
+				AlteredFields: tc.alteredFields,
+				CGREvent: &CGREvent{
+					Event: map[string]any{"attr1": "value1", "attr2": "value2"},
+					APIOpts: map[string]any{
+						"*originID": "call1",
+						"*usage":    "60s",
+					},
+				},
+			}
+			want := "attr1:value1,attr2:value2"
+			if got := reply.Digest(); got != want {
+				t.Errorf("Digest() = %q, want %q", got, want)
+			}
+		})
+	}
+}

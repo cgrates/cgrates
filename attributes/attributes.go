@@ -97,41 +97,9 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 	return matchedProfile, nil
 }
 
-// ProcessEventReply is the reply to processEvent.
-type ProcessEventReply struct {
-	AlteredFields []*FieldsAltered
-	CGREvent      *utils.CGREvent
-	Blocker       bool `json:"-"` // internally used to stop further processRuns
-}
-
-// FieldsAltered holds the fields altered by a matched profile.
-type FieldsAltered struct {
-	MatchedProfileID string
-	Fields           []string
-}
-
-// Digest returns the altered fields serialized as
-// fldName1:fldVal1,fldName2:fldVal2.
-func (r *ProcessEventReply) Digest() (rplyDigest string) {
-	for _, altered := range r.AlteredFields {
-		for _, fldName := range altered.Fields {
-			fldName = strings.TrimPrefix(fldName, utils.MetaReq+utils.NestingSep)
-			if _, has := r.CGREvent.Event[fldName]; !has {
-				continue //maybe removed
-			}
-			if rplyDigest != "" {
-				rplyDigest += utils.FieldsSep
-			}
-			fldStrVal, _ := r.CGREvent.FieldAsString(fldName)
-			rplyDigest += fldName + utils.InInFieldSep + fldStrVal
-		}
-	}
-	return
-}
-
 // processEvent will match event with attribute profile and do the necessary replacements
 func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
-	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *ProcessEventReply, err error) {
+	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *utils.AttributesProcessEventReply, err error) {
 	var attrIDs []string
 	if attrIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
 		config.AttributesProfileIDsDftOpt, utils.OptsAttributesProfileIDs); err != nil {
@@ -150,8 +118,8 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 	if blocker, err = engine.BlockerFromDynamics(ctx, attrPrf.Blockers, alS.fltrS, tnt, evNm); err != nil {
 		return
 	}
-	rply = &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
+	rply = &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{{
 			MatchedProfileID: attrPrf.TenantIDInline(),
 			Fields:           []string{},
 		}},
@@ -262,7 +230,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 
 // V1ProcessEvent proccess the event and returns the result
 func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
-	reply *ProcessEventReply) (err error) {
+	reply *utils.AttributesProcessEventReply) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = alS.cfg.GeneralCfg().DefaultTenant
@@ -297,11 +265,11 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 	}
 
 	var lastID string
-	matchedIDs := []*FieldsAltered{}
+	matchedIDs := []*utils.FieldsAltered{}
 	dynDP := engine.NewDynamicDP(ctx, alS.cfg, args.Tenant, eNV, alS.fltrS)
 	for i := 0; i < processRuns; i++ {
 		eNV[utils.MetaVars].(utils.MapStorage)[utils.MetaProcessRunsCfg] = i + 1
-		var evRply *ProcessEventReply
+		var evRply *utils.AttributesProcessEventReply
 		evRply, err = alS.processEvent(ctx, tnt, args, eNV, dynDP, lastID, processedPrfNo, profileRuns)
 		if err != nil {
 			if err != utils.ErrNotFound {
@@ -315,7 +283,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		tnt = evRply.CGREvent.Tenant
 
 		lastID = evRply.AlteredFields[0].MatchedProfileID
-		altered := &FieldsAltered{
+		altered := &utils.FieldsAltered{
 			MatchedProfileID: lastID,
 			Fields:           make([]string, len(evRply.AlteredFields[0].Fields)),
 		}
@@ -340,7 +308,7 @@ func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent
 		return
 	}
 
-	*reply = ProcessEventReply{
+	*reply = utils.AttributesProcessEventReply{
 		AlteredFields: matchedIDs,
 		CGREvent:      args,
 	}

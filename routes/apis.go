@@ -5,7 +5,6 @@ package routes
 
 import (
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -36,7 +35,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 			return
 		}
 		args.APIOpts[utils.OptsContext] = context
-		var rplyEv attributes.ProcessEventReply
+		var rplyEv utils.AttributesProcessEventReply
 		if err := rpS.connMgr.Call(ctx, attrConns,
 			utils.AttributeSv1ProcessEvent, args, &rplyEv); err == nil && len(rplyEv.AlteredFields) != 0 {
 			args = rplyEv.CGREvent

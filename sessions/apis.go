@@ -85,7 +85,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		} else if len(rplyAttr.AlteredFields) != 0 { // at least one change was performed
 			*apiArgs = *rplyAttr.CGREvent
 			if apiRply.Attributes == nil {
-				apiRply.Attributes = make(map[string]*attributes.ProcessEventReply)
+				apiRply.Attributes = make(map[string]*utils.AttributesProcessEventReply)
 			}
 			apiRply.Attributes[utils.MetaPrimary] = rplyAttr
 		}
@@ -156,9 +156,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			cgrEvs[runID] = chrgr.CGREvent
 			if len(chrgr.AlteredFields) != len(chargers.ChargerSDefaultAlteredFields) {
 				if apiRply.Attributes == nil {
-					apiRply.Attributes = make(map[string]*attributes.ProcessEventReply)
+					apiRply.Attributes = make(map[string]*utils.AttributesProcessEventReply)
 				}
-				apiRply.Attributes[runID] = &attributes.ProcessEventReply{
+				apiRply.Attributes[runID] = &utils.AttributesProcessEventReply{
 					AlteredFields: chrgr.AlteredFields,
 					CGREvent:      chrgr.CGREvent,
 				}

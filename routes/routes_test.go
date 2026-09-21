@@ -10,7 +10,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
@@ -1938,8 +1937,8 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 
 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
 			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
-				*reply.(*attributes.ProcessEventReply) = attributes.ProcessEventReply{
-					AlteredFields: []*attributes.FieldsAltered{{
+				*reply.(*utils.AttributesProcessEventReply) = utils.AttributesProcessEventReply{
+					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{utils.AccountField},
 					}},
 					CGREvent: &utils.CGREvent{

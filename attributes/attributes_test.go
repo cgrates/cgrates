@@ -855,8 +855,8 @@ func TestAttributeSProcessSubstituteRmvBlockerTrue(t *testing.T) {
 		},
 	}
 
-	exp := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
+	exp := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{{
 			MatchedProfileID: "cgrates.org:ATTR_TEST",
 			Fields:           []string{utils.MetaRemove, "*req.Password"},
 		}},
@@ -972,7 +972,7 @@ func TestAttributesV1ProcessEventFieldMissingErr(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	var rply ProcessEventReply
+	var rply utils.AttributesProcessEventReply
 	expErr := "MANDATORY_IE_MISSING: [testfield]"
 	err = alS.V1ProcessEvent(context.Background(), ev, &rply)
 	if err == nil || err.Error() != expErr {
@@ -1429,8 +1429,8 @@ func TestAttributeProfileForEvent(t *testing.T) {
 
 func TestAttributeProcessEvent(t *testing.T) {
 	attrEvs[0].Event["Account"] = "1010" //Field added in event after process
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{{
 			MatchedProfileID: "cgrates.org:AttributeProfile1",
 			Fields:           []string{utils.MetaReq + utils.NestingSep + "Account"},
 		}},
@@ -1472,8 +1472,8 @@ func TestAttributeProcessEventWithNotFound(t *testing.T) {
 func TestAttributeProcessEventWithIDs(t *testing.T) {
 	attrEvs[3].Event["Account"] = "1010" //Field added in event after process
 	attrEvs[3].APIOpts[utils.OptsAttributesProfileIDs] = []string{"AttributeIDMatch"}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{{
 			MatchedProfileID: "cgrates.org:AttributeIDMatch",
 			Fields:           []string{utils.MetaReq + utils.NestingSep + "Account"},
 		}},
@@ -1490,131 +1490,6 @@ func TestAttributeProcessEventWithIDs(t *testing.T) {
 	if atrp, err := attrS.processEvent(context.TODO(), attrEvs[0].Tenant, attrEvs[3], eNM, engine.NewDynamicDP(context.TODO(), cfg, "cgrates.org", eNM, nil), utils.EmptyString, make(map[string]int), 0); err != nil {
 	} else if !reflect.DeepEqual(eRply, atrp) {
 		t.Errorf("Expecting: %+v, received: %+v", utils.ToJSON(eRply), utils.ToJSON(atrp))
-	}
-}
-
-func TestAttributeEventReplyDigest(t *testing.T) {
-	eRpl := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
-			MatchedProfileID: "cgrates.org:ATTR_1",
-			Fields:           []string{utils.AccountField, utils.Subject},
-		}},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-			},
-		},
-	}
-	expRpl := "Account:1001,Subject:1001"
-	val := eRpl.Digest()
-	if !reflect.DeepEqual(val, expRpl) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
-	}
-}
-
-func TestAttributeEventReplyDigest2(t *testing.T) {
-	eRpl := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
-			MatchedProfileID: "cgrates.org:ATTR_1",
-			Fields:           []string{},
-		}},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-			},
-		},
-	}
-	expRpl := ""
-	val := eRpl.Digest()
-	if !reflect.DeepEqual(val, expRpl) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
-	}
-}
-
-func TestAttributeEventReplyDigest3(t *testing.T) {
-	eRpl := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
-			MatchedProfileID: "cgrates.org:ATTR_1",
-			Fields:           []string{"*req.Subject"},
-		}},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-				utils.Subject:      "1001",
-			},
-		},
-	}
-	expRpl := "Subject:1001"
-	val := eRpl.Digest()
-	if !reflect.DeepEqual(val, expRpl) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
-	}
-}
-
-func TestAttributeEventReplyDigest4(t *testing.T) {
-	eRpl := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{{
-			MatchedProfileID: "cgrates.org:ATTR_1",
-			Fields:           []string{"*req.Subject"},
-		}},
-		CGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "testAttributeSProcessEvent",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-			},
-		},
-	}
-	expRpl := ""
-	val := eRpl.Digest()
-	if !reflect.DeepEqual(val, expRpl) {
-		t.Errorf("Expecting : %+v, received: %+v", utils.ToJSON(expRpl), utils.ToJSON(val))
-	}
-}
-
-func TestAttributeEventReplyDigestSkipOptions(t *testing.T) {
-	for _, tc := range []struct {
-		name          string
-		alteredFields []*FieldsAltered
-	}{
-		{
-			name: "same profile",
-			alteredFields: []*FieldsAltered{{
-				Fields: []string{"*opts.*originID", "*opts.*usage", "*req.attr1", "*req.attr2"},
-			}},
-		},
-		{
-			name: "previous profile",
-			alteredFields: []*FieldsAltered{
-				{Fields: []string{"*opts.*originID", "*opts.*usage"}},
-				{Fields: []string{"*req.attr1", "*req.attr2"}},
-			},
-		},
-	} {
-		t.Run(tc.name, func(t *testing.T) {
-			reply := &ProcessEventReply{
-				AlteredFields: tc.alteredFields,
-				CGREvent: &utils.CGREvent{
-					Event: map[string]any{"attr1": "value1", "attr2": "value2"},
-					APIOpts: map[string]any{
-						"*originID": "call1",
-						"*usage":    "60s",
-					},
-				},
-			}
-			want := "attr1:value1,attr2:value2"
-			if got := reply.Digest(); got != want {
-				t.Errorf("Digest() = %q, want %q", got, want)
-			}
-		})
 	}
 }
 
@@ -1781,12 +1656,12 @@ func TestAttributeProcessWithMultipleRuns1(t *testing.T) {
 		},
 	}
 
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
-	eRply := ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -1905,8 +1780,8 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -1934,7 +1809,7 @@ func TestAttributeProcessWithMultipleRuns2(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2027,8 +1902,8 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -2048,7 +1923,7 @@ func TestAttributeProcessWithMultipleRuns3(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2124,8 +1999,8 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -2153,7 +2028,7 @@ func TestAttributeProcessWithMultipleRuns4(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2252,8 +2127,8 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -2273,7 +2148,7 @@ func TestAttributeMultipleProcessWithBlocker(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2371,8 +2246,8 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -2387,7 +2262,7 @@ func TestAttributeMultipleProcessWithBlocker2(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2446,8 +2321,8 @@ func TestAttributeProcessValue(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2462,7 +2337,7 @@ func TestAttributeProcessValue(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2526,8 +2401,8 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields: []string{utils.MetaReq + utils.NestingSep + "PassField",
@@ -2543,7 +2418,7 @@ func TestAttributeAttributeFilterIDs(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2603,8 +2478,8 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2619,7 +2494,7 @@ func TestAttributeProcessEventConstant(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2685,8 +2560,8 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2702,7 +2577,7 @@ func TestAttributeProcessEventVariable(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2773,8 +2648,8 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2790,7 +2665,7 @@ func TestAttributeProcessEventComposed(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Fatalf("Error: %+v", err)
 	}
@@ -2852,8 +2727,8 @@ func TestAttributeProcessEventSum(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2870,7 +2745,7 @@ func TestAttributeProcessEventSum(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -2933,8 +2808,8 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -2952,7 +2827,7 @@ func TestAttributeProcessEventUsageDifference(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3015,8 +2890,8 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3034,7 +2909,7 @@ func TestAttributeProcessEventValueExponent(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -3105,7 +2980,7 @@ func BenchmarkAttributeProcessEventConstant(b *testing.B) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
@@ -3174,7 +3049,7 @@ func BenchmarkAttributeProcessEventVariable(b *testing.B) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
@@ -3271,8 +3146,8 @@ func TestProcessAttributeConstant(t *testing.T) {
 		t.Errorf("Error: %+v", err)
 	}
 	ev.Event["Field2"] = "Val2"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_CONSTANT",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3345,8 +3220,8 @@ func TestProcessAttributeVariable(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "Val2"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_VARIABLE",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3425,8 +3300,8 @@ func TestProcessAttributeComposed(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "Val2Concatenated"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_COMPOSED",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3500,8 +3375,8 @@ func TestProcessAttributeUsageDifference(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "1h0m0s"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_USAGE_DIFF",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3575,8 +3450,8 @@ func TestProcessAttributeSum(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "16"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_SUM",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3650,8 +3525,8 @@ func TestProcessAttributeDiff(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "39"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_DIFF",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3725,8 +3600,8 @@ func TestProcessAttributeMultiply(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "2750"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_MULTIPLY",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3800,8 +3675,8 @@ func TestProcessAttributeDivide(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "2.75"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_DIVIDE",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3875,8 +3750,8 @@ func TestProcessAttributeValueExponent(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "50000"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_VAL_EXP",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -3950,8 +3825,8 @@ func TestProcessAttributeUnixTimeStamp(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "1388415601"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_UNIX_TIMESTAMP",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -4024,8 +3899,8 @@ func TestProcessAttributePrefix(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "abc_Val2"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_PREFIX",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -4098,8 +3973,8 @@ func TestProcessAttributeSuffix(t *testing.T) {
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "Val2_abc"
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_SUFFIX",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -4171,7 +4046,7 @@ func TestAttributeIndexSelectsFalse(t *testing.T) {
 		},
 	}
 
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected not found, reveiced: %+v", err)
 	}
@@ -4246,15 +4121,15 @@ func TestProcessAttributeWithSameWeight(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	var rcv ProcessEventReply
+	var rcv utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &rcv); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
 	clnEv := ev.Clone()
 	clnEv.Event["Field2"] = "1"
 	clnEv.Event["Field3"] = "1"
-	eRply := ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field2"},
@@ -4346,8 +4221,8 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1_EXISTS",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -4375,7 +4250,7 @@ func TestAttributeMultipleProcessWithFiltersExists(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -4459,8 +4334,8 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 4,
 		},
 	}
-	eRply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1_NOTEMPTY",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -4488,7 +4363,7 @@ func TestAttributeMultipleProcessWithFiltersNotEmpty(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -4545,8 +4420,8 @@ func TestAttributeMetaTenant(t *testing.T) {
 			utils.OptsContext: utils.MetaSessionS,
 		},
 	}
-	eRply := ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_TNT",
 				Fields:           []string{utils.MetaTenant},
@@ -4560,7 +4435,7 @@ func TestAttributeMetaTenant(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -4655,9 +4530,9 @@ func TestAttributesPorcessEventMatchingProcessRuns(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	reply := &ProcessEventReply{}
-	expReply := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	reply := &utils.AttributesProcessEventReply{}
+	expReply := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_MatchSecond",
 				Fields:           []string{"*req.Password"},
@@ -4754,8 +4629,8 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 40,
 		},
 	}
-	eRply := ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply := utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -4787,7 +4662,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			},
 		},
 	}
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -4806,8 +4681,8 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 40,
 		},
 	}
-	eRply = ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	eRply = utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_1",
 				Fields:           []string{utils.MetaReq + utils.NestingSep + "Field1"},
@@ -4831,7 +4706,7 @@ func TestAttributeMultipleProfileRunns(t *testing.T) {
 			},
 		},
 	}
-	reply = ProcessEventReply{}
+	reply = utils.AttributesProcessEventReply{}
 	if err := attrS.V1ProcessEvent(context.TODO(), ev, &reply); err != nil {
 		t.Errorf("Error: %+v", err)
 	}
@@ -4934,9 +4809,9 @@ func TestAttributesV1ProcessEvent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	rply := &ProcessEventReply{}
-	expected := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	rply := &utils.AttributesProcessEventReply{}
+	expected := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_CHANGE_TENANT_FROM_USER",
 				Fields: []string{utils.MetaReq + utils.NestingSep + "Account",
@@ -5066,7 +4941,7 @@ func TestAttributesV1ProcessEventErrorMetaSum(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	rply := &ProcessEventReply{}
+	rply := &utils.AttributesProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
@@ -5169,7 +5044,7 @@ func TestAttributesV1ProcessEventErrorMetaDifference(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	rply := &ProcessEventReply{}
+	rply := &utils.AttributesProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	expErr := "SERVER_ERROR: NotEnoughParameters"
 	if err == nil || err.Error() != expErr {
@@ -5273,7 +5148,7 @@ func TestAttributesV1ProcessEventErrorMetaValueExponent(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 2,
 		},
 	}
-	rply := &ProcessEventReply{}
+	rply := &utils.AttributesProcessEventReply{}
 	err = alS.V1ProcessEvent(context.Background(), ev, rply)
 	expErr := "SERVER_ERROR: invalid arguments <[{\"Rules\":\"CGRATES.ORG\",\"Path\":\"CGRATES.ORG\"}]> to *valueExponent"
 	if err == nil || err.Error() != expErr {
@@ -5659,9 +5534,9 @@ func TestAttributesV1ProcessEventMultipleRuns1(t *testing.T) {
 			utils.OptsAttributesProfileIDs:  []string{"ATTR1", "ATTR2"},
 		},
 	}
-	reply := &ProcessEventReply{}
-	exp := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	reply := &utils.AttributesProcessEventReply{}
+	exp := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR2",
 				Fields:           []string{"*req.RequestType"},
@@ -5791,9 +5666,9 @@ func TestAttributesV1ProcessEventMultipleRuns2(t *testing.T) {
 		},
 	}
 
-	reply := &ProcessEventReply{}
-	exp := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	reply := &utils.AttributesProcessEventReply{}
+	exp := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR1",
 				Fields:           []string{"*req.Password"},
@@ -6308,8 +6183,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	exp2 := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	exp2 := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:AC1",
 				Fields:           []string{},
@@ -6351,8 +6226,8 @@ func TestAttributesProcessEventProfileIgnoreFilters(t *testing.T) {
 			utils.OptsAttributesProcessRuns: 0,
 		},
 	}
-	exp := &ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	exp := &utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:AC1",
 				Fields:           []string{},
@@ -6584,7 +6459,7 @@ func TestAttributesAttributeServiceV1PrcssEvPrcssRunsGetIntOptsErr(t *testing.T)
 		},
 	}
 
-	reply := &ProcessEventReply{}
+	reply := &utils.AttributesProcessEventReply{}
 	exrErr := `strconv.Atoi: parsing "errVal": invalid syntax`
 	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
@@ -6637,7 +6512,7 @@ func TestAttributesAttributeServiceV1PrcssEvProfRunsGetIntOptsErr(t *testing.T) 
 		},
 	}
 
-	reply := &ProcessEventReply{}
+	reply := &utils.AttributesProcessEventReply{}
 	exrErr := `strconv.Atoi: parsing "errVal": invalid syntax`
 	if err := alS.V1ProcessEvent(context.Background(), ev, reply); err == nil || err.Error() != exrErr {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", exrErr, err)
@@ -6720,8 +6595,8 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 		},
 	}
 
-	exp := ProcessEventReply{
-		AlteredFields: []*FieldsAltered{
+	exp := utils.AttributesProcessEventReply{
+		AlteredFields: []*utils.FieldsAltered{
 			{
 				MatchedProfileID: "cgrates.org:ATTR_TEST",
 				Fields:           []string{"*req.Password"},
@@ -6737,7 +6612,7 @@ func TestAttributesProcessEventPasswordAttribute(t *testing.T) {
 		},
 	}
 	var hashedPw string
-	var reply ProcessEventReply
+	var reply utils.AttributesProcessEventReply
 	if err := attrS.V1ProcessEvent(context.Background(), cgrEv, &reply); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(reply.AlteredFields, exp.AlteredFields) {
