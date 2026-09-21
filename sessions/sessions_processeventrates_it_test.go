@@ -1926,3 +1926,177 @@ func TestSessionSv1ProcessEventAccountsForceUsage(t *testing.T) {
 		t.Errorf("VoiceBal = %+v, want 2s", acnt.Balances["VoiceBal"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventChargerRuns(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "ChargerRun1",
+				RunID:        "run1",
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile(run1): %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "ChargerRunB",
+				RunID:        "run2",
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile(run2): %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrRun1",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*opts.*runID",
+						Values:  []string{"run1"},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(run1): %v", err)
+	}
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrRun2",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*opts.*runID",
+						Values:  []string{"run2"},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter(run2): %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"Balance1": {
+						ID:        "Balance1",
+						FilterIDs: []string{"FltrRun1"},
+						Type:      utils.MetaAbstract,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(100 * time.Second)),
+					},
+					"Balance2": {
+						ID:        "Balance2",
+						FilterIDs: []string{"FltrRun2"},
+						Type:      utils.MetaAbstract,
+						Weights:   utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(100 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	var rply V1ProcessEventReply
+	if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "MultiRunEvent",
+			APIOpts: map[string]any{
+				utils.MetaChargers: true,
+				utils.MetaAccounts: true,
+				utils.MetaDebit:    true,
+				utils.MetaUsage:    10 * time.Second,
+				utils.MetaOriginID: "OriginIDMultiRun",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply); err != nil {
+		t.Fatalf("ProcessEvent: %v", err)
+	}
+
+	usageA, ok := rply.AccountsUsage["run1"]
+	if !ok {
+		t.Fatal("AccountsUsage missing run1")
+	}
+	if usageA != 10*time.Second {
+		t.Errorf("AccountsUsage[run1] = %v, want 10s", usageA)
+	}
+	usageB, ok := rply.AccountsUsage["run2"]
+	if !ok {
+		t.Fatal("AccountsUsage missing run2")
+	}
+	if usageB != 10*time.Second {
+		t.Errorf("AccountsUsage[run2] = %v, want 10s", usageB)
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	wantBalance1 := utils.NewDecimalFromFloat64(float64(90 * time.Second))
+	if acnt.Balances["Balance1"].Units.Compare(wantBalance1) != 0 {
+		t.Errorf("Balance1 = %+v, want 90s", acnt.Balances["Balance1"].Units)
+	}
+	wantBalance2 := utils.NewDecimalFromFloat64(float64(90 * time.Second))
+	if acnt.Balances["Balance2"].Units.Compare(wantBalance2) != 0 {
+		t.Errorf("Balance2 = %+v, want 90s", acnt.Balances["Balance2"].Units)
+	}
+}
