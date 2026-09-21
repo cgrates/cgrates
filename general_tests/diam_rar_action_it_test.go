@@ -4,12 +4,11 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package agents
+package general_tests
 
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"os"
 	"os/exec"
 	"path"
@@ -21,7 +20,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
-
+	"github.com/cgrates/cgrates/agents"
+	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -38,13 +38,13 @@ var (
 	daCfgPath, diamConfigDIR string
 	daCfg                    *config.CGRConfig
 	apierRpc                 *birpc.Client
-	diamClnt                 *DiameterClient
+	diamClnt                 *agents.DiameterClient
 
 	rplyTimeout time.Duration
 
 	isDispatcherActive bool
 
-	sTestsDiam = []func(t *testing.T){
+	sTestsDiamActionsRAR = []func(t *testing.T){
 		testDiamItInitCfg,
 		testDiamItResetDataDb,
 		testDiamItResetStorDb,
@@ -56,7 +56,7 @@ var (
 		testDiamItCCRInit,
 		testDiamItCCRUpdate,
 
-		testDiamItRAR,
+		testDiamItRARActions,
 
 		testDiamItCCRTerminate,
 		testDiamItCCRSMS,
@@ -74,7 +74,7 @@ var (
 )
 
 // Test start here
-func TestDiamItTcp(t *testing.T) {
+func TestDiamItTcpRARFromActions(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		diamConfigDIR = "diamagent_internal"
@@ -87,118 +87,9 @@ func TestDiamItTcp(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
-	for _, stest := range sTestsDiam {
+	for _, stest := range sTestsDiamActionsRAR {
 		t.Run(diamConfigDIR, stest)
 	}
-}
-
-func TestDiamItTcpNoDefaults(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamagent_internal_supp_apps"
-	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsDiam {
-		t.Run(diamConfigDIR, stest)
-	}
-}
-
-func TestDiamItDispatcher(t *testing.T) {
-	if *utils.Encoding == utils.MetaGOB {
-		t.SkipNow()
-		return
-	}
-	testDiamItResetAllDB(t)
-	isDispatcherActive = true
-	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all"), 200)
-	engine.StartEngine(path.Join(*utils.DataDir, "conf", "samples", "dispatchers", "all2"), 200)
-	diamConfigDIR = "dispatchers/diamagent"
-	for _, stest := range sTestsDiam {
-		t.Run(diamConfigDIR, stest)
-	}
-	isDispatcherActive = false
-}
-
-func TestDiamItSctp(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamsctpagent_internal"
-	case utils.MetaMySQL:
-		diamConfigDIR = "diamsctpagent_mysql"
-	case utils.MetaMongo:
-		diamConfigDIR = "diamsctpagent_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	for _, stest := range sTestsDiam {
-		t.Run(diamConfigDIR, stest)
-	}
-}
-
-func TestDiamItBiRPC(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamagent_internal_%sbirpc"
-	case utils.MetaMySQL:
-		diamConfigDIR = "diamagent_mysql_%sbirpc"
-	case utils.MetaMongo:
-		diamConfigDIR = "diamagent_mongo_%sbirpc"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-	diamConfigDIR = fmt.Sprintf(diamConfigDIR, strings.TrimPrefix(*utils.Encoding, utils.Meta))
-	for _, stest := range sTestsDiam {
-		t.Run(diamConfigDIR, stest)
-	}
-}
-
-func TestDiamItSessionDisconnect(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamagent_internal"
-	case utils.MetaMySQL:
-		diamConfigDIR = "diamagent_mysql"
-	case utils.MetaMongo:
-		diamConfigDIR = "diamagent_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-
-	for _, stest := range sTestsDiam[:7] {
-		t.Run(diamConfigDIR, stest)
-	}
-	t.Run(diamConfigDIR, testDiamInitWithSessionDisconnect)
-	t.Run(diamConfigDIR, testDiamItKillEngine)
-}
-
-func TestDiamItSessionDisconnectNoLoops(t *testing.T) {
-	switch *utils.DBType {
-	case utils.MetaInternal:
-		diamConfigDIR = "diamagent_internal"
-	case utils.MetaMySQL:
-		diamConfigDIR = "diamagent_mysql"
-	case utils.MetaMongo:
-		diamConfigDIR = "diamagent_mongo"
-	case utils.MetaPostgres:
-		t.SkipNow()
-	default:
-		t.Fatal("Unknown Database type")
-	}
-
-	for _, stest := range sTestsDiam[:7] {
-		t.Run(diamConfigDIR, stest)
-	}
-	t.Run(diamConfigDIR, testDiamInitWithSessionDisconnectNoLoops)
-	t.Run(diamConfigDIR, testDiamItKillEngine)
 }
 
 func testDiamItInitCfg(t *testing.T) {
@@ -264,7 +155,8 @@ func testDiamItStartEngine(t *testing.T) {
 }
 
 func testDiamItConnectDiameterClient(t *testing.T) {
-	diamClnt, err = NewDiameterClient(daCfg.DiameterAgentCfg().Listeners[0].Address, "INTEGRATION_TESTS",
+	var err error
+	diamClnt, err = agents.NewDiameterClient(daCfg.DiameterAgentCfg().Listeners[0].Address, "INTEGRATION_TESTS",
 		daCfg.DiameterAgentCfg().OriginRealm, daCfg.DiameterAgentCfg().VendorID,
 		daCfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 		daCfg.DiameterAgentCfg().DictionariesPath, daCfg.DiameterAgentCfg().Listeners[0].Network)
@@ -402,9 +294,6 @@ func testDiamItDryRun(t *testing.T) {
 		if diamClnt == nil {
 			t.Fatal("Diameter client should not be nil")
 		}
-		if diamClnt.conn == nil {
-			t.Fatal("Diameter connection should not be nil")
-		}
 		if ccr == nil {
 			t.Fatal("The mesage to diameter should not be nil")
 		}
@@ -418,75 +307,61 @@ func testDiamItDryRun(t *testing.T) {
 			t.Fatal("No message returned")
 		}
 		// Result-Code
-		eVal := "2002"
+		eVal := "Unsigned32{2002}"
 		if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 
-		eVal = "cgrates;1451911932;00082"
+		eVal = "UTF8String{cgrates;1451911932;00082},Padding:0"
 		if avps, err := msg.FindAVPsWithPath([]any{"Session-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal = "CGR-DA"
+		eVal = "DiameterIdentity{CGR-DA},Padding:2"
 		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Host"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal = "cgrates.org"
+		eVal = "DiameterIdentity{cgrates.org},Padding:1"
 		if avps, err := msg.FindAVPsWithPath([]any{"Origin-Realm"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal = "4"
+		eVal = "Unsigned32{4}"
 		if avps, err := msg.FindAVPsWithPath([]any{"Auth-Application-Id"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal = "1"
+		eVal = "Enumerated{1}"
 		if avps, err := msg.FindAVPsWithPath([]any{"CC-Request-Type"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
-		eVal = "1"
+		eVal = "Unsigned32{1}"
 		if avps, err := msg.FindAVPsWithPath([]any{"CC-Request-Number"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 		if avps, err := msg.FindAVPsWithPath([]any{"Multiple-Services-Credit-Control", "Rating-Group"}, dict.UndefinedVendorID); err != nil {
@@ -494,15 +369,11 @@ func testDiamItDryRun(t *testing.T) {
 		} else if len(avps) != 2 {
 			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Rating-Group : %d", len(avps))
 		} else {
-			if val, err := diamAVPAsString(avps[0]); err != nil {
-				t.Error(err)
-			} else if val != "1" {
-				t.Errorf("expecting: 1, received: <%s>", val)
+			if val := avps[0].Data.String(); val != "Unsigned32{1}" {
+				t.Errorf("expecting: Unsigned32{1}, received: <%s>", val)
 			}
-			if val, err := diamAVPAsString(avps[1]); err != nil {
-				t.Error(err)
-			} else if val != "2" {
-				t.Errorf("expecting: 2, received: <%s>", val)
+			if val := avps[1].Data.String(); val != "Unsigned32{2}" {
+				t.Errorf("expecting: Unsigned32{2}, received: <%s>", val)
 			}
 		}
 		if avps, err := msg.FindAVPsWithPath([]any{"Multiple-Services-Credit-Control", "Used-Service-Unit", "CC-Total-Octets"}, dict.UndefinedVendorID); err != nil {
@@ -510,25 +381,19 @@ func testDiamItDryRun(t *testing.T) {
 		} else if len(avps) != 2 {
 			t.Errorf("Unexpected number of Multiple-Services-Credit-Control.Used-Service-Unit.CC-Total-Octets : %d", len(avps))
 		} else {
-			if val, err := diamAVPAsString(avps[0]); err != nil {
-				t.Error(err)
-			} else if val != "7640" {
-				t.Errorf("expecting: 7640, received: <%s>", val)
+			if val := avps[0].Data.String(); val != "Unsigned64{7640}" {
+				t.Errorf("expecting: Unsigned64{7640}, received: <%s>", val)
 			}
-			if val, err := diamAVPAsString(avps[1]); err != nil {
-				t.Error(err)
-			} else if val != "3000" {
-				t.Errorf("expecting: 3000, received: <%s>", val)
+			if val := avps[1].Data.String(); val != "Unsigned64{3000}" {
+				t.Errorf("expecting: Unsigned64{3000}, received: <%s>", val)
 			}
 		}
-		eVal = "6" // sum of items
+		eVal = "Unsigned32{6}" // sum of items
 		if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"}, dict.UndefinedVendorID); err != nil {
 			t.Error(err)
 		} else if len(avps) == 0 {
 			t.Error("Missing AVP")
-		} else if val, err := diamAVPAsString(avps[0]); err != nil {
-			t.Error(err)
-		} else if val != eVal {
+		} else if val := avps[0].Data.String(); val != eVal {
 			t.Errorf("expecting: %s, received: <%s>", eVal, val)
 		}
 	}
@@ -583,9 +448,6 @@ func testDiamItCCRInit(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -598,26 +460,22 @@ func testDiamItCCRInit(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	// Result-Code
-	eVal = "300" // 5 mins of session
+	eVal = "Unsigned32{300}" // 5 mins of session
 	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 }
@@ -671,9 +529,6 @@ func testDiamItCCRInitWithForceDuration(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -686,14 +541,12 @@ func testDiamItCCRInitWithForceDuration(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "5030"
+	eVal := "Unsigned32{5030}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 
@@ -748,9 +601,6 @@ func testDiamItCCRUpdate(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -763,26 +613,22 @@ func testDiamItCCRUpdate(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	// Result-Code
-	eVal = "300" // 5 mins of session
+	eVal = "Unsigned32{300}" // 5 mins of session
 	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 }
@@ -836,9 +682,6 @@ func testDiamItCCRTerminate(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -851,14 +694,12 @@ func testDiamItCCRTerminate(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
@@ -932,9 +773,6 @@ func testDiamItCCRSMS(t *testing.T) {
 	// ============================================
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
-	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
 	}
 	if ccr == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -1011,9 +849,6 @@ func testDiamItCCRMMS(t *testing.T) {
 	// ============================================
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
-	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
 	}
 	if ccr == nil {
 		t.Fatal("The mesage to diameter should not be nil")
@@ -1103,9 +938,6 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -1118,14 +950,12 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	time.Sleep(2 * time.Second)
@@ -1137,9 +967,7 @@ func testDiamInitWithSessionDisconnect(t *testing.T) {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != sessID {
+	} else if val := avps[0].Data.String(); val != sessID {
 		t.Errorf("expecting: %s, received: <%s>", sessID, val)
 	}
 }
@@ -1210,9 +1038,6 @@ func testDiamInitWithSessionDisconnectNoLoops(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -1225,14 +1050,12 @@ func testDiamInitWithSessionDisconnectNoLoops(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 
@@ -1244,7 +1067,7 @@ func testDiamItKillEngine(t *testing.T) {
 	}
 }
 
-func testDiamItRAR(t *testing.T) {
+func testDiamItRARActions(t *testing.T) { // test RAR ran from ExecuteAction *alter_sessions
 	if diamConfigDIR == "dispatchers/diamagent" {
 		t.SkipNow()
 	}
@@ -1254,16 +1077,28 @@ func testDiamItRAR(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	// ============================================
 	var wait sync.WaitGroup
 	wait.Add(1)
 	go func() {
 		var reply string
-		if err := apierRpc.Call(context.Background(), utils.SessionSv1AlterSessions, utils.SessionFilterWithEvent{}, &reply); err != nil {
+		attrs1 := &v1.V1AttrSetActions{
+			ActionsId: "SendRAR",
+			Actions: []*v1.V1TPAction{
+				{
+					Identifier:      utils.MetaAlterSessions, // *alter_sessions
+					ExtraParameters: "cgrates.org;*string:~*req.Account:~*req.Account;1;;",
+				},
+			},
+		}
+		if err := apierRpc.Call(context.Background(), utils.APIerSv1SetActions, &attrs1, &reply); err != nil {
 			t.Error(err)
+		} else if reply != utils.OK {
+			t.Errorf("Unexpected reply returned: %s", reply)
+		}
+		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1006", ActionsId: "SendRAR"}
+		if err := apierRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
+			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)
 		}
 		wait.Done()
 	}()
@@ -1331,26 +1166,22 @@ func testDiamItRAR(t *testing.T) {
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	// Result-Code
-	eVal = "301" // 5 mins of session
+	eVal = "Unsigned32{301}" // 5 mins of session
 	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 }
@@ -1364,9 +1195,6 @@ func testDiamItDRR(t *testing.T) {
 	// ============================================
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
-	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
 	}
 	// ============================================
 	var wait sync.WaitGroup
@@ -1397,14 +1225,12 @@ func testDiamItDRR(t *testing.T) {
 
 	wait.Wait()
 
-	eVal := "1"
+	eVal := "Enumerated{1}"
 	if avps, err := drr.FindAVPsWithPath([]any{avp.DisconnectCause}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 }
@@ -1463,9 +1289,6 @@ func testDiamItTemplateErr(t *testing.T) {
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if ccr == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -1481,14 +1304,12 @@ func testDiamItTemplateErr(t *testing.T) {
 		t.Fatal("Message should not be nil")
 	}
 	// Result-Code
-	eVal := "5012" // error code diam.UnableToComply
+	eVal := "Unsigned32{5012}" // error code diam.UnableToComply
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 }
@@ -1590,9 +1411,6 @@ cgrates.com,Default,,,*default,*none,20`),
 	if diamClnt == nil {
 		t.Fatal("Diameter client should not be nil")
 	}
-	if diamClnt.conn == nil {
-		t.Fatal("Diameter connection should not be nil")
-	}
 	if m == nil {
 		t.Fatal("The mesage to diameter should not be nil")
 	}
@@ -1605,26 +1423,22 @@ cgrates.com,Default,,,*default,*none,20`),
 		t.Fatal("No message returned")
 	}
 	// Result-Code
-	eVal := "2001"
+	eVal := "Unsigned32{2001}"
 	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 	// Result-Code
-	eVal = "0" // 0 from sessions
+	eVal = "Unsigned32{0}" // 0 from sessions
 	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
 		dict.UndefinedVendorID); err != nil {
 		t.Error(err)
 	} else if len(avps) == 0 {
 		t.Error("Missing AVP")
-	} else if val, err := diamAVPAsString(avps[0]); err != nil {
-		t.Error(err)
-	} else if val != eVal {
+	} else if val := avps[0].Data.String(); val != eVal {
 		t.Errorf("expecting: %s, received: <%s>", eVal, val)
 	}
 

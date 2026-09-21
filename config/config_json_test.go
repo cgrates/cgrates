@@ -1608,6 +1608,7 @@ func TestDfApierCfg(t *testing.T) {
 		Scheduler_conns:  &[]string{},
 		Attributes_conns: &[]string{},
 		Ees_conns:        &[]string{},
+		Sessions_conns:   &[]string{},
 	}
 	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
 	if err != nil {

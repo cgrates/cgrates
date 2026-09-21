@@ -121,6 +121,10 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 	}
 	act := ActionConnCfg{}
 	switch source {
+	case utils.ApierS:
+		if slices.Contains(sessionActions, action) {
+			act.ConnIDs = cfg.ApierCfg().SessionSConns
+		}
 	case utils.ThresholdS:
 		switch {
 		case slices.Contains(sessionActions, action):
@@ -129,8 +133,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
-		switch {
-		case slices.Contains(sessionActions, action):
+		if slices.Contains(sessionActions, action) {
 			act.ConnIDs = cfg.RalsCfg().SessionSConns
 		}
 	}
@@ -1095,6 +1098,9 @@ func forceDisconnectSessionsAction(_ *Account, act *Action, _ Actions, _ *Filter
 // parseParamStringToMap parses a string containing key-value pairs separated by "&" and assigns
 // these pairs to a given map. Each pair is expected to be in the format "key:value".
 func parseParamStringToMap(paramStr string, targetMap map[string]any) error {
+	if paramStr == utils.EmptyString { // ignore empty parameter
+		return nil
+	}
 	for _, tuple := range strings.Split(paramStr, "&") {
 		// Use strings.Cut to split 'tuple' into key-value pairs at the first occurrence of ':'.
 		// This ensures that additional ':' characters within the value do not affect parsing.
@@ -1585,10 +1591,8 @@ func dynamicThreshold(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		thProf.EeIDs = strings.Split(params[11], utils.ANDSep)
 	}
 	// populate Threshold's APIOpts
-	if params[12] != utils.EmptyString {
-		if err := parseParamStringToMap(params[12], thProf.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[12], thProf.APIOpts); err != nil {
+		return err
 	}
 
 	// create the ThresholdProfile based on the populated parameters
@@ -1731,10 +1735,8 @@ func dynamicStats(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		stQProf.ThresholdIDs = strings.Split(params[12], utils.ANDSep)
 	}
 	// populate Stat's APIOpts
-	if params[13] != utils.EmptyString {
-		if err := parseParamStringToMap(params[13], stQProf.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[13], stQProf.APIOpts); err != nil {
+		return err
 	}
 
 	// create the StatQueueProfile based on the populated parameters
@@ -1849,10 +1851,8 @@ func dynamicAttribute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		}
 	}
 	// populate Attribute's APIOpts
-	if params[11] != utils.EmptyString {
-		if err := parseParamStringToMap(params[11], attrP.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[11], attrP.APIOpts); err != nil {
+		return err
 	}
 
 	// create the AttributeProfile based on the populated parameters
@@ -2283,10 +2283,8 @@ func dynamicFilter(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		}
 	}
 	// populate Filter's APIOpts
-	if params[6] != utils.EmptyString {
-		if err := parseParamStringToMap(params[6], fltr.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[6], fltr.APIOpts); err != nil {
+		return err
 	}
 	// create the Filter based on the populated parameters
 	var reply string
@@ -2499,10 +2497,8 @@ func dynamicRoute(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		route.Weight = routeProfileFound.Weight
 	}
 	// populate RouteProfile's APIOpts
-	if params[16] != utils.EmptyString {
-		if err := parseParamStringToMap(params[16], route.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[16], route.APIOpts); err != nil {
+		return err
 	}
 	// create the RouteProfile based on the populated parameters
 	var reply string
@@ -2583,10 +2579,8 @@ func dynamicRanking(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		ranking.ThresholdIDs = strings.Split(params[8], utils.ANDSep)
 	}
 	// populate Ranking's APIOpts
-	if params[9] != utils.EmptyString {
-		if err := parseParamStringToMap(params[9], ranking.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[9], ranking.APIOpts); err != nil {
+		return err
 	}
 	// create the RankingProfile based on the populated parameters
 	var reply string
@@ -2649,10 +2643,8 @@ func dynamicRatingProfile(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 		APIOpts: make(map[string]any),
 	}
 	// populate RatingProfiles's APIOpts
-	if params[6] != utils.EmptyString {
-		if err := parseParamStringToMap(params[6], ratingProf.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[6], ratingProf.APIOpts); err != nil {
+		return err
 	}
 	// create the RatingProfile based on the populated parameters
 	var reply string
@@ -2757,10 +2749,8 @@ func dynamicTrend(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		trend.ThresholdIDs = strings.Split(params[11], utils.ANDSep)
 	}
 	// populate Trend's APIOpts
-	if params[12] != utils.EmptyString {
-		if err := parseParamStringToMap(params[12], trend.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[12], trend.APIOpts); err != nil {
+		return err
 	}
 	// create the TrendProfile based on the populated parameters
 	var reply string
@@ -2880,10 +2870,8 @@ func dynamicResource(_ *Account, act *Action, _ Actions, _ *FilterS, ev any,
 		rsc.ThresholdIDs = strings.Split(params[10], utils.ANDSep)
 	}
 	// populate Resource's APIOpts
-	if params[11] != utils.EmptyString {
-		if err := parseParamStringToMap(params[11], rsc.APIOpts); err != nil {
-			return err
-		}
+	if err := parseParamStringToMap(params[11], rsc.APIOpts); err != nil {
+		return err
 	}
 	// create the ResourceProfile based on the populated parameters
 	var reply string

@@ -1126,6 +1126,7 @@ const CGRATES_CFG_JSON = `
 	"scheduler_conns": [],		// connections to SchedulerS for reloads
 	"attributes_conns": [],		// connections to AttributeS for CDRExporter
 	"ees_conns": [],		// connections to EEs
+	"sessions_conns": [],		// connections to Sessions for session actions 
 },
 
 

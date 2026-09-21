@@ -14,6 +14,7 @@ type ApierCfg struct {
 	SchedulerConns  []string // connections towards Scheduler
 	AttributeSConns []string // connections towards AttributeS
 	EEsConns        []string // connections towards EEs
+	SessionSConns   []string // connections towards SessionS
 }
 
 func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
@@ -60,6 +61,16 @@ func (aCfg *ApierCfg) loadFromJSONCfg(jsnCfg *ApierJsonCfg) (err error) {
 			aCfg.EEsConns[idx] = connID
 			if connID == utils.MetaInternal {
 				aCfg.EEsConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)
+			}
+		}
+	}
+	if jsnCfg.Sessions_conns != nil {
+		aCfg.SessionSConns = make([]string, len(*jsnCfg.Sessions_conns))
+		for idx, connID := range *jsnCfg.Sessions_conns {
+			// if we have the connection internal we change the name so we can have internal rpc for each subsystem
+			aCfg.SessionSConns[idx] = connID
+			if connID == utils.MetaInternal {
+				aCfg.SessionSConns[idx] = utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)
 			}
 		}
 	}
@@ -111,6 +122,16 @@ func (aCfg *ApierCfg) AsMapInterface() (initialMap map[string]any) {
 		}
 		initialMap[utils.EEsConnsCfg] = eesConns
 	}
+	if aCfg.SessionSConns != nil {
+		sessionConns := make([]string, len(aCfg.SessionSConns))
+		for i, item := range aCfg.SessionSConns {
+			sessionConns[i] = item
+			if item == utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS) {
+				sessionConns[i] = utils.MetaInternal
+			}
+		}
+		initialMap[utils.SessionSConnsCfg] = sessionConns
+	}
 	return
 }
 
@@ -137,6 +158,10 @@ func (aCfg *ApierCfg) Clone() (cln *ApierCfg) {
 	if aCfg.EEsConns != nil {
 		cln.EEsConns = make([]string, len(aCfg.EEsConns))
 		copy(cln.EEsConns, aCfg.EEsConns)
+	}
+	if aCfg.SessionSConns != nil {
+		cln.SessionSConns = make([]string, len(aCfg.SessionSConns))
+		copy(cln.SessionSConns, aCfg.SessionSConns)
 	}
 	return
 }

@@ -17,6 +17,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 		Scheduler_conns:  &[]string{utils.MetaInternal, "*conn1"},
 		Attributes_conns: &[]string{utils.MetaInternal, "*conn1"},
 		Ees_conns:        &[]string{utils.MetaInternal, "*conn1"},
+		Sessions_conns:   &[]string{utils.MetaInternal, "*conn1"},
 	}
 	expected := &ApierCfg{
 		Enabled:         false,
@@ -24,6 +25,7 @@ func TestApierCfgloadFromJsonCfg(t *testing.T) {
 		SchedulerConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 	}
 	jsnCfg := NewDefaultCGRConfig()
 	if err := jsnCfg.apier.loadFromJSONCfg(jsonCfg); err != nil {
@@ -46,6 +48,7 @@ func TestApierCfgAsMapInterface1(t *testing.T) {
 		utils.SchedulerConnsCfg:  sls,
 		utils.AttributeSConnsCfg: sls,
 		utils.EEsConnsCfg:        sls,
+		utils.SessionSConnsCfg:   sls,
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
 		t.Error(err)
@@ -62,6 +65,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
        "ees_conns": ["*internal:*ees", "*conn1"],
        "caches_conns": ["*internal:*caches", "*conn1"],
        "scheduler_conns": ["*internal:*scheduler", "*conn1"],
+       "sessions_conns": ["*internal:*sessions", "*conn1"],
     },
 }`
 	expectedMap := map[string]any{
@@ -70,6 +74,7 @@ func TestApierCfgAsMapInterface2(t *testing.T) {
 		utils.SchedulerConnsCfg:  []string{utils.MetaInternal, "*conn1"},
 		utils.AttributeSConnsCfg: []string{utils.MetaInternal, "*conn1"},
 		utils.EEsConnsCfg:        []string{utils.MetaInternal, "*conn1"},
+		utils.SessionSConnsCfg:   []string{utils.MetaInternal, "*conn1"},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(myJSONStr); err != nil {
 		t.Error(err)
@@ -85,6 +90,7 @@ func TestApierCfgClone(t *testing.T) {
 		SchedulerConns:  []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaScheduler), "*conn1"},
 		AttributeSConns: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAttributes), "*conn1"},
 		EEsConns:        []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), "*conn1"},
+		SessionSConns:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), "*conn1"},
 	}
 	rcv := sa.Clone()
 	if !reflect.DeepEqual(sa, rcv) {
@@ -100,6 +106,9 @@ func TestApierCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if rcv.EEsConns[1] = ""; sa.EEsConns[1] != "*conn1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if rcv.SessionSConns[1] = ""; sa.SessionSConns[1] != "*conn1" {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 
