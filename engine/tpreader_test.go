@@ -1061,7 +1061,8 @@ func TestTPReaderLoadDestinationsFiltered(t *testing.T) {
 	}, []string{"groupId"}, true, "tId")
 	db.db = tscache
 
-	tpr, err := NewTpReader(db, db, "itemId", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "itemId", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1087,9 +1088,13 @@ func TestTPReaderLoadAll(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(nil, db, "", "local", nil, nil)
+	dm := NewDataManager(nil, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
+	}
+	if tpr.dm != dm {
+		t.Fatal("expected the reader to use the existing DataManager")
 	}
 	if err = tpr.LoadAll(); err != nil {
 		t.Error(err)
@@ -1178,7 +1183,8 @@ func TestTpReaderIsValid(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(nil, db, "", "local", nil, nil)
+	dm := NewDataManager(nil, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1232,7 +1238,8 @@ func TestTpReaderLoadAccountActions(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1452,7 +1459,8 @@ func TestTpReaderLoadTimingsErr(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1491,7 +1499,8 @@ func TestLoadDestinationRatesErr(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1549,7 +1558,8 @@ func TestTpReaderLoadRatingPlansFilteredErr(t *testing.T) {
 		t.Error(dErr)
 	}
 
-	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1583,7 +1593,8 @@ func TestLoadRatingProfilesFiltered(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "local", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "local", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1644,7 +1655,8 @@ func TestTpReaderLoadActionTriggers(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1733,7 +1745,8 @@ func TestTpReaderSetDestination(t *testing.T) {
 		t.Error(dErr)
 	}
 	db.db = tscache
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1769,7 +1782,8 @@ func TestTPReaderLoadAccountActionsFilteredErr(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1818,7 +1832,8 @@ func TestTprRemoveFromDatabase(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1880,7 +1895,8 @@ func TestLoadActionPlansErrs(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "tpr", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "tpr", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -1931,7 +1947,8 @@ func TestLoadRatingPlansFiltered(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "*prf", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "*prf", "UTC", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2063,7 +2080,8 @@ func TestTPRLoadRatingProfiles(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "RP1", "", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "RP1", "", nil, nil)
 
 	if err != nil {
 		t.Error(err)
@@ -2129,7 +2147,8 @@ func TestTPRLoadAccountActions(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "", "", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "", nil, nil)
 
 	if err != nil {
 		t.Error(err)
@@ -2159,7 +2178,8 @@ func TestTpReaderRemoveFromDatabase(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "", "", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2225,7 +2245,8 @@ func TestTpReaderRemoveFromDatabaseDspPrf(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "", "", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2269,7 +2290,8 @@ func TestTpReaderRemoveFromDatabaseDspHst(t *testing.T) {
 	if dErr != nil {
 		t.Error(dErr)
 	}
-	tpr, err := NewTpReader(db, db, "", "", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "", "", nil, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2314,7 +2336,8 @@ func TestTprLoadAccountActionFiltered(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	tpr, err := NewTpReader(dataDb, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	dm := NewDataManager(dataDb, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2488,7 +2511,8 @@ func TestTprLoadRatingPlansFiltered(t *testing.T) {
 			},
 		}}
 	storDb.SetTPRatingPlans([]*utils.TPRatingPlan{rp})
-	tpr, err := NewTpReader(dataDb, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	dm := NewDataManager(dataDb, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, storDb, "TP1", "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
 	}
@@ -2516,7 +2540,8 @@ func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			tpr, err := NewTpReader(db, db, "TP1", "", nil, nil)
+			dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+			tpr, err := NewTpReader(dm, db, "TP1", "", nil, nil)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -2569,7 +2594,8 @@ func TestTPReaderLoadActionsNegatedTimingPrefix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	tpr, err := NewTpReader(db, db, "tpID", "UTC", nil, nil)
+	dm := NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr)
+	tpr, err := NewTpReader(dm, db, "tpID", "UTC", nil, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

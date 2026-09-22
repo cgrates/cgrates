@@ -12,7 +12,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -49,13 +48,13 @@ type TpReader struct {
 	schedulerConns     []string
 }
 
-func NewTpReader(db DataDB, lr LoadReader, tpid, timezone string,
+func NewTpReader(dm *DataManager, lr LoadReader, tpid, timezone string,
 	cacheConns, schedulerConns []string) (*TpReader, error) {
 
 	tpr := &TpReader{
 		tpid:           tpid,
 		timezone:       timezone,
-		dm:             NewDataManager(db, config.CgrConfig().CacheCfg(), connMgr), // ToDo: add ChacheCfg as parameter to the NewTpReader
+		dm:             dm,
 		lr:             lr,
 		cacheConns:     cacheConns,
 		schedulerConns: schedulerConns,

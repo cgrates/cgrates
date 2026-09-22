@@ -247,7 +247,7 @@ func (apierSv1 *APIerSv1) LoadDestination(ctx *context.Context, attrs *AttrLoadD
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone, apierSv1.Config.ApierCfg().CachesConns,
 		apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -278,7 +278,7 @@ func (apierSv1 *APIerSv1) LoadRatingPlan(ctx *context.Context, attrs *AttrLoadRa
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -301,7 +301,7 @@ func (apierSv1 *APIerSv1) LoadRatingProfile(ctx *context.Context, attrs *utils.T
 	if attrs.Tenant == utils.EmptyString {
 		attrs.Tenant = apierSv1.Config.GeneralCfg().DefaultTenant
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -335,7 +335,7 @@ func (apierSv1 *APIerSv1) LoadSharedGroup(ctx *context.Context, attrs *AttrLoadS
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -361,7 +361,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromStorDb(ctx *context.Context, attrs *
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -949,7 +949,7 @@ func (apierSv1 *APIerSv1) LoadAccountActions(ctx *context.Context, attrs *utils.
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -992,7 +992,7 @@ func (apierSv1 *APIerSv1) LoadTariffPlanFromFolder(ctx *context.Context, attrs *
 	}
 
 	// create the TpReader
-	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
+	loader, err := engine.NewTpReader(apierSv1.DataManager,
 		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -1068,7 +1068,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromFolder(ctx *context.Context, attrs *utils.
 	}
 
 	// create the TpReader
-	loader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(),
+	loader, err := engine.NewTpReader(apierSv1.DataManager,
 		csvStorage, "", apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {
@@ -1126,7 +1126,7 @@ func (apierSv1 *APIerSv1) RemoveTPFromStorDB(ctx *context.Context, attrs *AttrLo
 	if len(attrs.TPid) == 0 {
 		return utils.NewErrMandatoryIeMissing("TPid")
 	}
-	dbReader, err := engine.NewTpReader(apierSv1.DataManager.DataDB(), apierSv1.StorDb,
+	dbReader, err := engine.NewTpReader(apierSv1.DataManager, apierSv1.StorDb,
 		attrs.TPid, apierSv1.Config.GeneralCfg().DefaultTimezone,
 		apierSv1.Config.ApierCfg().CachesConns, apierSv1.Config.ApierCfg().SchedulerConns)
 	if err != nil {

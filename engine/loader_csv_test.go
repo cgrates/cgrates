@@ -280,7 +280,7 @@ var csvr *TpReader
 
 func init() {
 	var err error
-	csvr, err = NewTpReader(dm.dataDB, NewStringCSVStorage(utils.CSVSep,
+	csvr, err = NewTpReader(dm, NewStringCSVStorage(utils.CSVSep,
 		DestinationsCSVContent, TimingsCSVContent, RatesCSVContent, DestinationRatesCSVContent,
 		RatingPlansCSVContent, RatingProfilesCSVContent, SharedGroupsCSVContent,
 		ActionsCSVContent, ActionPlansCSVContent, ActionTriggersCSVContent, AccountActionsCSVContent,

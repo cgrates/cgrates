@@ -21,6 +21,7 @@ import (
 var (
 	// Globals used
 	dataDbCsv       DataDB // Each dataDb will have it's own sources to collect data
+	dmCsv           *DataManager
 	storDb          LoadStorage
 	lCfg            *config.CGRConfig
 	loader          *TpReader
@@ -89,7 +90,8 @@ func testLoaderITInitDataDB(t *testing.T) {
 	})
 
 	// Importing v1 package would create an import cycle; using the CacheS object instead.
-	chS := NewCacheS(lCfg, NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr), nil)
+	dmCsv = NewDataManager(dataDbCsv, lCfg.CacheCfg(), connMgr)
+	chS := NewCacheS(lCfg, dmCsv, nil)
 	srv, err := birpc.NewServiceWithMethodsRename(chS, utils.CacheSv1, true, func(oldFn string) (newFn string) {
 		return strings.TrimPrefix(oldFn, "V1")
 	})
@@ -134,7 +136,7 @@ func testLoaderITRemoveLoad(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	loader, err = NewTpReader(dataDbCsv, csvStorage, "", "",
+	loader, err = NewTpReader(dmCsv, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
@@ -219,7 +221,7 @@ func testLoaderITLoadFromCSV(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	loader, err = NewTpReader(dataDbCsv, csvStorage, "", "",
+	loader, err = NewTpReader(dmCsv, csvStorage, "", "",
 		[]string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err != nil {
 		t.Error(err)
@@ -550,7 +552,7 @@ func testLoaderITImportToStorDb(t *testing.T) {
 
 // Loads data from storDb into dataDb
 func testLoaderITLoadFromStorDb(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv, storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, _ := NewTpReader(dmCsv, storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	if err := loader.LoadDestinations(); err != nil && err.Error() != utils.NotFoundCaps {
 		t.Error("Failed loading destinations: ", err.Error())
 	}
@@ -587,7 +589,7 @@ func testLoaderITLoadFromStorDb(t *testing.T) {
 }
 
 func testLoaderITLoadIndividualProfiles(t *testing.T) {
-	loader, _ := NewTpReader(dataDbCsv, storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
+	loader, _ := NewTpReader(dmCsv, storDb, utils.TestSQL, "", []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)}, nil)
 	// Load ratingPlans. This will also set destination keys
 	if rps, err := storDb.GetTPRatingPlans(utils.TestSQL, "", nil); err != nil {
 		t.Fatal("Could not retrieve rating plans")

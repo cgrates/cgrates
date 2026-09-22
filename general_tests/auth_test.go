@@ -51,7 +51,7 @@ func TestAuthLoadCsvError(t *testing.T) {
 	suppliers := ``
 	attrProfiles := `cgrates.org,ATTR_1,*any,*string~*req.RunID:route1,,,*req.Info,*constant,1001,false,10`
 	chargerProfiles := ``
-	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
+	csvr, err := engine.NewTpReader(dbAuth, engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err != nil {
@@ -88,7 +88,7 @@ cgrates.org,call,*any,2013-01-06T00:00:00Z,RP_ANY,`
 	suppliers := ``
 	attrProfiles := ``
 	chargerProfiles := ``
-	csvr, err := engine.NewTpReader(dbAuth.DataDB(), engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
+	csvr, err := engine.NewTpReader(dbAuth, engine.NewStringCSVStorage(utils.CSVSep, destinations, timings, rates, destinationRates,
 		ratingPlans, ratingProfiles, sharedGroups, actions, actionPlans, actionTriggers, accountActions,
 		resLimits, ips, stats, trends, rankings, thresholds, filters, suppliers, attrProfiles, chargerProfiles, ``, ""), "", "", nil, nil)
 	if err != nil {
