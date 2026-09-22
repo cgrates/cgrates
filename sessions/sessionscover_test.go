@@ -3319,8 +3319,8 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 		"sess1": {
 
 			ID: "1001",
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"Id": {
 					ID: "Id",
 				},
 			},
