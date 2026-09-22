@@ -643,7 +643,6 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingA
 	} else { // ChargerS not requested, charge the original event
 		cgrEvs = evs
 	}
-	// Check if the unique ID was not already processed
 	if !args.reprocess {
 		for _, cgrEv := range cgrEvs {
 			me := MapEvent(cgrEv.Event)
@@ -652,20 +651,6 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingA
 					me.GetStringIgnoreErrors(utils.OriginID),
 					me.GetStringIgnoreErrors(utils.OriginHost),
 				)
-			}
-			uID := utils.ConcatenatedKey(
-				me.GetStringIgnoreErrors(utils.CGRID),
-				me.GetStringIgnoreErrors(utils.RunID),
-			)
-			if Cache.HasItem(utils.CacheCDRIDs, uID) && !args.reRate {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
-						utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
-				return nil, utils.ErrExists
-			}
-			if errCh := Cache.Set(utils.CacheCDRIDs, uID, true, nil,
-				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
-				return nil, errCh
 			}
 		}
 	}
@@ -712,6 +697,26 @@ func (cdrS *CDRServer) processEvents(evs []*utils.CGREvent, args *cdrProcessingA
 				if missing := utils.MissingMapFields(cgrEv.Event, []string{utils.Cost}); len(missing) != 0 {
 					return outEvs, utils.NewErrMandatoryIeMissing(missing...)
 				}
+			}
+		}
+	}
+	// Check if the unique ID was not already processed
+	if !args.reprocess {
+		for _, cgrEv := range cgrEvs {
+			me := MapEvent(cgrEv.Event)
+			uID := utils.ConcatenatedKey(
+				me.GetStringIgnoreErrors(utils.CGRID),
+				me.GetStringIgnoreErrors(utils.RunID),
+			)
+			if Cache.HasItem(utils.CacheCDRIDs, uID) && !args.reRate {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: <%s> processing event %+v with %s",
+						utils.CDRs, utils.ErrExists, utils.ToJSON(cgrEv), utils.CacheS))
+				return nil, utils.ErrExists
+			}
+			if errCh := Cache.Set(utils.CacheCDRIDs, uID, true, nil,
+				cacheCommit(utils.NonTransactional), utils.NonTransactional); errCh != nil {
+				return nil, errCh
 			}
 		}
 	}

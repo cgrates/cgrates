@@ -740,3 +740,60 @@ func testV2CDRsKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestCDRsUnexpectedExistsErr(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	jsonCfg := `{
+"rals": {
+	"enabled": true
+},
+"cdrs": {
+	"enabled": true,
+	"rals_conns": ["*internal"]
+},
+"apiers": {
+	"enabled": true
+}
+}`
+
+	ng := engine.TestEngine{
+		ConfigJSON: jsonCfg,
+		DBCfg:      engine.InternalDBCfg,
+	}
+	client, _ := ng.Run(t)
+
+	args := &engine.ArgV1ProcessEvent{
+		Flags: []string{utils.MetaRALs},
+		CGREvent: utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.Category:     "call",
+				utils.ToR:          utils.MetaVoice,
+				utils.OriginID:     "processCDR",
+				utils.RequestType:  utils.MetaPseudoPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.SetupTime:    time.Date(2021, time.February, 2, 15, 14, 50, 0, time.UTC),
+				utils.AnswerTime:   time.Date(2021, time.February, 2, 15, 15, 0, 0, time.UTC),
+				utils.Usage:        "invalid", // will cause conversion err (event -> cdr)
+			},
+		},
+	}
+
+	var reply string
+	if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err == nil ||
+		err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("CDRsV1.ProcessEvent err=%v, want %v", err, utils.ErrPartiallyExecuted)
+	}
+
+	args.Event[utils.Usage] = 2 * time.Second // prevent conversion error
+	if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, args, &reply); err != nil {
+		t.Error(err)
+	}
+}
