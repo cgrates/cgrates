@@ -95,38 +95,35 @@ func (s *Session) Clone() (cln *Session) {
 // AsExternalSessions returns the session as a list of ExternalSession using all SRuns (thread safe)
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	s.lk.RLock()
-	aSs = make([]*ExternalSession, len(s.SRuns))
-	for i, sr := range s.SRuns {
-		aSs[i] = &ExternalSession{
-			ID:       s.ID,
-			RunID:    sr.ID,
-			CGREvent: sr.CGREvent,
-			NodeID:   utils.EmptyString,
-		}
-	}
+	aSs = make([]*ExternalSession, 0, len(s.sRuns))
 	for _, sr := range s.sRuns {
-		eS := &ExternalSession{
-			ID:       s.ID,
-			RunID:    sr.ID,
-			CGREvent: sr.CGREvent,
-			NodeID:   utils.EmptyString,
-			Charges:  sr.Charges.Clone(),
-		}
-		if sr.UsageAdjustment != nil {
-			i, _ := sr.UsageAdjustment.Big.Int64()
-			eS.UsageAdjustment = utils.Int64Pointer(i)
-		}
-		if sr.InterimUsage != nil {
-			i, _ := sr.InterimUsage.Big.Int64()
-			eS.InterimUsage = utils.Int64Pointer(i)
-		}
-		if sr.TotalUsage != nil {
-			i, _ := sr.TotalUsage.Big.Int64()
-			eS.TotalUsage = utils.Int64Pointer(i)
-		}
-		aSs = append(aSs, eS)
+		aSs = append(aSs, sr.AsExternalSession(s.ID, nodeID))
 	}
 	s.lk.RUnlock()
+	return
+}
+
+// AsExternalSession returns SRun as an ExternalSession
+func (sr *SRun) AsExternalSession(sID, nodeID string) (eS *ExternalSession) {
+	eS = &ExternalSession{
+		ID:       sID,
+		RunID:    sr.ID,
+		CGREvent: sr.CGREvent,
+		NodeID:   nodeID,
+		Charges:  sr.Charges.Clone(),
+	}
+	if sr.UsageAdjustment != nil {
+		v, _ := sr.UsageAdjustment.Big.Int64()
+		eS.UsageAdjustment = new(v)
+	}
+	if sr.InterimUsage != nil {
+		v, _ := sr.InterimUsage.Big.Int64()
+		eS.InterimUsage = new(v)
+	}
+	if sr.TotalUsage != nil {
+		v, _ := sr.TotalUsage.Big.Int64()
+		eS.TotalUsage = new(v)
+	}
 	return
 }
 
@@ -293,9 +290,9 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 
 // setSRun will create/update a single run with the data received within CGREvent
 func (s *Session) setSRun(runID string, cgrEv *utils.CGREvent, alterableFields utils.StringSet, cch map[string]any,
-	interimConsumed, interimUsage, totalUsage *utils.Decimal) (err error) {
+	interimConsumed, interimUsage, totalUsage *utils.Decimal) (has bool, err error) {
 
-	if _, has := s.sRuns[runID]; !has {
+	if _, has = s.sRuns[runID]; !has {
 		s.sRuns[runID] = &SRun{
 			ID:       runID,
 			CGREvent: cgrEv,
