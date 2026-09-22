@@ -344,7 +344,7 @@ func main() {
 
 	ldrCfg := loadConfig()
 	// we initialize connManager here with nil for InternalChannels
-	engine.NewConnManager(ldrCfg, nil)
+	connMgr := engine.NewConnManager(ldrCfg, nil)
 
 	if !*toStorDB {
 		if dataDB, err = engine.NewDataDBConn(ldrCfg.DataDbCfg().Type,
@@ -354,7 +354,6 @@ func main() {
 			ldrCfg.DataDbCfg().Opts, ldrCfg.DataDbCfg().Items); err != nil {
 			log.Fatalf("Coud not open dataDB connection: %s", err.Error())
 		}
-		defer dataDB.Close()
 	}
 
 	if *fromStorDB || *toStorDB {
@@ -379,8 +378,12 @@ func main() {
 	if loader, err = getLoader(ldrCfg); err != nil {
 		log.Fatal(err)
 	}
+	dm := engine.NewDataManager(dataDB, ldrCfg.CacheCfg(), connMgr)
+	if dataDB != nil {
+		defer dm.Close()
+	}
 	var tpReader *engine.TpReader
-	if tpReader, err = engine.NewTpReader(dataDB, loader,
+	if tpReader, err = engine.NewTpReader(dm, loader,
 		ldrCfg.LoaderCgrCfg().TpID, ldrCfg.GeneralCfg().DefaultTimezone,
 		ldrCfg.LoaderCgrCfg().CachesConns,
 		ldrCfg.LoaderCgrCfg().SchedulerConns); err != nil {
