@@ -7,6 +7,7 @@
 package sessions
 
 import (
+	"strings"
 	"testing"
 	"time"
 
@@ -2098,5 +2099,251 @@ func TestSessionSv1ProcessEventChargerRuns(t *testing.T) {
 	wantBalance2 := utils.NewDecimalFromFloat64(float64(90 * time.Second))
 	if acnt.Balances["Balance2"].Units.Compare(wantBalance2) != 0 {
 		t.Errorf("Balance2 = %+v, want 90s", acnt.Balances["Balance2"].Units)
+	}
+}
+
+func TestSessionSv1ProcessEventChargerFilterIDsNoMatch(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrSubjectNoMatch",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Subject",
+						Values:  []string{"noMatch"},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				FilterIDs:    []string{"FltrSubjectNoMatch"},
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "1001",
+				Balances: map[string]*utils.Balance{
+					"AbstractBal": {
+						ID:      "AbstractBal",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(60 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	var rply V1ProcessEventReply
+	err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EvNoMatch",
+			APIOpts: map[string]any{
+				utils.MetaChargers: true,
+				utils.MetaAccounts: true,
+				utils.MetaDebit:    true,
+				utils.MetaUsage:    30 * time.Second,
+				utils.MetaOriginID: "originNoMatch",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Subject:      "1009",
+				utils.Destination:  "1002",
+				utils.ToR:          utils.MetaVoice,
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply)
+
+	if err == nil {
+		t.Fatal("expected CHARGERS_ERROR:NOT_FOUND, got nil")
+	}
+	if !strings.Contains(err.Error(), "CHARGERS_ERROR:NOT_FOUND") {
+		t.Errorf("ProcessEvent error = %q, want CHARGERS_ERROR:NOT_FOUND", err.Error())
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	wantUnits := utils.NewDecimalFromFloat64(float64(60 * time.Second))
+	if acnt.Balances["AbstractBal"].Units.Compare(wantUnits) != 0 {
+		t.Errorf("AbstractBal = %+v, want 60s", acnt.Balances["AbstractBal"].Units)
+	}
+}
+func TestSessionSv1ProcessEventAccountFilterIDsNoMatch(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
+		&engine.FilterWithAPIOpts{
+			Filter: &engine.Filter{
+				Tenant: "cgrates.org",
+				ID:     "FltrSubjectNoMatch",
+				Rules: []*engine.FilterRule{
+					{
+						Type:    utils.MetaString,
+						Element: "~*req.Subject",
+						Values:  []string{"noMatch"},
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetFilter: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:    "cgrates.org",
+				ID:        "1001",
+				FilterIDs: []string{"FltrSubjectNoMatch"},
+				Balances: map[string]*utils.Balance{
+					"AbstractBal": {
+						ID:      "AbstractBal",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(60 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	var rply V1ProcessEventReply
+	err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "EvAccountNoMatch",
+			APIOpts: map[string]any{
+				utils.MetaChargers: true,
+				utils.MetaAccounts: true,
+				utils.MetaDebit:    true,
+				utils.MetaUsage:    30 * time.Second,
+				utils.MetaOriginID: "originAccountNoMatch",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Subject:      "1009",
+				utils.Destination:  "1002",
+				utils.ToR:          utils.MetaVoice,
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply)
+
+	if err == nil {
+		t.Fatal("expected PARTIALLY_EXECUTED, got nil")
+	}
+	if err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("ProcessEvent error = %q, want %q", err.Error(), utils.ErrPartiallyExecuted.Error())
+	}
+	if len(rply.AccountsUsage) != 0 {
+		t.Errorf("expected empty AccountsUsage, got %+v", rply.AccountsUsage)
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+
+	wantUnits := utils.NewDecimalFromFloat64(float64(60 * time.Second))
+	if acnt.Balances["AbstractBal"].Units.Compare(wantUnits) != 0 {
+		t.Errorf("AbstractBal = %+v, want 60s", acnt.Balances["AbstractBal"].Units)
 	}
 }
