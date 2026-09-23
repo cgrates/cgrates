@@ -764,6 +764,9 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 				totalUsage, _ := s.sRuns[runID].TotalUsage.Duration()
 				apiRply.AccountsUsage[runID] = totalUsage
 			}
+			if charges := s.sRuns[runID].Charges; charges != nil {
+				cgrEv.APIOpts[utils.MetaAccountsCost] = charges
+			}
 		}
 		// UsageRecords generation
 		if ur, errUR := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
