@@ -952,6 +952,12 @@ func (AttributesDigestConverter) Convert(in any) (any, error) {
 	switch val := in.(type) {
 	case *AttributesProcessEventReply:
 		return val.Digest(), nil
+	case map[string]*DataNode: // reply resolved through AsNavigableMap
+		items := make([]string, 0, len(val))
+		for name, node := range val {
+			items = append(items, name+InInFieldSep+node.Value.String())
+		}
+		return strings.Join(items, FieldsSep), nil
 	default:
 		return nil, fmt.Errorf("*attributesDigest converter: failed to convert %T to string", in)
 	}
