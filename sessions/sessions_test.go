@@ -5,6 +5,7 @@ package sessions
 
 import (
 	"bytes"
+	"fmt"
 	"net/netip"
 	"reflect"
 	"strings"
@@ -3071,4 +3072,72 @@ func TestSetSTerminator(t *testing.T) {
 			t.Error("Expected session to be unregistered after automatic termination")
 		}
 	})
+}
+
+func TestSessionSForceSTerminate(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				argConv, can := args.(*utils.CGREventWithEeIDs)
+				if !can {
+					return fmt.Errorf("Wrong argument type: %T", args)
+				}
+				if argConv.Tenant != "cgrates.org" {
+					return fmt.Errorf("Expected %+v, received %+v", "cgrates.org", argConv.Tenant)
+				}
+				return nil
+			},
+			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = utils.OK
+				return nil
+			},
+			utils.IPsV1ReleaseIP: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*string) = utils.OK
+				return nil
+			},
+		},
+	}
+	addInternalConn(sessions, cfg, utils.MetaEEs, utils.EeSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaResources, utils.ResourceSv1, clnt)
+	addInternalConn(sessions, cfg, utils.MetaIPs, utils.IPsV1, clnt)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event:  map[string]any{utils.AccountField: "1001"},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaEEs:      true,
+			utils.MetaSession:  true,
+		},
+	}
+	cch := map[string]any{utils.MetaCGRid: ev.ID}
+	clientConnID := "ccID"
+	s, err := sessions.setSession(ctx, ev, cch, clientConnID)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		t.Error(err)
+	}
+	if activeS := sessions.getSessions(s.ID, false); len(activeS) != 0 {
+		t.Errorf("Expected session to be unregistered, recieved %v", activeS)
+	}
 }

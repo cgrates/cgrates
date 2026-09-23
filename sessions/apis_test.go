@@ -485,6 +485,48 @@ func TestSessionSBiRPCv1ProcessEventNotConnected(t *testing.T) {
 			},
 			expErr: "PARTIALLY_EXECUTED",
 		},
+		{
+			name: "MetaIPsAllocateCfg: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaIPsAllocateCfg:  true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "MetaIPsReleaseCfg: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:        "originID",
+					utils.OptsSesBlockerError: false,
+					utils.MetaIPsReleaseCfg:   true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			name: "MetaResourcesAuthorizeCfg: PARTIALLY_EXECUTED",
+			args: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event:  map[string]any{utils.AccountField: "1001"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:              "originID",
+					utils.OptsSesBlockerError:       false,
+					utils.MetaResourcesAuthorizeCfg: true,
+				},
+			},
+			expErr: "PARTIALLY_EXECUTED",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -1599,6 +1641,16 @@ func TestSessionSBiRPCv1ProcessEventNonBlockingParseErrors(t *testing.T) {
 			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
 		},
 		{
+			flag:        utils.MetaIPsAllocateCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
+			flag:        utils.MetaIPsReleaseCfg,
+			blockerErr:  true,
+			expectedErr: `strconv.ParseBool: parsing "test": invalid syntax`,
+		},
+		{
 			flag:        utils.MetaRoutes,
 			blockerErr:  false,
 			expectedErr: "PARTIALLY_EXECUTED",
@@ -1690,6 +1742,16 @@ func TestSessionSBiRPCv1ProcessEventNonBlockingParseErrors(t *testing.T) {
 		},
 		{
 			flag:        utils.MetaEEs,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaIPsAllocateCfg,
+			blockerErr:  false,
+			expectedErr: "PARTIALLY_EXECUTED",
+		},
+		{
+			flag:        utils.MetaIPsReleaseCfg,
 			blockerErr:  false,
 			expectedErr: "PARTIALLY_EXECUTED",
 		},
