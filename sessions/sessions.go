@@ -809,7 +809,7 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	originIDs, _ /*matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	originIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
@@ -833,10 +833,14 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		for _, sr := range s.sRuns {
+		runIDs := matchingSRuns[s.ID]
+		for runID, sr := range s.sRuns {
+			if len(originIDs) != 0 && !runIDs.Has(runID) {
+				continue
+			}
 			if pass(unindx, sr.CGREvent.Event) {
 				aSs = append(aSs,
-					sr.AsExternalSession(s.ID, sS.cfg.GeneralCfg().NodeID))
+					s.AsExternalSession(runID, sS.cfg.GeneralCfg().NodeID))
 				if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
 					s.lk.RUnlock()
 					return aSs[:*sf.Limit]
@@ -862,7 +866,7 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	originIDs, _ /* matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	originIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
@@ -885,7 +889,11 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		for _, sr := range s.sRuns {
+		runIDs := matchingSRuns[s.ID]
+		for runID, sr := range s.sRuns {
+			if len(originIDs) != 0 && !runIDs.Has(runID) {
+				continue
+			}
 			if pass(unindx, sr.CGREvent.Event) {
 				count++
 			}

@@ -3747,3 +3747,121 @@ cgrates.org,ATTR1,,;10,;false,,,*opts.*originID,*constant,sessFltr3`,
 	runPerEngine(t, client1, utils.EmptyString)
 	runPerEngine(t, client2, "Indexed")
 }
+
+func TestSessionSv1ProcessEventAlterIndexedField(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+	"enabled": true,
+	"sessionIndexes": ["Account"],
+	"alterableFields": ["Account"],
+	"conns": {
+		"*chargers": [{"connIDs": ["*internal"]}]
+	}
+},
+"attributes": {
+	"enabled": true
+},
+"chargers": {
+	"enabled": true,
+	"conns": {
+		"*attributes": [{"connIDs": ["*internal"]}]
+	}
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+		TpFiles: map[string]string{
+			utils.ChargersCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
+cgrates.org,CHRG_1,,;20,,run1,*none
+cgrates.org,CHRG_2,,;20,,run2,ATTR_ACNT_1002`,
+			utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_ACNT_1002,,;10,;false,,,*req.Account,*constant,1002`,
+		},
+	}
+	client, _ := ng.Run(t)
+
+	var rply V1ProcessEventReply
+	if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			APIOpts: map[string]any{
+				utils.MetaSession:      true,
+				utils.MetaChargers:     true,
+				utils.MetaOriginID:     "sessAlter",
+				utils.MetaInterimUsage: 10 * time.Second,
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+		}, &rply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			APIOpts: map[string]any{
+				utils.MetaSession:      true,
+				utils.MetaRunID:        "run2",
+				utils.MetaOriginID:     "sessAlter",
+				utils.MetaInterimUsage: 10 * time.Second,
+			},
+			Event: map[string]any{
+				utils.AccountField: "1003",
+			},
+		}, &rply); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name    string
+		acnt    string
+		expRuns map[string]string
+	}{
+		{
+			name:    "AlteredRun",
+			acnt:    "1003",
+			expRuns: map[string]string{"run2": "1003"},
+		},
+		{
+			name:    "NoMatch",
+			acnt:    "1002",
+			expRuns: map[string]string{},
+		},
+		{
+			name:    "NonAlteredRun",
+			acnt:    "1001",
+			expRuns: map[string]string{"run1": "1001"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fltr := &utils.SessionFilter{
+				Filters: []string{"*string:~*req.Account:" + tt.acnt},
+			}
+			var sessions []*ExternalSession
+			if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+				fltr, &sessions); err != nil &&
+				(len(tt.expRuns) != 0 || err.Error() != utils.ErrNotFound.Error()) {
+				t.Fatal(err)
+			}
+			rcvRuns := make(map[string]string)
+			for _, s := range sessions {
+				rcvRuns[s.RunID] = utils.IfaceAsString(s.CGREvent.Event[utils.AccountField])
+			}
+			if !reflect.DeepEqual(tt.expRuns, rcvRuns) {
+				t.Errorf("expected runs %s, received %s", utils.ToJSON(tt.expRuns), utils.ToIJSON(sessions))
+			}
+			var count int
+			if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessionsCount,
+				fltr, &count); err != nil {
+				t.Fatal(err)
+			} else if count != len(tt.expRuns) {
+				t.Errorf("expected count %d, received %d", len(tt.expRuns), count)
+			}
+		})
+	}
+}
