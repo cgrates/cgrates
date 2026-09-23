@@ -690,16 +690,16 @@ func TestNewSession(t *testing.T) {
 func TestSessionAsExternalSession(t *testing.T) {
 	session := &Session{
 		ID: "sess1",
-		SRuns: []*SRun{
-			{
+		sRuns: map[string]*SRun{
+			"run1": {
 				ID:       "run1",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
 			},
-			{
+			"run2": {
 				ID:       "run2",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
 			},
-			{
+			"run3": {
 				ID:       "run3",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates3.org", ID: "event3"},
 			},
@@ -708,28 +708,28 @@ func TestSessionAsExternalSession(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		sRunIdx        int
+		sRunIdx        string
 		nodeID         string
 		expectedRunID  string
 		expectedTenant string
 	}{
 		{
 			name:           "First run with debit",
-			sRunIdx:        0,
+			sRunIdx:        "run1",
 			nodeID:         "nodeA",
 			expectedRunID:  "run1",
 			expectedTenant: "cgrates1.org",
 		},
 		{
 			name:           "Second run with debit",
-			sRunIdx:        1,
+			sRunIdx:        "run2",
 			nodeID:         "nodeB",
 			expectedRunID:  "run2",
 			expectedTenant: "cgrates2.org",
 		},
 		{
 			name:           "Third run without debit",
-			sRunIdx:        2,
+			sRunIdx:        "run3",
 			nodeID:         "nodeC",
 			expectedRunID:  "run3",
 			expectedTenant: "cgrates3.org",
@@ -847,8 +847,10 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "run1",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event1",
+					Tenant:  "cgrates.org",
+					ID:      "event1",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
 				NodeID:          "node1",
 				UsageAdjustment: utils.Int64Pointer(5),
@@ -859,8 +861,10 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "run2",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event2",
+					Tenant:  "cgrates.org",
+					ID:      "event2",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
 				NodeID:          "node1",
 				UsageAdjustment: utils.Int64Pointer(5),
@@ -902,8 +906,10 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "runid",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event3",
+					Tenant:  "cgrates.org",
+					ID:      "event3",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
 				NodeID:          "node1",
 				UsageAdjustment: utils.Int64Pointer(5),
@@ -952,8 +958,10 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "runid",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event3",
+					Tenant:  "cgrates.org",
+					ID:      "event3",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
 				NodeID:          "",
 				UsageAdjustment: utils.Int64Pointer(5),

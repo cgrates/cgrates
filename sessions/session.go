@@ -96,21 +96,24 @@ func (s *Session) Clone() (cln *Session) {
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	s.lk.RLock()
 	aSs = make([]*ExternalSession, 0, len(s.sRuns))
-	for _, sr := range s.sRuns {
-		aSs = append(aSs, sr.AsExternalSession(s.ID, nodeID))
+	for runID := range s.sRuns {
+		aSs = append(aSs, s.AsExternalSession(runID, nodeID))
 	}
 	s.lk.RUnlock()
 	return
 }
 
 // AsExternalSession returns SRun as an ExternalSession
-func (sr *SRun) AsExternalSession(sID, nodeID string) (eS *ExternalSession) {
+func (s *Session) AsExternalSession(runID, nodeID string) (eS *ExternalSession) {
+	sr := s.sRuns[runID]
 	eS = &ExternalSession{
-		ID:       sID,
-		RunID:    sr.ID,
-		CGREvent: sr.CGREvent,
-		NodeID:   nodeID,
-		Charges:  sr.Charges.Clone(),
+		ID:      s.ID,
+		RunID:   sr.ID,
+		NodeID:  nodeID,
+		Charges: sr.Charges.Clone(),
+	}
+	if sr.CGREvent != nil {
+		eS.CGREvent = sr.CGREvent.Clone()
 	}
 	if sr.UsageAdjustment != nil {
 		v, _ := sr.UsageAdjustment.Big.Int64()
@@ -123,17 +126,6 @@ func (sr *SRun) AsExternalSession(sID, nodeID string) (eS *ExternalSession) {
 	if sr.TotalUsage != nil {
 		v, _ := sr.TotalUsage.Big.Int64()
 		eS.TotalUsage = new(v)
-	}
-	return
-}
-
-// AsExternalSession returns the session as an ExternalSession using the SRuns given
-func (s *Session) AsExternalSession(sRunIdx int, nodeID string) (aS *ExternalSession) {
-	aS = &ExternalSession{
-		ID:       s.ID,
-		RunID:    s.SRuns[sRunIdx].ID,
-		CGREvent: s.SRuns[sRunIdx].CGREvent,
-		NodeID:   nodeID,
 	}
 	return
 }
@@ -166,6 +158,34 @@ func (s *Session) stopSTerminator() {
 	}
 	close(s.sTerminator.endChan)
 	s.sTerminator.endChan = nil
+}
+
+// setSRun will create/update a single run with the data received within CGREvent
+func (s *Session) setSRun(runID string, cgrEv *utils.CGREvent, alterableFields, indexedFields utils.StringSet,
+	cch map[string]any, interimConsumed, interimUsage, totalUsage *utils.Decimal) (has, reIdx bool, err error) {
+	var sr *SRun
+	if sr, has = s.sRuns[runID]; !has {
+		sr = &SRun{
+			ID:       runID,
+			CGREvent: cgrEv.Clone(),
+		}
+		s.sRuns[runID] = sr
+	}
+	sr.computeUsages(interimConsumed, interimUsage, totalUsage)
+	if !has || len(alterableFields) == 0 {
+		return
+	}
+	for k, v := range cgrEv.Event {
+		if !alterableFields.Has(k) {
+			continue
+		}
+		if indexedFields.Has(k) &&
+			utils.IfaceAsString(sr.CGREvent.Event[k]) != utils.IfaceAsString(v) {
+			reIdx = true
+		}
+		sr.CGREvent.Event[k] = v
+	}
+	return
 }
 
 /*
@@ -286,20 +306,4 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 			sr.CGREvent.Event[k] = v
 		}
 	}
-}
-
-// setSRun will create/update a single run with the data received within CGREvent
-func (s *Session) setSRun(runID string, cgrEv *utils.CGREvent, alterableFields utils.StringSet, cch map[string]any,
-	interimConsumed, interimUsage, totalUsage *utils.Decimal) (has bool, err error) {
-
-	if _, has = s.sRuns[runID]; !has {
-		s.sRuns[runID] = &SRun{
-			ID:       runID,
-			CGREvent: cgrEv,
-		}
-	}
-
-	s.sRuns[runID].computeUsages(interimConsumed, interimUsage, totalUsage)
-
-	return
 }
