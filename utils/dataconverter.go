@@ -921,10 +921,26 @@ func (c *UnitsConverter) Convert(in any) (out any, err error) {
 
 type RoutesDigestConverter struct{}
 
-func (*RoutesDigestConverter) Convert(in any) (any, error) {
-	switch s := in.(type) {
+func (RoutesDigestConverter) Convert(in any) (any, error) {
+	switch val := in.(type) {
 	case SortedRoutesList:
-		return s.Digest(), nil
+		return val.Digest(), nil
+	case []*DataNode:
+		var items []string
+		uniqueRouteIDs := make(StringSet)
+		for _, profile := range val {
+			for _, route := range profile.Map[CapRoutes].Slice {
+				item := route.Map[RouteID].Value.String()
+				if params := route.Map[RouteParameters].Value.String(); params != "" {
+					item += InInFieldSep + params
+				}
+				if !uniqueRouteIDs.Has(item) {
+					uniqueRouteIDs.Add(item)
+					items = append(items, item)
+				}
+			}
+		}
+		return strings.Join(items, FieldsSep), nil
 	default:
 		return nil, fmt.Errorf("*routesDigest converter: failed to convert %T to string", in)
 	}
