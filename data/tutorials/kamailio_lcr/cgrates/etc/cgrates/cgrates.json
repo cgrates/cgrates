@@ -83,9 +83,9 @@
             "value": "~*cgrep.Error" },
           { "tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
             "value": "~*vars.MaxUsage{*durationSeconds}" },
-          { "tag": "Routes", "path": "*rep.Routes", "type": "*generic",
+          { "tag": "Routes", "path": "*rep.Routes", "type": "*variable",
             "value": "~*cgrep.RouteProfiles[*primary]{*routesDigest}" },
-          { "tag": "Attributes", "path": "*rep.Attributes", "type": "*generic",
+          { "tag": "Attributes", "path": "*rep.Attributes", "type": "*variable",
             "value": "~*cgrep.Attributes[*primary]{*attributesDigest}" }
         ]
       },

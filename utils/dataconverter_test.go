@@ -2044,6 +2044,12 @@ func TestUnitsConverter(t *testing.T) {
 }
 
 func TestRoutesDigestConverter(t *testing.T) {
+	nodes := SortedRoutesList{{
+		Routes: []*SortedRoute{
+			{RouteID: "route1", RouteParameters: "param1"},
+			{RouteID: "route2", RouteParameters: "param2"},
+		},
+	}}.AsNavigableMap().Slice
 	tests := []struct {
 		name   string
 		in     any
@@ -2176,6 +2182,21 @@ func TestRoutesDigestConverter(t *testing.T) {
 			exp: "",
 		},
 		{
+			name: "DataNode slice",
+			in:   nodes,
+			exp:  "route1:param1,route2:param2",
+		},
+		{
+			name: "JSON DataNode slice",
+			in:   ToJSON(nodes),
+			exp:  "route1:param1,route2:param2",
+		},
+		{
+			name:   "Invalid JSON",
+			in:     "{",
+			expErr: "unexpected end of JSON input",
+		},
+		{
 			name:   "Error case",
 			in:     []any{},
 			expErr: "*routesDigest converter: failed to convert []interface {} to string",
@@ -2185,6 +2206,9 @@ func TestRoutesDigestConverter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			rdc := new(RoutesDigestConverter)
 			rcv, err := rdc.Convert(tt.in)
+			if err == nil && tt.expErr != "" {
+				t.Fatalf("Expected error %q, received nil", tt.expErr)
+			}
 			if err != nil && err.Error() != tt.expErr {
 				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
 			}
@@ -2196,6 +2220,7 @@ func TestRoutesDigestConverter(t *testing.T) {
 }
 
 func TestAttributesDigestConverter(t *testing.T) {
+	nodes := map[string]*DataNode{AccountField: NewLeafNode("1001")}
 	tests := []struct {
 		name   string
 		in     any
@@ -2314,6 +2339,21 @@ func TestAttributesDigestConverter(t *testing.T) {
 			want: "",
 		},
 		{
+			name: "DataNode map",
+			in:   nodes,
+			want: "Account:1001",
+		},
+		{
+			name: "JSON DataNode map",
+			in:   ToJSON(nodes),
+			want: "Account:1001",
+		},
+		{
+			name:   "Invalid JSON",
+			in:     "{",
+			expErr: "unexpected end of JSON input",
+		},
+		{
 			name:   "Error case",
 			in:     []any{},
 			expErr: "*attributesDigest converter: failed to convert []interface {} to string",
@@ -2323,6 +2363,9 @@ func TestAttributesDigestConverter(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			adc := new(AttributesDigestConverter)
 			rcv, err := adc.Convert(tt.in)
+			if err == nil && tt.expErr != "" {
+				t.Fatalf("Expected error %q, received nil", tt.expErr)
+			}
 			if err != nil && err.Error() != tt.expErr {
 				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
 			}

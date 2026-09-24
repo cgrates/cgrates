@@ -921,10 +921,16 @@ func (c *UnitsConverter) Convert(in any) (out any, err error) {
 
 type RoutesDigestConverter struct{}
 
-func (RoutesDigestConverter) Convert(in any) (any, error) {
+func (c RoutesDigestConverter) Convert(in any) (any, error) {
 	switch val := in.(type) {
 	case SortedRoutesList:
 		return val.Digest(), nil
+	case string:
+		var nodes []*DataNode
+		if err := json.Unmarshal([]byte(val), &nodes); err != nil {
+			return nil, err
+		}
+		return c.Convert(nodes)
 	case []*DataNode:
 		var items []string
 		uniqueRouteIDs := make(StringSet)
@@ -948,10 +954,16 @@ func (RoutesDigestConverter) Convert(in any) (any, error) {
 
 type AttributesDigestConverter struct{}
 
-func (AttributesDigestConverter) Convert(in any) (any, error) {
+func (c AttributesDigestConverter) Convert(in any) (any, error) {
 	switch val := in.(type) {
 	case *AttributesProcessEventReply:
 		return val.Digest(), nil
+	case string:
+		var nodes map[string]*DataNode
+		if err := json.Unmarshal([]byte(val), &nodes); err != nil {
+			return nil, err
+		}
+		return c.Convert(nodes)
 	case map[string]*DataNode: // reply resolved through AsNavigableMap
 		items := make([]string, 0, len(val))
 		for name, node := range val {
