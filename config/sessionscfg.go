@@ -100,6 +100,7 @@ type SessionsOpts struct {
 	AccountsRefund         []*DynamicBoolOpt
 	Session                []*DynamicBoolOpt
 	AutoChargeInterval     []*DynamicDurationOpt
+	AutoChargeUsage        []*DynamicDecimalOpt
 	EEs                    []*DynamicBoolOpt
 	EEsIDs                 []*DynamicStringOpt
 	UR                     []*DynamicBoolOpt // UsageRecord generation
@@ -780,6 +781,7 @@ type SessionsOptsJson struct {
 	TTL                    []*DynamicInterfaceOpt `json:"*ttl"`
 	Chargeable             []*DynamicInterfaceOpt `json:"*chargeable"`
 	AutoChargeInterval     []*DynamicInterfaceOpt `json:"*autoChargeInterval"`
+	AutoChargeUsage        []*DynamicInterfaceOpt `json:"*autoChargeUsage"`
 	TTLLastUsage           []*DynamicInterfaceOpt `json:"*ttlLastUsage"`
 	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
 	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`

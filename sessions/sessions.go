@@ -953,36 +953,6 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 		}
 		sS.registerSession(s, false)
 	}
-	/*
-			s.updateSRuns(cgrEv.Event, sS.cfg.SessionSCfg().AlterableFields)
-		}
-		var interimConsumed *utils.Decimal
-		if iCsmd, has := cch[utils.MetaInterimConsumed]; has {
-			t, canCast := iCsmd.(*utils.Decimal)
-			if canCast {
-				interimConsumed = t
-			}
-		}
-		var interimUsage *utils.Decimal
-		if iU, has := cch[utils.MetaInterimUsage]; has {
-			t, canCast := iU.(*utils.Decimal)
-			if canCast {
-				interimUsage = t
-			}
-		}
-		var totalUsage *utils.Decimal
-		if tU, has := cch[utils.MetaTotalUsage]; has {
-			t, canCast := tU.(*utils.Decimal)
-			if canCast {
-				totalUsage = t
-			}
-		}
-		for _, sr := range s.sRuns { // FixMe: pass this from outside, so we can select individual debits per SRun
-			if err = sr.updateUsages(interimConsumed, interimUsage, totalUsage); err != nil {
-				return
-			}
-		}
-	*/
 	sS.setSTerminator(ctx, s, cgrEv.APIOpts) // start termination timer
 	return
 }
@@ -992,7 +962,9 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 	s.lk.Lock()
 	defer s.lk.Unlock()
 	s.stopSTerminator()
-	//s.stopDebitLoops()
+	for _, sRun := range s.SRuns {
+		sS.DisableAutoChargeSRun(sRun)
+	}
 	for _, sRun := range s.sRuns {
 		if sRun.Charges == nil {
 			continue
@@ -1000,7 +972,8 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 		sRun.CGREvent.APIOpts[utils.MetaAccountsCost] = sRun.Charges
 
 		// corrections don't make much sense without previous charges
-		if sRun.Charges.Abstracts == nil || sRun.Charges.Abstracts.Compare(utils.NewDecimal(0, 0)) != 1 {
+		if sRun.Charges.Abstracts == nil ||
+			sRun.Charges.Abstracts.Compare(utils.NewDecimal(0, 0)) != 1 {
 			continue
 		}
 
@@ -1028,10 +1001,57 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 	return
 }
 
+// EnableAutoChargeSRun will enable autocharging loop on a SRun
+func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Duration) {
+	var autoChargeUsage *utils.Decimal
+	var eEc *utils.EventCharges
+	var err error
+	for {
+		sRun.lk.RLock()
+		cgrEv := sRun.CGREvent.Clone()
+		sRun.lk.RUnlock()
+		if autoChargeUsage, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeUsage,
+			utils.MetaAutoChargeUsageCfg); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
+		} else {
+			cgrEv.APIOpts[utils.MetaUsage] = autoChargeUsage // dynamically change the next usage
+			if eEc, err = sS.accountSDebitEvent(context.TODO(), cgrEv); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+						utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
+			}
+			sRun.lk.Lock()
+			sRun.Charges.Merge(eEc)
+			sRun.NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
+			sRun.lk.Unlock()
+		}
+		select {
+		case <-sRun.autoChargeStop:
+			return
+		case <-time.After(autoChargeInterval):
+			continue
+		}
+	}
+}
+
+// DisableAutoChargeSRun will disable autocharging loop on a SRun
+func (sS *SessionS) DisableAutoChargeSRun(sRun *SRun) {
+	sRun.lk.Lock()
+	if sRun.autoChargeStop != nil {
+		close(sRun.autoChargeStop)
+		sRun.autoChargeStop = nil
+	}
+	sRun.lk.Unlock()
+}
+
 // ipsAuthorize will authorize the event with the IPs subsystem
 func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
+	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs,
+		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
 	}
 	if len(conns) == 0 {

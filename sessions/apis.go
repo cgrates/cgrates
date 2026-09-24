@@ -755,17 +755,16 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			return errTerminate
 		}
 	}
-
 	for runID, cgrEv := range cgrEvs { // need to run here in the eventuality of terminate being called
 		cchEv := make(map[string]any)
-
-		if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil { // terminate corrections
+		// terminate corrections
+		if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil {
 			if _, has := apiRply.AccountsUsage[runID]; has { // correct usage to reflect total usage instead of interm one
 				totalUsage, _ := s.sRuns[runID].TotalUsage.Duration()
 				apiRply.AccountsUsage[runID] = totalUsage
 			}
-			if charges := s.sRuns[runID].Charges; charges != nil {
-				cgrEv.APIOpts[utils.MetaAccountsCost] = charges
+			if s.sRuns[runID].Charges != nil {
+				cgrEv.APIOpts[utils.MetaAccountsCost] = s.sRuns[runID].Charges
 			}
 		}
 		// UsageRecords generation
@@ -785,7 +784,6 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 			}
 			apiRply.UsageRecords[runID] = cgrEv
 		}
-
 		// Event Exports
 		if ees, errEEs := engine.GetBoolOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cchEv,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.EEs,

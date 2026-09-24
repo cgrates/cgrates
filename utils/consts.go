@@ -2185,11 +2185,13 @@ const (
 	MetaTTLCfg                    = "*ttl"
 	MetaChargeableCfg             = "*chargeable"
 	MetaAutoChargeIntervalCfg     = "*autoChargeInterval"
+	MetaAutoChargeUsageCfg        = "*autoChargeUsage"
 	MetaTTLLastUsageCfg           = "*ttlLastUsage"
 	MetaTTLLastUsedCfg            = "*ttlLastUsed"
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
 	MetaTTLUsageCfg               = "*ttlUsage"
 	MetaAccountsForceUsage        = "*accountsForceUsage"
+	AutoCharge                    = "AutoCharge"
 
 	// AnalyzerSCfg
 	CleanupIntervalCfg = "cleanupInterval"

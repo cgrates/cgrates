@@ -65,7 +65,6 @@ type Session struct {
 
 	lk          sync.RWMutex
 	sTerminator *sTerminator // automatic timeout for the session
-
 }
 
 // Clone is a thread safe method to clone the sessions information
@@ -201,11 +200,11 @@ type SRun struct {
 	AutoChargeInterval *time.Duration      // Enable auto-charging
 	NextAutoCharge     *time.Time          // Save here the next auto-charge so we can continue on failover
 
-	sessionStop    chan struct{} // pass here the session stop channel, so we can close it from within debit loops
 	autoChargeStop chan struct{} // stop the autoCharge from outside by closing this channel, not nil means it was already started
 
 	lclDebit  *utils.Decimal // last positive adjustment done, treated as local debit
 	nextDebit *utils.Decimal // this specifies the amount should be debitted on next run
+	lk        sync.RWMutex   // protects the SRun on concurrency
 }
 
 // Clone returns the cloned version of SRun
