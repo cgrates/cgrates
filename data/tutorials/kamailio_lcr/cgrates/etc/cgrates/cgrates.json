@@ -83,11 +83,10 @@
             "value": "~*cgrep.Error" },
           { "tag": "MaxUsage", "path": "*rep.MaxUsage", "type": "*variable",
             "value": "~*vars.MaxUsage{*durationSeconds}" },
-          { "tag": "RouteID", "path": "*rep.Routes", "type": "*variable",
-            "value": "~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteID" },
-          { "tag": "RouteParameters", "path": "*rep.Routes", "type": "*composed",
-            "filters": [ "*notempty:~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteParameters:" ],
-            "value": ":;~*cgrep.RouteProfiles[*primary][0].Routes[0].RouteParameters" }
+          { "tag": "Routes", "path": "*rep.Routes", "type": "*generic",
+            "value": "~*cgrep.RouteProfiles[*primary]{*routesDigest}" },
+          { "tag": "Attributes", "path": "*rep.Attributes", "type": "*generic",
+            "value": "~*cgrep.Attributes[*primary]{*attributesDigest}" }
         ]
       },
       {
@@ -98,7 +97,27 @@
       {
         "id": "CallEnd",
         "filters": [ "*string:~*req.event:CGR_CALL_END" ],
-        "flags": [ "*sessions" ]
+        "flags": [ "*sessions" ],
+        "requestFields": [
+          { "tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable",
+            "value": "~*req.OriginID" },
+          { "tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+            "value": "~*vars.OriginHost" },
+          { "tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+            "value": "~*req.Account" },
+          { "tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+            "value": "~*req.Destination" },
+          { "tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
+            "value": "~*req.AnswerTime" },
+          { "tag": "RateProfileID", "path": "*cgreq.RateProfileID", "type": "*variable",
+            "value": "~*req.RateProfileID" },
+          { "tag": "event", "path": "*cgreq.event", "type": "*variable",
+            "value": "~*req.event" },
+          { "tag": "evapiConnID", "path": "*cgreq.evapiConnID", "type": "*variable",
+            "value": "~*vars.evapiConnID" },
+          { "tag": "Usage", "path": "*cgreq.Usage", "type": "*composed",
+            "value": "~*req.Usage;s" }
+        ]
       }
     ]
   },

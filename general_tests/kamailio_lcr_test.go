@@ -178,6 +178,9 @@ func TestKamailioLCR(t *testing.T) {
 		if ratesCost.ID != wantRateProfile {
 			t.Errorf("export %s rate profile = %q, want %q", dst, ratesCost.ID, wantRateProfile)
 		}
+		if usage, ok := accountsCost.Abstracts.Duration(); !ok || usage < time.Second {
+			t.Errorf("export %s usage = %v, want at least 1s", dst, usage)
+		}
 		if accountsCost.Concretes == nil || accountsCost.Concretes.Compare(zero) <= 0 ||
 			ratesCost.Cost == nil || ratesCost.Cost.Compare(zero) <= 0 {
 			t.Errorf("export %s missing cost: accountsCost=%v ratesCost=%v", dst, accountsCost.Concretes, ratesCost.Cost)
