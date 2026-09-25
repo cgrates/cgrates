@@ -1070,7 +1070,7 @@
 // 			"reconnects": 5
 // 		}
 // 	],
-// 	"requestProcessors": []			// generic request processors, mapping the Kamailio events via templates
+// 	"requestProcessors": [],		// list of processors to be applied to Kamailio events
 // },
 
 
@@ -2328,6 +2328,34 @@
 // 		{"tag":"DisconnectCause","path":"*cgreq.DisconnectCause",
 // 		    "filters":["*notempty:*req.Hangup-Cause:"],"type":"*variable","value":"~*req.Hangup-Cause"},
 //     ],
+// 	"*kamr": [
+// 		{"tag": "originID", "path": "*opts.*originID", "type": "*variable",
+// 			"value": "~*req.OriginID"},
+// 		{"tag": "OriginHost", "path": "*cgreq.OriginHost", "type": "*variable",
+// 			"value": "~*vars.OriginHost"},
+// 		{"tag": "Source", "path": "*cgreq.Source", "type": "*constant",
+// 			"value": "KamailioAgent"},
+// 		{"tag": "EvapiConnID", "path": "*cgreq.evapiConnID", "type": "*variable",
+// 			"value": "~*vars.evapiConnID"},
+// 		{"tag": "HashEntry", "path": "*cgreq.hEntry", "type": "*variable",
+// 			"filters": ["*notempty:*req.hEntry:"], "value": "~*req.hEntry"},
+// 		{"tag": "HashID", "path": "*cgreq.hID", "type": "*variable",
+// 			"filters": ["*notempty:*req.hID:"], "value": "~*req.hID"},
+// 		{"tag": "Tenant", "path": "*cgreq.Tenant", "type": "*variable",
+// 			"filters": ["*notempty:*req.Tenant:"], "value": "~*req.Tenant"},
+// 		{"tag": "Account", "path": "*cgreq.Account", "type": "*variable",
+// 			"value": "~*req.Account"},
+// 		{"tag": "Subject", "path": "*cgreq.Subject", "type": "*variable",
+// 			"value": "~*req.Account"},
+// 		{"tag": "Destination", "path": "*cgreq.Destination", "type": "*variable",
+// 			"value": "~*req.Destination"},
+// 		{"tag": "SetupTime", "path": "*cgreq.SetupTime", "type": "*variable",
+// 			"filters": ["*notempty:*req.SetupTime:"], "value": "~*req.SetupTime"},
+// 		{"tag": "AnswerTime", "path": "*cgreq.AnswerTime", "type": "*variable",
+// 			"filters": ["*notempty:*req.AnswerTime:"], "value": "~*req.AnswerTime"},
+// 		{"tag": "Usage", "path": "*cgreq.Usage", "type": "*composed",
+// 			"filters": ["*notempty:*req.Usage:"], "value": "~*req.Usage;s"},
+// 	],
 // 	"*rar": [
 // 		{"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
 // 			"value": "~*req.Session-Id", "mandatory": true},
