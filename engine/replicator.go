@@ -5,8 +5,10 @@ package engine
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,6 +21,20 @@ import (
 	"github.com/cgrates/guardian"
 )
 
+// indexPatchKey marks context patches for merging on retry and safe failed filenames.
+func indexPatchKey(key string) string {
+	return "\x00" + key
+}
+
+// failedReplicationFileName preserves existing key names. It hashes marked
+// index keys into names of a fixed length that are safe to use in paths.
+func failedReplicationFileName(key string) string {
+	if key == "" || key[0] != 0 {
+		return key
+	}
+	return fmt.Sprintf("index_%x", sha256.Sum256([]byte(key)))
+}
+
 // replicationData holds the information about a pending replication task.
 type replicationData struct {
 	objType string
@@ -29,11 +45,6 @@ type replicationData struct {
 
 // replicator manages replication tasks to synchronize data across instances.
 // It can perform immediate replication or batch tasks to replicate on intervals.
-//
-// For failed replications, files are created with predictable names based on
-// "methodName_objTypeObjID" as the key. Before each replication attempt, any existing
-// file for that key is removed. A new file is created only if the replication fails.
-// This ensures at most one failed replication file exists per unique item.
 type replicator struct {
 	mu sync.Mutex
 
@@ -75,24 +86,45 @@ func newReplicator(cfg *config.DBConn, cm *ConnManager, locker *guardian.Locker)
 
 }
 
+// replicationKey gives Set and Remove the same key only when the latest
+// operation makes the earlier one unnecessary.
+func replicationKey(objType, objID, method string) string {
+	switch method {
+	case utils.ReplicatorSv1SetAccount, utils.ReplicatorSv1RemoveAccount,
+		utils.ReplicatorSv1SetThresholdProfile, utils.ReplicatorSv1RemoveThresholdProfile,
+		utils.ReplicatorSv1SetThreshold, utils.ReplicatorSv1RemoveThreshold,
+		utils.ReplicatorSv1SetStatQueueProfile, utils.ReplicatorSv1RemoveStatQueueProfile,
+		utils.ReplicatorSv1SetStatQueue, utils.ReplicatorSv1RemoveStatQueue,
+		utils.ReplicatorSv1SetFilter, utils.ReplicatorSv1RemoveFilter,
+		utils.ReplicatorSv1SetRankingProfile, utils.ReplicatorSv1RemoveRankingProfile,
+		utils.ReplicatorSv1SetRanking, utils.ReplicatorSv1RemoveRanking,
+		utils.ReplicatorSv1SetTrendProfile, utils.ReplicatorSv1RemoveTrendProfile,
+		utils.ReplicatorSv1SetTrend, utils.ReplicatorSv1RemoveTrend,
+		utils.ReplicatorSv1SetResourceProfile, utils.ReplicatorSv1RemoveResourceProfile,
+		utils.ReplicatorSv1SetResource, utils.ReplicatorSv1RemoveResource,
+		utils.ReplicatorSv1SetIPProfile, utils.ReplicatorSv1RemoveIPProfile,
+		utils.ReplicatorSv1SetIPAllocations, utils.ReplicatorSv1RemoveIPAllocations,
+		utils.ReplicatorSv1SetActionProfile, utils.ReplicatorSv1RemoveActionProfile,
+		utils.ReplicatorSv1SetRouteProfile, utils.ReplicatorSv1RemoveRouteProfile,
+		utils.ReplicatorSv1SetAttributeProfile, utils.ReplicatorSv1RemoveAttributeProfile,
+		utils.ReplicatorSv1SetChargerProfile, utils.ReplicatorSv1RemoveChargerProfile:
+		return objType + objID
+	default:
+		_, methodName, _ := strings.Cut(method, utils.NestingSep)
+		return methodName + "_" + objType + objID
+	}
+}
+
 // replicate handles the object replication based on configuration.
 // When interval > 0, the replication task is queued for the next batch.
 // Otherwise, it executes immediately.
 func (r *replicator) replicate(ctx *context.Context, objType, objID, method string, args any,
-	item *config.ItemOpts) error {
+	item *config.ItemOpts) {
 	if !item.Replicate {
-		return nil
+		return
 	}
-
+	key := replicationKey(objType, objID, method)
 	if r.interval > 0 {
-
-		// Form a unique key by joining method name with object identifiers.
-		// Including the method name (Set/Remove) allows different operations
-		// on the same object to have distinct keys, which also serve as
-		// predictable filenames if replication fails.
-		_, methodName, _ := strings.Cut(method, utils.NestingSep)
-		key := methodName + "_" + objType + objID
-
 		r.mu.Lock()
 		defer r.mu.Unlock()
 		r.pending[key] = &replicationData{
@@ -101,10 +133,133 @@ func (r *replicator) replicate(ctx *context.Context, objType, objID, method stri
 			method:  method,
 			args:    args,
 		}
-		return nil
+		return
+	}
+	if err := r.replicateAndRestore(ctx, key, objType, objID, method, args); err != nil {
+		utils.Logger.Warning(fmt.Sprintf(
+			"<DataManager> failed to replicate %q for object %q: %v",
+			method, objType+objID, err))
+	}
+}
+
+func mergeIndexPatch(patch, newer *utils.SetIndexesArg) {
+	if newer.Clear {
+		clear(patch.Indexes)
+		patch.Clear = true
+	}
+	if patch.Indexes == nil && len(newer.Indexes) != 0 {
+		patch.Indexes = make(map[string]utils.StringSet, len(newer.Indexes))
+	}
+	maps.Copy(patch.Indexes, newer.Indexes)
+	patch.IdxItmType = newer.IdxItmType
+	patch.TntCtx = newer.TntCtx
+	patch.Tenant = newer.Tenant
+	patch.APIOpts = newer.APIOpts
+}
+
+func (r *replicator) replicateIndexes(ctx *context.Context, objType, objID string, args *utils.SetIndexesArg) error {
+	key := indexPatchKey(replicationKey(objType, objID, utils.ReplicatorSv1SetIndexes))
+	if r.interval <= 0 {
+		return r.replicateIndexPatchAndRestore(ctx, key, objType, objID, args)
 	}
 
-	return replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+	if pending, has := r.pending[key]; has {
+		mergeIndexPatch(pending.args.(*utils.SetIndexesArg), args)
+		return nil
+	}
+	patch := *args
+	patch.Indexes = maps.Clone(args.Indexes)
+	r.pending[key] = &replicationData{
+		objType: objType,
+		objID:   objID,
+		method:  utils.ReplicatorSv1SetIndexes,
+		args:    &patch,
+	}
+	return nil
+}
+
+func (r *replicator) replicateIndexPatchAndRestore(ctx *context.Context, key, objType, objID string,
+	args *utils.SetIndexesArg) error {
+	var failedPath string
+	if r.failedDir != "" {
+		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
+		task, err := NewReplicationTaskFromFile(ctx, failedPath, r.locker)
+		if err == nil {
+			if task == nil {
+				utils.Logger.Err(fmt.Sprintf(
+					"<DataManager> invalid failed index patch in %q", failedPath))
+			} else if failed, ok := task.Args.(*utils.SetIndexesArg); !ok ||
+				task.Method != utils.ReplicatorSv1SetIndexes ||
+				task.ObjType != objType || task.ObjID != objID {
+				utils.Logger.Err(fmt.Sprintf(
+					"<DataManager> invalid failed index patch in %q", failedPath))
+			} else {
+				mergeIndexPatch(failed, args)
+				args = failed
+			}
+		} else if !os.IsNotExist(err) {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to load index patch %q: %v", failedPath, err))
+		}
+	}
+	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID,
+		utils.ReplicatorSv1SetIndexes, args)
+	if err != nil && failedPath != "" {
+		task := &ReplicationTask{
+			ConnIDs:  r.conns,
+			Filtered: r.filtered,
+			ObjType:  objType,
+			ObjID:    objID,
+			Method:   utils.ReplicatorSv1SetIndexes,
+			Args:     args,
+		}
+		if wErr := task.WriteToFile(ctx, failedPath, r.locker); wErr != nil {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to save index patch %q: %v", failedPath, wErr))
+		}
+	}
+	return err
+}
+
+// replicateAndRestore is a wrapper over replicate function and checks failedDir
+// to create files for tracking unsuccessful writes
+func (r *replicator) replicateAndRestore(ctx *context.Context, key string, objType, objID, method string, args any) error {
+	if key != "" && key[0] == 0 {
+		patch, ok := args.(*utils.SetIndexesArg)
+		if !ok {
+			return fmt.Errorf("invalid index replication patch %T", args)
+		}
+		return r.replicateIndexPatchAndRestore(ctx, key, objType, objID, patch)
+	}
+	var failedPath string
+	if r.failedDir != "" {
+		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
+		// Clean up any existing file containing failed replications.
+		unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
+		if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to remove file %q: %v", failedPath, err))
+		}
+		unlock()
+	}
+	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
+	if err != nil && failedPath != "" {
+		task := &ReplicationTask{
+			ConnIDs:  r.conns,
+			Filtered: r.filtered,
+			ObjType:  objType,
+			ObjID:    objID,
+			Method:   method,
+			Args:     args,
+		}
+		if wErr := task.WriteToFile(ctx, failedPath, r.locker); wErr != nil {
+			utils.Logger.Err(fmt.Sprintf(
+				"<DataManager> failed to dump replication task: %v", wErr))
+		}
+	}
+	return err
 }
 
 // replicate performs the actual replication by calling Set/Remove APIs on ReplicatorSv1
@@ -157,40 +312,10 @@ func (r *replicator) flush() {
 	r.mu.Unlock()
 
 	for key, data := range pending {
-		var failedPath string
-
-		if r.failedDir != "" {
-			failedPath = filepath.Join(r.failedDir, key+utils.GOBSuffix)
-
-			// Clean up any existing file containing failed replications.
-			unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
-			if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
-				utils.Logger.Warning(fmt.Sprintf(
-					"<DataManager> failed to remove file for %q: %v", key, err))
-			}
-			unlock()
-		}
-
-		if err := replicate(context.TODO(), r.cm, r.conns, r.filtered, data.objType, data.objID,
-			data.method, data.args); err != nil {
+		if err := r.replicateAndRestore(context.TODO(), key, data.objType, data.objID, data.method, data.args); err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<DataManager> failed to replicate %q for object %q: %v",
 				data.method, data.objType+data.objID, err))
-
-			if failedPath != "" {
-				task := &ReplicationTask{
-					ConnIDs:  r.conns,
-					Filtered: r.filtered,
-					ObjType:  data.objType,
-					ObjID:    data.objID,
-					Method:   data.method,
-					Args:     data.args,
-				}
-				if err := task.WriteToFile(context.TODO(), failedPath, r.locker); err != nil {
-					utils.Logger.Err(fmt.Sprintf(
-						"<DataManager> failed to dump replication task: %v", err))
-				}
-			}
 		}
 	}
 }
