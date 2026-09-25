@@ -627,6 +627,15 @@ func (sS *SessionS) unregisterSession(sID string, passive bool) bool {
 
 // indexSession will index an active or passive Session based on configuration
 func (sS *SessionS) indexSession(s *Session, pSessions bool) {
+	srs := make([]*SRun, 0, len(s.sRuns))
+	for _, sr := range s.sRuns {
+		srs = append(srs, sr)
+	}
+	sS.indexSRuns(s.ID, pSessions, srs...)
+}
+
+// indexSRuns will index the SRuns
+func (sS *SessionS) indexSRuns(sID string, pSessions bool, srs ...*SRun) {
 	idxMux := &sS.aSIMux // pointer to original mux since will have no effect if we copy it
 	ssIndx := sS.aSessionsIdx
 	ssRIdx := sS.aSessionsRIdx
@@ -638,7 +647,7 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 	idxMux.Lock()
 	defer idxMux.Unlock()
 	for fieldName := range sS.cfg.SessionSCfg().SessionIndexes {
-		for _, sr := range s.SRuns {
+		for _, sr := range srs {
 			fieldVal, err := sr.CGREvent.FieldAsString(fieldName) // the only error from GetString is ErrNotFound
 			if err != nil {
 				fieldVal = utils.NotAvailable
@@ -652,16 +661,16 @@ func (sS *SessionS) indexSession(s *Session, pSessions bool) {
 			if _, hasFieldVal := ssIndx[fieldName][fieldVal]; !hasFieldVal {
 				ssIndx[fieldName][fieldVal] = make(map[string]utils.StringSet)
 			}
-			if _, hasID := ssIndx[fieldName][fieldVal][s.ID]; !hasID {
-				ssIndx[fieldName][fieldVal][s.ID] = make(utils.StringSet) // we index runs under session id here
+			if _, hasID := ssIndx[fieldName][fieldVal][sID]; !hasID {
+				ssIndx[fieldName][fieldVal][sID] = make(utils.StringSet) // we index runs under session id here
 			}
-			ssIndx[fieldName][fieldVal][s.ID].Add(sr.ID)
+			ssIndx[fieldName][fieldVal][sID].Add(sr.ID)
 
 			// reverse index
-			if _, hasIt := ssRIdx[s.ID]; !hasIt {
-				ssRIdx[s.ID] = make([]*riFieldNameVal, 0)
+			if _, hasIt := ssRIdx[sID]; !hasIt {
+				ssRIdx[sID] = make([]*riFieldNameVal, 0)
 			}
-			ssRIdx[s.ID] = append(ssRIdx[s.ID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
+			ssRIdx[sID] = append(ssRIdx[sID], &riFieldNameVal{fieldName: fieldName, fieldValue: fieldVal})
 		}
 	}
 }
@@ -800,7 +809,7 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	originIDs, _ /*matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	originIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
@@ -824,14 +833,14 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		// runIDs := matchingSRuns[s.OptsStart[utils.MetaOriginID]]
-		for i, sr := range s.SRuns {
-			// if len(originIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
-			// continue
-			// }
+		runIDs := matchingSRuns[s.ID]
+		for runID, sr := range s.sRuns {
+			if len(originIDs) != 0 && !runIDs.Has(runID) {
+				continue
+			}
 			if pass(unindx, sr.CGREvent.Event) {
 				aSs = append(aSs,
-					s.AsExternalSession(i, sS.cfg.GeneralCfg().NodeID)) // Expensive for large number of sessions
+					s.AsExternalSession(runID, sS.cfg.GeneralCfg().NodeID))
 				if sf.Limit != nil && *sf.Limit > 0 && *sf.Limit < len(aSs) {
 					s.lk.RUnlock()
 					return aSs[:*sf.Limit]
@@ -849,13 +858,15 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
-			count += len(s.SRuns)
+			s.lk.RLock()
+			count += len(s.sRuns)
+			s.lk.RUnlock()
 		}
 		return
 	}
 	tenant := utils.FirstNonEmpty(sf.Tenant, sS.cfg.GeneralCfg().DefaultTenant)
 	indx, unindx := sS.getIndexedFilters(ctx, tenant, sf.Filters)
-	originIDs, _ /* matchingSRuns*/ := sS.getSessionIDsMatchingIndexes(indx, psv)
+	originIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, psv)
 	if len(indx) != 0 && len(originIDs) == 0 { // no sessions matched the indexed filters
 		return
 	}
@@ -878,11 +889,11 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		// runIDs := matchingSRuns[s.OptsStart[utils.MetaOriginID]]
-		for _, sr := range s.SRuns {
-			// if len(originIDs) != 0 && !runIDs.Has(sr.CD.RunID) {
-			// continue
-			// }
+		runIDs := matchingSRuns[s.ID]
+		for runID, sr := range s.sRuns {
+			if len(originIDs) != 0 && !runIDs.Has(runID) {
+				continue
+			}
 			if pass(unindx, sr.CGREvent.Event) {
 				count++
 			}

@@ -221,15 +221,22 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 		// setSRun
 		if s != nil {
 			s.lk.Lock()
-			if errSet := s.setSRun(runID, cgrEv, sS.cfg.SessionSCfg().AlterableFields, cchEv,
+			if has, reIdx, errSet := s.setSRun(runID, cgrEv,
+				sS.cfg.SessionSCfg().AlterableFields, sS.cfg.SessionSCfg().SessionIndexes, cchEv,
 				interimConsumed, interimUsage, totalUsage); errSet != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
+					s.lk.Unlock()
 					return errSet
 				}
 				withErrors = true
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> error: %s processing event: %+v for SRun set",
 						utils.SessionS, errSet.Error(), cgrEv))
+			} else if !has { // index new SRun
+				sS.indexSRuns(s.ID, false, s.sRuns[runID])
+			} else if reIdx { // indexed field altered
+				sS.unindexSession(s.ID, false)
+				sS.indexSession(s, false)
 			}
 			s.lk.Unlock()
 		}

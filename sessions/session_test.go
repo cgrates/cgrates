@@ -5,6 +5,8 @@ package sessions
 
 import (
 	"reflect"
+	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -688,16 +690,16 @@ func TestNewSession(t *testing.T) {
 func TestSessionAsExternalSession(t *testing.T) {
 	session := &Session{
 		ID: "sess1",
-		SRuns: []*SRun{
-			{
+		sRuns: map[string]*SRun{
+			"run1": {
 				ID:       "run1",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates1.org", ID: "event1"},
 			},
-			{
+			"run2": {
 				ID:       "run2",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates2.org", ID: "event2"},
 			},
-			{
+			"run3": {
 				ID:       "run3",
 				CGREvent: &utils.CGREvent{Tenant: "cgrates3.org", ID: "event3"},
 			},
@@ -706,28 +708,28 @@ func TestSessionAsExternalSession(t *testing.T) {
 
 	tests := []struct {
 		name           string
-		sRunIdx        int
+		sRunIdx        string
 		nodeID         string
 		expectedRunID  string
 		expectedTenant string
 	}{
 		{
 			name:           "First run with debit",
-			sRunIdx:        0,
+			sRunIdx:        "run1",
 			nodeID:         "nodeA",
 			expectedRunID:  "run1",
 			expectedTenant: "cgrates1.org",
 		},
 		{
 			name:           "Second run with debit",
-			sRunIdx:        1,
+			sRunIdx:        "run2",
 			nodeID:         "nodeB",
 			expectedRunID:  "run2",
 			expectedTenant: "cgrates2.org",
 		},
 		{
 			name:           "Third run without debit",
-			sRunIdx:        2,
+			sRunIdx:        "run3",
 			nodeID:         "nodeC",
 			expectedRunID:  "run3",
 			expectedTenant: "cgrates3.org",
@@ -818,26 +820,24 @@ func TestSessionAsExternalSessions(t *testing.T) {
 			t.Errorf("Expected %v external sessions, got: %v", exp, rcv)
 		}
 	})
-	t.Run("SRun only", func(t *testing.T) {
+	t.Run("multiple sRuns", func(t *testing.T) {
 		session := &Session{
 			ID: "sessionID",
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run1": {
 					ID:              "run1",
 					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event1"},
 					UsageAdjustment: utils.NewDecimal(5, 0),
 					InterimUsage:    utils.NewDecimal(30, 0),
 					TotalUsage:      utils.NewDecimal(60, 0),
-					Charges:         utils.NewEventCharges(),
 					lclDebit:        utils.NewDecimal(50, 0),
 				},
-				{
+				"run2": {
 					ID:              "run2",
 					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event2"},
 					UsageAdjustment: utils.NewDecimal(5, 0),
 					InterimUsage:    utils.NewDecimal(20, 0),
 					TotalUsage:      utils.NewDecimal(25, 0),
-					Charges:         utils.NewEventCharges(),
 					lclDebit:        utils.NewDecimal(30, 0),
 				},
 			},
@@ -847,23 +847,38 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "run1",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event1",
+					Tenant:  "cgrates.org",
+					ID:      "event1",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
+				NodeID:          "node1",
+				UsageAdjustment: utils.Int64Pointer(5),
+				InterimUsage:    utils.Int64Pointer(30),
+				TotalUsage:      utils.Int64Pointer(60),
 			},
 			{
 				ID:    "sessionID",
 				RunID: "run2",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event2",
+					Tenant:  "cgrates.org",
+					ID:      "event2",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
+				NodeID:          "node1",
+				UsageAdjustment: utils.Int64Pointer(5),
+				InterimUsage:    utils.Int64Pointer(20),
+				TotalUsage:      utils.Int64Pointer(25),
 			},
 		}
 		rcv := session.AsExternalSessions("UTC", "node1")
 		if len(rcv) != 2 {
 			t.Errorf("Expected 2 external sessions, got %d", len(rcv))
 		}
+		slices.SortFunc(rcv, func(a, b *ExternalSession) int {
+			return strings.Compare(a.RunID, b.RunID)
+		})
 		if !reflect.DeepEqual(exp, rcv) {
 			t.Errorf("Expected %v, recieved %v", utils.ToJSON(exp), utils.ToJSON(rcv))
 		}
@@ -891,10 +906,12 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "runid",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event3",
+					Tenant:  "cgrates.org",
+					ID:      "event3",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
-				NodeID:          "",
+				NodeID:          "node1",
 				UsageAdjustment: utils.Int64Pointer(5),
 				InterimUsage:    utils.Int64Pointer(30),
 				TotalUsage:      utils.Int64Pointer(60),
@@ -918,44 +935,6 @@ func TestSessionAsExternalSessions(t *testing.T) {
 		}
 	})
 
-	t.Run("SRun only, empty parameters", func(t *testing.T) {
-		session := &Session{
-			ID: "sessionID",
-			SRuns: []*SRun{
-				{
-					ID:              "run1",
-					CGREvent:        &utils.CGREvent{Tenant: "cgrates.org", ID: "event1"},
-					UsageAdjustment: utils.NewDecimal(5, 0),
-					InterimUsage:    utils.NewDecimal(30, 0),
-					TotalUsage:      utils.NewDecimal(60, 0),
-					Charges:         utils.NewEventCharges(),
-					lclDebit:        utils.NewDecimal(50, 0),
-				},
-			},
-		}
-		expect := []*ExternalSession{
-			{
-				ID:    "sessionID",
-				RunID: "run1",
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event1",
-				},
-			},
-		}
-		rcv := session.AsExternalSessions(utils.EmptyString, utils.EmptyString)
-		if len(rcv) != 1 {
-			t.Errorf("Expected 1 external sessions, got %d", len(rcv))
-		}
-		if !reflect.DeepEqual(expect, rcv) {
-			t.Errorf("Expected %v, recieved %v", utils.ToJSON(expect), utils.ToJSON(rcv))
-		}
-		for _, s := range rcv {
-			if s.NodeID != utils.EmptyString {
-				t.Errorf("Expected NodeID to be empty, recieved: %v", s.NodeID)
-			}
-		}
-	})
 	t.Run("sRuns only, empty parameters", func(t *testing.T) {
 		session := &Session{
 			ID: "sessionID",
@@ -979,8 +958,10 @@ func TestSessionAsExternalSessions(t *testing.T) {
 				ID:    "sessionID",
 				RunID: "runid",
 				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "event3",
+					Tenant:  "cgrates.org",
+					ID:      "event3",
+					Event:   map[string]any{},
+					APIOpts: map[string]any{},
 				},
 				NodeID:          "",
 				UsageAdjustment: utils.Int64Pointer(5),
