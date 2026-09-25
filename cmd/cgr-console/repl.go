@@ -87,7 +87,15 @@ func loadHistory(rl *readline.Shell) {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return
 	}
-	if hist, err := readline.NewHistoryFromFile(filepath.Join(dir, "history")); err == nil {
+	path := filepath.Join(dir, "history")
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_WRONLY, 0o600)
+	if err != nil {
+		return
+	}
+	if err := f.Close(); err != nil {
+		return
+	}
+	if hist, err := readline.NewHistoryFromFile(path); err == nil {
 		rl.History.Add("cgr", hist)
 	}
 }
