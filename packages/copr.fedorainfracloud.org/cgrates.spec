@@ -15,7 +15,7 @@ Name:           cgrates
 Version:        %{version}
 Release:        {{{releaseTag}}}
 Summary:        Carrier Grade Real-time Charging System
-License:        GPLv3
+License:        AGPLv3
 URL:            https://github.com/cgrates/cgrates
 Source0:        https://github.com/cgrates/cgrates/archive/{{{git_commit}}}.tar.gz
 BuildRequires:  git curl tar
