@@ -596,7 +596,7 @@ func RunCGREngine(args []string, hooks ...func(*config.CGRConfig) error) {
 	reS := NewResourceService(cfg, dmService, cacheS, filterSChan, server,
 		internalResourceSChan, connManager, anz, srvDep)
 	ips := NewIPService(cfg, dmService, cacheS, filterSChan, server,
-		internalResourceSChan, connManager, anz, srvDep)
+		internalIPsChan, connManager, anz, srvDep)
 	routeS := NewRouteService(cfg, dmService, cacheS, filterSChan, server,
 		internalRouteSChan, connManager, anz, srvDep)
 
