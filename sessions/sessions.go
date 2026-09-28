@@ -6,6 +6,7 @@ package sessions
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"math/rand"
 	"runtime"
 	"slices"
@@ -4716,6 +4717,7 @@ func (sS *SessionS) BiRPCv1AlterSessions(ctx *context.Context,
 	}
 	uniqueSIDs := utils.NewStringSet(nil)
 	for _, as := range aSs {
+		initialEvent := maps.Clone(args.Event) // create a clone to not modify the original event when using it
 		if uniqueSIDs.Has(as.CGRID) {
 			continue
 		}
@@ -4724,7 +4726,7 @@ func (sS *SessionS) BiRPCv1AlterSessions(ctx *context.Context,
 		if len(ss) == 0 {
 			continue
 		}
-		if errTerm := sS.alterSession(ctx, ss[0], args.APIOpts, args.Event); errTerm != nil {
+		if errTerm := sS.alterSession(ctx, ss[0], args.APIOpts, initialEvent); errTerm != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> altering session with id '%s' failed: <%v>",
