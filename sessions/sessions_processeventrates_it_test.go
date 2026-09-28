@@ -2347,3 +2347,71 @@ func TestSessionSv1ProcessEventAccountFilterIDsNoMatch(t *testing.T) {
 		t.Errorf("AbstractBal = %+v, want 60s", acnt.Balances["AbstractBal"].Units)
 	}
 }
+
+func TestAccountSv1DebitMaxAbstracts(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:    "cgrates.org",
+				ID:        "1001",
+				FilterIDs: []string{"*string:~*req.Account:1001"},
+				Balances: map[string]*utils.Balance{
+					"AbstractBal": {
+						ID:   "AbstractBal",
+						Type: utils.MetaAbstract,
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment: utils.NewDecimal(1, 0),
+								FixedFee:  utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimal(30000, 0),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount: %v", err)
+	}
+
+	var ec utils.EventCharges
+	if err := client.Call(context.Background(), utils.AccountSv1DebitAbstracts,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaUsage: 1000,
+			},
+		}, &ec); err != nil {
+		t.Fatalf("AccountSv1DebitAbstracts: %v", err)
+	}
+	if ec.Abstracts == nil || ec.Abstracts.Compare(utils.NewDecimal(1000, 0)) != 0 {
+		t.Fatalf("Abstracts = %v, want 1000", ec.Abstracts)
+	}
+
+	var acnt utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "1001"}},
+		&acnt); err != nil {
+		t.Fatalf("AdminSv1GetAccount: %v", err)
+	}
+	if want := utils.NewDecimal(29000, 0); acnt.Balances["AbstractBal"].Units.Compare(want) != 0 {
+		t.Errorf("AbstractBal = %+v, want 29000", acnt.Balances["AbstractBal"].Units)
+	}
+}
