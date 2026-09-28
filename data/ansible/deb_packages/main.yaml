@@ -4,7 +4,7 @@
     rootUser: root
     nginx_server_name: apt.cgrates.org
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    cgrates_branch: master
+    cgrates_branch: v0.11
 
     dependencies:
       - build-essential
@@ -329,7 +329,7 @@
     rootUser: root
     nginx_server_name: pkg.cgrates.org
     nginx_user: "www-data"
-    cgrates_branch: "master"
+    cgrates_branch: "v0.11"
     distributions:
       - codename: bookworm
         version: 12
@@ -391,7 +391,6 @@
       become: true
       ansible.builtin.shell: "mv /tmp/cgrates_*~deb{{ item.version }}u1*.deb /var/packages/deb/{{ cgrates_branch }}/{{ item.codename }}/"
       with_items: "{{ distributions }}"
-      when: cgrates_branch == 'master' or hostvars['apt']['git_tag_result'].stdout_lines | length > 0
 
     - name: Find all package files
       become: true
@@ -399,7 +398,6 @@
         path: "/var/packages/deb/{{ cgrates_branch }}/"
         patterns: "*.deb"
         recurse: true
-      when: cgrates_branch == 'master' or hostvars['apt']['git_tag_result'].stdout_lines | length > 0
       register: package_files
 
     - name: Set ownership and permissions for moved files
@@ -410,7 +408,6 @@
         group: "{{ nginx_user }}"
         mode: "0644"
       loop: "{{ package_files.files }}"
-      when: cgrates_branch == 'master' or hostvars['apt']['git_tag_result'].stdout_lines | length > 0
 
     - name: Find package files per distribution
       become: true

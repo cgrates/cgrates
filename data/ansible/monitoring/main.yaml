@@ -31,7 +31,7 @@
         - name: Add the CGRateS repository to the sources list
           become: true
           ansible.builtin.copy:
-            content: "deb http://apt.cgrates.org/debian/ master-bookworm main\n"
+            content: "deb http://apt.cgrates.org/debian/ v0.11-bookworm main\n"
             dest: /etc/apt/sources.list.d/cgrates.list
 
         - name: Install or upgrade CGRateS

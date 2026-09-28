@@ -3,7 +3,7 @@
   vars:
     # CGRateS vars
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    cgrates_branch: "master"
+    cgrates_branch: "v0.11"
     cgrates_distribution: "nightly"
     docker_tag: "latest"
     registry_site: "dkr.cgrates.org"      # the web site

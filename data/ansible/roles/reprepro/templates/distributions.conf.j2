@@ -39,6 +39,21 @@ DscOverride: override.testing
 
 Origin: apt.cgrates.org
 Label: apt.cgrates.org
+Suite: v0.11-{{ distribution['codename'] }}
+Codename: v0.11-{{ distribution['codename'] }}
+Architectures: amd64 source
+Components: main
+Description: CGRateS v0.11 APT repository for {{ distribution['codename'] }}
+DebIndices: Packages Release . .gz
+Contents: . .gz
+ContentsArchitectures: amd64 source
+ContentsComponents: main
+SignWith: yes
+DebOverride: override.testing
+DscOverride: override.testing
+
+Origin: apt.cgrates.org
+Label: apt.cgrates.org
 Suite: master-{{ distribution['codename'] }}
 Codename: master-{{ distribution['codename'] }}
 Architectures: amd64 source
