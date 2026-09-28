@@ -5,7 +5,7 @@ AnalyzerS
 
 **AnalyzerS** is a service component part of the **CGRateS** infrastructure, designed to capture and index API interactions, enabling subsequent querying and analysis of API activity. It operates asynchronously without interfering with the normal API processing pipeline, with captured entries stored on disk and removed based on the configured *ttl* and *cleanup_interval*.
 
-Complete interaction with **AnalyzerS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+Complete interaction with **AnalyzerS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Processing logic

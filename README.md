@@ -1,9 +1,9 @@
 ## Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 
-[![build & test](https://github.com/cgrates/cgrates/actions/workflows/build.yaml/badge.svg?branch=master)](https://github.com/cgrates/cgrates/actions/workflows/build.yaml)
-[![integration](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml/badge.svg?branch=master)](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml)
-[![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=latest)](https://cgrates.readthedocs.io/en/latest/?badge=latest)
-[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@master)
+[![build & test](https://github.com/cgrates/cgrates/actions/workflows/build.yaml/badge.svg?branch=v0.11)](https://github.com/cgrates/cgrates/actions/workflows/build.yaml)
+[![integration](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml/badge.svg?branch=v0.11)](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml)
+[![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=v0.11)](https://cgrates.readthedocs.io/en/v0.11/?badge=v0.11)
+[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0)
 
 ### Features
 
@@ -27,14 +27,14 @@
 
 ### Documentation
 
-[Step by steps tutorials](https://cgrates.readthedocs.io/en/latest/tutorial.html)
+[Step by steps tutorials](https://cgrates.readthedocs.io/en/v0.11/tutorial.html)
 
-[Debian apt-get repository](https://cgrates.readthedocs.io/en/latest/installation.html#)
+[Debian apt-get repository](https://cgrates.readthedocs.io/en/v0.11/installation.html#)
 
 [Installing CGRateS from sources on minimal debian](https://asciinema.org/a/0lwlputceg52xssqgra7wjza0) (for devel or testing)
 
-Browsable HTML docs http://readthedocs.org/docs/cgrates/
+Browsable HTML docs https://cgrates.readthedocs.io/en/v0.11/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates/apier@master)
+API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0)

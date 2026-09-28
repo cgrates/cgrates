@@ -157,8 +157,8 @@ internalDBDumpPath
     Defines the path to the folder where the memory-stored **DataDB** will be dumped. This path is also used for recovery during engine startup. Ensure the folder exists before launching the engine.
 
 internalDBBackupPath
-    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.BackupDataDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, you can do so manualy by simply transfering the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring.
-    Or automatically using `APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreDataDB>`_ API call
+    Path where backup copies of the dump folder will be stored. Backups are triggered via the `APIerSv1.BackupDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.BackupDataDB>`_ API call. This API can also specify a custom path for backups, otherwise the default `internalDBBackupPath` is used. Backups serve as a fallback in case of dump file corruption or loss. The created folders are timestamped in UNIX time for easy identification of the latest backup. To recover using a backup, you can do so manualy by simply transfering the folders from a backup in internalDBBackupPath to internalDBDumpPath and start the engine. If backups are zipped, they need to be unzipped manually when restoring.
+    Or automatically using `APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.RestoreDataDB>`_ API call
 
 internalDBStartTimeout
     Specifies the maximum amount of time the engine will wait to recover the in-memory **DataDB** state from the dump files during startup. If this duration is exceeded, the engine will timeout and an error will be returned.
@@ -169,7 +169,7 @@ internalDBDumpInterval
     - Setting the interval to ``0s`` disables the periodic dumping, meaning any data in **DataDB** will be lost when the engine shuts down.
     - Setting the interval to ``-1`` enables immediate dumping—whenever a record in **DataDB** is added, changed, or removed, it will be dumped to disk immediately.
     
-    Manual dumping can be triggered using the `APIerSv1.DumpDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.DumpDataDB>`_ API.
+    Manual dumping can be triggered using the `APIerSv1.DumpDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.DumpDataDB>`_ API.
 
 internalDBRewriteInterval
     Defines the interval for rewriting files that are not currently being used for dumping data, converting them into an optimized, streamlined version and improving recovery time. Similar to ``internalDBDumpInterval``, the rewriting will trigger based on specified intervals:
@@ -178,21 +178,21 @@ internalDBRewriteInterval
     - Setting the interval ``-1`` triggers rewriting only once when the engine starts.
     - Setting the interval ``-2`` triggers rewriting only once when the engine shuts down.
 
-    Rewriting should be used sparingly, as the process temporarily loads the entire ``internalDBDumpPath`` folder into memory for optimization, and then writes it back to the dump folder once done. This results in a surge of memory usage, which could amount to the size of the dump file itself during the rewrite. As a rule of thumb, expect the engine's memory usage to approximately double while the rewrite process is running. Manual rewriting can be triggered at any time via the `APIerSv1.RewriteDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RewriteDataDB>`_ API.
+    Rewriting should be used sparingly, as the process temporarily loads the entire ``internalDBDumpPath`` folder into memory for optimization, and then writes it back to the dump folder once done. This results in a surge of memory usage, which could amount to the size of the dump file itself during the rewrite. As a rule of thumb, expect the engine's memory usage to approximately double while the rewrite process is running. Manual rewriting can be triggered at any time via the `APIerSv1.RewriteDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.RewriteDataDB>`_ API.
 
 internalDBFileSizeLimit
     Specifies the maximum size a single dump file can reach. Upon reaching the limit, a new dump file is created. Limiting file size improves recovery time and allows for limit reached files to be rewritten. It is recommended to have this limit to at most half of the machines memory, since the file will be put in memory while being read.
 
 The internal database also provides APIs for creating snapshots and restoring from backups.
 
-`APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.RestoreDataDB>`_
+`APIerSv1.RestoreDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.RestoreDataDB>`_
       Restores the internal **DataDB** from the path to the zip file or folder provided. If more than 1 backups are found in the path, it will select the latest generated one.
 
       - If no backup path is provided in the API call, the configured ``internalDBBackupPath`` is used.
       - Before restoring, all live data and currently dumped data from the internal database is cleared.
       - The restore process replaces the existing dump state with the selected backup contents.
 
-`APIerSv1.SnapshotDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@master/engine#InternalDB.SnapshotDataDB>`_
+`APIerSv1.SnapshotDataDB <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/engine#InternalDB.SnapshotDataDB>`_
       Creates a backup of the currently active dump state after which, it rebuilds the live dump files from the current in-memory **DataDB**.
 
       The snapshot process performs the following steps:
@@ -316,5 +316,5 @@ Notes
 
 * By default, both replication and remote functionality are disabled for all items and must be explicitly enabled by setting ``replicate: true`` or ``remote: true`` for each desired item
 * When using replication with intervals, make sure to configure a ``replication_failed_dir`` to handle failed replications
-* Failed replications can be manually replayed using the `APIerSv1.ReplayFailedReplications <https://pkg.go.dev/github.com/cgrates/cgrates@master/apier/v1#APIerSv1.ReplayFailedReplications>`_ API call
+* Failed replications can be manually replayed using the `APIerSv1.ReplayFailedReplications <https://pkg.go.dev/github.com/cgrates/cgrates@v0.11.0/apier/v1#APIerSv1.ReplayFailedReplications>`_ API call
 * Remote functionality and replication can be used independently or together, depending on your deployment needs

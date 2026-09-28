@@ -4,7 +4,7 @@ CDRs
 ====
 
 
-**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
+**CDRs** is a standalone subsystem within **CGRateS** responsible to process *CDR* events. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_ or separate *HTTP handlers* configured within *http* section inside :ref:`JSON configuration <configuration>`.
 
 Due to multiple interfaces exposed, the **CDRs** is designed to function as centralized server for *CDRs* received from various sources. Examples of such sources are:
 	*\*real-time events* from interfaces like *Diameter*, *Radius*, *Asterisk*, *FreeSWITCH*, *Kamailio*, *OpenSIPS*
@@ -70,7 +70,7 @@ You can control the templates which are to be executed via the filters which are
 Offline exports
 ^^^^^^^^^^^^^^^
 
-Are exports which are triggered via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ and they have as data source the CDRs stored within *StorDB*.
+Are exports which are triggered via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_ and they have as data source the CDRs stored within *StorDB*.
 
 
 APIs logic

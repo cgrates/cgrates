@@ -10,7 +10,7 @@ EEs
 ====
 
 
-**EventExporterService/EEs** is a subsystem designed to convert internal, already processed events into external ones and then export them to a defined destination. It is accessible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+**EventExporterService/EEs** is a subsystem designed to convert internal, already processed events into external ones and then export them to a defined destination. It is accessible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Configuration

@@ -41,7 +41,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ master-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ v0.11-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -51,7 +51,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/master/bookworm/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/v0.11/bookworm/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
    .. group-tab:: Bullseye
@@ -66,7 +66,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ master-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ v0.11-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -76,7 +76,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/master/bullseye/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/v0.11/bullseye/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
 
@@ -87,7 +87,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 Redhat-based Distributions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-For .rpm distros, we are using copr to manage the CGRateS packages:
+For .rpm distros, copr provides releases and development builds from the v0.11 branch:
 
 -  If using a version of Linux with dnf:
 
@@ -95,7 +95,7 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
 
       # sudo yum install -y dnf-plugins-core on RHEL 8 or CentOS Stream
       sudo dnf install -y dnf-plugins-core 
-      sudo dnf copr -y enable cgrates/master 
+      sudo dnf copr -y enable cgrates/v0.11
       sudo dnf install -y cgrates
 
 -  For older distributions: 
@@ -103,7 +103,7 @@ For .rpm distros, we are using copr to manage the CGRateS packages:
    .. code-block:: bash
 
       sudo yum install -y yum-plugin-copr
-      sudo yum copr -y enable cgrates/master
+      sudo yum copr -y enable cgrates/v0.11
       sudo yum install -y cgrates
 
 To install a specific version of the package, run:
@@ -116,12 +116,12 @@ Alternatively, you can manually install a specific .rpm package as follows:
 
 .. code-block:: bash
 
-   wget http://pkg.cgrates.org/rpm/nightly/epel-9-x86_64/cgrates-current.rpm
+   wget http://pkg.cgrates.org/rpm/v0.11/cgrates_current.rpm
    sudo dnf install ./cgrates_current.rpm
 
 
 .. note::
-   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/master/packages/ or http://pkg.cgrates.org/rpm/nightly/.
+   The entire archive of CGRateS rpm packages is available at https://copr.fedorainfracloud.org/coprs/cgrates/v0.11/packages/ or http://pkg.cgrates.org/rpm/v0.11/.
 
 Installing from Source
 ----------------------
@@ -156,7 +156,7 @@ Installation:
 .. code-block:: bash
 
    mkdir -p $HOME/go/src/github.com/cgrates/cgrates
-   git clone https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
+   git clone --branch v0.11 https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
    cd $HOME/go/src/github.com/cgrates/cgrates
 
    # Compile the binaries and move them to $GOPATH/bin
@@ -191,30 +191,25 @@ The following commands will pull the CGRateS components:
 
 ::
 
-    sudo docker pull dkr.cgrates.org/master/cgr-engine
-    sudo docker pull dkr.cgrates.org/master/cgr-loader
-    sudo docker pull dkr.cgrates.org/master/cgr-migrator
-    sudo docker pull dkr.cgrates.org/master/cgr-console
-    sudo docker pull dkr.cgrates.org/master/cgr-tester
+    sudo docker pull dkr.cgrates.org/v0.11/cgr-engine
+    sudo docker pull dkr.cgrates.org/v0.11/cgr-loader
+    sudo docker pull dkr.cgrates.org/v0.11/cgr-migrator
+    sudo docker pull dkr.cgrates.org/v0.11/cgr-console
+    sudo docker pull dkr.cgrates.org/v0.11/cgr-tester
 
 Verify the images were pulled successfully:
 
 ::
 
-    sudo docker images dkr.cgrates.org/master/cgr-*
-    REPOSITORY                           TAG       IMAGE ID       CREATED       SIZE
-    dkr.cgrates.org/master/cgr-loader    latest    5b667e92a475   6 weeks ago   46.5MB
-    dkr.cgrates.org/master/cgr-console   latest    464bd1992ab2   6 weeks ago   103MB
-    dkr.cgrates.org/master/cgr-engine    latest    e20f43491aa8   6 weeks ago   111MB
-    ...
+    sudo docker images dkr.cgrates.org/v0.11/cgr-*
 
 .. note::
-    While other version-specific tags are available, we recommend using the default **latest** tag for most use cases.
+    Tagged v0.11 builds use the **latest** tag. Untagged builds use timestamp and commit-hash tags without replacing **latest**.
     You can check available versions with:
 
     ::
 
-        curl -X GET https://dkr.cgrates.org/v2/master/cgr-engine/tags/list
+        curl -X GET https://dkr.cgrates.org/v2/v0.11/cgr-engine/tags/list
 
 
 cgr-engine Container
@@ -234,7 +229,7 @@ The current cgr-engine container entrypoint is:
 
     ::
 
-        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/master/cgr-engine:latest
+        sudo docker inspect --format='{{json .Config.Entrypoint}}' dkr.cgrates.org/v0.11/cgr-engine:latest
 
 Running cgr-engine
 ^^^^^^^^^^^^^^^^^^
@@ -250,7 +245,7 @@ Here's a basic example of running cgr-engine with common Docker parameters:
       -e REDIS_HOST=192.168.122.91 \
       --network bridge \
       --name cgr-engine \
-      dkr.cgrates.org/master/cgr-engine:latest \
+      dkr.cgrates.org/v0.11/cgr-engine:latest \
       -config_path=/etc/cgrates \
       -logger=*stdout
 
@@ -261,7 +256,7 @@ Verify cgr-engine is responding:
     sudo docker run --rm \
       --name cgr-console \
       --network host \
-      dkr.cgrates.org/master/cgr-console:latest \
+      dkr.cgrates.org/v0.11/cgr-console:latest \
       status
 
 Key parameters:

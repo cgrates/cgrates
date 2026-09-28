@@ -7,7 +7,7 @@ RankingS
 
 **RankingS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to work as an extension of the :ref:`StatS`, by regularly querying it for a list of predefined StatProfiles and ordering them based on their metrics.
 
-Complete interaction with **RankingS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+Complete interaction with **RankingS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 Due it's real-time nature, **RankingS** are designed towards high throughput being able to process thousands of queries per second. This is doable since each *Ranking* is a very light object, held in memory and eventually backed up in :ref:`DataDB`.
 
@@ -23,7 +23,7 @@ Automatic Query Scheduling
 	The profiles needing querying will be inserted into **RankingS** :ref:`JSON configuration <configuration>`. By leaving any part of *ranking_id* or *tenat* empty, it will be interpreted as catch-all filter.
 
 API Scheduling
-	The profiles needing querying will be sent inside arguments to the `RankingSv1.ScheduleQueries API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+	The profiles needing querying will be sent inside arguments to the `RankingSv1.ScheduleQueries API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Offline storage
@@ -35,7 +35,7 @@ Offline storage is optionally possible, by enabling profile *Stored* flag and co
 Ranking querying
 ----------------
 
-In order to query a **Ranking** (ie: to be displayed in a web interface), one should use the `RankingSv1.GetRanking API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ or `RankingSv1.GetRankingSummary API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`.
+In order to query a **Ranking** (ie: to be displayed in a web interface), one should use the `RankingSv1.GetRanking API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_ or `RankingSv1.GetRankingSummary API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`.
 
 
 Ranking exporting

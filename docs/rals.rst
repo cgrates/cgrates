@@ -4,7 +4,7 @@ RALs
 ====
 
 
-**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+**RALs** is a standalone subsystem within **CGRateS** designed to handle two major tasks: :ref:`Rating` and :ref:`Accounting`. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 
