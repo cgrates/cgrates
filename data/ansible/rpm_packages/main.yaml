@@ -240,11 +240,11 @@
 
     - name: Compose the ReleaseTag
       set_fact:
-        releaseTag: ""
+        releaseTag: "1"
 
     - name: Compose the ReleaseTag with values
       set_fact:
-        releaseTag: "{{ gitDate.stdout_lines[0] }}+{{ gitShortVersion.stdout_lines[0] }}"
+        releaseTag: "0.{{ gitDate.stdout_lines[0] }}+{{ gitShortVersion.stdout_lines[0] }}"
       when : gitTagVar.stdout_lines|length == 0
 ###########################################################################################################################
 ###########################################################################################################################
