@@ -125,7 +125,7 @@
       shell: "sudo chcon -t httpd_sys_rw_content_t /var/packages/ -R"
         
     - name: Generate GPG Key
-      include: gpg.yaml
+      ansible.builtin.include_tasks: gpg.yaml
 
     - name: Check if NGINX needs to be configured
       become: true
@@ -134,7 +134,7 @@
       register: nginxConfig
 
     - name: Configure NGINX server
-      include: nginx.yaml
+      ansible.builtin.include_tasks: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1
 
     - name: Enable and start nginx
@@ -156,15 +156,13 @@
     - name: Import the key in rpm
       become: true
       shell: rpm --import /var/packages/yum.cgrates.org.gpg.key
-      args:
-        warn: false
 
 ###########################################################################################################################
 ###########################################################################################################################
 # Install Go
-- name: Install Go
-    import_role:
-      name: ../roles/go
+    - name: Install Go
+      import_role:
+        name: ../roles/go
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -266,7 +264,7 @@
     - name: Download the tar.gz for the last commit
       become: yes
       get_url:
-        url: https://github.com/cgrates/cgrates/archive/{{ cgrates_branch }}/{{ gitVersion.stdout_lines[0] }}.tar.gz
+        url: https://github.com/cgrates/cgrates/archive/{{ gitVersion.stdout_lines[0] }}.tar.gz
         dest: cgr_build/SOURCES/{{ gitVersion.stdout_lines[0] }}.tar.gz
      
     - name: Add cgrates.spec in SPECS

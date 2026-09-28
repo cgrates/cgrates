@@ -1,7 +1,7 @@
 ---
 cgrates_clone_repo: true
 cgrates_dir: "/home/{{ ansible_user }}/go/src/github.com/cgrates/cgrates"
-cgrates_branch: master
+cgrates_branch: v0.11
 
 # Installation method: "source" or "package"
 cgrates_install_method: source

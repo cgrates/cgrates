@@ -135,7 +135,7 @@
         dest: "{{ cgrates_dir }}"
         update: yes
         force: yes
-        version: "master"
+        version: "v0.11"
       become: yes
       become_user: "{{ user }}"
 
