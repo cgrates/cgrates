@@ -51,7 +51,7 @@
   vars:
     # CGRateS location
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    cgrates_branch: "master"
+    cgrates_branch: "v0.11"
     cgrates_distribution: "nightly"
     ###############################################################
     ##################### GPG Vars #############################
