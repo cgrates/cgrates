@@ -4,7 +4,7 @@ SessionS
 ========
 
 
-**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+**SessionS** is a standalone subsystem within **CGRateS** responsible to manage virtual sessions based on events received. It is accessed via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Parameters

@@ -16,4 +16,4 @@ Due to complex data definition we have split information necessary on each load 
 
 Each individual CSV file can have any number of rows starting with comment character (#) which will be ignored on processing.
 
-Examples of TariffPlans as CSVs can be found on the `GitHub repository <https://github.com/cgrates/cgrates/tree/master/data/tariffplans>`_ . 
+Examples of TariffPlans as CSVs can be found on the `GitHub repository <https://github.com/cgrates/cgrates/tree/v0.11/data/tariffplans>`_ .

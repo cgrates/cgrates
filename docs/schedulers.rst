@@ -7,7 +7,7 @@ SchedulerS
 
 **SchedulerS** can be dynamically started and stopped via the ServiceManager.
 
-Complete interaction with **SchedulerS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+Complete interaction with **SchedulerS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Processing logic

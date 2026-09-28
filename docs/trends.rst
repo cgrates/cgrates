@@ -6,7 +6,7 @@ TrendS
 
 **TrendS** is a standalone subsystem part of the **CGRateS** infrastructure, designed to work as an extension of the :ref:`StatS`, by regularly querying it, storing it's values in a time-series-like database and calculate trend percentages based on their evolution.
 
-Complete interaction with **TrendS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+Complete interaction with **TrendS** is possible via `CGRateS RPC APIs <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 Due it's real-time nature, **TrendS** are designed towards high throughput being able to process thousands of queries per second. This is doable since each *Trend* is a very light object, held in memory and eventually backed up in :ref:`DataDB`.
 
@@ -22,7 +22,7 @@ Automatic Query Scheduling
 	The profiles needing querying will be inserted into **trends** :ref:`JSON configuration <configuration>`. By leaving any part of *trend_id* or *tenat* empty, it will be interpreted as catch-all filter.
 
 API Scheduling
-	The profiles needing querying will be sent inside arguments to the `TrendSv1.ScheduleQueries API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_.
+	The profiles needing querying will be sent inside arguments to the `TrendSv1.ScheduleQueries API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_.
 
 
 Offline storage
@@ -34,7 +34,7 @@ Offline storage is optionally possible, by enabling profile *Stored* flag and co
 Trend querying
 --------------
 
-In order to query a **Trend** (ie: to be displayed in a web interface), one should use the `TrendSv1.GetTrend API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@master/>`_ which also offers pagination parameters.
+In order to query a **Trend** (ie: to be displayed in a web interface), one should use the `TrendSv1.GetTrend API call <https://pkg.go.dev/github.com/cgrates/cgrates/apier@v0.11.0/>`_ which also offers pagination parameters.
 
 
 Trend exporting
