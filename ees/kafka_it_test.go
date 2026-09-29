@@ -180,10 +180,11 @@ func testKafkaDeleteTopic(t *testing.T) {
 		t.Fatal("expected topic named cgrates to exist")
 	}
 
-	if _, err := adm.DeleteTopics(context.Background(), utils.KafkaDefaultTopic); err != nil {
+	if _, err := adm.DeleteTopic(context.Background(), utils.KafkaDefaultTopic); err != nil {
 		t.Fatal(err)
 	}
 
+	cl.PurgeTopicsFromClient(utils.KafkaDefaultTopic)
 	topics, err = adm.ListTopics(context.Background(), utils.KafkaDefaultTopic)
 	if err != nil {
 		t.Fatal(err)
