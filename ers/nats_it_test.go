@@ -6,6 +6,7 @@
 package ers
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -33,11 +34,7 @@ func TestNatsConcurrentReaders(t *testing.T) {
 		t.Fatal("unsupported dbtype value")
 	}
 
-	cmd := exec.Command("nats-server", "-js")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
-	}
-	t.Cleanup(func() { cmd.Process.Kill() })
+	startNATSServer(t, "-js")
 
 	var js jetstream.JetStream // to reuse jetstream instance
 
@@ -253,11 +250,7 @@ resolver_preload: {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			cmd := exec.Command("nats-server", tc.serverFlags...)
-			if err := cmd.Start(); err != nil {
-				t.Fatal(err) // most probably not installed
-			}
-			t.Cleanup(func() { cmd.Process.Kill() })
+			startNATSServer(t, tc.serverFlags...)
 			var nc *nats.Conn // to reuse nats conn
 
 			ng := engine.TestEngine{
@@ -398,11 +391,7 @@ resolver_preload: {
 
 	for _, tc := range testcases {
 		t.Run(tc.name, func(t *testing.T) {
-			cmd := exec.Command("nats-server", tc.serverFlags...)
-			if err := cmd.Start(); err != nil {
-				t.Fatal(err) // most probably not installed
-			}
-			t.Cleanup(func() { cmd.Process.Kill() })
+			startNATSServer(t, tc.serverFlags...)
 			var js jetstream.JetStream // to reuse jetstream instance
 
 			ng := engine.TestEngine{
@@ -447,23 +436,43 @@ resolver_preload: {
 	}
 }
 
+func startNATSServer(t testing.TB, args ...string) {
+	t.Helper()
+	var output bytes.Buffer
+	cmd := exec.Command("nats-server", args...)
+	cmd.Stdout, cmd.Stderr = &output, &output
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := cmd.Process.Signal(os.Interrupt); err != nil {
+			t.Errorf("could not stop nats-server (%d): %v", cmd.Process.Pid, err)
+		}
+		if err := cmd.Wait(); err != nil {
+			t.Errorf("nats-server (%d) exited with error: %v", cmd.Process.Pid, err)
+		}
+		if t.Failed() {
+			t.Log(output.String())
+		}
+	})
+}
+
 func connectToNATSServer(t testing.TB, url string, opts ...nats.Option) *nats.Conn {
 	t.Helper()
 	deadline := time.Now().Add(500 * time.Millisecond)
-	time.Sleep(5 * time.Millisecond) // takes around 5ms for the server to be available
 	fib := utils.FibDuration(time.Millisecond, 0)
+	var nc *nats.Conn
+	var err error
 	for time.Now().Before(deadline) {
-		nc, err := nats.Connect(url, opts...)
-		if err == nil { // successfully connected
-			t.Cleanup(func() {
-				nc.Close()
-			})
+		nc, err = nats.Connect(url, opts...)
+		if err == nil {
+			t.Cleanup(nc.Close)
 			return nc
 		}
-		time.Sleep(fib())
+		time.Sleep(min(fib(), time.Until(deadline)))
 	}
 
-	t.Fatalf("NATS server did not become available within %s", time.Second)
+	t.Fatalf("could not connect to NATS at %s: %v", url, err)
 	return nil
 }
 

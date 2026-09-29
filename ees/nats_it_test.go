@@ -7,6 +7,7 @@
 package ees
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"path"
@@ -22,13 +23,7 @@ import (
 )
 
 func TestNatsEEJetStream(t *testing.T) {
-	exec.Command("pkill", "nats-server")
-	cmd := exec.Command("nats-server", "-js")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
-	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
+	startNATSServer(t, "-js")
 
 	testCreateDirectory(t)
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "ees"))
@@ -51,10 +46,7 @@ func TestNatsEEJetStream(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	nc, err := nats.Connect(nats.DefaultURL, nop...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	nc := connectToNATSServer(t, nats.DefaultURL, nop...)
 	defer nc.Drain()
 
 	js, err := jetstream.New(nc)
@@ -113,13 +105,7 @@ func TestNatsEEJetStream(t *testing.T) {
 }
 
 func TestNatsEE(t *testing.T) {
-	exec.Command("pkill", "nats-server")
-	cmd := exec.Command("nats-server")
-	if err := cmd.Start(); err != nil {
-		t.Fatal(err) // most probably not installed
-	}
-	time.Sleep(50 * time.Millisecond)
-	defer cmd.Process.Kill()
+	startNATSServer(t)
 
 	testCreateDirectory(t)
 	cgrCfg, err := config.NewCGRConfigFromPath(path.Join(*utils.DataDir, "conf", "samples", "ees"))
@@ -141,10 +127,7 @@ func TestNatsEE(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	nc, err := nats.Connect("nats://localhost:4222", nop...)
-	if err != nil {
-		t.Fatal(err)
-	}
+	nc := connectToNATSServer(t, "nats://localhost:4222", nop...)
 
 	ch := make(chan *nats.Msg, 3)
 	_, err = nc.ChanQueueSubscribe("processed_cdrs", "test3", ch)
@@ -175,6 +158,46 @@ func TestNatsEE(t *testing.T) {
 	case <-time.After(50 * time.Millisecond):
 		t.Fatal("Time limit exceeded")
 	}
+}
+
+func startNATSServer(t testing.TB, args ...string) {
+	t.Helper()
+	var output bytes.Buffer
+	cmd := exec.Command("nats-server", args...)
+	cmd.Stdout, cmd.Stderr = &output, &output
+	if err := cmd.Start(); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := cmd.Process.Signal(os.Interrupt); err != nil {
+			t.Errorf("could not stop nats-server (%d): %v", cmd.Process.Pid, err)
+		}
+		if err := cmd.Wait(); err != nil {
+			t.Errorf("nats-server (%d) exited with error: %v", cmd.Process.Pid, err)
+		}
+		if t.Failed() {
+			t.Log(output.String())
+		}
+	})
+}
+
+func connectToNATSServer(t testing.TB, url string, opts ...nats.Option) *nats.Conn {
+	t.Helper()
+	deadline := time.Now().Add(500 * time.Millisecond)
+	fib := utils.FibDuration(time.Millisecond, 0)
+	var nc *nats.Conn
+	var err error
+	for time.Now().Before(deadline) {
+		nc, err = nats.Connect(url, opts...)
+		if err == nil {
+			t.Cleanup(nc.Close)
+			return nc
+		}
+		time.Sleep(min(fib(), time.Until(deadline)))
+	}
+
+	t.Fatalf("could not connect to NATS at %s: %v", url, err)
+	return nil
 }
 
 func TestGetNatsOptsSeedFile(t *testing.T) {
