@@ -9,6 +9,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/cgrates/utils"
@@ -340,6 +341,35 @@ func TestIsWhiteSpace(t *testing.T) {
 	for char, expected := range map[byte]bool{'a': false, '\n': true, ' ': true, '\t': true, '\r': true, 0: true, '1': false} {
 		if rply := isWhiteSpace(char); expected != rply {
 			t.Errorf("Expected: %+v, received: %+v", expected, rply)
+		}
+	}
+}
+
+func TestRjReaderDecodeMissingEnv(t *testing.T) {
+	t.Setenv("TESTVAR", "")
+	for i, input := range []string{
+		`{"listen":{"rpc_json":"*env:TESTVAR:2012"}}`,
+		`{"general":{"log_level":*env:TESTVAR}}`,
+		`{"general":{"node_id":"` + strings.Repeat("x", 1024) + `"},"listen":{"rpc_json":"*env:TESTVAR:2012"}}`,
+	} {
+		_, err := NewCgrJsonCfgFromBytes([]byte(input))
+		if want := "NOT_FOUND:ENV_VAR:TESTVAR"; err == nil || err.Error() != want {
+			t.Errorf("input %d: expected %s, received %v", i, want, err)
+		}
+	}
+}
+
+func TestRjReaderReadError(t *testing.T) {
+	t.Setenv("TESTVAR", "")
+	rdr := NewRjReaderFromBytes([]byte(`{"value":"*env:TESTVAR"}`))
+	buf := make([]byte, 512)
+	for i := 0; i < 2; i++ {
+		n, err := rdr.Read(buf)
+		if want := "NOT_FOUND:ENV_VAR:TESTVAR"; err == nil || err.Error() != want {
+			t.Errorf("read %d: expected %s, received %v", i, want, err)
+		}
+		if i == 1 && n != 0 {
+			t.Errorf("read after error returned %d bytes", n)
 		}
 	}
 }
