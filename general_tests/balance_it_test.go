@@ -165,3 +165,241 @@ cgrates.org,call,1001,,RP_ANY,`,
 		}
 	})
 }
+
+func TestVoiceBalanceMonetary(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+    "log_level": 7
+},
+"data_db": {
+    "db_type": "*internal"
+},
+"stor_db": {
+    "db_type": "*internal"
+},
+"rals": {
+    "enabled": true
+},
+"schedulers": {
+    "enabled": true
+},
+"apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*internal"]
+}
+}`
+
+	tpFiles := map[string]string{
+		utils.DestinationsCsv: `#Id,Prefix
+DST1,1002`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_10PM,0,10,60s,1s,0`,
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_10PM,DST1,RT_10PM,*up,4,0,`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_10PM,DR_10PM,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,Tier1,,RP_10PM,
+cgrates.org,call,1001,,RP_10PM,`,
+	}
+
+	testEnv := TestEnvironment{
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _ := testEnv.Setup(t, 0)
+
+	var reply string
+	if err := client.Call(utils.APIerSv1SetBalance, &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.MONETARY,
+		Value:       10,
+		Balance: map[string]any{
+			utils.ID: "MAIN",
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(utils.APIerSv1SetBalance, &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.VOICE,
+		Value:       float64(5 * time.Minute),
+		Balance: map[string]any{
+			utils.ID:            "VOICE",
+			utils.RatingSubject: "Tier1",
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("MaxDebit", func(t *testing.T) {
+		tStart := time.Date(2026, time.September, 28, 8, 0, 0, 0, time.UTC)
+		cd := &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			ToR:           utils.VOICE,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(30 * time.Second),
+			DurationIndex: 30 * time.Second,
+		}
+		var cc engine.CallCost
+		if err := client.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+			t.Fatal(err)
+		}
+		if got := cc.GetDuration(); got != 30*time.Second {
+			t.Errorf("granted usage = %v, want 30s", got)
+		}
+		if cost := utils.Round(cc.Cost, 2, utils.ROUNDING_MIDDLE); cost != 5 {
+			t.Errorf("cost = %v, want 5", cost)
+		}
+	})
+
+	t.Run("CheckBalances", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		voice := time.Duration(acnt.BalanceMap[utils.VOICE][0].Value)
+		if want := 4*time.Minute + 30*time.Second; voice != want {
+			t.Errorf("remaining voice = %v, want %v", voice, want)
+		}
+		if money := utils.Round(acnt.BalanceMap[utils.MONETARY][0].Value, 2, utils.ROUNDING_MIDDLE); money != 5 {
+			t.Errorf("remaining money = %v, want 5", money)
+		}
+	})
+}
+
+func TestVoiceBalanceWithoutMonetary(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	content := `{
+
+"general": {
+	"log_level": 7
+},
+"data_db": {
+	"db_type": "*internal"
+},
+"stor_db": {
+	"db_type": "*internal"
+},
+"rals": {
+	"enabled": true
+},
+"schedulers": {
+	"enabled": true
+},
+"apiers": {
+	"enabled": true,
+	"scheduler_conns": ["*internal"]
+}
+}`
+
+	tpFiles := map[string]string{
+		utils.DestinationsCsv: `#Id,Prefix
+DST1,1002`,
+		utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_10PM,0,10,60s,1s,0`,
+		utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_10PM,DST1,RT_10PM,*up,4,0,`,
+		utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_10PM,DR_10PM,*any,10`,
+		utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,call,Tier1,,RP_10PM,
+cgrates.org,call,1001,,RP_10PM,`,
+	}
+
+	testEnv := TestEnvironment{
+		ConfigJSON: content,
+		TpFiles:    tpFiles,
+	}
+	client, _ := testEnv.Setup(t, 0)
+
+	var reply string
+	if err := client.Call(utils.APIerSv1SetBalance, &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.MONETARY,
+		Value:       0,
+		Balance: map[string]any{
+			utils.ID: "MAIN",
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(utils.APIerSv1SetBalance, &utils.AttrSetBalance{
+		Tenant:      "cgrates.org",
+		Account:     "1001",
+		BalanceType: utils.VOICE,
+		Value:       float64(5 * time.Minute),
+		Balance: map[string]any{
+			utils.ID:            "VOICE",
+			utils.RatingSubject: "Tier1",
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	t.Run("MaxDebit", func(t *testing.T) {
+		tStart := time.Date(2026, time.September, 28, 8, 0, 0, 0, time.UTC)
+		cd := &engine.CallDescriptor{
+			Category:      "call",
+			Tenant:        "cgrates.org",
+			Subject:       "1001",
+			Account:       "1001",
+			Destination:   "1002",
+			ToR:           utils.VOICE,
+			TimeStart:     tStart,
+			TimeEnd:       tStart.Add(30 * time.Second),
+			DurationIndex: 30 * time.Second,
+		}
+		var cc engine.CallCost
+		if err := client.Call(utils.ResponderMaxDebit, cd, &cc); err != nil {
+			t.Fatal(err)
+		}
+		if got := cc.GetDuration(); got != 0 {
+			t.Errorf("usage = %v, want 0", got)
+		}
+		if cc.Cost != 0 {
+			t.Errorf("cost = %v, want 0", cc.Cost)
+		}
+	})
+
+	t.Run("CheckBalances", func(t *testing.T) {
+		var acnt engine.Account
+		if err := client.Call(utils.APIerSv2GetAccount,
+			&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1001"}, &acnt); err != nil {
+			t.Fatal(err)
+		}
+		voice := time.Duration(acnt.BalanceMap[utils.VOICE][0].Value)
+		if want := 5 * time.Minute; voice != want {
+			t.Errorf("remaining voice = %v, want %v", voice, want)
+		}
+		if monetary := acnt.BalanceMap[utils.MONETARY][0].Value; monetary != 0 {
+			t.Errorf("remaining monetary = %v, want 0", monetary)
+		}
+	})
+}
