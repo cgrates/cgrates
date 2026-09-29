@@ -7,10 +7,8 @@
 package general_tests
 
 import (
-	"os/exec"
 	"path"
 	"reflect"
-	"syscall"
 	"testing"
 	"time"
 
@@ -22,33 +20,13 @@ import (
 
 	"github.com/cgrates/cgrates/engine"
 
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-var (
-	smgRplcCfgPath1, smgRplcCfgPath2 string
-	smgRplcCfgDIR1, smgRplcCfgDIR2   string
-	smgRplCfg1, smgRplCfg2           *config.CGRConfig
-	smgRplcRPC1, smgRplcRPC2         *birpc.Client
-	testEngine1, testEngine2         *exec.Cmd
-	sTestsSession1                   = []func(t *testing.T){
-		testSessionSRplcInitCfg,
-		testSessionSRplcResetDB,
-		testSessionSRplcStartEngine,
-		testSessionSRplcApierRpcConn,
-		testSessionSRplcApierGetActiveSessionsNotFound,
-		testSessionSRplcApierSetChargerS,
-		testSessionSRplcApierGetInitateSessions,
-		testSessionSRplcApierGetActiveSessions,
-		testSessionSRplcApierGetPassiveSessions,
-		testSessionSRplcApierStopSession2,
-		testSessionSRplcApierGetPassiveSessionsAfterStop,
-		testSessionSRplcStopCgrEngine,
-	}
-)
+var smgRplcRPC1, smgRplcRPC2 *birpc.Client
 
 func TestSessionSRplcGracefulShutdown(t *testing.T) {
+	var smgRplcCfgDIR1, smgRplcCfgDIR2 string
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		smgRplcCfgDIR1 = "rplcTestGracefulShutdown1_internal"
@@ -65,50 +43,30 @@ func TestSessionSRplcGracefulShutdown(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
-	for _, stest1 := range sTestsSession1 {
-		t.Run(*utils.DBType, stest1)
+	ng1 := engine.TestEngine{
+		ConfigPath:       path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1),
+		GracefulShutdown: true,
 	}
-}
+	smgRplcRPC1, _ = ng1.Run(t)
+	ng2 := engine.TestEngine{
+		ConfigPath:       path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR2),
+		PreserveDataDB:   true,
+		PreserveStorDB:   true,
+		GracefulShutdown: true,
+	}
+	smgRplcRPC2, _ = ng2.Run(t)
 
-// Init Config
-func testSessionSRplcInitCfg(t *testing.T) {
-	var err error
-	smgRplcCfgPath1 = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR1)
-	if smgRplCfg1, err = config.NewCGRConfigFromPath(smgRplcCfgPath1); err != nil {
-		t.Fatal(err)
+	for _, test := range []func(t *testing.T){
+		testSessionSRplcApierGetActiveSessionsNotFound,
+		testSessionSRplcApierSetChargerS,
+		testSessionSRplcApierGetInitateSessions,
+		testSessionSRplcApierGetActiveSessions,
+		testSessionSRplcApierGetPassiveSessions,
+		func(t *testing.T) { ng2.Stop(t) },
+		testSessionSRplcApierGetPassiveSessionsAfterStop,
+	} {
+		t.Run(*utils.DBType, test)
 	}
-	smgRplcCfgPath2 = path.Join(*utils.DataDir, "conf", "samples", "sessions_replication", smgRplcCfgDIR2)
-	if smgRplCfg2, err = config.NewCGRConfigFromPath(smgRplcCfgPath2); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Remove data in both rating and accounting db
-func testSessionSRplcResetDB(t *testing.T) {
-	if err := engine.InitDataDB(smgRplCfg1); err != nil {
-		t.Fatal(err)
-	}
-	if err := engine.InitStorDb(smgRplCfg1); err != nil {
-		t.Fatal(err)
-	}
-}
-
-// Start CGR Engine
-func testSessionSRplcStartEngine(t *testing.T) {
-	var err error
-	if _, err = engine.StopStartEngine(smgRplcCfgPath1, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-	if testEngine1, err = engine.StartEngine(smgRplcCfgPath2, *utils.WaitRater); err != nil {
-		t.Fatal(err)
-	}
-
-}
-
-// Connect rpc client to rater
-func testSessionSRplcApierRpcConn(t *testing.T) {
-	smgRplcRPC1 = engine.NewRPCClient(t, smgRplCfg1.ListenCfg())
-	smgRplcRPC2 = engine.NewRPCClient(t, smgRplCfg2.ListenCfg())
 }
 
 func testSessionSRplcApierGetActiveSessionsNotFound(t *testing.T) {
@@ -256,17 +214,6 @@ func testSessionSRplcApierGetPassiveSessions(t *testing.T) {
 	}
 }
 
-func testSessionSRplcApierStopSession2(t *testing.T) {
-	err := testEngine1.Process.Signal(syscall.SIGTERM)
-	if err != nil {
-		t.Error(err)
-	}
-	err = testEngine1.Wait()
-	if err != nil {
-		t.Error(err)
-	}
-}
-
 func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
@@ -303,11 +250,5 @@ func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 	if !reflect.DeepEqual(&aSessions2, &expected) {
 		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ToJSON(&aSessions2), utils.ToJSON(&expected))
 
-	}
-}
-
-func testSessionSRplcStopCgrEngine(t *testing.T) {
-	if err := engine.KillEngine(100); err != nil {
-		t.Error(err)
 	}
 }
