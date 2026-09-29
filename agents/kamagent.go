@@ -140,7 +140,7 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 		},
 	}
 	var processed bool
-	opts := utils.MapStorage(kev.GetOptions())
+	opts := utils.MapStorage{}
 	cgrRplyNM := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{}}
 	rply := utils.NewOrderedNavigableMap()
 	sessConns, _ := engine.GetConnIDs(ka.ctx, ka.kamCfg.Conns, utils.MetaSessionS,
@@ -153,7 +153,7 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 				ka.cfg.GeneralCfg().DefaultTimezone),
 			ka.cfg, nil, ka.fltrS, nil)
 		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it came from Kamailio
-			if err = kev.setCGRRequest(agReq.CGRRequest, connIdx); err != nil {
+			if err = kev.setCGRRequest(agReq.CGRRequest, agReq.Opts); err != nil {
 				break
 			}
 		}
