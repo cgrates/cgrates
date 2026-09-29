@@ -24,6 +24,7 @@ type RateProfile struct {
 	MaxCost         *Decimal
 	MaxCostStrategy string
 	Rates           map[string]*Rate
+	computed        bool
 }
 
 // Clone clones *RateProfile
@@ -35,6 +36,7 @@ func (rp *RateProfile) Clone() *RateProfile {
 		Tenant:          rp.Tenant,
 		ID:              rp.ID,
 		MaxCostStrategy: rp.MaxCostStrategy,
+		computed:        rp.computed,
 	}
 	if rp.FilterIDs != nil {
 		cloned.FilterIDs = make([]string, len(rp.FilterIDs))
@@ -67,6 +69,19 @@ func (rp *RateProfile) CacheClone() any {
 
 func (rp *RateProfile) TenantID() string {
 	return ConcatenatedKey(rp.Tenant, rp.ID)
+}
+
+// IsComputed checks if rates are computed previously
+func (rp *RateProfile) IsComputed() bool {
+	return rp.computed
+}
+
+func (rp *RateProfile) CacheCompute() (any, error) {
+	if err := rp.Compile(); err != nil {
+		return nil, err
+	}
+	rp.computed = true
+	return rp, nil
 }
 
 func (rp *RateProfile) Compile() (err error) {
