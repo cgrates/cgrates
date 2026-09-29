@@ -101,9 +101,13 @@ func TestERsLineNr(t *testing.T) {
 	fileIdx := 0
 	createFile := func(t *testing.T, dir, ext, content string) {
 		fileIdx++
-		filePath := filepath.Join(dir, fmt.Sprintf("file%d%s", fileIdx, ext))
+		fileName := fmt.Sprintf("file%d%s", fileIdx, ext)
+		filePath := filepath.Join(t.TempDir(), fileName)
 		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 			t.Fatalf("could not write to file %s: %v", filePath, err)
+		}
+		if err := os.Rename(filePath, filepath.Join(dir, fileName)); err != nil {
+			t.Fatal(err)
 		}
 	}
 
@@ -135,7 +139,7 @@ func TestERsLineNr(t *testing.T) {
 		}
 	}
 
-	// Create the files inside the source directories of the readers.
+	// Finish writing the files before moving them where the readers can see them.
 	createFile(t, csvFd, utils.CSVSuffix, "test1\ntest2\ntest3\ntest4\ntest5\ntest6")
 	createFile(t, fwvFd, utils.FWVSuffix, `HDR002
 test1
