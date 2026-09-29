@@ -140,10 +140,11 @@ func TestKafkaER(t *testing.T) {
 		t.Fatal("expected topic named cgrates to exist")
 	}
 
-	if _, err := adm2.DeleteTopics(context.Background(), utils.KafkaDefaultTopic); err != nil {
+	if _, err := adm2.DeleteTopic(context.Background(), utils.KafkaDefaultTopic); err != nil {
 		t.Fatal(err)
 	}
 
+	cl2.PurgeTopicsFromClient(utils.KafkaDefaultTopic)
 	topics, err = adm2.ListTopics(context.Background(), utils.KafkaDefaultTopic)
 	if err != nil {
 		t.Fatal(err)
