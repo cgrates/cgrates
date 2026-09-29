@@ -161,6 +161,7 @@ TRL6
 </root>`)
 
 	time.Sleep(20 * time.Millisecond) // wait for the files to be processed
+	ng.Stop(t)
 
 	// Check that the suffixes of the 'test' fields match the LineNumber field.
 	logData := strings.NewReader(buf.String())
