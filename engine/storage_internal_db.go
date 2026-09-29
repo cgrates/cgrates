@@ -556,9 +556,10 @@ func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, prof
 	return
 }
 
-func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
-	if err = rpp.Compile(); err != nil {
-		return
+func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile, optOverwrite bool) error {
+	_, err := rpp.CacheCompute()
+	if err != nil {
+		return err
 	}
 	if !optOverwrite {
 		// in case of add new rates into our profile
@@ -575,7 +576,7 @@ func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProf
 	}
 	iDB.db.Set(utils.CacheRateProfiles, rpp.TenantID(), rpp, nil,
 		true, utils.NonTransactional)
-	return
+	return nil
 }
 
 func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string, rateIDs *[]string) (err error) {

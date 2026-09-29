@@ -2828,8 +2828,10 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 			return nil, err
 		}
 	}
-	if err = rpp.Compile(); err != nil {
-		return nil, err
+	if !rpp.IsComputed() {
+		if err = rpp.Compile(); err != nil {
+			return nil, err
+		}
 	}
 	if cacheWrite {
 		if errCh := dm.cache.Set(ctx, utils.CacheRateProfiles, tntID, rpp, nil,

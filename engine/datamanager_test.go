@@ -9404,6 +9404,61 @@ func TestDMGetRateProfileNildm(t *testing.T) {
 	}
 }
 
+func TestGetRateProfileCompl(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := NewLocker(cfg)
+	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
+	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
+	cM := NewConnManager(cfg)
+	cM.SetCache(cacheS)
+	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := NewDataManager(dbCM, cfg, cM, locker)
+	dm.SetCache(cacheS)
+	rp1 := &utils.RateProfile{
+		ID:        "Rate1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_WEEK": {
+				ID:              "RT_WEEK",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	dm.SetRateProfile(context.Background(), rp1, false, false)
+	rp1 = &utils.RateProfile{
+		ID:        "Rate1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Subject:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_MONTH": {
+				ID:              "RT_MONTH",
+				ActivationTimes: "* * * * *",
+			},
+		},
+	}
+	dm.SetRateProfile(context.Background(), rp1, false, false)
+
+	if !rp1.IsComputed() {
+		t.Fatal("RateProfile should be computed")
+	}
+	rpRep, err := dm.GetRateProfile(context.Background(), "cgrates.org", "Rate1", false, false, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !rpRep.IsComputed() {
+		t.Fatal("RateProfile should be computed")
+	}
+	if len(rpRep.Rates) != 2 {
+		t.Fatalf("got %d", len(rpRep.Rates))
+	}
+	for _, rate := range rpRep.Rates {
+		if rate.UID() == "" {
+			t.Errorf("Expected Rate %s to be computed", rate.ID)
+		}
+	}
+}
+
 func TestDMResourcesUpdateResource(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)

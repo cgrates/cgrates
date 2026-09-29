@@ -21,7 +21,7 @@ require (
 	github.com/cgrates/guardian v0.0.0-20260717083347-4dd989a9dc8f
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20260610140503-79ff56e96191
-	github.com/cgrates/ltcache v0.0.0-20260702142901-a892bb64c827
+	github.com/cgrates/ltcache v0.0.0-20260929150357-755c75670c49
 	github.com/cgrates/radigo v0.0.0-20240123163129-491c899df727
 	github.com/cgrates/rpcclient v0.0.0-20240816141816-52dd1074499e
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
