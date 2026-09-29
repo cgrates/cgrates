@@ -21,12 +21,16 @@ import (
 	"github.com/cgrates/birpc/context"
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	v2 "github.com/cgrates/cgrates/apier/v2"
-	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func TestOfflineInternal(t *testing.T) { // run with sudo
+func TestOfflineInternal(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMongo, utils.MetaMySQL, utils.MetaPostgres, utils.MetaRedis:
+		t.SkipNow()
+	}
 	paths := []string{
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal"),                     // dump -1
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal_ms"),                  // dump ms
@@ -42,15 +46,17 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 		path.Join(*utils.DataDir, "conf", "samples", "offline_internal_ms_rewrite_ms_limit"), // dump ms and rewrite ms and limit passed
 	}
 	for i, pth := range paths {
-		if err := os.MkdirAll(config.NewDefaultCGRConfig().DataDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
-			t.Fatal(err)
-		}
-		if err := os.MkdirAll(config.NewDefaultCGRConfig().StorDbCfg().Opts.InternalDBDumpPath, 0755); err != nil {
-			t.Fatal(err)
-		}
 		t.Run("OfflineInternal"+strconv.Itoa(i), func(t *testing.T) {
+			dataDumpPath := t.TempDir()
+			storDumpPath := t.TempDir()
+			exportPath1 := t.TempDir()
+			exportPath2 := t.TempDir()
 			ng := engine.TestEngine{
-				ConfigPath:       pth,
+				ConfigPath: pth,
+				ConfigJSON: fmt.Sprintf(`{
+					"data_db": {"opts": {"internalDBDumpPath": %q}},
+					"stor_db": {"opts": {"internalDBDumpPath": %q}}
+				}`, dataDumpPath, storDumpPath),
 				GracefulShutdown: true,
 			}
 			client, cfg := ng.Run(t)
@@ -68,7 +74,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			t.Run("ExportDataDB", func(t *testing.T) {
 				// exports Attributes, Chargers, Dispatchers, DispatcherHosts, Filters, Resources, Stats, Routes, Thresholds, Rankings, Trends
 				var reply string
-				if err := client.Call(context.Background(), utils.APIerSv1ExportToFolder, utils.ArgExportToFolder{Path: "/tmp/ExportPath1"}, &reply); err != nil {
+				if err := client.Call(context.Background(), utils.APIerSv1ExportToFolder, utils.ArgExportToFolder{Path: exportPath1}, &reply); err != nil {
 					t.Error(err)
 				} else if reply != utils.OK {
 					t.Errorf("Expected: <%v>, received: <%v>", utils.OK, reply)
@@ -260,9 +266,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			})
 
 			t.Run("EngineShutdown", func(t *testing.T) {
-				if err := engine.KillEngine(100); err != nil {
-					t.Error(err)
-				}
+				ng.Stop(t)
 			})
 			t.Run("CountDataDBFiles", func(t *testing.T) {
 				var dirs, files int
@@ -314,7 +318,7 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 			time.Sleep(100 * time.Millisecond)
 			t.Run("ExportDataDB2", func(t *testing.T) {
 				var reply string
-				if err := client.Call(context.Background(), utils.APIerSv1ExportToFolder, utils.ArgExportToFolder{Path: "/tmp/ExportPath2"}, &reply); err != nil {
+				if err := client.Call(context.Background(), utils.APIerSv1ExportToFolder, utils.ArgExportToFolder{Path: exportPath2}, &reply); err != nil {
 					t.Error(err)
 				} else if reply != utils.OK {
 					t.Errorf("Expected: <%v>, received: <%v>", utils.OK, reply)
@@ -340,15 +344,15 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					sort.Strings(lines)
 					return lines, nil
 				}
-				if err := filepath.Walk("/tmp/ExportPath1", func(path1 string, info1 os.FileInfo, err1 error) error {
+				if err := filepath.Walk(exportPath1, func(path1 string, info1 os.FileInfo, err1 error) error {
 					if err1 != nil {
 						return err1
 					}
-					relPath, err := filepath.Rel("/tmp/ExportPath1", path1) // save path that comes after /tmp/ExportPath1
+					relPath, err := filepath.Rel(exportPath1, path1)
 					if err != nil {
 						return fmt.Errorf("error calculating relative path: %v", err)
 					}
-					path2 := filepath.Join("/tmp/ExportPath2", relPath)
+					path2 := filepath.Join(exportPath2, relPath)
 					if _, err := os.Stat(path2); err != nil {
 						return err
 					}
@@ -700,15 +704,6 @@ func TestOfflineInternal(t *testing.T) { // run with sudo
 					}
 				}
 			})
-			if err := os.RemoveAll("/var/lib/cgrates/internal_db"); err != nil {
-				t.Error(err)
-			}
-			if err := os.RemoveAll("/tmp/ExportPath1"); err != nil {
-				t.Error(err)
-			}
-			if err := os.RemoveAll("/tmp/ExportPath2"); err != nil {
-				t.Error(err)
-			}
 		})
 	}
 }
