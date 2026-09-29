@@ -44,3 +44,36 @@ func TestNewKamEvent(t *testing.T) {
 		t.Error("Received: ", kamEv)
 	}
 }
+
+func TestKamEventSetCGRRequest(t *testing.T) {
+	kev := KamEvent{
+		"trIndex":       "4",
+		"trLabel":       "label1",
+		"replyRoute":    "CGR_AUTH_REPLY",
+		"*interimUsage": "50",
+		"*totalUsage":   "100",
+		"*originID":     "kamailioOrigin",
+	}
+
+	nm := utils.NewOrderedNavigableMap()
+	opts := make(utils.MapStorage)
+	if err := kev.setCGRRequest(nm, opts); err != nil {
+		t.Fatal(err)
+	}
+	eEv := map[string]any{
+		"trIndex":    "4",
+		"trLabel":    "label1",
+		"replyRoute": "CGR_AUTH_REPLY",
+	}
+	if ev := nm.AsMap(); !reflect.DeepEqual(eEv, ev) {
+		t.Errorf("expected  %s, received %s", utils.ToJSON(eEv), utils.ToJSON(ev))
+	}
+	eopts := utils.MapStorage{
+		"*interimUsage": "50",
+		"*totalUsage":   "100",
+		"*originID":     "kamailioOrigin",
+	}
+	if !reflect.DeepEqual(eopts, opts) {
+		t.Errorf("expected %s, received %s", utils.ToJSON(eopts), utils.ToJSON(opts))
+	}
+}

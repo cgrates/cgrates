@@ -5,6 +5,7 @@ package agents
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -108,14 +109,15 @@ func (kev KamEvent) GetOptions() (mp map[string]any) {
 	return
 }
 
-func (kev KamEvent) setCGRRequest(nm *utils.OrderedNavigableMap, connIdx int) (err error) {
+func (kev KamEvent) setCGRRequest(nm *utils.OrderedNavigableMap, opts utils.MapStorage) (err error) {
 	for k, v := range kev {
-		if utils.CGROptionsSet.Has(k) {
+		if strings.HasPrefix(k, utils.Meta) {
+			opts[k] = v
 			continue
 		}
 		if err = nm.Set(&utils.FullPath{Path: k, PathSlice: []string{k}}, v); err != nil {
 			return
 		}
 	}
-	return nm.Set(&utils.FullPath{Path: EvapiConnID, PathSlice: []string{EvapiConnID}}, connIdx)
+	return
 }
