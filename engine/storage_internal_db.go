@@ -35,6 +35,9 @@ func NewInternalDB(transCacheOpts *ltcache.TransCacheOpts,
 			Clone:     true,
 		}
 	}
+	if _, has := tcCfg[utils.MetaRateProfiles]; has {
+		tcCfg[utils.MetaRateProfiles].Clone = false
+	}
 	if transCacheOpts != nil && transCacheOpts.DumpInterval == 0 && transCacheOpts.RewriteInterval == 0 {
 		transCacheOpts = nil // create TransCache without offline collector if neither
 		// DumpInterval or RewriteInterval are provided
