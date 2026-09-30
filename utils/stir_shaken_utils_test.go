@@ -6,9 +6,13 @@ package utils
 import (
 	"bytes"
 	"math"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 func TestRemoveWhiteSpaces(t *testing.T) {
@@ -75,6 +79,47 @@ func TestNewECDSAPubKeyFromReader(t *testing.T) {
 	r := bytes.NewBuffer([]byte("invalid certificate"))
 	if _, err := NewECDSAPubKeyFromReader(r); err == nil {
 		t.Errorf("Expected error")
+	}
+}
+
+func TestNewECDSAPrvKey(t *testing.T) {
+	server := httptest.NewServer(http.FileServer(http.Dir("../data/stir")))
+	defer server.Close()
+	expected, err := jwt.ParseECPrivateKeyFromPEM([]byte(`
+-----BEGIN EC PRIVATE KEY-----
+MHcCAQEEICcL1+2nj9ylMlTKjSpIGx03gALK0cISciviwudQuvb9oAoGCCqGSM49
+AwEHoUQDQgAEjS4zmWotYqKWB2/sn+4v1uUoPAQ2N2ZtrUsmewkl3ErAbIokXSZS
+rucJPPszlBtYbbhcmbXC7DKP9u9Pq/GnVg==
+-----END EC PRIVATE KEY-----`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	prvKey, err := NewECDSAPrvKey(server.URL+"/stir_privatekey.pem", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, prvKey) {
+		t.Errorf("Expected %+v, received %+v", expected, prvKey)
+	}
+}
+
+func TestNewECDSAPubKey(t *testing.T) {
+	server := httptest.NewServer(http.FileServer(http.Dir("../data/stir")))
+	defer server.Close()
+	expected, err := jwt.ParseECPublicKeyFromPEM([]byte(`
+-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEjS4zmWotYqKWB2/sn+4v1uUoPAQ2
+N2ZtrUsmewkl3ErAbIokXSZSrucJPPszlBtYbbhcmbXC7DKP9u9Pq/GnVg==
+-----END PUBLIC KEY-----`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	pubKey, err := NewECDSAPubKey(server.URL+"/stir_pubkey.pem", time.Second)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(expected, pubKey) {
+		t.Errorf("Expected %+v, received %+v", expected, pubKey)
 	}
 }
 

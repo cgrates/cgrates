@@ -4,6 +4,8 @@
 package sessions
 
 import (
+	"net/http"
+	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
@@ -197,7 +199,9 @@ func TestVerifySignature(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
-	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	server := httptest.NewServer(http.FileServer(http.Dir("../data/stir")))
+	defer server.Close()
+	rply.Header.X5u = server.URL + "/stir_pubkey.pem"
 	expectedErr := "crypto/ecdsa: verification error"
 	if err := rply.VerifySignature(context.Background(), cacheS, cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -257,6 +261,8 @@ aa+jqv4dwkr/FLEcN1zC76Y/IniI65fId55hVJvN3ORuzUqYEtzD3irmsw==
 }
 
 func TestNewSTIRIdentityError(t *testing.T) {
+	server := httptest.NewServer(http.FileServer(http.Dir("../data/stir")))
+	defer server.Close()
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
@@ -265,12 +271,12 @@ func TestNewSTIRIdentityError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := NewSTIRIdentity(context.Background(), cacheS, rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem", -1); err != nil {
+	if _, err := NewSTIRIdentity(context.Background(), cacheS, rply.Header, rply.Payload, server.URL+"/stir_privatekey.pem", cfg.GeneralCfg().ReplyTimeout); err != nil {
 		t.Error(err)
 	}
 
 	expectedErr := "http status error: 404"
-	if _, err := NewSTIRIdentity(context.Background(), cacheS, rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
+	if _, err := NewSTIRIdentity(context.Background(), cacheS, rply.Header, rply.Payload, server.URL+"/stir_privatekey.pe", cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }

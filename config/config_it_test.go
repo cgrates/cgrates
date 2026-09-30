@@ -417,11 +417,18 @@ func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 }
 
 func testLoadConfigFromHTTPValidURL(t *testing.T) {
+	server := httptest.NewServer(http.FileServer(http.Dir("../data/conf/samples/multifiles")))
+	defer server.Close()
 	cfg := NewDefaultCGRConfig()
 
-	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
-	if err := loadConfigFromHTTP(context.Background(), url, cfg.sections, cfg); err != nil {
-		t.Error(err)
+	if err := loadConfigFromHTTP(context.Background(), server.URL+"/a.json", cfg.sections, cfg); err != nil {
+		t.Fatal(err)
+	}
+	if got := cfg.GeneralCfg().DefaultReqType; got != utils.MetaPostpaid {
+		t.Errorf("Expected %q, received %q", utils.MetaPostpaid, got)
+	}
+	if got := cfg.HTTPAgentCfg(); len(got) != 1 || got[0].ID != "conecto1" {
+		t.Errorf("Expected HTTP agent conecto1, received %+v", got)
 	}
 }
 
