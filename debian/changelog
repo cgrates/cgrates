@@ -1,5 +1,5 @@
-cgrates (0.11.0) UNRELEASED; urgency=medium
+cgrates (0.11.1~dev-1) UNRELEASED; urgency=medium
 
-  * 0.11.0 release.
+  * Initial Release.
 
- -- DanB <danb@cgrates.org>  Thu, 30 Sep 2026 14:14:34 +0200
+ -- DanB <danb@cgrates.org>  Thu, 30 Sep 2026 20:34:34 +0200
