@@ -5,14 +5,12 @@ permissions: {}
 on:
   push:
     branches:
-      - 1.0
       - main
     paths-ignore:
       - 'docs/**'
       - README.md
   pull_request:
     branches:
-      - 1.0
       - main
     paths-ignore:
       - 'docs/**'
