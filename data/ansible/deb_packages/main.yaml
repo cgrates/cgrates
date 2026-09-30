@@ -359,6 +359,20 @@
         masked: false
         enabled: true
 
+    - name: Disable the default nginx site
+      become: true
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      register: nginx_default_site
+
+    - name: Reload nginx
+      become: true
+      ansible.builtin.systemd:
+        name: nginx
+        state: reloaded
+      when: nginx_default_site.changed
+
     - name: Add user to www-data group
       become: true
       ansible.builtin.user:
