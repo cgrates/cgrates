@@ -384,7 +384,7 @@ func testV1ReloadConfigFromPathConfigSanity(t *testing.T) {
 func testLoadConfigFromHTTPValidURL(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 
-	url := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/multifiles/a.json"
+	url := "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/conf/samples/multifiles/a.json"
 	if err := cfg.loadConfigFromHTTP(url, nil); err != nil {
 		t.Error(err)
 	}
