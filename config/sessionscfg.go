@@ -101,6 +101,7 @@ type SessionsOpts struct {
 	Session                []*DynamicBoolOpt
 	AutoChargeInterval     []*DynamicDurationOpt
 	AutoChargeUsage        []*DynamicDecimalOpt
+	AutoChargeMinGranted   []*DynamicDecimalOpt
 	EEs                    []*DynamicBoolOpt
 	EEsIDs                 []*DynamicStringOpt
 	UR                     []*DynamicBoolOpt // UsageRecord generation

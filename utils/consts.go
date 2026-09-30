@@ -2186,6 +2186,7 @@ const (
 	MetaChargeableCfg             = "*chargeable"
 	MetaAutoChargeIntervalCfg     = "*autoChargeInterval"
 	MetaAutoChargeUsageCfg        = "*autoChargeUsage"
+	MetaAutoChargeMinGranted      = "*autoCgargeMinGranted"
 	MetaTTLLastUsageCfg           = "*ttlLastUsage"
 	MetaTTLLastUsedCfg            = "*ttlLastUsed"
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"

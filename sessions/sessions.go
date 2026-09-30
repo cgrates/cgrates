@@ -1013,10 +1013,28 @@ func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err e
 }
 
 // EnableAutoChargeSRun will enable autocharging loop on a SRun
-func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Duration) {
-	var autoChargeUsage *utils.Decimal
+func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Duration, s *Session) {
+	var autoChargeUsage, aCMinGranted *utils.Decimal
 	var eEc *utils.EventCharges
 	var err error
+	var origAChrIval *time.Duration // populated if the original changes
+	sRun.lk.RLock()
+	cgrEv := sRun.CGREvent.Clone()
+	sRun.lk.RUnlock()
+	if aCMinGranted, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
+		sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeMinGranted,
+		utils.MetaAutoChargeMinGranted); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+				utils.SessionS, err.Error(), cgrEv, utils.MetaAutoChargeMinGranted))
+		if err = sS.disconnectSession(s, utils.ErrServerError.Error()); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, err.Error(), cgrEv, utils.AgentV1DisconnectSession))
+		}
+		return
+	}
+
 	for {
 		sRun.lk.RLock()
 		cgrEv := sRun.CGREvent.Clone()
@@ -1027,18 +1045,53 @@ func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Dur
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
 					utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
-		} else {
-			cgrEv.APIOpts[utils.MetaUsage] = autoChargeUsage // dynamically change the next usage
-			if eEc, err = sS.accountSDebitEvent(context.TODO(), cgrEv); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-						utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
-			}
-			sRun.lk.Lock()
-			sRun.Charges.Merge(eEc)
-			sRun.NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
-			sRun.lk.Unlock()
+			continue
 		}
+		isACLoopUsage := utils.NewDecimal(int64(autoChargeInterval), 0).Compare(autoChargeUsage) == 0 // special case when we are looping for the same usage, ie: voice debit
+		cgrEv.APIOpts[utils.MetaUsage] = autoChargeUsage                                              // dynamically change the next usage
+		if eEc, err = sS.accountSDebitEvent(context.TODO(), cgrEv); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
+					utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
+		}
+		sRun.lk.Lock()
+		sRun.Charges.Merge(eEc)
+		sRun.lk.Unlock()
+
+		if eEc.Abstracts.Compare(aCMinGranted) == -1 { // allowed Abstracts are smaller than MinGranted setting
+			if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s, reason: %s",
+						utils.SessionS, err.Error(), cgrEv,
+						utils.AgentV1DisconnectSession, utils.ErrInsufficientCredit.Error()))
+			}
+			return
+		}
+
+		if origAChrIval != nil { // restore it from previous
+			autoChargeInterval = *origAChrIval
+			origAChrIval = nil
+		}
+
+		if eEc.Abstracts.Compare(autoChargeUsage) == -1 && isACLoopUsage { // granted smaller than requested, for loopUsage we try again when that empties
+			origAChrIval = &autoChargeInterval
+			if eAbs, isDur := eEc.Abstracts.Duration(); !isDur {
+				if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err != nil {
+					utils.Logger.Warning(
+						fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s, reason: %s",
+							utils.SessionS, err.Error(), cgrEv,
+							utils.AgentV1DisconnectSession, utils.ErrServerError.Error()))
+				}
+				return
+			} else {
+				autoChargeInterval = eAbs
+			}
+		}
+
+		sRun.lk.Lock()
+		sRun.NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
+		sRun.lk.Unlock()
+
 		select {
 		case <-sRun.autoChargeStop:
 			return
