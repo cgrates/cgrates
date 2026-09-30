@@ -172,7 +172,7 @@ var (
 
 const (
 	CGRateS                  = "CGRateS"
-	Version                  = "v0.11.0~dev"
+	Version                  = "v0.11.0"
 	DiameterFirmwareRevision = 918
 	CGRateSLwr               = "cgrates"
 	Postgres                 = "postgres"
