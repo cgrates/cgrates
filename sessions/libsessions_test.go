@@ -194,7 +194,7 @@ func TestVerifySignature(t *testing.T) {
 	}
 	cfg := config.NewDefaultCGRConfig()
 
-	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	rply.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_pubkey.pem"
 	expectedErr := "crypto/ecdsa: verification error"
 	if err := rply.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
@@ -256,12 +256,12 @@ func TestNewSTIRIdentityError(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem", -1); err != nil {
+	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_privatekey.pem", -1); err != nil {
 		t.Error(err)
 	}
 
 	expectedErr := "http status error: 404"
-	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
+	if _, err := NewSTIRIdentity(rply.Header, rply.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_privatekey.pe", -1); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }

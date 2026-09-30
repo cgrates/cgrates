@@ -1741,17 +1741,17 @@ func TestLibsessionsSetMockErrors(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 
-	procIndt.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	procIndt.Header.X5u = "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_pubkey.pem"
 	if err := procIndt.VerifySignature(cfg.GeneralCfg().ReplyTimeout); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 
-	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem",
+	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_privatekey.pem",
 		-1); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}
 
-	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pe",
+	if _, err := NewSTIRIdentity(procIndt.Header, procIndt.Payload, "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_privatekey.pe",
 		-1); err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotImplemented, err)
 	}

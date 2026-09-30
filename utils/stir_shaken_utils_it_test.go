@@ -45,7 +45,7 @@ func testGetReaderFromPathStatusCode(t *testing.T) {
 }
 
 func testNewECDSAPrvKey(t *testing.T) {
-	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_privatekey.pem"
+	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_privatekey.pem"
 	expected, err := jwt.ParseECPrivateKeyFromPEM([]byte(`
 -----BEGIN EC PRIVATE KEY-----
 MHcCAQEEICcL1+2nj9ylMlTKjSpIGx03gALK0cISciviwudQuvb9oAoGCCqGSM49
@@ -63,7 +63,7 @@ rucJPPszlBtYbbhcmbXC7DKP9u9Pq/GnVg==
 }
 
 func testNewECDSAPublicKey(t *testing.T) {
-	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/master/data/stir/stir_pubkey.pem"
+	urlPath := "https://raw.githubusercontent.com/cgrates/cgrates/a4ad01156ae7c74321c9c3fb1097127685e307ca/data/stir/stir_pubkey.pem"
 	expPublKey, err := jwt.ParseECPublicKeyFromPEM([]byte(` 
 -----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEjS4zmWotYqKWB2/sn+4v1uUoPAQ2
