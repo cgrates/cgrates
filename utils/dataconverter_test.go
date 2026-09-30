@@ -157,6 +157,36 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
 
+	received, err := NewDataConverter(MetaConnStatus)
+	if err != nil {
+		t.Error(err)
+	}
+	connSC := ConnStatusConverter{}
+	if !reflect.DeepEqual(received, connSC) {
+		t.Errorf("Expected %+v received: %+v", connSC, received)
+	}
+
+	got, err := NewDataConverter(MetaGigawords)
+	if err != nil {
+		t.Error(err)
+	}
+	gc := new(GigawordsConverter)
+	if !reflect.DeepEqual(got, gc) {
+		t.Errorf("Expected %+v received: %+v", gc, got)
+	}
+
+	rec, err := NewDataConverter("*3gppULI:TAI.MCC")
+	if err != nil {
+		t.Error(err)
+	}
+	uli, err := NewULIConverter("*3gppULI:TAI.MCC")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(rec, uli) {
+		t.Errorf("Expected %+v received: %+v", uli, rec)
+	}
+
 	rcv, err := NewDataConverter(MetaRoutesDigest)
 	if err != nil {
 		t.Error(err)
@@ -1674,6 +1704,30 @@ func TestStripConverter(t *testing.T) {
 			convertErr:     false,
 		},
 		{
+			name:           "third parameter as string",
+			params:         "*strip:*prefix:err",
+			input:          "TEST",
+			expected:       `strip converter: invalid amount parameter (strconv.Atoi: parsing "err": invalid syntax)`,
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
+			name:           "*space and amount is 0",
+			params:         "*strip:*both:*space:0",
+			input:          " TEST ",
+			expected:       " TEST ",
+			constructorErr: false,
+			convertErr:     false,
+		},
+		{
+			name:           "invalid amount for *space",
+			params:         "*strip:*prefix:*space:x",
+			input:          " TEST ",
+			expected:       `strip converter: invalid amount parameter (strconv.Atoi: parsing "x": invalid syntax)`,
+			constructorErr: true,
+			convertErr:     false,
+		},
+		{
 			name:           "Empty third parameter",
 			params:         "*strip:*prefix:",
 			input:          "TEST",
@@ -1807,6 +1861,18 @@ func TestStripConverter(t *testing.T) {
 				t.Errorf("expected: %q, received: %q", tt.expected, rcv)
 			}
 		})
+	}
+}
+
+func TestStripConverterCastError(t *testing.T) {
+	var sc StripConverter
+	rcv, err := sc.Convert(123)
+	expErr := "strip converter: CAST_FAILED"
+	if err != nil && err.Error() != expErr {
+		t.Errorf("Expected %v, recieved %v", expErr, err)
+	}
+	if !reflect.DeepEqual(rcv, nil) {
+		t.Errorf("Expected nil, recieved %v", rcv)
 	}
 }
 
@@ -2371,6 +2437,202 @@ func TestAttributesDigestConverter(t *testing.T) {
 			}
 			if rcv != tt.want {
 				t.Errorf("Expected %v, \nreceived %v", tt.want, rcv)
+			}
+		})
+	}
+}
+
+func TestConnStatusConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		want   any
+		expErr string
+	}{
+		{
+			name: "ConnStatusUp",
+			in:   ConnStatusUp,
+			want: 1,
+		},
+		{
+			name: "ConnStatusDown",
+			in:   ConnStatusDown,
+			want: -1,
+		},
+		{
+			name:   "ConnStatusUp in lowercase letters",
+			in:     "up",
+			want:   0,
+			expErr: `unsupported connection status: "up"`,
+		},
+		{
+			name:   "ConnStatusDown in lowercase letters",
+			in:     "down",
+			want:   0,
+			expErr: `unsupported connection status: "down"`,
+		},
+		{
+			name:   "ConnStatus: random string",
+			in:     "unsupported",
+			want:   0,
+			expErr: `unsupported connection status: "unsupported"`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var c ConnStatusConverter
+			got, err := c.Convert(tt.in)
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, recieved %v", tt.expErr, err)
+			}
+
+			if got != tt.want {
+				t.Errorf("Expected %v, recieved %v", tt.want, got)
+			}
+		})
+	}
+}
+
+func TestRoutesDigestDataConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		exp    any
+		expErr string
+	}{
+		{
+			name: "DataNode slice with two SortedRoutes",
+			in: SortedRoutesList{
+				{
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route1",
+							RouteParameters: "param1",
+						},
+						{
+							RouteID:         "route2",
+							RouteParameters: "param2",
+						},
+					},
+				},
+				{
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route3",
+							RouteParameters: "param3",
+						},
+						{
+							RouteID:         "route4",
+							RouteParameters: "param4",
+						},
+					},
+				},
+			}.AsNavigableMap().Slice,
+			exp: "route1:param1,route2:param2,route3:param3,route4:param4",
+		},
+		{
+			name: "Empty RouteID and RouteParameters",
+			in: SortedRoutesList{
+				{
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "",
+							RouteParameters: "",
+						},
+					},
+				},
+			}.AsNavigableMap().Slice,
+			exp: "",
+		},
+		{
+			name: "DataNode slice with empty Routes",
+			in:   SortedRoutesList{{Routes: []*SortedRoute{{}}}}.AsNavigableMap().Slice,
+			exp:  "",
+		},
+		{
+			name: "Empty DataNode slice",
+			in:   []*DataNode{},
+			exp:  "",
+		},
+		{
+			name: "Empty slice as string",
+			in:   "[]",
+			exp:  "",
+		},
+		{
+			name:   "Empty input",
+			in:     "",
+			expErr: "unexpected end of JSON input",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rdc := new(RoutesDigestConverter)
+			rcv, err := rdc.Convert(tt.in)
+			if err == nil && tt.expErr != "" {
+				t.Fatalf("Expected error %v, received nil", tt.expErr)
+			}
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
+			}
+			if rcv != tt.exp {
+				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestAttributesDigestDataConverter(t *testing.T) {
+	tests := []struct {
+		name   string
+		in     any
+		exp    any
+		expErr string
+	}{
+		{
+			name: "DataNode map with Subject",
+			in: map[string]*DataNode{
+				Subject: NewLeafNode("1002"),
+			},
+			exp: "Subject:1002",
+		},
+		{
+			name: "DataNode map with AccountField",
+			in: map[string]*DataNode{
+				AccountField: NewLeafNode("1001"),
+			},
+			exp: "Account:1001",
+		},
+		{
+			name: "DataNode map with empty string as field",
+			in: map[string]*DataNode{
+				"": NewLeafNode("1003"),
+			},
+			exp: ":1003",
+		},
+		{
+			name: "Empty DataNode map",
+			in:   map[string]*DataNode{},
+			exp:  "",
+		},
+		{
+			name:   "Empty input",
+			in:     "",
+			expErr: "unexpected end of JSON input",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rdc := new(AttributesDigestConverter)
+			rcv, err := rdc.Convert(tt.in)
+			if err == nil && tt.expErr != "" {
+				t.Fatalf("Expected error %v, received nil", tt.expErr)
+			}
+			if err != nil && err.Error() != tt.expErr {
+				t.Errorf("Expected %v, \nreceived %v", tt.expErr, err)
+			}
+			if rcv != tt.exp {
+				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
 			}
 		})
 	}
