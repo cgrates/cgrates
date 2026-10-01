@@ -3,7 +3,7 @@ golang_gopath: "/home/{{ ansible_user }}/go"
 golang_install_dir: /usr/local/go
 cgrates_clone_repo: true
 cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-cgrates_branch: 1.0
+cgrates_branch: main
 
 # Installation method: "source" or "package"
 cgrates_install_method: "source"
@@ -12,7 +12,7 @@ cgrates_install_method: "source"
 cgrates_package_dependencies:
   - wget
   - gnupg
-cgrates_package_version: "1.0"
+cgrates_package_version: "main"
 cgrates_debian_codename: "bookworm"
 
 # Leave empty to skip creating symlinks
