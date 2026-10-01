@@ -1,0 +1,24 @@
+specfile_path: packages/copr.fedorainfracloud.org/cgrates.spec
+upstream_package_name: cgrates
+downstream_package_name: cgrates
+
+jobs:
+- job: copr_build
+  trigger: commit
+  manual_trigger: false
+  owner: cgrates
+  branch: main
+  project: main
+  preserve_project: True
+  enable_net: True
+  targets:
+    - epel-7-x86_64
+    - epel-8-x86_64
+    - epel-9-x86_64
+
+  actions:
+    create-archive:
+      - bash -c "git_last_commit=$(git rev-parse HEAD) && git archive --format=tar.gz --prefix=cgrates-${git_last_commit}/ -o /tmp/${git_last_commit}.tar.gz HEAD && echo /tmp/${git_last_commit}.tar.gz"
+    fix-spec-file:
+      - bash -c "git_last_commit=$(git rev-parse HEAD) && sed -i 's|{{{git_commit}}}|'\"${git_last_commit}\"'|' packages/copr.fedorainfracloud.org/cgrates.spec"
+      - bash -c "release_tag=0.$(git log -1 --format=%cd --date=format:%Y%m%d%H%M%S)+$(git rev-parse --short HEAD) && sed -i 's|{{{releaseTag}}}|'\"${release_tag}\"'|' packages/copr.fedorainfracloud.org/cgrates.spec"
