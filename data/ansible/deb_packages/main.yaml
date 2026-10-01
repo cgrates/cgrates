@@ -3,7 +3,7 @@
   vars:
     rootUser: root
     cgrates_dir: "/home/{{ user }}/go/src/github.com/cgrates/cgrates"
-    cgrates_branch: 1.0
+    cgrates_branch: main
 
     dependencies:
       - build-essential
@@ -300,7 +300,7 @@
 - hosts: pkg
   vars:
     nginx_user: "www-data"
-    cgrates_branch: "1.0"
+    cgrates_branch: main
     distributions:
       - codename: bookworm
         version: 12
