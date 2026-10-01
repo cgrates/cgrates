@@ -82,4 +82,19 @@ SignWith: yes
 DebOverride: override.testing
 DscOverride: override.testing
 
+Origin: apt.cgrates.org
+Label: apt.cgrates.org
+Suite: main-{{ distribution['codename'] }}
+Codename: main-{{ distribution['codename'] }}
+Architectures: amd64 source
+Components: main
+Description: CGRateS main rolling commit snapshots for {{ distribution['codename'] }}
+DebIndices: Packages Release . .gz
+Contents: . .gz
+ContentsArchitectures: amd64 source
+ContentsComponents: main
+SignWith: yes
+DebOverride: override.testing
+DscOverride: override.testing
+
 {% endfor %}
