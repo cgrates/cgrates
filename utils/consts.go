@@ -155,6 +155,7 @@ const (
 	GOBCaps                  = "GOB"
 	MsgPack                  = "msgpack"
 	MetaURID                 = "*urID"
+	MetaHostID               = "*HostID"
 	MetaOriginID             = "*originID"
 	MetaCGRid                = "*cgrID"
 	CGRidCharSize            = 40
@@ -2187,7 +2188,7 @@ const (
 	MetaChargeableCfg             = "*chargeable"
 	MetaAutoChargeIntervalCfg     = "*autoChargeInterval"
 	MetaAutoChargeUsageCfg        = "*autoChargeUsage"
-	MetaAutoChargeMinGranted      = "*autoCgargeMinGranted"
+	MetaAutoChargeMinGranted      = "*autoChargeMinGranted"
 	MetaTTLLastUsageCfg           = "*ttlLastUsage"
 	MetaTTLLastUsedCfg            = "*ttlLastUsed"
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"

@@ -642,302 +642,456 @@ const CGRATES_CFG_JSON = `
 		"publicKeyPath": "",		// the path to the public key 
 		"privateKeyPath": "",		// the path to the private key
 	},																		
-	"opts": {
-		// "*accounts": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*accountsDebit": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*accountsForceUsage": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],		
-		// "*debit": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*refund": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": "false"
-		// 	}
-		// ],
-		// "*attributes": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*attributesDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*blockerError": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*ur": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*chargeable": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],		
-		// "*chargers": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*debitInterval": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*ees": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*eesIDs": [
-        // 	{
-        // 		"tenant": "*any",
-        // 		"filterIDs": [],
-        // 		"value": ""
-        // 	}
-        // ],
-		// "*forceDuration": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*initiate": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*ips": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*ipsAllocate": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],	
-		// "*ipsAuthorize": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*ipsRelease": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*maxUsage": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*message": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*originID": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		//  "*rates": [
+  "opts": {
+
+        // "*accounts": [
         //  {
         //      "tenant": "*any",
         //      "filterIDs": [],
         //      "value": false
         //  }
         // ],
-		// "*resources": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*resourcesAllocate": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],		
-		// "*resourcesAuthorize": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],	
-		// "*resourcesDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*resourcesRelease": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*routes": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*routesDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*stats": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*statsDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*terminate": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*thresholds": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*thresholdsDerivedReply": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ],
-		// "*ttl": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*ttlLastUsage": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*ttlLastUsed": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*ttlMaxDelay": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*ttlUsage": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": ""
-		// 	}
-		// ],
-		// "*update": [
-		// 	{
-		// 		"tenant": "*any",
-		// 		"filterIDs": [],
-		// 		"value": false
-		// 	}
-		// ]
-	},
+
+        // "*accountsAuthorize": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*accountsDebit": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*accountsForceUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*accountsRefund": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*attributes": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*attributesDerivedReply": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*authorize": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*autoChargeInterval": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*autoChargeMinGranted": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*autoChargeUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*blockerError": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*chargeable": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*chargers": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*cgrID": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*debit": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*ees": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*eesIDs": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*forceUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*hostID": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*initiate": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*interimConsumed": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*interimUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ips": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*ipsAllocate": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*ipsAuthorize": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*ipsRelease": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*maxUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*message": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*originID": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*rates": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*refund": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resources": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resourcesAllocate": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resourcesAuthorize": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resourcesDerivedReply": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resourcesRelease": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*resourcesUnits": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": 0
+        //  }
+        // ],
+
+        // "*resourcesUsageID": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*routes": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*routesDerivedReply": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*session": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*stats": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*statsDerivedReply": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*terminate": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*thresholds": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*thresholdsDerivedReply": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*totalUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ttl": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ttlLastUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ttlLastUsed": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ttlMaxDelay": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ttlUsage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*update": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ],
+
+        // "*usage": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": ""
+        //  }
+        // ],
+
+        // "*ur": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": false
+        //  }
+        // ]
+    },
 	"conns": {
 		// "*accounts": [		// connections to AccountS
 		// 	{

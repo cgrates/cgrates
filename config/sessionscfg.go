@@ -93,18 +93,18 @@ type SessionsOpts struct {
 	HostID                 []*DynamicStringOpt
 	AccountsForceUsage     []*DynamicBoolOpt
 	AccountsAuthorize      []*DynamicBoolOpt
-	AccountsInitialize     []*DynamicBoolOpt
-	AccountsUpdate         []*DynamicBoolOpt
-	AccountsTerminate      []*DynamicBoolOpt
-	AccountsDebit          []*DynamicBoolOpt
-	AccountsRefund         []*DynamicBoolOpt
-	Session                []*DynamicBoolOpt
-	AutoChargeInterval     []*DynamicDurationOpt
-	AutoChargeUsage        []*DynamicDecimalOpt
-	AutoChargeMinGranted   []*DynamicDecimalOpt
-	EEs                    []*DynamicBoolOpt
-	EEsIDs                 []*DynamicStringOpt
-	UR                     []*DynamicBoolOpt // UsageRecord generation
+	// AccountsInitialize     []*DynamicBoolOpt
+	// AccountsUpdate       []*DynamicBoolOpt
+	// AccountsTerminate    []*DynamicBoolOpt
+	AccountsDebit        []*DynamicBoolOpt
+	AccountsRefund       []*DynamicBoolOpt
+	Session              []*DynamicBoolOpt
+	AutoChargeInterval   []*DynamicDurationOpt
+	AutoChargeUsage      []*DynamicDecimalOpt
+	AutoChargeMinGranted []*DynamicDecimalOpt
+	EEs                  []*DynamicBoolOpt
+	EEsIDs               []*DynamicStringOpt
+	UR                   []*DynamicBoolOpt // UsageRecord generation
 }
 
 // SessionSCfg is the config section for SessionS
@@ -200,6 +200,13 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.Thresholds = append(opts, sesOpts.Thresholds...)
 	}
+	if jsnCfg.Authorize != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Authorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.Authorize = append(opts, sesOpts.Authorize...)
+	}
 	if jsnCfg.Debit != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Debit)
 		if err != nil {
@@ -284,6 +291,20 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.ResourcesDerivedReply = append(opts, sesOpts.ResourcesDerivedReply...)
 	}
+	if jsnCfg.ResourcesUsageID != nil {
+		opts, err := InterfaceToDynamicStringOpts(jsnCfg.ResourcesUsageID)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesUsageID = append(opts, sesOpts.ResourcesUsageID...)
+	}
+	if jsnCfg.ResourcesUnits != nil {
+		opts, err := IfaceToIntDynamicOpts(jsnCfg.ResourcesUnits)
+		if err != nil {
+			return err
+		}
+		sesOpts.ResourcesUnits = append(opts, sesOpts.ResourcesUnits...)
+	}
 	if jsnCfg.IPsAuthorize != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.IPsAuthorize)
 		if err != nil {
@@ -333,6 +354,34 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.MaxUsage = append(opts, sesOpts.MaxUsage...)
 	}
+	if jsnCfg.InterimConsumed != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.InterimConsumed)
+		if err != nil {
+			return err
+		}
+		sesOpts.InterimConsumed = append(opts, sesOpts.InterimConsumed...)
+	}
+	if jsnCfg.InterimUsage != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.InterimUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.InterimUsage = append(opts, sesOpts.InterimUsage...)
+	}
+	if jsnCfg.TotalUsage != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.TotalUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.TotalUsage = append(opts, sesOpts.TotalUsage...)
+	}
+	if jsnCfg.Usage != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.Usage)
+		if err != nil {
+			return err
+		}
+		sesOpts.Usage = append(opts, sesOpts.Usage...)
+	}
 	if jsnCfg.ForceUsage != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.ForceUsage)
 		if err != nil {
@@ -368,13 +417,6 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.TTLLastUsed = append(lastUsed, sesOpts.TTLLastUsed...)
 	}
-	if jsnCfg.AutoChargeInterval != nil {
-		aCInterval, err := IfaceToDurationDynamicOpts(jsnCfg.AutoChargeInterval)
-		if err != nil {
-			return err
-		}
-		sesOpts.AutoChargeInterval = append(aCInterval, sesOpts.AutoChargeInterval...)
-	}
 	if jsnCfg.TTLMaxDelay != nil {
 		maxDelay, err := IfaceToDurationDynamicOpts(jsnCfg.TTLMaxDelay)
 		if err != nil {
@@ -389,12 +431,26 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.TTLUsage = append(usage, sesOpts.TTLUsage...)
 	}
+	if jsnCfg.CGRid != nil {
+		opts, err := InterfaceToDynamicStringOpts(jsnCfg.CGRid)
+		if err != nil {
+			return err
+		}
+		sesOpts.CGRid = append(opts, sesOpts.CGRid...)
+	}
 	if jsnCfg.OriginID != nil {
 		originID, err := InterfaceToDynamicStringOpts(jsnCfg.OriginID)
 		if err != nil {
 			return err
 		}
 		sesOpts.OriginID = append(originID, sesOpts.OriginID...)
+	}
+	if jsnCfg.HostID != nil {
+		opts, err := InterfaceToDynamicStringOpts(jsnCfg.HostID)
+		if err != nil {
+			return err
+		}
+		sesOpts.HostID = append(opts, sesOpts.HostID...)
 	}
 	if jsnCfg.AccountsForceUsage != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsForceUsage)
@@ -403,12 +459,54 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.AccountsForceUsage = append(opts, sesOpts.AccountsForceUsage...)
 	}
+	if jsnCfg.AccountsAuthorize != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsAuthorize)
+		if err != nil {
+			return err
+		}
+		sesOpts.AccountsAuthorize = append(opts, sesOpts.AccountsAuthorize...)
+	}
 	if jsnCfg.AccountsDebit != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsDebit)
 		if err != nil {
 			return err
 		}
 		sesOpts.AccountsDebit = append(opts, sesOpts.AccountsDebit...)
+	}
+	if jsnCfg.AccountsRefund != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.AccountsRefund)
+		if err != nil {
+			return err
+		}
+		sesOpts.AccountsRefund = append(opts, sesOpts.AccountsRefund...)
+	}
+	if jsnCfg.Session != nil {
+		opts, err := IfaceToBoolDynamicOpts(jsnCfg.Session)
+		if err != nil {
+			return err
+		}
+		sesOpts.Session = append(opts, sesOpts.Session...)
+	}
+	if jsnCfg.AutoChargeInterval != nil {
+		aCInterval, err := IfaceToDurationDynamicOpts(jsnCfg.AutoChargeInterval)
+		if err != nil {
+			return err
+		}
+		sesOpts.AutoChargeInterval = append(aCInterval, sesOpts.AutoChargeInterval...)
+	}
+	if jsnCfg.AutoChargeUsage != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.AutoChargeUsage)
+		if err != nil {
+			return err
+		}
+		sesOpts.AutoChargeUsage = append(opts, sesOpts.AutoChargeUsage...)
+	}
+	if jsnCfg.AutoChargeMinGranted != nil {
+		opts, err := IfaceToDecimalBigDynamicOpts(jsnCfg.AutoChargeMinGranted)
+		if err != nil {
+			return err
+		}
+		sesOpts.AutoChargeMinGranted = append(opts, sesOpts.AutoChargeMinGranted...)
 	}
 	if jsnCfg.EEs != nil {
 		opts, err := IfaceToBoolDynamicOpts(jsnCfg.EEs)
@@ -522,6 +620,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaRoutes:                    scfg.Opts.Routes,
 		utils.MetaStats:                     scfg.Opts.Stats,
 		utils.MetaThresholds:                scfg.Opts.Thresholds,
+		utils.MetaAuthorize:                 scfg.Opts.Authorize,
 		utils.MetaDebit:                     scfg.Opts.Debit,
 		utils.MetaRefund:                    scfg.Opts.Refund,
 		utils.MetaInitiate:                  scfg.Opts.Initiate,
@@ -534,6 +633,8 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaResourcesAllocateCfg:      scfg.Opts.ResourcesAllocate,
 		utils.MetaResourcesReleaseCfg:       scfg.Opts.ResourcesRelease,
 		utils.MetaResourcesDerivedReplyCfg:  scfg.Opts.ResourcesDerivedReply,
+		utils.OptsResourcesUsageID:          scfg.Opts.ResourcesUsageID,
+		utils.OptsResourcesUnits:            scfg.Opts.ResourcesUnits,
 		utils.MetaIPsAuthorizeCfg:           scfg.Opts.IPsAuthorize,
 		utils.MetaIPsAllocateCfg:            scfg.Opts.IPsAllocate,
 		utils.MetaIPsReleaseCfg:             scfg.Opts.IPsRelease,
@@ -541,17 +642,28 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaStatsDerivedReplyCfg:      scfg.Opts.StatsDerivedReply,
 		utils.MetaThresholdsDerivedReplyCfg: scfg.Opts.ThresholdsDerivedReply,
 		utils.MetaMaxUsageCfg:               scfg.Opts.MaxUsage,
+		utils.MetaInterimConsumed:           scfg.Opts.InterimConsumed,
+		utils.MetaInterimUsage:              scfg.Opts.InterimUsage,
+		utils.MetaTotalUsage:                scfg.Opts.TotalUsage,
+		utils.MetaUsage:                     scfg.Opts.Usage,
 		utils.MetaForceUsageCfg:             scfg.Opts.ForceUsage,
 		utils.MetaTTLCfg:                    scfg.Opts.TTL,
 		utils.MetaChargeableCfg:             scfg.Opts.Chargeable,
-		utils.MetaAutoChargeIntervalCfg:     scfg.Opts.AutoChargeInterval,
 		utils.MetaTTLLastUsageCfg:           scfg.Opts.TTLLastUsage,
 		utils.MetaTTLLastUsedCfg:            scfg.Opts.TTLLastUsed,
 		utils.MetaTTLMaxDelayCfg:            scfg.Opts.TTLMaxDelay,
 		utils.MetaTTLUsageCfg:               scfg.Opts.TTLUsage,
+		utils.MetaCGRid:                     scfg.Opts.CGRid,
 		utils.MetaOriginID:                  scfg.Opts.OriginID,
+		utils.MetaHostID:                    scfg.Opts.HostID,
 		utils.MetaAccountsForceUsage:        scfg.Opts.AccountsForceUsage,
+		utils.MetaAccountsAuthorizeCfg:      scfg.Opts.AccountsAuthorize,
 		utils.MetaAccountsDebitCfg:          scfg.Opts.AccountsDebit,
+		utils.MetaAccountsRefundCfg:         scfg.Opts.AccountsRefund,
+		utils.MetaSession:                   scfg.Opts.Session,
+		utils.MetaAutoChargeIntervalCfg:     scfg.Opts.AutoChargeInterval,
+		utils.MetaAutoChargeUsageCfg:        scfg.Opts.AutoChargeUsage,
+		utils.MetaAutoChargeMinGranted:      scfg.Opts.AutoChargeMinGranted,
 		utils.MetaEEs:                       scfg.Opts.EEs,
 		utils.MetaEEsIDs:                    scfg.Opts.EEsIDs,
 		utils.MetaUR:                        scfg.Opts.UR,
@@ -594,6 +706,7 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		Routes:                 CloneDynamicBoolOpt(o.Routes),
 		Stats:                  CloneDynamicBoolOpt(o.Stats),
 		Thresholds:             CloneDynamicBoolOpt(o.Thresholds),
+		Authorize:              CloneDynamicBoolOpt(o.Authorize),
 		Debit:                  CloneDynamicBoolOpt(o.Debit),
 		Refund:                 CloneDynamicBoolOpt(o.Refund),
 		Initiate:               CloneDynamicBoolOpt(o.Initiate),
@@ -606,6 +719,8 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		ResourcesAllocate:      CloneDynamicBoolOpt(o.ResourcesAllocate),
 		ResourcesRelease:       CloneDynamicBoolOpt(o.ResourcesRelease),
 		ResourcesDerivedReply:  CloneDynamicBoolOpt(o.ResourcesDerivedReply),
+		ResourcesUsageID:       CloneDynamicStringOpt(o.ResourcesUsageID),
+		ResourcesUnits:         CloneDynamicIntOpt(o.ResourcesUnits),
 		IPsAuthorize:           CloneDynamicBoolOpt(o.IPsAuthorize),
 		IPsAllocate:            CloneDynamicBoolOpt(o.IPsAllocate),
 		IPsRelease:             CloneDynamicBoolOpt(o.IPsRelease),
@@ -613,20 +728,28 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		StatsDerivedReply:      CloneDynamicBoolOpt(o.StatsDerivedReply),
 		ThresholdsDerivedReply: CloneDynamicBoolOpt(o.ThresholdsDerivedReply),
 		MaxUsage:               CloneDynamicBoolOpt(o.MaxUsage),
+		InterimConsumed:        CloneDynamicDecimalOpt(o.InterimConsumed),
 		InterimUsage:           CloneDynamicDecimalOpt(o.InterimUsage),
 		TotalUsage:             CloneDynamicDecimalOpt(o.TotalUsage),
+		Usage:                  CloneDynamicDecimalOpt(o.Usage),
 		ForceUsage:             CloneDynamicBoolOpt(o.ForceUsage),
 		TTL:                    CloneDynamicDurationOpt(o.TTL),
 		Chargeable:             CloneDynamicBoolOpt(o.Chargeable),
-		AutoChargeInterval:     CloneDynamicDurationOpt(o.AutoChargeInterval),
-		AccountsDebit:          CloneDynamicBoolOpt(o.AccountsDebit),
-		Session:                CloneDynamicBoolOpt(o.Session),
 		TTLLastUsage:           CloneDynamicDurationPointerOpt(o.TTLLastUsage),
 		TTLLastUsed:            CloneDynamicDurationPointerOpt(o.TTLLastUsed),
 		TTLMaxDelay:            CloneDynamicDurationOpt(o.TTLMaxDelay),
 		TTLUsage:               CloneDynamicDurationPointerOpt(o.TTLUsage),
+		CGRid:                  CloneDynamicStringOpt(o.CGRid),
 		OriginID:               CloneDynamicStringOpt(o.OriginID),
+		HostID:                 CloneDynamicStringOpt(o.HostID),
 		AccountsForceUsage:     CloneDynamicBoolOpt(o.AccountsForceUsage),
+		AccountsAuthorize:      CloneDynamicBoolOpt(o.AccountsAuthorize),
+		AccountsDebit:          CloneDynamicBoolOpt(o.AccountsDebit),
+		AccountsRefund:         CloneDynamicBoolOpt(o.AccountsRefund),
+		Session:                CloneDynamicBoolOpt(o.Session),
+		AutoChargeInterval:     CloneDynamicDurationOpt(o.AutoChargeInterval),
+		AutoChargeUsage:        CloneDynamicDecimalOpt(o.AutoChargeUsage),
+		AutoChargeMinGranted:   CloneDynamicDecimalOpt(o.AutoChargeMinGranted),
 		EEs:                    CloneDynamicBoolOpt(o.EEs),
 		EEsIDs:                 CloneDynamicStringOpt(o.EEsIDs),
 		UR:                     CloneDynamicBoolOpt(o.UR),
@@ -759,6 +882,7 @@ type SessionsOptsJson struct {
 	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
 	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
 	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
+	Authorize              []*DynamicInterfaceOpt `json:"authorize"`
 	Debit                  []*DynamicInterfaceOpt `json:"*debit"`
 	Refund                 []*DynamicInterfaceOpt `json:"*refund"`
 	Initiate               []*DynamicInterfaceOpt `json:"*initiate"`
@@ -771,6 +895,8 @@ type SessionsOptsJson struct {
 	ResourcesAllocate      []*DynamicInterfaceOpt `json:"*resourcesAllocate"`
 	ResourcesRelease       []*DynamicInterfaceOpt `json:"*resourcesRelease"`
 	ResourcesDerivedReply  []*DynamicInterfaceOpt `json:"*resourcesDerivedReply"`
+	ResourcesUsageID       []*DynamicInterfaceOpt `json:"*resourcesUsageID"`
+	ResourcesUnits         []*DynamicInterfaceOpt `json:"*resourcesUnits"`
 	IPsAuthorize           []*DynamicInterfaceOpt `json:"*ipsAuthorize"`
 	IPsAllocate            []*DynamicInterfaceOpt `json:"*ipsAllocate"`
 	IPsRelease             []*DynamicInterfaceOpt `json:"*ipsRelease"`
@@ -778,18 +904,28 @@ type SessionsOptsJson struct {
 	StatsDerivedReply      []*DynamicInterfaceOpt `json:"*statsDerivedReply"`
 	ThresholdsDerivedReply []*DynamicInterfaceOpt `json:"*thresholdsDerivedReply"`
 	MaxUsage               []*DynamicInterfaceOpt `json:"*maxUsage"`
+	InterimConsumed        []*DynamicInterfaceOpt `json:"*interimConsumed"`
+	InterimUsage           []*DynamicInterfaceOpt `json:"*interimUsage"`
+	TotalUsage             []*DynamicInterfaceOpt `json:"*totalUsage"`
+	Usage                  []*DynamicInterfaceOpt `json:"*usage"`
 	ForceUsage             []*DynamicInterfaceOpt `json:"*forceUsage"`
 	TTL                    []*DynamicInterfaceOpt `json:"*ttl"`
 	Chargeable             []*DynamicInterfaceOpt `json:"*chargeable"`
-	AutoChargeInterval     []*DynamicInterfaceOpt `json:"*autoChargeInterval"`
-	AutoChargeUsage        []*DynamicInterfaceOpt `json:"*autoChargeUsage"`
 	TTLLastUsage           []*DynamicInterfaceOpt `json:"*ttlLastUsage"`
 	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
 	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`
 	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
+	CGRid                  []*DynamicInterfaceOpt `json:"*cgrID"`
 	OriginID               []*DynamicInterfaceOpt `json:"*originID"`
+	HostID                 []*DynamicInterfaceOpt `json:"*hostID"`
 	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
+	AccountsAuthorize      []*DynamicInterfaceOpt `json:"*accountsAuthorize"`
 	AccountsDebit          []*DynamicInterfaceOpt `json:"*accountsDebit"`
+	AccountsRefund         []*DynamicInterfaceOpt `json:"*accountsRefund"`
+	Session                []*DynamicInterfaceOpt `json:"*session"`
+	AutoChargeInterval     []*DynamicInterfaceOpt `json:"*autoChargeInterval"`
+	AutoChargeUsage        []*DynamicInterfaceOpt `json:"*autoChargeUsage"`
+	AutoChargeMinGranted   []*DynamicInterfaceOpt `json:"*autoChargeMinGranted"`
 	EEs                    []*DynamicInterfaceOpt `json:"*ees"`
 	EEsIDs                 []*DynamicInterfaceOpt `json:"*eesIDs"`
 	UR                     []*DynamicInterfaceOpt `json:"*ur"`
@@ -843,6 +979,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
 		d.Thresholds = BoolToIfaceDynamicOpts(v2.Thresholds)
 	}
+	if !DynamicBoolOptEqual(v1.Authorize, v2.Authorize) {
+		d.Authorize = BoolToIfaceDynamicOpts(v2.Authorize)
+	}
 	if !DynamicBoolOptEqual(v1.Debit, v2.Debit) {
 		d.Debit = BoolToIfaceDynamicOpts(v2.Debit)
 	}
@@ -879,6 +1018,12 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicBoolOptEqual(v1.ResourcesDerivedReply, v2.ResourcesDerivedReply) {
 		d.ResourcesDerivedReply = BoolToIfaceDynamicOpts(v2.ResourcesDerivedReply)
 	}
+	if !DynamicStringOptEqual(v1.ResourcesUsageID, v2.ResourcesUsageID) {
+		d.ResourcesUsageID = DynamicStringToInterfaceOpts(v2.ResourcesUsageID)
+	}
+	if !DynamicIntOptEqual(v1.ResourcesUnits, v2.ResourcesUnits) {
+		d.ResourcesUnits = IntToIfaceDynamicOpts(v2.ResourcesUnits)
+	}
 	if !DynamicBoolOptEqual(v1.IPsAuthorize, v2.IPsAuthorize) {
 		d.IPsAuthorize = BoolToIfaceDynamicOpts(v2.IPsAuthorize)
 	}
@@ -900,6 +1045,18 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicBoolOptEqual(v1.MaxUsage, v2.MaxUsage) {
 		d.MaxUsage = BoolToIfaceDynamicOpts(v2.MaxUsage)
 	}
+	if !DynamicDecimalOptEqual(v1.InterimConsumed, v2.InterimConsumed) {
+		d.InterimConsumed = DecimalToIfaceDynamicOpts(v2.InterimConsumed)
+	}
+	if !DynamicDecimalOptEqual(v1.InterimUsage, v2.InterimUsage) {
+		d.InterimUsage = DecimalToIfaceDynamicOpts(v2.InterimUsage)
+	}
+	if !DynamicDecimalOptEqual(v1.TotalUsage, v2.TotalUsage) {
+		d.TotalUsage = DecimalToIfaceDynamicOpts(v2.TotalUsage)
+	}
+	if !DynamicDecimalOptEqual(v1.Usage, v2.Usage) {
+		d.Usage = DecimalToIfaceDynamicOpts(v2.Usage)
+	}
 	if !DynamicBoolOptEqual(v1.ForceUsage, v2.ForceUsage) {
 		d.ForceUsage = BoolToIfaceDynamicOpts(v2.ForceUsage)
 	}
@@ -915,23 +1072,47 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicDurationPointerOptEqual(v1.TTLLastUsed, v2.TTLLastUsed) {
 		d.TTLLastUsed = DurationPointerToIfaceDynamicOpts(v2.TTLLastUsed)
 	}
-	if !DynamicDurationOptEqual(v1.AutoChargeInterval, v2.AutoChargeInterval) {
-		d.AutoChargeInterval = DurationToIfaceDynamicOpts(v2.AutoChargeInterval)
-	}
 	if !DynamicDurationOptEqual(v1.TTLMaxDelay, v2.TTLMaxDelay) {
 		d.TTLMaxDelay = DurationToIfaceDynamicOpts(v2.TTLMaxDelay)
 	}
 	if !DynamicDurationPointerOptEqual(v1.TTLUsage, v2.TTLUsage) {
 		d.TTLUsage = DurationPointerToIfaceDynamicOpts(v2.TTLUsage)
 	}
+	if !DynamicStringOptEqual(v1.CGRid, v2.CGRid) {
+		d.CGRid = DynamicStringToInterfaceOpts(v2.CGRid)
+	}
 	if !DynamicStringOptEqual(v1.OriginID, v2.OriginID) {
 		d.OriginID = DynamicStringToInterfaceOpts(v2.OriginID)
+	}
+	if !DynamicStringOptEqual(v1.HostID, v2.HostID) {
+		d.HostID = DynamicStringToInterfaceOpts(v2.HostID)
+	}
+	if !DynamicDurationOptEqual(v1.AutoChargeInterval, v2.AutoChargeInterval) {
+		d.AutoChargeInterval = DurationToIfaceDynamicOpts(v2.AutoChargeInterval)
 	}
 	if !DynamicBoolOptEqual(v1.AccountsForceUsage, v2.AccountsForceUsage) {
 		d.AccountsForceUsage = BoolToIfaceDynamicOpts(v2.AccountsForceUsage)
 	}
+	if !DynamicBoolOptEqual(v1.AccountsAuthorize, v2.AccountsAuthorize) {
+		d.AccountsAuthorize = BoolToIfaceDynamicOpts(v2.AccountsAuthorize)
+	}
 	if !DynamicBoolOptEqual(v1.AccountsDebit, v2.AccountsDebit) {
 		d.AccountsDebit = BoolToIfaceDynamicOpts(v2.AccountsDebit)
+	}
+	if !DynamicBoolOptEqual(v1.AccountsRefund, v2.AccountsRefund) {
+		d.AccountsRefund = BoolToIfaceDynamicOpts(v2.AccountsRefund)
+	}
+	if !DynamicBoolOptEqual(v1.Session, v2.Session) {
+		d.Session = BoolToIfaceDynamicOpts(v2.Session)
+	}
+	if !DynamicDurationOptEqual(v1.AutoChargeInterval, v2.AutoChargeInterval) {
+		d.AutoChargeInterval = DurationToIfaceDynamicOpts(v2.AutoChargeInterval)
+	}
+	if !DynamicDecimalOptEqual(v1.AutoChargeUsage, v2.AutoChargeUsage) {
+		d.AutoChargeUsage = DecimalToIfaceDynamicOpts(v2.AutoChargeUsage)
+	}
+	if !DynamicDecimalOptEqual(v1.AutoChargeMinGranted, v2.AutoChargeMinGranted) {
+		d.AutoChargeMinGranted = DecimalToIfaceDynamicOpts(v2.AutoChargeMinGranted)
 	}
 	if !DynamicBoolOptEqual(v1.EEs, v2.EEs) {
 		d.EEs = BoolToIfaceDynamicOpts(v2.EEs)
