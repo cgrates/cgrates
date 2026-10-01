@@ -107,15 +107,6 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 	if kamDlgListRegexp.Match(evData) {
 		return
 	}
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting event: %v",
-					utils.KamailioAgent, err))
-			return
-		}
-		defer ka.caps.Deallocate()
-	}
 	if connIdx >= len(ka.conns) {
 		utils.Logger.Err(fmt.Sprintf("<%s> Index out of range[0,%v): %v ",
 			utils.KamailioAgent, len(ka.conns), connIdx))
@@ -127,6 +118,17 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event data: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
 		return
+	}
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting event: %v", utils.KamailioAgent, kev))
+			if kev[KamTRIndex] != utils.EmptyString {
+				ka.sendReply(kev, connIdx, utils.NewOrderedNavigableMap(), err)
+			}
+			return
+		}
+		defer ka.caps.Deallocate()
 	}
 	dP := utils.MapStringDP(kev)
 	reqVars := &utils.DataNode{
@@ -185,28 +187,24 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 
 func (ka *KamailioAgent) sendReply(kev KamEvent, connIdx int,
 	rplyNM *utils.OrderedNavigableMap, rplyErr error) {
-	var rply map[string]any
-	if rplyErr != nil && kev[KamHashEntry] != utils.EmptyString {
-		rply = map[string]any{
-			KamReplyEvent: utils.FirstNonEmpty(kev[KamReplyRoute], kev[EVENT]),
-			KamHashEntry:  kev[KamHashEntry],
-			KamHashID:     kev[KamHashID],
+	if kev[KamTRIndex] == utils.EmptyString {
+		if rplyErr != nil {
+			if kev[KamHashEntry] != utils.EmptyString {
+				ka.disconnectSession(connIdx,
+					NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID], rplyErr.Error()))
+			}
+			return
 		}
-		if err := ka.conns[connIdx].Send(utils.ToJSON(rply)); err != nil {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed sending reply for event: %s, error: %s",
-				utils.KamailioAgent, kev[utils.OriginID], err.Error()))
+		if rplyNM.Empty() {
+			return
 		}
-		return
 	}
-	if rplyNM.Empty() {
-		return
-	}
-	rply = map[string]any{
-		KamReplyEvent:   utils.FirstNonEmpty(kev[KamReplyRoute], kev[EVENT]),
+
+	rply := map[string]any{
+		KamReplyEvent:   kev[KamReplyRoute],
 		KamReplyTRIndex: kev[KamTRIndex],
 		KamReplyTRLabel: kev[KamTRLabel],
 	}
-
 	for el := rplyNM.GetFirstElement(); el != nil; el = el.Next() {
 		path := el.Value
 		itm, _ := rplyNM.Field(path)
@@ -217,6 +215,10 @@ func (ka *KamailioAgent) sendReply(kev KamEvent, connIdx int,
 	}
 	if rplyErr != nil {
 		rply[utils.Error] = rplyErr.Error()
+	}
+	if utils.IfaceAsString(rply[KamReplyEvent]) == utils.EmptyString {
+		utils.Logger.Err(fmt.Sprintf("<%s> no reply route for event: %s ", utils.KamailioAgent, kev[EVENT]))
+		return
 	}
 	if err := ka.conns[connIdx].Send(utils.ToJSON(rply)); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed sending reply for event: %s, error: %s",
