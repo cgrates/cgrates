@@ -3141,3 +3141,219 @@ func TestSessionSForceSTerminate(t *testing.T) {
 		t.Errorf("Expected session to be unregistered, recieved %v", activeS)
 	}
 }
+
+func TestSessionSForceSTerminate2(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	ctx := context.TODO()
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+
+	origEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evExtraUsage",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originExtraUsage",
+		},
+	}
+
+	s := &Session{
+		ID:             "originExtraUsage",
+		OriginCGREvent: origEv,
+		SRuns: []*SRun{
+			{
+				CGREvent: origEv,
+			},
+		},
+	}
+
+	sessions.registerSession(s, false)
+	if err := sessions.forceSTerminate(ctx, s, 5*time.Second, nil, nil); err != nil {
+		t.Error(err)
+	}
+
+	if activeS := sessions.getSessions(s.ID, false); len(activeS) != 0 {
+		t.Errorf("Expected session to be unregistered, recieved %v", activeS)
+	}
+}
+
+func TestSessionSForceSTerminateErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	ctx := context.TODO()
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	tmpLogger := utils.Logger
+	defer func() {
+		utils.Logger = tmpLogger
+	}()
+	var buf bytes.Buffer
+	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
+
+	clientConnID := "ccID"
+	origEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaOriginID: "originID",
+			utils.MetaEEs:      true,
+		},
+	}
+	cch := map[string]any{utils.MetaCGRid: origEv.ID}
+
+	t.Run("EEs: nil APIOpts", func(t *testing.T) {
+		s := &Session{
+			ID:             "originID",
+			OriginCGREvent: origEv,
+			SRuns: []*SRun{
+				{
+					CGREvent: origEv.Clone(),
+				},
+			},
+		}
+		sessions.registerSession(s, false)
+		expErr := "NOT_CONNECTED: EEs"
+		s.SRuns[0].CGREvent.APIOpts = nil
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err == nil || err.Error() != expErr {
+			t.Errorf("Expected error %v, \nrecieved %v", expErr, err)
+		}
+	})
+
+	t.Run("Resources conn error", func(t *testing.T) {
+		sessions.cfg.SessionSCfg().Conns[utils.MetaResources] = []*config.DynamicConns{
+			{
+				FilterIDs: []string{"fltr"},
+				ConnIDs:   []string{"testID"},
+			},
+		}
+		s, err := sessions.setSession(ctx, origEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+			t.Error(err)
+		}
+		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
+		if rcv := buf.String(); !strings.Contains(rcv, contain) {
+			t.Errorf("Expected log to contain %v, \nreceived %v", contain, rcv)
+		}
+	})
+
+	t.Run("IPs conn error", func(t *testing.T) {
+		sessions.cfg.SessionSCfg().Conns[utils.MetaIPs] = []*config.DynamicConns{
+			{
+				FilterIDs: []string{"fltr"},
+				ConnIDs:   []string{"testID"},
+			},
+		}
+		s, err := sessions.setSession(ctx, origEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+			t.Error(err)
+		}
+		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
+		if rcv := buf.String(); !strings.Contains(rcv, contain) {
+			t.Errorf("Expected log to contain %v, \nreceived %v", contain, rcv)
+		}
+	})
+
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+				return utils.ErrNotImplemented
+			},
+			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+				return utils.ErrNotImplemented
+			},
+			utils.IPsV1ReleaseIP: func(ctx *context.Context, m string, args, reply any) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	addInternalConn(sessions, sessions.cfg, utils.MetaResources, utils.ResourceSv1, clnt)
+	addInternalConn(sessions, sessions.cfg, utils.MetaEEs, utils.EeSv1, clnt)
+	addInternalConn(sessions, sessions.cfg, utils.MetaIPs, utils.IPsV1, clnt)
+
+	t.Run("Resources release call error", func(t *testing.T) {
+		s, err := sessions.setSession(ctx, origEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+			t.Error(err)
+		}
+		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
+		if rcv := buf.String(); !strings.Contains(rcv, contain) {
+			t.Errorf("Expected log to contain %v, \nreceived %v", contain, rcv)
+		}
+	})
+
+	t.Run("IPs release call error", func(t *testing.T) {
+		s, err := sessions.setSession(ctx, origEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+			t.Error(err)
+		}
+		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
+		if rcv := buf.String(); !strings.Contains(rcv, contain) {
+			t.Errorf("Expected log to contain %v, \nreceived %v", contain, rcv)
+		}
+	})
+
+	t.Run("EEs parsing error", func(t *testing.T) {
+		clientConnID := "ccID"
+		origEv := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "evID",
+			Event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			APIOpts: map[string]any{
+				utils.MetaOriginID: "originEEsID",
+				utils.MetaEEs:      "trueee",
+			},
+		}
+		cch := map[string]any{utils.MetaCGRid: origEv.ID}
+		s, err := sessions.setSession(ctx, origEv, cch, clientConnID)
+		if err != nil {
+			t.Error(err)
+		}
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+			t.Error(err)
+		}
+		contain := `CGRateS <> [WARNING] <SessionS> error: strconv.ParseBool: parsing "trueee": `
+		if rcv := buf.String(); !strings.Contains(rcv, contain) {
+			t.Errorf("Expected log to contain %v, \nreceived %v", contain, rcv)
+		}
+	})
+}
