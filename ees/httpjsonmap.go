@@ -40,6 +40,16 @@ type HTTPjsonMapEE struct {
 	hdr http.Header
 }
 
+// Headers will return the headers from hdr field
+func (httpEE *HTTPjsonMapEE) Headers() http.Header {
+	return httpEE.hdr
+}
+
+// AppendHeader appends the header key and values to the HTTPjsonMapEE hdr field
+func (httpEE *HTTPjsonMapEE) AppendHeader(hdrKey, hdrVal string) {
+	httpEE.hdr.Add(hdrKey, hdrVal)
+}
+
 // Compose and cache the header
 func (httpEE *HTTPjsonMapEE) composeHeader(cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS) (hdr http.Header, err error) {
 	hdr = make(http.Header)
