@@ -14,7 +14,11 @@ import (
 
 // V1ScheduleQueries manually schedules or reschedules ranking queries.
 func (rkS *RankingS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
-	if sched, errSched := rkS.scheduleRankingQueries(ctx, args.Tenant, args.RankingIDs); errSched != nil {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant
+	}
+	if sched, errSched := rkS.scheduleRankingQueries(ctx, tnt, args.RankingIDs); errSched != nil {
 		return errSched
 	} else {
 		*scheduled = sched
@@ -27,8 +31,12 @@ func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithA
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var rk *utils.Ranking
-	if rk, err = rkS.dm.GetRanking(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if rk, err = rkS.dm.GetRanking(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	rk.RLock()
@@ -103,9 +111,13 @@ func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgSchedule
 }
 
 // V1GetRankingSummary retrieves the most recent ranking summary.
-func (rS *RankingS) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+func (rkS *RankingS) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant
+	}
 	var rnk *utils.Ranking
-	if rnk, err = rS.dm.GetRanking(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if rnk, err = rkS.dm.GetRanking(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	rnk.RLock()

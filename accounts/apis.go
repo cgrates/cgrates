@@ -12,6 +12,9 @@ import (
 
 // V1AccountsForEvent returns the matching Accounts for Event
 func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
 		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
@@ -46,9 +49,13 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	var acnts []*utils.Account
 	var unlock func()
-	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, tnt,
 		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -77,9 +84,13 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	var acnts []*utils.Account
 	var unlock func()
-	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, tnt,
 		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -108,9 +119,13 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	var acnts []*utils.Account
 	var unlock func()
-	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, tnt,
 		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -139,9 +154,13 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	var acnts []*utils.Account
 	var unlock func()
-	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, args.Tenant,
+	if acnts, unlock, err = aS.matchingLockedAccountsForEvent(ctx, tnt,
 		args, accIDs, ignFilters); err != nil {
 		if err != utils.ErrNotFound {
 			err = utils.NewErrServerError(err)
@@ -160,10 +179,14 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 
 // V1RefundCharges will refund charges recorded inside EventCharges
 func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	}
 	if args.EventCharges == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CacheEventCharges)
 	}
-	if err = aS.refundCharges(ctx, args.Tenant, args.EventCharges); err != nil {
+	if err = aS.refundCharges(ctx, tnt, args.EventCharges); err != nil {
 		return
 	}
 	*rply = utils.OK

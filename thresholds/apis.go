@@ -21,7 +21,7 @@ func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, 
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	ids, err := s.processEvent(ctx, tnt, args)
@@ -88,7 +88,7 @@ func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDW
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := tntID.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level
@@ -108,7 +108,7 @@ func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := tntID.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure threshold is locked at process level

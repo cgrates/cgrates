@@ -15,7 +15,11 @@ import (
 
 // V1ScheduleQueries manually schedules or reschedules trend queries.
 func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
-	if sched, errSched := tS.scheduleTrendQueries(ctx, args.Tenant, args.TrendIDs); errSched != nil {
+	tnt := args.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
+	}
+	if sched, errSched := tS.scheduleTrendQueries(ctx, tnt, args.TrendIDs); errSched != nil {
 		return errSched
 	} else {
 		*scheduled = sched
@@ -28,8 +32,12 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
+	}
 	var trnd *utils.Trend
-	if trnd, err = tS.dm.GetTrend(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if trnd, err = tS.dm.GetTrend(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	trnd.RLock()
@@ -127,8 +135,12 @@ func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgSche
 
 // V1GetTrendSummary retrieves the most recent trend summary.
 func (tS *TrendS) V1GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
+	tnt := arg.Tenant
+	if tnt == utils.EmptyString {
+		tnt = tS.cfg.GeneralCfg().DefaultTenant
+	}
 	var trnd *utils.Trend
-	if trnd, err = tS.dm.GetTrend(ctx, arg.Tenant, arg.ID, true, true, utils.NonTransactional); err != nil {
+	if trnd, err = tS.dm.GetTrend(ctx, tnt, arg.ID, true, true, utils.NonTransactional); err != nil {
 		return
 	}
 	trnd.RLock()
