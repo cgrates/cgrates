@@ -254,7 +254,7 @@ There are several ways to use Delve with ``cgrates``:
 
    .. code-block:: console
 
-      dlv test github.com/cgrates/cgrates/apier/v1 -- -test.run=TestName
+      dlv test github.com/cgrates/cgrates/apis -- -test.run=TestName
 
 
 .. hint::

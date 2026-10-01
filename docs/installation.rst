@@ -41,7 +41,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ 1.0-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ main-bookworm main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -51,7 +51,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/1.0/bookworm/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/main/bookworm/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
    .. group-tab:: Bullseye
@@ -66,7 +66,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
          sudo mv apt.cgrates.org.asc /etc/apt/trusted.gpg.d/
 
          # Add the repository to the apt sources list
-         echo "deb http://apt.cgrates.org/debian/ 1.0-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
+         echo "deb http://apt.cgrates.org/debian/ main-bullseye main" | sudo tee /etc/apt/sources.list.d/cgrates.list
 
          # Update the system repository and install CGRateS
          sudo apt-get update -y
@@ -76,7 +76,7 @@ You can add the CGRateS repository to your system's sources list, depending of t
 
       .. code-block:: bash
 
-         wget http://pkg.cgrates.org/deb/1.0/bullseye/cgrates_current_amd64.deb
+         wget http://pkg.cgrates.org/deb/main/bullseye/cgrates_current_amd64.deb
          sudo dpkg -i ./cgrates_current_amd64.deb
 
 
@@ -116,7 +116,7 @@ Installation:
 .. code-block:: bash
 
    mkdir -p $HOME/go/src/github.com/cgrates/cgrates
-   git clone --branch=1.0 https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
+   git clone --branch=main https://github.com/cgrates/cgrates.git $HOME/go/src/github.com/cgrates/cgrates
    cd $HOME/go/src/github.com/cgrates/cgrates
 
    # Compile the binaries and move them to $GOPATH/bin
