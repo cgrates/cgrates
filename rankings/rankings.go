@@ -56,8 +56,8 @@ func NewRankingS(dm *engine.DataManager,
 
 // computeRanking queries stats and builds the Ranking based on RankingProfile configuration.
 // Called by Cron service at scheduled intervals.
-func (r *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfile) {
-	rk, err := r.dm.GetRanking(ctx, rkP.Tenant, rkP.ID, true, true, utils.NonTransactional)
+func (rkS *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfile) {
+	rk, err := rkS.dm.GetRanking(ctx, rkP.Tenant, rkP.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -73,13 +73,13 @@ func (r *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfil
 	rk.LastUpdate = time.Now()
 	rk.Metrics = make(map[string]map[string]float64) // reset previous values
 	rk.SortedStatIDs = make([]string, 0)
-	statConns, err := engine.GetConnIDs(ctx, r.cgrcfg.RankingSCfg().Conns, utils.MetaStats, rk.Tenant, rkP, nil, r.fltrS)
+	statConns, err := engine.GetConnIDs(ctx, rkS.cgrcfg.RankingSCfg().Conns, utils.MetaStats, rk.Tenant, rkP, nil, rkS.fltrS)
 	if err != nil {
 		return
 	}
 	for _, statID := range rkP.StatIDs {
 		var floatMetrics map[string]float64
-		if err := r.connMgr.Call(context.Background(), statConns,
+		if err := rkS.connMgr.Call(context.Background(), statConns,
 			utils.StatSv1GetQueueFloatMetrics,
 			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: rkP.Tenant, ID: statID}},
 			&floatMetrics); err != nil {
@@ -112,20 +112,20 @@ func (r *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfil
 				utils.RankingS, rkP.Tenant, rkP.ID, err.Error()))
 		return
 	}
-	if err = r.storeRanking(ctx, rk); err != nil {
+	if err = rkS.storeRanking(ctx, rk); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> storing Ranking with ID: <%s:%s> DM error: <%s>",
 				utils.RankingS, rkP.Tenant, rkP.ID, err.Error()))
 		return
 	}
-	if err := r.processThresholds(rk); err != nil {
+	if err := rkS.processThresholds(rk); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> Ranking with id <%s:%s> error: <%s> with ThresholdS",
 				utils.RankingS, rkP.Tenant, rkP.ID, err.Error()))
 	}
-	if err := r.processEEs(rk); err != nil {
+	if err := rkS.processEEs(rk); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> Trend with id <%s:%s> error: <%s> with EEs",
@@ -134,11 +134,11 @@ func (r *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfil
 }
 
 // processThresholds sends the computed ranking to ThresholdS.
-func (r *RankingS) processThresholds(rk *utils.Ranking) (err error) {
+func (rkS *RankingS) processThresholds(rk *utils.Ranking) (err error) {
 	if len(rk.SortedStatIDs) == 0 {
 		return
 	}
-	threshConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns, utils.MetaThresholds, rk.Tenant, rk.Config(), nil, r.fltrS)
+	threshConns, err := engine.GetConnIDs(context.TODO(), rkS.cgrcfg.RankingSCfg().Conns, utils.MetaThresholds, rk.Tenant, rk.Config(), nil, rkS.fltrS)
 	if len(threshConns) == 0 {
 		return
 	}
@@ -169,7 +169,7 @@ func (r *RankingS) processThresholds(rk *utils.Ranking) (err error) {
 	}
 	var withErrs bool
 	var rkIDs []string
-	if err := r.connMgr.Call(context.TODO(), threshConns,
+	if err := rkS.connMgr.Call(context.TODO(), threshConns,
 		utils.ThresholdSv1ProcessEvent, ev, &rkIDs); err != nil &&
 		(len(thIDs) != 0 || err.Error() != utils.ErrNotFound.Error()) {
 		utils.Logger.Warning(
@@ -183,11 +183,11 @@ func (r *RankingS) processThresholds(rk *utils.Ranking) (err error) {
 }
 
 // processEEs sends the computed ranking to EEs.
-func (r *RankingS) processEEs(rk *utils.Ranking) (err error) {
+func (rkS *RankingS) processEEs(rk *utils.Ranking) (err error) {
 	if len(rk.SortedStatIDs) == 0 {
 		return
 	}
-	eesConns, err := engine.GetConnIDs(context.TODO(), r.cgrcfg.RankingSCfg().Conns, utils.MetaEEs, rk.Tenant, rk.Config(), nil, r.fltrS)
+	eesConns, err := engine.GetConnIDs(context.TODO(), rkS.cgrcfg.RankingSCfg().Conns, utils.MetaEEs, rk.Tenant, rk.Config(), nil, rkS.fltrS)
 	if len(eesConns) == 0 {
 		return
 	}
@@ -208,7 +208,7 @@ func (r *RankingS) processEEs(rk *utils.Ranking) (err error) {
 	}
 	var withErrs bool
 	var reply map[string]map[string]any
-	if err := r.connMgr.Call(context.TODO(), eesConns,
+	if err := rkS.connMgr.Call(context.TODO(), eesConns,
 		utils.EeSv1ProcessEvent, ev, &reply); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		utils.Logger.Warning(
@@ -222,36 +222,36 @@ func (r *RankingS) processEEs(rk *utils.Ranking) (err error) {
 }
 
 // storeRanking stores or schedules the ranking for storage based on "storeInterval".
-func (r *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err error) {
-	if r.cgrcfg.RankingSCfg().StoreInterval == 0 {
+func (rkS *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err error) {
+	if rkS.cgrcfg.RankingSCfg().StoreInterval == 0 {
 		return
 	}
-	if r.cgrcfg.RankingSCfg().StoreInterval == -1 {
-		return r.dm.SetRanking(ctx, rk)
+	if rkS.cgrcfg.RankingSCfg().StoreInterval == -1 {
+		return rkS.dm.SetRanking(ctx, rk)
 	}
 	// schedule the asynchronous save, relies for Ranking to be in cache
-	r.sRksMux.Lock()
-	r.storedRankings.Add(rk.Config().TenantID())
-	r.sRksMux.Unlock()
+	rkS.sRksMux.Lock()
+	rkS.storedRankings.Add(rk.Config().TenantID())
+	rkS.sRksMux.Unlock()
 	return
 }
 
 // storeRankings stores modified rankings from cache in DB
 // Reschedules failed ranking IDs for next storage cycle.
 // This function is safe for concurrent use.
-func (r *RankingS) storeRankings(ctx *context.Context) {
+func (rkS *RankingS) storeRankings(ctx *context.Context) {
 	var failedRkIDs []string
 	for {
-		r.sRksMux.Lock()
-		rkID := r.storedRankings.GetOne()
+		rkS.sRksMux.Lock()
+		rkID := rkS.storedRankings.GetOne()
 		if rkID != utils.EmptyString {
-			r.storedRankings.Remove(rkID)
+			rkS.storedRankings.Remove(rkID)
 		}
-		r.sRksMux.Unlock()
+		rkS.sRksMux.Unlock()
 		if rkID == utils.EmptyString {
 			break // no more keys, backup completed
 		}
-		rkIf, ok := r.cache.Get(utils.CacheRankings, rkID)
+		rkIf, ok := rkS.cache.Get(utils.CacheRankings, rkID)
 		if !ok || rkIf == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving from cache Ranking with ID: %q",
@@ -261,7 +261,7 @@ func (r *RankingS) storeRankings(ctx *context.Context) {
 		}
 		rk := rkIf.(*utils.Ranking)
 		rk.RLock()
-		if err := r.dm.SetRanking(ctx, rk); err != nil {
+		if err := rkS.dm.SetRanking(ctx, rk); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed storing Trend with ID: %q, err: %q",
 					utils.RankingS, rkID, err))
@@ -272,24 +272,24 @@ func (r *RankingS) storeRankings(ctx *context.Context) {
 		runtime.Gosched()
 	}
 	if len(failedRkIDs) != 0 { // there were errors on save, schedule the keys for next backup
-		r.sRksMux.Lock()
-		r.storedRankings.AddSlice(failedRkIDs)
-		r.sRksMux.Unlock()
+		rkS.sRksMux.Lock()
+		rkS.storedRankings.AddSlice(failedRkIDs)
+		rkS.sRksMux.Unlock()
 	}
 }
 
 // asyncStoreRankings runs as a background process that periodically calls storeRankings.
-func (r *RankingS) asyncStoreRankings(ctx *context.Context) {
-	storeInterval := r.cgrcfg.RankingSCfg().StoreInterval
+func (rkS *RankingS) asyncStoreRankings(ctx *context.Context) {
+	storeInterval := rkS.cgrcfg.RankingSCfg().StoreInterval
 	if storeInterval <= 0 {
-		close(r.storingStopped)
+		close(rkS.storingStopped)
 		return
 	}
 	for {
-		r.storeRankings(ctx)
+		rkS.storeRankings(ctx)
 		select {
-		case <-r.rankingStop:
-			close(r.storingStopped)
+		case <-rkS.rankingStop:
+			close(rkS.storingStopped)
 			return
 		case <-time.After(storeInterval): // continue to another storing loop
 		}
@@ -297,21 +297,21 @@ func (r *RankingS) asyncStoreRankings(ctx *context.Context) {
 }
 
 // StartRankingS activates the Cron service with scheduled ranking queries.
-func (r *RankingS) StartRankingS(ctx *context.Context) (err error) {
-	if err = r.scheduleAutomaticQueries(ctx); err != nil {
+func (rkS *RankingS) StartRankingS(ctx *context.Context) (err error) {
+	if err = rkS.scheduleAutomaticQueries(ctx); err != nil {
 		return
 	}
-	r.crn.Start()
-	go r.asyncStoreRankings(ctx)
+	rkS.crn.Start()
+	go rkS.asyncStoreRankings(ctx)
 	return
 }
 
 // StopRankingS gracefully shuts down Cron tasks and ranking operations.
-func (r *RankingS) StopRankingS() {
-	timeEnd := time.Now().Add(r.cgrcfg.CoreSCfg().ShutdownTimeout)
+func (rkS *RankingS) StopRankingS() {
+	timeEnd := time.Now().Add(rkS.cgrcfg.CoreSCfg().ShutdownTimeout)
 
-	ctx := r.crn.Stop()
-	close(r.rankingStop)
+	ctx := rkS.crn.Stop()
+	close(rkS.rankingStop)
 
 	// Wait for cron
 	select {
@@ -325,7 +325,7 @@ func (r *RankingS) StopRankingS() {
 	}
 	// Wait for backup and other operations
 	select {
-	case <-r.storingStopped:
+	case <-rkS.storingStopped:
 	case <-time.After(time.Until(timeEnd)):
 		utils.Logger.Warning(
 			fmt.Sprintf(
@@ -336,21 +336,21 @@ func (r *RankingS) StopRankingS() {
 }
 
 // Reload restarts ranking services with updated configuration.
-func (r *RankingS) Reload(ctx *context.Context) {
-	crnCtx := r.crn.Stop()
-	close(r.rankingStop)
+func (rkS *RankingS) Reload(ctx *context.Context) {
+	crnCtx := rkS.crn.Stop()
+	close(rkS.rankingStop)
 	<-crnCtx.Done()
-	<-r.storingStopped
-	r.rankingStop = make(chan struct{})
-	r.storingStopped = make(chan struct{})
-	r.crn.Start()
-	go r.asyncStoreRankings(ctx)
+	<-rkS.storingStopped
+	rkS.rankingStop = make(chan struct{})
+	rkS.storingStopped = make(chan struct{})
+	rkS.crn.Start()
+	go rkS.asyncStoreRankings(ctx)
 }
 
 // scheduleAutomaticQueries schedules initial ranking queries based on configuration.
-func (r *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
+func (rkS *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
 	schedData := make(map[string][]string)
-	for k, v := range r.cgrcfg.RankingSCfg().ScheduledIDs {
+	for k, v := range rkS.cgrcfg.RankingSCfg().ScheduledIDs {
 		schedData[k] = v
 	}
 	var tnts []string
@@ -363,7 +363,7 @@ func (r *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
 		}
 	}
 	if tnts != nil {
-		qrydData, err := r.dm.GetRankingProfileIDs(ctx, tnts)
+		qrydData, err := rkS.dm.GetRankingProfileIDs(ctx, tnts)
 		if err != nil {
 			return err
 		}
@@ -372,7 +372,7 @@ func (r *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
 		}
 	}
 	for tnt, rkIDs := range schedData {
-		if _, err := r.scheduleRankingQueries(ctx, tnt, rkIDs); err != nil {
+		if _, err := rkS.scheduleRankingQueries(ctx, tnt, rkIDs); err != nil {
 			return err
 		}
 	}
@@ -381,37 +381,37 @@ func (r *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
 
 // scheduleRankingQueries schedules or reschedules specific ranking queries.
 // Safe for concurrent use.
-func (r *RankingS) scheduleRankingQueries(ctx *context.Context,
+func (rkS *RankingS) scheduleRankingQueries(ctx *context.Context,
 	tnt string, rkIDs []string) (scheduled int, err error) {
 	var partial bool
-	r.crnRQsMux.Lock()
-	if _, has := r.crnRQs[tnt]; !has {
-		r.crnRQs[tnt] = make(map[string]cron.EntryID)
+	rkS.crnRQsMux.Lock()
+	if _, has := rkS.crnRQs[tnt]; !has {
+		rkS.crnRQs[tnt] = make(map[string]cron.EntryID)
 	}
-	r.crnRQsMux.Unlock()
+	rkS.crnRQsMux.Unlock()
 	for _, rkID := range rkIDs {
-		r.crnRQsMux.RLock()
-		if entryID, has := r.crnRQs[tnt][rkID]; has {
-			r.crn.Remove(entryID) // deschedule the query
+		rkS.crnRQsMux.RLock()
+		if entryID, has := rkS.crnRQs[tnt][rkID]; has {
+			rkS.crn.Remove(entryID) // deschedule the query
 		}
-		r.crnRQsMux.RUnlock()
-		if rkP, err := r.dm.GetRankingProfile(ctx, tnt, rkID, true, true, utils.NonTransactional); err != nil {
+		rkS.crnRQsMux.RUnlock()
+		if rkP, err := rkS.dm.GetRankingProfile(ctx, tnt, rkID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> failed retrieving RankingProfile with id: <%s:%s> for scheduling, error: <%s>",
 					utils.RankingS, tnt, rkID, err.Error()))
 			partial = true
-		} else if entryID, err := r.crn.AddFunc(rkP.Schedule,
-			func() { r.computeRanking(ctx, rkP.Clone()) }); err != nil {
+		} else if entryID, err := rkS.crn.AddFunc(rkP.Schedule,
+			func() { rkS.computeRanking(ctx, rkP.Clone()) }); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
 					"<%s> scheduling RankingProfile <%s:%s>, error: <%s>",
 					utils.RankingS, tnt, rkID, err.Error()))
 			partial = true
 		} else { // log the entry ID for debugging
-			r.crnRQsMux.Lock()
-			r.crnRQs[rkP.Tenant][rkP.ID] = entryID
-			r.crnRQsMux.Unlock()
+			rkS.crnRQsMux.Lock()
+			rkS.crnRQs[rkP.Tenant][rkP.ID] = entryID
+			rkS.crnRQsMux.Unlock()
 			scheduled++
 		}
 	}

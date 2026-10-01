@@ -119,6 +119,9 @@ func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CG
 // profile. This continues until a valid cost is found or all profiles are
 // exhausted.
 func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = rS.cfg.GeneralCfg().DefaultTenant
+	}
 	var rPfIDs []string
 	if rPfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, rS.fltrS, rS.cfg.RateSCfg().Opts.ProfileIDs,
 		config.RatesProfileIDsDftOpt, utils.OptsRatesProfileIDs); err != nil {

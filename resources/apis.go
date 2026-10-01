@@ -31,11 +31,11 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == "" {
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
@@ -100,12 +100,12 @@ func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREv
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == "" {
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
@@ -177,12 +177,12 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == "" {
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
@@ -250,12 +250,12 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 	}
 	usageTTL := utils.DurationPointer(ttl)
 
-	if usageID == "" {
+	if usageID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.UsageID)
 	}
 
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
@@ -306,7 +306,7 @@ func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithA
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := arg.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 
@@ -328,7 +328,7 @@ func (s *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.Ten
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := arg.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 

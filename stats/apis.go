@@ -60,7 +60,7 @@ func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
@@ -80,7 +80,7 @@ func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenant
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
@@ -113,7 +113,7 @@ func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantI
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
@@ -144,7 +144,7 @@ func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tenan
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := args.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
@@ -194,7 +194,7 @@ func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWith
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
 	tnt := tntID.Tenant
-	if tnt == "" {
+	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
 	}
 	// make sure statQueue is locked at process level
