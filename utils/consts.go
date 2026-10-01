@@ -584,6 +584,7 @@ const (
 	MetaRep                = "*rep"
 	MetaExp                = "*exp"
 	MetaHdr                = "*hdr"
+	MetaHdrs               = "*hdrs"
 	MetaTrl                = "*trl"
 	MetaTmp                = "*tmp"
 	MetaOpts               = "*opts"

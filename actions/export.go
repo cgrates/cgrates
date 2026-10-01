@@ -6,7 +6,6 @@ package actions
 import (
 	"cmp"
 	"encoding/json"
-	"net/http"
 	"slices"
 	"strings"
 
@@ -55,6 +54,27 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 			cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir,
 			attempts, nil)
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, cache, nil, nil)
+		// append headers from Opts, if a key exists it will append the values to it
+		if headers, has := actD.Opts[utils.MetaHdrs]; has {
+			if headersIf, ok := headers.(map[string]any); ok {
+				for hdrKey, hdrsValIf := range headersIf {
+					switch hdrVal := hdrsValIf.(type) {
+					case []string:
+						for _, hdrV := range hdrVal {
+							aL.pstrs[i].AppendHeader(hdrKey, hdrV)
+						}
+					case string:
+						aL.pstrs[i].AppendHeader(hdrKey, hdrVal)
+					case []any:
+						for _, hdrVIf := range hdrVal {
+							if hdrV, ok := hdrVIf.(string); ok {
+								aL.pstrs[i].AppendHeader(hdrKey, hdrV)
+							}
+						}
+					}
+				}
+			}
+		}
 		if blocker, err := engine.BlockerFromDynamics(ctx, actD.Blockers, aL.fltrS, aL.config.GeneralCfg().DefaultTenant, data); err != nil {
 			return nil, err
 		} else if blocker {
@@ -89,9 +109,9 @@ func (aL *actHTTPPost) execute(ctx *context.Context, data utils.MapStorage, _ st
 	var partExec bool
 	for _, pstr := range aL.pstrs {
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
-			go ees.ExportWithAttempts(context.Background(), pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
+			go ees.ExportWithAttempts(context.Background(), pstr, &ees.HTTPPosterRequest{Body: body, Header: pstr.Headers()}, utils.EmptyString,
 				nil, aL.config.GeneralCfg().DefaultTenant, aL.fltrS)
-		} else if err = ees.ExportWithAttempts(ctx, pstr, &ees.HTTPPosterRequest{Body: body, Header: make(http.Header)}, utils.EmptyString,
+		} else if err = ees.ExportWithAttempts(ctx, pstr, &ees.HTTPPosterRequest{Body: body, Header: pstr.Headers()}, utils.EmptyString,
 			nil, aL.config.GeneralCfg().DefaultTenant, aL.fltrS); err != nil {
 			if pstr.Cfg().FailedPostsDir != utils.MetaNone {
 				err = nil
