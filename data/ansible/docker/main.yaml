@@ -2,28 +2,13 @@
 - hosts: dkr
   vars:
     ansible_python_interpreter: auto # to disable deprication warning related to the use of python2
-    ###############################################################
-    ##################### Golang Vars #############################
-    ###############################################################
-    # Go language SDK version number
-    golang_version: '1.26'
-    go_version_target: "go version go{{ golang_version }} linux/amd64"
-    # Mirror to download the Go language SDK redistributable package from
-    golang_mirror: 'https://storage.googleapis.com/golang'
-    # Base installation directory the Go language SDK distribution
-    golang_install_dir: '/usr/local/go'
-    # Directory to store files downloaded for Go language SDK installation
-    golang_download_dir: "{{ x_ansible_download_dir | default(ansible_env.HOME + '/.ansible/tmp/downloads') }}"
-    # Location for GOPATH environment variable
     golang_gopath: "/home/{{ user }}/go"
-    # Filename of Go language SDK redistributable package
-    golang_redis_filename: 'go{{ golang_version }}.linux-amd64.tar.gz'
 
     ###############################################################
     # CGRateS vars
     cgrates_dir: "{{ golang_gopath }}/src/github.com/cgrates/cgrates"
-    cgrates_branch: "1.0"
-    cgrates_distribution: "nightly"
+    cgrates_branch: "main"
+    cgrates_distribution: "main"
     docker_tag: "latest"
     registry_site: "dkr.cgrates.org"      # the web site
     registry_name: "registry"             # the name of the registry container
@@ -56,10 +41,6 @@
     
   remote_user: '{{ user }}'
   tasks:
-    - name: set cgrates distribution
-      set_fact:
-        cgrates_distribution: "{{ cgrates_branch }}"
-      when: cgrates_branch != "master" or cgrates_branch != "1.0"
 ###########################################################################################################################
 ###########################################################################################################################
 # install dependencies
@@ -76,7 +57,7 @@
       register: nginxConfig
 
     - name: Configure NGINX server
-      include: nginx.yaml
+      ansible.builtin.include_tasks: nginx.yaml
       when: nginxConfig.stdout_lines|length < 1 or users_filename|length > 0
 
     - name: Enable and start nginx
@@ -87,22 +68,14 @@
         enabled: yes
       
     - name: Configure docker 
-      include: docker.yaml
+      ansible.builtin.include_tasks: docker.yaml
 
 ###########################################################################################################################
 ###########################################################################################################################
 # Install Golang
-    - name: install unarchive dependencies (zypper)
-      become: yes
-      zypper:
-        name:
-          - gzip
-          - tar
-        state: present
-      when: ansible_pkg_mgr == 'zypper'
-
-    - name: Install golang
-      include: go.yaml
+    - name: Install Go
+      ansible.builtin.import_role:
+        name: ../roles/go
 
 ###########################################################################################################################
 ###########################################################################################################################
@@ -182,19 +155,19 @@
       args:
         chdir: '{{ cgrates_dir }}'
       register: gitCommit 
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or cgrates_branch == "main" or gitTagVar.stdout_lines|length == 0
    
     - name: get commit
       shell: date +%Y%m%d%H%M%S --date="@$(git log -n1 --format=format:%ct)"
       args:
         chdir: '{{ cgrates_dir }}'
       register: gitDate 
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or cgrates_branch == "main" or gitTagVar.stdout_lines|length == 0
 
     - name: set cgrates docker_tag
       set_fact:
         docker_tag: "{{ gitDate.stdout }}{{ gitCommit.stdout }}"
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" or gitTagVar.stdout_lines|length == 0
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or cgrates_branch == "main" or gitTagVar.stdout_lines|length == 0
 
     - name: build Docker image
       become: yes
@@ -210,18 +183,18 @@
         docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }};
       with_items: "{{ build_execs }}"
 
-    - name: tag docker master image
+    - name: tag docker development image
       become: yes
       shell: 
         docker tag 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:{{ docker_tag }} 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or cgrates_branch == "main"
       with_items: "{{ build_execs }}"
 
-    - name: push docker master image to repo
+    - name: push docker development image to repo
       become: yes
       shell: 
         docker image push 127.0.0.1:{{ registry_port }}/{{ cgrates_distribution }}/{{ item }}:latest;
-      when: cgrates_branch == "master" or cgrates_branch == "1.0" 
+      when: cgrates_branch == "master" or cgrates_branch == "1.0" or cgrates_branch == "main"
       with_items: "{{ build_execs }}"
 
     - name: clean binar files

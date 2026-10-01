@@ -1,11 +1,11 @@
 version: "3.7"
 services:
   cgr-migrator:
-    image: dkr.cgrates.org/nightly/cgr-migrator
+    image: dkr.cgrates.org/main/cgr-migrator
     container_name: cgr-migrator
     environment:
       - DOCKER_IP=cgr-engine
-    command:  -config_path=https://raw.githubusercontent.com/cgrates/cgrates/master/data/conf/samples/docker/cgrates.json --exec=*set_versions
+    command:  -config_path=https://raw.githubusercontent.com/cgrates/cgrates/main/data/conf/samples/docker/cgrates.json --exec=*set_versions
 networks:
   default:
     external:
