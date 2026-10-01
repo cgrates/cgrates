@@ -1,9 +1,9 @@
 ## Real-time Online/Offline Charging System (OCS) for Telecom & ISP environments
 
-[![build & test](https://github.com/cgrates/cgrates/actions/workflows/build.yaml/badge.svg?branch=1.0)](https://github.com/cgrates/cgrates/actions/workflows/build.yaml)
-[![integration](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml/badge.svg?branch=1.0)](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml)
+[![build & test](https://github.com/cgrates/cgrates/actions/workflows/build.yaml/badge.svg?branch=main)](https://github.com/cgrates/cgrates/actions/workflows/build.yaml)
+[![integration](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml/badge.svg?branch=main)](https://github.com/cgrates/cgrates/actions/workflows/integration_tests.yaml)
 [![Documentation Status](https://readthedocs.org/projects/cgrates/badge/?version=latest)](https://cgrates.readthedocs.io/en/latest/?badge=latest)
-[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@master)
+[![GoDoc](https://pkg.go.dev/badge/github.com/cgrates/cgrates)](https://pkg.go.dev/github.com/cgrates/cgrates@main/apis)
 
 ### Features
 
@@ -27,16 +27,16 @@
 
 ### Documentation
 
-[Step by steps tutorials](https://cgrates.readthedocs.io/en/latest/tutorial.html)
+[Debian apt-get repository](https://cgrates.readthedocs.io/en/latest/installation.html)
 
-[Debian apt-get repository](https://cgrates.readthedocs.io/en/latest/installation.html#)
+[Source](https://github.com/cgrates/cgrates/tree/main)
 
 [Installing CGRateS from sources on minimal debian](https://asciinema.org/a/0lwlputceg52xssqgra7wjza0) (for devel or testing)
 
-Browsable HTML docs http://readthedocs.org/docs/cgrates/
+Browsable HTML docs https://cgrates.readthedocs.io/en/latest/
 
 PDF, Epub, Manpage http://readthedocs.org/projects/cgrates/downloads/
 
-API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates@v1.0.0-dev)
+API reference [godoc](https://pkg.go.dev/github.com/cgrates/cgrates@main/apis)
 
 Also check [irc.freenode.net #cgrates](irc://irc.freenode.net:6667/cgrates) ([Webchat](http://webchat.freenode.net?randomnick=1&channels=%23cgrates)) and [Google group](https://groups.google.com/forum/#!forum/cgrates) for a more real-time support.
