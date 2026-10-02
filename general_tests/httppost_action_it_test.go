@@ -54,15 +54,16 @@ func TestHTTPPostAction(t *testing.T) {
 		rsSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			exp := http.Header{
 				"Accept-Encoding": []string{"gzip"},
-				"Content-Length":  []string{"52053"},
+				"Content-Length":  []string{"52399"},
 				"Content-Type":    []string{"application/json"},
 				"Hdr1":            []string{"val2", "val3"},
 				"Hdr3":            []string{"4"},
+				"Hdrdynamic":      []string{"Startheader1End", "Start2header2End2"},
 				"User-Agent":      []string{"Go-http-client/1.1"},
 			}
 			if fmt.Sprintln(r.Header) != fmt.Sprintln(exp) {
 				t.Errorf("expected <%+v>, received <%+v>", exp, r.Header)
-			}
+			} // ignore the httptest related panic if this error fails, fixing the error will fix the panic
 			r.Body.Close()
 		}))
 	})
@@ -80,11 +81,12 @@ func TestHTTPPostAction(t *testing.T) {
 							{
 								ID: "HttpsPost",
 								Opts: map[string]any{
-									"*url": rsSrv.URL,
+									"*url": "<~*req.url>",
 									// "*hdrs"
 									utils.MetaHdrs: map[string]any{
-										"hdr1": []string{"val2", "val3"},
-										"hdr3": "4",
+										"hdr1":       []string{"val2", "val3"},
+										"hdr3":       "4",
+										"hdrDynamic": []string{"Start<~*req.InjectHeader1>End", "Start2<~*req.InjectHeader2>End2"},
 									},
 								},
 							},
@@ -112,6 +114,9 @@ func TestHTTPPostAction(t *testing.T) {
 					utils.Tenant:       "cgrates.org",
 					utils.AccountField: "1001",
 					utils.Cost:         float64(30),
+					"InjectHeader1":    "header1",
+					"InjectHeader2":    "header2",
+					"url":              rsSrv.URL,
 				},
 			}, &reply); err != nil {
 			t.Error(err)
