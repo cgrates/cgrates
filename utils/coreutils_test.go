@@ -1317,7 +1317,7 @@ func TestGetCGRVersion(t *testing.T) {
 			name: "unknown verb %cI (git version is too old)",
 			date: "%cI",
 			hash: "73014daa0c1d7edcb532d5fe600b8a20d588cdf8",
-			want: "CGRateS@v0.11.0~dev-00010101000000-73014daa0c1d",
+			want: "CGRateS@" + Version + "-00010101000000-73014daa0c1d",
 		},
 		{
 			name: "successful version build (default)",
