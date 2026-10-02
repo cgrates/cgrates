@@ -49,8 +49,11 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		if err != nil {
 			return nil, err
 		}
-		eeCfg := config.NewEventExporterCfg(aL.id(), utils.EmptyString,
-			utils.IfaceAsString(actD.Opts[utils.MetaURL]),
+		processedURL, err := utils.ParseParamForDataProvider(utils.IfaceAsString(actD.Opts[utils.MetaURL]), data, false)
+		if err != nil {
+			return nil, err
+		}
+		eeCfg := config.NewEventExporterCfg(aL.id(), utils.EmptyString, processedURL,
 			cfg.EEsCfg().ExporterCfg(utils.MetaDefault).FailedPostsDir,
 			attempts, nil)
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, cache, nil, nil)
@@ -61,14 +64,26 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 					switch hdrVal := hdrsValIf.(type) {
 					case []string:
 						for _, hdrV := range hdrVal {
-							aL.pstrs[i].AppendHeader(hdrKey, hdrV)
+							hdrVProcessed, err := utils.ParseParamForDataProvider(hdrV, data, false)
+							if err != nil {
+								return nil, err
+							}
+							aL.pstrs[i].AppendHeader(hdrKey, hdrVProcessed)
 						}
 					case string:
-						aL.pstrs[i].AppendHeader(hdrKey, hdrVal)
+						hdrVProcessed, err := utils.ParseParamForDataProvider(hdrVal, data, false)
+						if err != nil {
+							return nil, err
+						}
+						aL.pstrs[i].AppendHeader(hdrKey, hdrVProcessed)
 					case []any:
 						for _, hdrVIf := range hdrVal {
 							if hdrV, ok := hdrVIf.(string); ok {
-								aL.pstrs[i].AppendHeader(hdrKey, hdrV)
+								hdrVProcessed, err := utils.ParseParamForDataProvider(hdrV, data, false)
+								if err != nil {
+									return nil, err
+								}
+								aL.pstrs[i].AppendHeader(hdrKey, hdrVProcessed)
 							}
 						}
 					}
