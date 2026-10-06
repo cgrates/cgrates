@@ -65,10 +65,10 @@
 
     - name: Install cgrates binaries
       ansible.builtin.command:
-        cmd: bash -c './build.sh'
+        cmd: ./build.sh
         chdir: "{{ cgrates_dir }}"
       environment:
-        PATH: "{{ ansible_env.PATH }}:/usr/local/go/bin"
+        PATH: "{{ ansible_facts['env']['PATH'] }}:/usr/local/go/bin"
 
     - name: Create cgrates data folder symlink
       ansible.builtin.file:

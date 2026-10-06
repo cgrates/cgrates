@@ -1,0 +1,4 @@
+---
+dependencies:
+  - role: go
+    when: cgrates_install_method == "source"

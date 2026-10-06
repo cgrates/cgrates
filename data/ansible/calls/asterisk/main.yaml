@@ -3,7 +3,6 @@
   hosts: all
   roles:
     - ../../roles/asterisk
-    - ../../roles/go
     - role: ../../roles/cgrates
       vars:
         cgrates_dbs:
