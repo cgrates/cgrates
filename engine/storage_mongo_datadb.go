@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"maps"
+	"net/netip"
 	"reflect"
 	"regexp"
 	"strings"
@@ -64,9 +65,12 @@ const (
 	ColAnp  = "accountProfiles"
 )
 
-func decimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
-	decimalType := reflect.TypeOf(utils.Decimal{})
+var (
+	decimalType = reflect.TypeFor[utils.Decimal]()
+	addrType    = reflect.TypeFor[netip.Addr]()
+)
 
+func decimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
 	// All encoder implementations should check that val is valid and is of
 	// the correct type before proceeding.
 	if !val.IsValid() || val.Type() != decimalType {
@@ -86,8 +90,6 @@ func decimalEncoder(ec bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val refle
 }
 
 func decimalDecoder(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
-	decimalType := reflect.TypeOf(utils.Decimal{})
-
 	// All decoder implementations should check that val is valid, settable,
 	// and is of the correct kind before proceeding.
 	if !val.IsValid() || !val.CanSet() || val.Type() != decimalType {
@@ -107,6 +109,42 @@ func decimalDecoder(dc bsoncodec.DecodeContext, vr bsonrw.ValueReader, val refle
 		return err
 	}
 	val.Set(reflect.ValueOf(utils.Decimal{Big: dBig}))
+	return nil
+}
+
+func addrEncoder(_ bsoncodec.EncodeContext, vw bsonrw.ValueWriter, val reflect.Value) error {
+	addr, ok := reflect.TypeAssert[netip.Addr](val)
+	if !ok {
+		return bsoncodec.ValueEncoderError{
+			Name:     "addrEncoder",
+			Types:    []reflect.Type{addrType},
+			Received: val,
+		}
+	}
+	saddr, err := addr.MarshalText()
+	if err != nil {
+		return err
+	}
+	return vw.WriteString(string(saddr))
+}
+
+func addrDecoder(_ bsoncodec.DecodeContext, vr bsonrw.ValueReader, val reflect.Value) error {
+	if !val.IsValid() || !val.CanSet() || val.Type() != addrType {
+		return bsoncodec.ValueDecoderError{
+			Name:     "addrDecoder",
+			Types:    []reflect.Type{addrType},
+			Received: val,
+		}
+	}
+	data, err := vr.ReadString()
+	if err != nil {
+		return err
+	}
+	var addr netip.Addr
+	if err := addr.UnmarshalText([]byte(data)); err != nil {
+		return err
+	}
+	val.Set(reflect.ValueOf(addr))
 	return nil
 }
 
@@ -145,9 +183,10 @@ func NewMongoStorage(scheme, host, port, db, user, pass, mrshlerStr string,
 	}
 	uri := composeMongoURI(scheme, host, port, db, user, pass)
 	reg := bson.NewRegistry()
-	decimalType := reflect.TypeOf(utils.Decimal{})
 	reg.RegisterTypeEncoder(decimalType, bsoncodec.ValueEncoderFunc(decimalEncoder))
 	reg.RegisterTypeDecoder(decimalType, bsoncodec.ValueDecoderFunc(decimalDecoder))
+	reg.RegisterTypeEncoder(addrType, bsoncodec.ValueEncoderFunc(addrEncoder))
+	reg.RegisterTypeDecoder(addrType, bsoncodec.ValueDecoderFunc(addrDecoder))
 	reg.RegisterTypeDecoder(reflect.TypeOf(map[string]any{}), bsoncodec.ValueDecoderFunc(mapStringAnyDecoderWithDecimal))
 	// serverAPI := options.ServerAPI(options.ServerAPIVersion1).SetStrict(true).SetDeprecationErrors(true)
 	opts := options.Client().
