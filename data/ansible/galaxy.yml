@@ -1,0 +1,21 @@
+---
+namespace: cgrates
+name: deployment
+version: "0.1.0"
+readme: README.md
+authors:
+  - CGRateS contributors
+description: Ansible roles for CGRateS and its supporting services.
+license:
+  - AGPL-3.0-or-later
+repository: https://github.com/cgrates/cgrates
+homepage: https://www.cgrates.org
+issues: https://github.com/cgrates/cgrates/issues
+build_ignore:
+  - calls
+  - deb_packages
+  - docker
+  - drone
+  - integration_tests
+  - monitoring
+  - rpm_packages
