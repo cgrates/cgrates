@@ -93,18 +93,15 @@ type SessionsOpts struct {
 	HostID                 []*DynamicStringOpt
 	AccountsForceUsage     []*DynamicBoolOpt
 	AccountsAuthorize      []*DynamicBoolOpt
-	// AccountsInitialize     []*DynamicBoolOpt
-	// AccountsUpdate       []*DynamicBoolOpt
-	// AccountsTerminate    []*DynamicBoolOpt
-	AccountsDebit        []*DynamicBoolOpt
-	AccountsRefund       []*DynamicBoolOpt
-	Session              []*DynamicBoolOpt
-	AutoChargeInterval   []*DynamicDurationOpt
-	AutoChargeUsage      []*DynamicDecimalOpt
-	AutoChargeMinGranted []*DynamicDecimalOpt
-	EEs                  []*DynamicBoolOpt
-	EEsIDs               []*DynamicStringOpt
-	UR                   []*DynamicBoolOpt // UsageRecord generation
+	AccountsDebit          []*DynamicBoolOpt
+	AccountsRefund         []*DynamicBoolOpt
+	Session                []*DynamicBoolOpt
+	AutoChargeInterval     []*DynamicDurationOpt
+	AutoChargeUsage        []*DynamicDecimalOpt
+	AutoChargeMinGranted   []*DynamicDecimalOpt
+	EEs                    []*DynamicBoolOpt
+	EEsIDs                 []*DynamicStringOpt
+	UR                     []*DynamicBoolOpt // UsageRecord generation
 }
 
 // SessionSCfg is the config section for SessionS
