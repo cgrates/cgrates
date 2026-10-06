@@ -494,6 +494,36 @@ cgrates.org,IPs2,*string:~*req.Account:1002,;20,2s,false,POOL1,*string:~*req.Des
 
 	})
 
+	t.Run("get allocations from db", func(t *testing.T) {
+		var allocIP utils.AllocatedIP
+		if err := client.Call(context.Background(), utils.IPsV1AllocateIP, &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     utils.GenUUID(),
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "2001",
+			},
+			APIOpts: map[string]any{
+				utils.OptsIPsAllocationID: "allc1",
+			},
+		}, &allocIP); err != nil {
+			t.Fatal(err)
+		}
+		if allocIP.Address.String() != "172.16.1.1" {
+			t.Fatalf("expected allocated IP 172.16.1.1, got %s", allocIP.Address.String())
+		}
+		var reply string
+		if err := client.Call(context.Background(), utils.CacheSv1Clear,
+			&utils.AttrCacheIDsWithAPIOpts{
+				CacheIDs: []string{utils.CacheIPAllocations},
+			}, &reply); err != nil {
+			t.Error(err)
+		}
+		verifyAllocations(t, client, "IPs1", "allc1")
+		verifyIPAllocation(t, client, "IPs1", "allc1", "172.16.1.1")
+
+	})
+
 	// t.Run("sessions integration", func(t *testing.T) {
 	// 	// NOTE: reply is of type any to avoid having to import sessions just for
 	// 	// this test in order to prevent future cyclic imports. Any sessions
