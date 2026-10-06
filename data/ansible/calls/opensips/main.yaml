@@ -1,7 +1,6 @@
 ---
 - hosts: all
   roles:
-    - ../../roles/go
     - role: ../../roles/cgrates
       vars:
         cgrates_dbs:

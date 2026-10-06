@@ -1,5 +1,19 @@
 ---
 - hosts: all
+  vars:
+    cgrates_dbs:
+      - mysql
+      - postgres
+      - mongo
+  pre_tasks:
+    - name: Install Redis and MariaDB
+      become: true
+      ansible.builtin.package:
+        name:
+          - redis-server
+          - mariadb-server
+        state: present
+        update_cache: true
   roles:
     - ../roles/rabbitmq
     - ../roles/nats
@@ -7,5 +21,4 @@
     - ../roles/kafka
     - ../roles/mongodb
     - ../roles/postgresql
-    - ../roles/go
     - ../roles/cgrates

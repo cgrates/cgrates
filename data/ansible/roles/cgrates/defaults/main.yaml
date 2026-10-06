@@ -19,14 +19,9 @@ cgrates_debian_codename: "bookworm"
 cgrates_data_path: "/usr/share/cgrates"
 cgrates_bin_path: "/usr/bin"
 
-cgrates_dbs:
-  - mysql
-  - postgres
-  - mongo
+cgrates_dbs: []
 
 cgrates_dependencies:
   - git
-  - redis-server
-  - mariadb-server
   - make
   - gcc
