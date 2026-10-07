@@ -4,6 +4,8 @@
 package config
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -47,6 +49,34 @@ import (
 // 		t.Errorf("Expected: %s ,received: %s", utils.ToJSON(exp2), utils.ToJSON(rpl2))
 // 	}
 // }
+
+func TestV1ReloadConfigAllSections(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	cfg.ConfigPath = t.TempDir()
+	cfg.rldCh = make(chan string, len(cfg.GetAllSectionIDs()))
+	if err := os.WriteFile(filepath.Join(cfg.ConfigPath, "cgrates.json"),
+		[]byte(`{"general":{"nodeID":"file-node"}}`), 0600); err != nil {
+		t.Fatal(err)
+	}
+	db, err := NewCgrJsonCfgFromBytes([]byte(`{"general":{"nodeID":"db-node"}}`))
+	if err != nil {
+		t.Fatal(err)
+	}
+	cfg.db = db
+	var reply string
+	if err := cfg.V1ReloadConfig(context.Background(), new(ReloadArgs), &reply); err != nil {
+		t.Fatal(err)
+	}
+	if got := cfg.GeneralCfg().NodeID; got != "db-node" {
+		t.Errorf("nodeID = %q, want db-node", got)
+	}
+	for len(cfg.rldCh) != 0 {
+		if <-cfg.rldCh == utils.AttributeS {
+			return
+		}
+	}
+	t.Error("missing AttributeS reload notification")
+}
 
 func TestConfigV1StoreCfgInDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()

@@ -42,7 +42,7 @@ func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, rep
 		return
 	}
 	sections := []string{args.Section}
-	allSections := args.Section == utils.MetaEmpty ||
+	allSections := args.Section == "" ||
 		args.Section == utils.MetaAll
 	if allSections {
 		sections = cfgV.GetAllSectionIDs()
