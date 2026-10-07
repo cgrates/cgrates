@@ -1,7 +1,7 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package servmanager_test
+package servmanager
 
 import (
 	"errors"
@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/cgrates/cgrates/config"
-	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,7 +28,7 @@ func newBlockingService(name string) *blockingService {
 	return &blockingService{name: name, shouldRun: true}
 }
 
-func (s *blockingService) Start(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+func (s *blockingService) Start(_ *utils.SyncedChan, _ *Registry) error {
 	s.started.Add(1)
 	if s.resumeStart == nil {
 		return nil
@@ -37,11 +36,11 @@ func (s *blockingService) Start(_ *utils.SyncedChan, _ *servmanager.Registry) er
 	return <-s.resumeStart
 }
 
-func (s *blockingService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error {
+func (s *blockingService) Reload(_ *utils.SyncedChan, _ *Registry) error {
 	return nil
 }
 
-func (s *blockingService) Shutdown(_ *servmanager.Registry) error {
+func (s *blockingService) Shutdown(_ *Registry) error {
 	s.stopped.Add(1)
 	return nil
 }
@@ -49,18 +48,18 @@ func (s *blockingService) Shutdown(_ *servmanager.Registry) error {
 func (s *blockingService) ShouldRun() bool     { return s.shouldRun }
 func (s *blockingService) ServiceName() string { return s.name }
 
-func newTestManager(t *testing.T, svcs ...servmanager.Service) (
-	*servmanager.ServiceManager, *servmanager.Registry, *sync.WaitGroup,
+func newTestManager(t *testing.T, svcs ...Service) (
+	*ServiceManager, *Registry, *sync.WaitGroup,
 ) {
 	t.Helper()
 	cfg := config.NewDefaultCGRConfig()
 	shdWg := &sync.WaitGroup{}
-	registry := servmanager.NewRegistry()
-	m := servmanager.NewServiceManager(shdWg, cfg, registry, svcs)
+	registry := NewRegistry()
+	m := NewServiceManager(shdWg, cfg, registry, svcs)
 	return m, registry, shdWg
 }
 
-func waitForState(t *testing.T, r *servmanager.Registry, id, target string) {
+func waitForState(t *testing.T, r *Registry, id, target string) {
 	t.Helper()
 	deadline := time.Now().Add(time.Second)
 	for time.Now().Before(deadline) {
@@ -155,6 +154,23 @@ func TestShutdownDuringStart(t *testing.T) {
 	if state := registry.State("svc"); state != utils.StateServiceDOWN {
 		t.Fatalf("final state = %q, want %q", state, utils.StateServiceDOWN)
 	}
+	waitShdWg(t, shdWg)
+}
+
+func TestStartAfterShutdown(t *testing.T) {
+	svc := newBlockingService("svc")
+	m, registry, shdWg := newTestManager(t, svc)
+	shutdown := utils.NewSyncedChan()
+	shutdown.CloseOnce()
+	shdWg.Add(1)
+	m.start(svc, shutdown)
+	if got := svc.started.Load(); got != 0 {
+		t.Errorf("Start called %d times after shutdown, want 0", got)
+	}
+	if state := registry.State(svc.ServiceName()); state != utils.StateServiceDOWN {
+		t.Errorf("service state = %q, want %q", state, utils.StateServiceDOWN)
+	}
+	m.ShutdownServices()
 	waitShdWg(t, shdWg)
 }
 

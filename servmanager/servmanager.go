@@ -56,6 +56,12 @@ func (m *ServiceManager) start(svc Service, shutdown *utils.SyncedChan) {
 		m.shdWg.Done()
 		return
 	}
+	select {
+	case <-shutdown.Done():
+		m.shdWg.Done()
+		return
+	default:
+	}
 	if err := svc.Start(shutdown, m.registry); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> failed to start <%s> service: %v",
 			utils.ServiceManager, id, err))
@@ -121,6 +127,11 @@ func (m *ServiceManager) reloadService(id string, shutdown *utils.SyncedChan) {
 			utils.Logger.Info(fmt.Sprintf("<%s> reloaded <%s> service",
 				utils.ServiceManager, id))
 			return
+		}
+		select {
+		case <-shutdown.Done():
+			return
+		default:
 		}
 		m.shdWg.Add(1)
 		if err := svc.Start(shutdown, m.registry); err != nil {
