@@ -28,13 +28,12 @@ var (
 	caPath          = consoleFlags.String(utils.CAPathCgr, "", "path to CA for tls connection(only for self sign certificate)")
 	tls             = consoleFlags.Bool(utils.TLSNoCaps, false, "TLS connection")
 	replyTimeout    = consoleFlags.Int(utils.ReplyTimeoutCfg, 300, "Reply timeout in seconds")
-	simpleMode      bool
+	menuMode        bool
 )
 
 func init() {
-	consoleFlags.BoolVar(&simpleMode, "simple", false, "Use the readline interface")
-	consoleFlags.BoolVar(&simpleMode, "s", false, "shorthand for -simple")
-
+	consoleFlags.BoolVar(&menuMode, "menu", false, "Use the tui interface")
+	consoleFlags.BoolVar(&menuMode, "m", false, "shorthand for -menu")
 }
 
 type app struct {
@@ -72,20 +71,13 @@ func main() {
 		a.execute(strings.Join(args, " "))
 		return
 	}
-	if !simpleMode && isTTY(os.Stdin) && isTTY(os.Stdout) {
+	if menuMode {
 		if err := runTUI(client, *server); err != nil {
 			log.Fatal(err)
 		}
 		return
 	}
 	a.repl()
-}
-
-// isTTY reports whether f is an interactive terminal, so pipes and scripts
-// fall back to the readline shell instead of the TUI.
-func isTTY(f *os.File) bool {
-	fi, err := f.Stat()
-	return err == nil && fi.Mode()&os.ModeCharDevice != 0
 }
 
 func (a *app) execute(input string) {
