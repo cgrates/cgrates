@@ -4,7 +4,10 @@
 package services
 
 import (
+	"errors"
+	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -149,6 +152,17 @@ func TestFlags(t *testing.T) {
 				t.Errorf("%s=%v, want %v", tt.name, flagVal, tt.want)
 			}
 		})
+	}
+}
+
+func TestRunCGREnginePIDCleanup(t *testing.T) {
+	dir := t.TempDir()
+	pidFile := filepath.Join(dir, "cgr-engine.pid")
+	if err := RunCGREngine([]string{"-pid", pidFile, "-config_path", filepath.Join(dir, "missing")}); err == nil {
+		t.Fatal("expected configuration error")
+	}
+	if _, err := os.Stat(pidFile); !errors.Is(err, os.ErrNotExist) {
+		t.Errorf("PID file remains after RunCGREngine: %v", err)
 	}
 }
 

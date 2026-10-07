@@ -112,6 +112,11 @@ func RunCGREngine(fs []string) (err error) {
 		if err = writePIDFile(flags.process.pidFile); err != nil {
 			return
 		}
+		defer func() {
+			if err := os.Remove(flags.process.pidFile); err != nil {
+				utils.Logger.Warning("Could not remove pid file: " + err.Error())
+			}
+		}()
 	}
 	if flags.process.singleCPU {
 		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
@@ -232,11 +237,6 @@ func RunCGREngine(fs []string) (err error) {
 		if ctx.Err() != context.Canceled {
 			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down all services in the given time",
 				utils.ServiceManager))
-		}
-		if flags.process.pidFile != utils.EmptyString {
-			if err := os.Remove(flags.process.pidFile); err != nil {
-				utils.Logger.Warning("Could not remove pid file: " + err.Error())
-			}
 		}
 		if cpuPrfF != nil && coreS == nil {
 			pprof.StopCPUProfile()
