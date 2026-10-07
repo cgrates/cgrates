@@ -213,6 +213,15 @@ func TestNewDataConverter(t *testing.T) {
 	if !reflect.DeepEqual(uc, expected) {
 		t.Errorf("Expected %+v received: %+v", expected, uc)
 	}
+
+	fsc, err := NewDataConverter(MetaFSArray)
+	if err != nil {
+		t.Error(err)
+	}
+	expect := new(FSArrayConverter)
+	if !reflect.DeepEqual(fsc, expect) {
+		t.Errorf("Expected %+v received: %+v", expect, fsc)
+	}
 }
 
 func TestNewDataConverterMustCompile(t *testing.T) {
@@ -2633,6 +2642,274 @@ func TestAttributesDigestDataConverter(t *testing.T) {
 			}
 			if rcv != tt.exp {
 				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+func TestFSArrayConverter(t *testing.T) {
+	tests := []struct {
+		name string
+		in   any
+		exp  any
+	}{
+		{
+			name: "multiple routes",
+			in:   "route1,route2,route3",
+			exp:  "ARRAY::3|:route1|:route2|:route3",
+		},
+		{
+			name: "routes with parameters",
+			in:   "route1:param1,route2:param2",
+			exp:  "ARRAY::2|:route1:param1|:route2:param2",
+		},
+		{
+			name: "single route",
+			in:   "route1",
+			exp:  "ARRAY::1|:route1",
+		},
+		{
+			name: "empty input",
+			in:   "",
+			exp:  "ARRAY::0",
+		},
+		{
+			name: "empty item between separators",
+			in:   "route1,,route2",
+			exp:  "ARRAY::3|:route1|:|:route2",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := new(FSArrayConverter).Convert(tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+			if rcv != tt.exp {
+				t.Errorf("Expected %v, \nreceived %v", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestRoutesFSArrayConverter(t *testing.T) {
+	tests := []struct {
+		name string
+		in   any
+		exp  any
+	}{
+		{
+			name: "routes with parameters",
+			in: SortedRoutesList{{
+				ProfileID: "ROUTE_1001",
+				Sorting:   MetaWeight,
+				Routes: []*SortedRoute{
+					{
+						RouteID:         "route1",
+						RouteParameters: "param1",
+					},
+					{
+						RouteID:         "route2",
+						RouteParameters: "param2",
+					},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::2|:route1:param1|:route2:param2",
+		},
+		{
+			name: "only routeIDs",
+			in: SortedRoutesList{{
+				ProfileID: "ROUTE_1002",
+				Routes: []*SortedRoute{
+					{
+						RouteID: "route1",
+					},
+					{
+						RouteID: "route2",
+					},
+					{
+						RouteID: "route3",
+					},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::3|:route1|:route2|:route3",
+		},
+		{
+			name: "with 2 SortedRoutes",
+			in: SortedRoutesList{
+				{
+					ProfileID: "ROUTE_1002",
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route1",
+							RouteParameters: "params1",
+						},
+						{
+							RouteID:         "route2",
+							RouteParameters: "params2",
+						},
+					},
+				},
+				{
+					ProfileID: "ROUTE_1003",
+					Routes: []*SortedRoute{
+						{
+							RouteID:         "route3",
+							RouteParameters: "params3",
+						},
+						{
+							RouteID:         "route4",
+							RouteParameters: "params4",
+						},
+					},
+				},
+			}.AsNavigableMap().Slice,
+			exp: "ARRAY::4|:route1:params1|:route2:params2|:route3:params3|:route4:params4",
+		},
+		{
+			name: "with dublicates",
+			in: SortedRoutesList{{
+				ProfileID: "ROUTE_1004",
+				Routes: []*SortedRoute{
+					{RouteID: "route1"},
+					{RouteID: "route2"},
+					{RouteID: "route5"},
+					{RouteID: "route2"},
+					{RouteID: "route3"},
+					{RouteID: "route0"},
+					{RouteID: "route1"},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::5|:route1|:route2|:route5|:route3|:route0",
+		},
+		{
+			name: "only RouteID",
+			in: SortedRoutesList{{
+				Routes: []*SortedRoute{
+					{RouteID: "route3"},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::1|:route3",
+		},
+		{
+			name: "only RouteParameters",
+			in: SortedRoutesList{{
+				Routes: []*SortedRoute{
+					{RouteParameters: "params1"},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::1|::params1",
+		},
+		{
+			name: "empty Routes",
+			in: SortedRoutesList{
+				{
+					Routes: []*SortedRoute{},
+				},
+			}.AsNavigableMap().Slice,
+			exp: "ARRAY::0",
+		},
+		{
+			name: "empty RouteID and RouteParameters",
+			in: SortedRoutesList{{
+				Routes: []*SortedRoute{
+					{
+						RouteID:         "",
+						RouteParameters: "",
+					},
+				},
+			}}.AsNavigableMap().Slice,
+			exp: "ARRAY::1|:",
+		},
+		{
+			name: "no profiles",
+			in:   SortedRoutesList{}.AsNavigableMap().Slice,
+			exp:  "ARRAY::0",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			rcv, err := new(FSArrayConverter).Convert(tt.in)
+			if err != nil {
+				t.Error(err)
+			}
+			if rcv != tt.exp {
+				t.Errorf("Expected %q, \nreceived %q", tt.exp, rcv)
+			}
+		})
+	}
+}
+
+func TestRouteProfilesFsArrayTemplates(t *testing.T) {
+	tests := []struct {
+		name string
+		in   SortedRoutesList
+		exp  string
+	}{
+		{
+			name: "routes",
+			in: SortedRoutesList{{
+				ProfileID: "ROUTE_1005",
+				Sorting:   MetaWeight,
+				Routes: []*SortedRoute{
+					{RouteID: "route1"},
+					{RouteID: "route2"},
+					{RouteID: "route3"},
+				},
+			}},
+			exp: "ARRAY::3|:route1|:route2|:route3",
+		},
+		{
+			name: "one route with RouteParameters",
+			in: SortedRoutesList{{
+				Routes: []*SortedRoute{
+					{
+						RouteID:         "route1",
+						RouteParameters: "p1",
+					},
+					{
+						RouteID: "route2",
+					},
+				},
+			}},
+			exp: "ARRAY::2|:route1:p1|:route2",
+		},
+		{
+			name: "routes with duplicates",
+			in: SortedRoutesList{{
+				Routes: []*SortedRoute{
+					{RouteID: "route1"},
+					{RouteID: "route2"},
+					{RouteID: "route2"},
+				},
+			}},
+			exp: "ARRAY::2|:route1|:route2",
+		},
+		{
+			name: "no routes",
+			in:   SortedRoutesList{{Routes: []*SortedRoute{}}},
+			exp:  "ARRAY::0",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			dp := MapStorage{
+				MetaCgrep: MapStorage{
+					"RouteProfiles": MapStorage{
+						MetaPrimary: tt.in.AsNavigableMap().Slice,
+					},
+				},
+			}
+			prsr, err := NewRSRParsers("~*cgrep.RouteProfiles[*primary]{*fsArray}", RSRSep)
+			if err != nil {
+				t.Error(err)
+			}
+			got, err := prsr.ParseDataProvider(dp)
+			if err != nil {
+				t.Error(err)
+			}
+
+			if got != tt.exp {
+				t.Errorf("Expected %v, \nreceived %v", tt.exp, got)
 			}
 		})
 	}

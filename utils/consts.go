@@ -674,6 +674,7 @@ const (
 	MetaUnits            = "*units"
 	MetaRoutesDigest     = "*routesDigest"
 	MetaAttributesDigest = "*attributesDigest"
+	MetaFSArray          = "*fsArray"
 	LoadIDs              = "loadIDs"
 	DNSAgent             = "DNSAgent"
 	TLSNoCaps            = "tls"

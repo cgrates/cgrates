@@ -141,6 +141,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(RoutesDigestConverter), nil
 	case params == MetaAttributesDigest:
 		return new(AttributesDigestConverter), nil
+	case params == MetaFSArray:
+		return new(FSArrayConverter), nil
 	default:
 		return nil, fmt.Errorf("unsupported converter definition: <%s>", params)
 	}
@@ -973,4 +975,36 @@ func (c AttributesDigestConverter) Convert(in any) (any, error) {
 	default:
 		return nil, fmt.Errorf("*attributesDigest converter: failed to convert %T to string", in)
 	}
+}
+
+type FSArrayConverter struct{}
+
+func (FSArrayConverter) Convert(in any) (any, error) {
+	val := IfaceAsString(in)
+	var nodes []*DataNode
+	var items []string
+	if val == EmptyString {
+		return fmt.Sprintf("ARRAY::%d", len(items)), nil
+	}
+	if err := json.Unmarshal([]byte(val), &nodes); err != nil {
+		items = strings.Split(val, FieldsSep)
+	} else {
+		uniqueRouteIDs := make(StringSet)
+		for _, profile := range nodes {
+			for _, route := range profile.Map[CapRoutes].Slice {
+				item := route.Map[RouteID].Value.String()
+				if params := route.Map[RouteParameters].Value.String(); params != "" {
+					item += InInFieldSep + params
+				}
+				if !uniqueRouteIDs.Has(item) {
+					uniqueRouteIDs.Add(item)
+					items = append(items, item)
+				}
+			}
+		}
+	}
+	if len(items) == 0 {
+		return fmt.Sprintf("ARRAY::%d", len(items)), nil
+	}
+	return fmt.Sprintf("ARRAY::%d|:%s", len(items), strings.Join(items, "|:")), nil
 }
