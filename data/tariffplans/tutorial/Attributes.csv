@@ -33,6 +33,15 @@ cgrates.com,ATTR_TNT_ALIAS,,,,,*req.Account,*constant,1001,,
 cgrates.com,ATTR_TNT_ALIAS,,,,,*req.RequestType,*constant,*prepaid,,
 cgrates.com,ATTR_TNT_ALIAS,,,,,*tenant,*constant,cgrates.org,,
 
+cgrates.org,ATTR_ACC_ALIAS2,*any,*string:~*req.SubscriberId:1002,,,,,,false,10
+cgrates.org,ATTR_ACC_ALIAS2,,,,,*req.Account,*constant,1002,,
+cgrates.org,ATTR_ACC_ALIAS2,,,,,*req.RequestType,*constant,*prepaid,,
+
+cgrates.com,ATTR_TNT_ALIAS2,*any,*string:~*req.SubscriberId:1002,,,,,,false,10
+cgrates.com,ATTR_TNT_ALIAS2,,,,,*req.Account,*constant,1002,,
+cgrates.com,ATTR_TNT_ALIAS2,,,,,*req.RequestType,*constant,*prepaid,,
+cgrates.com,ATTR_TNT_ALIAS2,,,,,*tenant,*constant,cgrates.org,,
+
 cgrates.com,ATTR_TNT_1001,*any,*string:~*req.Account:1001,,,*tenant,*constant,cgrates.org,,
 
 cgrates.com,ATTR_TNT_DISC,*any,*string:~*req.Account:testDiamInitWithSessionDisconnect,,,*tenant,*constant,cgrates.org,,
