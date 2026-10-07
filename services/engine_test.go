@@ -1,7 +1,7 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package main
+package services
 
 import (
 	"path"
