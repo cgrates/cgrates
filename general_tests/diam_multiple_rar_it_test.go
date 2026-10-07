@@ -21,6 +21,7 @@ import (
 	v1 "github.com/cgrates/cgrates/apier/v1"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/go-diameter/diam"
 	"github.com/cgrates/go-diameter/diam/avp"
@@ -49,12 +50,17 @@ var (
 		testDiamItMultipleCCRInit2,
 		testDiamItMultipleCCRUpdate2,
 
+		testDiamItMultipleCCRInitDifferentAccount,
+		testDiamItMultipleCCRUpdateDifferentAccount,
+		testDiamItMultipleCCRInit2DifferentAccount,
+		testDiamItMultipleCCRUpdate2DifferentAccount,
+
 		testDiamItMultipleRARActions,
 		testDiamItMultipleKillEngine,
 	}
 )
 
-// Test start here
+// Tests RAR sent to all sessions from an account (sessions have different SessionID)
 func TestDiamItTcpMultipleRARFromActions(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
@@ -489,7 +495,338 @@ func testDiamItMultipleCCRUpdate2(t *testing.T) {
 	}
 }
 
+func testDiamItMultipleCCRInitDifferentAccount(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("CCR1SessID1002"))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("voice@DiamItCCRInit"))
+	m.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 4, 14, 42, 20, 0, time.UTC)))
+	m.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),      // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("1002")), // Subscription-Id-Data
+		}})
+	m.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(0))}})
+	m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String("1002")),            // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String("1001")),            // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String("1001")),           // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),              // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("CCR1SessID1002")), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),               // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("")),               // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("")),               // SSP-Time
+				},
+			}),
+		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClntM == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
+	if err := diamClntM.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	msg := diamClntM.ReceivedMessage(rplyTimeoutM)
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	// Result-Code
+	eVal := "Unsigned32{2001}"
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+	// Result-Code
+	eVal = "Unsigned32{300}" // 5 mins of session
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
+		dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+
+func testDiamItMultipleCCRUpdateDifferentAccount(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("CCR1SessID1002"))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(2))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	m.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("voice@DiamItCCRInit"))
+	m.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 4, 14, 57, 20, 0, time.UTC)))
+	m.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),      // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("1002")), // Subscription-Id-Data
+		}})
+	m.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String("1002")),            // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String("1001")),            // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String("1001")),           // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),              // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("CCR1SessID1002")), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),               // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("")),               // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("")),               // SSP-Time
+				},
+			}),
+		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClntM == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
+	if err := diamClntM.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	msg := diamClntM.ReceivedMessage(rplyTimeoutM)
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	// Result-Code
+	eVal := "Unsigned32{2001}"
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+	// Result-Code
+	eVal = "Unsigned32{300}" // 5 mins of session
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
+		dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+
+func testDiamItMultipleCCRInit2DifferentAccount(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("CCR2SessID1002"))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("voice@DiamItCCRInit"))
+	m.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 4, 14, 42, 20, 0, time.UTC)))
+	m.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),      // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("1002")), // Subscription-Id-Data
+		}})
+	m.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(0))}})
+	m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String("1002")),            // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String("1001")),            // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String("1001")),           // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),              // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("CCR2SessID1002")), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),               // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("")),               // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("")),               // SSP-Time
+				},
+			}),
+		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClntM == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
+	if err := diamClntM.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	msg := diamClntM.ReceivedMessage(rplyTimeoutM)
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	// Result-Code
+	eVal := "Unsigned32{2001}"
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+	// Result-Code
+	eVal = "Unsigned32{300}" // 5 mins of session
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
+		dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+func testDiamItMultipleCCRUpdate2DifferentAccount(t *testing.T) {
+	m := diam.NewRequest(diam.CreditControl, 4, nil)
+	m.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("CCR2SessID1002"))
+	m.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("192.168.1.1"))
+	m.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	m.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(2))
+	m.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	m.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	m.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	m.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("voice@DiamItCCRInit"))
+	m.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 4, 14, 57, 20, 0, time.UTC)))
+	m.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(450, avp.Mbit, 0, datatype.Enumerated(0)),      // Subscription-Id-Type
+			diam.NewAVP(444, avp.Mbit, 0, datatype.UTF8String("1002")), // Subscription-Id-Data
+		}})
+	m.NewAVP(avp.ServiceIdentifier, avp.Mbit, 0, datatype.Unsigned32(0))
+	m.NewAVP(avp.RequestedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(420, avp.Mbit, 0, datatype.Unsigned32(300))}})
+	m.NewAVP(873, avp.Mbit, 10415, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(20300, avp.Mbit, 2011, &diam.GroupedAVP{ // IN-Information
+				AVP: []*diam.AVP{
+					diam.NewAVP(831, avp.Mbit, 10415, datatype.UTF8String("1002")),            // Calling-Party-Address
+					diam.NewAVP(832, avp.Mbit, 10415, datatype.UTF8String("1001")),            // Called-Party-Address
+					diam.NewAVP(20327, avp.Mbit, 2011, datatype.UTF8String("1001")),           // Real-Called-Number
+					diam.NewAVP(20339, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Charge-Flow-Type
+					diam.NewAVP(20302, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-Vlr-Number
+					diam.NewAVP(20303, avp.Mbit, 2011, datatype.UTF8String("")),               // Calling-CellID-Or-SAI
+					diam.NewAVP(20313, avp.Mbit, 2011, datatype.OctetString("")),              // Bearer-Capability
+					diam.NewAVP(20321, avp.Mbit, 2011, datatype.UTF8String("CCR2SessID1002")), // Call-Reference-Number
+					diam.NewAVP(20322, avp.Mbit, 2011, datatype.UTF8String("")),               // MSC-Address
+					diam.NewAVP(20324, avp.Mbit, 2011, datatype.Unsigned32(0)),                // Time-Zone
+					diam.NewAVP(20385, avp.Mbit, 2011, datatype.UTF8String("")),               // Called-Party-NP
+					diam.NewAVP(20386, avp.Mbit, 2011, datatype.UTF8String("")),               // SSP-Time
+				},
+			}),
+		}})
+	// ============================================
+	// prevent nil pointer dereference
+	// ============================================
+	if diamClntM == nil {
+		t.Fatal("Diameter client should not be nil")
+	}
+	if m == nil {
+		t.Fatal("The mesage to diameter should not be nil")
+	}
+	// ============================================
+	if err := diamClntM.SendMessage(m); err != nil {
+		t.Error(err)
+	}
+	msg := diamClntM.ReceivedMessage(rplyTimeoutM)
+	if msg == nil {
+		t.Fatal("No message returned")
+	}
+	// Result-Code
+	eVal := "Unsigned32{2001}"
+	if avps, err := msg.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+	// Result-Code
+	eVal = "Unsigned32{300}" // 5 mins of session
+	if avps, err := msg.FindAVPsWithPath([]any{"Granted-Service-Unit", "CC-Time"},
+		dict.UndefinedVendorID); err != nil {
+		t.Error(err)
+	} else if len(avps) == 0 {
+		t.Error("Missing AVP")
+	} else if val := avps[0].Data.String(); val != eVal {
+		t.Errorf("expecting: %s, received: <%s>", eVal, val)
+	}
+}
+
 func testDiamItMultipleRARActions(t *testing.T) { // test RAR ran from ExecuteAction *alter_sessions
+	var aSessions []*sessions.ExternalSession
+	if err := apierRpcM.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+		new(utils.SessionFilter), &aSessions); err != nil {
+		t.Error(err)
+	} else if len(aSessions) != 8 {
+		t.Errorf("expected 8 active sessions, got <%v>", utils.ToJSON(aSessions))
+	}
+	// t.Log(utils.ToJSON(aSessions))
 	if diamConfigDIRM == "dispatchers/diamagent" {
 		t.SkipNow()
 	}
