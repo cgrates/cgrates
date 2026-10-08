@@ -7,19 +7,35 @@
 
 - name: Download and install RabbitMQ keys
   become: yes
-  ansible.builtin.shell: |
-    curl -1sLf "{{ item.url }}" | gpg --dearmor | tee {{ item.dest }} > /dev/null
-  args:
-    creates: "{{ item.dest }}"
+  ansible.builtin.get_url:
+    url: "{{ item.url }}"
+    dest: "{{ item.dest }}"
+    mode: "0644"
   loop: "{{ rabbitmq_keys }}"
 
 - name: Add RabbitMQ APT repositories
   become: yes
-  ansible.builtin.apt_repository:
-    repo: "{{ item }}"
+  ansible.builtin.deb822_repository:
+    name: "{{ item.name }}"
+    types: "{{ item.types }}"
+    uris: "{{ item.uris }}"
+    suites: "{{ item.suites }}"
+    components: "{{ item.components }}"
+    architectures: "{{ item.architectures }}"
+    signed_by: "{{ item.signed_by }}"
     state: present
-    update_cache: no
   loop: "{{ rabbitmq_repositories }}"
+
+- name: Remove old RabbitMQ APT repository files
+  become: yes
+  ansible.builtin.file:
+    path: "/etc/apt/sources.list.d/{{ item }}"
+    state: absent
+  loop:
+    - "deb1_rabbitmq_com_rabbitmq_erlang_{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_release'] }}.list"
+    - "deb2_rabbitmq_com_rabbitmq_erlang_{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_release'] }}.list"
+    - "deb1_rabbitmq_com_rabbitmq_server_{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_release'] }}.list"
+    - "deb2_rabbitmq_com_rabbitmq_server_{{ ansible_facts['distribution'] | lower }}_{{ ansible_facts['distribution_release'] }}.list"
 
 - name: Update package cache after adding repositories
   become: yes

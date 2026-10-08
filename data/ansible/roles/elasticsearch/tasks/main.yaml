@@ -7,16 +7,26 @@
 
 - name: Import Elasticsearch PGP Key
   become: true
-  ansible.builtin.apt_key:
+  ansible.builtin.get_url:
     url: "{{ elasticsearch_gpg_key_url }}"
-    keyring: "{{ elasticsearch_gpg_keyring }}"
-    state: present
+    dest: "{{ elasticsearch_gpg_keyring }}"
+    mode: "0644"
 
 - name: Add Elasticsearch APT repository
   become: true
-  ansible.builtin.apt_repository:
-    repo: "{{ elasticsearch_repository }}"
+  ansible.builtin.deb822_repository:
+    name: elasticsearch
+    uris: "{{ elasticsearch_repository.uris }}"
+    suites: "{{ elasticsearch_repository.suites }}"
+    components: "{{ elasticsearch_repository.components }}"
+    signed_by: "{{ elasticsearch_gpg_keyring }}"
     state: present
+
+- name: Remove old Elasticsearch APT repository file
+  become: true
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/artifacts_elastic_co_packages_8_x_apt.list
+    state: absent
 
 - name: Update APT cache and install Elasticsearch
   become: true
