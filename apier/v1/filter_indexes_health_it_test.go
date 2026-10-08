@@ -693,6 +693,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	// *any context tenant: cgrates.org
 	expIdx = []string{
 		"*string:*req.SubscriberId:1006:ATTR_ACC_ALIAS",
+		"*string:*req.SubscriberId:1002:ATTR_ACC_ALIAS2",
 	}
 	if err := tFIdxHRpc.Call(context.Background(), utils.APIerSv1GetFilterIndexes, &AttrGetFilterIndexes{
 		ItemType: utils.MetaAttributes,
@@ -710,6 +711,7 @@ func testV1FIdxGetAttributesIndexesHealth(t *testing.T) {
 	// *any context tenant: cgrates.com
 	expIdx = []string{
 		"*string:*req.SubscriberId:1006:ATTR_TNT_ALIAS",
+		"*string:*req.SubscriberId:1002:ATTR_TNT_ALIAS2",
 		"*string:*req.Account:1001:ATTR_TNT_1001",
 		"*string:*req.Account:testDiamInitWithSessionDisconnect:ATTR_TNT_DISC",
 		"*string:*req.SubscriberId:testDiamItEmulateTerminate:ATTR_ACC_EMULATE_TERMINATE",
