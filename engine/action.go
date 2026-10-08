@@ -1016,13 +1016,24 @@ func cgrRPCAction(ub *Account, a *Action, acs Actions, _ *FilterS, extraData any
 //   - Event: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
-func alterSessionsAction(_ *Account, act *Action, _ Actions, _ *FilterS, _ any,
+func alterSessionsAction(acnt *Account, act *Action, _ Actions, _ *FilterS, ev any,
 	_ SharedActionsData, connCfg ActionConnCfg) (err error) {
 
+	dP := utils.MapStorage{ // create DataProvider from event
+		utils.MetaNow: time.Now(),
+		utils.MetaAsm: acnt.AsAccountSummary(),
+		utils.MetaAct: act,
+	}
 	// Parse action parameters based on the predefined format.
-	params := strings.Split(act.ExtraParameters, ";")
+	params := strings.Split(act.ExtraParameters, utils.InfieldSep)
 	if len(params) != 5 {
 		return fmt.Errorf("invalid number of parameters <%d> expected 5", len(params))
+	}
+	// parse dynamic parameters
+	for i := range params {
+		if params[i], err = utils.ParseParamForDataProvider(params[i], dP, true); err != nil {
+			return err
+		}
 	}
 
 	// If conversion fails, limit will default to 0.
