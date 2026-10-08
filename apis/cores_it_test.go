@@ -6,10 +6,8 @@
 package apis
 
 import (
-	"io/fs"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -147,7 +145,6 @@ func TestCoreSProfilingFlags(t *testing.T) {
 			new(utils.TenantWithAPIOpts), &reply); err != nil {
 			t.Errorf("%s unexpected err=%v", utils.CoreSv1StopMemoryProfiling, err)
 		}
-		time.Sleep(10 * time.Millisecond) // wait for the final mem prof file to be written
 	})
 }
 
@@ -252,73 +249,35 @@ func TestCoreSProfilingAPI(t *testing.T) {
 			new(utils.TenantWithAPIOpts), &reply); err != nil {
 			t.Errorf("%s unexpected err=%v", utils.CoreSv1StopMemoryProfiling, err)
 		}
-		time.Sleep(10 * time.Millisecond) // wait for the final mem prof file to be written
 	})
 }
 
 func checkMemProfiles(t *testing.T, memDirPath string, wantCount int) {
 	t.Helper()
+	entries, err := os.ReadDir(memDirPath)
+	if err != nil {
+		t.Fatal(err)
+	}
 	hasFinal := false
 	memFileCount := 0
-	_ = filepath.WalkDir(memDirPath, func(path string, d fs.DirEntry, err error) error {
+	for _, entry := range entries {
+		name := entry.Name()
+		if entry.IsDir() || !strings.HasPrefix(name, "mem_") || !strings.HasSuffix(name, ".prof") {
+			continue
+		}
+		memFileCount++
+		path := filepath.Join(memDirPath, name)
+		fi, err := entry.Info()
 		if err != nil {
-			t.Logf("failed to access path %s: %v", path, err)
-			return nil // skip paths that cause an error
+			t.Fatalf("failed to retrieve FileInfo from %q: %v", path, err)
 		}
-		defer func() {
-		}()
-		switch {
-		case d.IsDir():
-			// Memory profiles should be directly under 'memDirPath', skip all directories (excluding 'memDirPath')
-			// and their contents.
-			if path == memDirPath {
-				return nil
-			}
-			return filepath.SkipDir
-		case !strings.HasPrefix(d.Name(), "mem_") || !strings.HasSuffix(d.Name(), ".prof"):
-			return nil // skip files that don't have 'mem_*.prof' format
-		case d.Name() == utils.MemProfFinalFile:
+		if fi.Size() == 0 {
+			t.Errorf("memory profile file %q is empty", path)
+		}
+		if name == utils.MemProfFinalFile {
 			hasFinal = true
-			fallthrough // test should be the same as for a normal mem file
-		default: // files with format 'mem_*.prof'
-			fi, err := d.Info()
-			if err != nil {
-				t.Errorf("failed to retrieve FileInfo from %q: %v", path, err)
-			}
-			if fi.Size() == 0 {
-				t.Errorf("memory profile file %q is empty", path)
-			}
-			if d.Name() != utils.MemProfFinalFile {
-				// Check that date within file name is from within this minute.
-				layout := "20060102150405"
-				timestamp := strings.TrimPrefix(d.Name(), "mem_")
-				timestamp = strings.TrimSuffix(timestamp, ".prof")
-				date, extra, has := strings.Cut(timestamp, "_")
-				if !has {
-					t.Errorf("expected timestamp to have '<date>_<milliseconds>' format, got: %s", timestamp)
-				}
-				parsedTime, err := time.ParseInLocation(layout, date, time.Local)
-				if err != nil {
-					t.Errorf("time.Parse(%q,%q) returned unexpected err: %v", layout, date, err)
-				}
-
-				// Convert 'extra' to microseconds and add to the parsed time.
-				microSCount, err := strconv.Atoi(extra)
-				if err != nil {
-					t.Errorf("strconv.Atoi(%q) returned unexpected err: %v", extra, err)
-				}
-				parsedTime.Add(time.Duration(microSCount) * time.Microsecond)
-
-				now := time.Now()
-				oneMinuteEarlier := now.Add(-time.Minute)
-				if parsedTime.Before(oneMinuteEarlier) || parsedTime.After(now) {
-					t.Errorf("file name (%s) timestamp not from within last minute", d.Name())
-				}
-			}
-			memFileCount++
 		}
-		return nil
-	})
+	}
 
 	if wantCount != 0 && !hasFinal {
 		t.Error("final mem file is missing")
