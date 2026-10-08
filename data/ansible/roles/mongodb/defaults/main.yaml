@@ -7,3 +7,4 @@ mongodb_service_enabled: true
 mongodb_dependencies:
   - gnupg
   - curl
+  - python3-debian
