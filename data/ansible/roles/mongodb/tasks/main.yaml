@@ -24,23 +24,37 @@
 
     - name: Import the MongoDB public GPG Key
       become: yes
-      apt_key:
+      ansible.builtin.get_url:
         url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
-        keyring: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg"
+        dest: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+        mode: "0644"
 
     - name: Add MongoDB repository for Debian
       become: yes
-      apt_repository:
-        repo: "deb [ signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] http://repo.mongodb.org/apt/debian {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} main"
-        filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
-      when: ansible_distribution == 'Debian'
+      ansible.builtin.deb822_repository:
+        name: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+        uris: http://repo.mongodb.org/apt/debian
+        suites: "{{ ansible_facts['distribution_release'] }}/mongodb-org/{{ mongodb_version }}"
+        components: main
+        signed_by: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+      when: ansible_facts['distribution'] == 'Debian'
 
     - name: Add MongoDB repository for Ubuntu
       become: yes
-      apt_repository:
-        repo: "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.gpg ] https://repo.mongodb.org/apt/ubuntu {{ ansible_distribution_release }}/mongodb-org/{{ mongodb_version }} multiverse"
-        filename: "{{ mongodb_package_name }}-{{ mongodb_version }}"
-      when: ansible_distribution == 'Ubuntu'
+      ansible.builtin.deb822_repository:
+        name: "{{ mongodb_package_name }}-{{ mongodb_version }}"
+        uris: https://repo.mongodb.org/apt/ubuntu
+        suites: "{{ ansible_facts['distribution_release'] }}/mongodb-org/{{ mongodb_version }}"
+        components: multiverse
+        architectures: [amd64, arm64]
+        signed_by: "/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+      when: ansible_facts['distribution'] == 'Ubuntu'
+
+    - name: Remove old MongoDB APT repository file
+      become: yes
+      ansible.builtin.file:
+        path: "/etc/apt/sources.list.d/{{ mongodb_package_name }}-{{ mongodb_version }}.list"
+        state: absent
 
     - name: Install MongoDB packages
       become: yes
