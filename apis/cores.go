@@ -31,12 +31,12 @@ func (cS *CoreSv1) Shutdown(ctx *context.Context, args *utils.CGREvent, reply *s
 	return cS.cS.V1Shutdown(ctx, args, reply)
 }
 
-// StartCPUProfiling starts CPU profiling and saves the profile to the specified path.
+// StartCPUProfiling starts CPU profiling in args.DirPath.
 func (cS *CoreSv1) StartCPUProfiling(ctx *context.Context, args *utils.DirectoryArgs, reply *string) error {
 	return cS.cS.V1StartCPUProfiling(ctx, args, reply)
 }
 
-// StopCPUProfiling stops CPU Profiling.
+// StopCPUProfiling stops CPU profiling.
 func (cS *CoreSv1) StopCPUProfiling(ctx *context.Context, args *utils.TenantWithAPIOpts, reply *string) error {
 	return cS.cS.V1StopCPUProfiling(ctx, args, reply)
 }

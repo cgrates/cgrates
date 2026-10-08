@@ -4,6 +4,7 @@
 package apis
 
 import (
+	"path/filepath"
 	"sync"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ import (
 func TestCoreSStatus(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	var reply map[string]any
 	if err := cS.Status(context.Background(), &cores.V1StatusParams{}, &reply); err != nil {
@@ -29,7 +30,7 @@ func TestCoreSStatus(t *testing.T) {
 func TestCoreSSleep(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.DurationArgs{
 		Duration: 1 * time.Millisecond,
@@ -46,7 +47,7 @@ func TestCoreSShutdown(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
 	shutdown := utils.NewSyncedChan()
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, shutdown, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), shutdown, nil)
 	cS := NewCoreSv1(coreService)
 	arg := &utils.CGREvent{}
 	var reply string
@@ -65,17 +66,19 @@ func TestCoreSShutdown(t *testing.T) {
 func TestStartCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
+	dir := filepath.Join(t.TempDir(), "missing")
 	args := &utils.DirectoryArgs{
-		DirPath: "dir_path",
+		DirPath: dir,
 		APIOpts: map[string]any{},
 		Tenant:  "cgrates.org",
 	}
 
 	var reply string
-	errExp := "could not create CPU profile: open dir_path/cpu.prof: no such file or directory"
-	if err := cS.StartCPUProfiling(context.Background(), args, &reply); err.Error() != errExp {
+	errExp := "could not create CPU profile: open " + filepath.Join(dir, utils.CpuPathCgr) + ": no such file or directory"
+	err := cS.StartCPUProfiling(context.Background(), args, &reply)
+	if err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -83,7 +86,7 @@ func TestStartCPUProfiling(t *testing.T) {
 func TestStopCPUProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), nil, nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	args := &utils.TenantWithAPIOpts{
 		Tenant:  "cgrates.org",
@@ -91,7 +94,7 @@ func TestStopCPUProfiling(t *testing.T) {
 	}
 	var reply string
 	errExp := "stop CPU profiling: not started yet"
-	if err := cS.StopCPUProfiling(context.Background(), args, &reply); err.Error() != errExp {
+	if err := cS.StopCPUProfiling(context.Background(), args, &reply); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
@@ -99,7 +102,7 @@ func TestStopCPUProfiling(t *testing.T) {
 func TestStopMemoryProfiling(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	caps := engine.NewCaps(2, utils.MetaTopUp)
-	coreService := cores.NewCoreService(cfg, caps, nil, make(chan struct{}), new(sync.WaitGroup), nil, nil)
+	coreService := cores.NewCoreService(cfg, caps, cores.NewProfiler(new(sync.WaitGroup)), make(chan struct{}), nil, nil)
 	cS := NewCoreSv1(coreService)
 	var reply string
 	errExp := "stop memory profiling: not started yet"
@@ -107,7 +110,7 @@ func TestStopMemoryProfiling(t *testing.T) {
 		utils.TenantWithAPIOpts{
 			Tenant:  "cgrates.org",
 			APIOpts: map[string]any{},
-		}, &reply); err.Error() != errExp {
+		}, &reply); err == nil || err.Error() != errExp {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }

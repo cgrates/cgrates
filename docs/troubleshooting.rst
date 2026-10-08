@@ -120,7 +120,7 @@ Generate memory profile data like this:
      {
          "method": "CoreSv1.StartMemoryProfiling",
          "params": [{
-             "DirPath": "/tmp",
+             "DirPath": "/tmp/cgrates-profiles",
              "Interval": 5000000000,
              "MaxFiles": 5,
              "UseTimestamp": true
@@ -131,6 +131,10 @@ Generate memory profile data like this:
   .. note::
 
      ``Interval`` is in nanoseconds. Future updates will allow using time strings (e.g., ``5s``, ``1h``) or seconds as an integer.
+
+  The directory must already exist and be used by only one engine. Periodic profiles have names such as ``mem_1_<suffix>.prof`` or ``mem_20060102150405_<suffix>.prof``. The random suffix prevents overwriting an existing file. Timestamp names use the capture's start time in whole seconds at every interval. Periodic files are created with permissions ``0600`` before umask.
+
+  ``MaxFiles`` limits regular ``mem_*.prof`` files in the directory, including earlier runs, but excludes ``mem_final.prof``. Older files are removed only after a new periodic profile is written. Files from earlier runs are ordered by modification time. Zero or negative limits keep all files. The fixed names ``cpu.prof`` and ``mem_final.prof`` are unchanged.
 
 Other Useful Profiles
 ^^^^^^^^^^^^^^^^^^^^^

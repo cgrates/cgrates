@@ -10,7 +10,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"runtime/pprof"
 	"strconv"
 	"strings"
 	"sync"
@@ -150,15 +149,23 @@ func RunCGREngine(fs []string) (err error) {
 			"Configuration loaded from %q:\n%s", flags.config.path, cfgJSON))
 	}
 
-	var cpuPrfF *os.File
-	if flags.profiling.cpu.dir != utils.EmptyString {
+	shdWg := new(sync.WaitGroup)
+	profiler := cores.NewProfiler(shdWg)
+	if flags.profiling.cpu.dir != "" {
 		cpuPath := filepath.Join(flags.profiling.cpu.dir, utils.CpuPathCgr)
-		if cpuPrfF, err = cores.StartCPUProfiling(cpuPath); err != nil {
-			return
+		if err := profiler.StartCPUProfiling(cpuPath); err != nil {
+			return err
 		}
 	}
+	defer func() {
+		ctx, cancel := context.WithTimeout(context.Background(), cfg.CoreSCfg().ShutdownTimeout*10)
+		defer cancel()
+		if err := profiler.Shutdown(ctx); err != nil {
+			utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
+		}
+		utils.Logger.Info(fmt.Sprintf("<%s> CGRateS shutdown!", utils.ServiceManager))
+	}()
 
-	shdWg := new(sync.WaitGroup)
 	shdWg.Add(1)
 	shutdown := utils.NewSyncedChan()
 	go handleSignals(shutdown, cfg, shdWg)
@@ -180,8 +187,6 @@ func RunCGREngine(fs []string) (err error) {
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
 	registry := servmanager.NewRegistry()
-	coreS := NewCoreService(cfg, cpuPrfF, shdWg)
-
 	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
 		NewGlobalVarS(cfg),
 		NewCapService(cfg),
@@ -192,7 +197,7 @@ func RunCGREngine(fs []string) (err error) {
 		NewDBService(cfg, flags.data.setVersions),
 		NewConfigService(cfg),
 		NewGuardianService(cfg),
-		coreS,
+		NewCoreService(cfg, profiler),
 		NewCacheService(cfg),
 		NewFilterService(cfg),
 		NewLoaderService(cfg, flags.data.preloadIDs),
@@ -227,39 +232,14 @@ func RunCGREngine(fs []string) (err error) {
 		NewPrometheusAgent(cfg),
 	})
 
-	defer func() {
-		ctx, cancel := context.WithTimeout(context.Background(), cfg.CoreSCfg().ShutdownTimeout*10)
-		go func() {
-			shdWg.Wait()
-			cancel()
-		}()
-		<-ctx.Done()
-		if ctx.Err() != context.Canceled {
-			utils.Logger.Err(fmt.Sprintf("<%s> failed to shut down all services in the given time",
-				utils.ServiceManager))
-		}
-		if cpuPrfF != nil && coreS == nil {
-			pprof.StopCPUProfile()
-			if err := cpuPrfF.Close(); err != nil {
-				utils.Logger.Err(fmt.Sprintf("<%s> %v", utils.CoreS, err))
-			}
-		}
-
-		// TODO: check if there's any need to manually stop memory profiling.
-		// It should be stopped automatically during CoreS service shutdown.
-
-		utils.Logger.Info(fmt.Sprintf("<%s> stopped all services. CGRateS shutdown!", utils.ServiceManager))
-	}()
-
 	srvManager.StartServices(shutdown)
 	RegisterServiceManagerV1(cfg, srvManager, registry, shutdown)
 
 	// Serve rpc connections
 	startRPC(cfg, registry, shutdown)
 
-	// TODO: find a better location for this if block
 	if flags.profiling.mem.dir != "" {
-		if err := coreS.CoreS().StartMemoryProfiling(cores.MemoryProfilingParams{
+		if err := profiler.StartMemoryProfiling(cores.MemoryProfilingParams{
 			DirPath:      flags.profiling.mem.dir,
 			MaxFiles:     flags.profiling.mem.maxFiles,
 			Interval:     flags.profiling.mem.interval,

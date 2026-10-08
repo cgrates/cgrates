@@ -4,7 +4,6 @@
 package services
 
 import (
-	"os"
 	"sync"
 
 	"github.com/cgrates/cgrates/apis"
@@ -15,11 +14,10 @@ import (
 )
 
 // NewCoreService returns the Core Service
-func NewCoreService(cfg *config.CGRConfig, fileCPU *os.File, shdWg *sync.WaitGroup) *CoreService {
+func NewCoreService(cfg *config.CGRConfig, profiler *cores.Profiler) *CoreService {
 	return &CoreService{
-		shdWg:   shdWg,
-		cfg:     cfg,
-		fileCPU: fileCPU,
+		cfg:      cfg,
+		profiler: profiler,
 	}
 }
 
@@ -28,9 +26,8 @@ type CoreService struct {
 	mu       sync.RWMutex
 	cfg      *config.CGRConfig
 	cS       *cores.CoreS
-	fileCPU  *os.File
+	profiler *cores.Profiler
 	stopChan chan struct{}
-	shdWg    *sync.WaitGroup
 }
 
 // Start should handle the service start
@@ -52,7 +49,7 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.stopChan = make(chan struct{})
-	s.cS = cores.NewCoreService(s.cfg, caps, s.fileCPU, s.stopChan, s.shdWg, shutdown, cl)
+	s.cS = cores.NewCoreService(s.cfg, caps, s.profiler, s.stopChan, shutdown, cl)
 	srv, err := newRPCService(apis.NewCoreSv1(s.cS), utils.CoreSv1)
 	if err != nil {
 		return err
@@ -67,14 +64,11 @@ func (s *CoreService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) error
 	return nil
 }
 
-// Shutdown stops the service
+// Shutdown unregisters CoreS. Process profiling is stopped by the engine.
 func (s *CoreService) Shutdown(registry *servmanager.Registry) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	s.cS.Shutdown()
 	close(s.stopChan)
-	s.cS.StopCPUProfiling()
-	s.cS.StopMemoryProfiling()
 	s.cS = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.CoreSv1)
