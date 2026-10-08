@@ -1087,7 +1087,7 @@ func testDiamItRARActions(t *testing.T) { // test RAR ran from ExecuteAction *al
 			Actions: []*v1.V1TPAction{
 				{
 					Identifier:      utils.MetaAlterSessions, // *alter_sessions
-					ExtraParameters: "cgrates.org;*string:~*req.Account:~*req.Account;1;;",
+					ExtraParameters: "cgrates.org;*string:~*req.Account:<~*asm.AccountID>;1;;",
 				},
 			},
 		}
@@ -1096,7 +1096,7 @@ func testDiamItRARActions(t *testing.T) { // test RAR ran from ExecuteAction *al
 		} else if reply != utils.OK {
 			t.Errorf("Unexpected reply returned: %s", reply)
 		}
-		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1006", ActionsId: "SendRAR"}
+		attrsEA := &utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1001", ActionsId: "SendRAR"}
 		if err := apierRpc.Call(context.Background(), utils.APIerSv1ExecuteAction, attrsEA, &reply); err != nil {
 			t.Errorf("APIerSv1ExecuteAction failed unexpectedly: %v", err)
 		}

@@ -1265,6 +1265,9 @@ func (acc *Account) AsOldStructure() any {
 
 // AsAccountSummary converts the account into AccountSummary
 func (acc *Account) AsAccountSummary() *AccountSummary {
+	if acc == nil {
+		return nil
+	}
 	idSplt := strings.Split(acc.ID, utils.ConcatenatedKeySep)
 	ad := &AccountSummary{AllowNegative: acc.AllowNegative, Disabled: acc.Disabled}
 	if len(idSplt) == 1 {

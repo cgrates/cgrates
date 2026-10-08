@@ -843,7 +843,7 @@ func testDiamItMultipleRARActions(t *testing.T) { // test RAR ran from ExecuteAc
 		Actions: []*v1.V1TPAction{
 			{
 				Identifier:      utils.MetaAlterSessions, // *alter_sessions
-				ExtraParameters: "cgrates.org;*string:~*req.Account:~*req.Account;;;",
+				ExtraParameters: "cgrates.org;*string:~*req.Account:<~*asm.AccountID>;;;",
 			},
 		},
 	}
