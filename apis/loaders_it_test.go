@@ -36,6 +36,7 @@ var (
 		testLoadersInitDataDB,
 		testLoadersStartEngine,
 		testLoadersRPCConn,
+		testLoadersRunPathNotFound,
 
 		testLoadersWriteCSVs,
 		testLoadersLoad,
@@ -115,6 +116,26 @@ func testLoadersStartEngine(t *testing.T) {
 
 func testLoadersRPCConn(t *testing.T) {
 	ldrRPC = engine.NewRPCClient(t, ldrCfg.ListenCfg(), *utils.Encoding)
+}
+
+func testLoadersRunPathNotFound(t *testing.T) {
+	path := "/tmp/TestLoadersIT/path_not_found"
+	expected := "SERVER_ERROR: <LoaderS> nonexistent folder: " + path
+	for _, stopOnError := range []bool{false, true} {
+		var reply string
+		err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run,
+			&loaders.ArgsProcessFolder{
+				Path: path,
+				APIOpts: map[string]any{
+					utils.MetaCache:       utils.MetaNone,
+					utils.MetaStopOnError: stopOnError,
+				},
+			}, &reply)
+		if err == nil || err.Error() != expected {
+			t.Errorf("stopOnError=%v: expected: %q, received: %v (reply: %q)",
+				stopOnError, expected, err, reply)
+		}
+	}
 }
 
 // Kill the engine when it is about to be finished
