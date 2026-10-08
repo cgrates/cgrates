@@ -1,16 +1,25 @@
 ---
+- name: Install PostgreSQL dependencies
+  become: true
+  ansible.builtin.apt:
+    name: python3-debian
+    state: present
+    update_cache: yes
+
 - name: Create the PostgreSQL repository configuration
   become: true
-  ansible.builtin.copy:
-    content: 'deb {{ postgresql_repo }} {{ ansible_distribution_release }}-pgdg main'
-    dest: /etc/apt/sources.list.d/pgdg.list
-  when: not (ansible.builtin.stat.exists is defined and ansible.builtin.stat.exists)
+  ansible.builtin.deb822_repository:
+    name: pgdg
+    uris: '{{ postgresql_repo }}'
+    suites: "{{ ansible_facts['distribution_release'] }}-pgdg"
+    components: main
+    signed_by: '{{ postgresql_key_url }}'
 
-- name: Import the PostgreSQL repository signing key
+- name: Remove old PostgreSQL APT repository file
   become: true
-  ansible.builtin.apt_key:
-    url: '{{ postgresql_key_url }}'
-    state: present
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/pgdg.list
+    state: absent
 
 - name: Update the package lists and ensure PostgreSQL is the latest version
   become: true
