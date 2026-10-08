@@ -113,7 +113,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	}
 	expStats[utils.CacheActionPlans].Items = 1
 	expStats[utils.CacheActions].Items = 3
-	expStats[utils.CacheAttributeProfiles].Items = 11
+	expStats[utils.CacheAttributeProfiles].Items = 13
 	expStats[utils.CacheChargerProfiles].Items = 2
 	expStats[utils.CacheFilters].Items = 7
 	expStats[utils.CacheRatingPlans].Items = 6
@@ -138,7 +138,7 @@ func testDspChcLoadAfterFolder(t *testing.T) {
 	expStats[utils.CacheResourceFilterIndexes].Groups = 1
 	expStats[utils.CacheChargerFilterIndexes].Items = 1
 	expStats[utils.CacheChargerFilterIndexes].Groups = 1
-	expStats[utils.CacheAttributeFilterIndexes].Items = 11
+	expStats[utils.CacheAttributeFilterIndexes].Items = 13
 	expStats[utils.CacheAttributeFilterIndexes].Groups = 4
 	expStats[utils.CacheReverseFilterIndexes].Items = 8
 	expStats[utils.CacheReverseFilterIndexes].Groups = 6
