@@ -11,21 +11,25 @@ import (
 )
 
 func RegisterServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.ServiceManager,
-	registry *servmanager.Registry, shutdown *utils.SyncedChan) {
+	registry *servmanager.Registry, shutdown *utils.SyncedChan) error {
 	srvDeps, err := registry.WaitForServices(shutdown, utils.StateServiceUP,
 		[]string{
 			utils.CommonListenerS,
 			utils.ConnManager,
 		}, cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
-		return
+		return err
 	}
-	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 	srv, err := newRPCService(apis.NewServiceManagerV1(srvMngr), utils.ServiceManagerV1)
 	if err != nil {
-		return
+		return err
 	}
-	cl.RpcRegister(srv)
+
+	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	if err := cl.RpcRegister(srv); err != nil {
+		return err
+	}
 	cms.AddInternalConn(utils.ServiceManager, srv)
+	return nil
 }

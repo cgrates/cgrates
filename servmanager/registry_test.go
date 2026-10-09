@@ -4,6 +4,8 @@
 package servmanager_test
 
 import (
+	"context"
+	"errors"
 	"sync"
 	"testing"
 	"time"
@@ -87,6 +89,12 @@ func TestRegistryWaitForService(t *testing.T) {
 	_, err := r.WaitForService(shutdown, "svc", utils.StateServiceDOWN, 30*time.Millisecond)
 	if err == nil {
 		t.Fatal("expected timeout error")
+	}
+
+	shutdown.CloseOnce()
+	_, err = r.WaitForService(shutdown, "svc", utils.StateServiceDOWN, time.Second)
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("expected cancellation, got %v", err)
 	}
 }
 

@@ -4,8 +4,6 @@
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/servmanager"
@@ -21,7 +19,6 @@ func NewFilterService(cfg *config.CGRConfig) *FilterService {
 
 // FilterService implements Service interface.
 type FilterService struct {
-	mu    sync.RWMutex
 	cfg   *config.CGRConfig
 	fltrS *engine.FilterS
 }
@@ -45,9 +42,6 @@ func (s *FilterService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	}
 	dbs := srvDeps[utils.DB].(*DBService)
 
-	s.mu.Lock()
-	defer s.mu.Unlock()
-
 	s.fltrS = engine.NewFilterS(s.cfg, cms.ConnManager(), dbs.DataManager())
 	s.fltrS.SetCache(cacheS.CacheS())
 	return nil
@@ -60,9 +54,6 @@ func (s *FilterService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) err
 
 // Shutdown stops the service.
 func (s *FilterService) Shutdown(_ *servmanager.Registry) error {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.fltrS = nil
 	return nil
 }
 

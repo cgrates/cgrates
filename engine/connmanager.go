@@ -6,6 +6,7 @@ package engine
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -35,11 +36,12 @@ func (cM *ConnManager) replicationHostIDs(grpID string) []string {
 
 // ConnManager handle the RPC connections
 type ConnManager struct {
-	cfg         *config.CGRConfig
-	cache       *CacheS
-	rpcInternal map[string]chan birpc.ClientConnector
-	dynIntCh    *RPCClientSet
-	connCache   *ltcache.Cache
+	cfg           *config.CGRConfig
+	cache         *CacheS
+	rpcInternalMu sync.RWMutex
+	rpcInternal   map[string]chan birpc.ClientConnector
+	dynIntCh      *RPCClientSet
+	connCache     *ltcache.Cache
 }
 
 // getConn is used to retrieve a connection from cache
@@ -53,7 +55,9 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 		return x.(birpc.ClientConnector), nil
 	}
 	// in case we don't find in cache create the connection and add this in cache
+	cM.rpcInternalMu.RLock()
 	intChan, isInternalRPC := cM.rpcInternal[connID]
+	cM.rpcInternalMu.RUnlock()
 	var connCfg *config.RPCConn
 	if isInternalRPC {
 		connCfg = cM.cfg.RPCConns()[rpcclient.InternalRPC]
@@ -210,6 +214,10 @@ func (cM *ConnManager) GetInternalChan() chan birpc.ClientConnector {
 
 func (cM *ConnManager) AddInternalConn(connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
+	cM.rpcInternalMu.Lock()
 	cM.rpcInternal[connName] = iConnCh
+	cM.rpcInternalMu.Unlock()
+	cM.dynIntCh.mu.Lock()
 	cM.dynIntCh.conns[apiPrefix] = iConnCh
+	cM.dynIntCh.mu.Unlock()
 }

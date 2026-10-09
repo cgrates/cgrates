@@ -6,6 +6,7 @@ package engine
 import (
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -526,3 +527,38 @@ func TestCMDeadLock(t *testing.T) {
 	}
 }
 */
+
+func TestCMConcurrentInternalRegistration(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cm := NewConnManager(cfg)
+	cm.SetCache(NewCacheS(cfg, nil, nil, nil, NewLocker(cfg)))
+	ch := make(chan birpc.ClientConnector, 1)
+	ch <- new(mockConnector)
+	cm.AddInternalConn("*internal:*test", "TestSv1", ch)
+	conn := <-cm.GetInternalChan()
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			cm.AddInternalConn("*internal:*test", "TestSv1", ch)
+		}
+	})
+	wg.Go(func() {
+		<-start
+		for range 1000 {
+			cm.cache.Clear([]string{utils.CacheRPCConnections})
+			if _, err := cm.getConn(context.Background(), "*internal:*test"); err != nil {
+				t.Error(err)
+				return
+			}
+			var reply string
+			if err := conn.Call(context.Background(), "TestSv1.Ping", nil, &reply); err != nil {
+				t.Error(err)
+				return
+			}
+		}
+	})
+	close(start)
+	wg.Wait()
+}

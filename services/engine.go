@@ -4,6 +4,7 @@
 package services
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -233,10 +234,21 @@ func RunCGREngine(fs []string) (err error) {
 	})
 
 	srvManager.StartServices(shutdown)
-	RegisterServiceManagerV1(cfg, srvManager, registry, shutdown)
+	if err := RegisterServiceManagerV1(cfg, srvManager, registry, shutdown); err != nil {
+		if errors.Is(err, context.Canceled) {
+			return nil
+		}
+		shutdown.CloseOnce()
+		return err
+	}
 
-	// Serve rpc connections
-	startRPC(cfg, registry, shutdown)
+	select {
+	case <-shutdown.Done():
+		return nil
+	default:
+	}
+	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
+	cl.StartServer(cfg, shutdown)
 
 	if flags.profiling.mem.dir != "" {
 		if err := profiler.StartMemoryProfiling(cores.MemoryProfilingParams{
@@ -335,10 +347,4 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 			}()
 		}
 	}
-}
-
-// startRPC initializes and starts the RPC server.
-func startRPC(cfg *config.CGRConfig, registry *servmanager.Registry, shutdown *utils.SyncedChan) {
-	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
-	cl.StartServer(cfg, shutdown)
 }

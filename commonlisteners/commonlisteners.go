@@ -13,6 +13,7 @@ import (
 	"net/http/pprof"
 	"strings"
 	"sync"
+	"sync/atomic"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -51,7 +52,7 @@ type CommonListenerS struct {
 	httpsMux        *http.ServeMux
 	httpMux         *http.ServeMux
 	caps            *engine.Caps
-	anz             *analyzers.AnalyzerS
+	anz             atomic.Pointer[analyzers.AnalyzerS]
 
 	rpcServer   *birpc.Server
 	rpcJSONl    net.Listener
@@ -64,11 +65,11 @@ type CommonListenerS struct {
 }
 
 func (c *CommonListenerS) SetAnalyzer(anz *analyzers.AnalyzerS) {
-	c.anz = anz
+	c.anz.Store(anz)
 }
 
-func (c *CommonListenerS) RpcRegister(rcvr any) {
-	c.rpcServer.Register(rcvr)
+func (c *CommonListenerS) RpcRegister(rcvr any) error {
+	return c.rpcServer.Register(rcvr)
 }
 
 func (c *CommonListenerS) RpcRegisterName(name string, rcvr any) {
@@ -112,13 +113,13 @@ func (c *CommonListenerS) handleRequest(w http.ResponseWriter, r *http.Request) 
 	w.Header().Set("Content-Type", "application/json")
 	rmtIP, _ := utils.GetRemoteIP(r)
 	rmtAddr, _ := net.ResolveIPAddr(utils.EmptyString, rmtIP)
-	res := newRPCRequest(c.rpcServer, r.Body, rmtAddr, c.caps, c.anz).Call()
+	res := newRPCRequest(c.rpcServer, r.Body, rmtAddr, c.caps, c.anz.Load()).Call()
 	io.Copy(w, res)
 	r.Body.Close()
 }
 
 func (c *CommonListenerS) handleWebSocket(ws *websocket.Conn) {
-	c.rpcServer.ServeCodec(newCapsJSONCodec(ws, c.caps, c.anz))
+	c.rpcServer.ServeCodec(newCapsJSONCodec(ws, c.caps, c.anz.Load()))
 }
 
 func (c *CommonListenerS) ServeJSON(addr string, shutdown *utils.SyncedChan) (err error) {
@@ -129,7 +130,7 @@ func (c *CommonListenerS) ServeJSON(addr string, shutdown *utils.SyncedChan) (er
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.JSONCaps, addr))
 	return acceptRPC(shutdown, c.rpcServer, c.rpcJSONl, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsJSONCodec(conn, c.caps, c.anz)
+		return newCapsJSONCodec(conn, c.caps, c.anz.Load())
 	})
 }
 
@@ -141,7 +142,7 @@ func (c *CommonListenerS) ServeGOB(addr string, shutdown *utils.SyncedChan) (err
 	}
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s server at <%s>.", utils.GOBCaps, addr))
 	return acceptRPC(shutdown, c.rpcServer, c.rpcGOBl, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, c.caps, c.anz)
+		return newCapsGOBCodec(conn, c.caps, c.anz.Load())
 	})
 }
 
@@ -208,7 +209,7 @@ func (c *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis fun
 	if addrJSON != utils.EmptyString {
 		var ljson net.Listener
 		if ljson, err = listenBiRPC(c.birpcSrv, addrJSON, utils.JSONCaps, func(conn conn) birpc.BirpcCodec {
-			return newCapsBiRPCJSONCodec(conn, c.caps, c.anz)
+			return newCapsBiRPCJSONCodec(conn, c.caps, c.anz.Load())
 		}, c.stopbiRPCServer); err != nil {
 			return
 		}
@@ -217,7 +218,7 @@ func (c *CommonListenerS) ServeBiRPC(addrJSON, addrGOB string, onConn, onDis fun
 	if addrGOB != utils.EmptyString {
 		var lgob net.Listener
 		if lgob, err = listenBiRPC(c.birpcSrv, addrGOB, utils.GOBCaps, func(conn conn) birpc.BirpcCodec {
-			return newCapsBiRPCGOBCodec(conn, c.caps, c.anz)
+			return newCapsBiRPCGOBCodec(conn, c.caps, c.anz.Load())
 		}, c.stopbiRPCServer); err != nil {
 			return
 		}
@@ -243,7 +244,7 @@ func (c *CommonListenerS) ServeGOBTLS(addr, serverCrt, serverKey, caCert string,
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.GOBCaps, addr))
 
 	return acceptRPC(shutdown, c.rpcServer, c.rpcGOBlTLS, utils.GOBCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, c.caps, c.anz)
+		return newCapsGOBCodec(conn, c.caps, c.anz.Load())
 	})
 }
 
@@ -263,7 +264,7 @@ func (c *CommonListenerS) ServeJSONTLS(addr, serverCrt, serverKey, caCert string
 	utils.Logger.Info(fmt.Sprintf("Starting CGRateS %s TLS server at <%s>.", utils.JSONCaps, addr))
 
 	return acceptRPC(shutdown, c.rpcServer, c.rpcJSONlTLS, utils.JSONCaps, func(conn conn) birpc.ServerCodec {
-		return newCapsGOBCodec(conn, c.caps, c.anz)
+		return newCapsGOBCodec(conn, c.caps, c.anz.Load())
 	})
 }
 

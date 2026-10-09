@@ -23,12 +23,28 @@ import (
 )
 
 // NewAnalyzerS initializes a AnalyzerService
-func NewAnalyzerS(cfg *config.CGRConfig) (aS *AnalyzerS, err error) {
-	aS = &AnalyzerS{
-		cfg: cfg,
+func NewAnalyzerS(cfg *config.CGRConfig) (*AnalyzerS, error) {
+	var db bleve.Index
+	var err error
+	if cfg.AnalyzerSCfg().IndexType == utils.MetaInternal {
+		db, err = bleve.NewMemOnly(newAnalyzerIndexMapping())
+	} else {
+		dbPath := path.Join(cfg.AnalyzerSCfg().DBPath, utils.AnzDBDir)
+		if _, err = os.Stat(dbPath); err == nil {
+			db, err = bleve.Open(dbPath)
+		} else if os.IsNotExist(err) {
+			indxType, storeType := getIndex(cfg.AnalyzerSCfg().IndexType)
+			db, err = bleve.NewUsing(dbPath,
+				newAnalyzerIndexMapping(), indxType, storeType, nil)
+		}
 	}
-	err = aS.initDB()
-	return
+	if err != nil {
+		return nil, err
+	}
+	return &AnalyzerS{
+		cfg: cfg,
+		db:  db,
+	}, nil
 }
 
 // AnalyzerS is the service handling analyzer
@@ -43,22 +59,6 @@ type AnalyzerS struct {
 // this function is called before the API is registerd
 func (aS *AnalyzerS) SetFilterS(fS *engine.FilterS) {
 	aS.fltrS = fS
-}
-
-func (aS *AnalyzerS) initDB() (err error) {
-	if aS.cfg.AnalyzerSCfg().IndexType == utils.MetaInternal {
-		aS.db, err = bleve.NewMemOnly(newAnalyzerIndexMapping())
-		return
-	}
-	dbPath := path.Join(aS.cfg.AnalyzerSCfg().DBPath, utils.AnzDBDir)
-	if _, err = os.Stat(dbPath); err == nil {
-		aS.db, err = bleve.Open(dbPath)
-	} else if os.IsNotExist(err) {
-		indxType, storeType := getIndex(aS.cfg.AnalyzerSCfg().IndexType)
-		aS.db, err = bleve.NewUsing(dbPath,
-			newAnalyzerIndexMapping(), indxType, storeType, nil)
-	}
-	return
 }
 
 func (aS *AnalyzerS) clenaUp() (err error) {

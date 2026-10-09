@@ -14,7 +14,7 @@ import (
 )
 
 type Server interface {
-	RpcRegister(rcvr any)
+	RpcRegister(rcvr any) error
 	RpcRegisterName(name string, rcvr any)
 	RegisterHTTPFunc(pattern string, handler func(http.ResponseWriter, *http.Request))
 	RegisterHttpHandler(pattern string, handler http.Handler)

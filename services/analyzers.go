@@ -34,33 +34,36 @@ type AnalyzerService struct {
 }
 
 // Start should handle the sercive start
-func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) (err error) {
+func (anz *AnalyzerService) Start(shutdown *utils.SyncedChan, registry *servmanager.Registry) error {
 	cls, err := registry.WaitForService(shutdown, utils.CommonListenerS, utils.StateServiceUP,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
-		return
+		return err
 	}
 	cl := cls.(*CommonListenerService).CLS()
 
 	anz.mu.Lock()
 	defer anz.mu.Unlock()
-	if anz.anz, err = analyzers.NewAnalyzerS(anz.cfg); err != nil {
-		return
+	a, err := analyzers.NewAnalyzerS(anz.cfg)
+	if err != nil {
+		return err
 	}
+	anz.anz = a
 	anzCtx, cancel := context.WithCancel(context.TODO())
 	anz.cancelFunc = cancel
-	go func(a *analyzers.AnalyzerS) {
+	go func() {
 		if err := a.ListenAndServe(anzCtx); err != nil {
 			utils.Logger.Crit(fmt.Sprintf("<%s> Error: %s listening for packets", utils.AnalyzerS, err.Error()))
 			shutdown.CloseOnce()
 		}
-	}(anz.anz)
-	cl.SetAnalyzer(anz.anz)
-	go anz.start(shutdown, registry, cl)
-	return
+	}()
+	cl.SetAnalyzer(a)
+	go anz.registerRPC(shutdown, registry, cl, a)
+	return nil
 }
 
-func (anz *AnalyzerService) start(shutdown *utils.SyncedChan, registry *servmanager.Registry, cl *commonlisteners.CommonListenerS) {
+func (anz *AnalyzerService) registerRPC(shutdown *utils.SyncedChan, registry *servmanager.Registry,
+	cl *commonlisteners.CommonListenerS, a *analyzers.AnalyzerS) {
 	fs, err := registry.WaitForService(shutdown, utils.FilterS, utils.StateServiceUP,
 		anz.cfg.GeneralCfg().ConnectTimeout)
 	if err != nil {
@@ -68,15 +71,18 @@ func (anz *AnalyzerService) start(shutdown *utils.SyncedChan, registry *servmana
 	}
 	anz.mu.Lock()
 	defer anz.mu.Unlock()
-	anz.anz.SetFilterS(fs.(*FilterService).FilterS())
+	if anz.anz != a {
+		return
+	}
+	a.SetFilterS(fs.(*FilterService).FilterS())
 
-	srv, err := newRPCService(apis.NewAnalyzerSv1(anz.anz), utils.AnalyzerSv1)
+	srv, err := newRPCService(apis.NewAnalyzerSv1(a), utils.AnalyzerSv1)
 	if err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error registering RPC service: %s", utils.AnalyzerS, err))
 		shutdown.CloseOnce()
 		return
 	}
-	cl.RpcRegister(srv)
+	_ = cl.RpcRegister(srv)
 }
 
 // Reload handles the change of config
@@ -107,15 +113,13 @@ func (anz *AnalyzerService) ShouldRun() bool {
 	return anz.cfg.AnalyzerSCfg().Enabled
 }
 
-// GetInternalCodec wraps the provided ClientConnector in an analyzer connector
-// if the analyzer service should run. Otherwise, it returns the original connector
-// unchanged.
+// GetInternalCodec wraps the provided ClientConnector when an analyzer exists.
+// Otherwise, it returns the original connector unchanged.
 func (anz *AnalyzerService) GetInternalCodec(c birpc.ClientConnector, to string) birpc.ClientConnector {
-	if !anz.ShouldRun() {
-		// It's enough to check the result of ShouldRun as other
-		// services calling GetInternalCodec had already waited for
-		// AnalyzerService to be initiated/started.
+	anz.mu.RLock()
+	defer anz.mu.RUnlock()
+	if anz.anz == nil {
 		return c
 	}
-	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, utils.EmptyString, to)
+	return anz.anz.NewAnalyzerConnector(c, utils.MetaInternal, "", to)
 }
