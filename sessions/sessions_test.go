@@ -14,7 +14,6 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
-	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -142,11 +141,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	session := &Session{
 		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
-		SRuns: []*SRun{
-			{
-				Event: sEv,
-			},
-		},
 	}
 	cgrID := GetSetOptsOriginID(sEv)
 	sS.indexSession(session, false)
@@ -208,11 +202,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	session2 := &Session{
 		CGRID:      cgrID2,
 		EventStart: sSEv2,
-		SRuns: []*SRun{
-			{
-				Event: sSEv2,
-			},
-		},
 	}
 	sS.indexSession(session2, false)
 	sSEv3 := engine.NewMapEvent(map[string]any{
@@ -226,11 +215,6 @@ func TestSessionSIndexAndUnindexSessions(t *testing.T) {
 	session3 := &Session{
 		CGRID:      cgrID3,
 		EventStart: sSEv3,
-		SRuns: []*SRun{
-			{
-				Event: sSEv3,
-			},
-		},
 	}
 	sS.indexSession(session3, false)
 	eIndexes = map[string]map[string]map[string]utils.StringSet{
@@ -447,11 +431,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	s := &Session{
 		CGRID:      "session1",
 		EventStart: sSEv,
-		SRuns: []*SRun{
-			{
-				Event: sSEv,
-			},
-		},
 	}
 	//register the session
 	sS.registerSession(s, false)
@@ -502,11 +481,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	s2 := &Session{
 		CGRID:      "session2",
 		EventStart: sSEv2,
-		SRuns: []*SRun{
-			{
-				Event: sSEv2,
-			},
-		},
 	}
 	//register the second session
 	sS.registerSession(s2, false)
@@ -566,11 +540,6 @@ func TestSessionSRegisterAndUnregisterASessions(t *testing.T) {
 	s3 := &Session{
 		CGRID:      "session1",
 		EventStart: sSEv3,
-		SRuns: []*SRun{
-			{
-				Event: sSEv3,
-			},
-		},
 	}
 	//register the third session with cgrID as first one (should be replaced)
 	sS.registerSession(s3, false)
@@ -656,11 +625,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	s := &Session{
 		CGRID:      "session1",
 		EventStart: sSEv,
-		SRuns: []*SRun{
-			{
-				Event: sSEv,
-			},
-		},
 	}
 	//register the session
 	sS.registerSession(s, true)
@@ -714,11 +678,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	s2 := &Session{
 		CGRID:      "session2",
 		EventStart: sSEv2,
-		SRuns: []*SRun{
-			{
-				Event: sSEv2,
-			},
-		},
 	}
 	//register the second session
 	sS.registerSession(s2, true)
@@ -778,11 +737,6 @@ func TestSessionSRegisterAndUnregisterPSessions(t *testing.T) {
 	s3 := &Session{
 		CGRID:      "session1",
 		EventStart: sSEv3,
-		SRuns: []*SRun{
-			{
-				Event: sSEv3,
-			},
-		},
 	}
 	//register the third session with cgrID as first one (should be replaced)
 	sS.registerSession(s3, false)
@@ -1238,106 +1192,6 @@ func TestSessionSGetIndexedFilters(t *testing.T) {
 }
 
 /*
-func TestSessionSgetSessionIDsMatchingIndexes(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
-		"ToR": {},
-	}
-	sS := NewSessionS(cfg, nil, nil)
-	sEv := engine.NewMapEvent(map[string]any{
-		utils.EventName:       "TEST_EVENT",
-		utils.ToR:             "*voice",
-		utils.OriginID:        "12345",
-		utils.AccountField:    "account1",
-		utils.Subject:         "subject1",
-		utils.Destination:     "+4986517174963",
-		utils.Category:        "call",
-		utils.Tenant:          "cgrates.org",
-		utils.RequestType:     "*prepaid",
-		utils.SetupTime:       "2015-11-09T14:21:24Z",
-		utils.AnswerTime:      "2015-11-09T14:22:02Z",
-		utils.Usage:           "1m23s",
-		utils.LastUsed:        "21s",
-		utils.PDD:             "300ms",
-		utils.Route:           "supplier1",
-		utils.DisconnectCause: "NORMAL_DISCONNECT",
-		utils.OriginHost:      "127.0.0.1",
-		"Extra1":              "Value1",
-		"Extra2":              5,
-		"Extra3":              "",
-	})
-	// Index first session
-	session := &Session{
-		CGRID:      GetSetOptsOriginID(sEv),
-		EventStart: sEv,
-		SRuns: []*SRun{
-			{
-				Event: sEv,
-			},
-		},
-	}
-	cgrID := GetSetOptsOriginID(sEv)
-	sS.indexSession(session, false)
-	indx := map[string][]string{"ToR": {utils.MetaVoice, utils.MetaData}}
-	expCGRIDs := []string{cgrID}
-	expmatchingSRuns := map[string]utils.StringSet{cgrID: {
-		"RunID": {},
-	}}
-	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, false); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
-	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
-	}
-	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
-		"ToR":    {},
-		"Extra3": {},
-	}
-	sS = NewSessionS(cfg, nil, nil)
-	sS.indexSession(session, false)
-	indx = map[string][]string{
-		"ToR":    {utils.MetaVoice, utils.MetaData},
-		"Extra2": {"55"},
-	}
-	expCGRIDs = []string{}
-	expmatchingSRuns = map[string]utils.StringSet{}
-	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, false); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
-	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
-	}
-	//t3
-	session.SRuns = []*SRun{
-		{
-			Event: sEv,
-		},
-		{
-			Event: engine.NewMapEvent(map[string]any{
-				utils.EventName: "TEST_EVENT",
-				utils.ToR:       "*voice"}),
-		},
-	}
-	cfg.SessionSCfg().SessionIndexes = utils.StringSet{
-		"ToR":    {},
-		"Extra2": {},
-	}
-	sS = NewSessionS(cfg, nil, nil)
-	sS.indexSession(session, true)
-	indx = map[string][]string{
-		"ToR":    {utils.MetaVoice, utils.MetaData},
-		"Extra2": {"5"},
-	}
-
-	expCGRIDs = []string{cgrID}
-	expmatchingSRuns = map[string]utils.StringSet{cgrID: {
-		"RunID": {},
-	}}
-	if cgrIDs, matchingSRuns := sS.getSessionIDsMatchingIndexes(indx, true); !reflect.DeepEqual(expCGRIDs, cgrIDs) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expCGRIDs), utils.ToJSON(cgrIDs))
-	} else if !reflect.DeepEqual(expmatchingSRuns, matchingSRuns) {
-		t.Errorf("Expected %s , received: %s", utils.ToJSON(expmatchingSRuns), utils.ToJSON(matchingSRuns))
-	}
-}
-
 type testRPCClientConnection struct{}
 
 func (*testRPCClientConnection) Call(string, any, any) error { return nil }
@@ -1446,14 +1300,6 @@ func TestSessionSfilterSessions(t *testing.T) {
 	session := &Session{
 		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
-		SRuns: []*SRun{
-			{
-				Event: sEv,
-			},
-			{
-				Event: sr2,
-			},
-		},
 	}
 	sr2[utils.ToR] = utils.MetaSMS
 	sr2[utils.Subject] = "subject2"
@@ -1615,14 +1461,6 @@ func TestSessionSfilterSessionsCount(t *testing.T) {
 	session := &Session{
 		CGRID:      GetSetOptsOriginID(sEv),
 		EventStart: sEv,
-		SRuns: []*SRun{
-			{
-				Event: sEv,
-			},
-			{
-				Event: sr2,
-			},
-		},
 	}
 	sEv[utils.ToR] = utils.MetaData
 	sr2[utils.MetaOriginID] = GetSetOptsOriginID(sEv)
@@ -1830,78 +1668,6 @@ dm.SetCache(engine.Cache)
 	}
 }
 
-type clMock func(_ string, _ any, _ any) error
-
-func (c clMock) Call(m string, a any, r any) error {
-	return c(m, a, r)
-}
-func TestInitSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
-		{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)}},
-	}
-	clientConect := make(chan birpc.ClientConnector, 1)
-	clientConect <- clMock(func(_ string, args any, reply any) error {
-		rply, cancast := reply.(*[]*chargers.ChrgSProcessEventReply)
-		if !cancast {
-			return fmt.Errorf("can't cast")
-		}
-		*rply = []*chargers.ChrgSProcessEventReply{
-			{
-				ChargerSProfile:    "raw",
-				AttributeSProfiles: []string{utils.MetaNone},
-				AlteredFields:      []string{"~*req.RunID"},
-				CGREvent:           args.(*utils.CGREvent),
-			},
-		}
-		return nil
-	})
-	conMng := engine.NewConnManager(cfg, map[string]chan birpc.ClientConnector{
-		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers): clientConect,
-	})
-	conMng.SetCache(engine.Cache)
-	sS := NewSessionS(cfg, nil, conMng)
-	s, err := sS.initSession(&utils.CGREvent{
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.Category:     "call",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "TestTerminate",
-			utils.RequestType:  utils.MetaPostpaid,
-			utils.AccountField: "1002",
-			utils.Subject:      "1001",
-			utils.Destination:  "1001",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.LastUsed:     2 * time.Second,
-		}}, "", "", 0, false, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	exp := &Session{
-		CGRID:  "c72b7074ef9375cd19ab7bbceb530e99808c3194",
-		Tenant: "cgrates.org",
-		EventStart: engine.MapEvent{
-			utils.MetaOriginID:        "c72b7074ef9375cd19ab7bbceb530e99808c3194",
-			utils.Category:     "call",
-			utils.ToR:          utils.MetaVoice,
-			utils.OriginID:     "TestTerminate",
-			utils.RequestType:  utils.MetaPostpaid,
-			utils.AccountField: "1002",
-			utils.Subject:      "1001",
-			utils.Destination:  "1001",
-			utils.SetupTime:    time.Date(2018, time.January, 7, 16, 60, 0, 0, time.UTC),
-			utils.AnswerTime:   time.Date(2018, time.January, 7, 16, 60, 10, 0, time.UTC),
-			utils.LastUsed:     2 * time.Second,
-			utils.Usage:        2 * time.Second,
-		},
-		DebitInterval: 0,
-		chargeable:    true,
-	}
-	s.SRuns = nil
-	if !reflect.DeepEqual(exp, s) {
-		t.Errorf("Expected %v , received: %s", utils.ToJSON(exp), utils.ToJSON(s))
-	}
 }
 
 func TestSessionSAsBiRPC(t *testing.T) {
@@ -2132,173 +1898,6 @@ func TestGetRelocateSession(t *testing.T) {
 	}
 }
 
-func TestSessionSNewSession(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
-	locker := engine.NewLocker(cfg)
-	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Run("newSession populates SRuns", func(t *testing.T) {
-		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
-		dm.SetCache(cacheS)
-		fltrS := engine.NewFilterS(cfg, nil, dm)
-		connMgr := engine.NewConnManager(cfg)
-		connMgr.SetCache(cacheS)
-		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
-		ctx := context.TODO()
-
-		clnt := &testMockClients{
-			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
-					cghrgs := []*chargers.ChrgSProcessEventReply{
-						{
-							CGREvent: &utils.CGREvent{
-								Tenant: "cgrates.org",
-								ID:     "TestID",
-								Event: map[string]any{
-									utils.Usage: "10s",
-								},
-							},
-						},
-					}
-					*reply.(*[]*chargers.ChrgSProcessEventReply) = cghrgs
-					return nil
-				},
-			},
-		}
-		chanInternal := make(chan birpc.ClientConnector, 1)
-		chanInternal <- clnt
-		connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
-			{ConnIDs: []string{connID}},
-		}
-		sessions.connMgr.AddInternalConn(connID, utils.ChargerSv1, chanInternal)
-
-		args := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "evID",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]any{
-				utils.MetaOriginID: "newS",
-				utils.MetaChargers: true,
-			},
-		}
-		expS := &Session{
-			ID: "newS",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "evID",
-				Event: map[string]any{
-					utils.AccountField: "1001",
-				},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "newS",
-					utils.MetaChargers: true,
-				},
-			},
-			ClientConnID: "*internal:*chargers",
-			SRuns: []*SRun{
-				{
-					CGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "TestID",
-						Event: map[string]any{
-							utils.Usage: "10s",
-						},
-					},
-				},
-			},
-		}
-		if s, err := sessions.newSession(ctx, args, connID); err != nil {
-			t.Error(err)
-		} else if !reflect.DeepEqual(s, expS) {
-			t.Errorf("Expected %#v, \nrecieved %#v", expS, s)
-		}
-	})
-	t.Run("Error Cases", func(t *testing.T) {
-		dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-		cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-		dm := engine.NewDataManager(dbCM, cfg, nil, locker)
-		dm.SetCache(cacheS)
-		fltrS := engine.NewFilterS(cfg, nil, dm)
-		connMgr := engine.NewConnManager(cfg)
-		connMgr.SetCache(cacheS)
-		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
-		ctx := context.TODO()
-
-		clnt := &testMockClients{
-			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-				utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
-					return utils.ErrNotImplemented
-				},
-			},
-		}
-		chanInternal := make(chan birpc.ClientConnector, 1)
-		chanInternal <- clnt
-		connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers)
-		cfg.SessionSCfg().Conns[utils.MetaChargers] = []*config.DynamicConns{
-			{ConnIDs: []string{connID}},
-		}
-		sessions.connMgr.AddInternalConn(connID, utils.ChargerSv1, chanInternal)
-
-		args := &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "evID",
-			Event: map[string]any{
-				utils.AccountField: "1001",
-			},
-			APIOpts: map[string]any{
-				utils.MetaOriginID: "newS",
-				utils.MetaChargers: "truee",
-			},
-		}
-		expS := &Session{
-			ID: "newS",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "evID",
-				Event: map[string]any{
-					utils.AccountField: "1001",
-				},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "newS",
-					utils.MetaChargers: "truee",
-				},
-			},
-			ClientConnID: "*internal:*chargers",
-			sRuns:        nil,
-		}
-		expErr := `strconv.ParseBool: parsing "truee": invalid syntax`
-		if s, err := sessions.newSession(ctx, args, connID); err == nil || err.Error() != expErr {
-			t.Errorf("Expected %v, \nrecieved %v", expErr, err)
-		} else if !reflect.DeepEqual(s, expS) {
-			t.Errorf("Expected %v, \nrecieved %v", expS, s)
-		}
-
-		args.APIOpts = map[string]any{
-			utils.MetaOriginID: "newS",
-			utils.MetaChargers: true,
-		}
-		expS.OriginCGREvent.APIOpts = map[string]any{
-			utils.MetaOriginID: "newS",
-			utils.MetaChargers: true,
-		}
-		expErr = "CHARGERS_ERROR:NOT_IMPLEMENTED"
-		if s, err := sessions.newSession(ctx, args, connID); err == nil || err.Error() != expErr {
-			t.Errorf("Expected %v, \nrecieved %v", expErr, err)
-		} else if !reflect.DeepEqual(s, expS) {
-			t.Errorf("Expected %v, \nrecieved %v", expS, s)
-		}
-	})
-}
-
 func TestSessionSSetSession(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
@@ -2410,9 +2009,10 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 		Event:   map[string]any{utils.OriginID: cgrID},
 		APIOpts: map[string]any{},
 	}
-
+	sr := &SRun{
+		CGREvent: cgrEv,
+	}
 	t.Run("Charges set with nil UsageAdjustment", func(t *testing.T) {
-		sr := NewSRun(cgrEv)
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(500, 0)
 		sr.UsageAdjustment = nil
@@ -2431,7 +2031,6 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 	})
 
 	t.Run("Debit: error case", func(t *testing.T) {
-		sr := NewSRun(cgrEv)
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
 		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
@@ -2456,7 +2055,6 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 	})
 
 	t.Run("Refund: error case", func(t *testing.T) {
-		sr := NewSRun(cgrEv)
 		sr.Charges = &utils.EventCharges{
 			Abstracts: utils.NewDecimal(100, 0),
 			Charges: []*utils.ChargeEntry{
@@ -2604,9 +2202,10 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 			utils.MetaBlockerErrorCfg: true,
 		},
 	}
-
+	sr := &SRun{
+		CGREvent: cgrEv,
+	}
 	t.Run("Refund", func(t *testing.T) {
-		sr := NewSRun(cgrEv)
 		sr.Charges = &utils.EventCharges{
 			Abstracts: utils.NewDecimal(100, 0),
 			Charges: []*utils.ChargeEntry{
@@ -2706,7 +2305,6 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 	})
 
 	t.Run("Debit", func(t *testing.T) {
-		sr := NewSRun(cgrEv)
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
 		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
@@ -2729,11 +2327,15 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 		}
 	})
 
-	t.Run("Multiple SRuns all processed", func(t *testing.T) {
-		sr1 := NewSRun(cgrEv)
+	t.Run("Multiple SRun all processed", func(t *testing.T) {
+		sr1 := &SRun{
+			CGREvent: cgrEv,
+		}
 		sr1.Charges = utils.NewEventCharges()
 		sr1.Charges.Abstracts = utils.NewDecimal(200, 0)
-		sr2 := NewSRun(cgrEv)
+		sr2 := &SRun{
+			CGREvent: cgrEv,
+		}
 		sr2.Charges = utils.NewEventCharges()
 		sr2.Charges.Abstracts = utils.NewDecimal(300, 0)
 		s := &Session{
@@ -2842,8 +2444,8 @@ func TestSetSTerminator(t *testing.T) {
 							utils.MetaOriginID: "id2",
 						},
 					},
-					SRuns: []*SRun{
-						{
+					sRuns: map[string]*SRun{
+						"run1": {
 							CGREvent: &utils.CGREvent{
 								Event:   map[string]any{},
 								APIOpts: map[string]any{},
@@ -2877,8 +2479,8 @@ func TestSetSTerminator(t *testing.T) {
 					utils.MetaOriginID: "ssID",
 				},
 			},
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run1": {
 					CGREvent: &utils.CGREvent{
 						Event:   map[string]any{},
 						APIOpts: map[string]any{},
@@ -2905,13 +2507,13 @@ func TestSetSTerminator(t *testing.T) {
 					utils.MetaOriginID: "ssID2",
 				},
 			},
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run2": {
 					CGREvent: &utils.CGREvent{
 						Event:   map[string]any{},
 						APIOpts: map[string]any{},
 					},
-					TotalUsage: utils.NewDecimal(90, 0),
+					TotalUsage: utils.NewDecimal(80, 0),
 				},
 			},
 		}
@@ -2959,13 +2561,13 @@ func TestSetSTerminator(t *testing.T) {
 					utils.MetaOriginID: "idS3",
 				},
 			},
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run3": {
 					CGREvent: &utils.CGREvent{
 						Event:   map[string]any{},
 						APIOpts: map[string]any{},
 					},
-					TotalUsage: utils.NewDecimal(90, 0),
+					TotalUsage: utils.NewDecimal(70, 0),
 				},
 			},
 		}
@@ -3011,13 +2613,13 @@ func TestSetSTerminator(t *testing.T) {
 					utils.MetaOriginID: "sessionID",
 				},
 			},
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run4": {
 					CGREvent: &utils.CGREvent{
 						Event:   map[string]any{},
 						APIOpts: map[string]any{},
 					},
-					TotalUsage: utils.NewDecimal(90, 0),
+					TotalUsage: utils.NewDecimal(60, 0),
 				},
 			},
 		}
@@ -3045,13 +2647,13 @@ func TestSetSTerminator(t *testing.T) {
 					utils.MetaOriginID: "ssID",
 				},
 			},
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run5": {
 					CGREvent: &utils.CGREvent{
 						Event:   map[string]any{},
 						APIOpts: map[string]any{},
 					},
-					TotalUsage: utils.NewDecimal(90, 0),
+					TotalUsage: utils.NewDecimal(50, 0),
 				},
 			},
 		}
@@ -3173,8 +2775,8 @@ func TestSessionSForceSTerminate2(t *testing.T) {
 	s := &Session{
 		ID:             "originExtraUsage",
 		OriginCGREvent: origEv,
-		SRuns: []*SRun{
-			{
+		sRuns: map[string]*SRun{
+			"run1": {
 				CGREvent: origEv,
 			},
 		},
@@ -3231,15 +2833,16 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		s := &Session{
 			ID:             "originID",
 			OriginCGREvent: origEv,
-			SRuns: []*SRun{
-				{
+			sRuns: map[string]*SRun{
+				"run1": {
+					ID:       "runID1",
 					CGREvent: origEv.Clone(),
 				},
 			},
 		}
 		sessions.registerSession(s, false)
 		expErr := "NOT_CONNECTED: EEs"
-		s.SRuns[0].CGREvent.APIOpts = nil
+		s.sRuns["run1"].CGREvent.APIOpts = nil
 		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err == nil || err.Error() != expErr {
 			t.Errorf("Expected error %v, \nrecieved %v", expErr, err)
 		}

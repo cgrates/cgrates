@@ -38,30 +38,13 @@ type ExternalSession struct {
 	Charges            *utils.EventCharges
 }
 
-// NewSession is the constructor for one Session
-func NewSession(origCGREv *utils.CGREvent, clientConnID string, runEvents []*utils.CGREvent) (s *Session) {
-	s = &Session{
-		ID:             utils.IfaceAsString(origCGREv.APIOpts[utils.MetaOriginID]),
-		OriginCGREvent: origCGREv,
-		ClientConnID:   clientConnID,
-	}
-	if runEvents != nil {
-		s.SRuns = make([]*SRun, len(runEvents))
-		for i, runEv := range runEvents {
-			s.SRuns[i] = NewSRun(runEv)
-		}
-	}
-	return
-}
-
 // Session is the main structure to describe a call
 type Session struct {
 	ID             string          // Unique identifier per Session, defaults to APIOpts[*cgrID]
 	OriginCGREvent *utils.CGREvent // initial CGREvent received
 	ClientConnID   string          // connection ID towards the client so we can recover from passive
 
-	SRuns []*SRun          // forked based on ChargerS
-	sRuns map[string]*SRun // new way of indexing SRuns, should replace SRuns
+	sRuns map[string]*SRun // new way of indexing SRuns
 
 	lk          sync.RWMutex
 	sTerminator *sTerminator // automatic timeout for the session
@@ -76,12 +59,6 @@ func (s *Session) Clone() (cln *Session) {
 	if s.OriginCGREvent != nil {
 		cln.OriginCGREvent = s.OriginCGREvent.Clone()
 	}
-	if s.SRuns != nil {
-		cln.SRuns = make([]*SRun, len(s.SRuns))
-		for i, sR := range s.SRuns {
-			cln.SRuns[i] = sR.Clone()
-		}
-	}
 	if s.sRuns != nil {
 		cln.sRuns = make(map[string]*SRun)
 		for rID, sR := range s.sRuns {
@@ -92,7 +69,7 @@ func (s *Session) Clone() (cln *Session) {
 	return
 }
 
-// AsExternalSessions returns the session as a list of ExternalSession using all SRuns (thread safe)
+// AsExternalSessions returns the session as a list of ExternalSession using all sRuns (thread safe)
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	s.lk.RLock()
 	aSs = make([]*ExternalSession, 0, len(s.sRuns))
@@ -130,17 +107,7 @@ func (s *Session) AsExternalSession(runID, nodeID string) (eS *ExternalSession) 
 	return
 }
 
-// AsCGREvents is a  method to return the Session as CGREvents
-// AsCGREvents is not thread safe since it is supposed to run by the time Session is closed
-func (s *Session) asCGREvents() (cgrEvs []*utils.CGREvent) {
-	cgrEvs = make([]*utils.CGREvent, len(s.SRuns)) // so we can gather all cdr info while under lock
-	for i, sr := range s.SRuns {
-		cgrEvs[i] = sr.CGREvent
-	}
-	return
-}
-
-// asCGREventsMap returns a map of all SRuns
+// asCGREventsMap returns a map of all sRuns
 // asCGREventsMap is not thread safe
 func (s *Session) asCGREventsMap() (cgrEvs map[string]*utils.CGREvent) {
 	cgrEvs = make(map[string]*utils.CGREvent, len(s.sRuns)) // so we can gather all cdr info while under lock
@@ -198,13 +165,6 @@ func (s *Session) stopDebitLoops() {
 	}
 }
 */
-
-func NewSRun(cgrEv *utils.CGREvent) *SRun {
-	return &SRun{
-		ID:       utils.IfaceAsString(cgrEv.APIOpts[utils.MetaRunID]),
-		CGREvent: cgrEv,
-	}
-}
 
 // SRun is one billing run for the Session
 type SRun struct {
@@ -290,7 +250,7 @@ func (sr *SRun) computeUsages(interimConsumed, interimUsage, totalUsage *utils.D
 
 }
 
-// updateSRuns updates the SRuns event with the alterable fields (is not thread safe)
+// updateSRuns updates the sRuns event with the alterable fields (is not thread safe)
 func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.StringSet) {
 	if alterableFields.Size() == 0 {
 		return
@@ -298,9 +258,6 @@ func (s *Session) updateSRuns(updEv engine.MapEvent, alterableFields utils.Strin
 	for k, v := range updEv {
 		if !alterableFields.Has(k) {
 			continue
-		}
-		for _, sr := range s.SRuns {
-			sr.CGREvent.Event[k] = v
 		}
 		for _, sr := range s.sRuns { // Update the *new* approach
 			sr.CGREvent.Event[k] = v

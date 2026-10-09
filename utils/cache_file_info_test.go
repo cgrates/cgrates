@@ -108,7 +108,7 @@ func TestLoadInstancesAsMapStringInterface(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := LoadInstancesAsMapStringInterface(tt.loadInstances)
 			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
-				t.Errorf("Expected %#+v, recieved %#+v", ToJSON(tt.want), ToJSON(got))
+				t.Errorf("Expected %#v, recieved %#v", ToJSON(tt.want), ToJSON(got))
 			}
 		})
 	}
