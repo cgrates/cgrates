@@ -687,3 +687,45 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 		}
 	}
 }
+
+func TestLoaderServiceV1RunPathNotFound(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	tmpIn, err := os.MkdirTemp(utils.EmptyString, "TestLoaderServiceV1RunPathNotFoundIn")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer os.RemoveAll(tmpIn)
+	cfg.LoaderCfg()[0].Enabled = true
+	cfg.LoaderCfg()[0].TpInDir = tmpIn
+	cfg.LoaderCfg()[0].TpOutDir = utils.EmptyString
+
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	cM := engine.NewConnManager(cfg)
+	cM.SetCache(cacheS)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, cM, locker)
+	dm.SetCache(cacheS)
+	fS := engine.NewFilterS(cfg, cM, dm)
+
+	ld := NewLoaderS(cfg, dm, fS, cM, locker)
+	var rply string
+
+	wrongPath := path.Join(tmpIn, "path_not_found")
+	expErrMsg := "SERVER_ERROR: <LoaderS> nonexistent folder: " + wrongPath
+	for _, stopOnError := range []bool{false, true} {
+		if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
+			Path: wrongPath,
+			APIOpts: map[string]any{
+				utils.MetaCache:       utils.MetaNone,
+				utils.MetaStopOnError: stopOnError,
+			},
+		}, &rply); err == nil || err.Error() != expErrMsg {
+			t.Errorf("stopOnError=%v: expected: %q, received: %v", stopOnError, expErrMsg, err)
+		}
+	}
+}
