@@ -1,0 +1,16 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+all:
+  vars:
+    ansible_user: user # SSH user with sudo access.
+    user: user # Build account, separate from ansible_user.
+  hosts:
+    apt:
+      ansible_host: "<apt-address>"
+      pkgAddr: "<pkg-address>"
+
+      # Optional: repository signing identity.
+      # gpg_realname: Example
+      # gpg_useremail: packages@example.com
+    pkg:
+      ansible_host: "<pkg-address>"
