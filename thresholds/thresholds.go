@@ -309,6 +309,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			if args.APIOpts == nil {
 				args.APIOpts = make(map[string]any)
 			}
+			args.APIOpts[utils.MetaCGRSource] = utils.MetaThresholds
 			args.APIOpts[utils.OptsActionsProfileIDs] = mt.profile.ActionProfileIDs
 			evNm := utils.MapStorage{
 				utils.MetaReq:  args.Event,

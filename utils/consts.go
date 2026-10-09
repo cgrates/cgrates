@@ -813,6 +813,7 @@ const (
 	Length                  = "Length"
 	V1Prfx                  = "V1"
 	Ping                    = "Ping"
+	MetaCGRSource           = "*cgrSource"
 
 	// dns
 	DNSQueryType          = "QueryType"
