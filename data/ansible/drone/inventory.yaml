@@ -1,0 +1,15 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+all:
+  vars:
+    drone_github_client_id: "<github-client-id>"
+    drone_github_client_secret: "<github-client-secret>"
+  hosts:
+    ci:
+      ansible_host: "<host-address>"
+      user: user
+      gapi_credentials: "<credentials.json contents>"
+      gapi_token: "<token.json contents>"
+    localhost:
+      ansible_connection: local
+      ansible_python_interpreter: "{{ ansible_playbook_python }}"

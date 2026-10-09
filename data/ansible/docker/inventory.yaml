@@ -1,0 +1,11 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+# Registry settings are set in main.yaml.
+all:
+  hosts:
+    dkr:
+      ansible_host: "<host-address>"
+      user: user # SSH user with sudo access.
+
+      # Optional: use Go already installed on this host.
+      # install_go: false

@@ -1,0 +1,13 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+all:
+  hosts:
+    server:
+      ansible_host: "<host-address>"
+      ansible_user: user # SSH user with sudo access.
+
+      # FreeSWITCH needs a SignalWire token. Keep it in Ansible Vault.
+      signalwire_token: "<signalwire-token>"
+
+      # Optional: use Go already installed on this host.
+      # install_go: false

@@ -1,0 +1,10 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+all:
+  hosts:
+    server:
+      ansible_host: "<host-address>"
+      ansible_user: user # SSH user with sudo access.
+
+      # Optional: install or upgrade CGRateS from packages.
+      # install_or_update_cgrates: true

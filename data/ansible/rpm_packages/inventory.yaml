@@ -1,0 +1,12 @@
+# Run from this directory:
+# ansible-playbook -i inventory.yaml main.yaml
+all:
+  vars:
+    user: user
+  hosts:
+    yum:
+      ansible_host: "<yum-address>"
+      golang_gopath: "/home/{{ user }}/go"
+      pkgAddr: "<pkg-address>"
+    pkg:
+      ansible_host: "<pkg-address>"
