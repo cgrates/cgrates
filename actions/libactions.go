@@ -112,6 +112,8 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 		return &actURLog{cfg, cache, fltrS, connMgr, aCfg}, nil
 	case utils.MetaHTTPPost:
 		return newActHTTPPost(ctx, tnt, cgrEv, cache, fltrS, cfg, aCfg)
+	case utils.MetaHTTP:
+		return newActHTTP(ctx, tnt, cgrEv, cache, fltrS, cfg, aCfg)
 	case utils.MetaExport:
 		return &actExport{tnt, cfg, connMgr, fltrS, aCfg}, nil
 	case utils.MetaResetStatQueue:

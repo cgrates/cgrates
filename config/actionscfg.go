@@ -18,9 +18,14 @@ const (
 )
 
 type ActionsOpts struct {
+	Body                 []*DynamicInterfaceOpt
+	Hdrs                 []*DynamicInterfaceOpt
+	HttpContentType      []*DynamicStringOpt
+	Method               []*DynamicStringOpt
 	ProfileIDs           []*DynamicStringSliceOpt
 	ProfileIgnoreFilters []*DynamicBoolOpt
 	PosterAttempts       []*DynamicIntOpt
+	Url                  []*DynamicStringOpt
 }
 
 // ActionSCfg is the configuration of ActionS
@@ -52,6 +57,26 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error)
 	if jsnCfg == nil {
 		return
 	}
+	if jsnCfg.Body != nil {
+		actOpts.Body = append(jsnCfg.Body, actOpts.Body...)
+	}
+	if jsnCfg.HttpContentType != nil {
+		httpContentType, err := InterfaceToDynamicStringOpts(jsnCfg.HttpContentType)
+		if err != nil {
+			return err
+		}
+		actOpts.HttpContentType = append(httpContentType, actOpts.HttpContentType...)
+	}
+	if jsnCfg.Method != nil {
+		method, err := InterfaceToDynamicStringOpts(jsnCfg.Method)
+		if err != nil {
+			return err
+		}
+		actOpts.Method = append(method, actOpts.Method...)
+	}
+	if jsnCfg.Hdrs != nil {
+		actOpts.Hdrs = append(jsnCfg.Hdrs, actOpts.Hdrs...)
+	}
 	if jsnCfg.ProfileIDs != nil {
 		actOpts.ProfileIDs = append(actOpts.ProfileIDs, jsnCfg.ProfileIDs...)
 	}
@@ -64,6 +89,13 @@ func (actOpts *ActionsOpts) loadFromJSONCfg(jsnCfg *ActionsOptsJson) (err error)
 		var pstrAtt []*DynamicIntOpt
 		pstrAtt, err = IfaceToIntDynamicOpts(jsnCfg.PosterAttempts)
 		actOpts.PosterAttempts = append(actOpts.PosterAttempts, pstrAtt...)
+	}
+	if jsnCfg.Url != nil {
+		url, err := InterfaceToDynamicStringOpts(jsnCfg.Url)
+		if err != nil {
+			return err
+		}
+		actOpts.Url = append(url, actOpts.Url...)
 	}
 	return
 }
@@ -118,9 +150,14 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]any
 func (acS ActionSCfg) AsMapInterface() any {
 	opts := map[string]any{
+		utils.MetaBody:                 acS.Opts.Body,
+		utils.MetaHdrs:                 acS.Opts.Hdrs,
+		utils.MetaHttpContentType:      acS.Opts.HttpContentType,
+		utils.MetaMethod:               acS.Opts.Method,
 		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
 		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
 		utils.MetaPosterAttempts:       acS.Opts.PosterAttempts,
+		utils.MetaUrl:                  acS.Opts.Url,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:                acS.Enabled,
@@ -155,6 +192,14 @@ func (ActionSCfg) SName() string             { return ActionSJSON }
 func (acS ActionSCfg) CloneSection() Section { return acS.Clone() }
 
 func (actOpts *ActionsOpts) Clone() *ActionsOpts {
+	var body []*DynamicInterfaceOpt
+	if actOpts.Body != nil {
+		body = CloneDynamicInterfaceOpt(actOpts.Body)
+	}
+	var hdrs []*DynamicInterfaceOpt
+	if actOpts.Hdrs != nil {
+		hdrs = CloneDynamicInterfaceOpt(actOpts.Hdrs)
+	}
 	var actPrfIDs []*DynamicStringSliceOpt
 	if actOpts.ProfileIDs != nil {
 		actPrfIDs = CloneDynamicStringSliceOpt(actOpts.ProfileIDs)
@@ -168,9 +213,14 @@ func (actOpts *ActionsOpts) Clone() *ActionsOpts {
 		posterAttempts = CloneDynamicIntOpt(actOpts.PosterAttempts)
 	}
 	return &ActionsOpts{
+		Body:                 body,
+		Hdrs:                 hdrs,
+		HttpContentType:      CloneDynamicStringOpt(actOpts.HttpContentType),
+		Method:               CloneDynamicStringOpt(actOpts.Method),
 		ProfileIDs:           actPrfIDs,
 		ProfileIgnoreFilters: profileIgnoreFilters,
 		PosterAttempts:       posterAttempts,
+		Url:                  CloneDynamicStringOpt(actOpts.Url),
 	}
 }
 
@@ -209,9 +259,14 @@ func (acS ActionSCfg) Clone() (cln *ActionSCfg) {
 }
 
 type ActionsOptsJson struct {
+	Body                 []*DynamicInterfaceOpt   `json:"*body"`
+	Hdrs                 []*DynamicInterfaceOpt   `json:"*hdrs"`
+	HttpContentType      []*DynamicInterfaceOpt   `json:"*httpContentType"`
+	Method               []*DynamicInterfaceOpt   `json:"*method"`
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
 	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
 	PosterAttempts       []*DynamicInterfaceOpt   `json:"*posterAttempts"`
+	Url                  []*DynamicInterfaceOpt   `json:"*url"`
 }
 
 // Action service config section
@@ -234,6 +289,18 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	if d == nil {
 		d = new(ActionsOptsJson)
 	}
+	if !DynamicInterfaceOptEqual(v1.Body, v2.Body) {
+		d.Body = v2.Body
+	}
+	if !DynamicInterfaceOptEqual(v1.Hdrs, v2.Hdrs) {
+		d.Hdrs = v2.Hdrs
+	}
+	if !DynamicStringOptEqual(v1.HttpContentType, v2.HttpContentType) {
+		d.HttpContentType = DynamicStringToInterfaceOpts(v2.HttpContentType)
+	}
+	if !DynamicStringOptEqual(v1.Method, v2.Method) {
+		d.Method = DynamicStringToInterfaceOpts(v2.Method)
+	}
 	if !DynamicStringSliceOptEqual(v1.ProfileIDs, v2.ProfileIDs) {
 		d.ProfileIDs = v2.ProfileIDs
 	}
@@ -242,6 +309,9 @@ func diffActionsOptsJsonCfg(d *ActionsOptsJson, v1, v2 *ActionsOpts) *ActionsOpt
 	}
 	if !DynamicIntOptEqual(v1.PosterAttempts, v2.PosterAttempts) {
 		d.PosterAttempts = IntToIfaceDynamicOpts(v2.PosterAttempts)
+	}
+	if !DynamicStringOptEqual(v1.Url, v2.Url) {
+		d.Url = DynamicStringToInterfaceOpts(v2.Url)
 	}
 	return d
 }
