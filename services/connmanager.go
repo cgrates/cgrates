@@ -4,8 +4,6 @@
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -23,7 +21,6 @@ func NewConnManagerService(cfg *config.CGRConfig) *ConnManagerService {
 
 // ConnManagerService implements Service interface.
 type ConnManagerService struct {
-	mu      sync.RWMutex
 	cfg     *config.CGRConfig
 	connMgr *engine.ConnManager
 	anz     *AnalyzerService
@@ -50,7 +47,6 @@ func (s *ConnManagerService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry
 
 // Shutdown stops the service.
 func (s *ConnManagerService) Shutdown(_ *servmanager.Registry) error {
-	s.connMgr = nil
 	return nil
 }
 
@@ -72,8 +68,6 @@ func (s *ConnManagerService) ConnManager() *engine.ConnManager {
 // AddInternalConn registers direct internal RPC access for a service.
 // TODO: Add function to remove internal conns (useful for shutdown).
 func (s *ConnManagerService) AddInternalConn(svcName string, receiver birpc.ClientConnector) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	route, exists := serviceMethods[svcName]
 	if !exists {
 		return

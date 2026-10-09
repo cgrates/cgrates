@@ -6,6 +6,7 @@ package engine
 import (
 	"fmt"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -94,6 +95,7 @@ func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, cer
 
 // RPCClientSet is a RPC ClientConnector for the internal subsystems
 type RPCClientSet struct {
+	mu    sync.RWMutex
 	cfg   *config.CGRConfig
 	conns map[string]chan birpc.ClientConnector
 }
@@ -118,7 +120,9 @@ func (s *RPCClientSet) Call(ctx *context.Context, method string, args any, reply
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}
+	s.mu.RLock()
 	connCh, has := s.conns[methodSplit[0]]
+	s.mu.RUnlock()
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	}

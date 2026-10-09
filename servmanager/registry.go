@@ -4,6 +4,7 @@
 package servmanager
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
@@ -138,7 +139,7 @@ func (r *Registry) waitForState(shutdown *utils.SyncedChan, id, target string,
 		select {
 		case <-ch: // fires on any state change, not just the expected one
 		case <-shutdownCh:
-			return fmt.Errorf("shutdown while waiting for %q state %q", id, target)
+			return fmt.Errorf("shutdown while waiting for %q state %q: %w", id, target, context.Canceled)
 		case <-timer.C:
 			return fmt.Errorf("timed out waiting for %q state %q", id, target)
 		}

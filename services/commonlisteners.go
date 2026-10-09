@@ -4,8 +4,6 @@
 package services
 
 import (
-	"sync"
-
 	"github.com/cgrates/cgrates/commonlisteners"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/servmanager"
@@ -21,7 +19,6 @@ func NewCommonListenerService(cfg *config.CGRConfig) *CommonListenerService {
 
 // CommonListenerService implements Service interface.
 type CommonListenerService struct {
-	mu  sync.RWMutex
 	cfg *config.CGRConfig
 	cls *commonlisteners.CommonListenerS
 }
@@ -33,8 +30,6 @@ func (s *CommonListenerService) Start(shutdown *utils.SyncedChan, registry *serv
 	if err != nil {
 		return err
 	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	s.cls = commonlisteners.NewCommonListenerS(cs.(*CapService).Caps())
 	if s.cfg.ConfigSCfg().Enabled {
 		s.cls.RegisterHTTPFunc(s.cfg.ConfigSCfg().URL, config.HandlerConfigS(s.cfg))
@@ -48,48 +43,7 @@ func (s *CommonListenerService) Reload(_ *utils.SyncedChan, _ *servmanager.Regis
 }
 
 // Shutdown stops the service.
-func (s *CommonListenerService) Shutdown(registry *servmanager.Registry) error {
-	deps := []string{
-		utils.AccountS,
-		utils.ActionS,
-		utils.AdminS,
-		utils.AnalyzerS,
-		utils.AttributeS,
-		utils.CacheS,
-		utils.ChargerS,
-		utils.ConfigS,
-		utils.CoreS,
-		utils.EEs,
-		utils.EFs,
-		utils.ERs,
-		utils.GuardianS,
-		utils.HTTPAgent,
-		utils.JanusAgent,
-		utils.LoaderS,
-		utils.RankingS,
-		utils.RateS,
-		utils.RegistrarC,
-		utils.ResourceS,
-		utils.IPs,
-		utils.RouteS,
-		utils.SessionS,
-		utils.StatS,
-		utils.ThresholdS,
-		utils.TPeS,
-		utils.TrendS,
-	}
-	for _, svcID := range deps {
-		if registry.State(svcID) != utils.StateServiceUP {
-			continue
-		}
-		_, err := registry.WaitForService(nil, svcID, utils.StateServiceDOWN, s.cfg.GeneralCfg().ConnectTimeout)
-		if err != nil {
-			return err
-		}
-	}
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	s.cls = nil
+func (s *CommonListenerService) Shutdown(_ *servmanager.Registry) error {
 	return nil
 }
 

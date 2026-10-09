@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -60,7 +61,8 @@ func TestNewAnalyzerService(t *testing.T) {
 	if err = anz.Shutdown(); err != nil {
 		t.Fatal(err)
 	}
-	if err = anz.initDB(); err != nil {
+	anz, err = NewAnalyzerS(cfg)
+	if err != nil {
 		t.Fatal(err)
 	}
 	shdChan := make(chan struct{}, 1)
@@ -73,6 +75,21 @@ func TestNewAnalyzerService(t *testing.T) {
 	anz.db.Close()
 	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestNewAnalyzerSDBError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.AnalyzerSCfg().DBPath = filepath.Join(t.TempDir(), "db")
+	if err := os.WriteFile(cfg.AnalyzerSCfg().DBPath, nil, 0600); err != nil {
+		t.Fatal(err)
+	}
+	anz, err := NewAnalyzerS(cfg)
+	if err == nil {
+		t.Fatal("expected database initialization error")
+	}
+	if anz != nil {
+		t.Fatal("failed construction should return nil analyzer")
 	}
 }
 
