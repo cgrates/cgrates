@@ -303,6 +303,6 @@ func TestMapStringDPString(t *testing.T) {
 	fldPath := ToJSON(mp)
 	got := mp.String()
 	if !reflect.DeepEqual(got, fldPath) {
-		t.Errorf("Expected %#+v, recieved %#+v", fldPath, got)
+		t.Errorf("Expected %#v, recieved %#v", fldPath, got)
 	}
 }

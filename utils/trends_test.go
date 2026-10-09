@@ -1330,7 +1330,7 @@ func TestTrendProfileAsMapStringInterface(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.tp.AsMapStringInterface()
 			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
-				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+				t.Errorf("Expected %#v, recieved %#v", tt.want, got)
 			}
 		})
 	}

@@ -670,7 +670,7 @@ func TestResourceProfileAsMapStringInterface(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.rp.AsMapStringInterface()
 			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.want)) {
-				t.Errorf("Expected %#+v, recieved %#+v", tt.want, got)
+				t.Errorf("Expected %#v, recieved %#v", tt.want, got)
 			}
 		})
 	}
@@ -758,7 +758,7 @@ func TestMapStringInterfaceToResourceProfile(t *testing.T) {
 			}
 
 			if !reflect.DeepEqual(ToJSON(got), ToJSON(tt.rp)) {
-				t.Errorf("Expected %#+v, recieved %#+v", tt.rp, got)
+				t.Errorf("Expected %#v, recieved %#v", tt.rp, got)
 			}
 		})
 	}
