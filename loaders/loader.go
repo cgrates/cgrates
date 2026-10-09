@@ -364,11 +364,6 @@ func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[str
 	case utils.IsURL(inPath):
 		csvType = urlProvider{cfg: l.cfg}
 	}
-	if _, isFolder := csvType.(fileProvider); isFolder {
-		if _, statErr := os.Stat(inPath); statErr != nil && os.IsNotExist(statErr) {
-			return fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, inPath)
-		}
-	}
 	for _, cfg := range l.orderedData() {
 		if err = l.processFile(ctx, cfg, inPath, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
 			if !stopOnError {

@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"os"
 	"sync"
 
 	"github.com/cgrates/birpc/context"
@@ -70,6 +71,12 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 	ldr, has := ldrS.ldrs[args.LoaderID]
 	if !has {
 		return fmt.Errorf("UNKNOWN_LOADER: %s", args.LoaderID)
+	}
+	if args.Path != utils.EmptyString && !utils.IsURL(args.Path) {
+		if _, statErr := os.Stat(args.Path); statErr != nil && os.IsNotExist(statErr) {
+			return utils.NewErrServerError(
+				fmt.Errorf("<%s> nonexistent folder: %s", utils.LoaderS, args.Path))
+		}
 	}
 	var locked bool
 	if locked, err = ldr.locker.locked(); err != nil {
