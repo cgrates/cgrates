@@ -2609,6 +2609,34 @@ const CGRATES_CFG_JSON = `
 	"nestedFields": false,		// determines which field is checked when matching indexed filters(true: all; false: only the one on the first level)
 	"dynaprepaidActionProfile": [],
 	"opts":{
+		// "*body": [				// static body to be inserted in *http request
+		//     {
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": {}			// map[string]any
+		// 	}
+		// ],
+		// "*hdrs": [				// static headers to be appended in *http request
+		//     {
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": {}			// map[string][]string
+		// 	}
+		// ],
+		// "*httpContentType": [	// http request's body type ("form" or "json")
+		//     {
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "json"
+		// 	}
+		// ],
+		// "*method": [				// method to be used in *http request
+		//     {
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": "POST"
+		// 	}
+		// ],
 		// "*posterAttempts": [		// poster attempts for HTTPPost action type	
 		//     {
 		// 		"tenant": "*any",
@@ -2628,6 +2656,13 @@ const CGRATES_CFG_JSON = `
 		// 		"tenant": "*any",
 		// 		"filterIDs": [],
 		// 		"value": false
+		// 	}
+		// ],
+		// "*url": [				// url where *http request will be sent
+		//     {
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"value": ""
 		// 	}
 		// ]
 	}

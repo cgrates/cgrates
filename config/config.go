@@ -254,9 +254,14 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 		actionSCfg: &ActionSCfg{
 			Conns: make(map[string][]*DynamicConns),
 			Opts: &ActionsOpts{
+				Body:                 []*DynamicInterfaceOpt{},
+				Hdrs:                 []*DynamicInterfaceOpt{},
+				HttpContentType:      []*DynamicStringOpt{},
+				Method:               []*DynamicStringOpt{},
 				ProfileIDs:           []*DynamicStringSliceOpt{},
 				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: ActionsProfileIgnoreFiltersDftOpt}},
 				PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
+				Url:                  []*DynamicStringOpt{},
 			}},
 		sipAgentCfg:   &SIPAgentCfg{Conns: make(map[string][]*DynamicConns)},
 		configSCfg:    new(ConfigSCfg),
