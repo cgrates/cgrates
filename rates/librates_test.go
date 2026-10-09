@@ -5750,71 +5750,6 @@ func TestOrderRatesOnIntervalsErrorConvert(t *testing.T) {
 	}
 }
 
-func TestComputeRateSIntervalsRecurrentFee(t *testing.T) {
-	tsecDecimal, err := utils.NewDecimalFromUsage("30s")
-	if err != nil {
-		t.Error(err)
-	}
-	secDecimal, err := utils.NewDecimalFromUsage("1s")
-	if err != nil {
-		t.Error(err)
-	}
-	rt1 := &utils.Rate{
-		ID: "RATE1",
-		IntervalRates: []*utils.IntervalRate{
-			{
-				IntervalStart: utils.NewDecimal(0, 0),
-				RecurrentFee:  nil,
-				Unit:          tsecDecimal,
-				Increment:     secDecimal,
-			},
-		},
-	}
-	rt1.Compile()
-
-	ordRts := []*orderedRate{
-		{
-			utils.NewDecimal(0, 0),
-			rt1,
-		},
-	}
-	expOrdRts := []*utils.RateSInterval{
-		{
-			IntervalStart: utils.NewDecimal(0, 0),
-			Increments: []*utils.RateSIncrement{
-				{
-					IncrementStart:    utils.NewDecimal(0, 0),
-					RateIntervalIndex: 0,
-					RateID:            "UUID00",
-					CompressFactor:    20,
-					Usage:             utils.NewDecimal(int64(time.Minute+10*time.Second), 0),
-				},
-			},
-			CompressFactor: 1,
-		},
-	}
-	expCstRts := map[string]*utils.IntervalRate{
-		"UUID00": {
-			IntervalStart: utils.NewDecimal(0, 0),
-			RecurrentFee:  nil,
-			Unit:          tsecDecimal,
-			Increment:     secDecimal,
-		},
-	}
-	cstRts := make(map[string]*utils.IntervalRate)
-	if rtIvls, err := computeRateSIntervals(ordRts, utils.NewDecimal(0, 0),
-		utils.NewDecimal(int64(time.Minute+10*time.Second), 0), cstRts); err != nil {
-		t.Error(err)
-	} else {
-		for idx, val := range rtIvls {
-			if !val.Equals(expOrdRts[idx], cstRts, expCstRts) {
-				t.Errorf("expecting: %+v \n,received: %+v", utils.ToJSON(expCstRts), utils.ToJSON(cstRts))
-				t.Fatalf("expecting: %+v \n,received: %+v", utils.ToJSON(expOrdRts), utils.ToJSON(rtIvls))
-			}
-		}
-	}
-}
-
 func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T) {
 	fminDecimal, err := utils.NewDecimalFromUsage("5m")
 	if err != nil {
@@ -5844,5 +5779,148 @@ func TestComputeRateSIntervalsRecurrentFeeCmpFactorIntInvalidError(t *testing.T)
 		utils.NewDecimalFromFloat64(math.Inf(1)), make(map[string]*utils.IntervalRate))
 	if err == nil || err.Error() != expected {
 		t.Error(err)
+	}
+}
+
+func TestComputeRateSIntervalsCostIncrement(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		usage        string
+		recurrentFee string
+		increment    string
+		fixedFee     string
+		unit         string
+		wantCost     string
+	}{
+		{
+			name:         "partialIncrement",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			unit:         "1",
+			wantCost:     "2",
+		},
+		{
+			name:         "wholeUsage",
+			usage:        "2",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			unit:         "1",
+			wantCost:     "2",
+		},
+		{
+			name:         "halfIncrement",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "0.5",
+			fixedFee:     "0",
+			unit:         "1",
+			wantCost:     "1.5",
+		},
+		{
+			name:         "decimalFee",
+			usage:        "2",
+			recurrentFee: "0.25",
+			increment:    "1",
+			fixedFee:     "0",
+			unit:         "1",
+			wantCost:     "0.5",
+		},
+		{
+			name:         "fixedFee",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0.25",
+			unit:         "1",
+			wantCost:     "2.25",
+		},
+		{
+			name:         "partialHalfIncrement",
+			usage:        "1.25",
+			recurrentFee: "0.5",
+			increment:    "0.5",
+			fixedFee:     "0",
+			unit:         "1",
+			wantCost:     "0.75",
+		},
+		{
+			name:         "fixedFeeOnly",
+			usage:        "2",
+			recurrentFee: "",
+			increment:    "1",
+			fixedFee:     "0.25",
+			unit:         "1",
+			wantCost:     "0.25",
+		},
+		{
+			name:         "noFees",
+			usage:        "70s",
+			recurrentFee: "",
+			increment:    "1s",
+			fixedFee:     "",
+			unit:         "30s",
+		},
+		{
+			name:         "dataBytes",
+			usage:        "1572864", // 1.5 MB
+			recurrentFee: "1024",
+			increment:    "1048576", // 1 MB
+			fixedFee:     "0",
+			unit:         "1073741824", // 1 GB
+			wantCost:     "2",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			newDecimal := func(value string) *utils.Decimal {
+				t.Helper()
+				if value == "" {
+					return nil
+				}
+				decimal, err := utils.NewDecimalFromUsage(value)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return decimal
+			}
+			intervalRate := &utils.IntervalRate{
+				IntervalStart: utils.NewDecimal(0, 0),
+				RecurrentFee:  newDecimal(tc.recurrentFee),
+				Increment:     newDecimal(tc.increment),
+				FixedFee:      newDecimal(tc.fixedFee),
+				Unit:          newDecimal(tc.unit),
+			}
+			rates := []*orderedRate{
+				{
+					Decimal: utils.NewDecimal(0, 0),
+					Rate: &utils.Rate{
+						ID:            "rate",
+						IntervalRates: []*utils.IntervalRate{intervalRate},
+					},
+				},
+			}
+			costRates := map[string]*utils.IntervalRate{"rate": intervalRate}
+
+			intervals, err := computeRateSIntervals(rates, utils.NewDecimal(0, 0),
+				newDecimal(tc.usage), costRates)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if tc.wantCost == "" {
+				if len(intervals) != 0 {
+					t.Fatalf("intervals: %d, want 0", len(intervals))
+				}
+				return
+			}
+			if len(intervals) != 1 {
+				t.Fatalf("intervals: %d, want 1", len(intervals))
+			}
+			interval := intervals[0]
+			if cost := interval.Cost(costRates); cost.Compare(newDecimal(tc.wantCost)) != 0 {
+				t.Errorf("cost: %s, want %s", cost, tc.wantCost)
+			}
+		})
 	}
 }

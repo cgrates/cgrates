@@ -969,3 +969,166 @@ func TestBalanceLimit(t *testing.T) {
 		t.Errorf("Expected default limit 0, got %v", limit.String())
 	}
 }
+
+func TestMaxDebitAbstractsFromConcretesIncrements(t *testing.T) {
+	for _, tc := range []struct {
+		name         string
+		usage        string
+		recurrentFee string
+		increment    string
+		fixedFee     string
+		balance      string
+		wantUsage    string
+		wantCost     string
+	}{
+		{
+			name:         "partialIncrement",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			balance:      "10",
+			wantUsage:    "1.5",
+			wantCost:     "1.5",
+		},
+		{
+			name:         "exactBalance",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			balance:      "1.5",
+			wantUsage:    "1.5",
+			wantCost:     "1.5",
+		},
+		{
+			name:         "wholeUsage",
+			usage:        "2",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			balance:      "10",
+			wantUsage:    "2",
+			wantCost:     "2",
+		},
+		{
+			name:         "partialDebit",
+			usage:        "2",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0",
+			balance:      "1.5",
+			wantUsage:    "1",
+			wantCost:     "1",
+		},
+		{
+			name:         "halfIncrement",
+			usage:        "1.5",
+			recurrentFee: "0.5",
+			increment:    "0.5",
+			fixedFee:     "0",
+			balance:      "10",
+			wantUsage:    "1.5",
+			wantCost:     "1.5",
+		},
+		{
+			name:         "decimalFee",
+			usage:        "2",
+			recurrentFee: "0.25",
+			increment:    "1",
+			fixedFee:     "0",
+			balance:      "1",
+			wantUsage:    "2",
+			wantCost:     "0.5",
+		},
+		{
+			name:         "fixedFee",
+			usage:        "1.5",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0.25",
+			balance:      "10",
+			wantUsage:    "1.5",
+			wantCost:     "1.75",
+		},
+		{
+			name:         "fixedFeePartialDebit",
+			usage:        "2",
+			recurrentFee: "1",
+			increment:    "1",
+			fixedFee:     "0.25",
+			balance:      "1.5",
+			wantUsage:    "1",
+			wantCost:     "1.25",
+		},
+		{
+			name:         "partialHalfIncrement",
+			usage:        "1.25",
+			recurrentFee: "0.25",
+			increment:    "0.5",
+			fixedFee:     "0",
+			balance:      "1",
+			wantUsage:    "1.25",
+			wantCost:     "0.625",
+		},
+		{
+			name:         "dataBytes",
+			usage:        "1572864", // 1.5 MB
+			recurrentFee: "1",
+			increment:    "1048576", // 1 MB
+			fixedFee:     "0",
+			balance:      "10",
+			wantUsage:    "1572864",
+			wantCost:     "1.5",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			newDecimal := func(value string) *utils.Decimal {
+				t.Helper()
+				decimal, err := utils.NewDecimalFromString(value)
+				if err != nil {
+					t.Fatal(err)
+				}
+				return decimal
+			}
+			ctx := context.Background()
+			cfg := config.NewDefaultCGRConfig()
+			filters := engine.NewFilterS(cfg, nil, nil)
+			monetary := &utils.Balance{
+				ID:    "monetary",
+				Type:  utils.MetaConcrete,
+				Units: newDecimal(tc.balance),
+			}
+			concrete := newConcreteBalanceOperator(ctx, cfg, "test", monetary,
+				filters, nil, nil, nil).(*concreteBalance)
+			event := &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				Event:   map[string]any{},
+				APIOpts: map[string]any{},
+			}
+			costIncrement := &utils.CostIncrement{
+				Increment:    newDecimal(tc.increment),
+				FixedFee:     newDecimal(tc.fixedFee),
+				RecurrentFee: newDecimal(tc.recurrentFee),
+			}
+
+			charges, err := maxDebitAbstractsFromConcretes(ctx, newDecimal(tc.usage),
+				"test", []*concreteBalance{concrete}, nil, event,
+				nil, nil, nil, nil, costIncrement,
+				utils.NewDecimal(0, 0), cfg.AccountSCfg().MaxIterations)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if charges.Abstracts.Compare(newDecimal(tc.wantUsage)) != 0 {
+				t.Errorf("usage: %s, want %s", charges.Abstracts, tc.wantUsage)
+			}
+			if charges.Concretes.Compare(newDecimal(tc.wantCost)) != 0 {
+				t.Errorf("cost: %s, want %s", charges.Concretes, tc.wantCost)
+			}
+			wantLeft := utils.SubstractDecimal(newDecimal(tc.balance), newDecimal(tc.wantCost))
+			if monetary.Units.Compare(wantLeft) != 0 {
+				t.Errorf("remaining balance: %s, want %s", monetary.Units, wantLeft)
+			}
+		})
+	}
+}
