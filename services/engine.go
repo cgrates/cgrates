@@ -25,7 +25,6 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// flags holds all command line arguments. Flag descriptions are set in newFlags.
 type flags struct {
 	*flag.FlagSet
 	config struct {
@@ -61,7 +60,6 @@ type flags struct {
 	}
 }
 
-// newFlags creates and initializes a new flags instance with default values.
 func newFlags() *flags {
 	f := &flags{
 		FlagSet: flag.NewFlagSet("cgr-engine", flag.ExitOnError),
@@ -95,22 +93,25 @@ func newFlags() *flags {
 	return f
 }
 
-// RunCGREngine initializes and runs the CGREngine with the provided command line arguments.
-func RunCGREngine(fs []string) (err error) {
+// RunCGREngine loads configuration into cfg and runs the engine.
+// cfg must already contain defaults and any extra sections.
+// Extra services must use the loaded configuration in Start, not in their constructors.
+func RunCGREngine(fs []string, cfg *config.CGRConfig, extraServices ...servmanager.Service) error {
 	flags := newFlags()
-	flags.Parse(fs)
+	_ = flags.Parse(fs)
 
-	var vers string
-	if vers, err = utils.GetCGRVersion(); err != nil {
-		return
+	vers, err := utils.GetCGRVersion()
+	if err != nil {
+		return err
 	}
 	if flags.config.version {
 		fmt.Println(vers)
-		return
+		return nil
 	}
-	if flags.process.pidFile != utils.EmptyString {
-		if err = writePIDFile(flags.process.pidFile); err != nil {
-			return
+	if flags.process.pidFile != "" {
+		pid := strconv.Itoa(os.Getpid())
+		if err := os.WriteFile(flags.process.pidFile, []byte(pid), 0666); err != nil {
+			return err
 		}
 		defer func() {
 			if err := os.Remove(flags.process.pidFile); err != nil {
@@ -119,25 +120,26 @@ func RunCGREngine(fs []string) (err error) {
 		}()
 	}
 	if flags.process.singleCPU {
-		runtime.GOMAXPROCS(1) // Having multiple cpus may slow down computing due to CPU management, to be reviewed in future Go releases
+		runtime.GOMAXPROCS(1)
 	}
 
-	var cfg *config.CGRConfig
-	if cfg, err = initConfigFromPath(context.TODO(), flags.config.path, flags.logger.nodeID,
-		flags.logger.typ, flags.logger.level); err != nil || flags.config.check {
-		return
+	if err := loadConfig(context.TODO(), cfg, flags); err != nil {
+		return err
+	}
+	if flags.config.check {
+		return nil
 	}
 
 	if cfg.LoggerCfg().Level >= 0 {
 		switch cfg.LoggerCfg().Type {
 		case utils.MetaSysLog:
-			utils.Logger, err = utils.NewSysLogger(cfg.GeneralCfg().NodeID, cfg.LoggerCfg().Level)
+			logger, err := utils.NewSysLogger(cfg.GeneralCfg().NodeID, cfg.LoggerCfg().Level)
 			if err != nil {
-				return
+				return err
 			}
+			utils.Logger = logger
 		case utils.MetaStdLog, utils.MetaKafkaLog:
-			// If the logger is of type *kafka, use the *stdout logger until
-			// LoggerService finishes startup.
+			// Kafka logging needs ConnManager, so use stdout during startup.
 			utils.Logger = utils.NewStdLogger(cfg.GeneralCfg().NodeID, cfg.LoggerCfg().Level)
 		default:
 			return fmt.Errorf("unsupported logger type: %q", cfg.LoggerCfg().Type)
@@ -167,31 +169,29 @@ func RunCGREngine(fs []string) (err error) {
 		utils.Logger.Info(fmt.Sprintf("<%s> CGRateS shutdown!", utils.ServiceManager))
 	}()
 
-	shdWg.Add(1)
 	shutdown := utils.NewSyncedChan()
-	go handleSignals(shutdown, cfg, shdWg)
+	shdWg.Go(func() {
+		handleSignals(shutdown, cfg)
+	})
 
 	if flags.process.scheduledShutdown != 0 {
-		shdWg.Add(1)
-		go func() { // Schedule shutdown
-			defer shdWg.Done()
-			tm := time.NewTimer(flags.process.scheduledShutdown)
+		shdWg.Go(func() {
 			select {
-			case <-tm.C:
+			case <-time.After(flags.process.scheduledShutdown):
 				shutdown.CloseOnce()
 			case <-shutdown.Done():
-				tm.Stop()
 			}
-		}()
+		})
 	}
 
 	utils.Logger.Info(fmt.Sprintf("<CoreS> starting version <%s><%s>", vers, runtime.Version()))
 
 	registry := servmanager.NewRegistry()
-	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, []servmanager.Service{
+	cl := NewCommonListenerService(cfg)
+	services := []servmanager.Service{
 		NewGlobalVarS(cfg),
 		NewCapService(cfg),
-		NewCommonListenerService(cfg),
+		cl,
 		NewAnalyzerService(cfg),
 		NewConnManagerService(cfg),
 		NewLoggerService(cfg, flags.logger.typ),
@@ -231,7 +231,8 @@ func RunCGREngine(fs []string) (err error) {
 		NewAccountService(cfg),
 		NewTPeService(cfg),
 		NewPrometheusAgent(cfg),
-	})
+	}
+	srvManager := servmanager.NewServiceManager(shdWg, cfg, registry, append(services, extraServices...))
 
 	srvManager.StartServices(shutdown)
 	if err := RegisterServiceManagerV1(cfg, srvManager, registry, shutdown); err != nil {
@@ -247,8 +248,7 @@ func RunCGREngine(fs []string) (err error) {
 		return nil
 	default:
 	}
-	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
-	cl.StartServer(cfg, shutdown)
+	cl.CLS().StartServer(cfg, shutdown)
 
 	if flags.profiling.mem.dir != "" {
 		if err := profiler.StartMemoryProfiling(cores.MemoryProfilingParams{
@@ -262,72 +262,48 @@ func RunCGREngine(fs []string) (err error) {
 	}
 
 	<-shutdown.Done()
-	return
+	return nil
 }
 
-// writePIDFile creates a file at the specified path containing the current process ID.
-func writePIDFile(path string) error {
-	f, err := os.Create(path)
-	if err != nil {
-		return fmt.Errorf("failed to create pid file: %s", err)
+func loadConfig(ctx *context.Context, cfg *config.CGRConfig, flags *flags) error {
+	if err := cfg.LoadFromPath(ctx, flags.config.path); err != nil {
+		return fmt.Errorf("could not parse config: <%s>", err)
 	}
-	if _, err := f.WriteString(strconv.Itoa(os.Getpid())); err != nil {
-		f.Close()
-		return fmt.Errorf("failed to write to pid file: %s", err)
+	dbCfg := cfg.ConfigDBCfg()
+	// Internal configDB is loaded only when dumping is enabled.
+	if dbCfg.Type != utils.MetaInternal || dbCfg.Opts.InternalDBDumpInterval != 0 {
+		d, err := engine.NewDBConn(dbCfg.Type,
+			dbCfg.Host, dbCfg.Port, dbCfg.Name, dbCfg.User,
+			dbCfg.Password, cfg.GeneralCfg().DBDataEncoding, dbCfg.Opts, nil)
+		if err != nil {
+			return fmt.Errorf("could not configure configDB: <%s>", err)
+		}
+		if err := cfg.LoadFromDB(ctx, d); err != nil {
+			return fmt.Errorf("could not parse config from DB: <%s>", err)
+		}
 	}
-	if err := f.Close(); err != nil {
-		return fmt.Errorf("failed to close pid file: %s", err)
+	if flags.logger.nodeID != "" {
+		cfg.GeneralCfg().NodeID = flags.logger.nodeID
+	}
+	if flags.logger.level != -1 {
+		cfg.LoggerCfg().Level = flags.logger.level
+	}
+	if flags.logger.typ != "" {
+		cfg.LoggerCfg().Type = flags.logger.typ
+	}
+	if utils.ConcurrentReqsLimit != 0 {
+		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
+	}
+	if utils.ConcurrentReqsStrategy != "" {
+		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
 	}
 	return nil
 }
 
-// initConfigFromPath loads and initializes the CGR configuration from the specified path.
-func initConfigFromPath(ctx *context.Context, path, nodeID, logType string, logLevel int) (cfg *config.CGRConfig, err error) {
-	if cfg, err = config.NewCGRConfigFromPath(ctx, path); err != nil {
-		err = fmt.Errorf("could not parse config: <%s>", err)
-		return
-	}
-	if !(cfg.ConfigDBCfg().Type == utils.MetaInternal &&
-		cfg.ConfigDBCfg().Opts.InternalDBDumpInterval == 0) { // ignore if offline internal is disabled
-		var d config.ConfigDB
-		if d, err = engine.NewDBConn(cfg.ConfigDBCfg().Type,
-			cfg.ConfigDBCfg().Host, cfg.ConfigDBCfg().Port,
-			cfg.ConfigDBCfg().Name, cfg.ConfigDBCfg().User,
-			cfg.ConfigDBCfg().Password, cfg.GeneralCfg().DBDataEncoding,
-			cfg.ConfigDBCfg().Opts, nil); err != nil { // Cannot configure getter database, show stopper
-			err = fmt.Errorf("could not configure configDB: <%s>", err)
-			return
-		}
-		if err = cfg.LoadFromDB(ctx, d); err != nil {
-			err = fmt.Errorf("could not parse config from DB: <%s>", err)
-			return
-		}
-	}
-	if nodeID != utils.EmptyString {
-		cfg.GeneralCfg().NodeID = nodeID
-	}
-	if logLevel != -1 { // Modify the log level if provided by command arguments
-		cfg.LoggerCfg().Level = logLevel
-	}
-	if logType != utils.EmptyString {
-		cfg.LoggerCfg().Type = logType
-	}
-	if utils.ConcurrentReqsLimit != 0 { // used as shared variable
-		cfg.CoreSCfg().Caps = utils.ConcurrentReqsLimit
-	}
-	if len(utils.ConcurrentReqsStrategy) != 0 {
-		cfg.CoreSCfg().CapsStrategy = utils.ConcurrentReqsStrategy
-	}
-	return
-}
-
-// handleSignals manages system signals for graceful shutdown and configuration reload.
-func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *sync.WaitGroup) {
-	defer shdWg.Done()
+func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig) {
 	shutdownSignal := make(chan os.Signal, 1)
 	reloadSignal := make(chan os.Signal, 1)
-	signal.Notify(shutdownSignal, os.Interrupt,
-		syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(shutdownSignal, os.Interrupt, syscall.SIGTERM, syscall.SIGQUIT)
 	signal.Notify(reloadSignal, syscall.SIGHUP)
 	for {
 		select {
@@ -336,7 +312,7 @@ func handleSignals(shutdown *utils.SyncedChan, cfg *config.CGRConfig, shdWg *syn
 		case <-shutdownSignal:
 			shutdown.CloseOnce()
 		case <-reloadSignal:
-			//  do it in its own goroutine in order to not block the signal handler with the reload functionality
+			// Do not block shutdown signals while reloading configuration.
 			go func() {
 				var reply string
 				if err := cfg.V1ReloadConfig(context.TODO(),

@@ -11,6 +11,8 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/cgrates/cgrates/config"
 )
 
 // If any flag changes, this test should fail.
@@ -158,7 +160,7 @@ func TestFlags(t *testing.T) {
 func TestRunCGREnginePIDCleanup(t *testing.T) {
 	dir := t.TempDir()
 	pidFile := filepath.Join(dir, "cgr-engine.pid")
-	if err := RunCGREngine([]string{"-pid", pidFile, "-config_path", filepath.Join(dir, "missing")}); err == nil {
+	if err := RunCGREngine([]string{"-pid", pidFile, "-config_path", filepath.Join(dir, "missing")}, config.NewDefaultCGRConfig()); err == nil {
 		t.Fatal("expected configuration error")
 	}
 	if _, err := os.Stat(pidFile); !errors.Is(err, os.ErrNotExist) {

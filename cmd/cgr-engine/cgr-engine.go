@@ -7,11 +7,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/services"
 )
 
 func main() {
-	if err := services.RunCGREngine(os.Args[1:]); err != nil {
+	if err := services.RunCGREngine(os.Args[1:], config.NewDefaultCGRConfig()); err != nil {
 		log.Fatal(err)
 	}
 }
