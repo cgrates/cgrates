@@ -38,7 +38,6 @@ type ConnManager struct {
 	cfg         *config.CGRConfig
 	cache       *CacheS
 	rpcInternal map[string]chan birpc.ClientConnector
-	disp        map[string]chan birpc.ClientConnector
 	dynIntCh    *RPCClientSet
 	connCache   *ltcache.Cache
 }
@@ -54,10 +53,9 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 		return x.(birpc.ClientConnector), nil
 	}
 	// in case we don't find in cache create the connection and add this in cache
-	var intChan chan birpc.ClientConnector
-	var isInternalRPC bool
+	intChan, isInternalRPC := cM.rpcInternal[connID]
 	var connCfg *config.RPCConn
-	if intChan, isInternalRPC = cM.getInternalConnChan(connID); isInternalRPC {
+	if isInternalRPC {
 		connCfg = cM.cfg.RPCConns()[rpcclient.InternalRPC]
 		if strings.HasPrefix(connID, rpcclient.BiRPCInternal) {
 			connCfg = cM.cfg.RPCConns()[rpcclient.BiRPCInternal]
@@ -74,7 +72,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 			}
 		}
 	}
-	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan, isInternalRPC); err != nil {
+	if conn, err = cM.getConnWithConfig(ctx, connID, connCfg, intChan); err != nil {
 		return
 	}
 	err = cM.cache.Set(context.TODO(), utils.CacheRPCConnections, connID, conn, nil,
@@ -82,8 +80,8 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 	return
 }
 
-func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, connCfg *config.RPCConn, intChan chan birpc.ClientConnector,
-	isInternalRPC bool) (conn birpc.ClientConnector, err error) {
+func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, connCfg *config.RPCConn,
+	intChan chan birpc.ClientConnector) (conn birpc.ClientConnector, err error) {
 	if connCfg.Strategy == rpcclient.PoolParallel {
 		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
 		codec := rpcclient.GOBrpc
@@ -189,7 +187,7 @@ func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, s
 			// skip this pool if no connection matches
 			continue
 		}
-		if conn, err = cM.getConnWithConfig(ctx, connID, newCfg, nil, false); err != nil {
+		if conn, err = cM.getConnWithConfig(ctx, connID, newCfg, nil); err != nil {
 			continue
 		}
 		if err = conn.Call(ctx, method, arg, reply); !rpcclient.ShouldFailover(err) {
@@ -210,20 +208,8 @@ func (cM *ConnManager) GetInternalChan() chan birpc.ClientConnector {
 	return cM.dynIntCh.GetInternalChanel()
 }
 
-func (cM *ConnManager) GetDispInternalChan() chan birpc.ClientConnector {
-	return cM.dynIntCh.GetInternalChanel()
-}
 func (cM *ConnManager) AddInternalConn(connName, apiPrefix string,
 	iConnCh chan birpc.ClientConnector) {
 	cM.rpcInternal[connName] = iConnCh
 	cM.dynIntCh.conns[apiPrefix] = iConnCh
-}
-
-func (cM *ConnManager) getInternalConnChan(key string) (c chan birpc.ClientConnector, has bool) {
-	if cM.disp != nil {
-		c, has = cM.disp[key]
-	} else {
-		c, has = cM.rpcInternal[key]
-	}
-	return
 }

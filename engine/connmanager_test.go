@@ -151,7 +151,7 @@ func TestCMgetConnWithConfigUnsupportedTransport(t *testing.T) {
 	}
 
 	experr := fmt.Sprintf("Unsupported transport: <%+s>", "invalid")
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err.Error() != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -186,7 +186,7 @@ func TestCMgetConnWithConfigUnsupportedCodec(t *testing.T) {
 
 	experr := rpcclient.ErrUnsupportedCodec
 	var exp *rpcclient.RPCParallelClientPool
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -221,7 +221,7 @@ func TestCMgetConnWithConfigEmptyTransport(t *testing.T) {
 
 	cM.connCache.Set(connID, nil, nil)
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -253,7 +253,7 @@ func TestCMgetConnWithConfigInternalRPCCodec(t *testing.T) {
 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
 	}
 
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err != nil {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", nil, err)
@@ -286,7 +286,7 @@ func TestCMgetConnWithConfigInternalBiRPCCodecUnsupported(t *testing.T) {
 	}
 
 	experr := rpcclient.ErrUnsupportedCodec
-	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc, true)
+	rcv, err := cM.getConnWithConfig(context.Background(), connID, cfg.RPCConns()[connID], cc)
 
 	if err == nil || err != experr {
 		t.Fatalf("\nexpected: <%+v>, \nreceived: <%+v>", experr, err)
@@ -526,155 +526,3 @@ func TestCMDeadLock(t *testing.T) {
 	}
 }
 */
-
-func TestCMGetInternalChan(t *testing.T) {
-
-	cfg := config.NewDefaultCGRConfig()
-	locker := NewLocker(cfg)
-	cM := NewConnManager(cfg)
-	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	cM.SetCache(cacheS)
-
-	exp := make(chan context.ClientConnector, 1)
-	rcv := cM.GetInternalChan()
-	rcvType := reflect.TypeOf(rcv)
-	expType := reflect.TypeOf(exp)
-	if rcvType != expType {
-		t.Errorf("Unexpected return type, expected %+v, received %+v", rcvType, expType)
-	}
-
-}
-
-func TestCMGetDispInternalChan(t *testing.T) {
-
-	cfg := config.NewDefaultCGRConfig()
-	locker := NewLocker(cfg)
-	cM := NewConnManager(cfg)
-	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
-	cM.SetCache(cacheS)
-
-	exp := make(chan context.ClientConnector, 1)
-	rcv := cM.GetDispInternalChan()
-	rcvType := reflect.TypeOf(rcv)
-	expType := reflect.TypeOf(exp)
-	if rcvType != expType {
-		t.Errorf("Unexpected return type, expected %+v, received %+v", rcvType, expType)
-	}
-
-}
-
-// func TestCMEnableDispatcher(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-// 	cM := NewConnManager(cfg)
-// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
-// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-// dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	Cache = NewCacheS(cfg, dm, nil, nil)
-// 	var storDB StorDB
-// 	storDBChan := make(chan StorDB, 1)
-// 	storDBChan <- storDB
-// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
-
-// 	srvcNames := []string{utils.AccountS, utils.ActionS, utils.AttributeS,
-// 		utils.CacheS, utils.ChargerS, utils.ConfigS, utils.DispatcherS,
-// 		utils.GuardianS, utils.RateS, utils.ResourceS, utils.RouteS,
-// 		utils.SessionS, utils.StatS, utils.ThresholdS, utils.CDRs,
-// 		utils.ReplicatorS, utils.EeS, utils.CoreS, utils.AnalyzerS,
-// 		utils.AdminS, utils.LoaderS, utils.ServiceManager}
-
-// 	for _, name := range srvcNames {
-
-// 		newSrvcWName, err := NewServiceWithName(newCDRSrv, name, true)
-// 		if err != nil {
-// 			t.Error(err)
-// 		}
-// 		cM.EnableDispatcher(newSrvcWName)
-
-// 	}
-// }
-
-// func TestCMDisableDispatcher(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-
-// 	cM := &ConnManager{
-// 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
-// 	}
-// 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
-// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-// dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	var storDB StorDB
-// 	storDBChan := make(chan StorDB, 1)
-// 	storDBChan <- storDB
-// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
-// 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	cM.EnableDispatcher(newSrvcWName)
-
-// 	Cache = NewCacheS(cfg, dm, cM, nil)
-// 	Cache.SetWithoutReplicate(utils.CacheRPCConnections, "itmID2",
-// 		"value of 2nd item", nil, true, utils.NonTransactional)
-
-// 	var exp []string
-
-// 	cM.DisableDispatcher()
-// 	rcv1 := cM.connCache.GetItemIDs("itmID1")
-// 	rcv2 := Cache.GetItemIDs(utils.CacheRPCConnections, utils.EmptyString)
-
-// 	if !reflect.DeepEqual(rcv1, exp) {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv1)
-// 	} else if !reflect.DeepEqual(rcv2, exp) {
-// 		t.Errorf("\nexpected: <%+v>, \nreceived: <%+v>", exp, rcv2)
-// 	} else if cM.disp != nil || cM.dispIntCh != nil {
-// 		t.Errorf("\nexpected nil cM.disp and cM.dispIntCh, \nreceived cM.disp: <%+v>, \n cM.dispIntCh: <%+v>", cM.disp, cM.dispIntCh)
-// 	}
-
-// }
-
-// func TestCMgetInternalConnChanFromDisp(t *testing.T) {
-// 	tmp := Cache
-// 	defer func() {
-// 		Cache = tmp
-// 	}()
-// 	Cache.Clear(nil)
-// 	cfg := config.NewDefaultCGRConfig()
-
-// 	cM := &ConnManager{
-// 		cfg:       cfg,
-// 		connCache: ltcache.NewCache(-1, 0, true, false, nil, nil),
-// 	}
-// 	cM.connCache.Set("itmID1", "value of first item", nil)
-// 	data , _ := NewInternalDB(nil, cfg.DbCfg().Items)
-// 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-// dm := NewDataManager(dbCM, cfg.CacheCfg(), nil)
-// 	fltrs := NewFilterS(cfg, nil, dm)
-// 	var storDB StorDB
-// 	storDBChan := make(chan StorDB, 1)
-// 	storDBChan <- storDB
-// 	newCDRSrv := NewCDRServer(cfg, dm, fltrs, nil, storDBChan)
-// 	newSrvcWName, err := NewServiceWithName(newCDRSrv, utils.AccountS, true)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// 	cM.EnableDispatcher(newSrvcWName)
-
-// 	if rcv, ok := cM.getInternalConnChan(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)); !ok {
-// 		t.Errorf("Unexpected error getting internalConnChan, Received <%+v>", rcv)
-// 	}
-
-// }
