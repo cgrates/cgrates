@@ -60,12 +60,15 @@ type flags struct {
 	}
 }
 
-func newFlags() *flags {
+func newFlags(configPath string) *flags {
+	if configPath == "" {
+		configPath = utils.ConfigPath
+	}
 	f := &flags{
 		FlagSet: flag.NewFlagSet("cgr-engine", flag.ExitOnError),
 	}
 
-	f.StringVar(&f.config.path, utils.CfgPathCgr, utils.ConfigPath, "Configuration directory path")
+	f.StringVar(&f.config.path, utils.CfgPathCgr, configPath, "Configuration directory path")
 	f.BoolVar(&f.config.check, utils.CheckCfgCgr, false, "Verify the config without starting the engine")
 	f.BoolVar(&f.config.print, utils.PrintCfgCgr, false, "Print configuration object in JSON format")
 	f.BoolVar(&f.config.version, utils.VersionCgr, false, "Print application version and exit")
@@ -97,7 +100,7 @@ func newFlags() *flags {
 // cfg must already contain defaults and any extra sections.
 // Extra services must use the loaded configuration in Start, not in their constructors.
 func RunCGREngine(fs []string, cfg *config.CGRConfig, extraServices ...servmanager.Service) error {
-	flags := newFlags()
+	flags := newFlags(cfg.ConfigPath)
 	_ = flags.Parse(fs)
 
 	vers, err := utils.GetCGRVersion()

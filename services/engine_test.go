@@ -18,7 +18,10 @@ import (
 // If any flag changes, this test should fail.
 // Do not use constants in this test to ensure these changes are detected.
 func TestFlags(t *testing.T) {
-	flags := newFlags()
+	if got := newFlags("/etc/custom").config.path; got != "/etc/custom" {
+		t.Fatalf("config_path = %q, want /etc/custom", got)
+	}
+	flags := newFlags("")
 	tests := []struct {
 		name       string
 		flags      []string
@@ -169,7 +172,7 @@ func TestRunCGREnginePIDCleanup(t *testing.T) {
 }
 
 func TestPreloadFlag(t *testing.T) {
-	flg := newFlags()
+	flg := newFlags("")
 	if err := flg.Parse([]string{"-preload", "loader1,loader2"}); err != nil {
 		t.Fatal(err)
 	}
