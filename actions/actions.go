@@ -263,7 +263,7 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 					utils.ActionS, sActs.tenant, sActs.apID, err))
 		}
 		return
-	}, utils.ActionProfilePrefix+sActs.apID)
+	}, utils.ActionProfilePrefix+utils.ConcatenatedKey(sActs.tenant, sActs.apID))
 }
 
 // cronExecuteActions runs a profile's units together under one lock.
@@ -286,7 +286,7 @@ func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
 			err = errors.Join(err, sActs.Execute(ctx))
 		}
 		return err
-	}, utils.ActionProfilePrefix+first.apID)
+	}, utils.ActionProfilePrefix+utils.ConcatenatedKey(first.tenant, first.apID))
 	if err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> executing scheduled ActionProfile <%s:%s>, error: <%s>",
