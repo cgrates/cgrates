@@ -143,7 +143,6 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 	cfg.rankingsCfg = new(RankingSCfg)
 	cfg.thresholdSCfg = &ThresholdSCfg{Opts: &ThresholdsOpts{}}
 	cfg.routeSCfg = &RouteSCfg{Opts: &RoutesOpts{}}
-	cfg.sureTaxCfg = new(SureTaxCfg)
 	cfg.dispatcherSCfg = new(DispatcherSCfg)
 	cfg.registrarCCfg = new(RegistrarCCfgs)
 	cfg.registrarCCfg.RPC = new(RegistrarCCfg)
@@ -305,7 +304,6 @@ type CGRConfig struct {
 	rankingsCfg        *RankingSCfg        // Rankings config
 	thresholdSCfg      *ThresholdSCfg      // ThresholdS config
 	routeSCfg          *RouteSCfg          // RouteS config
-	sureTaxCfg         *SureTaxCfg         // SureTax config
 	dispatcherSCfg     *DispatcherSCfg     // DispatcherS config
 	registrarCCfg      *RegistrarCCfgs     // RegistrarC config
 	loaderCgrCfg       *LoaderCgrCfg       // LoaderCgr config
@@ -356,7 +354,7 @@ func (cfg *CGRConfig) loadFromJSONCfg(jsnCfg *CgrJsonCfg) (err error) {
 		cfg.loadDNSAgentCfg, cfg.loadHTTPAgentCfg, cfg.loadPrometheusAgentCfg, cfg.loadAttributeSCfg,
 		cfg.loadChargerSCfg, cfg.loadResourceSCfg, cfg.loadStatSCfg, cfg.loadTrendSCfg,
 		cfg.loadRankingSCfg, cfg.loadThresholdSCfg, cfg.loadRouteSCfg,
-		cfg.loadMailerCfg, cfg.loadSureTaxCfg, cfg.loadDispatcherSCfg,
+		cfg.loadMailerCfg, cfg.loadDispatcherSCfg,
 		cfg.loadLoaderCgrCfg, cfg.loadMigratorCgrCfg, cfg.loadTLSCgrCfg,
 		cfg.loadAnalyzerCgrCfg, cfg.loadApierCfg, cfg.loadErsCfg, cfg.loadEesCfg,
 		cfg.loadSIPAgentCfg, cfg.loadRegistrarCCfg, cfg.loadJanusAgentCfg,
@@ -680,15 +678,6 @@ func (cfg *CGRConfig) loadMailerCfg(jsnCfg *CgrJsonCfg) (err error) {
 	return cfg.mailerCfg.loadFromJSONCfg(jsnMailerCfg)
 }
 
-// loadSureTaxCfg loads the SureTax section of the configuration
-func (cfg *CGRConfig) loadSureTaxCfg(jsnCfg *CgrJsonCfg) (err error) {
-	var jsnSureTaxCfg *SureTaxJsonCfg
-	if jsnSureTaxCfg, err = jsnCfg.SureTaxJsonCfg(); err != nil {
-		return
-	}
-	return cfg.sureTaxCfg.loadFromJSONCfg(jsnSureTaxCfg)
-}
-
 // loadDispatcherSCfg loads the DispatcherS section of the configuration
 func (cfg *CGRConfig) loadDispatcherSCfg(jsnCfg *CgrJsonCfg) (err error) {
 	var jsnDispatcherSCfg *DispatcherSJsonCfg
@@ -841,13 +830,6 @@ func (cfg *CGRConfig) loadIPsCfg(jsnCfg *CgrJsonCfg) error {
 		return err
 	}
 	return cfg.ipsCfg.loadFromJSONCfg(jsnIPsCfg)
-}
-
-// SureTaxCfg use locking to retrieve the configuration, possibility later for runtime reload
-func (cfg *CGRConfig) SureTaxCfg() *SureTaxCfg {
-	cfg.lks[SURETAX_JSON].Lock()
-	defer cfg.lks[SURETAX_JSON].Unlock()
-	return cfg.sureTaxCfg
 }
 
 // DiameterAgentCfg returns the config for Diameter Agent
@@ -1269,7 +1251,6 @@ func (cfg *CGRConfig) getLoadFunctions() map[string]func(*CgrJsonCfg) error {
 		THRESHOLDS_JSON:     cfg.loadThresholdSCfg,
 		RouteSJson:          cfg.loadRouteSCfg,
 		MAILER_JSN:          cfg.loadMailerCfg,
-		SURETAX_JSON:        cfg.loadSureTaxCfg,
 		CgrLoaderCfgJson:    cfg.loadLoaderCgrCfg,
 		CgrMigratorCfgJson:  cfg.loadMigratorCgrCfg,
 		DispatcherSJson:     cfg.loadDispatcherSCfg,
@@ -1474,7 +1455,6 @@ func (cfg *CGRConfig) reloadSections(sections ...string) {
 		case CACHE_JSN:
 		case FilterSjsn:
 		case MAILER_JSN:
-		case SURETAX_JSON:
 		case CgrLoaderCfgJson:
 		case CgrMigratorCfgJson:
 		case TemplatesJson:
@@ -1578,7 +1558,6 @@ func (cfg *CGRConfig) AsMapInterface(separator string) (mp map[string]any) {
 		RANKINGS_JSON:       cfg.rankingsCfg.AsMapInterface(),
 		THRESHOLDS_JSON:     cfg.thresholdSCfg.AsMapInterface(),
 		RouteSJson:          cfg.routeSCfg.AsMapInterface(),
-		SURETAX_JSON:        cfg.sureTaxCfg.AsMapInterface(separator),
 		DispatcherSJson:     cfg.dispatcherSCfg.AsMapInterface(),
 		RegistrarCJson:      cfg.registrarCCfg.AsMapInterface(),
 		CgrLoaderCfgJson:    cfg.loaderCgrCfg.AsMapInterface(),
@@ -1725,8 +1704,6 @@ func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts
 		mp = cfg.ThresholdSCfg().AsMapInterface()
 	case RouteSJson:
 		mp = cfg.RouteSCfg().AsMapInterface()
-	case SURETAX_JSON:
-		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case DispatcherSJson:
 		mp = cfg.DispatcherSCfg().AsMapInterface()
 	case RegistrarCJson:
@@ -1896,8 +1873,6 @@ func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithA
 		mp = cfg.ThresholdSCfg().AsMapInterface()
 	case RouteSJson:
 		mp = cfg.RouteSCfg().AsMapInterface()
-	case SURETAX_JSON:
-		mp = cfg.SureTaxCfg().AsMapInterface(cfg.GeneralCfg().RSRSep)
 	case DispatcherSJson:
 		mp = cfg.DispatcherSCfg().AsMapInterface()
 	case RegistrarCJson:
@@ -2019,7 +1994,6 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 		rankingsCfg:        cfg.rankingsCfg.Clone(),
 		thresholdSCfg:      cfg.thresholdSCfg.Clone(),
 		routeSCfg:          cfg.routeSCfg.Clone(),
-		sureTaxCfg:         cfg.sureTaxCfg.Clone(),
 		dispatcherSCfg:     cfg.dispatcherSCfg.Clone(),
 		registrarCCfg:      cfg.registrarCCfg.Clone(),
 		loaderCgrCfg:       cfg.loaderCgrCfg.Clone(),

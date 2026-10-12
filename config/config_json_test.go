@@ -1388,46 +1388,6 @@ func TestDfMailerJsonCfg(t *testing.T) {
 	}
 }
 
-func TestDfSureTaxJsonCfg(t *testing.T) {
-	eCfg := &SureTaxJsonCfg{
-		Url:                     utils.StringPointer(""),
-		Client_number:           utils.StringPointer(""),
-		Validation_key:          utils.StringPointer(""),
-		Business_unit:           utils.StringPointer(""),
-		Timezone:                utils.StringPointer("Local"),
-		Include_local_cost:      utils.BoolPointer(false),
-		Return_file_code:        utils.StringPointer("0"),
-		Response_group:          utils.StringPointer("03"),
-		Response_type:           utils.StringPointer("D4"),
-		Regulatory_code:         utils.StringPointer("03"),
-		Client_tracking:         utils.StringPointer(utils.DynamicDataPrefix + utils.MetaReq + utils.NestingSep + utils.CGRID),
-		Customer_number:         utils.StringPointer("~*req.Subject"),
-		Orig_number:             utils.StringPointer("~*req.Subject"),
-		Term_number:             utils.StringPointer("~*req.Destination"),
-		Bill_to_number:          utils.StringPointer(""),
-		Zipcode:                 utils.StringPointer(""),
-		Plus4:                   utils.StringPointer(""),
-		P2PZipcode:              utils.StringPointer(""),
-		P2PPlus4:                utils.StringPointer(""),
-		Units:                   utils.StringPointer("1"),
-		Unit_type:               utils.StringPointer("00"),
-		Tax_included:            utils.StringPointer("0"),
-		Tax_situs_rule:          utils.StringPointer("04"),
-		Trans_type_code:         utils.StringPointer("010101"),
-		Sales_type_code:         utils.StringPointer("R"),
-		Tax_exemption_code_list: utils.StringPointer(""),
-	}
-	dfCgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(CGRATES_CFG_JSON))
-	if err != nil {
-		t.Error(err)
-	}
-	if cfg, err := dfCgrJSONCfg.SureTaxJsonCfg(); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(eCfg, cfg) {
-		t.Error("Received: ", cfg)
-	}
-}
-
 func TestDfHttpJsonCfg(t *testing.T) {
 	eCfg := &HTTPJsonCfg{
 		Json_rpc_url:        utils.StringPointer("/jsonrpc"),

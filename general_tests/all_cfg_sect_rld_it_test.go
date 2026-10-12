@@ -7,7 +7,6 @@ package general_tests
 
 import (
 	"path"
-	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -77,7 +76,6 @@ var (
 		testSectConfigSReloadTemplates,
 		testSectConfigSReloadSIPAgent,
 		testSectConfigSReloadMigrator,
-		testSectConfigSReloadSuretax,
 		testSectConfigSReloadAsteriskAgent,
 		//testSectConfigSReloadKamailioAgent,
 		//testSectConfigSReloadFreeswitchAgent,
@@ -1123,57 +1121,6 @@ func testSectConfigSReloadMailer(t *testing.T) {
 	}, &rpl); err != nil {
 		t.Error(err)
 	} else if cfgStr != rpl {
-		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
-	}
-}
-
-func testSectConfigSReloadSuretax(t *testing.T) {
-
-	var reply string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1SetConfigFromJSON, &config.SetConfigFromJSONArgs{
-		Tenant: "cgrates.org",
-		Config: `{"suretax": {
-			"url": "google.ro",
-			"client_number": "4",
-			"validation_key": "5",
-			"business_unit": "6",
-			"timezone": "UTC",
-			"include_local_cost": true,
-			"return_file_code": "01",
-			"response_group": "04",
-			"response_type": "D5",
-			"regulatory_code": "04",
-			"client_tracking": "~*req.CGRID",
-			"customer_number": "~*req.Subject",
-			"orig_number":  "~*req.Subject",
-			"term_number": "~*req.Destination",
-			"bill_to_number": "3",
-			"zipcode": "3",
-			"plus4": "3",
-			"p2pzipcode": "3",
-			"p2pplus4": "3",
-			"units": "2",
-			"unit_type": "01",
-			"tax_included": "02",
-			"tax_situs_rule": "05",
-			"trans_type_code": "101010",
-			"sales_type_code": "RC",
-			"tax_exemption_code_list": "3",
-		},
-	}}`,
-	}, &reply); err != nil {
-		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Expected OK received: %+v", reply)
-	}
-	cfgStr := "{\"suretax\":{\"bill_to_number\":\"3\",\"business_unit\":\"6\",\"client_number\":\"4\",\"client_tracking\":\"~*req.CGRID\",\"customer_number\":\"~*req.Subject\",\"include_local_cost\":true,\"orig_number\":\"~*req.Subject\",\"p2pplus4\":\"3\",\"p2pzipcode\":\"3\",\"plus4\":\"3\",\"regulatory_code\":\"04\",\"response_group\":\"04\",\"response_type\":\"D5\",\"return_file_code\":\"01\",\"sales_type_code\":\"RC\",\"tax_exemption_code_list\":\"3\",\"tax_included\":\"02\",\"tax_situs_rule\":\"05\",\"term_number\":\"~*req.Destination\",\"timezone\":\"UTC\",\"trans_type_code\":\"101010\",\"unit_type\":\"01\",\"units\":\"2\",\"url\":\"google.ro\",\"validation_key\":\"5\",\"zipcode\":\"3\"}}"
-	var rpl string
-	if err := testSectRPC.Call(context.Background(), utils.ConfigSv1GetConfigAsJSON, &config.SectionWithAPIOpts{
-		Tenant:  "cgrates.org",
-		Section: config.SURETAX_JSON,
-	}, &rpl); err != nil {
-		t.Error(err)
-	} else if !reflect.DeepEqual(rpl, cfgStr) {
 		t.Errorf("\nExpected %+v ,\n received: %+v", utils.ToIJSON(cfgStr), utils.ToIJSON(rpl))
 	}
 }
