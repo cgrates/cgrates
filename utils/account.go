@@ -173,9 +173,9 @@ func (bL *Balance) Equals(bal *Balance) (eq bool) {
 // CostIncrement enforces cost calculation to specific balance increments
 type CostIncrement struct {
 	FilterIDs    []string
-	Increment    *Decimal
-	FixedFee     *Decimal
-	RecurrentFee *Decimal
+	Increment    *Decimal // RoundingIncrement
+	FixedFee     *Decimal // Flat fee for the usage charged
+	RecurrentFee *Decimal // The fee applied for each number of increments charged
 }
 
 // Equals returns the equality between two CostIncrement

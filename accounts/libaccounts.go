@@ -67,11 +67,34 @@ type balanceOperator interface {
 }
 
 // roundUnitsWithIncrements rounds the usage based on increments
-func roundUnitsWithIncrements(usage, incrm *utils.Decimal) *utils.Decimal {
+func roundUnitsWithIncrements(roundMode decimal.RoundingMode, usage, incrm *utils.Decimal) *utils.Decimal {
+	if incrm == nil || incrm.Compare(utils.NewDecimal(0, 0)) == 0 {
+		return usage
+	}
 	usgMaxIncrm := decimal.WithContext(
-		decimal.Context{RoundingMode: decimal.ToZero}).Quo(usage.Big,
+		decimal.Context{RoundingMode: roundMode}).Quo(usage.Big,
 		incrm.Big).RoundToInt()
 	return utils.MultiplyDecimal(utils.NewDecimalFromBig(usgMaxIncrm), incrm)
+}
+
+// roundUnitsWithIncrementsAndLimit rounds the usage based on increments, returning the highest value under limit
+func roundUnitsWithIncrementsAndLimit(usage, incrm, limit *utils.Decimal) *utils.Decimal {
+	if incrm == nil || incrm.Compare(utils.NewDecimal(0, 0)) == 0 {
+		return usage
+	}
+	if usage.Compare(incrm) == -1 {
+		usage = incrm
+	}
+	usgMaxMltp := decimal.WithContext(
+		decimal.Context{RoundingMode: decimal.ToNearestAway}).Quo(usage.Big,
+		incrm.Big).RoundToInt()
+	lmtMaxMltp := decimal.WithContext(
+		decimal.Context{RoundingMode: decimal.ToZero}).Quo(limit.Big,
+		incrm.Big).RoundToInt()
+	if usgMaxMltp.Cmp(lmtMaxMltp) > 0 {
+		usgMaxMltp = lmtMaxMltp
+	}
+	return utils.MultiplyDecimal(utils.NewDecimalFromBig(usgMaxMltp), incrm)
 }
 
 // processAttributeS will process the event with AttributeS
@@ -84,6 +107,7 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaAccounts)
+	cgrEv.APIOpts[utils.MetaCGRSource] = utils.MetaAccounts
 	var tmpReply utils.AttributesProcessEventReply
 	if err = connMgr.Call(ctx, attrSConns, utils.AttributeSv1ProcessEvent,
 		cgrEv, &tmpReply); err != nil {
@@ -196,6 +220,10 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement, dbtedAUnts *utils.Decimal, maxItr int) (ec *utils.EventCharges, err error) {
+	if costIcrm.Increment != nil {
+		aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment)
+	}
+	//fmt.Printf("maxDebitAbstractsFromConcretes: %s, anctID: %s, cncrtBlncs: %s, cgrEv: %s, costIcrm: %s, dbtAUnts: %s, maxItr: %d\n", aUnits.String(), acntID, utils.ToIJSON(cncrtBlncs), utils.ToIJSON(cgrEv), utils.ToIJSON(costIcrm), dbtedAUnts.String(), maxItr)
 	// Init EventCharges
 	calculateCost := costIcrm.RecurrentFee == nil && costIcrm.FixedFee == nil
 	// process AttributeS if needed
@@ -235,8 +263,8 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 			// cleanup the opts
 			delete(cgrEv.APIOpts, utils.OptsRatesIntervalStart)
 			delete(cgrEv.APIOpts, utils.OptsRatesUsage)
-			costIcrm = costIcrm.Clone() // so we don't modify the original
-			costIcrm.FixedFee = rplyCost.Cost
+			costIcrm = costIcrm.Clone()       // so we don't modify the original
+			costIcrm.FixedFee = rplyCost.Cost // FixMe: add here IncrementRounding since the cost can be for more than we have asked as usage
 		}
 		var cUnits *utils.Decimal // concrete units to debit
 		if costIcrm.FixedFee != nil {
@@ -265,7 +293,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 			if aPaid == nil { // going backwards
 				aUnits = utils.DivideDecimal( // divide by 2
 					aUnits, utils.NewDecimal(2, 0))
-				aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment) // make sure abstracts are multiple of increments
+				aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment) // make sure abstracts are multiple of increments
 				if aUnits.Compare(aDenied) >= 0 ||
 					aUnits.Compare(utils.NewDecimal(0, 0)) == 0 ||
 					aUnits.Compare(aQried) == 0 { // loop
@@ -289,7 +317,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 		if aUnits.Compare(aDenied) >= 0 {
 			aUnits = utils.SumDecimal(aPaid, costIcrm.Increment)
 		}
-		aUnits = roundUnitsWithIncrements(aUnits, costIcrm.Increment)
+		aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment)
 		if aUnits.Compare(aPaid) <= 0 ||
 			aUnits.Compare(aDenied) >= 0 ||
 			aUnits.Compare(aQried) == 0 { // loop
@@ -345,25 +373,4 @@ func refundUnitsOnAccount(acnt *utils.Account, units *utils.Decimal, origBlnc *u
 		acnt.Balances[origBlnc.ID] = origBlnc.Clone()
 		acnt.Balances[origBlnc.ID].Units = units.Clone()
 	}
-}
-
-// AccountScDebitAbstracts is a wrapper to unify processing from the client side from multiple subsystems
-func AccountScDebitAbstracts(ctx *context.Context, fltrS *engine.FilterS,
-	connsCfg map[string][]*config.DynamicConns, connMgr *engine.ConnManager,
-	cgrEv *utils.CGREvent) (dbt *utils.EventCharges, err error) {
-	var conns []string
-	if conns, err = engine.GetConnIDs(ctx, connsCfg, utils.MetaAccounts,
-		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, fltrS); err != nil {
-		return
-	}
-	if len(conns) == 0 {
-		err = utils.NewErrNotConnected(utils.AccountS)
-		return
-	}
-	dbt = &utils.EventCharges{}
-	if err = connMgr.Call(ctx, conns,
-		utils.AccountSv1DebitAbstracts, cgrEv, dbt); err != nil {
-		return
-	}
-	return
 }

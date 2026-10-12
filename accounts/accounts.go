@@ -236,6 +236,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 }
 
 // accountDebit will debit the usage out of an Account
+// dbted: used to populate incrementStart so we can properly identify the rate from RateS
 func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usage *utils.Decimal,
 	cgrEv *utils.CGREvent, concretes bool, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
@@ -270,7 +271,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 		if concretes {
 			debFunc = blncOper.debitConcretes
 		}
-		if usage.Compare(utils.NewDecimal(0, 0)) == 0 {
+		if usage.Compare(utils.NewDecimal(0, 0)) <= 0 {
 			return // no more debit
 		}
 		var ecDbt *utils.EventCharges

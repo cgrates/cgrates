@@ -8,6 +8,7 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/ericlagergren/decimal"
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
@@ -69,6 +70,9 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		cgrEv.Tenant, evNm); err != nil {
 		return
 	}
+	if costIcrm.Increment != nil {
+		usage = roundUnitsWithIncrementsAndLimit(usage, costIcrm.Increment, aB.blnCfg.Units) // usage rounded up, lower or equal to balance
+	}
 	// unitFactor
 	var uF *utils.UnitFactor
 	if uF, err = unitFactor(ctx, aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
@@ -83,7 +87,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		if hasUF {
 			maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor) // common units with debit and increments
 		}
-		maxBlcDbt = roundUnitsWithIncrements(maxBlcDbt, costIcrm.Increment)
+		maxBlcDbt = roundUnitsWithIncrements(decimal.ToNearestAway, maxBlcDbt, costIcrm.Increment)
 		if maxBlcDbt.Compare(usage) == -1 { // balance smaller than usage, correct usage
 			usage = maxBlcDbt
 		}
