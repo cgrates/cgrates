@@ -867,6 +867,311 @@ func TestAccountsDebitRoundIncrementCombined(t *testing.T) {
 	}
 }
 
+func TestAccountsDebitAbstractIncrements(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	newDecimal := utils.NewDecimalFromFloat64
+	for _, tc := range []struct {
+		name      string
+		units     float64
+		usage     float64
+		increment *utils.Decimal
+		factor    *utils.Decimal
+		limit     float64
+		unlimited bool
+		wantUsage float64
+		wantUnits float64
+	}{
+		{
+			name:      "roundUp",
+			units:     10,
+			usage:     1.25,
+			increment: newDecimal(1),
+			wantUsage: 2,
+			wantUnits: 8,
+		},
+		{
+			name:      "storedSeconds",
+			units:     130,
+			usage:     float64(120 * time.Second),
+			increment: newDecimal(float64(time.Minute)),
+			factor:    newDecimal(1 / float64(time.Second)),
+			wantUsage: float64(120 * time.Second),
+			wantUnits: 10,
+		},
+		{
+			name:      "balanceLimitWithUnitFactor",
+			units:     3,
+			usage:     2,
+			increment: newDecimal(1),
+			factor:    newDecimal(2),
+			wantUsage: 1,
+			wantUnits: 1,
+		},
+		{
+			name:      "unlimited",
+			units:     0,
+			usage:     1,
+			increment: newDecimal(1),
+			unlimited: true,
+			wantUsage: 1,
+			wantUnits: -1,
+		},
+		{
+			name:      "balanceLimit",
+			units:     3,
+			usage:     4,
+			increment: newDecimal(2),
+			factor:    newDecimal(1),
+			wantUsage: 2,
+			wantUnits: 1,
+		},
+		{
+			name:      "balanceLimitWithoutUnitFactor",
+			units:     3,
+			usage:     3,
+			increment: newDecimal(2),
+			wantUsage: 2,
+			wantUnits: 1,
+		},
+		{
+			name:      "negativeLimitRemainder",
+			units:     0,
+			usage:     12,
+			increment: newDecimal(3),
+			limit:     -10,
+			wantUsage: 9,
+			wantUnits: -9,
+		},
+		{
+			name:      "negativeLimitExact",
+			units:     0,
+			usage:     12,
+			increment: newDecimal(2),
+			limit:     -10,
+			wantUsage: 10,
+			wantUnits: -10,
+		},
+		{
+			name:      "noIncrement",
+			units:     2,
+			usage:     1.25,
+			increment: nil,
+			wantUsage: 1.25,
+			wantUnits: 0.75,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			balance := &utils.Balance{
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: newDecimal(tc.units),
+				Opts:  map[string]any{utils.MetaBalanceLimit: tc.limit},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    tc.increment,
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(0),
+				}},
+			}
+			if tc.factor != nil {
+				balance.UnitFactors = []*utils.UnitFactor{{Factor: tc.factor}}
+			}
+			if tc.unlimited {
+				balance.Opts[utils.MetaBalanceUnlimited] = true
+			}
+			account := &utils.Account{
+				Tenant:   "cgrates.org",
+				ID:       "test",
+				Balances: map[string]*utils.Balance{"AbstractBalance1": balance},
+			}
+			event := &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				Event:   map[string]any{},
+				APIOpts: map[string]any{utils.MetaUsage: newDecimal(tc.usage)},
+			}
+			charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if charges.Abstracts.Compare(newDecimal(tc.wantUsage)) != 0 {
+				t.Errorf("usage: %s, want %g", charges.Abstracts, tc.wantUsage)
+			}
+			if charges.Concretes != nil && charges.Concretes.Compare(newDecimal(0)) != 0 {
+				t.Errorf("cost: %s, want 0", charges.Concretes)
+			}
+			if balance.Units.Compare(newDecimal(tc.wantUnits)) != 0 {
+				t.Errorf("remaining units: %s, want %g", balance.Units, tc.wantUnits)
+			}
+		})
+	}
+}
+
+func TestAccountsDebitInsufficientConcretes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	newDecimal := utils.NewDecimalFromFloat64
+	for _, tc := range []struct {
+		name              string
+		usage             float64
+		concreteUnits     float64
+		wantUsage         float64
+		wantCost          float64
+		wantAbstractUnits float64
+		wantConcreteUnits float64
+	}{
+		{
+			name:              "partialPayment",
+			usage:             3,
+			concreteUnits:     1.5,
+			wantUsage:         3,
+			wantCost:          1.4,
+			wantAbstractUnits: 3,
+			wantConcreteUnits: 0.1,
+		},
+		{
+			name:              "insufficientPayment",
+			usage:             2,
+			concreteUnits:     0.5,
+			wantUsage:         2,
+			wantCost:          0.4,
+			wantAbstractUnits: 4,
+			wantConcreteUnits: 0.1,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			abstractBalance := &utils.Balance{
+				ID:      "AbstractBalance1",
+				Type:    utils.MetaAbstract,
+				Units:   newDecimal(4),
+				Weights: utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(1),
+				}},
+			}
+			concreteBalance := &utils.Balance{
+				ID:      "ConcreteBalance1",
+				Type:    utils.MetaConcrete,
+				Units:   newDecimal(tc.concreteUnits),
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(0.2),
+				}},
+			}
+			account := &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "test",
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": abstractBalance,
+					"ConcreteBalance1": concreteBalance,
+				},
+			}
+			event := &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				Event:   map[string]any{},
+				APIOpts: map[string]any{utils.MetaUsage: newDecimal(tc.usage)},
+			}
+			charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if charges.Abstracts.Compare(newDecimal(tc.wantUsage)) != 0 {
+				t.Errorf("usage: %s, want %g", charges.Abstracts, tc.wantUsage)
+			}
+			if charges.Concretes.Compare(newDecimal(tc.wantCost)) != 0 {
+				t.Errorf("cost: %s, want %g", charges.Concretes, tc.wantCost)
+			}
+			if abstractBalance.Units.Compare(newDecimal(tc.wantAbstractUnits)) != 0 {
+				t.Errorf("remaining abstract units: %s, want %g", abstractBalance.Units, tc.wantAbstractUnits)
+			}
+			if concreteBalance.Units.Compare(newDecimal(tc.wantConcreteUnits)) != 0 {
+				t.Errorf("remaining concrete units: %s, want %g", concreteBalance.Units, tc.wantConcreteUnits)
+			}
+		})
+	}
+}
+
+func TestAccountsDebitConcreteAbstractConcrete(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	newDecimal := utils.NewDecimalFromFloat64
+	account := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test",
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance1": {
+				ID:      "ConcreteBalance1",
+				Type:    utils.MetaConcrete,
+				Units:   newDecimal(1),
+				Weights: utils.DynamicWeights{{Weight: 30}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(1),
+				}},
+			},
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Type:    utils.MetaAbstract,
+				Units:   newDecimal(1),
+				Weights: utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(0),
+				}},
+			},
+			"ConcreteBalance2": {
+				ID:      "ConcreteBalance2",
+				Type:    utils.MetaConcrete,
+				Units:   newDecimal(4),
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(2),
+				}},
+			},
+		},
+	}
+	event := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		Event:   map[string]any{},
+		APIOpts: map[string]any{utils.MetaUsage: newDecimal(3)},
+	}
+	charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if charges.Abstracts.Compare(newDecimal(3)) != 0 {
+		t.Errorf("usage: %s, want 3", charges.Abstracts)
+	}
+	if charges.Concretes.Compare(newDecimal(3)) != 0 {
+		t.Errorf("cost: %s, want 3", charges.Concretes)
+	}
+	wantUnitsMap := map[string]float64{
+		"ConcreteBalance1": 0,
+		"AbstractBalance1": 0,
+		"ConcreteBalance2": 2,
+	}
+	for id, wantUnits := range wantUnitsMap {
+		if units := account.Balances[id].Units; units.Compare(newDecimal(wantUnits)) != 0 {
+			t.Errorf("%s remaining units: %s, want %g", id, units, wantUnits)
+		}
+	}
+	var order []string
+	for _, charge := range charges.Charges {
+		order = append(order, charges.Accounting[charge.ChargingID].BalanceID)
+	}
+	wantOrder := []string{utils.MetaMockAbstract, "AbstractBalance1", utils.MetaMockAbstract}
+	if !reflect.DeepEqual(order, wantOrder) {
+		t.Errorf("debit order: %v, want %v", order, wantOrder)
+	}
+}
+
 func TestV1AccountsForEvent(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
