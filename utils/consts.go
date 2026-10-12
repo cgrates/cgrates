@@ -364,7 +364,6 @@ const (
 	ExtraFields               = "ExtraFields"
 	SourceBalanceSummary      = "SourceBalanceSummary"
 	DestinationBalanceSummary = "DestinationBalanceSummary"
-	MetaSureTax               = "*sure_tax"
 	MetaDynamic               = "*dynamic"
 	MetaCounterEvent          = "*event"
 	MetaBalance               = "*balance"
@@ -2775,34 +2774,10 @@ const (
 	MaskLenCfg         = "mask_length"
 )
 
-// SureTax
+// ConfigSCfg
 const (
-	RootDirCfg              = "root_dir"
-	URLCfg                  = "url"
-	ClientNumberCfg         = "client_number"
-	ValidationKeyCfg        = "validation_key"
-	BusinessUnitCfg         = "business_unit"
-	IncludeLocalCostCfg     = "include_local_cost"
-	ReturnFileCodeCfg       = "return_file_code"
-	ResponseGroupCfg        = "response_group"
-	ResponseTypeCfg         = "response_type"
-	RegulatoryCodeCfg       = "regulatory_code"
-	ClientTrackingCfg       = "client_tracking"
-	CustomerNumberCfg       = "customer_number"
-	OrigNumberCfg           = "orig_number"
-	TermNumberCfg           = "term_number"
-	BillToNumberCfg         = "bill_to_number"
-	ZipcodeCfg              = "zipcode"
-	Plus4Cfg                = "plus4"
-	P2PZipcodeCfg           = "p2pzipcode"
-	P2PPlus4Cfg             = "p2pplus4"
-	UnitsCfg                = "units"
-	UnitTypeCfg             = "unit_type"
-	TaxIncludedCfg          = "tax_included"
-	TaxSitusRuleCfg         = "tax_situs_rule"
-	TransTypeCodeCfg        = "trans_type_code"
-	SalesTypeCodeCfg        = "sales_type_code"
-	TaxExemptionCodeListCfg = "tax_exemption_code_list"
+	RootDirCfg = "root_dir"
+	URLCfg     = "url"
 )
 
 // LoaderCgrCfg
