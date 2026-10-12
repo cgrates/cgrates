@@ -87,7 +87,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		if hasUF {
 			maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor) // common units with debit and increments
 		}
-		maxBlcDbt = roundUnitsWithIncrements(decimal.ToNearestAway, maxBlcDbt, costIcrm.Increment)
+		maxBlcDbt = roundUnitsWithIncrements(decimal.ToZero, maxBlcDbt, costIcrm.Increment)
 		if maxBlcDbt.Compare(usage) == -1 { // balance smaller than usage, correct usage
 			usage = maxBlcDbt
 		}
