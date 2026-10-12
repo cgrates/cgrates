@@ -1187,7 +1187,7 @@ func testStatsSetActionProfileBeforeProcessEv(t *testing.T) {
 						{
 							ID: "HttpPost",
 							Opts: map[string]any{
-								"*url": sqSrv.URL,
+								utils.MetaHTTPurl: sqSrv.URL,
 							},
 						},
 					},

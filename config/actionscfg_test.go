@@ -51,14 +51,14 @@ func TestActionSCfgLoadFromJSONCfg(t *testing.T) {
 		NestedFields:             true,
 		DynaprepaidActionProfile: []string{"val1", "val2"},
 		Opts: &ActionsOpts{
-			Body:                 []*DynamicInterfaceOpt{},
-			Hdrs:                 []*DynamicInterfaceOpt{},
+			HttpBody:             []*DynamicInterfaceOpt{},
+			HttpHdrs:             []*DynamicInterfaceOpt{},
 			HttpContentType:      []*DynamicStringOpt{},
-			Method:               []*DynamicStringOpt{},
+			HttpMethod:           []*DynamicStringOpt{},
 			ProfileIDs:           []*DynamicStringSliceOpt{},
 			ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 			PosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
-			Url:                  []*DynamicStringOpt{},
+			HttpURL:              []*DynamicStringOpt{},
 		},
 	}
 	jsnCfg := NewDefaultCGRConfig()
@@ -172,11 +172,11 @@ func TestActionsOptsLoadFromJSONCfg(t *testing.T) {
 				NestedFields:             true,
 				DynaprepaidActionProfile: []string{"val1", "val2"},
 				Opts: &ActionsOpts{
-					Body:            []*DynamicInterfaceOpt{},
-					Hdrs:            []*DynamicInterfaceOpt{},
+					HttpBody:        []*DynamicInterfaceOpt{},
+					HttpHdrs:        []*DynamicInterfaceOpt{},
 					HttpContentType: []*DynamicStringOpt{},
-					Method:          []*DynamicStringOpt{},
-					Url:             []*DynamicStringOpt{},
+					HttpMethod:      []*DynamicStringOpt{},
+					HttpURL:         []*DynamicStringOpt{},
 					ProfileIDs: []*DynamicStringSliceOpt{
 						{
 							Tenant: "cgrates.org",
@@ -238,10 +238,10 @@ func TestActionsOptsLoadFromJSONCfg(t *testing.T) {
 				NestedFields:             true,
 				DynaprepaidActionProfile: []string{"val1", "val2"},
 				Opts: &ActionsOpts{
-					Body:                 []*DynamicInterfaceOpt{},
-					Hdrs:                 []*DynamicInterfaceOpt{},
+					HttpBody:             []*DynamicInterfaceOpt{},
+					HttpHdrs:             []*DynamicInterfaceOpt{},
 					HttpContentType:      []*DynamicStringOpt{},
-					Method:               []*DynamicStringOpt{},
+					HttpMethod:           []*DynamicStringOpt{},
 					ProfileIDs:           []*DynamicStringSliceOpt{},
 					ProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 					PosterAttempts: []*DynamicIntOpt{
@@ -249,7 +249,7 @@ func TestActionsOptsLoadFromJSONCfg(t *testing.T) {
 							value: ActionsPosterAttempsDftOpt,
 						},
 					},
-					Url: []*DynamicStringOpt{},
+					HttpURL: []*DynamicStringOpt{},
 				},
 			},
 		},
@@ -310,14 +310,14 @@ func TestActionSCfgAsMapInterface(t *testing.T) {
 		utils.NestedFieldsCfg:           true,
 		utils.DynaprepaidActionplansCfg: []string{},
 		utils.OptsCfg: map[string]any{
-			utils.MetaBody:                 []*DynamicInterfaceOpt{},
-			utils.MetaHdrs:                 []*DynamicInterfaceOpt{},
-			utils.MetaHttpContentType:      []*DynamicStringOpt{},
-			utils.MetaMethod:               []*DynamicStringOpt{},
+			utils.MetaHTTPBody:             []*DynamicInterfaceOpt{},
+			utils.MetaHTTPContentType:      []*DynamicStringOpt{},
+			utils.MetaHTTPHdrs:             []*DynamicInterfaceOpt{},
+			utils.MetaHTTPMethod:           []*DynamicStringOpt{},
+			utils.MetaHTTPurl:              []*DynamicStringOpt{},
 			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
 			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
 			utils.MetaPosterAttempts:       []*DynamicIntOpt{{value: ActionsPosterAttempsDftOpt}},
-			utils.MetaUrl:                  []*DynamicStringOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"slices"
 	"strings"
 
@@ -22,10 +23,11 @@ import (
 
 // reqDetails holds HTTP request details: URL, method, headers and static body
 type reqDetails struct {
-	URL        string
-	Method     string
-	Headers    http.Header
-	StaticBody map[string]any
+	StaticBody  map[string]any
+	ContentType string
+	Method      string
+	Headers     http.Header
+	URL         string
 }
 
 // newActHTTPGeneric creates a new action that performs HTTP requests
@@ -63,9 +65,9 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	dP := cgrEv.AsDataProvider() // convert event to data provider
 	reqD := make([]*reqDetails, 0)
 	for _, actD := range diktats {
-		// get value of opts *url and parse it
-		urlOpts, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.Url,
-			utils.MetaURL)
+		// get value of opts *httpURL and parse it
+		urlOpts, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpURL,
+			utils.MetaHTTPurl)
 		if err != nil {
 			return nil, err
 		}
@@ -73,9 +75,9 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		if err != nil {
 			return nil, err
 		}
-		// get value of opts *hdrs and parse it
+		// get value of opts *httpHdrs and parse it
 		h := make(http.Header)
-		hdrOpts, err := engine.GetInterfaceOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.Hdrs, utils.MetaHdrs)
+		hdrOpts, err := engine.GetInterfaceOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpHdrs, utils.MetaHTTPHdrs)
 		if err != nil {
 			return nil, err
 		}
@@ -112,14 +114,19 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 				}
 			}
 		}
-		// get value of opts *method
-		method, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.Method, utils.MetaMethod)
+		// get value of opts *httpMethod
+		method, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpMethod, utils.MetaHTTPMethod)
 		if err != nil {
 			return nil, err
 		}
-		// get value of opts *body, if populated, its value will be inserted in the request body instead of the event that triggered this action
+		// get value of opts *httpContentType
+		contentType, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpContentType, utils.MetaHTTPContentType)
+		if err != nil {
+			return nil, err
+		}
+		// get value of opts *httpBody, if populated, its value will be inserted in the request body instead of the event that triggered this action
 		var staticBody map[string]any
-		staticBodyAny, err := engine.GetInterfaceOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.Body, utils.MetaBody)
+		staticBodyAny, err := engine.GetInterfaceOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpBody, utils.MetaHTTPBody)
 		if err != nil {
 			return nil, err
 		}
@@ -130,10 +137,11 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		}
 		// populate request details
 		aL.reqDetails = append(reqD, &reqDetails{
-			URL:        processedURL,
-			Method:     strings.ToUpper(method),
-			Headers:    h,
-			StaticBody: staticBody,
+			StaticBody:  staticBody,
+			ContentType: contentType,
+			Method:      strings.ToUpper(method),
+			Headers:     h,
+			URL:         processedURL,
 		})
 		if blocker, err := engine.BlockerFromDynamics(ctx, actD.Blockers, aL.fltrS, aL.config.GeneralCfg().DefaultTenant, data); err != nil {
 			return nil, err
@@ -151,25 +159,38 @@ func (aL *actHTTP) execute(ctx *context.Context, data utils.MapStorage, _ string
 		if reqD.StaticBody != nil {
 			data = reqD.StaticBody
 		}
-		var body []byte
-		if body, err = json.Marshal(data); err != nil {
-			return
+		var body io.Reader
+		// build body depending on ContentType
+		if reqD.ContentType == utils.ContentForm {
+			urlVals := url.Values{}
+			for k, v := range data {
+				urlVals.Set(k, utils.IfaceAsString(v))
+			}
+			body = strings.NewReader(urlVals.Encode())
+			reqD.Headers.Set("Content-Type", "application/x-www-form-urlencoded")
+		} else {
+			jsonBody, err := json.Marshal(data)
+			if err != nil {
+				return err
+			}
+			body = bytes.NewBuffer(jsonBody)
+			reqD.Headers.Set("Content-Type", "application/json")
 		}
-		req, rerr := http.NewRequestWithContext(context.Background(), reqD.Method, reqD.URL, bytes.NewBuffer(body))
+
+		req, rerr := http.NewRequestWithContext(context.Background(), reqD.Method, reqD.URL, body)
 		if rerr != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ActionS> failed to send <%v> request <%v> to URL <%v> with error <%v>", reqD.Method, data, reqD.URL, rerr))
+			utils.Logger.Warning(fmt.Sprintf("<ActionS> failed to create <%v> request <%v> to URL <%v> with error <%v>", reqD.Method, data, reqD.URL, rerr))
 			partExec = true
 			continue
 		}
 		req.Header = reqD.Headers
-		req.Header.Set("Content-Type", "application/json")
 
 		// dispatch request
 		if async, has := aL.cfg().Opts[utils.MetaAsync]; has && utils.IfaceAsString(async) == utils.TrueStr {
 			go func(r *http.Request) {
 				resp, err := aL.client.Do(r)
 				if err != nil {
-					utils.Logger.Warning("async http request failed: " + err.Error())
+					utils.Logger.Warning("<ActionS> *async http request failed: " + err.Error())
 					return
 				}
 				// cleanup response to reuse the connection
@@ -260,7 +281,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		if err != nil {
 			return nil, err
 		}
-		processedURL, err := utils.ParseParamForDataProvider(utils.IfaceAsString(actD.Opts[utils.MetaURL]), data, false)
+		processedURL, err := utils.ParseParamForDataProvider(utils.IfaceAsString(actD.Opts[utils.MetaHTTPurl]), data, false)
 		if err != nil {
 			return nil, err
 		}
@@ -269,7 +290,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 			attempts, nil)
 		aL.pstrs[i], _ = ees.NewHTTPjsonMapEE(eeCfg, cfg, cache, nil, nil)
 		// append headers from Opts, if a key exists it will append the values to it
-		if headers, has := actD.Opts[utils.MetaHdrs]; has {
+		if headers, has := actD.Opts[utils.MetaHTTPHdrs]; has {
 			if headersIf, ok := headers.(map[string]any); ok {
 				for hdrKey, hdrsValIf := range headersIf {
 					switch hdrVal := hdrsValIf.(type) {

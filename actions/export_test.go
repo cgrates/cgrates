@@ -25,7 +25,7 @@ func TestACHTTPPostExecute(t *testing.T) {
 		Diktats: []*utils.APDiktat{
 			{
 				Opts: map[string]any{
-					"*url": "~*balance.TestBalance.Value",
+					utils.MetaHTTPurl: "~*balance.TestBalance.Value",
 				},
 			},
 		},
