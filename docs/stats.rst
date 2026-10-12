@@ -147,6 +147,26 @@ Following metrics are implemented:
 	Reply fail count. Counts requests where ReplyState is not "OK". Uses *ReplyState* field in the *Event*. Format: <*\*repfc*> for all failed requests or <*\*repfc#ErrorType*> for specific error types (e.g., *repfc#ERR_INITIATE).
 
 
+.. _stats-oneevent:
+
+StatQueue OneEvent mode
+^^^^^^^^^^^^^^^^^^^^^^^
+
+When both *QueueLength* and *TTL* of a *StatQueueProfile* are set to ``-1``, the *StatQueue* works in *OneEvent* mode: each matching *Event* is added directly into the metrics and then discarded, without being stored as an item in the queue.
+
+Since no *Events* are stored it will lead to a smaller memory footprint, nothing expires or gets removed from the queue and the metrics will accumulate for the whole lifetime of the *StatQueue*.
+
+This makes more suitable for long running metrics (e.g. total cost or total usage) where there is no *QueueLength* and *TTL* limit.
+
+Notes:
+
+* Both fields need to be ``-1``. If only one of them is set, the *Events* are still stored in the queue.
+* All metrics can be stored as OneEvent
+* *MinItems* is compared against the number of all aggregated *Events*.
+* *StatQueue* in OneEvent mode can be reset only via *StatSv1.ResetStatQueue*.
+
+
+
 Use cases
 ---------
 
