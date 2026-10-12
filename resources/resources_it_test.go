@@ -590,7 +590,7 @@ func testResourceSSetActionProfile(t *testing.T) {
 						{
 							ID: "HttpsPost",
 							Opts: map[string]any{
-								"*url": rsSrv.URL,
+								utils.MetaHTTPurl: rsSrv.URL,
 							},
 						},
 					},

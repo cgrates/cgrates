@@ -585,10 +585,11 @@ const (
 	MetaRep                = "*rep"
 	MetaExp                = "*exp"
 	MetaHdr                = "*hdr"
-	MetaHdrs               = "*hdrs"
-	MetaMethod             = "*method"
-	MetaBody               = "*body"
-	MetaHttpContentType    = "*httpContentType"
+	MetaHTTPHdrs           = "*httpHdrs"
+	MetaHTTPMethod         = "*httpMethod"
+	MetaHTTPBody           = "*httpBody"
+	MetaHTTPContentType    = "*httpContentType"
+	MetaHTTPurl            = "*httpURL"
 	MetaTrl                = "*trl"
 	MetaTmp                = "*tmp"
 	MetaOpts               = "*opts"
@@ -1051,7 +1052,6 @@ const (
 	// Diktats Opts Fields
 	MetaBalancePath  = "*balancePath"
 	MetaBalanceValue = "*balanceValue"
-	MetaURL          = "*url"
 )
 
 // Migrator Metas

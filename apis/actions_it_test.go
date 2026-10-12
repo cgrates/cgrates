@@ -420,7 +420,7 @@ func testActionsSetActionProfileBeforeExecuteHTTPPost(t *testing.T) {
 						{
 							ID: "HttpPost",
 							Opts: map[string]any{
-								"*url": actSrv.URL,
+								utils.MetaHTTPurl: actSrv.URL,
 							},
 						},
 					},
