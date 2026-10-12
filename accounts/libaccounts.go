@@ -86,7 +86,7 @@ func roundUnitsWithIncrementsAndLimit(usage, incrm, limit *utils.Decimal) *utils
 		usage = incrm
 	}
 	usgMaxMltp := decimal.WithContext(
-		decimal.Context{RoundingMode: decimal.ToNearestAway}).Quo(usage.Big,
+		decimal.Context{RoundingMode: decimal.ToPositiveInf}).Quo(usage.Big,
 		incrm.Big).RoundToInt()
 	lmtMaxMltp := decimal.WithContext(
 		decimal.Context{RoundingMode: decimal.ToZero}).Quo(limit.Big,
@@ -221,7 +221,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
 	costIcrm *utils.CostIncrement, dbtedAUnts *utils.Decimal, maxItr int) (ec *utils.EventCharges, err error) {
 	if costIcrm.Increment != nil {
-		aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment)
+		aUnits = roundUnitsWithIncrements(decimal.ToPositiveInf, aUnits, costIcrm.Increment)
 	}
 	//fmt.Printf("maxDebitAbstractsFromConcretes: %s, anctID: %s, cncrtBlncs: %s, cgrEv: %s, costIcrm: %s, dbtAUnts: %s, maxItr: %d\n", aUnits.String(), acntID, utils.ToIJSON(cncrtBlncs), utils.ToIJSON(cgrEv), utils.ToIJSON(costIcrm), dbtedAUnts.String(), maxItr)
 	// Init EventCharges
@@ -293,7 +293,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 			if aPaid == nil { // going backwards
 				aUnits = utils.DivideDecimal( // divide by 2
 					aUnits, utils.NewDecimal(2, 0))
-				aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment) // make sure abstracts are multiple of increments
+				aUnits = roundUnitsWithIncrements(decimal.ToZero, aUnits, costIcrm.Increment) // make sure abstracts are multiple of increments
 				if aUnits.Compare(aDenied) >= 0 ||
 					aUnits.Compare(utils.NewDecimal(0, 0)) == 0 ||
 					aUnits.Compare(aQried) == 0 { // loop
@@ -317,7 +317,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 		if aUnits.Compare(aDenied) >= 0 {
 			aUnits = utils.SumDecimal(aPaid, costIcrm.Increment)
 		}
-		aUnits = roundUnitsWithIncrements(decimal.ToNearestAway, aUnits, costIcrm.Increment)
+		aUnits = roundUnitsWithIncrements(decimal.ToZero, aUnits, costIcrm.Increment)
 		if aUnits.Compare(aPaid) <= 0 ||
 			aUnits.Compare(aDenied) >= 0 ||
 			aUnits.Compare(aQried) == 0 { // loop
