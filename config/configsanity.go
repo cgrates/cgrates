@@ -1215,5 +1215,12 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 		}
 	}
 
+	for _, section := range cfg.sections {
+		if checker, ok := section.(SanityChecker); ok {
+			if err := checker.CheckConfigSanity(cfg.sections); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }

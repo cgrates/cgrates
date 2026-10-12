@@ -159,6 +159,12 @@ type Section interface {
 	// UpdateDB(*context.Context) // not know
 }
 
+// SanityChecker adds optional checks after all sections have loaded.
+// Checks must not modify sections or acquire their locks.
+type SanityChecker interface {
+	CheckConfigSanity(Sections) error
+}
+
 func newSections(cfg *CGRConfig) Sections {
 	return Sections{
 		cfg.generalCfg,

@@ -4,8 +4,10 @@
 package config
 
 import (
+	"errors"
 	"testing"
 
+	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1904,5 +1906,38 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 	err = cfg.checkConfigSanity()
 	if err == nil || err.Error() != experr {
 		t.Errorf("expected: %s, received: %s", experr, err)
+	}
+}
+
+type testSanitySection struct{ *CoreSCfg }
+
+func (*testSanitySection) SName() string { return "sanity" }
+func (s *testSanitySection) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) error {
+	return db.GetSection(ctx, s.SName(), s.CoreSCfg)
+}
+func (s *testSanitySection) CloneSection() Section {
+	return &testSanitySection{s.CoreSCfg.Clone()}
+}
+func (s *testSanitySection) CheckConfigSanity(sections Sections) error {
+	cores, _ := sections.Get(CoreSJSON)
+	if cores.(*CoreSCfg).Caps != s.Caps {
+		return errors.New("caps differ")
+	}
+	return nil
+}
+
+func TestConfigSectionSanityDryRun(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	section := &testSanitySection{cfg.CoreSCfg().Clone()}
+	cfg.AddSection(section)
+	var reply string
+	if err := cfg.V1SetConfigFromJSON(context.Background(), &SetConfigFromJSONArgs{
+		Config: `{"cores":{"caps":1},"sanity":{"caps":0}}`,
+		DryRun: true,
+	}, &reply); err == nil || err.Error() != "caps differ" {
+		t.Fatalf("expected caps differ, got %v", err)
+	}
+	if cfg.CoreSCfg().Caps != 0 || section.Caps != 0 {
+		t.Fatal("dry run changed the original sections")
 	}
 }
