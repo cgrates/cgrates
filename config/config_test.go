@@ -2067,7 +2067,7 @@ func TestTemplatesConfig(t *testing.T) {
 		"*kamr":         nil,
 		utils.MetaDMR:   nil,
 		utils.MetaCoA:   nil,
-		utils.MetaUrLog: nil,
+		utils.MetaURLog: nil,
 	}
 	for _, value := range expected {
 		for _, elem := range value {
@@ -2084,7 +2084,7 @@ func TestTemplatesConfig(t *testing.T) {
 	newConfig["*kamr"] = nil
 	newConfig[utils.MetaDMR] = nil
 	newConfig[utils.MetaCoA] = nil
-	newConfig[utils.MetaUrLog] = nil
+	newConfig[utils.MetaURLog] = nil
 	if !reflect.DeepEqual(expected, newConfig) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(newConfig))
 	}
@@ -4465,7 +4465,7 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 			utils.MetaRAR:   {},
 			"*errSip":       {},
 			"*fsr":          {},
-			utils.MetaUrLog: {},
+			utils.MetaURLog: {},
 			utils.MetaDMR: {
 				{utils.TagCfg: "User-Name", utils.PathCfg: "*radDAReq.User-Name", utils.TypeCfg: "*variable", utils.ValueCfg: "~*oreq.User-Name"},
 				{utils.TagCfg: "NAS-IP-Address", utils.PathCfg: "*radDAReq.NAS-IP-Address", utils.TypeCfg: "*variable", utils.ValueCfg: "~*oreq.NAS-IP-Address"},
@@ -4491,7 +4491,7 @@ func TestV1GetConfigSectionTemplates(t *testing.T) {
 		mp[utils.MetaRAR] = []map[string]any{}
 		mp["*errSip"] = []map[string]any{}
 		mp["*fsr"] = []map[string]any{}
-		mp[utils.MetaUrLog] = []map[string]any{}
+		mp[utils.MetaURLog] = []map[string]any{}
 		mp["*kamr"] = []map[string]any{}
 		if !reflect.DeepEqual(reply, expected) {
 			t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expected), utils.ToJSON(reply))

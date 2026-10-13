@@ -577,7 +577,7 @@ func TestURLogActionExecute(t *testing.T) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalEEsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_URLOG",
-		Type: utils.MetaUrLog,
+		Type: utils.MetaURLog,
 	}
 	urLogAction := &actURLog{
 		config:  cfg,
@@ -686,7 +686,7 @@ func TestURLogActionWithOpts(t *testing.T) {
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs), utils.EeSv1, internalURsChann)
 	apA := &utils.APAction{
 		ID:   "ACT_URLOG2",
-		Type: utils.MetaUrLog,
+		Type: utils.MetaURLog,
 		Opts: map[string]any{
 			utils.MetaTemplateID: "CustomTemplate",
 		},

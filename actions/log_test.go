@@ -17,7 +17,7 @@ func TestACExecuteActURLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cfg.ActionSCfg().Conns[utils.MetaEEs] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaEEs)}}}
-	cfg.TemplatesCfg()[utils.MetaUrLog][0].Filters = []string{"invalid_filter_value"}
+	cfg.TemplatesCfg()[utils.MetaURLog][0].Filters = []string{"invalid_filter_value"}
 	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
