@@ -2960,3 +2960,168 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSGetRoutes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+	clnt := &testMockClients{
+		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{
+					{
+						ProfileID: "RouteProfile1",
+						Sorting:   utils.MetaWeight,
+						Routes: []*utils.SortedRoute{
+							{
+								RouteID:         "route1",
+								RouteParameters: "param1",
+								SortingData: map[string]any{
+									"Weight": 10,
+								},
+							},
+						},
+					},
+					{
+						ProfileID: "RouteProfile2",
+						Sorting:   utils.MetaWeight,
+						Routes: []*utils.SortedRoute{
+							{
+								RouteID:         "route2",
+								RouteParameters: "param2",
+								SortingData: map[string]any{
+									"Weight": 20,
+								},
+							},
+						},
+					},
+				}
+				return nil
+			},
+		},
+	}
+	addInternalConn(sessions, cfg, utils.MetaRoutes, utils.RouteSv1, clnt)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ev1",
+		Event: map[string]any{
+			utils.ACD: "10s",
+		},
+		APIOpts: map[string]any{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	exp := utils.SortedRoutesList{
+		{
+			ProfileID: "RouteProfile1",
+			Sorting:   utils.MetaWeight,
+			Routes: []*utils.SortedRoute{
+				{
+					RouteID:         "route1",
+					RouteParameters: "param1",
+					SortingData: map[string]any{
+						"Weight": 10,
+					},
+				},
+			},
+		},
+		{
+			ProfileID: "RouteProfile2",
+			Sorting:   utils.MetaWeight,
+			Routes: []*utils.SortedRoute{
+				{
+					RouteID:         "route2",
+					RouteParameters: "param2",
+					SortingData: map[string]any{
+						"Weight": 20,
+					},
+				},
+			},
+		},
+	}
+
+	got, err := sessions.getRoutes(ctx, cgrEv)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(got, exp) {
+		t.Errorf("Expected %v, \nrecieved %v", utils.ToJSON(exp), utils.ToJSON(got))
+	}
+	if cgrEv.Event[utils.Usage] != "10s" {
+		t.Errorf("Expected usage: 10s, recieved: %v", cgrEv.Event[utils.Usage])
+	}
+}
+
+func TestSessionsGetRoutesErrors(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
+	locker := engine.NewLocker(cfg)
+	data, dberr := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if dberr != nil {
+		t.Fatal(dberr)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
+	ctx := context.TODO()
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "ev1",
+		Event: map[string]any{
+			utils.ACD: "10s",
+		},
+		APIOpts: map[string]any{
+			utils.OptsRoutesProfilesCount: 1,
+		},
+	}
+
+	t.Run("Call Error: NOT_IMPLEMENTED", func(t *testing.T) {
+		clnt := &testMockClients{
+			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
+				utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+					return utils.ErrNotImplemented
+				},
+			},
+		}
+		addInternalConn(sessions, cfg, utils.MetaRoutes, utils.RouteSv1, clnt)
+		expErr := "ROUTES_ERROR:NOT_IMPLEMENTED"
+		_, err := sessions.getRoutes(ctx, cgrEv)
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected error %v, recieved %v", expErr, err)
+		}
+	})
+
+	t.Run("GetConnIDs error: NOT_FOUND", func(t *testing.T) {
+		cfg.SessionSCfg().Conns[utils.MetaRoutes] = []*config.DynamicConns{
+			{
+				ConnIDs:   []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRoutes)},
+				FilterIDs: []string{"invFilterID"},
+			},
+		}
+		expErr := "NOT_FOUND:invFilterID"
+		_, err := sessions.getRoutes(ctx, cgrEv)
+		if err == nil || err.Error() != expErr {
+			t.Errorf("Expected error %v, recieved %v", expErr, err)
+		}
+	})
+}
