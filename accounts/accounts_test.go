@@ -918,6 +918,25 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 			wantUnits: -1,
 		},
 		{
+			name:      "unlimitedRoundUp",
+			units:     0,
+			usage:     1.25,
+			increment: newDecimal(1),
+			unlimited: true,
+			wantUsage: 2,
+			wantUnits: -2,
+		},
+		{
+			name:      "unlimitedStoredSeconds",
+			units:     0,
+			usage:     float64(61 * time.Second),
+			increment: newDecimal(float64(time.Minute)),
+			factor:    newDecimal(1 / float64(time.Second)),
+			unlimited: true,
+			wantUsage: float64(120 * time.Second),
+			wantUnits: -120,
+		},
+		{
 			name:      "balanceLimit",
 			units:     3,
 			usage:     4,
@@ -959,6 +978,14 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 			increment: nil,
 			wantUsage: 1.25,
 			wantUnits: 0.75,
+		},
+		{
+			name:      "balanceLimitNoIncrement",
+			units:     1,
+			usage:     1.25,
+			increment: nil,
+			wantUsage: 1,
+			wantUnits: 0,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
