@@ -2699,7 +2699,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Value: utils.StringPointer("~*req.CustomFilter"),
 			},
 		},
-		utils.MetaUrLog: {
+		utils.MetaURLog: {
 			{
 				Tag:       utils.StringPointer("ToR"),
 				Path:      utils.StringPointer("*ur.ToR"),
@@ -2753,7 +2753,7 @@ func TestDfTemplateSJsonCfg(t *testing.T) {
 				Tag:       utils.StringPointer("Source"),
 				Path:      utils.StringPointer("*ur.Source"),
 				Type:      utils.StringPointer(utils.MetaConstant),
-				Value:     utils.StringPointer(utils.MetaUrLog),
+				Value:     utils.StringPointer(utils.MetaURLog),
 				Mandatory: utils.BoolPointer(true),
 			},
 			{

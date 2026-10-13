@@ -510,7 +510,7 @@ func TestActionsExecuteActionsLogURs(t *testing.T) {
 	fltrs := engine.NewFilterS(cfg, nil, dm)
 
 	// expArgs := &utils.CGREvent{
-	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for urlog
+	// 	Flags: []string{utils.ConcatenatedKey(utils.MetaChargers, utils.FalseStr)}, // do not try to get the chargers for urLog
 	// 	CGREvent: *utils.NMAsCGREvent(utils.NewOrderedNavigableMap(), "cgrates.org",
 	// 		utils.NestingSep, utils.MapStorage{}),
 	// }

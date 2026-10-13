@@ -58,7 +58,7 @@ func (aL *actURLog) execute(ctx *context.Context, data utils.MapStorage, tnt str
 	if len(eesConns) == 0 {
 		return fmt.Errorf("no connection with EEs Server")
 	}
-	template := aL.config.TemplatesCfg()[utils.MetaUrLog]
+	template := aL.config.TemplatesCfg()[utils.MetaURLog]
 	if id, has := aL.cfg().Opts[utils.MetaTemplateID]; has { // if templateID is not present we use default template
 		template = aL.config.TemplatesCfg()[utils.IfaceAsString(id)]
 	}
@@ -68,7 +68,7 @@ func (aL *actURLog) execute(ctx *context.Context, data utils.MapStorage, tnt str
 	if optsMS == nil {
 		optsMS = utils.MapStorage{}
 	}
-	optsMS[utils.MetaChargers] = false // do not try to get the chargers for urlog
+	optsMS[utils.MetaChargers] = false // do not try to get the chargers for urLog
 	oNm := map[string]*utils.OrderedNavigableMap{
 		utils.MetaUR: utils.NewOrderedNavigableMap(),
 	}
