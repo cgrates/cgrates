@@ -365,6 +365,7 @@ func CapturePprofProfile(t testing.TB, cfg *config.CGRConfig, profile, outputPat
 // TestEngine holds the setup parameters and configurations
 // required for running integration tests.
 type TestEngine struct {
+	BinaryPath       string            // executable name or path (defaults to cgr-engine)
 	ConfigPath       string            // path to the main configuration file
 	ConfigJSON       string            // JSON cfg content (standalone/overwrites static configs)
 	DBCfg            DBCfg             // custom db settings for dynamic setup (overrides static config)
@@ -377,7 +378,7 @@ type TestEngine struct {
 	Persist          bool              // keep generated config dir after test (logs its path)
 
 	// PreStartHook executes custom logic relying on CGRConfig
-	// before starting cgr-engine.
+	// before starting the engine.
 	PreStartHook func(testing.TB, *config.CGRConfig)
 
 	cmd        *exec.Cmd
@@ -387,7 +388,7 @@ type TestEngine struct {
 	extraFlags []string
 }
 
-// Run sets up and starts a cgr-engine for testing. Engine logs
+// Run sets up and starts an engine for testing. Engine logs
 // are dumped via t.Log on failure.
 func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *config.CGRConfig) {
 	t.Helper()
@@ -476,7 +477,11 @@ func (ng *TestEngine) start(t testing.TB) {
 	if ng.cmd != nil && !ng.stopped {
 		ng.stop(t)
 	}
-	binPath, err := exec.LookPath("cgr-engine")
+	binary := ng.BinaryPath
+	if binary == "" {
+		binary = "cgr-engine"
+	}
+	binPath, err := exec.LookPath(binary)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -487,7 +492,7 @@ func (ng *TestEngine) start(t testing.TB) {
 	ng.cmd.Stdout = w
 	ng.cmd.Stderr = w
 	if err := ng.cmd.Start(); err != nil {
-		t.Fatalf("cgr-engine command failed: %v", err)
+		t.Fatalf("%s command failed: %v", binary, err)
 	}
 	ng.stopped = false
 	backoff := utils.FibDuration(time.Millisecond, 0)
@@ -511,17 +516,17 @@ func (ng *TestEngine) stop(t testing.TB) {
 	ng.stopped = true
 	if ng.GracefulShutdown {
 		if err := ng.cmd.Process.Signal(syscall.SIGTERM); err != nil {
-			t.Errorf("failed to terminate cgr-engine process (%d): %v",
+			t.Errorf("failed to terminate engine process (%d): %v",
 				ng.cmd.Process.Pid, err)
 		}
 		if err := ng.cmd.Wait(); err != nil {
-			t.Errorf("cgr-engine process (%d) exited with error: %v",
+			t.Errorf("engine process (%d) exited with error: %v",
 				ng.cmd.Process.Pid, err)
 		}
 		return
 	}
 	if err := ng.cmd.Process.Kill(); err != nil {
-		t.Errorf("failed to kill cgr-engine process (%d): %v",
+		t.Errorf("failed to kill engine process (%d): %v",
 			ng.cmd.Process.Pid, err)
 	}
 	_ = ng.cmd.Wait()
