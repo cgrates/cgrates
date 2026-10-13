@@ -70,9 +70,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		cgrEv.Tenant, evNm); err != nil {
 		return
 	}
-	if costIcrm.Increment != nil {
-		usage = roundUnitsWithIncrementsAndLimit(usage, costIcrm.Increment, aB.blnCfg.Units) // usage rounded up, lower or equal to balance
-	}
 	// unitFactor
 	var uF *utils.UnitFactor
 	if uF, err = unitFactor(ctx, aB.blnCfg.UnitFactors, aB.fltrS, cgrEv.Tenant, evNm); err != nil {
@@ -82,11 +79,14 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	if uF != nil && uF.Factor.Compare(utils.NewDecimal(1, 0)) != 0 {
 		hasUF = true
 	}
+	maxBlcDbt := aB.blnCfg.Units.Clone()
+	if hasUF {
+		maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor) // common units with debit and increments
+	}
+	if costIcrm.Increment != nil {
+		usage = roundUnitsWithIncrementsAndLimit(usage, costIcrm.Increment, maxBlcDbt) // usage rounded up, lower or equal to balance
+	}
 	if blncLmt != nil { // unlimited balances do not need usage limiting
-		maxBlcDbt := aB.blnCfg.Units.Clone()
-		if hasUF {
-			maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor) // common units with debit and increments
-		}
 		maxBlcDbt = roundUnitsWithIncrements(decimal.ToZero, maxBlcDbt, costIcrm.Increment)
 		if maxBlcDbt.Compare(usage) == -1 { // balance smaller than usage, correct usage
 			usage = maxBlcDbt
