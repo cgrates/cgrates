@@ -60,26 +60,30 @@ type RjReader struct {
 	isInString bool // ignore character in strings
 	indx       int  // used to parse the buffer
 	envOff     bool
+	readErr    error
 }
 
 // Read implementation
-func (rjr *RjReader) Read(p []byte) (n int, err error) {
-	for n = range p {
-		p[n], err = rjr.ReadByte()
+func (rjr *RjReader) Read(p []byte) (int, error) {
+	// Decoders may retry a read that returned both bytes and an error.
+	if rjr.readErr != nil {
+		return 0, rjr.readErr
+	}
+	for n := range p {
+		p[n], rjr.readErr = rjr.ReadByte()
+		if rjr.readErr != nil {
+			return n, rjr.readErr
+		}
 		if !rjr.envOff &&
 			p[n] == '*' &&
 			rjr.checkMeta() {
-			if err = rjr.replaceEnv(rjr.indx - 1); err != nil {
-				return
+			if rjr.readErr = rjr.replaceEnv(rjr.indx - 1); rjr.readErr != nil {
+				return n, rjr.readErr
 			}
 			p[n] = rjr.buf[rjr.indx-1] // replace with first value
 		}
-		if err != nil {
-			return
-		}
 	}
-	n++ //because it starts from 0
-	return
+	return len(p), nil
 }
 
 // Close implementation
