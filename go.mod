@@ -46,7 +46,7 @@ require (
 	github.com/reeflective/readline v1.3.1-0.20260915095427-196a349a42c3
 	github.com/twmb/franz-go v1.22.2
 	github.com/twmb/franz-go/pkg/kadm v1.19.0
-	github.com/ugorji/go/codec v1.2.12
+	github.com/ugorji/go/codec v1.3.2
 	go.mongodb.org/mongo-driver v1.17.10
 	golang.org/x/crypto v0.58.0
 	golang.org/x/exp v0.0.0-20261013213113-2ab7f3cbc5fb
