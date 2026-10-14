@@ -808,7 +808,7 @@ func TestLoadRPCConnsError(t *testing.T) {
 	      },
      },		
 }`
-	expected := "json: cannot unmarshal string into Go struct field RPCConnJson.PoolSize of type int"
+	expected := "json: cannot unmarshal string into Go struct field RPCConnsJson.*localhost.poolSize of type int"
 	cgrCfg := NewDefaultCGRConfig()
 	if cgrJSONCfg, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -892,7 +892,7 @@ func TestLoadDataDBCfgErrorCase1(t *testing.T) {
 		},
 	}
 }`
-	expected := "json: cannot unmarshal number into Go struct field DbConnJson.dbConns.dbHost of type string"
+	expected := "json: cannot unmarshal number into Go struct field DbJsonCfg.dbConns.*default.dbHost of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -959,7 +959,7 @@ func TestLoadKamAgentCfgError(t *testing.T) {
 			"timezone": 1234,
 		},
 	}`
-	expected := "json: cannot unmarshal number into Go struct field KamAgentJsonCfg.Timezone of type string"
+	expected := "json: cannot unmarshal number into Go struct field KamAgentJsonCfg.timezone of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -974,7 +974,7 @@ func TestLoadAsteriskAgentCfgError(t *testing.T) {
 		"enabled": "notabool",
 	},
 }`
-	expected := "json: cannot unmarshal string into Go struct field AsteriskAgentJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal string into Go struct field AsteriskAgentJsonCfg.enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -993,7 +993,7 @@ func TestLoadDiameterAgentCfgError(t *testing.T) {
          ]
       }
 }`
-	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.requestProcessors.ID of type string"
+	expected := "json: cannot unmarshal number into Go struct field DiameterAgentJsonCfg.requestProcessors.0.id of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1012,7 +1012,7 @@ func TestLoadRadiusAgentCfgError(t *testing.T) {
 	]
 }
 }`
-	expected := "json: cannot unmarshal number into Go struct field RadiusListenerJsonCfg.listeners.authAddress of type string"
+	expected := "json: cannot unmarshal number into Go struct field RadiusAgentJsonCfg.listeners.0.authAddress of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1031,7 +1031,7 @@ func TestLoadDNSAgentCfgError(t *testing.T) {
 			],
 		},
 	}`
-	expected := "json: cannot unmarshal number into Go struct field ListenerJsnCfg.listeners.Address of type string"
+	expected := "json: cannot unmarshal number into Go struct field DNSAgentJsonCfg.listeners.0.address of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1048,7 +1048,7 @@ func TestLoadHttpAgentCfgError(t *testing.T) {
 		},
 	],	
 }`
-	expected := "json: cannot unmarshal array into Go struct field HttpAgentJsonCfg.id of type string"
+	expected := "json: cannot unmarshal array into Go struct field .0.id of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1125,7 +1125,7 @@ func TestLoadLoaderSCfgError(t *testing.T) {
 		},
 	],	
 }`
-	expected := "json: cannot unmarshal number into Go struct field LoaderJsonCfg.runDelay of type string"
+	expected := "json: cannot unmarshal number into Go struct field .0.runDelay of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1201,7 +1201,7 @@ func TestLoadAnalyzerCgrCfgError(t *testing.T) {
         },
     }
 }`
-	expected := "json: cannot unmarshal number into Go struct field AnalyzerSJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal number into Go struct field AnalyzerSJsonCfg.enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1216,7 +1216,7 @@ func TestLoadAPIBanCgrCfgError(t *testing.T) {
 			"enabled": "no",
 		},
 }`
-	expected := "json: cannot unmarshal string into Go struct field APIBanJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal string into Go struct field APIBanJsonCfg.enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1231,7 +1231,7 @@ func TestLoadApierCfgError(t *testing.T) {
        "enabled": "yes",
     },
 }`
-	expected := "json: cannot unmarshal string into Go struct field AdminSJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal string into Go struct field AdminSJsonCfg.enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(myJSONStr)); err != nil {
 		t.Error(err)
@@ -1261,7 +1261,7 @@ func TestLoadEesCfgError(t *testing.T) {
             "enabled": "yes"
 	  }
     }`
-	expected := "json: cannot unmarshal string into Go struct field EEsJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal string into Go struct field EEsJsonCfg.enabled of type bool"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1310,7 +1310,7 @@ func TestLoadSIPAgentCfgError(t *testing.T) {
 		],
 	},
 }`
-	expected := "json: cannot unmarshal number into Go struct field ReqProcessorJsnCfg.requestProcessors.ID of type string"
+	expected := "json: cannot unmarshal number into Go struct field SIPAgentJsonCfg.requestProcessors.0.id of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1329,7 +1329,7 @@ func TestLoadTemplateSCfgError(t *testing.T) {
            ],
      }
 }`
-	expected := "json: cannot unmarshal number into Go struct field FcTemplateJsonCfg.Tag of type string"
+	expected := "json: cannot unmarshal number into Go struct field .custom_template.0.tag of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -1360,7 +1360,7 @@ func TestLoadConfigsCfgError(t *testing.T) {
           "url": 123,
       },
 }`
-	expected := "json: cannot unmarshal number into Go struct field ConfigSCfgJson.Url of type string"
+	expected := "json: cannot unmarshal number into Go struct field ConfigSCfgJson.url of type string"
 	cgrConfig := NewDefaultCGRConfig()
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {
 		t.Error(err)
@@ -5339,7 +5339,7 @@ func TestLoadConfigFromReaderLoadFunctionsError(t *testing.T) {
 		},				
      }
 }`
-	expected := `json: cannot unmarshal number into Go struct field DbConnJson.dbConns.dbType of type string`
+	expected := `json: cannot unmarshal number into Go struct field DbJsonCfg.dbConns.*default.dbType of type string`
 	cgrCfg := NewDefaultCGRConfig()
 	if err := loadConfigFromReader(context.Background(), strings.NewReader(cfgJSONStr),
 		cgrCfg.sections, true, cgrCfg); err == nil || err.Error() != expected {
@@ -5567,7 +5567,7 @@ func TestLoadAccountSCfgError(t *testing.T) {
 	"enabled": "not_bool",
    }
 }`
-	expected := "json: cannot unmarshal string into Go struct field AccountSJsonCfg.Enabled of type bool"
+	expected := "json: cannot unmarshal string into Go struct field AccountSJsonCfg.enabled of type bool"
 	cfg := NewDefaultCGRConfig()
 
 	if cgrCfgJSON, err := NewCgrJsonCfgFromBytes([]byte(cfgJSONStr)); err != nil {

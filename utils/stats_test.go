@@ -972,7 +972,7 @@ func TestStatQueueUnmarshalJSONErr(t *testing.T) {
 		{
 			name:    "invalid json",
 			data:    []byte{212},
-			wantErr: "invalid character 'Ô' looking for beginning of value",
+			wantErr: "invalid character '\\xd4' looking for beginning of value",
 		},
 		{
 			name: "unsupported metric",
@@ -1009,7 +1009,7 @@ func TestStatQueueUnmarshalJSONErr(t *testing.T) {
 
 func TestStatQueueWithAPIOptsUnmarshalJSONErrWithSSQ(t *testing.T) {
 	ssq := &StatQueueWithAPIOpts{}
-	expErr := "invalid character 'Ô' looking for beginning of value"
+	expErr := "invalid character '\\xd4' looking for beginning of value"
 	if err := ssq.UnmarshalJSON([]byte{212}); err == nil || err.Error() != expErr {
 		t.Errorf("Expected error <%v>, Received error <%v>", expErr, err)
 	}

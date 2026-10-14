@@ -1,6 +1,6 @@
 module github.com/cgrates/cgrates
 
-go 1.26.2
+go 1.27.2
 
 // replace github.com/cgrates/radigo => ../radigo
 
@@ -27,6 +27,7 @@ require (
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/charmbracelet/bubbles v0.21.0
 	github.com/charmbracelet/bubbletea v1.3.5
+	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/creack/pty v1.1.24
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/elastic/elastic-transport-go/v8 v8.6.0
@@ -55,8 +56,6 @@ require (
 	gorm.io/gorm v1.25.12
 	nhooyr.io/websocket v1.8.17
 )
-
-require github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
@@ -87,7 +86,6 @@ require (
 	github.com/cenkalti/hub v1.0.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/colorprofile v0.3.1 // indirect
-	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
 	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.2 // indirect
@@ -96,6 +94,7 @@ require (
 	github.com/coder/websocket v1.8.14 // indirect
 	github.com/couchbase/ghistogram v0.1.0 // indirect
 	github.com/couchbase/moss v0.3.0 // indirect
+	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
 	github.com/go-logr/logr v1.4.3 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-sql-driver/mysql v1.8.1 // indirect
