@@ -59,11 +59,6 @@ func (tp *ThresholdProfile) Clone() *ThresholdProfile {
 	return clone
 }
 
-// CacheClone returns a clone of ThresholdProfile used by ltcache CacheCloner
-func (tp *ThresholdProfile) CacheClone() any {
-	return tp.Clone()
-}
-
 // TenantID returns the concatenated key between tenant and ID
 func (tp *ThresholdProfile) TenantID() string {
 	return ConcatenatedKey(tp.Tenant, tp.ID)
@@ -293,11 +288,6 @@ func (t *Threshold) Clone() *Threshold {
 		Snooze: t.Snooze,
 	}
 	return clone
-}
-
-// CacheClone returns a clone of Threshold used by ltcache CacheCloner
-func (t *Threshold) CacheClone() any {
-	return t.Clone()
 }
 
 // TenantID returns the concatenated key between tenant and ID

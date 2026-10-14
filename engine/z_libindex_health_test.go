@@ -50,9 +50,9 @@ func TestHealthFilterAttributes(t *testing.T) {
 	}
 
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		utils.CacheAttributeFilterIndexes); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -125,12 +125,12 @@ func TestHealthReverseFilter(t *testing.T) {
 	}
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, false, nil, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil, nil)
 	}
-	objCaches[utils.CacheRateFilterIndexes] = ltcache.NewCache(-1, 0, false, false, nil, nil)
+	objCaches[utils.CacheRateFilterIndexes] = ltcache.NewCache(-1, 0, false, nil, nil)
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -172,9 +172,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -207,9 +207,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -244,9 +244,9 @@ func TestHealthIndexThreshold(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheThresholdFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -292,9 +292,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -327,9 +327,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -370,9 +370,9 @@ func TestHealthIndexCharger(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -422,9 +422,9 @@ func TestHealthIndexResources(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -457,9 +457,9 @@ func TestHealthIndexResources(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -504,9 +504,9 @@ func TestHealthIndexResources(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheResourceFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -568,9 +568,9 @@ func TestHealthIndexStats(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -603,9 +603,9 @@ func TestHealthIndexStats(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -662,9 +662,9 @@ func TestHealthIndexStats(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheStatFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -730,9 +730,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -779,9 +779,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		MissingFilters: map[string][]string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -852,9 +852,9 @@ func TestHealthIndexRoutes(t *testing.T) {
 		},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheRouteFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -950,9 +950,9 @@ func TestIndexHealthMultipleProfiles(t *testing.T) {
 		MissingObjects: []string{},
 	}
 	if rply, err := GetFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		utils.CacheChargerFilterIndexes); err != nil {
 		t.Error(err)
 	} else {
@@ -999,7 +999,7 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 	// get cachePrefix for every subsystem
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, false, nil, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil, nil)
 	}
 
 	// reverse indexes for charger
@@ -1014,8 +1014,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(exp, rply) {
@@ -1048,8 +1048,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(0, 0, false, false, nil, nil),
-		ltcache.NewCache(0, 0, false, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
+		ltcache.NewCache(0, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1089,8 +1089,8 @@ func TestIndexHealthReverseChecking(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1176,7 +1176,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	// get cachePrefix for every subsystem
 	objCaches := make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, false, nil, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil, nil)
 	}
 
 	exp := map[string]*ReverseFilterIHReply{
@@ -1189,8 +1189,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1212,7 +1212,7 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 	// initialized cachePrefix for every subsystem again for a new case
 	objCaches = make(map[string]*ltcache.Cache)
 	for indxType := range utils.CacheIndexesToPrefix {
-		objCaches[indxType] = ltcache.NewCache(-1, 0, false, false, nil, nil)
+		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil, nil)
 	}
 	chPrf1 = &utils.ChargerProfile{
 		Tenant: "cgrates.org",
@@ -1245,8 +1245,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {
@@ -1280,8 +1280,8 @@ func TestIndexHealthMissingReverseIndexes(t *testing.T) {
 		},
 	}
 	if rply, err := GetRevFltrIdxHealth(context.Background(), dm,
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
-		ltcache.NewCache(-1, 0, false, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
+		ltcache.NewCache(-1, 0, false, nil, nil),
 		objCaches); err != nil {
 		t.Fatal(err)
 	} else {

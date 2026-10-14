@@ -51,11 +51,6 @@ func (p *IPProfile) Clone() *IPProfile {
 	}
 }
 
-// CacheClone returns a clone of IPProfile used by ltcache CacheCloner
-func (p *IPProfile) CacheClone() any {
-	return p.Clone()
-}
-
 func (p *IPProfile) Set(path []string, val any, newBranch bool) error {
 	if len(path) != 1 && len(path) != 2 {
 		return ErrWrongPath
@@ -455,11 +450,6 @@ func InterfaceToPools(v any) []*IPPool {
 // TenantID returns the unique ID in a multi-tenant environment
 func (a *IPAllocations) TenantID() string {
 	return ConcatenatedKey(a.Tenant, a.ID)
-}
-
-// CacheClone returns a clone of IPAllocations object used by ltcache CacheCloner.
-func (a *IPAllocations) CacheClone() any {
-	return a.Clone()
 }
 
 // Clone creates a deep clone of the IPAllocations object.

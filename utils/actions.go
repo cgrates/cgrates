@@ -61,11 +61,6 @@ func (ap *ActionProfile) Clone() *ActionProfile {
 	return cloned
 }
 
-// CacheClone returns a clone of ActionProfile used by ltcache CacheCloner
-func (ap *ActionProfile) CacheClone() any {
-	return ap.Clone()
-}
-
 // ActionProfileWithAPIOpts wraps ActionProfile with APIOpts.
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile

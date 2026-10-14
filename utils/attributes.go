@@ -46,11 +46,6 @@ func (ap *AttributeProfile) Clone() *AttributeProfile {
 	return clone
 }
 
-// CacheClone returns a clone of AttributeProfile used by ltcache CacheCloner
-func (ap *AttributeProfile) CacheClone() any {
-	return ap.Clone()
-}
-
 // AttributeProfileWithAPIOpts wraps AttributeProfile with APIOpts.
 type AttributeProfileWithAPIOpts struct {
 	*AttributeProfile

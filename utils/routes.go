@@ -60,11 +60,6 @@ func (rp *RouteProfile) Clone() *RouteProfile {
 	return clone
 }
 
-// CacheClone returns a clone of RouteProfile used by ltcache CacheCloner
-func (rp *RouteProfile) CacheClone() any {
-	return rp.Clone()
-}
-
 // RouteProfileWithAPIOpts wraps RouteProfile with APIOpts.
 type RouteProfileWithAPIOpts struct {
 	*RouteProfile

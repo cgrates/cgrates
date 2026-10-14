@@ -66,11 +66,6 @@ func (tp *TrendProfile) Clone() (clnTp *TrendProfile) {
 	return
 }
 
-// CacheClone returns a clone of TrendProfile used by ltcache CacheCloner
-func (tP *TrendProfile) CacheClone() any {
-	return tP.Clone()
-}
-
 // TenantID returns the concatenated tenant and ID.
 func (tp *TrendProfile) TenantID() string {
 	return ConcatenatedKey(tp.Tenant, tp.ID)
@@ -341,11 +336,6 @@ func (t *Trend) Clone() *Trend {
 		clone.tPrfl = t.tPrfl.Clone()
 	}
 	return clone
-}
-
-// CacheClone returns a clone of Trend used by ltcache CacheCloner
-func (t *Trend) CacheClone() any {
-	return t.Clone()
 }
 
 // TrendWithAPIOpts wraps Trend with APIOpts.

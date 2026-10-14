@@ -866,12 +866,6 @@ func TestAttributeProfileClone(t *testing.T) {
 				t.Errorf("Clone returned the same instance, expected a new instance")
 			}
 		})
-		t.Run(tt.name, func(t *testing.T) {
-			rcv := tt.ap.CacheClone()
-			if !reflect.DeepEqual(rcv, tt.ap) {
-				t.Errorf("Expected %+v, received %+v", tt.ap, rcv)
-			}
-		})
 	}
 }
 

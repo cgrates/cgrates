@@ -82,42 +82,6 @@ func TestTrendProfileClone(t *testing.T) {
 	}
 }
 
-func TestTrendProfileCacheClone(t *testing.T) {
-	tests := []struct {
-		name string
-		tp   *TrendProfile
-	}{
-		{
-			name: "Complete TrendProfile",
-			tp: &TrendProfile{
-				Tenant:          "cgrates.org",
-				ID:              "ID",
-				Schedule:        "Schedule",
-				StatID:          "StatID",
-				Metrics:         []string{"metric1", "metric2"},
-				TTL:             10 * time.Minute,
-				QueueLength:     100,
-				MinItems:        10,
-				CorrelationType: "average",
-				Tolerance:       0.05,
-				Stored:          true,
-				ThresholdIDs:    []string{"thresh1", "thresh2"},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.tp.CacheClone()
-			if !reflect.DeepEqual(got, tt.tp) {
-				t.Errorf("Expected %v, recieved %v", tt.tp, got)
-			}
-			if tt.tp != nil && got == tt.tp {
-				t.Errorf("Clone returned the same instance, expected a new instance")
-			}
-		})
-	}
-}
-
 func TestTrendProfileTenantIDAndTrendProfileWithAPIOpts(t *testing.T) {
 
 	tp := &TrendProfile{
@@ -1191,12 +1155,6 @@ func TestTrendClone(t *testing.T) {
 			}
 			if tt.trend != nil && got == tt.trend {
 				t.Errorf("Clone returned the same instance, expected a new instance")
-			}
-		})
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.trend.CacheClone()
-			if !reflect.DeepEqual(got, tt.trend) {
-				t.Errorf("Expected %+v, recieved %+v", tt.trend, got)
 			}
 		})
 	}

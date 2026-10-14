@@ -365,7 +365,7 @@ func TestResourceProfileMerge(t *testing.T) {
 	}
 }
 
-func TestResourceProfileCloneCacheClone(t *testing.T) {
+func TestResourceProfileClone(t *testing.T) {
 	var nilRP *ResourceProfile
 	if nilRP.Clone() != nil {
 		t.Fatal("Expected nil clone for nil ResourceProfile")
@@ -396,17 +396,6 @@ func TestResourceProfileCloneCacheClone(t *testing.T) {
 				return r.Clone()
 			},
 		},
-		{
-			name: "CacheClone",
-			clone: func(r *ResourceProfile) *ResourceProfile {
-				cc := r.CacheClone()
-				cl, ok := cc.(*ResourceProfile)
-				if !ok {
-					t.Fatalf("CacheClone returned %T, expected *ResourceProfile", cc)
-				}
-				return cl
-			},
-		},
 	}
 
 	for _, tt := range tests {
@@ -435,7 +424,7 @@ func TestResourceProfileCloneCacheClone(t *testing.T) {
 	}
 }
 
-func TestResourceCloneAndCacheClone(t *testing.T) {
+func TestResourceClone(t *testing.T) {
 	var nilR *Resource
 	if nilR.Clone() != nil {
 		t.Fatal("Expected nil clone for nil Resource")
@@ -468,17 +457,6 @@ func TestResourceCloneAndCacheClone(t *testing.T) {
 			name: "Clone",
 			clone: func(res *Resource) *Resource {
 				return res.Clone()
-			},
-		},
-		{
-			name: "CacheClone",
-			clone: func(res *Resource) *Resource {
-				cc := res.CacheClone()
-				cl, ok := cc.(*Resource)
-				if !ok {
-					t.Fatalf("CacheClone returned %T, expected *Resource", cc)
-				}
-				return cl
 			},
 		},
 	}

@@ -21,7 +21,7 @@ var failedPostCache *ltcache.Cache
 
 // InitFailedPostCache initializes the failed posts cache.
 func InitFailedPostCache(ttl time.Duration, static bool) {
-	failedPostCache = ltcache.NewCache(-1, ttl, static, false, []func(itmID string, value any){writeFailedPosts}, nil)
+	failedPostCache = ltcache.NewCache(-1, ttl, static, []func(itmID string, value any){writeFailedPosts}, nil)
 }
 
 func writeFailedPosts(_ string, value any) {

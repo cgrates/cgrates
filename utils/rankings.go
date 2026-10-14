@@ -67,11 +67,6 @@ func (rkP *RankingProfile) Clone() (cln *RankingProfile) {
 	return
 }
 
-// CacheClone returns a clone of RankingProfile used by ltcache CacheCloner
-func (rkP *RankingProfile) CacheClone() any {
-	return rkP.Clone()
-}
-
 // Set implements the profile interface, setting values in RankingProfile based on path.
 func (rp *RankingProfile) Set(path []string, val any, _ bool) (err error) {
 	if len(path) != 1 {
@@ -309,11 +304,6 @@ func (r *Ranking) Clone() *Ranking {
 		cln.metricIDs = r.metricIDs.Clone()
 	}
 	return cln
-}
-
-// CacheClone returns a clone of Ranking used by ltcache CacheCloner
-func (r *Ranking) CacheClone() any {
-	return r.Clone()
 }
 
 // RankingWithAPIOpts wraps Ranking with APIOpts.

@@ -349,11 +349,6 @@ func (acc *Account) Clone() (cln *Account) {
 	return
 }
 
-// CacheClone returns a clone of Account used by ltcache CacheCloner
-func (acc *Account) CacheClone() any {
-	return acc.Clone()
-}
-
 // AsMapStringInterface converts Account struct to map[string]any
 func (acc *Account) AsMapStringInterface() map[string]any {
 	if acc == nil {

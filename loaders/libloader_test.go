@@ -48,7 +48,7 @@ func TestNewRecord(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	fs := engine.NewFilterS(cfg, nil, nil)
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := newRecord(utils.MapStorage{}, nil, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(utils.MapStorage{}, nil, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), []*config.FCTemplate{
 			{Filters: []string{"*exists:~*req.NoField:"}},
 			{Filters: []string{"*string"}},
@@ -56,7 +56,7 @@ func TestNewRecord(t *testing.T) {
 		t.Errorf("Expeceted: %q, received: %v", expErrMsg, err)
 	}
 	pt := profileTest{}
-	if err := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), []*config.FCTemplate{}, fs, 0, ""); err != nil {
 		t.Error(err)
 	}
@@ -64,7 +64,7 @@ func TestNewRecord(t *testing.T) {
 		t.Fatal("Expected empty map")
 	}
 	exp := `{}`
-	if rply := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).String(); exp != rply {
+	if rply := newRecord(utils.MapStorage{}, pt, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).String(); exp != rply {
 		t.Errorf("Expeceted: %q, received: %v", exp, rply)
 	}
 }
@@ -91,7 +91,7 @@ func TestNewRecordWithCahe(t *testing.T) {
 		utils.Value:  "0",
 	}
 	r := profileTest{}
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
@@ -120,7 +120,7 @@ func TestNewRecordWithTmp(t *testing.T) {
 		utils.Value:  "0",
 	}
 	r := profileTest{}
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
@@ -179,7 +179,7 @@ func TestNewRecordWithTmp2(t *testing.T) {
 		utils.Value:  "0",
 	}
 	r := profileTest{}
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(r, exp) {
@@ -202,7 +202,7 @@ func TestNewRecordWithComposeError(t *testing.T) {
 	r := profileTest{
 		"Value": []string{},
 	}
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -222,7 +222,7 @@ func TestNewRecordWithRemoveError(t *testing.T) {
 		"Values": []string{},
 	}
 	expErrMsg := `strconv.Atoi: parsing "NotVal": invalid syntax`
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
@@ -241,7 +241,7 @@ func TestNewRecordSetFieldsError(t *testing.T) {
 	r := profileTest{
 		"Values": []string{},
 	}
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err != utils.ErrWrongPath {
 		t.Error(err)
 	}
@@ -260,7 +260,7 @@ func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
 		"Values": []string{},
 	}
 	expErrMsg := `NOT_FOUND:`
-	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil)).
+	if err := newRecord(config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil), r, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil)).
 		SetFields(context.Background(), fc, fs, 0, ""); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expeceted: %v, received: %v", expErrMsg, err)
 	}
@@ -269,7 +269,7 @@ func TestNewRecordSetFieldsMandatoryError(t *testing.T) {
 func TestRecordFieldAsInterface(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	dp := config.NewSliceDP([]string{"cgrates.org", "Attr1"}, nil)
-	r := newRecord(dp, profileTest{}, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, false, nil, nil))
+	r := newRecord(dp, profileTest{}, "cgrates.org", cfg, ltcache.NewCache(-1, 0, false, nil, nil))
 	if val, err := r.FieldAsInterface([]string{utils.MetaReq}); err != nil {
 		t.Fatal(err)
 	} else if exp := dp; !reflect.DeepEqual(val, exp) {

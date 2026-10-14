@@ -247,12 +247,6 @@ func TestChargerProfileClone(t *testing.T) {
 				t.Errorf("Clone returned the same instance, expected a new instance")
 			}
 		})
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.cp.CacheClone()
-			if !reflect.DeepEqual(got, tt.cp) {
-				t.Errorf("Expected %v, recieved %v", tt.cp, got)
-			}
-		})
 	}
 }
 

@@ -24,7 +24,7 @@ func NewLoaderS(cfg *config.CGRConfig, dm *engine.DataManager,
 	locker *guardian.Locker) *LoaderS {
 	ldrS := &LoaderS{cfg: cfg, locker: locker, cache: make(map[string]*ltcache.Cache)}
 	for k, cfg := range cfg.LoaderCfg()[0].Cache {
-		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, false, nil, nil)
+		ldrS.cache[k] = ltcache.NewCache(cfg.Limit, cfg.TTL, cfg.StaticTTL, nil, nil)
 	}
 	ldrS.createLoaders(dm, filterS, connMgr)
 	return ldrS

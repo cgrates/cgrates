@@ -46,8 +46,8 @@ func NewERService(dm *engine.DataManager, cfg *config.CGRConfig, cache *engine.C
 		connMgr:       connMgr,
 		dm:            dm,
 	}
-	ers.partialCache = ltcache.NewCache(ltcache.UnlimitedCaching, cfg.ERsCfg().PartialCacheTTL, false, false,
-		[]func(itmID string, value any){ers.onEvicted}, nil)
+	ers.partialCache = ltcache.NewCache(ltcache.UnlimitedCaching,
+		cfg.ERsCfg().PartialCacheTTL, false, []func(itmID string, value any){ers.onEvicted}, nil)
 	return ers
 }
 

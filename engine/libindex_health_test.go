@@ -52,9 +52,9 @@ func TestGetFltrIdxHealthForRateRates(t *testing.T) {
 	if err := dm.SetRateProfile(context.Background(), rt, false, true); err != nil {
 		t.Error(err)
 	}
-	rply, err := GetFltrIdxHealthForRateRates(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, false, nil, nil),
-		ltcache.NewCache(40, 30*time.Second, false, false, nil, nil),
-		ltcache.NewCache(20, 20*time.Second, true, false, nil, nil))
+	rply, err := GetFltrIdxHealthForRateRates(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil, nil),
+		ltcache.NewCache(40, 30*time.Second, false, nil, nil),
+		ltcache.NewCache(20, 20*time.Second, true, nil, nil))
 	if err != nil {
 		t.Error(err)
 	}
@@ -272,7 +272,7 @@ func TestGetFilterAsIndexSetDynamicVal(t *testing.T) {
 	}
 
 	exp := map[string]utils.StringSet{}
-	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, false, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
+	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v\n but received %v", exp, rcv)
@@ -304,7 +304,7 @@ func TestGetFilterAsIndexSetElementNotDynamic(t *testing.T) {
 	exp := map[string]utils.StringSet{
 		"*string:*req.Account:*req.Account": {},
 	}
-	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, false, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
+	if rcv, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %+v\n but received %+v", exp, rcv)
@@ -337,7 +337,7 @@ func TestGetFilterAsIndexSetGetIHFltrIdxFromCacheErr(t *testing.T) {
 		},
 	}
 
-	if _, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, false, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != utils.ErrNotImplemented {
+	if _, err := getFilterAsIndexSet(context.Background(), dm, ltcache.NewCache(50, 60*time.Second, true, nil, nil), utils.CacheRateFilterIndexes, "cgrates.org:RPID", fltr); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -362,7 +362,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache1Err(t *testing.T) {
 		MissingFilters: make(map[string][]string),
 	}
 
-	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, false, nil, nil), ltcache.NewCache(0, 0, false, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil, nil), ltcache.NewCache(0, 0, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -386,7 +386,7 @@ func TestUpdateFilterIHMisingIndxGetIHFltrIdxFromCache2Err(t *testing.T) {
 		MissingFilters: make(map[string][]string),
 	}
 
-	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, false, nil, nil), ltcache.NewCache(0, 0, false, false, nil, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil, nil), ltcache.NewCache(0, 0, false, nil, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -413,7 +413,7 @@ func TestUpdateFilterIHMisingIndxReplyIndexes(t *testing.T) {
 		},
 	}
 
-	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, false, nil, nil), ltcache.NewCache(0, 0, false, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != nil {
+	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil, nil), ltcache.NewCache(0, 0, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, rply) {
 		t.Errorf("Expected %+v\n but received %+v", rply, rcv)
@@ -450,7 +450,7 @@ func TestUpdateFilterIHMisingIndxHasNotReplyIndexes(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, false, nil, nil), ltcache.NewCache(0, 0, false, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "NewRP", rply); err != nil {
+	if rcv, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil, nil), ltcache.NewCache(0, 0, false, nil, nil), []string{}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "NewRP", rply); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, rply) {
 		t.Errorf("Expected %+v\n but received %+v", rply, rcv)
@@ -493,7 +493,7 @@ func TestUpdateFilterIHMisingIndxGetFilterAsIndexSetErr(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, false, nil, nil), ltcache.NewCache(0, 0, false, false, nil, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
+	if _, err := updateFilterIHMisingIndx(context.Background(), dm, ltcache.NewCache(0, 0, false, nil, nil), ltcache.NewCache(0, 0, false, nil, nil), []string{"fltr"}, utils.CacheRateFilterIndexes, "cgrates.org", "cgrates.org:RP", "RP", rply); err != utils.ErrNotImplemented {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotImplemented, err)
 	}
 }
@@ -507,7 +507,7 @@ func TestGetFltrIdxHealthGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 
 	expErr := "unsupported prefix in GetKeysForPrefix: "
 	if _, err := GetFltrIdxHealth(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheVersions); err == nil || err.Error() != expErr {
@@ -525,7 +525,7 @@ func TestGetFltrIdxHealthgetIHObjFromCacheErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
@@ -553,7 +553,7 @@ func TestGetFltrIdxHealthIdxKeyFormatErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
@@ -583,7 +583,7 @@ func TestGetRevFltrIdxHealthFromObjGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 
 	expErr := "unsupported prefix in GetKeysForPrefix: "
 	if _, err := getRevFltrIdxHealthFromObj(context.Background(), dm, useLtcache, useLtcache, useLtcache, utils.CacheVersions); err == nil || err.Error() != expErr {
@@ -601,7 +601,7 @@ func TestGetRevFltrIdxHealthFromObjIHObjFromCacheErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	cacheS := setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 	if err := dm.SetAttributeProfile(context.Background(), &utils.AttributeProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ATTR1",
@@ -633,7 +633,7 @@ func TestGetRevFltrIdxHealthFromReverseGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 	objCaches := make(map[string]*ltcache.Cache)
 
 	rply := make(map[string]*ReverseFilterIHReply)
@@ -654,7 +654,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 
 	if _, err := getRatesFromCache(context.Background(), dm, useLtcache, "", ""); err != utils.ErrNotFound {
 		t.Errorf("Expected error <%v>, Received error <%v>", utils.ErrNotFound, err)
@@ -664,7 +664,7 @@ func TestGetRatesFromCacheGetRateProfileErr(t *testing.T) {
 
 func TestGetRatesFromCacheObjValNil(t *testing.T) {
 
-	useLtcache := ltcache.NewCache(20, 20*time.Second, true, false, nil, nil)
+	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil, nil)
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
@@ -693,7 +693,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(0, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(0, 0, false, nil, nil)
 
 	expErr := "unsupported prefix in GetKeysForPrefix: "
 	if _, err := getRevFltrIdxHealthFromRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotImplemented {
@@ -745,7 +745,7 @@ func TestGetRevFltrIdxHealthFromRateRatesGetRatesFromCacheErr(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	useLtcache := ltcache.NewCache(20, 20*time.Second, true, false, nil, nil)
+	useLtcache := ltcache.NewCache(20, 20*time.Second, true, nil, nil)
 	useLtcache.Set("cgrates.org:RP1", nil, []string{})
 
 	if _, err := getRevFltrIdxHealthFromRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotFound {
@@ -767,7 +767,7 @@ func TestGetFltrIdxHealthForRateRatesGetKeysForPrefixErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	setTestCache(dm, cfg, locker)
 
-	useLtcache := ltcache.NewCache(-1, 0, false, false, nil, nil)
+	useLtcache := ltcache.NewCache(-1, 0, false, nil, nil)
 
 	expErr := "unsupported prefix in GetKeysForPrefix: "
 	if _, err := GetFltrIdxHealthForRateRates(context.Background(), dm, useLtcache, useLtcache, useLtcache); err != utils.ErrNotImplemented {

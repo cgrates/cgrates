@@ -114,68 +114,6 @@ func TestIPProfileClone(t *testing.T) {
 	}
 }
 
-func TestIPProfileCacheClone(t *testing.T) {
-	var p *IPProfile = nil
-	res := p.CacheClone()
-	if res != nil {
-		if ip, ok := res.(*IPProfile); ok && ip == nil {
-		} else {
-			t.Errorf("CacheClone() with nil receiver: got %v, want nil or typed nil", res)
-		}
-	}
-	orig := &IPProfile{
-		Tenant:    "cgrates.org",
-		ID:        "1001",
-		FilterIDs: []string{"f1", "f2"},
-		Weights: DynamicWeights{
-			&DynamicWeight{
-				FilterIDs: []string{"w1"},
-				Weight:    10.5,
-			},
-		},
-		TTL:    5 * time.Minute,
-		Stored: true,
-		Pools: []*IPPool{
-			{
-				ID:        "pool1",
-				FilterIDs: []string{"pf1"},
-				Type:      "type1",
-				Range:     "range1",
-				Strategy:  "strat1",
-				Message:   "msg1",
-				Weights: DynamicWeights{
-					&DynamicWeight{
-						FilterIDs: []string{"pw1"},
-						Weight:    7.5,
-					},
-				},
-				Blockers: DynamicBlockers{
-					&DynamicBlocker{
-						FilterIDs: []string{"pb1"},
-						Blocker:   true,
-					},
-				},
-			},
-		},
-	}
-
-	res = orig.CacheClone()
-	clone, ok := res.(*IPProfile)
-	if !ok {
-		t.Errorf("CacheClone() returned type %T, want *IPProfile", res)
-		return
-	}
-
-	if clone == nil {
-		t.Errorf("CacheClone() returned nil, want non-nil")
-		return
-	}
-
-	if clone.Tenant != orig.Tenant {
-		t.Errorf("Tenant mismatch: got %q, want %q", clone.Tenant, orig.Tenant)
-	}
-}
-
 func TestIPProfileSet(t *testing.T) {
 	p := &IPProfile{}
 
@@ -493,27 +431,6 @@ func TestIPAllocationsTenantID(t *testing.T) {
 	got := ipAlloc.TenantID()
 	if got != expected {
 		t.Errorf("Expected '%s', got '%s'", expected, got)
-	}
-}
-
-func TestIPAllocationsCacheClone(t *testing.T) {
-	orig := &IPAllocations{
-		Tenant: "cgrates.org",
-		ID:     "1001",
-	}
-
-	clonedAny := orig.CacheClone()
-	cloned, ok := clonedAny.(*IPAllocations)
-	if !ok {
-		t.Errorf("Expected type *IPAllocations, got %T", clonedAny)
-	}
-
-	if !reflect.DeepEqual(orig, cloned) {
-		t.Errorf("Expected cloned object to equal original.\nOriginal: %#v\nCloned: %#v", orig, cloned)
-	}
-
-	if orig == cloned {
-		t.Errorf("Expected different pointer for clone, got the same")
 	}
 }
 
