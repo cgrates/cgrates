@@ -1,5 +1,5 @@
 %global version 1.0~dev
-%global go_version 1.26.2
+%global go_version 1.27.2
 %global git_commit {{{git_commit}}}
 
 %define debug_package  %{nil}

@@ -1,10 +1,10 @@
 ---
-go_version: 1.26.2
+go_version: 1.27.2
 go_platform: linux
 go_arch: amd64
 go_tarball: go{{ go_version }}.{{ go_platform }}-{{ go_arch }}.tar.gz
 go_download_url: https://dl.google.com/go/{{ go_tarball }}
-go_checksum: 990e6b4bbba816dc3ee129eaeaf4b42f17c2800b88a2166c265ac1a200262282
+go_checksum: ecbadb99091a3f46e31f5f934b068b1864eafa7995211b39eaddf76996045fe5
 install_go: true
 
 # Cleaning caches assumes go is available (either installed by the role or pre-existing)
