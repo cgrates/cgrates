@@ -6,6 +6,7 @@ package utils
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"io"
 	"reflect"
 	"testing"
@@ -191,7 +192,7 @@ func TestBincMarshalerUnmarshal(t *testing.T) {
 	bm := &BincMarshaler{&codec.BincHandle{}}
 	v := "testinterce"
 	data := []byte{64, 13, 11, 115, 116, 105, 110, 116, 101, 114, 102, 97, 99, 101}
-	if err := bm.Unmarshal(data, &v); err != io.ErrUnexpectedEOF {
+	if err := bm.Unmarshal(data, &v); !errors.Is(err, io.ErrUnexpectedEOF) {
 		t.Errorf("Expected error <%v>, Received <%v>", io.ErrUnexpectedEOF, err)
 	}
 }

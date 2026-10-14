@@ -73,7 +73,6 @@ func NewCodecMsgpackMarshaler() *CodecMsgpackMarshaler {
 	mh := new(codec.MsgpackHandle)
 	mh.MapType = reflect.TypeOf(map[string]any(nil))
 	mh.RawToString = true
-	// mh.TimeNotBuiltin = true
 	return &CodecMsgpackMarshaler{mh}
 }
 
