@@ -41,11 +41,6 @@ func (cp *ChargerProfile) Clone() *ChargerProfile {
 	return clone
 }
 
-// CacheClone returns a clone of ChargerProfile used by ltcache CacheCloner
-func (cp *ChargerProfile) CacheClone() any {
-	return cp.Clone()
-}
-
 // TenantID returns the concatenated tenant and ID.
 func (cp *ChargerProfile) TenantID() string {
 	return ConcatenatedKey(cp.Tenant, cp.ID)

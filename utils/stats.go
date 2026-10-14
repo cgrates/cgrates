@@ -61,11 +61,6 @@ func (sqp *StatQueueProfile) Clone() *StatQueueProfile {
 	return result
 }
 
-// CacheClone returns a clone of StatQueueProfile used by ltcache CacheCloner
-func (sqp *StatQueueProfile) CacheClone() any {
-	return sqp.Clone()
-}
-
 func (sqp *StatQueueProfile) TenantID() string {
 	return ConcatenatedKey(sqp.Tenant, sqp.ID)
 }
@@ -527,11 +522,6 @@ func (sq *StatQueue) Clone() (cln *StatQueue) {
 		}
 	}
 	return
-}
-
-// CacheClone returns a clone of StatQueue used by ltcache CacheCloner
-func (sq *StatQueue) CacheClone() any {
-	return sq.Clone()
 }
 
 type SQItem struct {

@@ -182,27 +182,6 @@ func TestCGREventClone(t *testing.T) {
 	}
 }
 
-func TestCGREventCacheClone(t *testing.T) {
-	ev := &CGREvent{
-		Tenant: "cgrates.org",
-		ID:     "testID",
-		Event: map[string]any{
-			"AnswerTime":       time.Now(),
-			"supplierprofile1": "supplier",
-			"UsageInterval":    "54.2",
-			"PddInterval":      "1s",
-			"Weight":           20.0,
-		},
-		APIOpts: map[string]any{
-			"testKey": 12,
-		},
-	}
-	cl := ev.CacheClone()
-	if !reflect.DeepEqual(ev, cl) {
-		t.Errorf("Expecting: %+v, received: %+v", ev, cl)
-	}
-}
-
 func TestCGREventOptAsInt64(t *testing.T) {
 	ev := &CGREvent{
 		APIOpts: map[string]any{

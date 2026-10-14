@@ -288,7 +288,7 @@ func TestV1ProcessEvent4(t *testing.T) {
 	}
 	eeS.exporterCache = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,
-			time.Second, false, false, []func(itmID string, value any){
+			time.Second, false, []func(itmID string, value any){
 				onCacheEvicted,
 			}, nil),
 	}
@@ -370,7 +370,7 @@ func TestV1ProcessEventMockMetrics(t *testing.T) {
 	}
 	eeS.exporterCache = map[string]*ltcache.Cache{
 		utils.MetaHTTPPost: ltcache.NewCache(1,
-			time.Second, false, false, []func(itmID string, value any){
+			time.Second, false, []func(itmID string, value any){
 				onCacheEvicted,
 			}, nil),
 	}

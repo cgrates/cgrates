@@ -50,11 +50,6 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 	return clone
 }
 
-// CacheClone returns a clone of ResourceProfile used by ltcache CacheCloner
-func (rp *ResourceProfile) CacheClone() any {
-	return rp.Clone()
-}
-
 // TenantID returns unique identifier of the ResourceProfile in a multi-tenant environment
 func (rp *ResourceProfile) TenantID() string {
 	return ConcatenatedKey(rp.Tenant, rp.ID)
@@ -336,11 +331,6 @@ func (r *Resource) Clone() *Resource {
 		copy(clone.TTLIdx, r.TTLIdx)
 	}
 	return clone
-}
-
-// CacheClone returns a clone of Resource used by ltcache CacheCloner
-func (r *Resource) CacheClone() any {
-	return r.Clone()
 }
 
 // TenantID returns the unique ID in a multi-tenant environment

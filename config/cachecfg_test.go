@@ -224,7 +224,7 @@ func TestDiffCacheJsonCfg(t *testing.T) {
 	}
 }
 
-func TestCacheCloneSection(t *testing.T) {
+func TestCloneCacheSection(t *testing.T) {
 	cacheCfg := &CacheCfg{
 		Partitions: map[string]*CacheParamCfg{
 			"CACHE_2": {

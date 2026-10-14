@@ -62,11 +62,6 @@ func (rp *RateProfile) Clone() *RateProfile {
 	return cloned
 }
 
-// CacheClone returns a clone of RateProfile used by ltcache CacheCloner
-func (rp *RateProfile) CacheClone() any {
-	return rp.Clone()
-}
-
 func (rp *RateProfile) TenantID() string {
 	return ConcatenatedKey(rp.Tenant, rp.ID)
 }

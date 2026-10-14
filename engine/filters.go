@@ -229,11 +229,6 @@ func (fltr *Filter) Clone() *Filter {
 	return clone
 }
 
-// CacheClone returns a clone of Filter used by ltcache CacheCloner
-func (fltr *Filter) CacheClone() any {
-	return fltr.Clone()
-}
-
 // FilterWithOpts the arguments for the replication
 type FilterWithAPIOpts struct {
 	*Filter

@@ -376,27 +376,6 @@ func TestThresholdProfileClone(t *testing.T) {
 	}
 }
 
-func TestThresholdProfileCacheClone(t *testing.T) {
-	orig := &ThresholdProfile{
-		Tenant:           "cgrates.org",
-		ID:               "thresholdID",
-		FilterIDs:        []string{"*string:~*req.Account:1001"},
-		MaxHits:          100,
-		MinHits:          5,
-		MinSleep:         10 * time.Second,
-		Blocker:          true,
-		Weights:          DynamicWeights{&DynamicWeight{Weight: 20.0}},
-		ActionProfileIDs: []string{"ACT_LOG", "ACT_CDR"},
-		Async:            true,
-		EeIDs:            []string{"EE1", "EE2", "EE3"},
-		AttributeIDs:     []string{"attr1", "attr2"},
-	}
-	cloned := orig.CacheClone()
-	if !reflect.DeepEqual(cloned, orig) {
-		t.Errorf("Expected %+v, recieved %+v", cloned, orig)
-	}
-}
-
 func TestThresholdClone(t *testing.T) {
 	orig := &Threshold{
 		Tenant: "cgrates.org",
@@ -429,20 +408,6 @@ func TestThresholdClone(t *testing.T) {
 	nilClone := nilThreshold.Clone()
 	if nilClone != nil {
 		t.Errorf("Expected nil from Clone on nil receiver, got: %+v", nilClone)
-	}
-}
-
-func TestThresholdCacheClone(t *testing.T) {
-	orig := &Threshold{
-		Tenant: "cgrates.org",
-		ID:     "TH2",
-		Hits:   42,
-		Snooze: time.Date(2026, 1, 1, 12, 0, 0, 0, time.UTC),
-	}
-
-	cloned := orig.CacheClone()
-	if !reflect.DeepEqual(cloned, orig) {
-		t.Errorf("Expected %v, recieved %v", orig, cloned)
 	}
 }
 
