@@ -18,7 +18,7 @@ type LoaderSv1 struct {
 }
 
 func (ldrSv1 *LoaderSv1) Run(ctx *context.Context, args *loaders.ArgsProcessFolder,
-	rply *string) error {
+	rply *map[string]int) error {
 	return ldrSv1.ldrS.V1Run(ctx, args, rply)
 }
 

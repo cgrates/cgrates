@@ -61,7 +61,7 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 		return nil
 	}
 
-	var reply string
+	var reply map[string]int
 	for _, loaderID := range s.preloadIDs {
 		if err = s.ldrs.V1Run(context.TODO(),
 			&loaders.ArgsProcessFolder{
