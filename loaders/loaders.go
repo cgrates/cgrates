@@ -61,7 +61,7 @@ type ArgsProcessFolder struct {
 }
 
 func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
-	rply *string) (err error) {
+	rply *map[string]int) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
 
@@ -108,11 +108,12 @@ func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
 			return
 		}
 	}
-	if err := ldr.processFolder(context.Background(), args.Path, args.APIOpts,
+	var stats map[string]int
+	if stats, err = ldr.processFolder(context.Background(), args.Path, args.APIOpts,
 		wI, soE); err != nil {
 		return utils.NewErrServerError(err)
 	}
-	*rply = utils.OK
+	*rply = stats
 	return
 }
 

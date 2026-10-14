@@ -1691,8 +1691,10 @@ func TestLoadersLoad(t *testing.T) {
 	args := &loaders.ArgsProcessFolder{
 		LoaderID: "LoaderID",
 	}
-	var reply string
+	var reply map[string]int
 	if err := lSv1.Run(context.Background(), args, &reply); err != nil {
 		t.Error(err)
+	} else if len(reply) != 0 {
+		t.Errorf("Expected empty stats, received: %v", utils.ToJSON(reply))
 	}
 }

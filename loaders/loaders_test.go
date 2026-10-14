@@ -67,7 +67,6 @@ func TestNewLoaderService(t *testing.T) {
 	}
 	ld.ListenAndServe(stop)
 }
-
 func TestLoaderServiceV1Run(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
@@ -126,7 +125,7 @@ func TestLoaderServiceV1Run(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM, locker)
-	var rply string
+	var rply map[string]int
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		APIOpts: map[string]any{
 			utils.MetaCache:       utils.MetaNone,
@@ -136,15 +135,15 @@ func TestLoaderServiceV1Run(t *testing.T) {
 		},
 	}, &rply); err != nil {
 		t.Fatal(err)
-	} else if rply != utils.OK {
-		t.Errorf("Expected: %q,received: %q", utils.OK, rply)
+	} else if exp := (map[string]int{utils.MetaAttributes: 1}); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
 		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 	}
 }
@@ -206,7 +205,7 @@ func TestLoaderServiceV1RunErrors(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM, locker)
-	var rply string
+	var rply map[string]int
 
 	expErrMsg := "SERVER_ERROR: inline parse error for string: <*string>"
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
@@ -526,7 +525,7 @@ func TestLoaderMemoryLockCoordinatesWork(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		var reply string
+		var reply map[string]int
 		err = waitForLoaderCall(t, unlock, func() error {
 			return ldrS.V1Run(context.Background(), &ArgsProcessFolder{
 				APIOpts: map[string]any{utils.MetaForceLock: true},
@@ -568,7 +567,8 @@ func TestLoaderMemoryLockCoordinatesWork(t *testing.T) {
 			t.Fatal(err)
 		}
 		if err := waitForLoaderCall(t, unlock, func() error {
-			return ldr.processFolder(context.Background(), "", nil, false, false)
+			_, err := ldr.processFolder(context.Background(), "", nil, false, false)
+			return err
 		}); err != nil {
 			t.Fatal(err)
 		}
@@ -597,7 +597,7 @@ func TestLoaderMemoryLockCoordinatesWork(t *testing.T) {
 			t.Fatal(err)
 		}
 		ldrS.Reload(nil, nil, nil)
-		var reply string
+		var reply map[string]int
 		err = waitForLoaderCall(t, unlock, func() error {
 			return ldrS.V1Run(context.Background(), &ArgsProcessFolder{}, &reply)
 		})
@@ -664,7 +664,7 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM, locker)
-	var rply string
+	var rply map[string]int
 	if err := ld.V1Run(context.Background(), &ArgsProcessFolder{
 		Path: tmpPath,
 		APIOpts: map[string]any{
@@ -675,15 +675,15 @@ func TestLoaderServiceV1RunPath(t *testing.T) {
 		},
 	}, &rply); err != nil {
 		t.Fatal(err)
-	} else if rply != utils.OK {
-		t.Errorf("Expected: %q,received: %q", utils.OK, rply)
+	} else if exp := (map[string]int{utils.MetaAttributes: 1}); !reflect.DeepEqual(exp, rply) {
+		t.Errorf("Expected: %v, received: %v", utils.ToJSON(exp), utils.ToJSON(rply))
 	}
 	if prf, err := dm.GetAttributeProfile(context.Background(), "cgrates.org", "ID", false, true, utils.NonTransactional); err != nil {
 		t.Fatal(err)
 	} else {
 		v := &utils.AttributeProfile{Tenant: "cgrates.org", ID: "ID"}
 		if !reflect.DeepEqual(v, prf) {
-			t.Errorf("Expeceted: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
+			t.Errorf("Expected: %v, received: %v", utils.ToJSON(v), utils.ToJSON(prf))
 		}
 	}
 }
@@ -713,7 +713,7 @@ func TestLoaderServiceV1RunPathNotFound(t *testing.T) {
 	fS := engine.NewFilterS(cfg, cM, dm)
 
 	ld := NewLoaderS(cfg, dm, fS, cM, locker)
-	var rply string
+	var rply map[string]int
 
 	wrongPath := path.Join(tmpIn, "path_not_found")
 	expErrMsg := "SERVER_ERROR: <LoaderS> nonexistent folder: " + wrongPath

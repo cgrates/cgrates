@@ -254,7 +254,7 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheArgs, cacheIDs, opts, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
+func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]any, withIndex, partialRates bool) (prfCount int, err error) {
 	newPrf := newProfileFunc(lType)
 	obj := newPrf()
 	var prevTntID string
@@ -285,6 +285,7 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 				if err = l.process(ctx, obj, lType, action, opts, withIndex, partialRates); err != nil {
 					return
 				}
+				prfCount++
 			}
 			prevTntID = tntID
 			obj = newPrf()
@@ -292,24 +293,27 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 		obj.Merge(tmp)
 	}
 	if len(prevTntID) != 0 {
-		err = l.process(ctx, obj, lType, action, opts, withIndex, partialRates)
+		if err = l.process(ctx, obj, lType, action, opts, withIndex, partialRates); err == nil {
+			prfCount++
+		}
 	}
 	return
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]any, withIndex bool, prv CSVProvider) (err error) {
+func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]any, withIndex bool, prv CSVProvider) (prfCount int, err error) {
 	var csv *CSVFile
 	if csv, err = NewCSVReader(prv, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
 		return
 	}
 	defer csv.Close()
-	if err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, opts,
+	if prfCount, err = l.processData(ctx, csv, cfg.Fields, cfg.Type, action, opts,
 		withIndex, cfg.Flags.GetBool(utils.PartialRatesOpt)); err != nil || // encounterd error
 		outPath == utils.EmptyString || // or no moving
 		prv.Type() != utils.MetaFileCSV { // or the type can not be moved(e.g. url)
 		return
 	}
-	return os.Rename(path.Join(inPath, cfg.Filename), path.Join(outPath, cfg.Filename))
+	err = os.Rename(path.Join(inPath, cfg.Filename), path.Join(outPath, cfg.Filename))
+	return
 }
 
 func (l *loader) getCfg(fileName string) (cfg *config.LoaderDataType) {
@@ -344,13 +348,14 @@ func (l *loader) processIFile(fileName string) (err error) {
 		return err
 	}
 	defer unlock()
-	return l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
+	_, err = l.processFile(context.Background(), cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, nil, l.ldrCfg.Opts.WithIndex, fileProvider{})
+	return
 }
 
-func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (err error) {
+func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (stats map[string]int, err error) {
 	unlock, err := l.locker.lock()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer unlock()
 	if inPath == utils.EmptyString {
@@ -364,8 +369,10 @@ func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[str
 	case utils.IsURL(inPath):
 		csvType = urlProvider{cfg: l.cfg}
 	}
+	stats = make(map[string]int)
 	for _, cfg := range l.orderedData() {
-		if err = l.processFile(ctx, cfg, inPath, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
+		var prfCount int
+		if prfCount, err = l.processFile(ctx, cfg, inPath, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, csvType); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))
@@ -374,6 +381,7 @@ func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[str
 			}
 			return
 		}
+		stats[cfg.Type] += prfCount
 	}
 	if len(l.ldrCfg.TpOutDir) != 0 {
 		err = l.moveUnprocessedFiles(inPath)
@@ -398,7 +406,7 @@ func (l *loader) moveUnprocessedFiles(inPath string) (err error) {
 
 func (l *loader) handleFolder(stopChan chan struct{}) {
 	// instantly process the folder once before starting the loop
-	if err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
+	if _, err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
 		utils.Logger.Warning(fmt.Sprintf("<%s-%s> cannot process <%s> folder initially, err: %s",
 			utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir, err))
 	}
@@ -410,7 +418,7 @@ func (l *loader) handleFolder(stopChan chan struct{}) {
 					utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir))
 			return
 		case <-time.After(l.ldrCfg.RunDelay):
-			if err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
+			if _, err := l.processFolder(context.Background(), utils.EmptyString, nil, l.ldrCfg.Opts.WithIndex, false); err != nil {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> cannot process <%s> folder, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, l.ldrCfg.TpInDir, err))
 			}
@@ -439,7 +447,7 @@ func (l *loader) processZip(ctx *context.Context, opts map[string]any, withIndex
 	defer unlock()
 	ziP := zipProvider{zipR}
 	for _, cfg := range l.orderedData() {
-		if err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, ziP); err != nil {
+		if _, err = l.processFile(ctx, cfg, l.ldrCfg.TpInDir, l.ldrCfg.TpOutDir, l.ldrCfg.Action, opts, withIndex, ziP); err != nil {
 			if !stopOnError {
 				utils.Logger.Warning(fmt.Sprintf("<%s-%s> loaderType: <%s> cannot open files, err: %s",
 					utils.LoaderS, l.ldrCfg.ID, cfg.Type, err))

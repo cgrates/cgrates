@@ -352,7 +352,7 @@ func main() {
 	}
 
 	ldrS := loaders.NewLoaderS(ldrCfg, dm, fS, cM, locker)
-	var rply string
+	var rply map[string]int
 	if err = ldrS.V1Run(context.Background(), &loaders.ArgsProcessFolder{
 		Path: *dataPath,
 		APIOpts: map[string]any{

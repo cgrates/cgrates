@@ -445,7 +445,7 @@ func TestLoaderStoreRemove(t *testing.T) {
 		utils.MetaWithIndex:   true,
 	}}
 
-	var reply string
+	var reply map[string]int
 	if err := loader.V1Run(context.Background(), args, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -829,7 +829,7 @@ func TestLoaderProcessData(t *testing.T) {
 	for _, f := range fc {
 		f.ComputePath()
 	}
-	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+	if _, err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
@@ -883,7 +883,7 @@ func TestLoaderProcessDataErrors(t *testing.T) {
 		f.ComputePath()
 	}
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+	if _, err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
@@ -897,13 +897,13 @@ cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, utils.MetaStore,
 		f.ComputePath()
 	}
 	expErrMsg = `unsupported loader action: <"notSupported">`
-	if err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
+	if _, err := ld.processData(context.Background(), NewStringCSV(`cgrates.org,ID
 cgrates.org,ID2`, utils.CSVSep, -1), fc, utils.MetaAttributes, "notSupported",
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %q, received: %v", expErrMsg, err)
 	}
 
-	if err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported",
+	if _, err := ld.processData(context.Background(), &CSVFile{csvRdr: csv.NewReader(mockReader{})}, fc, utils.MetaAttributes, "notSupported",
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != utils.ErrNotFound {
 		t.Errorf("Expected: %q, received: %v", utils.ErrNotFound, err)
 	}
@@ -943,7 +943,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 	defer s.Close()
 	runtime.Gosched()
 
-	if err := ld.processFile(context.Background(), &config.LoaderDataType{
+	if _, err := ld.processFile(context.Background(), &config.LoaderDataType{
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
@@ -960,7 +960,7 @@ func TestLoaderProcessFileURL(t *testing.T) {
 		}
 	}
 
-	if err := ld.processFile(context.Background(), &config.LoaderDataType{
+	if _, err := ld.processFile(context.Background(), &config.LoaderDataType{
 		Type:     utils.MetaAttributes,
 		Filename: utils.AttributesCsv,
 		Fields:   fc,
@@ -1152,7 +1152,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	if err := f.Close(); err != nil {
 		t.Fatal(err)
 	}
-	if err := ld.processFolder(context.Background(), utils.EmptyString,
+	if _, err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err != nil {
 		t.Fatal(err)
 	}
@@ -1185,7 +1185,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	}
 
 	ld.locker = loaderLocker{path: path.Join(t.TempDir(), "missing", ".lck")}
-	if err := ld.processFolder(context.Background(), utils.EmptyString,
+	if _, err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); !os.IsNotExist(err) {
 		t.Fatalf("expected not-exist error, got %v", err)
 	}
@@ -1193,7 +1193,7 @@ func TestLoaderProcessFolder(t *testing.T) {
 	ld.locker = loaderLocker{}
 	ld.ldrCfg.TpInDir = "http://localhost:0"
 	expErrMsg := `path:"http://localhost:0/Attributes.csv" is not reachable`
-	if err := ld.processFolder(context.Background(), utils.EmptyString,
+	if _, err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
@@ -1268,7 +1268,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	}
 
 	expErrMsg := "inline parse error for string: <*string>"
-	if err := ld.processFolder(context.Background(), utils.EmptyString,
+	if _, err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, true); err == nil || err.Error() != expErrMsg {
 		t.Errorf("Expected: %v, received: %v", expErrMsg, err)
 	}
@@ -1288,7 +1288,7 @@ func TestLoaderProcessFolderErrors(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	if err := ld.processFolder(context.Background(), utils.EmptyString,
+	if _, err := ld.processFolder(context.Background(), utils.EmptyString,
 		map[string]any{utils.MetaCache: utils.MetaNone}, true, false); err != nil {
 		t.Fatal(err)
 	}
