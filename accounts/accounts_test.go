@@ -751,7 +751,7 @@ func TestAccountsDebitRoundIncrementCombined(t *testing.T) {
 				AccountID:       "TestAccountsDebitRoundIncrementCombined",
 				BalanceID:       "*mockabstract",
 				Units:           utils.NewDecimal(1024, 0),
-				RatingID:        "a1002a0",
+				RatingID:        "d993bb2",
 				JoinedChargeIDs: []string{"a0d5162"},
 			},
 			"a0d5162": {
@@ -771,16 +771,6 @@ func TestAccountsDebitRoundIncrementCombined(t *testing.T) {
 		},
 		UnitFactors: map[string]*utils.UnitFactor{},
 		Rating: map[string]*utils.RateSInterval{
-			"a1002a0": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						RateID:            "9d18ebe",
-						CompressFactor:    1,
-					},
-				},
-				CompressFactor: 1,
-			},
 			"d993bb2": {
 				Increments: []*utils.RateSIncrement{
 					{
@@ -795,10 +785,6 @@ func TestAccountsDebitRoundIncrementCombined(t *testing.T) {
 
 		Rates: map[string]*utils.IntervalRate{
 			"1529ff2": {
-				FixedFee:     utils.NewDecimal(0, 0),
-				RecurrentFee: utils.NewDecimal(1, 0),
-			},
-			"9d18ebe": {
 				FixedFee:     utils.NewDecimal(0, 0),
 				RecurrentFee: utils.NewDecimal(1, 0),
 			},
@@ -5523,5 +5509,297 @@ func TestAccountsDebitAbstractConcretesAbstract(t *testing.T) {
 	concretes := account.Balances["concreteBalance"]
 	if concretes.Units.Compare(newDecimal(295)) != 0 {
 		t.Errorf("Expected 295, recieved %v", concretes.Units)
+	}
+}
+
+func TestAccountsMergeMultiple(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsMergeMultiple",
+			FilterIDs: []string{"*string:~*req.Account:TestAccountsMergeMultiple"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: utils.DynamicWeights{{Weight: 30}},
+					Type:    utils.MetaAbstract,
+					Units:   utils.NewDecimal(600, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(30, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: utils.DynamicWeights{{Weight: 20}},
+					Type:    utils.MetaConcrete,
+					Units:   utils.NewDecimal(2, 0),
+				},
+				"ConcreteBalance2": {
+					ID:      "ConcreteBalance2",
+					Weights: utils.DynamicWeights{{Weight: 10}},
+					Type:    utils.MetaConcrete,
+					Units:   utils.NewDecimal(100, 0),
+				},
+			},
+		},
+	}
+	ecs := utils.NewEventCharges()
+	for range 4 {
+		ec, err := accnts.accountsDebit(context.Background(), accntsPrf, &utils.CGREvent{
+			ID:     "TestAccountsMergeMultiple",
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "TestAccountsMergeMultiple",
+			},
+			APIOpts: map[string]any{
+				utils.MetaUsage: "30",
+			},
+		}, false, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ecs.Merge(ec)
+	}
+	if len(ecs.Charges) != 2 ||
+		ecs.Charges[0].CompressFactor != 2 || ecs.Charges[1].CompressFactor != 2 {
+		t.Errorf("Expected 2 charges with CompressFactor 2, received %v", utils.ToJSON(ecs.Charges))
+	}
+	if len(ecs.Accounting) != 4 || len(ecs.Rating) != 1 || len(ecs.Rates) != 1 {
+		t.Errorf("Expected 4 AccountCharges, 1 Rating and 1 Rate, received %v", utils.ToJSON(ecs))
+	}
+	if ecs.Abstracts.Compare(utils.NewDecimal(120, 0)) != 0 ||
+		ecs.Concretes.Compare(utils.NewDecimal(4, 0)) != 0 {
+		t.Errorf("Expected 120 abstracts and 4 concretes, received %v and %v", ecs.Abstracts, ecs.Concretes)
+	}
+	if blnc := accntsPrf[0].Balances["ConcreteBalance1"].Units; blnc.Compare(utils.NewDecimal(0, 0)) != 0 {
+		t.Errorf("Expected ConcreteBalance1 0, received %v", blnc)
+	}
+	if blnc := accntsPrf[0].Balances["ConcreteBalance2"].Units; blnc.Compare(utils.NewDecimal(98, 0)) != 0 {
+		t.Errorf("Expected ConcreteBalance2 98, received %v", blnc)
+	}
+}
+
+func TestAccountsMergeSameCharge(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsMergeSameCharge",
+			FilterIDs: []string{"*string:~*req.Account:TestAccountsMergeSameCharge"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: utils.DynamicWeights{{Weight: 30}},
+					Type:    utils.MetaAbstract,
+					Units:   utils.NewDecimal(600, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(30, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: utils.DynamicWeights{{Weight: 20}},
+					Type:    utils.MetaConcrete,
+					Units:   utils.NewDecimal(100, 0),
+				},
+			},
+		},
+	}
+	ecs := utils.NewEventCharges()
+	for range 4 {
+		ec, err := accnts.accountsDebit(context.Background(), accntsPrf, &utils.CGREvent{
+			ID:     "TestAccountsMergeSameCharge",
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "TestAccountsMergeSameCharge",
+			},
+			APIOpts: map[string]any{
+				utils.MetaUsage: "30",
+			},
+		}, false, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ecs.Merge(ec)
+	}
+	if len(ecs.Charges) != 1 || ecs.Charges[0].CompressFactor != 4 {
+		t.Errorf("Expected 1 Charge with CompressFactor 4, received %v", utils.ToJSON(ecs.Charges))
+	}
+	if len(ecs.Accounting) != 2 || len(ecs.Rating) != 1 || len(ecs.Rates) != 1 {
+		t.Errorf("Expected 2 AccountCharges, 1 Rating and 1 Rate, received %v", utils.ToJSON(ecs))
+	}
+	if ecs.Abstracts.Compare(utils.NewDecimal(120, 0)) != 0 ||
+		ecs.Concretes.Compare(utils.NewDecimal(4, 0)) != 0 {
+		t.Errorf("Expected 120 abstracts and 4 concretes, received %v and %v", ecs.Abstracts, ecs.Concretes)
+	}
+	if blnc := accntsPrf[0].Balances["ConcreteBalance1"].Units; blnc.Compare(utils.NewDecimal(96, 0)) != 0 {
+		t.Errorf("Expected ConcreteBalance1 96, received %v", blnc)
+	}
+}
+
+func TestAccountsMergeDifferentCharges(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsMergeDifferentCharges",
+			FilterIDs: []string{"*string:~*req.Account:TestAccountsMergeDifferentCharges"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: utils.DynamicWeights{{Weight: 30}},
+					Type:    utils.MetaAbstract,
+					Units:   utils.NewDecimal(600, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(30, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: utils.DynamicWeights{{Weight: 20}},
+					Type:    utils.MetaConcrete,
+					Units:   utils.NewDecimal(100, 0),
+				},
+			},
+		},
+	}
+	ecs := utils.NewEventCharges()
+	for _, usage := range []string{"30", "60", "30"} {
+		ec, err := accnts.accountsDebit(context.Background(), accntsPrf, &utils.CGREvent{
+			ID:     "TestAccountsMergeDifferentCharges",
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "TestAccountsMergeDifferentCharges",
+			},
+			APIOpts: map[string]any{
+				utils.MetaUsage: usage,
+			},
+		}, false, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ecs.Merge(ec)
+	}
+
+	if len(ecs.Charges) != 3 ||
+		ecs.Charges[0].ChargingID != ecs.Charges[2].ChargingID ||
+		ecs.Charges[0].ChargingID == ecs.Charges[1].ChargingID {
+		t.Errorf("Expected 3 charges , received %v", utils.ToJSON(ecs.Charges))
+	}
+	if len(ecs.Accounting) != 4 || len(ecs.Rating) != 1 || len(ecs.Rates) != 1 {
+		t.Errorf("Expected 4 AccountCharges, 1 Rating and 1 Rate, received %v", utils.ToJSON(ecs))
+	}
+}
+
+func TestAccountsMergeDifferenRateInterval(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsMergeDifferenRateInterval",
+			FilterIDs: []string{"*string:~*req.Account:TestAccountsMergeDifferenRateInterval"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID:      "AbstractBalance1",
+					Weights: utils.DynamicWeights{{Weight: 30}},
+					Type:    utils.MetaAbstract,
+					Units:   utils.NewDecimal(60, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(30, 0),
+							RecurrentFee: utils.NewDecimal(1, 0),
+						},
+					},
+				},
+				"AbstractBalance2": {
+					ID:      "AbstractBalance2",
+					Weights: utils.DynamicWeights{{Weight: 20}},
+					Type:    utils.MetaAbstract,
+					Units:   utils.NewDecimal(600, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(30, 0),
+							RecurrentFee: utils.NewDecimal(2, 0),
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID:      "ConcreteBalance1",
+					Weights: utils.DynamicWeights{{Weight: 10}},
+					Type:    utils.MetaConcrete,
+					Units:   utils.NewDecimal(100, 0),
+				},
+			},
+		},
+	}
+	ecs := utils.NewEventCharges()
+	for range 4 {
+		ec, err := accnts.accountsDebit(context.Background(), accntsPrf, &utils.CGREvent{
+			ID:     "TestAccountsMergeDifferenRateInterval",
+			Tenant: "cgrates.org",
+			Event: map[string]any{
+				utils.AccountField: "TestAccountsMergeDifferenRateInterval",
+			},
+			APIOpts: map[string]any{
+				utils.MetaUsage: "30",
+			},
+		}, false, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		ecs.Merge(ec)
+	}
+	if len(ecs.Charges) != 2 ||
+		ecs.Charges[0].CompressFactor != 2 || ecs.Charges[1].CompressFactor != 2 {
+		t.Errorf("Expected 2 Charges with CompressFactor 2, received %v", utils.ToJSON(ecs.Charges))
+	}
+	if len(ecs.Accounting) != 4 || len(ecs.Rating) != 2 || len(ecs.Rates) != 2 {
+		t.Errorf("Expected 4 AccountCharges, 2 Ratings and 2 Rates, received %v", utils.ToJSON(ecs))
 	}
 }

@@ -116,7 +116,7 @@ func (ce *ChargeEntry) FieldAsInterface(fldPath []string) (_ any, err error) {
 
 // Merge will merge the event charges into existing
 func (ec *EventCharges) Merge(eCs ...*EventCharges) {
-	//ec.SyncIDs(eCs...) // so we can compare properly
+	ec.SyncIDs(eCs...)
 	for _, nEc := range eCs {
 		if nEc == nil {
 			continue // nothing to merge
@@ -235,7 +235,7 @@ func (ec *EventCharges) appendChargeEntry(cIls ...*ChargeEntry) {
 			continue
 		}
 		if ec.Charges[len(ec.Charges)-1].CompressEquals(cIl) {
-			ec.Charges[len(ec.Charges)-1].CompressFactor += 1
+			ec.Charges[len(ec.Charges)-1].CompressFactor += cIl.CompressFactor
 			continue
 		}
 		ec.Charges = append(ec.Charges, cIl)
@@ -324,46 +324,88 @@ func (cE *ChargeEntry) CompressEquals(chEn *ChargeEntry) bool {
 // SyncIDs will repopulate Accounting, UnitFactors and  Rating IDs if they equal the references in ec
 func (ec *EventCharges) SyncIDs(eCs ...*EventCharges) {
 	for _, nEc := range eCs {
+		if nEc == nil {
+			continue
+		}
+
+		// UnitFactors
+		uFctIDs := make(map[string]string)
+		for uFctID, uFct := range nEc.UnitFactors {
+			if ecUFctID := ec.unitFactorID(uFct); ecUFctID != EmptyString {
+				uFctIDs[uFctID] = ecUFctID
+				delete(nEc.UnitFactors, uFctID)
+			}
+		}
+
+		// Rating
+		rtngIDs := make(map[string]string)
+		for rtngID, rtng := range nEc.Rating {
+			if ecRtngID := ec.ratingID(rtng, nEc.Rates); ecRtngID != EmptyString {
+				rtngIDs[rtngID] = ecRtngID
+				delete(nEc.Rating, rtngID)
+			}
+		}
+		rtIDs := make(map[string]string)
+		for rtID, rt := range nEc.Rates {
+			for ecRtID, ecRt := range ec.Rates {
+				if ecRt.Equals(rt) {
+					rtIDs[rtID] = ecRtID
+					delete(nEc.Rates, rtID)
+					break
+				}
+			}
+		}
+		for _, rtng := range nEc.Rating {
+			for _, incr := range rtng.Increments {
+				if ecRtID, has := rtIDs[incr.RateID]; has {
+					incr.RateID = ecRtID
+				}
+			}
+		}
+
+		// AccountCharges
+		for _, acnt := range nEc.Accounting {
+			if ecUFctID, has := uFctIDs[acnt.UnitFactorID]; has {
+				acnt.UnitFactorID = ecUFctID
+			}
+			if ecRtngID, has := rtngIDs[acnt.RatingID]; has {
+				acnt.RatingID = ecRtngID
+			}
+		}
+		acntIDs := make(map[string]string)
 		for _, cIl := range nEc.Charges {
+			if acntChrgID, has := acntIDs[cIl.ChargingID]; has {
+				cIl.ChargingID = acntChrgID
+				continue
+			}
 			nEcAcntChrg := nEc.Accounting[cIl.ChargingID]
-
-			// UnitFactors
-			if nEcAcntChrg.UnitFactorID != EmptyString {
-				if uFctID := ec.unitFactorID(nEc.UnitFactors[nEcAcntChrg.UnitFactorID]); uFctID != EmptyString &&
-					uFctID != nEcAcntChrg.UnitFactorID {
-					nEc.UnitFactors[uFctID] = ec.UnitFactors[uFctID]
-					delete(nEc.UnitFactors, nEcAcntChrg.UnitFactorID)
-					nEcAcntChrg.UnitFactorID = uFctID
-				}
+			if nEcAcntChrg == nil {
+				continue
 			}
-
-			// Rating
-			if nEcAcntChrg.RatingID != EmptyString {
-				if rtID := ec.ratingID(nEc.Rating[nEcAcntChrg.RatingID], nEc.Rates); rtID != EmptyString &&
-					rtID != nEcAcntChrg.RatingID {
-					nEc.Rating[rtID] = ec.Rating[rtID]
-					delete(nEc.Rating, nEcAcntChrg.RatingID)
-					nEcAcntChrg.RatingID = rtID
+			for i, chrgID := range nEcAcntChrg.JoinedChargeIDs {
+				if acntChrgID, has := acntIDs[chrgID]; has {
+					nEcAcntChrg.JoinedChargeIDs[i] = acntChrgID
+					continue
 				}
-			}
-
-			// AccountCharges
-			for i, chrgID := range nEc.Accounting[cIl.ChargingID].JoinedChargeIDs {
-				if acntChrgID := ec.accountChargeID(nEc.Accounting[chrgID]); acntChrgID != chrgID {
+				jAcnt := nEc.Accounting[chrgID]
+				if jAcnt == nil {
+					continue
+				}
+				if acntChrgID := ec.accountChargeID(jAcnt); acntChrgID != EmptyString &&
+					acntChrgID != chrgID {
 					// matched the accountChargeID with an existing one in reference ec, replace in nEc
-					nEc.Accounting[acntChrgID] = ec.Accounting[acntChrgID]
+					acntIDs[chrgID] = acntChrgID
 					delete(nEc.Accounting, chrgID)
-					nEc.Accounting[cIl.ChargingID].JoinedChargeIDs[i] = acntChrgID
+					nEcAcntChrg.JoinedChargeIDs[i] = acntChrgID
 				}
 			}
 			if acntChrgID := ec.accountChargeID(nEcAcntChrg); acntChrgID != EmptyString &&
 				acntChrgID != cIl.ChargingID {
 				// matched the accountChargeID with an existing one in reference ec, replace in nEc
-				nEc.Accounting[acntChrgID] = ec.Accounting[cIl.ChargingID]
+				acntIDs[cIl.ChargingID] = acntChrgID
 				delete(nEc.Accounting, cIl.ChargingID)
 				cIl.ChargingID = acntChrgID
 			}
-
 		}
 	}
 }
@@ -464,7 +506,10 @@ func (ec *EventCharges) ratingID(rIl *RateSInterval, nIrRef map[string]*Interval
 // accountChargeID returns the ID of the matching AccountCharge within ec.Accounting
 func (ec *EventCharges) accountChargeID(ac *AccountCharge) (acID string) {
 	for ecID, ecAc := range ec.Accounting {
-		if ecAc.equals(ac) {
+		if ecAc.equals(ac) &&
+			ecAc.UnitFactorID == ac.UnitFactorID &&
+			ecAc.RatingID == ac.RatingID &&
+			slices.Equal(ecAc.JoinedChargeIDs, ac.JoinedChargeIDs) {
 			return ecID
 		}
 	}
