@@ -1,7 +1,7 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package main
+package console
 
 import (
 	"errors"
@@ -16,15 +16,15 @@ import (
 	"github.com/reeflective/readline"
 )
 
-func (a *app) repl() {
-	fmt.Printf("cgr-console, connected to %s.\n", *server)
+func (a *app) repl(name, prefix, server string) {
+	fmt.Printf("%s, connected to %s.\n", name, server)
 	fmt.Printf("%d methods available. Type help to list them, help keys for shortcuts, exit to quit.\n\n",
 		len(a.client.Methods()))
 	rl := readline.NewShell()
 	setCompletionDefaults(rl)
-	rl.Prompt.Primary(func() string { return "cgr> " })
+	rl.Prompt.Primary(func() string { return prefix + "> " })
 	rl.Completer = a.complete
-	loadHistory(rl)
+	loadHistory(rl, prefix)
 	for {
 		line, err := rl.Readline()
 		if err != nil {
@@ -61,8 +61,8 @@ Defaults. Override any of them in ~/.inputrc.
 `)
 }
 
-// setCompletionDefaults seeds display defaults, then reloads ~/.inputrc on top
-// so the user's own settings win.
+// setCompletionDefaults sets display defaults, then reloads ~/.inputrc
+// so the user's settings override them.
 func setCompletionDefaults(rl *readline.Shell) {
 	defaults := map[string]any{
 		"menu-complete-display-prefix": true,
@@ -76,14 +76,14 @@ func setCompletionDefaults(rl *readline.Shell) {
 	_ = rl.Keymap.ReloadConfig(rl.Opts...)
 }
 
-// loadHistory attaches a history file at ~/.cgr/history, ignoring errors so an
-// unwritable home never blocks the REPL.
-func loadHistory(rl *readline.Shell) {
+// loadHistory ignores errors so the REPL still works if the home directory is
+// not writable.
+func loadHistory(rl *readline.Shell, prefix string) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return
 	}
-	dir := filepath.Join(home, ".cgr")
+	dir := filepath.Join(home, "."+prefix)
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return
 	}
@@ -96,12 +96,10 @@ func loadHistory(rl *readline.Shell) {
 		return
 	}
 	if hist, err := readline.NewHistoryFromFile(path); err == nil {
-		rl.History.Add("cgr", hist)
+		rl.History.Add(prefix, hist)
 	}
 }
 
-// complete is reeflective's Completer entry point. DisplayList shows each match
-// on its own line instead of packed columns.
 func (a *app) complete(line []rune, cursor int) readline.Completions {
 	return a.completions(line, cursor).DisplayList()
 }
@@ -123,15 +121,14 @@ func (a *app) completions(line []rune, cursor int) readline.Completions {
 	}
 	if key, _, isValue := strings.Cut(current, "="); isValue {
 		if fd := rpcconsole.ArgField(md, key); fd != nil && len(fd.Fields) != 0 {
-			return completeNested(*fd)
+			return readline.CompleteMessage("%s = <%s>", fd.Name, fd.Type).
+				Usage("%s", rpcconsole.InnerFields(*fd))
 		}
 		return completeValue(md, key)
 	}
 	return completeFields(md, typedKeys(done[1:]))
 }
 
-// completeMethods offers every method grouped under its service, with the alias
-// as the value and the RPC name as its description.
 func (a *app) completeMethods() readline.Completions {
 	methods := a.client.Methods()
 	comps := make([]readline.Completion, 0, len(methods))
@@ -143,8 +140,6 @@ func (a *app) completeMethods() readline.Completions {
 	return readline.CompleteRaw(comps)
 }
 
-// completeFields offers the argument keys not already on the line, each with its
-// type. Which keys are required is the handler's call, not derivable here.
 func completeFields(md *utils.MethodDescriptor, typed map[string]struct{}) readline.Completions {
 	comps := make([]readline.Completion, 0, len(md.Args))
 	for _, f := range md.Args {
@@ -165,7 +160,6 @@ func completeFields(md *utils.MethodDescriptor, typed map[string]struct{}) readl
 		JustifyDescriptions()
 }
 
-// completeValue offers values for the field being typed.
 func completeValue(md *utils.MethodDescriptor, key string) readline.Completions {
 	typ := rpcconsole.FieldType(md, key)
 	switch typ {
@@ -178,12 +172,6 @@ func completeValue(md *utils.MethodDescriptor, key string) readline.Completions 
 	default:
 		return readline.CompleteMessage("%s = <%s>", key, typ)
 	}
-}
-
-// completeNested hints a value with inner fields, listing them one level deep.
-func completeNested(fd utils.FieldDescriptor) readline.Completions {
-	return readline.CompleteMessage("%s = <%s>", fd.Name, fd.Type).
-		Usage("%s", rpcconsole.InnerFields(fd))
 }
 
 // tokens splits the text before the cursor into finished tokens and the partial
@@ -202,7 +190,6 @@ func endsWithSpace(s string) bool {
 	return strings.HasSuffix(s, " ") || strings.HasSuffix(s, "\t")
 }
 
-// typedKeys returns the argument keys already present on the line.
 func typedKeys(args []string) map[string]struct{} {
 	keys := make(map[string]struct{}, len(args))
 	for _, a := range args {

@@ -1,7 +1,7 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package main
+package console
 
 import (
 	"fmt"
@@ -24,8 +24,8 @@ type tuiClient interface {
 	Call(string, any) (any, error)
 }
 
-func runTUI(client tuiClient, server string) error {
-	_, err := tea.NewProgram(newModel(client, server), tea.WithAltScreen()).Run()
+func runTUI(client tuiClient, name, server string) error {
+	_, err := tea.NewProgram(newModel(client, name, server), tea.WithAltScreen()).Run()
 	return err
 }
 
@@ -71,21 +71,19 @@ type model struct {
 
 type methodItem struct {
 	method      string
-	title       string
 	description string
 }
 
-func (i methodItem) Title() string       { return i.title }
+func (i methodItem) Title() string       { return i.method }
 func (i methodItem) Description() string { return i.description }
 func (i methodItem) FilterValue() string { return i.method }
 
-func newModel(client tuiClient, server string) model {
+func newModel(client tuiClient, name, server string) model {
 	methods := client.Methods()
 	items := make([]list.Item, len(methods))
 	for i, method := range methods {
 		items[i] = methodItem{
 			method:      method,
-			title:       method,
 			description: argSummary(client.Describe(method)),
 		}
 	}
@@ -95,7 +93,7 @@ func newModel(client tuiClient, server string) model {
 	delegate.Styles.SelectedDesc = delegate.Styles.SelectedDesc.
 		Foreground(tuiDimGreen).BorderLeftForeground(tuiGreen)
 	browser := list.New(items, delegate, 0, 0)
-	browser.Title = fmt.Sprintf("cgr-console %s", server)
+	browser.Title = fmt.Sprintf("%s %s", name, server)
 	browser.Styles.Title = browser.Styles.Title.Background(lipgloss.Color("72"))
 	browser.Styles.FilterCursor = browser.Styles.FilterCursor.Foreground(tuiGreen)
 	browser.SetStatusBarItemName("method", "methods")

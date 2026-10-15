@@ -1,7 +1,7 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package main
+package console
 
 import (
 	"strings"
@@ -20,7 +20,7 @@ func (testClient) Describe(string) *utils.MethodDescriptor {
 func (testClient) Call(string, any) (any, error) { return nil, nil }
 
 func TestResultViewportScrollsHorizontally(t *testing.T) {
-	m := newModel(testClient{}, "")
+	m := newModel(testClient{}, "cgr-console", "")
 	m.result.Width, m.result.Height = 8, 1
 	m.result.SetContent("0123456789abcdef")
 	before := m.result.View()
@@ -32,7 +32,7 @@ func TestResultViewportScrollsHorizontally(t *testing.T) {
 }
 
 func TestResizeClampsResultViewport(t *testing.T) {
-	m := newModel(testClient{}, "")
+	m := newModel(testClient{}, "cgr-console", "")
 	m.result.Width, m.result.Height = 40, 5
 	m.result.SetContent(strings.Repeat("line\n", 100))
 	m.result.GotoBottom()
