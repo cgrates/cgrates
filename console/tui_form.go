@@ -1,11 +1,12 @@
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
 
-package main
+package console
 
 import (
 	"encoding/json"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/cgrates/cgrates/rpcconsole"
@@ -170,9 +171,6 @@ func (value *formValue) build() (any, bool, error) {
 func (value *formValue) scalar() (any, error) {
 	typ, raw := value.field.Type, value.input.Value()
 	jsonType := typ != "string" && typ != "time" && typ != "duration"
-	if jsonType && !strings.HasPrefix(raw, "@") && !json.Valid([]byte(raw)) {
-		return nil, fmt.Errorf("expected JSON for %s", typ)
-	}
 	parsed, err := rpcconsole.ParseValue(typ, raw)
 	if err != nil {
 		return nil, err
@@ -300,7 +298,7 @@ func (m model) updateCollection(key tea.KeyMsg) (tea.Model, tea.Cmd) {
 		}
 	case "d", "x":
 		if frame.count() != 0 {
-			frame.value.items = append(frame.value.items[:frame.focus], frame.value.items[frame.focus+1:]...)
+			frame.value.items = slices.Delete(frame.value.items, frame.focus, frame.focus+1)
 			if frame.focus >= frame.count() && frame.focus > 0 {
 				frame.focus--
 			}
