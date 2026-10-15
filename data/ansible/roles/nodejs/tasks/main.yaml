@@ -1,0 +1,37 @@
+---
+- name: Install dependencies
+  become: true
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+    state: present
+
+- name: Download nvm installer
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nodejs_nvm_version }}/install.sh"
+    dest: "/tmp/nvm-install-{{ nodejs_nvm_version }}.sh"
+    mode: "0644"
+
+- name: Create nvm directory
+  ansible.builtin.file:
+    path: "{{ nodejs_nvm_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Install nvm
+  ansible.builtin.command: "bash /tmp/nvm-install-{{ nodejs_nvm_version }}.sh"
+  args:
+    creates: "{{ nodejs_nvm_dir }}/nvm.sh"
+  environment:
+    NVM_DIR: "{{ nodejs_nvm_dir }}"
+
+- name: Install Node.js
+  ansible.builtin.shell: |
+    . "{{ nodejs_nvm_dir }}/nvm.sh"
+    nvm install "{{ nodejs_version }}"
+  args:
+    executable: /bin/bash
+    creates: "{{ nodejs_nvm_dir }}/versions/node/v{{ nodejs_version }}/bin/node"
+  environment:
+    NVM_DIR: "{{ nodejs_nvm_dir }}"

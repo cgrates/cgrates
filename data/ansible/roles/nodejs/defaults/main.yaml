@@ -1,0 +1,4 @@
+---
+nodejs_version: 24.22.0
+nodejs_nvm_version: 0.40.8
+nodejs_nvm_dir: "{{ ansible_facts['env']['HOME'] }}/.nvm"
