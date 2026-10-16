@@ -96,7 +96,7 @@ func TestERsProcessEventErr(t *testing.T) {
 	srv := NewERService(nil, cfg, engine.NewCacheS(cfg, nil, nil, nil, locker), fltrS, nil)
 	rdrCfg := &config.EventReaderCfg{}
 	cgrEvent := &utils.CGREvent{}
-	err := srv.processEvent(cgrEvent, rdrCfg)
+	_, err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
 	}
@@ -463,7 +463,7 @@ func TestERsProcessEvent(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{}
-	err := srv.processEvent(cgrEvent, rdrCfg)
+	_, err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "unsupported reqType: <>" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "unsupported reqType: <>", err)
 	}
@@ -487,7 +487,7 @@ func TestERsProcessEvent2(t *testing.T) {
 		},
 	}
 	cgrEvent := &utils.CGREvent{}
-	err := srv.processEvent(cgrEvent, rdrCfg)
+	_, err := srv.processEvent(cgrEvent, rdrCfg)
 	if err != nil {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
@@ -514,7 +514,7 @@ func TestERsProcessEvent3(t *testing.T) {
 			utils.OptsRoutesLimit: true,
 		},
 	}
-	err := srv.processEvent(cgrEvent, rdrCfg)
+	_, err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [connIDs]" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", nil, err)
 	}
@@ -570,7 +570,7 @@ func TestERsProcessEventSessionSErrorPropagation(t *testing.T) {
 			utils.OptsRoutesLimit: true,
 		},
 	}
-	err := srv.processEvent(cgrEvent, rdrCfg)
+	_, err := srv.processEvent(cgrEvent, rdrCfg)
 	if err == nil || err.Error() != "RALS_ERROR" {
 		t.Fatalf("\nExpecting <%+v>,\n Received <%+v>", "RALS_ERROR", err)
 	}

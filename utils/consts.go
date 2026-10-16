@@ -1322,6 +1322,7 @@ const (
 	AdminSv1RemoveAccount             = "AdminSv1.RemoveAccount"
 	AdminSv1GetAccountsCount          = "AdminSv1.GetAccountsCount"
 	AdminSv1GetURs                    = "AdminSv1.GetURs"
+	AdminSv1SetURs                    = "AdminSv1.SetURs"
 	AdminSv1RemoveURs                 = "AdminSv1.RemoveURs"
 	AdminSv1DumpDB                    = "AdminSv1.DumpDB"
 	AdminSv1RewriteDB                 = "AdminSv1.RewriteDB"
@@ -1355,9 +1356,10 @@ const (
 
 // ERs
 const (
-	ErSv1          = "ErSv1"
-	ErSv1Ping      = "ErSv1.Ping"
-	ErSv1RunReader = "ErSv1.RunReader"
+	ErSv1                    = "ErSv1"
+	ErSv1Ping                = "ErSv1.Ping"
+	ErSv1RunReader           = "ErSv1.RunReader"
+	ErSv1ProcessReaderEvents = "ErSv1.ProcessReaderEvents"
 )
 
 // ConfigSv1 APIs
