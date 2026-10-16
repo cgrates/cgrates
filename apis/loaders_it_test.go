@@ -1698,3 +1698,96 @@ func TestLoadersLoad(t *testing.T) {
 		t.Errorf("Expected empty stats, received: %v", utils.ToJSON(reply))
 	}
 }
+
+func TestLoadersRunStats(t *testing.T) {
+	tpPath := "/tmp/tps/loaders/TestLoadersRunStats"
+	csvFiles := map[string]string{
+
+		utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_1001_SIMPLEAUTH,*string:~*opts.*context:simpleauth;*string:~*req.Account:1001,;20,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1001_SESSIONAUTH,*string:~*opts.*context:*sessions;*string:~*req.Account:1001,;10,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.RequestType,*constant,*prepaid
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.PaypalAccount,*constant,cgrates@paypal.com
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.LCRProfile,*constant,premium_cli
+cgrates.org,ATTR_1002_SESSIONAUTH,*string:~*opts.*context:*sessions;*string:~*req.Account:1002,;10,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.RequestType,*constant,*postpaid
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.PaypalAccount,*constant,cgrates@paypal.com
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.LCRProfile,*constant,premium_cli
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,ResourceAllocation,*constant,"ResGroup1"`,
+
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Element[3],Values[4]
+cgrates.org,FLTR_RES,*string,~*req.Account,1001;1002;1003
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Account,1001;1002
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.RunID,*default
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Destination,1001;1002;1003
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.Account,1003
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.RunID,*default
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.Destination,1001`,
+
+		utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],Thresholds[9]
+cgrates.org,ResGroup21,*string:~*req.Account:1001,;10,1s,2,call,true,true,
+cgrates.org,ResGroup21,,,,,,,,
+cgrates.org,ResGroup22,,,,,,,,
+cgrates.org,ResGroup22,*string:~*req.Account:dan,;10,3600s,2,premium_call,true,true,`,
+
+		utils.ChargersCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
+cgrates.org,Charger1,*string:~*req.Account:1001,;20,;true,,
+cgrates.org,Charger1,,,,*rated,ATTR_1001_SIMPLEAUTH
+cgrates.org,Charger2,,,,*rated,ATTR_1002_SESSIONAUTH
+cgrates.org,Charger2,*string:~*req.Account:1002,;15,;false,,`,
+
+		utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],AttributeIDs[8],ActionProfileIDs[9],Async[10],EeIDs[11]
+cgrates.org,TH1,*string:~*req.Account:1001;*string:~*req.RunID:*default,;10,12,10,1s,true,,ACT_PRF1,true,
+cgrates.org,TH1,,,,,,,,,,
+cgrates.org,TH2,,,,,,,,,,
+cgrates.org,TH2,*string:~*req.Account:1002,,,,,true,,,true,
+cgrates.org,TH2,,;5,10,8,1s,true,,ACT_PRF2,true,`,
+	}
+
+	if err := os.MkdirAll(tpPath, 0755); err != nil {
+		t.Fatalf("could not create folder %s: %v", tpPath, err)
+	}
+	defer os.RemoveAll(tpPath)
+
+	for fileName, content := range csvFiles {
+		filePath := path.Join(tpPath, fileName)
+		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
+			t.Fatalf("could not write to file %s: %v", filePath, err)
+		}
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"loaders": [
+    {
+        "id": "*default",
+        "enabled": true,
+        "tenant": "cgrates.org",
+        "tpInPath": "/tmp/tps/loaders/TestLoadersRunStats",
+        "tpOutPath": ""
+    }
+]
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply map[string]int
+	if err := client.Call(context.Background(), utils.LoaderSv1Run,
+		&loaders.ArgsProcessFolder{
+			APIOpts: map[string]any{utils.MetaCache: utils.MetaNone},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	exp := map[string]int{
+		utils.MetaAttributes: 3,
+		utils.MetaFilters:    3,
+		utils.MetaResources:  2,
+		utils.MetaChargers:   2,
+		utils.MetaThresholds: 2,
+	}
+	if !reflect.DeepEqual(exp, reply) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}

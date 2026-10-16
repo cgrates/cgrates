@@ -364,4 +364,5 @@ func main() {
 	}, &rply); err != nil {
 		log.Fatal("Could not load tariff plan: ", err)
 	}
+	fmt.Println(utils.ToJSON(rply))
 }
