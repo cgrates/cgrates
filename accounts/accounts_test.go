@@ -5112,3 +5112,416 @@ func TestV1DebitConcretesProfileIgnoreFiltersError(t *testing.T) {
 	}
 
 }
+
+func TestAccountsDebitPackage(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	newDecimal := utils.NewDecimalFromFloat64
+	for _, tc := range []struct {
+		name              string
+		category          string
+		balance           string
+		usage             float64
+		abstracts         float64
+		concretes         float64
+		wantUsage         float64
+		wantCost          float64
+		wantAbstractsLeft float64
+		wantConcretesLeft float64
+	}{
+		{
+			name:              "voice call covered by abstracts",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(60 * time.Minute),
+			abstracts:         float64(4000 * time.Minute),
+			concretes:         300,
+			wantUsage:         float64(60 * time.Minute),
+			wantCost:          0,
+			wantAbstractsLeft: float64(3940 * time.Minute),
+			wantConcretesLeft: 300,
+		},
+		{
+			name:              "150s call takes the last 60s from the abstracts and the other 90s from concretes",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(150 * time.Second),
+			abstracts:         float64(60 * time.Second),
+			concretes:         300,
+			wantUsage:         float64(180 * time.Second),
+			wantCost:          10,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 290,
+		},
+		{
+			name:              "120s call when there are no more abstracts left",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(120 * time.Second),
+			abstracts:         0,
+			concretes:         300,
+			wantUsage:         float64(120 * time.Second),
+			wantCost:          10,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 290,
+		},
+		{
+			name:              "100s call costs exactly the 5 left on the concretes",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(60 * time.Second),
+			abstracts:         0,
+			concretes:         5,
+			wantUsage:         float64(60 * time.Second),
+			wantCost:          5,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 0,
+		},
+		{
+			name:              "120s call will be only 60s because 5 in concretes can only cover 60s",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(120 * time.Second),
+			abstracts:         0,
+			concretes:         5,
+			wantUsage:         float64(60 * time.Second),
+			wantCost:          5,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 0,
+		},
+		{
+			name:              "rejected call when there are no minutes and no concretes",
+			category:          "voice",
+			balance:           "nationalMin",
+			usage:             float64(60 * time.Second),
+			abstracts:         0,
+			concretes:         0,
+			wantUsage:         0,
+			wantCost:          0,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 0,
+		},
+		{
+			name:              "2.5 MB session is rounded up to 3 MB",
+			category:          "data",
+			balance:           "internetData",
+			usage:             2.5 * 1024 * 1024,
+			abstracts:         15 * 1024 * 1024,
+			concretes:         300,
+			wantUsage:         3 * 1024 * 1024,
+			wantCost:          0,
+			wantAbstractsLeft: 12 * 1024 * 1024,
+			wantConcretesLeft: 300,
+		},
+		{
+			name:              "5 MB session takes the last 3 MB from the abstracts and covers the other 2 MB with concrete",
+			category:          "data",
+			balance:           "internetData",
+			usage:             5 * 1024 * 1024,
+			abstracts:         3 * 1024 * 1024,
+			concretes:         300,
+			wantUsage:         5 * 1024 * 1024,
+			wantCost:          20,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 280,
+		},
+		{
+			name:              "5 MB session with no more abstracts left is covered with concrete",
+			category:          "data",
+			balance:           "internetData",
+			usage:             5 * 1024 * 1024,
+			abstracts:         0,
+			concretes:         300,
+			wantUsage:         5 * 1024 * 1024,
+			wantCost:          50,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 250,
+		},
+		{
+			name:              "5 MB session is cut at 2 MB because the concrete can cover only 2 MB",
+			category:          "data",
+			balance:           "internetData",
+			usage:             5 * 1024 * 1024,
+			abstracts:         0,
+			concretes:         20.2,
+			wantUsage:         2 * 1024 * 1024,
+			wantCost:          20,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 0.2,
+		},
+		{
+			name:              "1 message covered by abstract balance",
+			category:          "sms",
+			balance:           "nationalSMS",
+			usage:             1,
+			abstracts:         1000,
+			concretes:         300,
+			wantUsage:         1,
+			wantCost:          0,
+			wantAbstractsLeft: 999,
+			wantConcretesLeft: 300,
+		},
+		{
+			name:              "3 messages take the last sms from the abstract and covers the other two with concrete",
+			category:          "sms",
+			balance:           "nationalSMS",
+			usage:             3,
+			abstracts:         1,
+			concretes:         300,
+			wantUsage:         3,
+			wantCost:          16,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 284,
+		},
+		{
+			name:              "sms usage with no abstracts left, covered with concretes",
+			category:          "sms",
+			balance:           "nationalSMS",
+			usage:             1,
+			abstracts:         0,
+			concretes:         300,
+			wantUsage:         1,
+			wantCost:          8,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 292,
+		},
+		{
+			name:              "sms is rejected because it cannot be covered by concrete",
+			category:          "sms",
+			balance:           "nationalSMS",
+			usage:             1,
+			abstracts:         0,
+			concretes:         5,
+			wantUsage:         0,
+			wantCost:          0,
+			wantAbstractsLeft: 0,
+			wantConcretesLeft: 5,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			account := &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "355691234567",
+				Balances: map[string]*utils.Balance{
+					"nationalMin": {
+						ID:        "nationalMin",
+						Type:      utils.MetaAbstract,
+						FilterIDs: []string{"*string:~*req.Category:voice"},
+						Units:     newDecimal(tc.abstracts),
+						Weights:   utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{{
+							Increment:    newDecimal(float64(time.Second)),
+							FixedFee:     newDecimal(0),
+							RecurrentFee: newDecimal(0),
+						}},
+					},
+					"internetData": {
+						ID:        "internetData",
+						Type:      utils.MetaAbstract,
+						FilterIDs: []string{"*string:~*req.Category:data"},
+						Units:     newDecimal(tc.abstracts),
+						Weights:   utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{{
+							Increment:    newDecimal(1024 * 1024),
+							FixedFee:     newDecimal(0),
+							RecurrentFee: newDecimal(0),
+						}},
+					},
+					"nationalSMS": {
+						ID:        "nationalSMS",
+						Type:      utils.MetaAbstract,
+						FilterIDs: []string{"*string:~*req.Category:sms"},
+						Units:     newDecimal(tc.abstracts),
+						Weights:   utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{{
+							Increment:    newDecimal(1),
+							FixedFee:     newDecimal(0),
+							RecurrentFee: newDecimal(0),
+						}},
+					},
+					"concreteBalance": {
+						ID:      "concreteBalance",
+						Type:    utils.MetaConcrete,
+						Units:   newDecimal(tc.concretes),
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								FilterIDs:    []string{"*string:~*req.Category:voice"},
+								Increment:    newDecimal(float64(time.Minute)),
+								FixedFee:     newDecimal(0),
+								RecurrentFee: utils.NewDecimal(5, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Category:data"},
+								Increment:    newDecimal(1024 * 1024),
+								FixedFee:     newDecimal(0),
+								RecurrentFee: utils.NewDecimal(10, 0),
+							},
+							{
+								FilterIDs:    []string{"*string:~*req.Category:sms"},
+								Increment:    newDecimal(1),
+								FixedFee:     newDecimal(0),
+								RecurrentFee: utils.NewDecimal(8, 0),
+							},
+						},
+					},
+				},
+			}
+			event := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event: map[string]any{
+					utils.AccountField: "355691234567",
+					utils.Category:     tc.category,
+				},
+				APIOpts: map[string]any{
+					utils.MetaUsage: newDecimal(tc.usage),
+				},
+			}
+
+			charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+			if err != nil {
+				t.Error(err)
+			}
+			if charges.Abstracts != nil && charges.Abstracts.Compare(newDecimal(tc.wantUsage)) != 0 {
+				t.Errorf("Expected usage: %v, recieved: %v", tc.wantUsage, charges.Abstracts)
+			}
+			if charges.Concretes != nil && charges.Concretes.Compare(newDecimal(tc.wantCost)) != 0 {
+				t.Errorf("Expected cost: %v, recieved: %v", tc.wantCost, charges.Concretes)
+			}
+
+			abstracts := account.Balances[tc.balance]
+			concretes := account.Balances["concreteBalance"]
+			if abstracts.Units.Compare(newDecimal(tc.wantAbstractsLeft)) != 0 {
+				t.Errorf("Expected %v, recieved %v", tc.wantAbstractsLeft, abstracts.Units)
+			}
+			if concretes.Units.Compare(newDecimal(tc.wantConcretesLeft)) != 0 {
+				t.Errorf("Expected %v, recieved %v", tc.wantConcretesLeft, concretes.Units)
+			}
+		})
+	}
+}
+
+func TestAccountsDebitAbstractConcretesAbstract(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	newDecimal := utils.NewDecimalFromFloat64
+	account := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "355691234567",
+		Balances: map[string]*utils.Balance{
+			"nationalMin": {
+				ID:        "nationalMin",
+				Type:      utils.MetaAbstract,
+				FilterIDs: []string{"*string:~*req.Category:voice"},
+				Units:     newDecimal(float64(2 * time.Minute)),
+				Weights:   utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(float64(time.Second)),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(0),
+				}},
+			},
+			"internetData": {
+				ID:        "internetData",
+				Type:      utils.MetaAbstract,
+				FilterIDs: []string{"*string:~*req.Category:data"},
+				Units:     newDecimal(15 * 1024 * 1024),
+				Weights:   utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    newDecimal(1024 * 1024),
+					FixedFee:     newDecimal(0),
+					RecurrentFee: newDecimal(0),
+				}},
+			},
+			"concreteBalance": {
+				ID:      "concreteBalance",
+				Type:    utils.MetaConcrete,
+				Units:   newDecimal(300),
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						FilterIDs:    []string{"*string:~*req.Category:voice"},
+						Increment:    newDecimal(float64(time.Minute)),
+						FixedFee:     newDecimal(0),
+						RecurrentFee: utils.NewDecimal(5, 0),
+					},
+					{
+						FilterIDs:    []string{"*string:~*req.Category:data"},
+						Increment:    newDecimal(1024 * 1024),
+						FixedFee:     newDecimal(0),
+						RecurrentFee: utils.NewDecimal(10, 0),
+					},
+				},
+			},
+		},
+	}
+	event := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "355691234567",
+		},
+	}
+
+	event.Event = map[string]any{
+		utils.AccountField: "355691234567",
+		utils.Category:     "voice",
+	}
+	event.APIOpts = map[string]any{
+		utils.MetaUsage: newDecimal(float64(120 * time.Second)),
+	}
+	charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if charges.Abstracts != nil && charges.Abstracts.Compare(newDecimal(float64(120*time.Second))) != 0 {
+		t.Errorf("Expected usage: %v, recieved %v", newDecimal(float64(120*time.Second)), charges.Abstracts)
+	}
+	if charges.Concretes != nil && charges.Concretes.Compare(newDecimal(0)) != 0 {
+		t.Errorf("Expected cost: 0, recieved %v", charges.Concretes)
+	}
+
+	event.APIOpts = map[string]any{
+		utils.MetaUsage: newDecimal(float64(20 * time.Second)),
+	}
+	charges, err = accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if charges.Abstracts != nil && charges.Abstracts.Compare(newDecimal(float64(60*time.Second))) != 0 {
+		t.Errorf("Expected usage: %v, recieved %v", newDecimal(float64(60*time.Second)), charges.Abstracts)
+	}
+	if charges.Concretes != nil && charges.Concretes.Compare(newDecimal(5)) != 0 {
+		t.Errorf("Expected cost: 5, recieved %v", charges.Concretes)
+	}
+
+	event.Event = map[string]any{
+		utils.AccountField: "355691234567",
+		utils.Category:     "data",
+	}
+	event.APIOpts = map[string]any{
+		utils.MetaUsage: newDecimal(1 * 1024 * 1024),
+	}
+	charges, err = accnts.accountsDebit(context.Background(), []*utils.Account{account}, event, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if charges.Abstracts != nil && charges.Abstracts.Compare(newDecimal(1*1024*1024)) != 0 {
+		t.Errorf("Expected usage: %v, recieved %v", newDecimal(1*1024*1024), charges.Abstracts)
+	}
+	if charges.Concretes != nil && charges.Concretes.Compare(newDecimal(0)) != 0 {
+		t.Errorf("Expected cost: 0, recieved %v", charges.Concretes)
+	}
+
+	abstracts := account.Balances["nationalMin"]
+	if abstracts.Units.Compare(newDecimal(0)) != 0 {
+		t.Errorf("Expected 0, recieved %v", abstracts.Units)
+	}
+	abstracts = account.Balances["internetData"]
+	if abstracts.Units.Compare(newDecimal(14*1024*1024)) != 0 {
+		t.Errorf("Expected %v, recieved %v", newDecimal(14*1024*1024), abstracts.Units)
+	}
+	concretes := account.Balances["concreteBalance"]
+	if concretes.Units.Compare(newDecimal(295)) != 0 {
+		t.Errorf("Expected 295, recieved %v", concretes.Units)
+	}
+}
