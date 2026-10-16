@@ -1202,3 +1202,32 @@ func (fltr *FilterRule) FilterToSQLQuery() (conditions []string, args []any) {
 	}
 	return conditions, args
 }
+
+// FiltersForQuery converts filters slice to SQL query filters
+func FiltersForQuery(filters []string, dm *DataManager, tenant string) (dbFilters []string, dbFilterArgs []any,
+	lazyFilters []string, err error) {
+	for _, filterID := range filters {
+		filterObj, err := dm.GetFilter(context.TODO(), tenant,
+			filterID, true, false, utils.NonTransactional)
+		if err != nil {
+			return nil, nil, nil, err
+		}
+		if err := CheckFilter(filterObj); err != nil {
+			return nil, nil, nil, err
+		}
+		var lazyFilter bool
+		for _, rule := range filterObj.Rules {
+			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) {
+				conditions, args := rule.FilterToSQLQuery()
+				dbFilters = append(dbFilters, strings.Join(conditions, " OR "))
+				dbFilterArgs = append(dbFilterArgs, args...)
+				continue
+			}
+			if !lazyFilter {
+				lazyFilters = append(lazyFilters, filterObj.ID)
+				lazyFilter = true
+			}
+		}
+	}
+	return dbFilters, dbFilterArgs, lazyFilters, nil
+}
