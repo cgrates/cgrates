@@ -7,12 +7,16 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"path"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -209,5 +213,58 @@ func TestLoadConfig(t *testing.T) {
 	}
 	if !reflect.DeepEqual(ldrCfg.RPCConns(), expaddr) {
 		t.Errorf("Expected %v received %v", utils.ToJSON(expaddr), utils.ToJSON(ldrCfg.RPCConns()))
+	}
+}
+
+func TestCgrLoaderStats(t *testing.T) {
+	csvFiles := map[string]string{
+
+		utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
+cgrates.org,ATTR_1001_SIMPLEAUTH,*string:~*opts.*context:simpleauth;*string:~*req.Account:1001,;20,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1001_SESSIONAUTH,*string:~*opts.*context:*sessions;*string:~*req.Account:1001,;10,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.RequestType,*constant,*prepaid
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.PaypalAccount,*constant,cgrates@paypal.com
+cgrates.org,ATTR_1001_SESSIONAUTH,,,,,,*req.LCRProfile,*constant,premium_cli
+cgrates.org,ATTR_1002_SESSIONAUTH,*string:~*opts.*context:*sessions;*string:~*req.Account:1002,;10,;false,,,*req.Password,*constant,CGRateS.org
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.RequestType,*constant,*postpaid
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.PaypalAccount,*constant,cgrates@paypal.com
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,*req.LCRProfile,*constant,premium_cli
+cgrates.org,ATTR_1002_SESSIONAUTH,,,,,,ResourceAllocation,*constant,"ResGroup1"`,
+
+		utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Element[3],Values[4]
+cgrates.org,FLTR_RES,*string,~*req.Account,1001;1002;1003
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Account,1001;1002
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.RunID,*default
+cgrates.org,FLTR_ACNT_1001_1002,*string,~*req.Destination,1001;1002;1003
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.Account,1003
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.RunID,*default
+cgrates.org,FLTR_ACNT_1003_1001,*string,~*req.Destination,1001`,
+	}
+
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	_, cfg := ng.Run(t)
+
+	var logBuf bytes.Buffer
+	engine.LoadCSVsWithCGRLoader(t, cfg.ConfigPath, "", &logBuf, csvFiles)
+
+	lines := strings.Split(strings.TrimSpace(logBuf.String()), "\n")
+	var stats map[string]int
+	if err := json.Unmarshal([]byte(lines[len(lines)-1]), &stats); err != nil {
+		t.Fatalf("could not decode stats: %v\noutput:\n%s", err, logBuf.String())
+	}
+	exp := map[string]int{
+		utils.MetaAttributes: 3,
+		utils.MetaFilters:    3,
+	}
+	if !reflect.DeepEqual(exp, stats) {
+		t.Errorf("Expected: %s, received: %s", utils.ToJSON(exp), utils.ToJSON(stats))
 	}
 }
