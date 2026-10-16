@@ -2224,13 +2224,20 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],	
 		"*caches": [{"connIDs": ["*internal"]}],
-		// "*ees": [	// connections to EEs
+		// "*ees": [			// connections to EEs
 		// 	{
 		// 		"tenant": "",
 		// 		"filterIDs": [],
 		// 		"connIDs": ["*internal"]
 		// 	}
 		// ],
+		// "*ers": [			// connections to ERs
+		// 	{
+		// 		"tenant": "",
+		// 		"filterIDs": [],
+		// 		"connIDs": ["*internal"]
+		// 	}
+		// ]
 	}
 },
 

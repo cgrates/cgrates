@@ -108,34 +108,6 @@ func (rdr *CgrUR) openDB() (*gorm.DB, *sql.DB, error) {
 	return db, sqlDB, nil
 }
 
-func (rdr *CgrUR) filtersForQuery(filters []string) (dbFilters []string, dbFilterArgs []any,
-	lazyFilters []string, err error) {
-	for _, filterID := range filters {
-		filterObj, err := rdr.dm.GetFilter(context.TODO(), rdr.cgrCfg.GeneralCfg().DefaultTenant,
-			filterID, true, false, utils.NonTransactional)
-		if err != nil {
-			return nil, nil, nil, err
-		}
-		if err := engine.CheckFilter(filterObj); err != nil {
-			return nil, nil, nil, err
-		}
-		var lazyFilter bool
-		for _, rule := range filterObj.Rules {
-			if strings.HasPrefix(rule.Element, utils.MetaDynReq+utils.NestingSep) {
-				conditions, args := rule.FilterToSQLQuery()
-				dbFilters = append(dbFilters, strings.Join(conditions, " OR "))
-				dbFilterArgs = append(dbFilterArgs, args...)
-				continue
-			}
-			if !lazyFilter {
-				lazyFilters = append(lazyFilters, filterObj.ID)
-				lazyFilter = true
-			}
-		}
-	}
-	return dbFilters, dbFilterArgs, lazyFilters, nil
-}
-
 func (rdr *CgrUR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 	defer sqlDB.Close()
 	if rdr.Config().StartDelay > 0 {
@@ -148,7 +120,7 @@ func (rdr *CgrUR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 			return
 		}
 	}
-	dbFilters, dbFilterArgs, lazyFilters, err := rdr.filtersForQuery(rdr.Config().Filters)
+	dbFilters, dbFilterArgs, lazyFilters, err := engine.FiltersForQuery(rdr.Config().Filters, rdr.dm, rdr.cgrCfg.GeneralCfg().DefaultTenant)
 	if err != nil {
 		rdr.rdrErr <- err
 		return
@@ -190,10 +162,16 @@ func (rdr *CgrUR) readLoop(db *gorm.DB, sqlDB io.Closer) {
 				}
 			}
 			go func(urSql *utils.URSQLTable) {
-				if err := rdr.processMessage(urSql, lazyFilters); err != nil {
+				if rdrEv, err := rdr.processMessage(urSql, lazyFilters); err != nil {
 					utils.Logger.Warning(
 						fmt.Sprintf("<%s> processing UR id <%d> error: %s",
 							utils.ERs, urSql.ID, err.Error()))
+				} else { // send event to ERs ListenAndServe
+					rdrEvChan := rdr.rdrEvents
+					if _, isPartial := rdrEv.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+						rdrEvChan = rdr.partialEvents
+					}
+					rdrEvChan <- rdrEv
 				}
 				if rdr.Config().ConcurrentReqs != -1 {
 					<-rdr.cap
@@ -222,7 +200,7 @@ func (rdr *CgrUR) run(filters []string) error {
 		return err
 	}
 	defer func() { _ = sqlDB.Close() }()
-	dbFilters, dbFilterArgs, lazyFilters, err := rdr.filtersForQuery(filters)
+	dbFilters, dbFilterArgs, lazyFilters, err := engine.FiltersForQuery(filters, rdr.dm, rdr.cgrCfg.GeneralCfg().DefaultTenant)
 	if err != nil {
 		return err
 	}
@@ -243,14 +221,20 @@ func (rdr *CgrUR) run(filters []string) error {
 				return err
 			}
 		}
-		if err := rdr.processMessage(urSQL, lazyFilters); err != nil {
+		if rdrEv, err := rdr.processMessage(urSQL, lazyFilters); err != nil {
 			return err
+		} else { // send events to ERs ListenAndServe
+			rdrEvChan := rdr.rdrEvents
+			if _, isPartial := rdrEv.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+				rdrEvChan = rdr.partialEvents
+			}
+			rdrEvChan <- rdrEv
 		}
 	}
 	return nil
 }
 
-func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) error {
+func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) (*erEvent, error) {
 	ur := &utils.UR{
 		Tenant:    urSql.Tenant,
 		Opts:      urSql.Opts,
@@ -262,7 +246,7 @@ func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) 
 	cgrEv := ur.CGREvent()
 	if pass, err := rdr.fltrS.Pass(context.TODO(), cgrEv.Tenant, lazyFilters,
 		cgrEv.AsDataProvider()); err != nil || !pass {
-		return err
+		return nil, err
 	}
 	if len(rdr.Config().Fields) != 0 {
 		reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{
@@ -280,11 +264,11 @@ func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) 
 		// Copy the stored Event first so values not listed in Fields stay unchanged.
 		for k, v := range cgrEv.Event {
 			if err := agReq.CGRRequest.Set(utils.NewFullPath(k), v); err != nil {
-				return err
+				return nil, err
 			}
 		}
 		if err := agReq.SetFields(rdr.Config().Fields); err != nil {
-			return err
+			return nil, err
 		}
 		if ev := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant,
 			utils.NestingSep, agReq.Opts); ev != nil {
@@ -293,10 +277,6 @@ func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) 
 			cgrEv.Event = make(map[string]any)
 		}
 		cgrEv.APIOpts = agReq.Opts
-	}
-	rdrEv := rdr.rdrEvents
-	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
-		rdrEv = rdr.partialEvents
 	}
 	var rawEvent map[string]any
 	if len(rdr.Config().EEsSuccessIDs) != 0 || len(rdr.Config().EEsFailedIDs) != 0 {
@@ -307,12 +287,11 @@ func (rdr *CgrUR) processMessage(urSql *utils.URSQLTable, lazyFilters []string) 
 			utils.EventLowCase: urSql.Event,
 		}
 	}
-	rdrEv <- &erEvent{
+	return &erEvent{
 		cgrEvent: cgrEv,
 		rawEvent: rawEvent,
 		rdrCfg:   rdr.Config(),
-	}
-	return nil
+	}, nil
 }
 
 func (rdr *CgrUR) setURL(inURL string, opts *config.EventReaderOpts) error {
@@ -348,4 +327,47 @@ func (rdr *CgrUR) setURL(inURL string, opts *config.EventReaderOpts) error {
 		return fmt.Errorf("unknown dbType %s", rdr.connType)
 	}
 	return nil
+}
+
+// GetReaderEvents will gather all *cgrur reader events found using the filter
+func (rdr *CgrUR) GetReaderEvents(filters []string) ([]*erEvent, error) {
+	if rdr.connType != utils.MySQL {
+		return nil, errors.New("manual cgrur processing supports only mysql")
+	}
+	db, sqlDB, err := rdr.openDB()
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = sqlDB.Close() }()
+	dbFilters, dbFilterArgs, lazyFilters, err := engine.FiltersForQuery(filters, rdr.dm, rdr.cgrCfg.GeneralCfg().DefaultTenant)
+	if err != nil {
+		return nil, err
+	}
+	var urs []*utils.URSQLTable
+	tx := db.Table(rdr.tableName).Model(&utils.URSQLTable{})
+	if selectWhereQuery := strings.Join(dbFilters, " AND "); selectWhereQuery != "" {
+		tx = tx.Where(selectWhereQuery, dbFilterArgs...)
+	}
+	if rdr.Config().Opts.SQLBatchSize != nil && *rdr.Config().Opts.SQLBatchSize > 0 {
+		tx = tx.Limit(*rdr.Config().Opts.SQLBatchSize)
+	}
+	if err := tx.Find(&urs).Error; err != nil {
+		return nil, err
+	}
+	rdrEvents := make([]*erEvent, 0) // collect reader events
+	for _, urSQL := range urs {
+		if rdr.Config().ProcessedPath == utils.MetaDelete {
+			if err := db.Table(rdr.tableName).Delete(&utils.URSQLTable{}, urSQL.ID).Error; err != nil {
+				return nil, err
+			}
+		}
+
+		urSQL.Opts[utils.MetaUR] = true // make sure we get reply from sessions for *ur when processed
+		if rdrEv, err := rdr.processMessage(urSQL, lazyFilters); err != nil {
+			return nil, err
+		} else {
+			rdrEvents = append(rdrEvents, rdrEv)
+		}
+	}
+	return rdrEvents, nil
 }
