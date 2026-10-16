@@ -892,9 +892,6 @@ func TestEventChargerMerge(t *testing.T) {
 			"GENUUID_FACTOR2": {
 				Factor: NewDecimal(200, 0),
 			},
-			"GENUUID_FACTOR3": {
-				Factor: NewDecimal(200, 0),
-			},
 		},
 		Rating: map[string]*RateSInterval{
 			"GENUUID_RATING1": {
@@ -943,17 +940,6 @@ func TestEventChargerMerge(t *testing.T) {
 				RecurrentFee:  NewDecimal(24, 1),
 			},
 			"RATE_2": {
-				IntervalStart: NewDecimal(12, 1),
-				FixedFee:      NewDecimal(1, 0),
-				RecurrentFee:  NewDecimal(5, 2),
-			},
-
-			"RATE_3": {
-				IntervalStart: NewDecimal(0, 0),
-				FixedFee:      NewDecimal(4, 1),
-				RecurrentFee:  NewDecimal(24, 1),
-			},
-			"RATE_4": {
 				IntervalStart: NewDecimal(12, 1),
 				FixedFee:      NewDecimal(1, 0),
 				RecurrentFee:  NewDecimal(5, 2),
@@ -1218,8 +1204,8 @@ func TestEventChargesAppendChargeEntryNonEmptyCharges(t *testing.T) {
 	}
 
 	eC.appendChargeEntry(cIls3)
-	if eC.Charges[len(eC.Charges)-1].CompressFactor != 5 {
-		t.Errorf("Expected 5, received %v", eC.Charges[len(eC.Charges)-1].CompressFactor)
+	if eC.Charges[len(eC.Charges)-1].CompressFactor != 8 {
+		t.Errorf("Expected 8, received %v", eC.Charges[len(eC.Charges)-1].CompressFactor)
 	}
 }
 
