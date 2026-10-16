@@ -920,3 +920,12 @@ func LoadCSVsWithCGRLoader(t testing.TB, cfgPath, tpPath string, logBuffer io.Wr
 		}
 	}
 }
+
+// IsWithinMargin returns true if dates are withing the margin apart from each other
+func IsWithinMargin(date1, date2 time.Time, margin time.Duration) bool {
+	diff := date1.Sub(date2)
+	if diff < 0 {
+		diff = -diff
+	}
+	return diff <= margin
+}

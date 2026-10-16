@@ -199,7 +199,7 @@ func TestCDRsToCGREvents(t *testing.T) {
 			},
 		}
 
-		cgrEvents := CDRsToCGREvents(cdrs)
+		cgrEvents := URsToCGREvents(cdrs)
 
 		if len(cgrEvents) != len(cdrs) {
 			t.Errorf("CDRsToCGREvents() returned %d events, expected %d", len(cgrEvents), len(cdrs))
@@ -229,7 +229,7 @@ func TestCDRsToCGREvents(t *testing.T) {
 	{
 		cdrs := []*UR{}
 
-		cgrEvents := CDRsToCGREvents(cdrs)
+		cgrEvents := URsToCGREvents(cdrs)
 
 		if len(cgrEvents) != 0 {
 			t.Errorf("CDRsToCGREvents() returned %d events, expected 0", len(cgrEvents))
