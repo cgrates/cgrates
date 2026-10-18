@@ -68,7 +68,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	var hasUF bool
 	if uF != nil && uF.Factor.Compare(utils.NewDecimal(1, 0)) != 0 {
 		hasUF = true
-		usage = utils.MultiplyDecimal(usage, uF.Factor)
 	}
 
 	// balanceLimit
@@ -117,6 +116,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 			return ecCost, nil
 		}
 	}
+	// dbtUnits are the units debitted, different than usage so we can process them without altering usage
 	var dbtUnits *utils.Decimal
 	if ecCost != nil { // abstracts with concretes cost
 		usage = ecCost.Abstracts
@@ -124,10 +124,13 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	} else { // abstracts without cost
 		dbtUnits = usage.Clone()
 	}
-
+	if hasUF {
+		dbtUnits = utils.MultiplyDecimal(dbtUnits, uF.Factor)
+	}
 	if dbtUnits.Compare(utils.NewDecimal(0, 0)) != 0 {
 		aB.blnCfg.Units = utils.SubstractDecimal(aB.blnCfg.Units, dbtUnits)
 	}
+
 	if hasLmt { // put back the limit
 		aB.blnCfg.Units = utils.SumDecimal(aB.blnCfg.Units, blncLmt)
 	}

@@ -1078,8 +1078,8 @@ func TestAccountsDebitRoundIncrementUnlimitedWithUF(t *testing.T) {
 	}
 
 	evChExp := &utils.EventCharges{
-		Abstracts: utils.NewDecimal(4096, 0),
-		Concretes: utils.NewDecimal(4, 0),
+		Abstracts: utils.NewDecimal(2048, 0),
+		Concretes: utils.NewDecimal(2, 0),
 		Charges: []*utils.ChargeEntry{
 			{
 				ChargingID:     "1df1c3b",
@@ -1090,7 +1090,7 @@ func TestAccountsDebitRoundIncrementUnlimitedWithUF(t *testing.T) {
 			"1df1c3b": {
 				AccountID:       "TestAccountsDebitRoundIncrement",
 				BalanceID:       "AbstractBalance1",
-				Units:           utils.NewDecimal(4096, 0),
+				Units:           utils.NewDecimal(2048, 0),
 				UnitFactorID:    "54c5bb9",
 				RatingID:        "0faf226",
 				JoinedChargeIDs: []string{"aac7ed5"},
@@ -1098,7 +1098,176 @@ func TestAccountsDebitRoundIncrementUnlimitedWithUF(t *testing.T) {
 			"aac7ed5": {
 				AccountID:    "TestAccountsDebitRoundIncrement",
 				BalanceID:    "ConcreteBalance1",
-				Units:        utils.NewDecimal(4, 0),
+				Units:        utils.NewDecimal(2, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"54c5bb9": {
+				Factor: utils.NewDecimal(2, 0),
+			},
+		},
+		Rating: map[string]*utils.RateSInterval{
+			"0faf226": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "2097669",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+
+		Rates: map[string]*utils.IntervalRate{
+			"2097669": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"TestAccountsDebitRoundIncrement": {
+				Tenant:    "cgrates.org",
+				ID:        "TestAccountsDebitRoundIncrement",
+				FilterIDs: []string{"*string:~*req.Account:TestAccountsDebitRoundIncrement"},
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID: "AbstractBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 20,
+							},
+						},
+						Type: utils.MetaAbstract,
+						UnitFactors: []*utils.UnitFactor{
+							{
+								Factor: utils.NewDecimal(2, 0), // Nanoseconds
+							},
+						},
+						Units: &utils.Decimal{Big: decimal.New(-4096, 0)},
+						Opts: map[string]any{
+							utils.MetaBalanceUnlimited: true,
+						},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
+								FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
+							},
+						},
+					},
+					"ConcreteBalance1": {
+						ID: "ConcreteBalance1",
+						Weights: utils.DynamicWeights{
+							{
+								Weight: 10,
+							},
+						},
+						Type:  utils.MetaConcrete,
+						Units: &utils.Decimal{Big: decimal.New(2, 0)},
+					},
+				},
+			},
+		},
+	}
+
+	// get usage from *ratesUsage
+	cgrEvent := &utils.CGREvent{
+		ID:     "TEST_EVENT_AccountsDebitRoundIncrement",
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "TestAccountsDebitRoundIncrement",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: "2040", // Should instead debit 2028
+		},
+	}
+	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
+		cgrEvent, false, false); err != nil { // debit abstract
+		t.Error(err)
+	} else if !rcv.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
+	}
+}
+
+func TestAccountsDebitRoundIncrementUnlimitedWithUFAndLessConcrete(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "TestAccountsDebitRoundIncrement",
+			FilterIDs: []string{"*string:~*req.Account:TestAccountsDebitRoundIncrement"},
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID: "AbstractBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 20,
+						},
+					},
+					Type: utils.MetaAbstract,
+					Opts: map[string]any{
+						utils.MetaBalanceUnlimited: true,
+					},
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
+							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
+							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
+						},
+					},
+					UnitFactors: []*utils.UnitFactor{
+						{
+							Factor: utils.NewDecimal(2, 0), // Nanoseconds
+						},
+					},
+				},
+				"ConcreteBalance1": {
+					ID: "ConcreteBalance1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{Big: decimal.New(2, 0)},
+				},
+			},
+		},
+	}
+
+	evChExp := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(2048, 0),
+		Concretes: utils.NewDecimal(2, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "1df1c3b",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"1df1c3b": {
+				AccountID:       "TestAccountsDebitRoundIncrement",
+				BalanceID:       "AbstractBalance1",
+				Units:           utils.NewDecimal(2048, 0),
+				UnitFactorID:    "54c5bb9",
+				RatingID:        "0faf226",
+				JoinedChargeIDs: []string{"aac7ed5"},
+			},
+			"aac7ed5": {
+				AccountID:    "TestAccountsDebitRoundIncrement",
+				BalanceID:    "ConcreteBalance1",
+				Units:        utils.NewDecimal(2, 0),
 				BalanceLimit: utils.NewDecimal(0, 0),
 			},
 		},
@@ -1180,176 +1349,7 @@ func TestAccountsDebitRoundIncrementUnlimitedWithUF(t *testing.T) {
 			utils.AccountField: "TestAccountsDebitRoundIncrement",
 		},
 		APIOpts: map[string]any{
-			utils.MetaUsage: "2040", // Should instead debit 2028
-		},
-	}
-	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
-		cgrEvent, false, false); err != nil { // debit abstract
-		t.Error(err)
-	} else if !rcv.Equals(evChExp) {
-		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(rcv))
-	}
-}
-
-func TestAccountsDebitRoundIncrementUnlimitedWithUFAndLessConcrete(t *testing.T) {
-	cfg := config.NewDefaultCGRConfig()
-	locker := engine.NewLocker(cfg)
-	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
-	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
-	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
-	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
-	dm.SetCache(cacheS)
-	fltr := engine.NewFilterS(cfg, nil, dm)
-	accnts := NewAccountS(cfg, fltr, nil, dm)
-
-	accntsPrf := []*utils.Account{
-		{
-			Tenant:    "cgrates.org",
-			ID:        "TestAccountsDebitRoundIncrement",
-			FilterIDs: []string{"*string:~*req.Account:TestAccountsDebitRoundIncrement"},
-			Balances: map[string]*utils.Balance{
-				"AbstractBalance1": {
-					ID: "AbstractBalance1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 20,
-						},
-					},
-					Type: utils.MetaAbstract,
-					Opts: map[string]any{
-						utils.MetaBalanceUnlimited: true,
-					},
-					CostIncrements: []*utils.CostIncrement{
-						{
-							Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
-							FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-							RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
-						},
-					},
-					UnitFactors: []*utils.UnitFactor{
-						{
-							Factor: utils.NewDecimal(2, 0), // Nanoseconds
-						},
-					},
-				},
-				"ConcreteBalance1": {
-					ID: "ConcreteBalance1",
-					Weights: utils.DynamicWeights{
-						{
-							Weight: 10,
-						},
-					},
-					Type:  utils.MetaConcrete,
-					Units: &utils.Decimal{Big: decimal.New(3, 0)},
-				},
-			},
-		},
-	}
-
-	evChExp := &utils.EventCharges{
-		Abstracts: utils.NewDecimal(3072, 0),
-		Concretes: utils.NewDecimal(3, 0),
-		Charges: []*utils.ChargeEntry{
-			{
-				ChargingID:     "1df1c3b",
-				CompressFactor: 1,
-			},
-		},
-		Accounting: map[string]*utils.AccountCharge{
-			"1df1c3b": {
-				AccountID:       "TestAccountsDebitRoundIncrement",
-				BalanceID:       "AbstractBalance1",
-				Units:           utils.NewDecimal(3072, 0),
-				UnitFactorID:    "54c5bb9",
-				RatingID:        "0faf226",
-				JoinedChargeIDs: []string{"aac7ed5"},
-			},
-			"aac7ed5": {
-				AccountID:    "TestAccountsDebitRoundIncrement",
-				BalanceID:    "ConcreteBalance1",
-				Units:        utils.NewDecimal(3, 0),
-				BalanceLimit: utils.NewDecimal(0, 0),
-			},
-		},
-		UnitFactors: map[string]*utils.UnitFactor{
-			"54c5bb9": {
-				Factor: utils.NewDecimal(2, 0),
-			},
-		},
-		Rating: map[string]*utils.RateSInterval{
-			"0faf226": {
-				Increments: []*utils.RateSIncrement{
-					{
-						RateIntervalIndex: 0,
-						RateID:            "2097669",
-						CompressFactor:    1,
-					},
-				},
-				CompressFactor: 1,
-			},
-		},
-
-		Rates: map[string]*utils.IntervalRate{
-			"2097669": {
-				FixedFee:     utils.NewDecimal(0, 0),
-				RecurrentFee: utils.NewDecimal(1, 0),
-			},
-		},
-		Accounts: map[string]*utils.Account{
-			"TestAccountsDebitRoundIncrement": {
-				Tenant:    "cgrates.org",
-				ID:        "TestAccountsDebitRoundIncrement",
-				FilterIDs: []string{"*string:~*req.Account:TestAccountsDebitRoundIncrement"},
-				Balances: map[string]*utils.Balance{
-					"AbstractBalance1": {
-						ID: "AbstractBalance1",
-						Weights: utils.DynamicWeights{
-							{
-								Weight: 20,
-							},
-						},
-						Type: utils.MetaAbstract,
-						UnitFactors: []*utils.UnitFactor{
-							{
-								Factor: utils.NewDecimal(2, 0), // Nanoseconds
-							},
-						},
-						Units: &utils.Decimal{Big: decimal.New(-3072, 0)},
-						Opts: map[string]any{
-							utils.MetaBalanceUnlimited: true,
-						},
-						CostIncrements: []*utils.CostIncrement{
-							{
-								Increment:    &utils.Decimal{Big: decimal.New(1024, 0)},
-								FixedFee:     &utils.Decimal{Big: decimal.New(0, 0)},
-								RecurrentFee: &utils.Decimal{Big: decimal.New(1, 0)},
-							},
-						},
-					},
-					"ConcreteBalance1": {
-						ID: "ConcreteBalance1",
-						Weights: utils.DynamicWeights{
-							{
-								Weight: 10,
-							},
-						},
-						Type:  utils.MetaConcrete,
-						Units: &utils.Decimal{Big: decimal.New(0, 0)},
-					},
-				},
-			},
-		},
-	}
-
-	// get usage from *ratesUsage
-	cgrEvent := &utils.CGREvent{
-		ID:     "TEST_EVENT_AccountsDebitRoundIncrement",
-		Tenant: "cgrates.org",
-		Event: map[string]any{
-			utils.AccountField: "TestAccountsDebitRoundIncrement",
-		},
-		APIOpts: map[string]any{
-			utils.MetaUsage: "2040", // Should instead debit 2028
+			utils.MetaUsage: "2040", // Should instead debit 2048
 		},
 	}
 	if rcv, err := accnts.accountsDebit(context.Background(), accntsPrf,
