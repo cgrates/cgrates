@@ -93,15 +93,13 @@ func testTutSMGLoadTariffPlanFromFolder(t *testing.T) {
 	if tutSMGCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]int
 	if err := tutSMGRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
 			APIOpts: map[string]any{utils.MetaCache: caching},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

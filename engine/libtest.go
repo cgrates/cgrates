@@ -437,7 +437,7 @@ func (ng *TestEngine) Run(t testing.TB, extraFlags ...string) (*birpc.Client, *c
 				t.Fatalf("could not write to file %s: %v", filePath, err)
 			}
 		}
-		var reply string
+		var reply map[string]int
 		if err := client.Call(context.Background(), utils.LoaderSv1Run,
 			&struct{ LoaderID string }{}, &reply); err != nil {
 			t.Fatal(err)

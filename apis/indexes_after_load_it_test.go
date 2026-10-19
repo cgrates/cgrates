@@ -84,15 +84,13 @@ func testIdxLoadRPCConn(t *testing.T) {
 }
 
 func testIdxLoadTariffPlan(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := idxLoadBiRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			// StopOnError: true,
 			APIOpts: map[string]any{utils.MetaCache: utils.MetaReload}, // after laod, we got CacheIDs and it will be called Cachesv1.Clear, so indexes will be removed
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

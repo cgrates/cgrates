@@ -92,14 +92,12 @@ func testAnzBiSRPCConn(t *testing.T) {
 }
 
 func testAnalyzerSLoad(t *testing.T) {
-	var reply string
+	var reply map[string]int
 
 	if err := anzBiRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
 		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
 }

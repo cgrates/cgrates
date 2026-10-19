@@ -146,7 +146,7 @@ cgrates.org,DEFAULT_RATE,,;0,0,0,*free,RT_ALWAYS,,"* * * * *",;0,false,0s,,0.1,1
 
 	client := engine.NewRPCClient(t, cfg.ListenCfg(), *utils.Encoding)
 
-	var reply string
+	var reply map[string]int
 	err = client.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{

@@ -152,7 +152,7 @@ cgrates.org,ATTR_DC,,,,,,*req.Float64Variable,*variable,~*opts.variable15{*float
 // cgrates.org,ATTR_DC,,,,,,*req.SplitVariable,*variable,~*opts.variable22{*split}
 
 func testDCLoaderRun(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := dcRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -161,8 +161,6 @@ func testDCLoaderRun(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

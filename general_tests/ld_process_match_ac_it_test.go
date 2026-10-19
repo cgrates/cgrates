@@ -114,7 +114,7 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 	if testLdPrMatchAcCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]any
 	if err := testLdPrMatchAcRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -123,8 +123,6 @@ func testLdPrMatchAcLoadTP(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

@@ -172,12 +172,10 @@ func populateData(inPath string) func(t *testing.T) {
 
 func runLoader(loaderID string) func(t *testing.T) {
 	return func(t *testing.T) {
-		var reply string
+		var reply map[string]int
 		if err := loaderRPC.Call(context.Background(), utils.LoaderSv1Run,
 			&ArgsProcessFolder{LoaderID: loaderID}, &reply); err != nil {
 			t.Fatal(loaderID, err)
-		} else if reply != utils.OK {
-			t.Fatalf("<%s> Expected: %q, received: %q", loaderID, utils.OK, reply)
 		}
 	}
 }
