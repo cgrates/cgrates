@@ -110,6 +110,40 @@ func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.A
 
 // SetActionProfile add/update a new Action Profile
 func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionProfileWithAPIOpts, reply *string) error {
+	if ap.Tenant == "" {
+		ap.Tenant = admS.cfg.GeneralCfg().DefaultTenant
+	}
+	if !ap.Overwrite && ap.ID != "" {
+		stored, err := admS.dm.GetActionProfile(ctx, ap.Tenant, ap.ID, true, false, utils.NonTransactional)
+		if err != nil && err != utils.ErrNotFound {
+			return utils.APIErrorHandler(err)
+		}
+		if err == nil {
+			stored = stored.Clone()
+			if stored.Targets == nil && len(ap.Targets) != 0 {
+				stored.Targets = make(map[string]utils.StringSet)
+			}
+			if ap.FilterIDs != nil {
+				stored.FilterIDs = ap.FilterIDs
+			}
+			if ap.Weights != nil {
+				stored.Weights = ap.Weights
+			}
+			if ap.Blockers != nil {
+				stored.Blockers = ap.Blockers
+			}
+			if ap.Actions != nil {
+				stored.Actions = ap.Actions
+			}
+			if ap.Schedule != "" {
+				stored.Schedule = ap.Schedule
+			}
+			for targetType, targets := range ap.Targets {
+				stored.Targets[targetType] = targets
+			}
+			ap.ActionProfile = stored
+		}
+	}
 	if missing := utils.MissingStructFields(ap.ActionProfile, []string{utils.ID, utils.Actions}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -124,10 +158,6 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionPro
 			}
 		}
 	}
-	if ap.Tenant == utils.EmptyString {
-		ap.Tenant = admS.cfg.GeneralCfg().DefaultTenant
-	}
-
 	if err := admS.dm.SetActionProfile(ctx, ap.ActionProfile, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}

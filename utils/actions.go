@@ -64,7 +64,8 @@ func (ap *ActionProfile) Clone() *ActionProfile {
 // ActionProfileWithAPIOpts wraps ActionProfile with APIOpts.
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
-	APIOpts map[string]any
+	Overwrite bool
+	APIOpts   map[string]any
 }
 
 // TenantID returns the concatenated tenant and ID.
