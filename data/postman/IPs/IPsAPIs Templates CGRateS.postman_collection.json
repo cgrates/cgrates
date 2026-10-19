@@ -1,0 +1,758 @@
+{
+	"info": {
+		"_postman_id": "eae36133-624f-4270-a901-06f07b769f4b",
+		"name": "IPsAPIs Templates CGRateS",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50854024",
+		"_collection_link": "https://armir-veliaj-6785241.postman.co/workspace/Armir-Veliaj's-Workspace~21f08ff6-63e6-4768-8232-94ed953c13a2/collection/50854024-eae36133-624f-4270-a901-06f07b769f4b?action=share&source=collection_link&creator=50854024"
+	},
+	"item": [
+		{
+			"name": "IP administration APIs",
+			"item": [
+				{
+					"name": "to set/update an IPProfile",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456000000001\",\n      \"FilterIDs\": [\n        \"*string:~*req.IMSI:123456000000001\"\n      ],\n      \"TTL\": -1,\n      \"Stored\": true,\n      \"Pools\": [\n        {\n          \"ID\": \"DEFAULT\",\n          \"Type\": \"*ipv4\",\n          \"Range\": \"10.100.0.1/32\"\n        }\n      ]\n    }\n  ],\n  \"id\": 5\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Creates or updates an IP profile"
+					},
+					"response": []
+				},
+				{
+					"name": "to check current allocations",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"IPsV1.GetIPAllocations\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456000000001\"\n    }\n  ],\n  \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Retrieves current IP allocations for a specific IMSI"
+					},
+					"response": []
+				},
+				{
+					"name": "to retrieve single IPProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456000000001\"\n    }\n  ],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "to retrieve multiple IPProfiles",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetIPProfiles\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ItemsPrefix\": \"IMSI_\"\n    }\n  ],\n  \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Fetches all IP profiles matching a prefix pattern"
+					},
+					"response": []
+				},
+				{
+					"name": "count IPProfiles",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetIPProfilesCount\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ItemsPrefix\": \"IMSI_\"\n    }\n  ],\n  \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Returns the total number of IP profiles matching a prefix"
+					},
+					"response": []
+				},
+				{
+					"name": "to remove an IPProfile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.RemoveIPProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456000000001\"\n    }\n  ],\n  \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Deletes an IP profile and its associated configurations"
+					},
+					"response": []
+				},
+				{
+					"name": "to list IPProfile IDs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetIPProfileIDs\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ItemsPrefix\": \"IMSI_\"\n    }\n  ],\n  \"id\": 7\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "to load tp data",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"LoaderSv1.Run\",\n  \"params\": [\n    {\n      \"LoaderID\": \"*default\"\n    }\n  ],\n  \"id\": 8\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "allocate IP",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"IPsV1.AllocateIP\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"alloc-001\",\n      \"Event\": {\n        \"IMSI\": \"123456000000001\"\n      },\n      \"APIOpts\": {\n        \"*ipsAllocationID\": \"acct-session-001\"\n      }\n    }\n  ],\n  \"id\": 11\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "authorize IP allocation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"IPsV1.AuthorizeIP\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"auth-test-001\",\n      \"Event\": {\n        \"IMSI\": \"123456000000001\"\n      },\n      \"APIOpts\": {\n        \"*ipsAllocationID\": \"auth-test-001\"\n      }\n    }\n  ],\n  \"id\": 9\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Checks if an IP can be allocated without actually allocating it (dry run). Useful for testing that profiles and filters are configured correctly."
+					},
+					"response": []
+				},
+				{
+					"name": "release IP allocation",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"IPsV1.ReleaseIP\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"release-001\",\n      \"Event\": {\n        \"IMSI\": \"123456000000001\"\n      },\n      \"APIOpts\": {\n        \"*ipsAllocationID\": \"acct-session-001\"\n      }\n    }\n  ],\n  \"id\": 10\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Releases a previously allocated IP address. Use this for manual cleanup when the RADIUS client couldn't send a proper release request."
+					},
+					"response": []
+				},
+				{
+					"name": "clear IP allocations",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"IPsV1.ClearIPAllocations\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"IMSI_123456000000001\",\n      \"AllocationIDs\": [\"acct-session-001\"]\n    }\n  ],\n  \"id\": 11\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Clears IP allocations from an IPAllocations object. If AllocationIDs is empty, all allocations for that profile are cleared."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "radius data plan provisioning",
+			"item": [
+				{
+					"name": "provision the data balances with an action profileer",
+					"item": [
+						{
+							"name": "account with only credit",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"AdminSv1.SetAccount\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"310150123456789\",\n      \"FilterIDs\": [\n        \"*string:~*req.IMSI:310150123456789\",\n        \"FLTR_US\"\n      ],\n      \"Weights\": null,\n      \"Blockers\": null,\n      \"Opts\": null,\n      \"Balances\": {\n        \"monetary\": {\n          \"ID\": \"monetary\",\n          \"FilterIDs\": null,\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 5\n            }\n          ],\n          \"Blockers\": null,\n          \"Type\": \"*concrete\",\n          \"Units\": 100,\n          \"UnitFactors\": null,\n          \"Opts\": null,\n          \"CostIncrements\": null,\n          \"AttributeIDs\": null,\n          \"RateProfileIDs\": null\n        }\n      },\n      \"ThresholdIDs\": null,\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 3\n}"
+								},
+								"url": {
+									"raw": "{{jsonrpc_url}}",
+									"host": [
+										"{{jsonrpc_url}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "provision action",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"AdminSv1.SetActionProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"AP_PROVISION_310150123456789\",\n      \"FilterIDs\": null,\n      \"Weights\": [\n        {\n          \"FilterIDs\": null,\n          \"Weight\": 10\n        }\n      ],\n      \"Blockers\": null,\n      \"Schedule\": \"*asap\",\n      \"Targets\": {\n        \"*accounts\": {\n          \"310150123456789\": {}\n        }\n      },\n      \"Actions\": [\n        {\n          \"ID\": \"provision\",\n          \"FilterIDs\": null,\n          \"TTL\": 0,\n          \"Type\": \"*setBalance\",\n          \"Opts\": null,\n          \"Weights\": null,\n          \"Blockers\": null,\n          \"Diktats\": [\n            {\"ID\": \"alw_type\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Type\", \"*balanceValue\": \"*abstract\"}},\n            {\"ID\": \"alw_weight\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Weights\", \"*balanceValue\": \"`;20`\"}},\n            {\"ID\": \"alw_cost\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.CostIncrements\", \"*balanceValue\": \"`;1;0;0`\"}},\n            {\"ID\": \"alw_units\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Units\", \"*balanceValue\": 1073741824}},\n            {\"ID\": \"ovg_type\", \"Opts\": {\"*balancePath\": \"*balance.data_overage.Type\", \"*balanceValue\": \"*abstract\"}},\n            {\"ID\": \"ovg_weight\", \"Opts\": {\"*balancePath\": \"*balance.data_overage.Weights\", \"*balanceValue\": \"`;10`\"}},\n            {\"ID\": \"ovg_rate\", \"Opts\": {\"*balancePath\": \"*balance.data_overage.RateProfileIDs\", \"*balanceValue\": \"RP_US_OVERAGE\"}},\n            {\"ID\": \"ovg_units\", \"Opts\": {\"*balancePath\": \"*balance.data_overage.Units\", \"*balanceValue\": 0}},\n            {\"ID\": \"ovg_unlimited\", \"Opts\": {\"*balancePath\": \"*balance.data_overage.Opts.*balanceUnlimited\", \"*balanceValue\": true}}\n          ]\n        }\n      ],\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 4\n}"
+								},
+								"url": {
+									"raw": "{{jsonrpc_url}}",
+									"host": [
+										"{{jsonrpc_url}}"
+									]
+								},
+								"description": "Each balance field is one diktat. Weights and CostIncrements are wrapped in backticks because the value splits on \";\", which is also the separator inside those fields."
+							},
+							"response": []
+						},
+						{
+							"name": "run the provision action",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"ActionSv1.ExecuteActions\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"provision_310150123456789\",\n      \"Event\": {\n        \"Account\": \"310150123456789\"\n      },\n      \"APIOpts\": {\n        \"*actionsProfileIDs\": [\n          \"AP_PROVISION_310150123456789\"\n        ]\n      }\n    }\n  ],\n  \"id\": 5\n}"
+								},
+								"url": {
+									"raw": "{{jsonrpc_url}}",
+									"host": [
+										"{{jsonrpc_url}}"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "The account in step 3 declares all three balances directly. You can instead create the account with only the monetary balance and build the data balances with a \\*setBalance action. Same result, the account is just credit until the action runs."
+				},
+				{
+					"name": "pooled plan",
+					"item": [
+						{
+							"name": "pool members filter",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"AdminSv1.SetFilter\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"FLTR_POOL_US\",\n      \"Rules\": [\n        {\n          \"Type\": \"*string\",\n          \"Element\": \"~*req.IMSI\",\n          \"Values\": [\n            \"310150000000001\",\n            \"310150000000002\",\n            \"310150000000003\"\n          ]\n        }\n      ],\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 10\n}"
+								},
+								"url": {
+									"raw": "{{jsonrpc_url}}",
+									"host": [
+										"{{jsonrpc_url}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "pool account",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"method\": \"AdminSv1.SetAccount\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"POOL_US\",\n      \"FilterIDs\": [\n        \"FLTR_POOL_US\"\n      ],\n      \"Weights\": [\n        {\n          \"FilterIDs\": null,\n          \"Weight\": 20\n        }\n      ],\n      \"Blockers\": null,\n      \"Opts\": null,\n      \"Balances\": {\n        \"data\": {\n          \"ID\": \"data\",\n          \"FilterIDs\": null,\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 10\n            }\n          ],\n          \"Blockers\": null,\n          \"Type\": \"*abstract\",\n          \"Units\": 10737418240,\n          \"UnitFactors\": null,\n          \"Opts\": null,\n          \"CostIncrements\": [\n            {\n              \"FilterIDs\": null,\n              \"Increment\": 1,\n              \"FixedFee\": 0,\n              \"RecurrentFee\": 0\n            }\n          ],\n          \"AttributeIDs\": null,\n          \"RateProfileIDs\": null\n        }\n      },\n      \"ThresholdIDs\": null,\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 11\n}"
+								},
+								"url": {
+									"raw": "{{jsonrpc_url}}",
+									"host": [
+										"{{jsonrpc_url}}"
+									]
+								},
+								"description": "The shared account and its single data balance. Set Units to whatever the group bought (here 10 GB)."
+							},
+							"response": []
+						}
+					],
+					"description": "A pooled plan is where several SIMs share one account and one data balance, matched by a filter that lists its members. There is no overage."
+				},
+				{
+					"name": "1. region filter",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetFilter\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"FLTR_US\",\n      \"Rules\": [\n        {\n          \"Type\": \"*string\",\n          \"Element\": \"~*req.Country\",\n          \"Values\": [\n            \"United States\"\n          ]\n        }\n      ],\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Matches the subscriber's country to a region. The account points at it by id, so it only counts while the subscriber is in that country."
+					},
+					"response": []
+				},
+				{
+					"name": "2. overage rate",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetRateProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"RP_US_OVERAGE\",\n      \"FilterIDs\": null,\n      \"Weights\": [\n        {\n          \"FilterIDs\": null,\n          \"Weight\": 10\n        }\n      ],\n      \"MinCost\": null,\n      \"MaxCost\": null,\n      \"MaxCostStrategy\": \"\",\n      \"Rates\": {\n        \"overage\": {\n          \"ID\": \"overage\",\n          \"FilterIDs\": null,\n          \"ActivationTimes\": \"* * * * *\",\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 10\n            }\n          ],\n          \"Blocker\": false,\n          \"IntervalRates\": [\n            {\n              \"IntervalStart\": 0,\n              \"FixedFee\": null,\n              \"RecurrentFee\": 15,\n              \"Unit\": 1073741824,\n              \"Increment\": 1048576\n            }\n          ]\n        }\n      },\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "The price for data past the bundle is 15 per GB, and I chose to bill with MB precision for this use case (Unit is 1 GB, Increment 1 MB)"
+					},
+					"response": []
+				},
+				{
+					"name": "3. account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetAccount\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"310150123456789\",\n      \"FilterIDs\": [\n        \"*string:~*req.IMSI:310150123456789\",\n        \"FLTR_US\"\n      ],\n      \"Weights\": null,\n      \"Blockers\": null,\n      \"Opts\": null,\n      \"Balances\": {\n        \"data_allowance\": {\n          \"ID\": \"data_allowance\",\n          \"FilterIDs\": null,\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 20\n            }\n          ],\n          \"Blockers\": null,\n          \"Type\": \"*abstract\",\n          \"Units\": 0,\n          \"UnitFactors\": null,\n          \"Opts\": null,\n          \"CostIncrements\": [\n            {\n              \"FilterIDs\": null,\n              \"Increment\": 1,\n              \"FixedFee\": 0,\n              \"RecurrentFee\": 0\n            }\n          ],\n          \"AttributeIDs\": null,\n          \"RateProfileIDs\": null\n        },\n        \"data_overage\": {\n          \"ID\": \"data_overage\",\n          \"FilterIDs\": null,\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 10\n            }\n          ],\n          \"Blockers\": null,\n          \"Type\": \"*abstract\",\n          \"Units\": 0,\n          \"UnitFactors\": null,\n          \"Opts\": {\n            \"*balanceUnlimited\": true\n          },\n          \"CostIncrements\": null,\n          \"AttributeIDs\": null,\n          \"RateProfileIDs\": [\n            \"RP_US_OVERAGE\"\n          ]\n        },\n        \"monetary\": {\n          \"ID\": \"monetary\",\n          \"FilterIDs\": null,\n          \"Weights\": [\n            {\n              \"FilterIDs\": null,\n              \"Weight\": 5\n            }\n          ],\n          \"Blockers\": null,\n          \"Type\": \"*concrete\",\n          \"Units\": 100,\n          \"UnitFactors\": null,\n          \"Opts\": null,\n          \"CostIncrements\": null,\n          \"AttributeIDs\": null,\n          \"RateProfileIDs\": null\n        }\n      },\n      \"ThresholdIDs\": null,\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 3\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "The subscriber and their three balances. The account filters select it: the imsi rule ties it to this subscriber, FLTR_US keeps it to the US. data_allowance is the bundle and starts at 0, data_overage is unlimited and priced by the rate, so usage past the bundle keeps going and is billed against monetary until the credit runs out, and monetary is their credit."
+					},
+					"response": []
+				},
+				{
+					"name": "4. subscribe profile (optional)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetActionProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"AP_SUBSCRIBE_310150123456789\",\n      \"FilterIDs\": null,\n      \"Weights\": [\n        {\n          \"FilterIDs\": null,\n          \"Weight\": 10\n        }\n      ],\n      \"Blockers\": null,\n      \"Schedule\": \"*asap\",\n      \"Targets\": {\n        \"*accounts\": {\n          \"310150123456789\": {}\n        }\n      },\n      \"Actions\": [\n        {\n          \"ID\": \"topup\",\n          \"FilterIDs\": null,\n          \"TTL\": 0,\n          \"Type\": \"*addBalance\",\n          \"Opts\": null,\n          \"Weights\": null,\n          \"Blockers\": null,\n          \"Diktats\": [\n            {\n              \"ID\": \"topup\",\n              \"FilterIDs\": null,\n              \"Opts\": {\n                \"*balancePath\": \"*balance.data_allowance.Units\",\n                \"*balanceValue\": 1073741824\n              },\n              \"Weights\": null,\n              \"Blockers\": null\n            }\n          ]\n        }\n      ],\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Tops up the bundle once, when you run it. This step is optional, it gives a free first bundle at signup. Leave it and step 6 out to let the plan just start on its monthly schedule."
+					},
+					"response": []
+				},
+				{
+					"name": "5. monthly fee profile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetActionProfile\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"AP_PLAN_310150123456789\",\n      \"FilterIDs\": [\n        \"*gte:~*accounts.310150123456789.Balances[monetary].Units:10\"\n      ],\n      \"Weights\": [\n        {\n          \"FilterIDs\": null,\n          \"Weight\": 10\n        }\n      ],\n      \"Blockers\": null,\n      \"Schedule\": \"0 0 1 * *\",\n      \"Targets\": {\n        \"*accounts\": {\n          \"310150123456789\": {}\n        }\n      },\n      \"Actions\": [\n        {\n          \"ID\": \"topup\",\n          \"FilterIDs\": null,\n          \"TTL\": 0,\n          \"Type\": \"*addBalance\",\n          \"Opts\": null,\n          \"Weights\": null,\n          \"Blockers\": null,\n          \"Diktats\": [\n            {\n              \"ID\": \"topup\",\n              \"FilterIDs\": null,\n              \"Opts\": {\n                \"*balancePath\": \"*balance.data_allowance.Units\",\n                \"*balanceValue\": 1073741824\n              },\n              \"Weights\": null,\n              \"Blockers\": null\n            }\n          ]\n        },\n        {\n          \"ID\": \"debit\",\n          \"FilterIDs\": null,\n          \"TTL\": 0,\n          \"Type\": \"*addBalance\",\n          \"Opts\": null,\n          \"Weights\": null,\n          \"Blockers\": null,\n          \"Diktats\": [\n            {\n              \"ID\": \"debit\",\n              \"FilterIDs\": null,\n              \"Opts\": {\n                \"*balancePath\": \"*balance.monetary.Units\",\n                \"*balanceValue\": -10\n              },\n              \"Weights\": null,\n              \"Blockers\": null\n            }\n          ]\n        },\n        {\n          \"ID\": \"cdr\",\n          \"FilterIDs\": null,\n          \"TTL\": 0,\n          \"Type\": \"*cdrlog\",\n          \"Opts\": null,\n          \"Weights\": null,\n          \"Blockers\": null,\n          \"Diktats\": null\n        }\n      ],\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 5\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "The monthly fee. If monetary covers it, the profile tops up the bundle, debits the fee, and logs a CDR. If it does not, the whole profile is skipped. There is one of these per subscriber."
+					},
+					"response": []
+				},
+				{
+					"name": "6. run the subscribe (optional)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ActionSv1.ExecuteActions\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"subscribe_310150123456789\",\n      \"Event\": {\n        \"Account\": \"310150123456789\"\n      },\n      \"APIOpts\": {\n        \"*actionsProfileIDs\": [\n          \"AP_SUBSCRIBE_310150123456789\"\n        ]\n      }\n    }\n  ],\n  \"id\": 6\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Runs the subscribe profile now so they get their first bundle. Optional, it pairs with step 4."
+					},
+					"response": []
+				},
+				{
+					"name": "7. schedule the monthly fee",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ActionSv1.ScheduleActions\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"plan_310150123456789\",\n      \"Event\": {\n        \"Account\": \"310150123456789\"\n      },\n      \"APIOpts\": {\n        \"*accounts\": false,\n        \"*actionsProfileIDs\": [\n          \"AP_PLAN_310150123456789\"\n        ]\n      }\n    }\n  ],\n  \"id\": 7\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Registers the fee for the 1st of each month. The Event fields land on the CDR it writes."
+					},
+					"response": []
+				},
+				{
+					"name": "8. check the account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetAccount\",\n  \"params\": [\n    {\n      \"Tenant\": \"cgrates.org\",\n      \"ID\": \"310150123456789\",\n      \"APIOpts\": null\n    }\n  ],\n  \"id\": 8\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "data_allowance holds the 1 GB bundle now (bytes), monetary is still 100."
+					},
+					"response": []
+				}
+			],
+			"description": "The samples in this folder are the setup for one data subscriber from US, with imsi 310150123456789 (which will also be used as account ID). Should be the same for any other subscriber, just change the IMSI, region and prices.\n\nThe account is picked by its filters, matched against the imsi the radius side sends (it maps User-Name to \\~\\*req.IMSI). So each account carries a rule for its own imsi. The account id is just a label, the imsi filter is what selects it.\n\nMore specifically, from the matrix xlsx file, it's the setup for the following row:\n\n```\nData Allowance,Countries,Duration,Plan Price,Overage Price\n1 GB,US-Only,1 Month,$10.00,$15.00 Per GB\n\n ```"
+		},
+		{
+			"name": "Provisioning - Sample 1GB Data Bundle",
+			"item": [
+				{
+					"name": "1. Create the SIM account",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetAccount\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"310150123456789\",\n    \"FilterIDs\": [\"*string:~*req.IMSI:310150123456789\"]\n  }],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "The filter selects the account by `req.IMSI`."
+					},
+					"response": []
+				},
+				{
+					"name": "2. Define the initial action profile",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetActionProfile\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"AP_PROVISION_1GB\",\n    \"Schedule\": \"*asap\",\n    \"Targets\": {\n      \"*accounts\": {\"310150123456789\": {}}\n    },\n    \"Actions\": [{\n      \"ID\": \"provision\",\n      \"Type\": \"*setBalance\",\n      \"Diktats\": [\n        {\"ID\": \"alw_type\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Type\", \"*balanceValue\": \"*abstract\"}},\n        {\"ID\": \"alw_weight\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Weights\", \"*balanceValue\": \"`;20`\"}},\n        {\"ID\": \"alw_cost\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.CostIncrements\", \"*balanceValue\": \"`;1;0;0`\"}},\n        {\"ID\": \"alw_units\", \"Opts\": {\"*balancePath\": \"*balance.data_allowance.Units\", \"*balanceValue\": 1073741824}}\n      ]\n    }]\n  }],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "`Targets.\\\\*accounts` lists the accounts that receive the bundle. When run, this profile creates the data balance with 1 GB.\n\n\\*Keep the backticks in the `Weights` and `CostIncrements` values. They keep the values from being split at the semicolons."
+					},
+					"response": []
+				},
+				{
+					"name": "3. Add the initial 1 GB now",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ActionSv1.ExecuteActions\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"APIOpts\": {\n      \"*actionsProfileIDs\": [\"AP_PROVISION_1GB\"]\n    }\n  }],\n  \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. Define the monthly topup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.SetActionProfile\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"AP_MONTHLY_1GB\",\n    \"Schedule\": \"0 0 1 * *\",\n    \"Targets\": {\n      \"*accounts\": {\"310150123456789\": {}}\n    },\n    \"Actions\": [{\n      \"ID\": \"topup\",\n      \"Type\": \"*addBalance\",\n      \"Diktats\": [{\n        \"ID\": \"units\",\n        \"Opts\": {\n          \"*balancePath\": \"*balance.data_allowance.Units\",\n          \"*balanceValue\": 1073741824\n        }\n      }]\n    }]\n  }],\n  \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "For this example, the monthly topup runs on the first day of each month at 00:00 in the engine’s local time zone. Each run adds 1 GB and keeps any unused data.\n\nFor more accounts, put their IDs under `Targets.\\*accounts` before calling `ScheduleActions`."
+					},
+					"response": []
+				},
+				{
+					"name": "5. Schedule the monthly topup",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"ActionSv1.ScheduleActions\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"APIOpts\": {\n      \"*actionsProfileIDs\": [\"AP_MONTHLY_1GB\"]\n    }\n  }],\n  \"id\": 5\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						},
+						"description": "Call `ScheduleActions` once for this profile. Repeating the call adds another scheduled job."
+					},
+					"response": []
+				}
+			],
+			"description": "Here is a 1 GB example for SIM `310150123456789`."
+		},
+		{
+			"name": "Sessions - Sample Data Usage Debit",
+			"item": [
+				{
+					"name": "1.SessionInitiate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"SessionSv1.ProcessEvent\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"init-001\",\n    \"APIOpts\": {\n      \"*originID\": \"acct-session-001\",\n      \"*usage\": 1048576,\n      \"*session\": true,\n      \"*initiate\": true,\n      \"*accounts\": true\n    },\n    \"Event\": {\n      \"IMSI\": \"310150123456789\",\n      \"Account\": \"310150123456789\"\n    }\n  }],\n  \"id\": 1\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "2.GetActiveSessions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"SessionSv1.GetActiveSessions\",\n  \"params\": [{}],\n  \"id\": 2\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "3.update + debit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"SessionSv1.ProcessEvent\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"upd-001\",\n    \"APIOpts\": {\n      \"*originID\": \"acct-session-001\",\n      \"*usage\": 1048576,\n      \"*session\": true,\n      \"*update\": true,\n      \"*accounts\": true,\n      \"*debit\": true\n    },\n    \"Event\": {\n      \"IMSI\": \"310150123456789\",\n      \"Account\": \"310150123456789\"\n    }\n  }],\n  \"id\": 3\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "4. GetAccount",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"AdminSv1.GetAccount\",\n  \"params\": [{ \"Tenant\": \"cgrates.org\",\n                \"ID\": \"310150123456789\" \n            }],\n  \"id\": 4\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "5.terminate + debit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"method\": \"SessionSv1.ProcessEvent\",\n  \"params\": [{\n    \"Tenant\": \"cgrates.org\",\n    \"ID\": \"term-001\",\n    \"APIOpts\": {\n      \"*originID\": \"acct-session-001\",\n      \"*usage\": 1048576,\n      \"*session\": true,\n      \"*terminate\": true,\n      \"*accounts\": true,\n      \"*debit\": true\n    },\n    \"Event\": {\n      \"IMSI\": \"310150123456789\",\n      \"Account\": \"310150123456789\"\n    }\n  }],\n  \"id\": 5\n}"
+						},
+						"url": {
+							"raw": "{{jsonrpc_url}}",
+							"host": [
+								"{{jsonrpc_url}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "# Sessions Sample: Data Usage Debit\n\nThis folder shows how a data session is charged against a data balance, from start to finish.\n\n**Example:** the account starts with a balance of 1000 MiB of data. Each step in the session uses 1 MiB.\n\n## Steps\n\n| Step | Request | What it shows |\n| --- | --- | --- |\n| 1 | Get Active Sessions | No session is open yet. |\n| 2 | Get Account | The starting balance: 1000 MiB. |\n| 3 | Start session | Opens the session and records 1 MiB of usage. Nothing is deducted yet. |\n| 4 | Get Active Sessions | The session is open with 1 MiB of usage. |\n| 5 | Update session | Deducts 1 MiB from the balance. |\n| 6 | Get Active Sessions / Get Account | The session shows 2 MiB of usage and the balance is 1 MiB lower. |\n| 7 | End session | Deducts another 1 MiB and closes the session. |\n| 8 | Get Account / Get Active Sessions | The balance is 2 MiB lower than at the start and no session is open. |\n\nUse the same session ID ```*originID``` in all requests of one session.\nThe balance only changes in requests that include ```*debit```.\nTo run the example again, make sure no old session is still open and that the balance is back to 1000 MiB"
+		}
+	]
+}
