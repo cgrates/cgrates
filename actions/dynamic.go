@@ -2045,7 +2045,8 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 					},
 				},
 			},
-			APIOpts: make(map[string]any),
+			APIOpts:   make(map[string]any),
+			Overwrite: true,
 		}
 		// populate ActionProfile's FilterIDs
 		if params[2] != utils.EmptyString {

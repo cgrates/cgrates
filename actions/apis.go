@@ -25,8 +25,14 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
+	var overwrite bool
+	if value, has := args.APIOpts[utils.MetaOverwrite]; has {
+		if overwrite, err = utils.IfaceAsBool(value); err != nil {
+			return err
+		}
+	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
-		actPrfIDs, ignFilters, false); err != nil {
+		actPrfIDs, ignFilters, overwrite, false); err != nil {
 		return
 	}
 	*rpl = utils.OK
@@ -51,7 +57,7 @@ func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, 
 	}
 	var schedActSet []*scheduledActs
 	if schedActSet, err = aS.scheduledActions(ctx, args.Tenant,
-		args, actPrfIDs, ignFilters, true); err != nil {
+		args, actPrfIDs, ignFilters); err != nil {
 		return
 	}
 	var partExec bool

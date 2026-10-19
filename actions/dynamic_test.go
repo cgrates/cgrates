@@ -3817,6 +3817,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 		{
 			name: "SuccessfulRequest",
 			expActionProfile: &utils.ActionProfileWithAPIOpts{
+				Overwrite: true,
 				ActionProfile: &utils.ActionProfile{
 					Tenant:    "cgrates.org",
 					ID:        "ACT_1001",
@@ -3906,6 +3907,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 		{
 			name: "SuccessfulRequestEmptyFields",
 			expActionProfile: &utils.ActionProfileWithAPIOpts{
+				Overwrite: true,
 				ActionProfile: &utils.ActionProfile{
 					Tenant:  "cgrates.org",
 					ID:      "ACT_EMPTY",

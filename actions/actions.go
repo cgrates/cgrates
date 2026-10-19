@@ -33,13 +33,19 @@ func NewActionS(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.Filte
 
 // ActionS manages exection of Actions
 type ActionS struct {
-	cfg     *config.CGRConfig
-	cache   *engine.CacheS
-	connMgr *engine.ConnManager
-	fltrS   *engine.FilterS
-	dm      *engine.DataManager
-	crn     *cron.Cron
-	crnLk   *sync.RWMutex
+	cfg              *config.CGRConfig
+	cache            *engine.CacheS
+	connMgr          *engine.ConnManager
+	fltrS            *engine.FilterS
+	dm               *engine.DataManager
+	crn              *cron.Cron
+	crnLk            *sync.RWMutex
+	profileSchedules map[string]*profileSchedule
+}
+
+type profileSchedule struct {
+	entryIDs []cron.EntryID
+	targets  map[string]utils.StringSet
 }
 
 // Shutdown is called to shutdown the service
@@ -66,52 +72,80 @@ func (aS *ActionS) schedInit() {
 			},
 		}
 	}
-	aS.scheduleActions(context.Background(), cgrEvs, nil, false, true)
+	aS.scheduleActions(context.Background(), cgrEvs, nil, false, false, true)
 }
 
 // scheduleActions will set up cron and load the matching data
-func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, crnReset bool) (err error) {
-	aS.crnLk.Lock() // make sure we don't have parallel processes running  setu
+func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, overwrite, crnReset bool) error {
+	aS.crnLk.Lock()
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
 	if crnReset {
 		crn = cron.New()
+		aS.profileSchedules = make(map[string]*profileSchedule)
 	}
+	ignFilters = ignFilters && len(aPrflIDs) != 0
 	var partExec bool
 	for _, cgrEv := range cgrEvs {
-		var schedActSet []*scheduledActs
-		if schedActSet, err = aS.scheduledActions(ctx, cgrEv.Tenant, cgrEv, aPrflIDs, ignFilters, false); err != nil {
+		evNm := cgrEv.AsDataProvider()
+		evNm[utils.MetaCfg] = aS.cfg.GetDataProvider()
+		profiles, err := aS.matchingActionProfilesForEvent(ctx, cgrEv.Tenant, evNm, aPrflIDs, ignFilters)
+		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf(
 				"<%s> scheduler init, ignoring tenant: <%s>, error: <%s>",
 				utils.ActionS, cgrEv.Tenant, err))
 			partExec = true
 			continue
 		}
-		cronGroups := make(map[string][]*scheduledActs)
-		var cronOrder []string
-		for _, sActs := range schedActSet {
-			if sActs.schedule == utils.MetaASAP {
-				go aS.asapExecuteActions(context.Background(), sActs)
+		for _, profile := range profiles {
+			schedActs, err := aS.scheduledActionsForProfile(ctx, cgrEv.Tenant, cgrEv, profile, evNm, ignFilters)
+			if err != nil {
 				continue
 			}
-			if _, has := cronGroups[sActs.apID]; !has {
-				cronOrder = append(cronOrder, sActs.apID)
+			key := profile.TenantID()
+			scheduled := aS.profileSchedules[key]
+			if !overwrite && scheduled != nil {
+				schedActs = slices.DeleteFunc(schedActs, func(sActs *scheduledActs) bool {
+					return scheduled.targets[sActs.trgTyp].Has(sActs.trgID)
+				})
 			}
-			cronGroups[sActs.apID] = append(cronGroups[sActs.apID], sActs)
-		}
-		for _, apID := range cronOrder {
-			units := cronGroups[apID]
-			if _, err = crn.AddFunc(units[0].schedule, func() { aS.cronExecuteActions(units) }); err != nil {
-				utils.Logger.Warning(fmt.Sprintf(
-					"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
-					utils.ActionS, units[0].tenant, units[0].apID, err))
-				partExec = true
-				continue
+			var schedule cron.Schedule
+			if len(schedActs) != 0 && profile.Schedule != utils.MetaASAP {
+				if schedule, err = cron.ParseStandard(profile.Schedule); err != nil {
+					utils.Logger.Warning(fmt.Sprintf(
+						"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
+						utils.ActionS, profile.Tenant, profile.ID, err))
+					partExec = true
+					continue
+				}
+			}
+			if overwrite && scheduled != nil {
+				for _, entryID := range scheduled.entryIDs {
+					crn.Remove(entryID)
+				}
+				delete(aS.profileSchedules, key)
+				scheduled = nil
+			}
+			if schedule != nil {
+				if scheduled == nil {
+					scheduled = &profileSchedule{targets: make(map[string]utils.StringSet)}
+					aS.profileSchedules[key] = scheduled
+				}
+				entryID := crn.Schedule(schedule, cron.FuncJob(func() { aS.cronExecuteActions(schedActs) }))
+				scheduled.entryIDs = append(scheduled.entryIDs, entryID)
+				for _, sActs := range schedActs {
+					if scheduled.targets[sActs.trgTyp] == nil {
+						scheduled.targets[sActs.trgTyp] = make(utils.StringSet)
+					}
+					scheduled.targets[sActs.trgTyp].Add(sActs.trgID)
+				}
+			}
+			if profile.Schedule == utils.MetaASAP {
+				for _, sActs := range schedActs {
+					go aS.asapExecuteActions(context.Background(), sActs)
+				}
 			}
 		}
-	}
-	if partExec {
-		err = utils.ErrPartiallyExecuted
 	}
 	if crnReset {
 		if aS.crn != nil {
@@ -120,14 +154,16 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 		aS.crn = crn
 		aS.crn.Start()
 	}
-	return
+	if partExec {
+		return utils.ErrPartiallyExecuted
+	}
+	return nil
 }
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
 func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
 	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs []*utils.ActionProfile, err error) {
 	if len(aPrflIDs) == 0 {
-		ignoreFilters = false
 		var aPfIDMp utils.StringSet
 		if aPfIDMp, err = engine.MatchingItemIDsForEvent(
 			ctx,
@@ -197,47 +233,51 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
 func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
-	ignoreFilters, forceASAP bool) (schedActs []*scheduledActs, err error) {
+	ignoreFilters bool) (schedActs []*scheduledActs, err error) {
 	evNm := cgrEv.AsDataProvider()
 	evNm[utils.MetaCfg] = aS.cfg.GetDataProvider() // add *cfg dataprovider for *cfg filters
+	ignoreFilters = ignoreFilters && len(aPrflIDs) != 0
 	aPfs, err := aS.matchingActionProfilesForEvent(ctx, tnt, evNm, aPrflIDs, ignoreFilters)
 	if err != nil {
 		return
 	}
-	// like matchingActionProfilesForEvent, ignoreFilters only applies with explicit IDs
-	ignoreFilters = ignoreFilters && len(aPrflIDs) != 0
-
 	for _, aPf := range aPfs {
-		trgActs := map[string][]actioner{} // build here the list of actioners based on the trgKey
-		var partExec bool
-		for _, aCfg := range aPf.Actions { // create actioners and attach them to the right target
-			if act, errAct := newActioner(ctx, cgrEv, aS.cfg, aS.cache, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt); errAct != nil {
-				utils.Logger.Warning(fmt.Sprintf(
-					"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",
-					utils.ActionS, aPf.Tenant, aPf.ID, aCfg.ID, errAct))
-				partExec = true
-				break
-			} else {
-				trgTyp := actionTarget(aCfg.Type)
-				trgActs[trgTyp] = append(trgActs[trgTyp], act)
-			}
+		sActs, err := aS.scheduledActionsForProfile(ctx, tnt, cgrEv, aPf, evNm, ignoreFilters)
+		if err != nil {
+			continue
 		}
-		if partExec {
-			continue // skip this profile from processing further
-		}
-		for trg, acts := range trgActs {
-			if trg == utils.MetaNone { // only one scheduledActs set
-				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, "", aPf.Schedule,
-					ignoreFilters, evNm, acts))
-				continue
-			}
-			for trgID := range aPf.Targets[trg] {
-				schedActs = append(schedActs, newScheduledActs(ctx, aPf.Tenant, aPf.ID, trg, trgID, aPf.Schedule,
-					ignoreFilters, evNm, acts))
-			}
-		}
+		schedActs = append(schedActs, sActs...)
 	}
 	return
+}
+
+func (aS *ActionS) scheduledActionsForProfile(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+	profile *utils.ActionProfile, evNm utils.MapStorage, ignoreFilters bool) ([]*scheduledActs, error) {
+	trgActs := make(map[string][]actioner)
+	for _, aCfg := range profile.Actions {
+		act, err := newActioner(ctx, cgrEv, aS.cfg, aS.cache, aS.fltrS, aS.dm, aS.connMgr, aCfg, tnt)
+		if err != nil {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<%s> ignoring ActionProfile with id: <%s:%s> creating action: <%s>, error: <%s>",
+				utils.ActionS, profile.Tenant, profile.ID, aCfg.ID, err))
+			return nil, err
+		}
+		trgTyp := actionTarget(aCfg.Type)
+		trgActs[trgTyp] = append(trgActs[trgTyp], act)
+	}
+	var schedActs []*scheduledActs
+	for trg, acts := range trgActs {
+		if trg == utils.MetaNone {
+			schedActs = append(schedActs, newScheduledActs(ctx, profile.Tenant, profile.ID, trg, "",
+				ignoreFilters, evNm, acts))
+			continue
+		}
+		for trgID := range profile.Targets[trg] {
+			schedActs = append(schedActs, newScheduledActs(ctx, profile.Tenant, profile.ID, trg, trgID,
+				ignoreFilters, evNm, acts))
+		}
+	}
+	return schedActs, nil
 }
 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
@@ -266,10 +306,10 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 	}, utils.ActionProfilePrefix+utils.ConcatenatedKey(sActs.tenant, sActs.apID))
 }
 
-// cronExecuteActions runs a profile's units together under one lock.
-func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
+// cronExecuteActions runs a batch of scheduled actions under the profile lock.
+func (aS *ActionS) cronExecuteActions(schedActs []*scheduledActs) {
 	ctx := context.Background()
-	first := units[0]
+	first := schedActs[0]
 	err := aS.dm.Guard(ctx, func(ctx *context.Context) error {
 		if !first.ignFilters {
 			ap, err := aS.dm.GetActionProfile(ctx, first.tenant, first.apID, true, true, utils.NonTransactional)
@@ -282,7 +322,7 @@ func (aS *ActionS) cronExecuteActions(units []*scheduledActs) {
 			}
 		}
 		var err error
-		for _, sActs := range units {
+		for _, sActs := range schedActs {
 			err = errors.Join(err, sActs.Execute(ctx))
 		}
 		return err

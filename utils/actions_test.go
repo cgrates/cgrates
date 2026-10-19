@@ -560,6 +560,7 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 		Schedule: "* * * * 1-5",
 		Targets:  map[string]StringSet{MetaAccounts: {"1002": {}}},
 		Actions: []*APAction{
+			nil,
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3"},
@@ -589,6 +590,7 @@ func TestActionProfileMergeAPActionMerge(t *testing.T) {
 		Schedule: "* * * * *",
 		Targets:  map[string]StringSet{MetaAccounts: {"1001": {}}},
 		Actions: []*APAction{
+			nil,
 			{
 				ID:        "APAct1",
 				FilterIDs: []string{"FLTR1", "FLTR2", "FLTR3", "FLTR4"},
@@ -743,9 +745,7 @@ func TestActionProfileAPActionMergeKeepsEmptyOptsDiktats(t *testing.T) {
 }
 
 func TestActionProfileAPActionMergeEmptyV1(t *testing.T) {
-	apAct := &APAction{
-		Opts: make(map[string]any),
-	}
+	apAct := &APAction{}
 	expected := &APAction{
 		ID:        "APAct1",
 		FilterIDs: []string{"FLTR1"},
@@ -812,10 +812,6 @@ func TestActionProfileAPActionMerge(t *testing.T) {
 			{
 				ID:        "DID1",
 				FilterIDs: []string{"fltr1"},
-				Opts: map[string]any{
-					"*balancePath":  "",
-					"*balanceValue": "",
-				},
 				Weights: DynamicWeights{
 					{
 						FilterIDs: []string{"fltr2"},

@@ -349,6 +349,7 @@ const (
 	MetaERs                  = "*ers"
 	MetaRates                = "*rates"
 	MetaRateSOverwrite       = "*rateSOverwrite"
+	MetaOverwrite            = "*overwrite"
 	MetaContinue             = "*continue"
 	Migrator                 = "migrator"
 	UnsupportedMigrationTask = "unsupported migration task"
