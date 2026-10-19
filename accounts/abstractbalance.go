@@ -88,6 +88,9 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		if costIcrm.Increment != nil {
 			maxBlcDbt = roundUnitsWithIncrements(decimal.ToZero, maxBlcDbt, costIcrm.Increment)
 		}
+		if hasUF {
+			maxBlcDbt = utils.DivideDecimal(maxBlcDbt, uF.Factor)
+		}
 	} else { // unlimited
 		maxBlcDbt = usage.Clone()
 		if costIcrm.Increment != nil {
