@@ -160,7 +160,7 @@ func testCallRpcConn(t *testing.T) {
 }
 
 func testCallLoadTariffPlanFromFolder(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	args := &loaders.ArgsProcessFolder{
 		Path: path.Join(*utils.DataDir, "tariffplans", "tutorial"),
 		APIOpts: map[string]any{
@@ -170,8 +170,6 @@ func testCallLoadTariffPlanFromFolder(t *testing.T) {
 	}
 	if err := tutorialCallsRpc.Call(context.Background(), utils.LoaderSv1Run, args, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Errorf("Unexpected reply returned: %s", reply)
 	}
 	time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond)
 }

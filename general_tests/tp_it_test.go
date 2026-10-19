@@ -99,7 +99,7 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 	if tpCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]int
 	if err := tpRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -108,8 +108,6 @@ func testTpLoadTariffPlanFromFolder(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

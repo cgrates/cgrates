@@ -108,7 +108,7 @@ func testV1FltrLoadTarrifPlans(t *testing.T) {
 			caching = utils.MetaNone
 		}
 	}
-	var reply string
+	var reply map[string]int
 	if err := fltrRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -117,8 +117,6 @@ func testV1FltrLoadTarrifPlans(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 	time.Sleep(200 * time.Millisecond)
 }

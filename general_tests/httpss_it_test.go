@@ -102,13 +102,11 @@ func testHttpSsRPC(t *testing.T) {
 
 // Load the data from offline TP
 func testHttpSsLoadTPFromFolder(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := httpSsRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			Path: path.Join(*utils.DataDir, "tariffplans", "sessions")}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 	//time.Sleep(time.Duration(*utils.WaitRater) * time.Millisecond) // Give time for scheduler to execute topups
 }

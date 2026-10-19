@@ -40,7 +40,7 @@ func TestMultipleDBs(t *testing.T) {
 	client, cfg := ng.Run(t)
 	engine.WaitForServiceStart(t, client, utils.LoaderS, cfg.GeneralCfg().ConnectTimeout)
 	t.Run("LoadTariffPlans", func(t *testing.T) {
-		var reply string
+		var reply map[string]int
 		if err := client.Call(context.Background(), utils.LoaderSv1Run,
 			&loaders.ArgsProcessFolder{
 				APIOpts: map[string]any{
@@ -48,8 +48,6 @@ func TestMultipleDBs(t *testing.T) {
 				},
 			}, &reply); err != nil {
 			t.Error(err)
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply returned:", reply)
 		}
 		time.Sleep(100 * time.Millisecond)
 	})
@@ -386,7 +384,7 @@ func TestMultipleDBsMongo(t *testing.T) {
 	client, cfg := ng.Run(t)
 	engine.WaitForServiceStart(t, client, utils.LoaderS, cfg.GeneralCfg().ConnectTimeout)
 	t.Run("LoadTariffPlans", func(t *testing.T) {
-		var reply string
+		var reply map[string]int
 		if err := client.Call(context.Background(), utils.LoaderSv1Run,
 			&loaders.ArgsProcessFolder{
 				APIOpts: map[string]any{
@@ -394,8 +392,6 @@ func TestMultipleDBsMongo(t *testing.T) {
 				},
 			}, &reply); err != nil {
 			t.Error(err)
-		} else if reply != utils.OK {
-			t.Error("Unexpected reply returned:", reply)
 		}
 		time.Sleep(100 * time.Millisecond)
 	})

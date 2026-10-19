@@ -100,7 +100,7 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 	if attrCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var replyLD string
+	var replyLD map[string]int
 	if err := attrRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -109,8 +109,6 @@ func testAttributeSLoadFromFolder(t *testing.T) {
 			},
 		}, &replyLD); err != nil {
 		t.Error(err)
-	} else if replyLD != utils.OK {
-		t.Error("Unexpected reply returned:", replyLD)
 	}
 	time.Sleep(200 * time.Millisecond)
 }

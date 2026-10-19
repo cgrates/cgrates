@@ -122,7 +122,7 @@ func testLoadersRunPathNotFound(t *testing.T) {
 	path := "/tmp/TestLoadersIT/path_not_found"
 	expected := "SERVER_ERROR: <LoaderS> nonexistent folder: " + path
 	for _, stopOnError := range []bool{false, true} {
-		var reply string
+		var reply map[string]int
 		err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run,
 			&loaders.ArgsProcessFolder{
 				Path: path,
@@ -132,7 +132,7 @@ func testLoadersRunPathNotFound(t *testing.T) {
 				},
 			}, &reply)
 		if err == nil || err.Error() != expected {
-			t.Errorf("stopOnError=%v: expected: %q, received: %v (reply: %q)",
+			t.Errorf("stopOnError=%v: expected: %q, received: %v (reply: %v)",
 				stopOnError, expected, err, reply)
 		}
 	}
@@ -357,7 +357,7 @@ cgrates.org,TH2,,;5,10,8,1s,true,,ACT_PRF2,true,
 }
 
 func testLoadersLoad(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -366,8 +366,6 @@ func testLoadersLoad(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
@@ -1425,7 +1423,7 @@ func testLoadersGetThresholdProfiles(t *testing.T) {
 }
 
 func testLoadersRemove(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := ldrRPC.Call(context.Background(), utils.LoaderSv1Run, //Remove,
 		&loaders.ArgsProcessFolder{
 			LoaderID: "remove",
@@ -1435,8 +1433,6 @@ func testLoadersRemove(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

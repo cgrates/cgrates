@@ -93,7 +93,7 @@ func testLoadersIDBIdxItRPCConn(t *testing.T) {
 }
 
 func testLoadersIDBIdxItLoad(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := loadersIDBIdxRPCInternal.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -102,8 +102,6 @@ func testLoadersIDBIdxItLoad(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
 }

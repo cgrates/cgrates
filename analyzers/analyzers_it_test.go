@@ -117,13 +117,11 @@ func testAnalyzerSRPCConn(t *testing.T) {
 }
 
 func testAnalyzerSLoadTarrifPlans(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := anzRPC.Call(context.Background(), utils.LoaderSv1Run, &loaders.ArgsProcessFolder{
 		APIOpts: map[string]any{utils.MetaCache: utils.MetaReload},
 	}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned", reply)
 	}
 }
 

@@ -87,7 +87,7 @@ func testSes2ItRPCConn(t *testing.T) {
 }
 
 func testSes2ItLoadFromFolder(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := ses2RPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -96,8 +96,6 @@ func testSes2ItLoadFromFolder(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 	time.Sleep(100 * time.Millisecond)
 }

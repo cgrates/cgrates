@@ -133,7 +133,7 @@ func testExpLoadTPFromFolder(t *testing.T) {
 	if expCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]int
 	if err := expRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -142,8 +142,6 @@ func testExpLoadTPFromFolder(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
@@ -211,7 +209,7 @@ func testExpLoadTPFromExported(t *testing.T) {
 	if expCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]int
 	if err := expRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			LoaderID: "exported_ldr",
@@ -220,8 +218,6 @@ func testExpLoadTPFromExported(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 

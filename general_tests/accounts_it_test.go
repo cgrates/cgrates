@@ -113,7 +113,7 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 	if accCfg.DbCfg().DBConns[utils.MetaDefault].Type == utils.MetaInternal {
 		caching = utils.MetaNone
 	}
-	var reply string
+	var reply map[string]int
 	if err := accRpc.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -122,8 +122,6 @@ func testV1AccLoadTarrifPlans(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 	time.Sleep(200 * time.Millisecond)
 }

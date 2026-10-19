@@ -120,7 +120,7 @@ cgrates.org,ATTR_FLTR_TEST,,,,,,*req.TestField,*constant,testValue
 }
 
 func testFltrSepLoadTarrifPlans(t *testing.T) {
-	var reply string
+	var reply map[string]int
 	if err := fltrSepRPC.Call(context.Background(), utils.LoaderSv1Run,
 		&loaders.ArgsProcessFolder{
 			APIOpts: map[string]any{
@@ -129,8 +129,6 @@ func testFltrSepLoadTarrifPlans(t *testing.T) {
 			},
 		}, &reply); err != nil {
 		t.Error(err)
-	} else if reply != utils.OK {
-		t.Error("Unexpected reply returned:", reply)
 	}
 }
 
