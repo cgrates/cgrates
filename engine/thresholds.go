@@ -9,6 +9,7 @@ import (
 	"runtime"
 	"slices"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -579,7 +580,8 @@ func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thre
 			thresholdClient: clnt,
 		}, nil
 	}
-	return nil, nil
+	utils.Logger.Warning(fmt.Sprintf("<ThresholdS> processEvent failed to find ClientConnID for ThresholdProfileID <%s>", thresholdProfileID))
+	return nil, utils.ErrPartiallyExecuted
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
@@ -622,10 +624,13 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 				if tntAcnt != utils.EmptyString {
 					at.accountIDs = utils.NewStringMap(tntAcnt)
 				}
-				thSC, err := tS.getThresholdSyConn(t.tPrfl.ID)
-				if err != nil {
-					withErrors = true
-					continue
+				var thSC *thresholdSyConn
+				if strings.HasPrefix(t.tPrfl.ID, utils.MetaSy) {
+					thSC, err = tS.getThresholdSyConn(t.tPrfl.ID)
+					if err != nil {
+						withErrors = true
+						continue
+					}
 				}
 				if t.tPrfl.Async {
 					go func(setID string) {

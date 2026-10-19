@@ -6,11 +6,13 @@
 package agents
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"path/filepath"
 	"reflect"
 	"slices"
+	"strings"
 	"sync"
 	"testing"
 	"time"
@@ -2157,5 +2159,570 @@ RP_1001,DR_DATA,*any,10`,
 			t.Fatal(err)
 		}
 	})
+
+}
+
+// test is used to make sure engine doesnt crash on restart when no sessions are backed up
+func TestDiamSyRestartNoSessionsBackup(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+  "general": {
+    "log_level": 7
+  },
+  "schedulers": {
+    "enabled": true
+  },
+  "data_db": {
+    "db_type": "*internal",
+    "opts": {
+      "internalDBDumpPath": "/tmp/internal_db",
+      "internalDBDumpInterval": "-1"
+    }
+  },
+  "stor_db": {
+    "db_type": "*internal"
+  },
+  "apiers": {
+    "enabled": true,
+    "scheduler_conns": ["*localhost"]
+  },
+  "filters": {
+    "apiers_conns": ["*localhost"]
+  },
+  "thresholds": {
+    "enabled": true
+  },
+
+  "rpc_conns": {
+    "*bijson_localhost_thresholds": {
+      "conns": [
+        {
+          "address": "127.0.0.1:2014",
+          "transport": "*birpc_json"
+        }
+      ]
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "apiers_conns": ["*localhost"],
+    // "thresholds_conns": ["*birpc_internal"],
+    "thresholds_conns": ["*bijson_localhost_thresholds"],
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
+  },
+  "chargers": {
+    "enabled": true,
+    "string_indexed_fields": ["*req.Account"]
+  },
+  "rals": {
+    "enabled": true,
+    "thresholds_conns": ["*localhost"],
+    "max_computed_usage": {
+      "*data": "10737418"
+    }
+  },
+  "diameter_agent": {
+    "enabled": true,
+    "listeners": [
+      {
+        "address": "0.0.0.0:3868"
+      }
+    ],
+    "sessions_conns": ["*bijson_localhost"],
+    "snr_template": "*snr",
+    "request_processors": [
+      {
+        "id": "data_init",
+        "filters": [
+          "*string:~*vars.*cmd:CCR","*string:~*req.CC-Request-Type:1",
+          "*string:~*req.Auth-Application-Id:4"
+        ],
+        "flags": ["*initiate", "*accounts", "*log"],
+        "request_fields": [
+          {"tag": "ToR","path": "*cgreq.ToR","type": "*constant","value": "*data"},
+          {"tag": "Tenant","path": "*cgreq.Tenant","type": "*constant","value": "cgrates.org"},
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host"},
+          {"tag": "SetupTime","path": "*cgreq.SetupTime","type": "*variable","value": "~*req.Event-Timestamp","mandatory": true},
+          {"tag": "AnswerTime","path": "*cgreq.AnswerTime","type": "*variable","value": "~*req.Event-Timestamp","mandatory": true},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*prepaid"},
+          {"tag": "Category","path": "*cgreq.Category","type": "*constant","value": "data"},
+          {"tag": "Account","path": "*cgreq.Account","type": "*variable","value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]","mandatory": true},
+          {"tag": "Destination","path": "*cgreq.Destination","type": "*variable","value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC","mandatory": true},
+          {"tag": "Subject","path": "*cgreq.Subject","type": "*variable","value": "~*req.Service-Information.PS-Information.Called-Station-Id"},
+          {"tag": "Usage","path": "*cgreq.Usage","type": "*constant","value": "2048"}
+        ],
+        "reply_fields": [
+          {"tag": "CCATemplate","type": "*template","value": "*cca"},
+          {"tag": "RatingGroup","path": "*rep.Multiple-Services-Credit-Control.Rating-Group","type": "*constant","value": "1"},
+          {"tag": "CCTotalOctets1","path": "*rep.Multiple-Services-Credit-Control.Granted-Service-Unit.CC-Total-Octets","type": "*constant","value": "9999999"},
+          {"tag": "GrantedUsage","path": "*rep.Multiple-Services-Credit-Control.Validity-Time","type": "*constant","value": "600"}
+        ]
+      },
+
+      {
+        "id": "data_update",
+        "filters": ["*string:~*vars.*cmd:CCR","*string:~*req.CC-Request-Type:2"],
+        "flags": ["*update", "*accounts", "*log"],
+        "request_fields": [
+          {"tag": "ToR","path": "*cgreq.ToR","type": "*constant","value": "*data"},
+          {"tag": "Tenant","path": "*cgreq.Tenant","type": "*constant","value": "cgrates.org"},
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "Destination","path": "*cgreq.Destination","type": "*variable","value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC","mandatory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host"},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*prepaid"},
+          {"tag": "Category","path": "*cgreq.Category","type": "*constant","value": "data"},
+          {"tag": "Account","path": "*cgreq.Account","type": "*variable","value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]","mandatory": true},
+          {"tag": "SetupTime","path": "*cgreq.SetupTime","type": "*variable","value": "~*req.Event-Timestamp","mandatory": true},
+          {"tag": "AnswerTime","path": "*cgreq.AnswerTime","type": "*variable","value": "~*req.Event-Timestamp","mandatory": true},
+          {"tag": "Usage","path": "*cgreq.Usage","type": "*sum","value": "~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Input-Octets;~*req.Multiple-Services-Credit-Control.Used-Service-Unit.CC-Output-Octets"}
+        ],
+        "reply_fields": [
+          {"tag": "CCATemplate","type": "*template","value": "*cca"},
+          {"tag": "RatingGroup","path": "*rep.Multiple-Services-Credit-Control.Rating-Group","type": "*constant","value": "1"},
+          {"tag": "CCTotalOctets1","path": "*rep.Multiple-Services-Credit-Control.Granted-Service-Unit.CC-Total-Octets","type": "*constant","value": "9999999"},
+          {"tag": "GrantedUsage","path": "*rep.Multiple-Services-Credit-Control.Validity-Time","type": "*constant","value": "600"},
+        ]
+      },
+
+      {
+        "id": "data_terminate",
+        "filters": ["*string:~*vars.*cmd:CCR","*string:~*req.CC-Request-Type:3"],
+        "flags": ["*terminate", "*accounts", "*log"],
+        "request_fields": [
+          {"tag": "ToR","path": "*cgreq.ToR","type": "*constant","value": "*data"},
+          {"tag": "Tenant","path": "*cgreq.Tenant","type": "*constant","value": "cgrates.org"},
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandat ory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host"},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*prepaid"},
+          {"tag": "Category","path": "*cgreq.Category","type": "*constant","value": "data"},
+          {"tag": "Account","path": "*cgreq.Account","type": "*variable","value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]","mandatory": true},
+          {"tag": "Destination","path": "*cgreq.Destination","type": "*variable","value": "~*req.Service-Information.PS-Information.3GPP-SGSN-MCC-MNC","mandatory": true}
+        ],
+        "reply_fields": [
+          {"tag": "CCATemplate","type": "*template","value": "*cca"},
+          {"tag": "ResultCode","path": "*rep.Result-Code","type": "*constant","value": "2001"}
+        ]
+      },
+      {
+        "id": "Sy_Initial_SLR",
+        "filters": ["*string:~*vars.*cmd:SLR","*string:~*req.SL-Request-Type:0" // initial request
+        ],
+        "flags": ["*log", "*initiate"],
+        "request_fields": [
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host","mandatory": true},
+          {"tag": "OriginRealm","path": "*cgreq.OriginRealm","type": "*variable","value": "~*req.Origin-Realm","mandatory": true},
+          {"tag": "Account","path": "*cgreq.Account","type": "*variable","mandatory": true,"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*sy"},
+		  // The balance Value which when under it, it will trigger the SNR
+          {"tag": "BalanceValuePolicyFilter","path": "*opts.*syPolicyFilters","type": "*group","value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"}
+        ],
+        "reply_fields": [
+		  // error if session exists
+          {"tag": "FailedAVP","path": "*rep.Failed-AVP","filters": ["*string:~*cgrep.Error:EXISTS"],"type": "*variable","value": "~*req.SL-Request-Type"},
+		  // error if session exists
+          {"tag": "ResultCode", "path": "*rep.Result-Code","filters": ["*string:~*cgrep.Error:EXISTS"],"type": "*constant","value": "5004","blocker": true},  // DIAMETER_INVALID_AVP_VALUE
+          {"tag": "Session-Id","path": "*rep.Session-Id","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "Auth-Application-Id","path": "*rep.Auth-Application-Id","type": "*variable","value": "~*req.Auth-Application-Id","mandatory": true},
+          {"tag": "Origin-Host","path": "*rep.Origin-Host","type": "*variable","value": "~*req.Origin-Host","mandatory": true},
+          {"tag": "Origin-Realm","path": "*rep.Origin-Realm","type": "*variable","value": "~*req.Origin-Realm","mandatory": true},
+          {"tag": "ResultCode","path": "*rep.Result-Code","type": "*constant","value": "2001"},
+          {"tag": "Policy-Counter-Identifier","path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier","type": "*group","value": "Monthly","new_branch": true},
+          {"tag": "Policy-Counter-Status","path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status","type": "*group","value": "30GB"},
+          {"tag": "Pending-Policy-Counter-Information-Status","path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status","type": "*group","value": "30GB"},
+          {"tag": "Pending-Policy-Counter-Information-Status-Change-Time","path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time","type": "*datetime","value": "*now"}
+        ]
+      },
+      {
+        "id": "Sy_Intermediate_SLR",
+        "filters": [
+          "*string:~*vars.*cmd:SLR","*string:~*req.SL-Request-Type:1" // intermediate request
+        ],
+        "flags": ["*log", "*update"],
+        "request_fields": [
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host","mandatory": true},
+          {"tag": "OriginRealm","path": "*cgreq.OriginRealm","type": "*variable","value": "~*req.Origin-Realm","mandatory": true},
+          {"tag": "Account","path": "*cgreq.Account","type": "*variable","mandatory": true,"value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]"},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*sy"},
+		  // The balance Value which when under it, it will trigger the SNR
+          {"tag": "BalanceValuePolicyFilter", "path": "*opts.*syPolicyFilters","type": "*group","value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"}
+        ],
+        "reply_fields": [
+          {"tag": "Session-Id","path": "*rep.Session-Id","type": "*variable","value": "~*req.Session-Id"},
+          {"tag": "Auth-Application-Id","path": "*rep.Auth-Application-Id","type": "*variable","value": "~*req.Auth-Application-Id"},
+          {"tag": "Origin-Host","path": "*rep.Origin-Host","type": "*variable","value": "~*req.Origin-Host"},
+          {"tag": "Origin-Realm","path": "*rep.Origin-Realm","type": "*variable","value": "~*req.Origin-Realm"},
+          {"tag": "ResultCode","path": "*rep.Result-Code","type": "*constant","value": "2001"},
+          {"tag": "Policy-Counter-Identifier","path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Identifier","type": "*group","value": "Monthly","new_branch": true},
+          {"tag": "Policy-Counter-Status","path": "*rep.Policy-Counter-Status-Report.Policy-Counter-Status","type": "*group","value": "30GB"},
+          {"tag": "Pending-Policy-Counter-Information-Status","path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Policy-Counter-Status","type": "*group","value": "30GB"},
+          {"tag": "Pending-Policy-Counter-Information-Status-Change-Time","path": "*rep.Policy-Counter-Status-Report.Pending-Policy-Counter-Information.Pending-Policy-Counter-Change-Time","type": "*datetime","value": "*now"}
+        ]
+      },
+      {
+        "id": "Sy_Terminate_STR",
+        "filters": ["*string:~*vars.*cmd:STR"],
+        "flags": ["*log", "*terminate"],
+        "request_fields": [
+          {"tag": "OriginID","path": "*cgreq.OriginID","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+          {"tag": "OriginHost","path": "*cgreq.OriginHost","type": "*variable","value": "~*req.Origin-Host","mandatory": true},
+          {"tag": "OriginRealm","path": "*cgreq.OriginRealm","type": "*variable","value": "~*req.Origin-Realm","mandatory": true},
+          {"tag": "RequestType","path": "*cgreq.RequestType","type": "*constant","value": "*sy"}
+        ],
+        "reply_fields": [
+          {"tag": "Session-Id","path": "*rep.Session-Id","type": "*variable","value": "~*req.Session-Id"},
+          {"tag": "Origin-Host","path": "*rep.Origin-Host","type": "*variable","value": "~*req.Origin-Host"},
+          {"tag": "Origin-Realm","path": "*rep.Origin-Realm","type": "*variable","value": "~*req.Origin-Realm"},
+          {"tag": "ResultCode","path": "*rep.Result-Code","type": "*constant","value": "2001"}
+        ]
+      }
+    ]
+  },
+  "templates": {
+    "*cca": [
+      {"tag": "SessionId","path": "*rep.Session-Id","type": "*variable","value": "~*req.Session-Id","mandatory": true},
+      {"tag": "ResultCode","path": "*rep.Result-Code","type": "*constant","value": "2001"},
+      {"tag": "OriginHost","path": "*rep.Origin-Host","type": "*variable","value": "~*vars.OriginHost","mandatory": true},
+      {"tag": "OriginRealm","path": "*rep.Origin-Realm","type": "*variable","value": "~*vars.OriginRealm","mandatory": true},
+      {"tag": "AuthApplicationId","path": "*rep.Auth-Application-Id","type": "*variable","value": "~*vars.*appid","mandatory": true},
+      {"tag": "CCRequestType","path": "*rep.CC-Request-Type","type": "*variable","value": "~*req.CC-Request-Type","mandatory": true},
+      {"tag": "CCRequestNumber","path": "*rep.CC-Request-Number","type": "*variable","value": "~*req.CC-Request-Number","mandatory": true}
+    ]
+  }
+}
+`,
+		TpFiles: map[string]string{
+			utils.AccountActionsCsv: `#Tenant,Account,ActionPlanId,ActionTriggersId,AllowNegative,Disabled
+cgrates.org,1001,PACKAGE_1001,,,`,
+			utils.ActionPlansCsv: `#Id,ActionsId,TimingId,Weight
+PACKAGE_1001,ACT_TOPUP,*asap,10`,
+			utils.ActionsCsv: `#ActionsId[0],Action[1],ExtraParameters[2],Filter[3],BalanceId[4],BalanceType[5],Categories[6],DestinationIds[7],RatingSubject[8],SharedGroup[9],ExpiryTime[10],TimingIds[11],Units[12],BalanceWeight[13],BalanceBlocker[14],BalanceDisabled[15],Weight[16]
+ACT_TOPUP,*topup_reset,,,balance_data,*data,,,,,*unlimited,,3072,,,,`,
+			utils.ChargersCsv: `#Tenant,ID,FilterIDs,ActivationInterval,RunID,AttributeIDs,Weight
+cgrates.org,DEFAULT,,,*default,*none,0`,
+			utils.DestinationRatesCsv: `#Id,DestinationId,RatesTag,RoundingMethod,RoundingDecimals,MaxCost,MaxCostStrategy
+DR_DATA,*any,RT_DATA,*up,4,0,`,
+			utils.RatesCsv: `#Id,ConnectFee,Rate,RateUnit,RateIncrement,GroupIntervalStart
+RT_DATA,0,0.01,1,1,0`,
+			utils.RatingProfilesCsv: `#Tenant,Category,Subject,ActivationTime,RatingPlanId,RatesFallbackSubject
+cgrates.org,data,itsyscom,,RP_1001,`,
+			utils.RatingPlansCsv: `#Id,DestinationRatesId,TimingTag,Weight
+RP_1001,DR_DATA,*any,10`,
+		},
+		LogBuffer: &bytes.Buffer{},
+	}
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		if err := os.MkdirAll("/tmp/internal_db", 0755); err != nil {
+			t.Fatal(err)
+		}
+		t.Cleanup(func() {
+			if err := os.RemoveAll("/tmp/internal_db"); err != nil {
+				t.Error(err)
+			}
+		})
+	case utils.MetaMySQL, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+	client, cfg := ng.Run(t)
+
+	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
+
+	// Start monitoring SL
+	diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
+	if err != nil {
+		t.Fatal(err)
+	}
+	syOriginID := utils.UUIDSha1Prefix()
+	slr := diam.NewRequest(diam.SpendingLimit, 16777302, nil)
+	slr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(syOriginID))
+	slr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	slr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	slr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA-DH"))
+	slr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("dr-cgrates.org"))
+	slr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(16777302))
+	slr.NewAVP(avp.SLRequestType, avp.Vbit, 10415, datatype.Enumerated(0)) //INITIAL_REQUEST (0)
+	slr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data (MSISDN)
+		}})
+	slr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data (IMSI)
+		}})
+	// t.Log("sendingg msg: ", slr.PrettyDump())
+	if err := diamClientSy.SendMessage(slr); err != nil {
+		t.Errorf("failed to send diameter message: %v", err)
+	}
+
+	reply := diamClientSy.ReceivedMessage(2 * time.Second)
+	if reply == nil {
+		t.Fatal("received empty reply")
+	}
+	// t.Log(reply.PrettyDump())
+	avps, err := reply.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(avps) == 0 {
+		t.Fatal("missing AVPs in reply")
+	}
+
+	resultCode, err := diamAVPAsString(avps[0])
+	if err != nil {
+		t.Error(err)
+	}
+	if resultCode != "2001" {
+		t.Errorf("Result-Code=%s, want 2001", resultCode)
+	}
+
+	expBalance := float64(3072)
+	var acnt *engine.Account
+	attrsAcnt := &utils.AttrGetAccount{
+		Tenant:  "cgrates.org",
+		Account: "1001",
+	}
+	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
+		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
+	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
+		t.Errorf("APIerSv1.GetAccount: data_balance: %f, want: %f", rply, expBalance)
+	}
+
+	var replyActSess []*sessions.ExternalSession // find indexed Sy sessions active
+	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions, utils.SessionFilter{Filters: []string{"*string:~*req.RequestType:*sy"}}, &replyActSess); err != nil {
+		t.Error(err)
+	}
+	if len(replyActSess) != 1 {
+		t.Errorf("expected 1 active sessions, received <%v>", replyActSess)
+	}
+	// t.Log(utils.ToIJSON(replyActSess))
+
+	// get thresholds
+	var tIDs []string
+	if err := client.Call(context.Background(), utils.ThresholdSv1GetThresholdIDs,
+		&utils.TenantWithAPIOpts{}, &tIDs); err != nil {
+		t.Error(err)
+	}
+	if len(tIDs) != 1 {
+		t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
+	} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID {
+		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID, tIDs[0])
+	}
+	thresholdID := utils.MetaSy + utils.Underline + syOriginID
+	expTp := &engine.ThresholdProfile{
+		Tenant: "cgrates.org",
+		ID:     thresholdID,
+		FilterIDs: []string{
+			utils.ConcatenatedKey(utils.MetaLessOrEqual, utils.DynamicDataPrefix+utils.MetaAsm+utils.NestingSep+utils.BalanceSummaries+utils.NestingSep+"balance_data"+utils.NestingSep+utils.Value, "1023"),
+			utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, "1001"),
+		},
+		MaxHits:   1,
+		MinHits:   1,
+		Async:     true,
+		ActionIDs: []string{utils.MetaSyPublish},
+	}
+	tp := &engine.ThresholdProfile{}
+	if err := client.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
+		&utils.TenantID{ID: tIDs[0]}, &tp); err != nil {
+		t.Error(err)
+	}
+	expTp.ActivationInterval = tp.ActivationInterval
+	slices.Sort(tp.FilterIDs) // sort filters received since they are processed from a map
+	if !reflect.DeepEqual(tp, expTp) {
+		t.Errorf("expected <%v>\nreceived\n<%v>", utils.ToJSON(expTp), utils.ToJSON(tp))
+	}
+	// restart engine
+	if err := engine.KillEngine(100); err != nil {
+		t.Error(err)
+	}
+	ng.PreserveDataDB = true
+	client, cfg = ng.Run(t)
+	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
+	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+	defer cancel()
+	engine.WaitForService(t, ctx, client, utils.SessionSv1)
+
+	diamClientRo, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, "localhost",
+		cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+		cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+		cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[0].Network)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccrOriginID := utils.UUIDSha1Prefix()
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginID))
+	ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccr.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("dr-cgrates.org"))
+	ccr.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("message@DiamItCCRData"))
+	ccr.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(0))
+	ccr.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA-DH"))
+	ccr.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(time.Now().Unix()))
+	ccr.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 5, 11, 43, 10, 0, time.UTC)))
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccr.NewAVP(avp.MultipleServicesIndicator, avp.Mbit, 0, datatype.Enumerated(1))
+	ccr.NewAVP(avp.MultipleServicesCreditControl, avp.Mbit, 0, &diam.GroupedAVP{ // Multiple-Services-Credit-Control
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
+		},
+	})
+	ccr.NewAVP(avp.ServiceInformation, avp.Mbit, 10415,
+		&diam.GroupedAVP{
+			AVP: []*diam.AVP{
+				diam.NewAVP(avp.PSInformation, avp.Mbit, 10415,
+					&diam.GroupedAVP{
+						AVP: []*diam.AVP{
+							diam.NewAVP(avp.CalledStationID, avp.Mbit, 0, datatype.UTF8String("itsyscom")),
+							diam.NewAVP(avp.TGPPSGSNMCCMNC, avp.Mbit, 10415, datatype.OctetString("1002")),
+						},
+					},
+				),
+			},
+		},
+	)
+
+	// t.Log("sendingg CCR msg: ", ccr.PrettyDump())
+	if err := diamClientRo.SendMessage(ccr); err != nil {
+		t.Errorf("failed to send diameter message: %v", err)
+	}
+
+	reply = diamClientRo.ReceivedMessage(2 * time.Second)
+	if reply == nil {
+		t.Error("received empty reply")
+	}
+	// t.Log(reply.PrettyDump())
+
+	avps, err = reply.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(avps) == 0 {
+		t.Error("missing AVPs in reply")
+	}
+
+	resultCode, err = diamAVPAsString(avps[0])
+	if err != nil {
+		t.Error(err)
+	}
+	if resultCode != "2001" {
+		t.Errorf("Result-Code=%s, want %s", resultCode, "2001")
+	}
+
+	expBalance = float64(1024) // CCR init should take 2048 units
+	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
+		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
+	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
+		t.Errorf("APIerSv1.GetAccount: data_balance: %f, want: %f", rply, expBalance)
+	}
+
+	ccrU := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccrU.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginID))
+	ccrU.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
+	ccrU.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA"))
+	ccrU.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
+	ccrU.NewAVP(avp.DestinationRealm, avp.Mbit, 0, datatype.DiameterIdentity("dr-cgrates.org"))
+	ccrU.NewAVP(avp.ServiceContextID, avp.Mbit, 0, datatype.UTF8String("message@DiamItCCRData"))
+	ccrU.NewAVP(avp.CCRequestType, avp.Mbit, 0, datatype.Enumerated(2))
+	ccrU.NewAVP(avp.CCRequestNumber, avp.Mbit, 0, datatype.Unsigned32(1))
+	ccrU.NewAVP(avp.DestinationHost, avp.Mbit, 0, datatype.DiameterIdentity("CGR-DA-DH"))
+	ccrU.NewAVP(avp.OriginStateID, avp.Mbit, 0, datatype.Unsigned32(time.Now().Unix()))
+	ccrU.NewAVP(avp.EventTimestamp, avp.Mbit, 0, datatype.Time(time.Date(2018, 10, 5, 11, 47, 10, 0, time.UTC)))
+	ccrU.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(0)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("1001")), // Subscription-Id-Data
+		}})
+	ccrU.NewAVP(avp.SubscriptionID, avp.Mbit, 0, &diam.GroupedAVP{
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.SubscriptionIDType, avp.Mbit, 0, datatype.Enumerated(1)),
+			diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data
+		}})
+	ccrU.NewAVP(avp.MultipleServicesIndicator, avp.Mbit, 0, datatype.Enumerated(1))
+	ccrU.NewAVP(avp.MultipleServicesCreditControl, avp.Mbit, 0, &diam.GroupedAVP{ // Multiple-Services-Credit-Control
+		AVP: []*diam.AVP{
+			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
+			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
+				AVP: []*diam.AVP{
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+				},
+			}),
+		},
+	})
+	ccrU.NewAVP(avp.ServiceInformation, avp.Mbit, 10415,
+		&diam.GroupedAVP{
+			AVP: []*diam.AVP{
+				diam.NewAVP(avp.PSInformation, avp.Mbit, 10415,
+					&diam.GroupedAVP{
+						AVP: []*diam.AVP{
+							diam.NewAVP(avp.CalledStationID, avp.Mbit, 0, datatype.UTF8String("itsyscom")),
+							diam.NewAVP(avp.TGPPSGSNMCCMNC, avp.Mbit, 10415, datatype.OctetString("1002")),
+						},
+					},
+				),
+			},
+		},
+	)
+
+	// t.Log("sendingg CCR-U msg: ", ccrU.PrettyDump())
+	if err := diamClientRo.SendMessage(ccrU); err != nil {
+		t.Errorf("failed to send diameter message: %v", err)
+	}
+
+	reply = diamClientRo.ReceivedMessage(5 * time.Second)
+	if reply == nil {
+		t.Fatal("received empty reply")
+	}
+	// t.Log(reply.PrettyDump())
+
+	avps, err = reply.FindAVPsWithPath([]any{"Result-Code"}, dict.UndefinedVendorID)
+	if err != nil {
+		t.Error(err)
+	}
+	if len(avps) == 0 {
+		t.Error("missing AVPs in reply")
+	}
+
+	resultCode, err = diamAVPAsString(avps[0])
+	if err != nil {
+		t.Error(err)
+	}
+	if resultCode != "2001" {
+		t.Errorf("Result-Code=%s, want %s", resultCode, "2001")
+	}
+
+	expBalance = float64(0) // CCR update should take 2048 units
+	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
+		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
+	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
+		t.Errorf("APIerSv1.GetAccount: data_balance: %f, want: %f", rply, expBalance)
+	}
+	expLog := fmt.Sprintf("<ThresholdS> processEvent failed to find ClientConnID for ThresholdProfileID <%v>", thresholdID)
+	if !strings.Contains(fmt.Sprintln(ng.LogBuffer), expLog) {
+		t.Errorf("expected log warning <%v>,\nLogs \n<%v>", expLog, ng.LogBuffer)
+	}
 
 }
