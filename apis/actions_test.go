@@ -45,7 +45,10 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 					Weight: 10,
 				},
 			},
-			Actions: make([]*utils.APAction, 1),
+			Actions: []*utils.APAction{{ID: "log", Type: utils.MetaLog, Diktats: []*utils.APDiktat{{ID: "d"}}}},
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: utils.NewStringSet([]string{"account1", "account2"}),
+			},
 		},
 	}
 
@@ -55,6 +58,34 @@ func TestActionsSetGetRemActionProfile(t *testing.T) {
 		t.Errorf("expected: <%+v>, received: <%+v>", utils.OK, reply)
 	}
 
+	if err := adms.GetActionProfile(context.Background(), arg, &result); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(result, *actPrf.ActionProfile) {
+		t.Errorf("expected: <%+v>, received: <%+v>",
+			utils.ToJSON(actPrf.ActionProfile), utils.ToJSON(result))
+	}
+
+	update := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
+			ID: " actID ",
+			Targets: map[string]utils.StringSet{
+				utils.MetaAccounts: utils.NewStringSet([]string{"account2", "account3"}),
+			},
+		},
+	}
+	if err := adms.SetActionProfile(context.Background(), update, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := adms.SetActionProfile(context.Background(), &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
+			ID:      "actID",
+			Actions: []*utils.APAction{{ID: "log", Diktats: []*utils.APDiktat{{ID: " d "}}}},
+		},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	actPrf.Targets[utils.MetaAccounts].Add("account3")
+	cacheS.Clear(nil)
 	if err := adms.GetActionProfile(context.Background(), arg, &result); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(result, *actPrf.ActionProfile) {

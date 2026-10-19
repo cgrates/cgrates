@@ -64,7 +64,8 @@ func (ap *ActionProfile) Clone() *ActionProfile {
 // ActionProfileWithAPIOpts wraps ActionProfile with APIOpts.
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
-	APIOpts map[string]any
+	Overwrite bool
+	APIOpts   map[string]any
 }
 
 // TenantID returns the concatenated tenant and ID.
@@ -154,19 +155,14 @@ func (ap *ActionProfile) Merge(v2 any) {
 		ap.ID = vi.ID
 	}
 	ap.FilterIDs = append(ap.FilterIDs, vi.FilterIDs...)
-	var equal bool
 	for _, actionV2 := range vi.Actions {
-		for _, action := range ap.Actions {
-			if action.ID == actionV2.ID {
-				action.Merge(actionV2)
-				equal = true
-				break
-			}
+		if idx := slices.IndexFunc(ap.Actions, func(action *APAction) bool {
+			return action != nil && actionV2 != nil && action.ID == actionV2.ID
+		}); idx != -1 {
+			ap.Actions[idx].Merge(actionV2)
+			continue
 		}
-		if !equal {
-			ap.Actions = append(ap.Actions, actionV2)
-		}
-		equal = false
+		ap.Actions = append(ap.Actions, actionV2)
 	}
 
 	ap.Weights = append(ap.Weights, vi.Weights...)
@@ -533,6 +529,9 @@ func (a *APAction) Merge(v2 *APAction) {
 	if len(v2.Type) != 0 {
 		a.Type = v2.Type
 	}
+	if a.Opts == nil && len(v2.Opts) != 0 {
+		a.Opts = make(map[string]any)
+	}
 	maps.Copy(a.Opts, v2.Opts)
 	if v2.Blockers != nil {
 		a.Blockers = append(a.Blockers, v2.Blockers...)
@@ -696,6 +695,9 @@ func (d *APDiktat) Clone() *APDiktat {
 // Merge combines the values from another APDiktat into this one.
 func (a *APDiktat) Merge(v2 *APDiktat) {
 	a.FilterIDs = append(a.FilterIDs, v2.FilterIDs...)
+	if a.Opts == nil && len(v2.Opts) != 0 {
+		a.Opts = make(map[string]any)
+	}
 	maps.Copy(a.Opts, v2.Opts)
 	a.Blockers = append(a.Blockers, v2.Blockers...)
 	a.Weights = append(a.Weights, v2.Weights...)

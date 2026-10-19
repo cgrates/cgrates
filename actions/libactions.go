@@ -45,14 +45,13 @@ func actionTarget(act string) string {
 	}
 }
 
-func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID, schedule string,
+func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID string,
 	ignFilters bool, data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
 	return &scheduledActs{
 		tenant:     tenant,
 		apID:       apID,
 		trgTyp:     trgTyp,
 		trgID:      trgID,
-		schedule:   schedule,
 		ignFilters: ignFilters,
 		data:       data,
 		acts:       acts,
@@ -66,7 +65,6 @@ type scheduledActs struct {
 	apID       string
 	trgTyp     string
 	trgID      string
-	schedule   string
 	ignFilters bool
 	data       utils.MapStorage
 	acts       []actioner

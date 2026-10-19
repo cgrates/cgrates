@@ -92,6 +92,7 @@ func testAccActionsRPCConn(t *testing.T) {
 
 func testAccActionsSetActionProfile(t *testing.T) {
 	actPrf := &utils.ActionProfileWithAPIOpts{
+		Overwrite: true,
 		ActionProfile: &utils.ActionProfile{
 			Tenant:    "cgrates.org",
 			ID:        "CREATE_ACC",

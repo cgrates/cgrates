@@ -184,11 +184,11 @@ func TestScheduledActions(t *testing.T) {
 		t.Error(err)
 	}
 
-	if rcv, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false, false); err != nil {
+	if rcv, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false); err != nil {
 		t.Error(err)
 	} else {
 		expSchedActs := newScheduledActs(context.Background(), cgrEv.Tenant, cgrEv.ID, utils.MetaNone, "",
-			"", false, evNM, rcv[0].acts)
+			false, evNM, rcv[0].acts)
 		if reflect.DeepEqual(expSchedActs, rcv) {
 			t.Errorf("Expected %+v, received %+v", expSchedActs, rcv)
 		}
@@ -201,7 +201,7 @@ func TestScheduledActions(t *testing.T) {
 			utils.AccountsStr: "10",
 		},
 	}
-	if _, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false, false); err == nil || err != utils.ErrNotFound {
+	if _, err := acts.scheduledActions(context.Background(), cgrEv.Tenant, cgrEv, []string{}, false); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
 }
@@ -251,12 +251,12 @@ func TestScheduleAction(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err != nil {
 		t.Error(err)
 	}
 
 	//Cannot schedule an action if the ID is invalid
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{"INVALID_ID1"}, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{"INVALID_ID1"}, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -265,7 +265,7 @@ func TestScheduleAction(t *testing.T) {
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err != nil {
 		t.Error(err)
 	}
 	cacheS.Clear(nil)
@@ -274,8 +274,104 @@ func TestScheduleAction(t *testing.T) {
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
+	}
+}
+
+func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	executed := make(map[string]int)
+	rpcInternal := make(chan birpc.ClientConnector, 1)
+	rpcInternal <- &mockClientConn{
+		calls: map[string]func(*context.Context, any, any) error{
+			utils.AccountSv1ActionSetBalance: func(_ *context.Context, args, reply any) error {
+				executed[args.(*utils.ArgsActSetBalance).AccountID]++
+				return nil
+			},
+		},
+	}
+	cm := engine.NewConnManager(cfg)
+	cm.SetCache(cacheS)
+	cm.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts), utils.AccountSv1, rpcInternal)
+	acts := NewActionS(cfg, cacheS, filters, dm, cm)
+	acts.Shutdown() // Run jobs explicitly, without waiting for cron ticks.
+	ctx := context.Background()
+	var reply string
+	profile := &utils.ActionProfile{
+		Tenant:   "cgrates.org",
+		ID:       "product",
+		Schedule: "@monthly",
+		Actions:  []*utils.APAction{{ID: "balance", Type: utils.MetaSetBalance}},
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: utils.NewStringSet([]string{"account1", "account2"})},
+	}
+	event := &utils.CGREvent{
+		Tenant:  profile.Tenant,
+		APIOpts: map[string]any{utils.OptsActionsProfileIDs: []string{profile.ID}},
+	}
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := acts.V1ScheduleActions(ctx, event, &reply); err != nil {
+		t.Fatal(err)
+	}
+	originalID := acts.crn.Entries()[0].ID
+
+	profile.Targets[utils.MetaAccounts].Add("account3")
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	cacheS.Clear(nil)
+	for range 2 {
+		if err := acts.V1ScheduleActions(ctx, event, &reply); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if !acts.crn.Entry(originalID).Valid() {
+		t.Fatal("incremental scheduling removed the original job")
+	}
+	for _, entry := range acts.crn.Entries() {
+		entry.Job.Run()
+	}
+	if want := map[string]int{"account1": 1, "account2": 1, "account3": 1}; !reflect.DeepEqual(executed, want) {
+		t.Fatalf("expected %v, received %v", want, executed)
+	}
+
+	profile.Targets[utils.MetaAccounts] = utils.NewStringSet([]string{"account2"})
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	cacheS.Clear(nil)
+	event.APIOpts[utils.MetaOverwrite] = true
+	if err := acts.V1ScheduleActions(ctx, event, &reply); err != nil {
+		t.Fatal(err)
+	}
+	clear(executed)
+	for _, entry := range acts.crn.Entries() {
+		entry.Job.Run()
+	}
+	if want := map[string]int{"account2": 1}; !reflect.DeepEqual(executed, want) {
+		t.Fatalf("expected %v, received %v", want, executed)
+	}
+
+	profile.Targets = nil
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	cacheS.Clear(nil)
+	if err := acts.V1ScheduleActions(ctx, event, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if entries := acts.crn.Entries(); len(entries) != 0 {
+		t.Fatalf("empty-target overwrite retained jobs: %v", entries)
 	}
 }
 
@@ -307,7 +403,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	}
 
 	expSchedActs := newScheduledActs(context.Background(), cgrEv[0].Tenant, cgrEv[0].ID, utils.MetaNone, "",
-		"", false, evNM, nil)
+		false, evNM, nil)
 
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNoDatabaseConn {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNoDatabaseConn, err)
@@ -318,7 +414,7 @@ func TestAsapExecuteActions(t *testing.T) {
 	acts.dm = engine.NewDataManager(dbCm, cfg, nil, locker)
 	acts.dm.SetCache(cacheS)
 	expSchedActs = newScheduledActs(context.Background(), cgrEv[0].Tenant, "another_id", utils.MetaNone, "",
-		"", false, evNM, nil)
+		false, evNM, nil)
 	if err := acts.asapExecuteActions(context.Background(), expSchedActs); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
 	}
@@ -1065,7 +1161,7 @@ func TestACScheduledActions(t *testing.T) {
 
 	acts := NewActionS(cfg, cacheS, fltrs, dm, nil)
 	expected := "WARNING] <ActionS> ignoring ActionProfile with id: <cgrates.org:TestACScheduledActions> creating action: <TOPUP>, error: <unsupported action type: <inexistent_type>>"
-	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
+	if _, err := acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false); err != nil {
 		t.Error(err)
 	} else if rcv := buf.String(); !strings.Contains(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
@@ -1089,17 +1185,16 @@ func TestACScheduledActions(t *testing.T) {
 	}
 	expectedSChed := []*scheduledActs{
 		{
-			tenant:   "cgrates.org",
-			apID:     "TestACScheduledActions",
-			trgTyp:   utils.MetaStats,
-			trgID:    "ID_TEST",
-			schedule: utils.EmptyString,
-			data:     mapStorage,
+			tenant: "cgrates.org",
+			apID:   "TestACScheduledActions",
+			trgTyp: utils.MetaStats,
+			trgID:  "ID_TEST",
+			data:   mapStorage,
 		},
 	}
 	var err error
 	var schedActs []*scheduledActs
-	if schedActs, err = acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false, true); err != nil {
+	if schedActs, err = acts.scheduledActions(context.Background(), "cgrates.org", cgrEv, []string{}, false); err != nil {
 		t.Error(err)
 	} else if len(schedActs) != 1 {
 		t.Errorf("expected 1 schedActs, received <%v>. \n<%+v>", len(schedActs), schedActs)
@@ -1151,7 +1246,7 @@ func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	sActs := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+	sActs := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "",
 		true, evData, urLog)
 	acts.cronExecuteActions([]*scheduledActs{sActs})
 	if rcv := buf.String(); !strings.Contains(rcv, "executing action: <TEST_URLOG>") {
@@ -1159,7 +1254,7 @@ func TestACCronExecuteActionsIgnoreFilters(t *testing.T) {
 	}
 
 	buf.Reset()
-	sActs = newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+	sActs = newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "",
 		false, evData, urLog)
 	acts.cronExecuteActions([]*scheduledActs{sActs})
 	if rcv := buf.String(); strings.Contains(rcv, "executing action: <TEST_URLOG>") {
@@ -1206,9 +1301,9 @@ func TestACCronExecuteActionsFilterOncePerProfile(t *testing.T) {
 	var buf bytes.Buffer
 	utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-	drainUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+	drainUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "",
 		false, evData, []actioner{dropCounter{}})
-	logUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "", "@every 1s",
+	logUnit := newScheduledActs(nil, "cgrates.org", actPrf.ID, utils.MetaNone, "",
 		false, evData, []actioner{&actURLog{cfg, cacheS, fltrs, nil, &utils.APAction{ID: "LOG_UNIT", Type: utils.MetaURLog}}})
 
 	acts.cronExecuteActions([]*scheduledActs{drainUnit, logUnit})

@@ -626,7 +626,7 @@
 								"{{jsonrpc_url}}"
 							]
 						},
-						"description": "Call `ScheduleActions` once for this profile. Repeating the call adds another scheduled job."
+						"description": "`ScheduleActions` adds only accounts not already scheduled for this profile. Set `APIOpts.*overwrite` to `true` to replace its existing jobs."
 					},
 					"response": []
 				}
