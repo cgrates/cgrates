@@ -381,6 +381,8 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 	}
 	m := diam.NewRequest(dmd.m.Header.CommandCode,
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	// RFC 6733 section 6.1.9: PXY flag is mandatory for ASR
+	m.Header.CommandFlags |= diam.ProxiableFlag
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
@@ -428,6 +430,8 @@ func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREve
 	}
 	m := diam.NewRequest(diam.ReAuth,
 		dmd.m.Header.ApplicationID, dmd.m.Dictionary())
+	// RFC 6733 section 6.1.9: PXY flag is mandatory for ASR
+	m.Header.CommandFlags |= diam.ProxiableFlag
 	if err = updateDiamMsgFromNavMap(m, aReq.diamreq,
 		da.cgrCfg.GeneralCfg().DefaultTimezone); err != nil {
 		utils.Logger.Warning(
