@@ -13,6 +13,9 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/go-diameter/diam"
+	"github.com/cgrates/go-diameter/diam/avp"
+	"github.com/cgrates/go-diameter/diam/datatype"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/sessions"
@@ -532,5 +535,60 @@ func TestV1GetActiveSessionIDs(t *testing.T) {
 	}
 	if len(sessionIDs) != 0 {
 		t.Errorf("Expected sessionIDs slice to be empty, but got %d items", len(sessionIDs))
+	}
+}
+
+type capturingConn struct {
+	diam.Conn
+	written [][]byte
+}
+
+func (c *capturingConn) Write(b []byte) (int, error) {
+	c.written = append(c.written, append([]byte(nil), b...))
+	return len(b), nil
+}
+
+func (c *capturingConn) WriteStream(b []byte, _ uint) (int, error) { return c.Write(b) }
+
+// Test to check the flags of ASR where REQ and PXY flags are present
+func TestServerInitiatedRequestsAreProxiable(t *testing.T) {
+	engine.Cache.Clear(nil)
+	defer engine.Cache.Clear(nil)
+	cfg, _ := config.NewDefaultCGRConfig()
+	conn := &capturingConn{}
+
+	// The cached CCR the agent builds the ASR from.
+	ccr := diam.NewRequest(diam.CreditControl, 4, nil)
+	ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String("sess1"))
+	ccr.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("pgw.example.org"))
+	ccr.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("example.org"))
+
+	engine.Cache.Set(utils.CacheDiameterMessages, "sess1",
+		&diamMsgData{c: conn, m: ccr, vars: utils.NavigableMap2{}}, nil, true, utils.NonTransactional)
+	defer engine.Cache.Remove(utils.CacheDiameterMessages, "sess1",
+		true, utils.NonTransactional)
+
+	da := &DiameterAgent{
+		cgrCfg: cfg,
+	}
+	cgrEv := utils.AttrDisconnectSession{EventStart: map[string]any{utils.OriginID: "sess1"}}
+	var reply string
+	if err := da.V1DisconnectSession(cgrEv, &reply); err != nil {
+		t.Error(err)
+	}
+
+	if len(conn.written) != 1 {
+		t.Fatalf("expected exactly one request on the wire, got %d", len(conn.written))
+	}
+
+	var hdr diam.Header
+	if err := hdr.DecodeFromBytes(conn.written[0]); err != nil {
+		t.Fatalf("could not decode the request we wrote: %v", err)
+	}
+	if hdr.CommandFlags&diam.RequestFlag == 0 {
+		t.Error("the R bit is not set; this is not a request")
+	}
+	if hdr.CommandFlags&diam.ProxiableFlag == 0 {
+		t.Error("the P bit is not set: a relay agent answers 3001 and the ASR never reaches the gateway")
 	}
 }
