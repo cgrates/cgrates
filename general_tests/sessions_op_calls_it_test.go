@@ -35,6 +35,7 @@ func TestSessionSOpCalls(t *testing.T) {
 },
 "attributes": {
 	"enabled": true,
+    "opts":{ "*processRuns": [	{"value": 2}]}
 },
 "resources": {
 	"enabled": true,
@@ -60,15 +61,18 @@ func TestSessionSOpCalls(t *testing.T) {
 
 }`,
 		TpFiles: map[string]string{
+			utils.FiltersCsv: `#Tenant[0],ID[1],Type[2],Element[3],Values[4]
+cgrates.org,FLTR_CLI_BL,*string,~*req.CLI,1001;1002;1003;1004;1005`,
 			utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
-cgrates.org,ATTR_1001,*string:~*req.Account:1001,;10,,,,*req.Category,*constant,Customer`,
+cgrates.org,ATTR_1001,*string:~*req.CLI:1001,;10,,,,*req.Category,*constant,Customer
+cgrates.org,ATTR_Blacklist,FLTR_CLI_BL;*string:~*req.Destination:111,;20,,,,*req.Destination,*constant,Blacklisted`,
 			utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
-cgrates.org,RES_1001,*string:~*req.Account:1001,;10,-1,2,,false,true,*none`,
+cgrates.org,RES_1001,*string:~*req.CLI:1001,;10,-1,2,,false,true,*none`,
 			utils.AccountsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,*string:~*req.Account:1001,;10,,,MONETARY,,;10,,*concrete,10,,,;1s;;,,RP_CUSTOMER,`,
+cgrates.org,1001,*string:~*req.CLI:1001,;10,,,MONETARY,,;10,,*concrete,10,,,;1s;;,,RP_CUSTOMER,`,
 			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
-cgrates.org,RP_CUSTOMER,*string:~*req.Category:Customer,;10,,,,RT_DE,*prefix:~*req.Destination:+49,,,,0s,,0.6,1m,1s
-cgrates.org,RP_CUSTOMER,,,,,,RT_RO,*prefix:~*req.Destination:+40,,,,0s,,0.3,1m,1s`,
+cgrates.org,RP_CUSTOMER,*string:~*req.Category:Customer,;10,,,,RT1,*string:~*req.Destination:Blacklisted,,,,0s,,0.6,1m,1s
+cgrates.org,RP_CUSTOMER,,,,,,RT2,*prefix:~*req.Destination:22,,,,0s,,0.3,1m,1s`,
 		},
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
@@ -92,16 +96,18 @@ cgrates.org,RP_CUSTOMER,,,,,,RT_RO,*prefix:~*req.Destination:+40,,,,0s,,0.3,1m,1
 					utils.MetaUsage:            2 * time.Minute,
 				},
 				Event: map[string]any{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "+4986517174963",
+					"CLI":             "1001",
+					utils.Destination: "111",
 				},
 			}, &rply); err != nil {
 			t.Fatal(err)
 		}
-		if len(rply.Attributes[utils.MetaPrimary].AlteredFields) != 1 ||
-			rply.Attributes[utils.MetaPrimary].AlteredFields[0].MatchedProfileID != "cgrates.org:ATTR_1001" {
+		if len(rply.Attributes[utils.MetaPrimary].AlteredFields) != 2 ||
+			rply.Attributes[utils.MetaPrimary].AlteredFields[0].MatchedProfileID != "cgrates.org:ATTR_1001" && rply.Attributes[utils.MetaPrimary].AlteredFields[1].MatchedProfileID != "cgrates.org:ATTR_1001" {
 			t.Errorf("received attributes reply: %s", utils.ToJSON(rply.Attributes))
+		}
+		if rply.Attributes[utils.MetaPrimary].CGREvent.Event[utils.Destination] != "Blacklisted" && rply.Attributes[utils.MetaPrimary].CGREvent.Event[utils.Category] != "Customer" {
+			t.Errorf("attributes dint update event")
 		}
 		if rply.ResourceAllocation[utils.MetaPrimary] != "RES_1001" {
 			t.Errorf("received resource allocation: %v", rply.ResourceAllocation)
@@ -129,9 +135,8 @@ cgrates.org,RP_CUSTOMER,,,,,,RT_RO,*prefix:~*req.Destination:+40,,,,0s,,0.3,1m,1
 					utils.MetaUsage:                time.Minute,
 				},
 				Event: map[string]any{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "+4986517174963",
+					"CLI":             "1001",
+					utils.Destination: "111",
 				},
 			}, &rply); err != nil {
 			t.Fatal(err)
@@ -192,9 +197,8 @@ cgrates.org,RP_CUSTOMER,,,,,,RT_RO,*prefix:~*req.Destination:+40,,,,0s,,0.3,1m,1
 					utils.MetaUR:                  true,
 				},
 				Event: map[string]any{
-					utils.AccountField: "1001",
-					utils.Subject:      "1001",
-					utils.Destination:  "+4986517174963",
+					"CLI":             "1001",
+					utils.Destination: "111",
 				},
 			}, &rply); err != nil {
 			t.Fatal(err)
@@ -226,6 +230,13 @@ cgrates.org,RP_CUSTOMER,,,,,,RT_RO,*prefix:~*req.Destination:+40,,,,0s,,0.3,1m,1
 
 		if resusage := resource.TotalUsage(); resusage != 0 {
 			t.Errorf("expected 0, received %v", resusage)
+		}
+
+		var aSessions []*sessions.ExternalSession
+
+		if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions,
+			utils.SessionFilter{}, &aSessions); err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Error(err)
 		}
 
 		var acnt utils.Account
