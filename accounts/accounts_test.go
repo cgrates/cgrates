@@ -5944,3 +5944,55 @@ func TestAccountsDebitBalanceBlockerNotMatchingFilter(t *testing.T) {
 		t.Errorf("Expected 80, received %v", acc.Balances["abstractBalance2"].Units)
 	}
 }
+
+func TestAccountsDebitAbstractNilUnits(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(
+		map[string]engine.DataDB{utils.MetaDefault: data},
+		cfg.DbCfg(),
+	)
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant: "cgrates.org",
+			ID:     "TestAccountsDebitAbstractNilUnits",
+			Balances: map[string]*utils.Balance{
+				"AbstractBalance1": {
+					ID:   "AbstractBalance1",
+					Type: utils.MetaAbstract,
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(1, 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+
+	cgrEvent := &utils.CGREvent{
+		ID:     "IDAccountsDebitAbstractNilUnits",
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "TestAccountsDebitAbstractNilUnits",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: "2",
+		},
+	}
+
+	if _, err := accnts.accountsDebit(
+		context.Background(), accntsPrf, cgrEvent, false, false,
+	); err != nil {
+		t.Fatalf("unexpected error for abstract balance with nil Units: %v", err)
+	}
+}
