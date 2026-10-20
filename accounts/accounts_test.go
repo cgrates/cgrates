@@ -1520,6 +1520,24 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 			wantUnits: 10,
 		},
 		{
+			name:      "storedMB",
+			units:     3,
+			usage:     2 * 1024 * 1024,
+			increment: newDecimal(1024 * 1024),
+			factor:    newDecimal(1.0 / (1024 * 1024)),
+			wantUsage: 2 * 1024 * 1024,
+			wantUnits: 1,
+		},
+		{
+			name:      "unitFactorBelowOne",
+			units:     3,
+			usage:     20,
+			increment: newDecimal(10),
+			factor:    utils.NewDecimal(1, 1),
+			wantUsage: 20,
+			wantUnits: 1,
+		},
+		{
 			name:      "balanceLimitWithUnitFactor",
 			units:     3,
 			usage:     2,
@@ -1657,6 +1675,16 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 			wantUsage: 0,
 			wantUnits: 2,
 		},
+		{
+			name:      "balanceBelowLimit",
+			units:     1,
+			usage:     2,
+			increment: newDecimal(2),
+			factor:    newDecimal(0.5),
+			limit:     2,
+			wantUsage: 0,
+			wantUnits: 1,
+		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			balance := &utils.Balance{
@@ -1700,6 +1728,111 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 				t.Errorf("remaining units: %s, want %g", balance.Units, tc.wantUnits)
 			}
 		})
+	}
+}
+
+func TestAccountsDebitRoundIncrementWithFactor(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+
+	account := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(3, 0),
+				Opts:  map[string]any{utils.MetaBalanceLimit: float64(0)},
+				UnitFactors: []*utils.UnitFactor{
+					{Factor: utils.NewDecimal(1, 1)},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(10, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(20, 0),
+		},
+	}
+	evChExp := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(20, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "charge1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"charge1": {
+				AccountID:    "test",
+				BalanceID:    "AbstractBalance1",
+				Units:        utils.NewDecimal(20, 0),
+				BalanceLimit: utils.NewDecimal(0, 0),
+				UnitFactorID: "factor1",
+				RatingID:     "rating1",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"factor1": {Factor: utils.NewDecimal(1, 1)},
+		},
+		Rating: map[string]*utils.RateSInterval{
+			"rating1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateID:         "rate1",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"test": {
+				Tenant: "cgrates.org",
+				ID:     "test",
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID:    "AbstractBalance1",
+						Type:  utils.MetaAbstract,
+						Units: utils.NewDecimal(1, 0),
+						Opts:  map[string]any{utils.MetaBalanceLimit: float64(0)},
+						UnitFactors: []*utils.UnitFactor{
+							{Factor: utils.NewDecimal(1, 1)},
+						},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(10, 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, cgrEvent, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !charges.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(charges))
 	}
 }
 
