@@ -70,6 +70,10 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		hasUF = true
 	}
 
+	if aB.blnCfg.Units == nil {
+		aB.blnCfg.Units = utils.NewDecimal(0, 0)
+	}
+
 	// balanceLimit
 	var blncLmt *utils.Decimal
 	if blncLmt, err = balanceLimit(aB.blnCfg.Opts); err != nil {

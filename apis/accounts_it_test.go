@@ -1945,3 +1945,80 @@ func testAccSKillEngine(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+func TestAccSMaxAbstractsNilUnits(t *testing.T) {
+	var cfgDir string
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		cfgDir = "tutinternal"
+	case utils.MetaMongo:
+		cfgDir = "tutmongo"
+	case utils.MetaRedis:
+		cfgDir = "tutredis"
+	case utils.MetaMySQL:
+		cfgDir = "mysql_acc"
+	case utils.MetaPostgres:
+		cfgDir = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	cfgPath := path.Join(*utils.DataDir, "conf", "samples", cfgDir)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDB(cfg); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := engine.KillEngine(100); err != nil {
+			t.Log(err)
+		}
+	})
+	client := engine.NewRPCClient(t, cfg.ListenCfg(), *utils.Encoding)
+
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "312300027170510",
+			Balances: map[string]*utils.Balance{
+				"DATA1": {
+					ID:   "DATA1",
+					Type: utils.MetaAbstract,
+					CostIncrements: []*utils.CostIncrement{
+						{
+							Increment:    utils.NewDecimal(1, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		acc, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("unexpected reply: %s", reply)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "NilUnitsEvent",
+		Event: map[string]any{
+			"Account": "312300027170510",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: 1000,
+		},
+	}
+	var rply *utils.EventCharges
+	if err := client.Call(context.Background(), utils.AccountSv1MaxAbstracts,
+		ev, &rply); err != nil {
+		t.Fatal(err)
+	}
+}
