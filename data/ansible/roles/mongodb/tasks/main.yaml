@@ -25,7 +25,7 @@
     - name: Import the MongoDB public GPG Key
       become: true
       ansible.builtin.get_url:
-        url: 'https://pgp.mongodb.com/server-{{ mongodb_version }}.asc'
+        url: 'https://pgp.mongodb.com/server-{{ mongodb_signing_key_version }}.asc'
         dest: '/usr/share/keyrings/mongodb-server-{{ mongodb_version }}.asc'
         mode: '0644'
 
