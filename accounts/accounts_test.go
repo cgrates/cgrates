@@ -1678,9 +1678,8 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 		{
 			name:      "balanceBelowLimit",
 			units:     1,
-			usage:     2,
-			increment: newDecimal(2),
-			factor:    newDecimal(0.5),
+			usage:     1,
+			increment: newDecimal(1),
 			limit:     2,
 			wantUsage: 0,
 			wantUnits: 1,
@@ -1818,6 +1817,102 @@ func TestAccountsDebitRoundIncrementWithFactor(t *testing.T) {
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment:    utils.NewDecimal(10, 0),
+								FixedFee:     utils.NewDecimal(0, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, cgrEvent, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !charges.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(charges))
+	}
+}
+
+func TestAccountsDebitBalanceBelowLimit(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+
+	account := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(1, 0),
+				Opts:  map[string]any{utils.MetaBalanceLimit: float64(2)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(1, 0),
+		},
+	}
+	evChExp := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(0, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "charge1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"charge1": {
+				AccountID:    "test",
+				BalanceID:    "AbstractBalance1",
+				Units:        utils.NewDecimal(0, 0),
+				BalanceLimit: utils.NewDecimal(2, 0),
+				RatingID:     "rating1",
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating: map[string]*utils.RateSInterval{
+			"rating1": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateID:         "rate1",
+						CompressFactor: 1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"rate1": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(0, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"test": {
+				Tenant: "cgrates.org",
+				ID:     "test",
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID:    "AbstractBalance1",
+						Type:  utils.MetaAbstract,
+						Units: utils.NewDecimal(1, 0),
+						Opts:  map[string]any{utils.MetaBalanceLimit: float64(2)},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
 								FixedFee:     utils.NewDecimal(0, 0),
 								RecurrentFee: utils.NewDecimal(0, 0),
 							},
