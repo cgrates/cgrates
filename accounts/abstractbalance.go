@@ -53,6 +53,11 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		return nil, utils.ErrFilterNotPassingNoCaps
 	}
 
+	// So we can still calculate also for unlimited balances
+	if aB.blnCfg.Units == nil {
+		aB.blnCfg.Units = utils.NewDecimal(0, 0)
+	}
+
 	// costIncrement
 	var costIcrm *utils.CostIncrement
 	if costIcrm, err = costIncrement(ctx, aB.blnCfg.CostIncrements, aB.fltrS,
@@ -70,10 +75,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 		hasUF = true
 	}
 
-	if aB.blnCfg.Units == nil {
-		aB.blnCfg.Units = utils.NewDecimal(0, 0)
-	}
-
 	// balanceLimit
 	var blncLmt *utils.Decimal
 	if blncLmt, err = balanceLimit(aB.blnCfg.Opts); err != nil {
@@ -89,6 +90,9 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	var maxBlcDbt *utils.Decimal
 	if blncLmt != nil {
 		maxBlcDbt = aB.blnCfg.Units.Clone()
+		if maxBlcDbt.Compare(utils.NewDecimal(0, 0)) <= 0 {
+			maxBlcDbt = utils.NewDecimal(0, 0) // maxBlcDbt should always be positive since limit was deducted already
+		}
 		if costIcrm.Increment != nil {
 			maxBlcDbt = roundUnitsWithIncrements(decimal.ToZero, maxBlcDbt, costIcrm.Increment)
 		}
