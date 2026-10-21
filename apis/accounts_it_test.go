@@ -2022,3 +2022,81 @@ func TestAccSMaxAbstractsNilUnits(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestMaxAbstractsNilIncrement(t *testing.T) {
+	var cfgDir string
+	switch *utils.DBType {
+	case utils.MetaInternal:
+		cfgDir = "tutinternal"
+	case utils.MetaMongo:
+		cfgDir = "tutmongo"
+	case utils.MetaRedis:
+		cfgDir = "tutredis"
+	case utils.MetaMySQL:
+		cfgDir = "mysql_acc"
+	case utils.MetaPostgres:
+		cfgDir = "tutpostgres"
+	default:
+		t.Fatal("Unknown Database type")
+	}
+	cfgPath := path.Join(*utils.DataDir, "conf", "samples", cfgDir)
+	cfg, err := config.NewCGRConfigFromPath(context.Background(), cfgPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := engine.InitDB(cfg); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := engine.StopStartEngine(cfgPath, *utils.WaitRater); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() {
+		if err := engine.KillEngine(100); err != nil {
+			t.Log(err)
+		}
+	})
+	client := engine.NewRPCClient(t, cfg.ListenCfg(), *utils.Encoding)
+	acc := &utils.AccountWithAPIOpts{
+		Account: &utils.Account{
+			Tenant: "cgrates.org",
+			ID:     "ID1001",
+			Balances: map[string]*utils.Balance{
+				"DATA1": {
+					ID:    "DATA1",
+					Type:  utils.MetaAbstract,
+					Units: utils.NewDecimal(5000, 0),
+					CostIncrements: []*utils.CostIncrement{
+						{
+							RecurrentFee: utils.NewDecimal(0, 0),
+						},
+					},
+				},
+			},
+		},
+	}
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		acc, &reply); err != nil {
+		t.Fatal(err)
+	} else if reply != utils.OK {
+		t.Fatalf("unexpected reply: %s", reply)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "NilIncrementEvent",
+		Event: map[string]any{
+			"Account": "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: 1000,
+		},
+	}
+	var rply *utils.EventCharges
+	if err := client.Call(context.Background(), utils.AccountSv1MaxAbstracts,
+		ev, &rply); err != nil {
+		t.Fatal(err)
+	}
+	if rply.Abstracts == nil || rply.Abstracts.Compare(utils.NewDecimal(1000, 0)) != 0 {
+		t.Errorf("expected 1000, received %v", rply.Abstracts)
+	}
+}
