@@ -6224,3 +6224,262 @@ func TestAccountsDebitAbstractNilUnits(t *testing.T) {
 		t.Fatalf("unexpected error for abstract balance with nil Units: %v", err)
 	}
 }
+
+func TestAccountsDebitUnitFactorsWithFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACCOUNT1",
+		Balances: map[string]*utils.Balance{
+			"abstractBalance": {
+				ID:   "abstractBalance",
+				Type: utils.MetaAbstract,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Units: utils.NewDecimal(100, 0),
+				UnitFactors: []*utils.UnitFactor{
+					{
+						FilterIDs: []string{"*string:~*req.Category:sms"},
+						Factor:    utils.NewDecimal(1, 0),
+					},
+					{
+						FilterIDs: []string{"*string:~*req.Category:data"},
+						Factor:    utils.NewDecimal(10, 0),
+					},
+				},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID1",
+		Event: map[string]any{
+			utils.Category: "sms",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(5, 0),
+		},
+	}
+
+	ec, err := accnts.accountsDebit(context.Background(), []*utils.Account{acc}, ev, false, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if ec.Abstracts.Compare(utils.NewDecimal(5, 0)) != 0 {
+		t.Errorf("Expected 5, received %+v", ec.Abstracts)
+	}
+	if acc.Balances["abstractBalance"].Units.Compare(utils.NewDecimal(95, 0)) != 0 {
+		t.Errorf("Expected 95, received %v", acc.Balances["abstractBalance"].Units)
+	}
+
+	ev.Event[utils.Category] = "data"
+	ec, err = accnts.accountsDebit(context.Background(), []*utils.Account{acc}, ev, false, false)
+	if err != nil {
+		t.Error(err)
+	}
+	if ec.Abstracts.Compare(utils.NewDecimal(5, 0)) != 0 {
+		t.Errorf("Expected 5, received %v", ec.Abstracts)
+	}
+	if len(ec.UnitFactors) != 1 {
+		t.Errorf("Expected 1, received %v", len(ec.UnitFactors))
+	}
+	if acc.Balances["abstractBalance"].Units.Compare(utils.NewDecimal(45, 0)) != 0 {
+		t.Errorf("Expected 45, received %v", acc.Balances["abstractBalance"].Units)
+	}
+}
+
+func TestRefundChargesJoinedChargeSameAccountBalances(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	account1 := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACCOUNT1",
+		Balances: map[string]*utils.Balance{
+			"abstractBalance": {
+				ID:      "abstractBalance",
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(0, 0),
+				Weights: utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    utils.NewDecimal(1, 0),
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(0, 0),
+				}},
+			},
+			"concreteBalance": {
+				ID:      "concreteBalance",
+				Type:    utils.MetaConcrete,
+				Units:   utils.NewDecimal(0, 0),
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    utils.NewDecimal(1, 0),
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(0, 0),
+				}},
+			},
+		},
+	}
+	if err := dm.SetAccount(context.Background(), account1, true); err != nil {
+		t.Fatal(err)
+	}
+
+	ec := &utils.EventCharges{
+		Abstracts: utils.NewDecimal(10, 0),
+		Concretes: utils.NewDecimal(5, 0),
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "1df1c3b",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"1df1c3b": {
+				AccountID:       "ACCOUNT1",
+				BalanceID:       "abstractBalance",
+				Units:           utils.NewDecimal(10, 0),
+				UnitFactorID:    "54c5bb9",
+				RatingID:        "0faf226",
+				JoinedChargeIDs: []string{"aac7ed5"},
+			},
+			"aac7ed5": {
+				AccountID:    "ACCOUNT1",
+				BalanceID:    "concreteBalance",
+				Units:        utils.NewDecimal(5, 0),
+				UnitFactorID: "44c5bb8",
+				BalanceLimit: utils.NewDecimal(0, 0),
+			},
+		},
+		UnitFactors: map[string]*utils.UnitFactor{
+			"54c5bb9": {
+				Factor: utils.NewDecimal(1024, 0),
+			},
+			"44c5bb8": {
+				Factor: utils.NewDecimal(100, 0),
+			},
+		},
+		Rating: map[string]*utils.RateSInterval{
+			"0faf226": {
+				Increments: []*utils.RateSIncrement{
+					{
+						RateIntervalIndex: 0,
+						RateID:            "2097669",
+						CompressFactor:    1,
+					},
+				},
+				CompressFactor: 1,
+			},
+		},
+		Rates: map[string]*utils.IntervalRate{
+			"2097669": {
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"ACCOUNT1": account1,
+		},
+	}
+
+	if err := accnts.refundCharges(context.Background(), "cgrates.org", ec); err != nil {
+		t.Error(err)
+	}
+
+	acc, err := dm.GetAccount(context.Background(), "cgrates.org", "ACCOUNT1")
+	if err != nil {
+		t.Error(err)
+	}
+	if acc.Balances["abstractBalance"].Units.Compare(utils.NewDecimal(10240, 0)) != 0 {
+		t.Errorf("Expected 10240, received %v", acc.Balances["abstractBalance"].Units)
+	}
+	if acc.Balances["concreteBalance"].Units.Compare(utils.NewDecimal(500, 0)) != 0 {
+		t.Errorf("Expected 500, received %v", acc.Balances["concreteBalance"].Units)
+	}
+}
+
+func TestRefundChargesSetAccountError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dbMock := &engine.DataDBMock{
+		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+			accPrf := &utils.Account{
+				Tenant: "cgrates.org",
+				ID:     "ACCOUNT1",
+				Balances: map[string]*utils.Balance{
+					"abstractBalance": {
+						ID:      "abstractBalance",
+						Type:    utils.MetaAbstract,
+						Units:   utils.NewDecimal(0, 0),
+						Weights: utils.DynamicWeights{{Weight: 20}},
+						CostIncrements: []*utils.CostIncrement{{
+							Increment:    utils.NewDecimal(1, 0),
+							FixedFee:     utils.NewDecimal(0, 0),
+							RecurrentFee: utils.NewDecimal(0, 0),
+						}},
+					},
+				},
+			}
+			return accPrf, nil
+		},
+		SetAccountDrvF: func(*context.Context, *utils.Account) error {
+			return utils.ErrNotImplemented
+		},
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dbMock}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	ec := &utils.EventCharges{
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "54c5bb9",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"54c5bb9": {
+				AccountID: "ACCOUNT1",
+				BalanceID: "abstractBalance",
+				Units:     utils.NewDecimal(10, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"ACCOUNT1": {
+				Tenant: "cgrates.org",
+				ID:     "ACCOUNT1",
+				Balances: map[string]*utils.Balance{
+					"abstractBalance": {
+						ID:   "abstractBalance",
+						Type: utils.MetaAbstract,
+					},
+				},
+			},
+		},
+	}
+
+	err := accnts.refundCharges(context.Background(), "cgrates.org", ec)
+	if err == nil || err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+}
