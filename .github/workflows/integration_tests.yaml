@@ -46,12 +46,11 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.14"
 
       - name: Install Ansible
         run: |
-          python -m pip install --upgrade pip
-          pip install ansible
+          python -m pip install 'ansible>=14,<15'
 
       - name: Run Ansible Playbook
         run: |
