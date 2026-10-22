@@ -40,8 +40,12 @@ func TestCloneBalance(t *testing.T) {
 		},
 		Units: NewDecimal(125, 3),
 	}
+	expBlc.CostIncrements[0].Unit = NewDecimal(60, 0)
 	if rcv := expBlc.Clone(); !reflect.DeepEqual(rcv, expBlc) {
 		t.Errorf("Expected %+v \n, received %+v", ToJSON(expBlc), ToJSON(rcv))
+	} else if rcv.CostIncrements[0].Unit == expBlc.CostIncrements[0].Unit ||
+		rcv.CostIncrements[0].Unit.Big == expBlc.CostIncrements[0].Unit.Big {
+		t.Error("clone shares Unit with the original")
 	}
 
 	expBlc.Opts = nil
@@ -614,6 +618,19 @@ func TestCostIncrementCase2(t *testing.T) {
 	if rcv := eCi.Equals(extCi); rcv {
 		t.Error("RateProfiles should not match")
 	}
+	extCi.FilterIDs = eCi.FilterIDs
+	eCi.Unit = NewDecimal(60, 0)
+	if eCi.Equals(extCi) || extCi.Equals(eCi) {
+		t.Error("nil and non-nil Units should not match")
+	}
+	extCi.Unit = NewDecimal(30, 0)
+	if eCi.Equals(extCi) || extCi.Equals(eCi) {
+		t.Error("different Units should not match")
+	}
+	extCi.Unit = NewDecimal(60, 0)
+	if !eCi.Equals(extCi) {
+		t.Error("equal Units should match")
+	}
 }
 
 func TestAccountEqualsCase1(t *testing.T) {
@@ -841,7 +858,7 @@ func TestAccountSet(t *testing.T) {
 				},
 				CostIncrements: []*CostIncrement{
 					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0)},
-					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0)},
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0), Unit: NewDecimal(101, 0)},
 				},
 			},
 		},
@@ -979,6 +996,9 @@ func TestAccountSet(t *testing.T) {
 	if err := acc.Set([]string{Balances, "bal1", CostIncrements, RecurrentFee}, "101", false); err != nil {
 		t.Error(err)
 	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements, Unit}, "101", false); err != nil {
+		t.Error(err)
+	}
 	if err := acc.Set([]string{Balances, "bal1", CostIncrements, Increment}, "101", false); err != nil {
 		t.Error(err)
 	}
@@ -1032,7 +1052,7 @@ func TestAccountFieldAsInterface(t *testing.T) {
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
 				},
 				CostIncrements: []*CostIncrement{
-					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0), Unit: NewDecimal(60, 0)},
 					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0)},
 				},
 			},
@@ -1306,6 +1326,11 @@ func TestAccountFieldAsInterface(t *testing.T) {
 	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", RecurrentFee}); err != nil {
 		t.Fatal(err)
 	} else if exp := acc.Balances["bal1"].CostIncrements[0].RecurrentFee; exp.Cmp(val.(*Decimal).Big) != 0 {
+		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
+	}
+	if val, err := acc.FieldAsInterface([]string{Balances + "[bal1]", CostIncrements + "[0]", Unit}); err != nil {
+		t.Fatal(err)
+	} else if exp := acc.Balances["bal1"].CostIncrements[0].Unit; exp.Cmp(val.(*Decimal).Big) != 0 {
 		t.Errorf("Expected %v \n but received \n %v", ToJSON(exp), ToJSON(val))
 	}
 
@@ -2035,6 +2060,7 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 						Increment:    2,
 						FixedFee:     NewDecimal(75, 2),
 						RecurrentFee: NewDecimal(20, 2),
+						Unit:         "60",
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},
@@ -2071,6 +2097,7 @@ func TestMapStringInterfaceToBalance(t *testing.T) {
 						Increment:    nil,
 						FixedFee:     NewDecimal(75, 2),
 						RecurrentFee: NewDecimal(20, 2),
+						Unit:         NewDecimal(60, 0),
 					},
 				},
 				AttributeIDs:   []string{"attr1", "attr2"},

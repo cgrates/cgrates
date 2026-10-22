@@ -284,6 +284,8 @@ func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string
 	switch path[1] {
 	case utils.FilterIDs:
 		cIs[idx].FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
+	case utils.Unit:
+		cIs[idx].Unit, err = utils.NewDecimalFromString(value)
 	case utils.Increment:
 		cIs[idx].Increment, err = utils.NewDecimalFromString(value)
 	case utils.FixedFee:

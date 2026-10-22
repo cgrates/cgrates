@@ -273,11 +273,13 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 		if costIcrm.FixedFee != nil {
 			cUnits = costIcrm.FixedFee
 		}
-		// RecurrentFee is configured, used it with increments
 		if costIcrm.RecurrentFee != nil {
-			rcrntCost := utils.MultiplyDecimal(
-				utils.DivideDecimal(aUnits, costIcrm.Increment),
-				costIcrm.RecurrentFee)
+			unit := costIcrm.Unit
+			if unit == nil {
+				unit = costIcrm.Increment
+			}
+			rcrntCost := utils.DivideDecimal(
+				utils.MultiplyDecimal(aUnits, costIcrm.RecurrentFee), unit)
 			if cUnits == nil {
 				cUnits = rcrntCost
 			} else {
