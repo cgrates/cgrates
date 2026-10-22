@@ -4432,7 +4432,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 
 	// verify the EvChargers
 	expEvCHargers := &utils.EventCharges{
-		Abstracts: utils.NewDecimal(44825100000, 0),
+		Abstracts: utils.NewDecimal(int64(45*time.Second), 0),
 		Concretes: utils.NewDecimal(15, 2),
 		Charges: []*utils.ChargeEntry{
 			{
@@ -4455,9 +4455,8 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			"CHARGER2": {
 				AccountID:       "ACNT1",
 				BalanceID:       "ABS2",
-				Units:           utils.NewDecimal(14825100000, 0), // 14.8251 seconds from *abstract ABS2 ((it should be debited all 15s from the entire balance))
+				Units:           utils.NewDecimal(int64(15*time.Second), 0),
 				BalanceLimit:    utils.NewDecimal(0, 0),
-				RatingID:        "Rating2",
 				JoinedChargeIDs: []string{"Joined1"},
 			},
 			"Joined1": {
@@ -4515,7 +4514,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 							},
 						},
 						Type:  utils.MetaAbstract,
-						Units: utils.NewDecimal(174900000, 0), // 0.17.. s available
+						Units: utils.NewDecimal(0, 0),
 						CostIncrements: []*utils.CostIncrement{
 							{
 								Increment: utils.NewDecimal(int64(time.Second), 0),
@@ -4543,7 +4542,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 			},
 		},
 	}
-	if expEvCHargers.Equals(&reply) {
+	if !expEvCHargers.Equals(&reply) {
 		t.Errorf("Expected %+v \n, received %+v", utils.ToJSON(expEvCHargers), utils.ToJSON(reply))
 	}
 
@@ -4577,7 +4576,7 @@ func TestDebitAbstractUsingRatesWithRoundByIncrement(t *testing.T) {
 					},
 				},
 				Type:  utils.MetaAbstract,
-				Units: utils.NewDecimal(174900000, 0), // 0.17.. s available (should be 0 because of Increment of 1s)
+				Units: utils.NewDecimal(0, 0),
 				CostIncrements: []*utils.CostIncrement{
 					{
 						Increment: utils.NewDecimal(int64(time.Second), 0),
