@@ -81,7 +81,7 @@ cgrates.org,RP1,,,,,,RT_CHRISTMAS,,* * 24 12 *,;30,false,0s,0.0564,0.06,1m,1s
 	// writing in files the csv containing the profile for Accounts
 	if err := os.WriteFile(path.Join("/tmp/AccountsIn", utils.AccountsCsv), []byte(`
 #Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,,;20,,,MonetaryBalance,,;10,,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;1.3;2.3;3.3;,attr1;attr2,,*none
+cgrates.org,1001,,;20,,,MonetaryBalance,,;10,,*monetary,14,fltr1&fltr2;100;fltr3;200,,fltr1&fltr2;2.3;3.3;;1.3,attr1;attr2,,*none
 cgrates.org,1001,,,,,VoiceBalance,,;10,*string:~*req.Destination:1002;true;;false,*voice,1h,,,,,,
 `), 0644); err != nil {
 		t.Fatalf("Err %v when writing in file %s", err, utils.AccountsCsv)

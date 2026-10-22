@@ -284,7 +284,7 @@ func TestRadiusChargingActionProvisioning(t *testing.T) {
 						Diktats: []*utils.APDiktat{
 							dk("alw_type", "*balance.data_allowance.Type", utils.MetaAbstract),
 							dk("alw_weight", "*balance.data_allowance.Weights", "`;20`"),
-							dk("alw_cost", "*balance.data_allowance.CostIncrements", "`;1;0;0;`"),
+							dk("alw_cost", "*balance.data_allowance.CostIncrements", "`;0;0;;1`"),
 							dk("alw_units", "*balance.data_allowance.Units", gb),
 							dk("mon_rate", "*balance.monetary.RateProfileIDs", "RP_US_OVERAGE"),
 						},
