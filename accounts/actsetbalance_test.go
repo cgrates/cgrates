@@ -413,12 +413,20 @@ func TestActSetCostIncrement(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
 	}
 
+	expected[0].Unit = utils.NewDecimal(60, 0)
+	if rcv, err := actSetCostIncrement(costIncr, []string{"CostIncrements[0]", utils.Unit}, "60"); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expected, rcv) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expected), utils.ToJSON(rcv))
+	}
+
 	expected = []*utils.CostIncrement{
 		{
 			FilterIDs:    []string{"fltr2"},
 			Increment:    &utils.Decimal{Big: decimal.New(2, 0)},
 			FixedFee:     &utils.Decimal{Big: decimal.New(1, 0)},
 			RecurrentFee: &utils.Decimal{Big: decimal.New(2, 0)},
+			Unit:         utils.NewDecimal(60, 0),
 		},
 		{
 			Increment: &utils.Decimal{Big: decimal.New(2, 0)},

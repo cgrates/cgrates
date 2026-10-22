@@ -976,6 +976,7 @@ func TestMaxDebitAbstractsFromConcretesIncrements(t *testing.T) {
 		usage        string
 		recurrentFee string
 		increment    string
+		unit         string
 		fixedFee     string
 		balance      string
 		wantUsage    string
@@ -1092,6 +1093,50 @@ func TestMaxDebitAbstractsFromConcretesIncrements(t *testing.T) {
 			wantCost:     "0.75",
 		},
 		{
+			name:         "pricePerGBRoundedToMB",
+			usage:        "1",
+			recurrentFee: "15",
+			increment:    "1048576",
+			unit:         "1073741824",
+			fixedFee:     "0",
+			balance:      "20",
+			wantUsage:    "1048576",
+			wantCost:     "0.0146484375",
+		},
+		{
+			name:         "pricePerGBPartialDebit",
+			usage:        "2097152",
+			recurrentFee: "15",
+			increment:    "1048576",
+			unit:         "1073741824",
+			fixedFee:     "0",
+			balance:      "0.02",
+			wantUsage:    "1048576",
+			wantCost:     "0.0146484375",
+		},
+		{
+			name:         "unitWithFixedFee",
+			usage:        "1.5",
+			recurrentFee: "3",
+			increment:    "1",
+			unit:         "2",
+			fixedFee:     "0.25",
+			balance:      "10",
+			wantUsage:    "2",
+			wantCost:     "3.25",
+		},
+		{
+			name:         "multiplyBeforeDivide",
+			usage:        "1",
+			recurrentFee: "3",
+			increment:    "1",
+			unit:         "3",
+			fixedFee:     "0",
+			balance:      "10",
+			wantUsage:    "1",
+			wantCost:     "1",
+		},
+		{
 			name:         "dataBytes",
 			usage:        "1572864", // 1.5 MB
 			recurrentFee: "1",
@@ -1130,6 +1175,9 @@ func TestMaxDebitAbstractsFromConcretesIncrements(t *testing.T) {
 				Increment:    newDecimal(tc.increment),
 				FixedFee:     newDecimal(tc.fixedFee),
 				RecurrentFee: newDecimal(tc.recurrentFee),
+			}
+			if tc.unit != "" {
+				costIncrement.Unit = newDecimal(tc.unit)
 			}
 
 			charges, err := maxDebitAbstractsFromConcretes(ctx, newDecimal(tc.usage),
