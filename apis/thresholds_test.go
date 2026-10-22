@@ -617,6 +617,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		APIOpts: map[string]any{
 			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
 			utils.OptsActionsProfileIDs:    []string{"actPrfID"},
+			utils.MetaCGRSource:            utils.MetaThresholds,
 		},
 	}
 	mCC := &mockClientConn{
