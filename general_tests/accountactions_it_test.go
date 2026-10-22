@@ -142,7 +142,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 							ID: "SetBalMonetaryCostIncrements",
 							Opts: map[string]any{
 								"*balancePath":  "*balance.MONETARY.CostIncrements",
-								"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01`",
+								"*balanceValue": "`*string:~*req.ToR:*data;0;0.01;;1024`",
 							},
 						},
 					},
@@ -184,7 +184,7 @@ func testAccActionsSetActionProfile(t *testing.T) {
 							ID: "AddBalVoiceCostIncrements",
 							Opts: map[string]any{
 								"*balancePath":  "*balance.VOICE.CostIncrements",
-								"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01`",
+								"*balanceValue": "`*string:~*req.ToR:*voice;0;0.01;;1000000000`",
 							},
 						},
 					},

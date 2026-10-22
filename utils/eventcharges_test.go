@@ -2402,7 +2402,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Charges[0].Charging.Account",
 			fields: []string{"Charges[0]", "Charging", "Account"},
-			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
+			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"FixedFee":2,"RecurrentFee":3,"Unit":null,"Increment":1}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
 		},
 		{
 			name:   "Charges[0].Charging.Account.Tenant",
@@ -2487,12 +2487,12 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Charges[0].Charging.Account.Balances",
 			fields: []string{"Charges[0]", "Charging", "Account", "Balances"},
-			exp:    `{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}}`,
+			exp:    `{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"FixedFee":2,"RecurrentFee":3,"Unit":null,"Increment":1}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}}`,
 		},
 		{
 			name:   "Charges[0].Charging.Account.Balances.balance1",
 			fields: []string{"Charges[0]", "Charging", "Account", "Balances", "balance1"},
-			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
+			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
 		},
 		{
 			name:   "Charges[0].Charging.Account.Balances.balance1.ID",
@@ -2607,12 +2607,12 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Charges[0].Charging.Account.Balances.balance1.CostIncrements",
 			fields: []string{"Charges[0]", "Charging", "Account", "Balances", "balance1", "CostIncrements"},
-			exp:    `[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}]`,
+			exp:    `[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}]`,
 		},
 		{
 			name:   "Charges[0].Charging.Account.Balances.balance1.CostIncrements[0]",
 			fields: []string{"Charges[0]", "Charging", "Account", "Balances", "balance1", "CostIncrements[0]"},
-			exp:    `{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}`,
+			exp:    `{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}`,
 		},
 		{
 			name:   "Charges[0].Charging.Account.Balances.balance1.CostIncrements[0].FilterIDs",
@@ -2662,7 +2662,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Charges[0].Charging.Balance",
 			fields: []string{"Charges[0]", "Charging", "Balance"},
-			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
+			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
 		},
 		{
 			name:   "Charges[0].Charging.Balance.ID",
@@ -2777,12 +2777,12 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Charges[0].Charging.Balance.CostIncrements",
 			fields: []string{"Charges[0]", "Charging", "Balance", "CostIncrements"},
-			exp:    `[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}]`,
+			exp:    `[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}]`,
 		},
 		{
 			name:   "Charges[0].Charging.Balance.CostIncrements[0]",
 			fields: []string{"Charges[0]", "Charging", "Balance", "CostIncrements[0]"},
-			exp:    `{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}`,
+			exp:    `{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}`,
 		},
 		{
 			name:   "Charges[0].Charging.Balance.CostIncrements[0].FilterIDs",
@@ -3306,12 +3306,12 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Account",
 			fields: []string{"Account", "acc1"},
-			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
+			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"FixedFee":2,"RecurrentFee":3,"Unit":null,"Increment":1}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
 		},
 		{
 			name:   "Account.acc1",
 			fields: []string{"Account", "acc1"},
-			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
+			exp:    `{"Tenant":"cgrates.org","ID":"acc1","FilterIDs":["fltr1"],"Weights":[{"FilterIDs":["fltr2"],"Weight":10}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Opts":{"opt1":"value1"},"Balances":{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"FixedFee":2,"RecurrentFee":3,"Unit":null,"Increment":1}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}},"ThresholdIDs":null}`,
 		},
 		{
 			name:   "Account.acc1.Tenant",
@@ -3346,7 +3346,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Account.acc1.Balances",
 			fields: []string{"Account", "acc1", "Balances"},
-			exp:    `{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"Increment":1,"FixedFee":2,"RecurrentFee":3}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}}`,
+			exp:    `{"balance1":{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]},"balance2":{"ID":"balance2","FilterIDs":["fltr3"],"Weights":[{"FilterIDs":["fltr5"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr5"],"Blocker":true}],"Type":"*voice","Units":5,"UnitFactors":[{"FilterIDs":["fltr3","fltr4"],"Factor":1}],"Opts":{"opts1":"value1"},"CostIncrements":[{"FilterIDs":["fltr2"],"FixedFee":2,"RecurrentFee":3,"Unit":null,"Increment":1}],"AttributeIDs":["attr2"],"RateProfileIDs":["rate_prf2"]}}`,
 		},
 		{
 			name:   "Account.acc1.Weights[0].FilterIDs",
@@ -3371,7 +3371,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Account.acc1.Balances.balance1",
 			fields: []string{"Account", "acc1", "Balances", "balance1"},
-			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
+			exp:    `{"ID":"balance1","FilterIDs":["fltr4"],"Weights":[{"FilterIDs":["fltr3"],"Weight":20}],"Blockers":[{"FilterIDs":["fltr3"],"Blocker":true}],"Type":"*monetary","Units":1,"UnitFactors":[{"FilterIDs":["fltr1","fltr2"],"Factor":2}],"Opts":{"opt1":"value1"},"CostIncrements":[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}],"AttributeIDs":["attr1"],"RateProfileIDs":["rate_prf1"]}`,
 		},
 		{
 			name:   "Account.acc1.Balances.balance1,ID",
@@ -3416,7 +3416,7 @@ func TestEventChargesFieldAsInterface(t *testing.T) {
 		{
 			name:   "Account.acc1.Balances.balance1.CostIncrements",
 			fields: []string{"Account", "acc1", "Balances", "balance1", "CostIncrements"},
-			exp:    `[{"FilterIDs":["fltr3"],"Increment":3,"FixedFee":1,"RecurrentFee":2}]`,
+			exp:    `[{"FilterIDs":["fltr3"],"FixedFee":1,"RecurrentFee":2,"Unit":null,"Increment":3}]`,
 		},
 		{
 			name:   "Account.acc1.Balances.balance1.AttributeIDs",
@@ -5781,7 +5781,7 @@ func TestEventChargesString(t *testing.T) {
 		},
 	}
 
-	exp := `{"Abstracts":300000,"Concretes":null,"Charges":[{"ChargingID":"97aa08e","CompressFactor":1}],"Accounting":{"97aa08e":{"AccountID":"2343000000000123","BalanceID":"DATA1","Units":50000,"BalanceLimit":0,"UnitFactorID":"UF2","AttributeIDs":null,"RatingID":"877a74e","JoinedChargeIDs":null}},"UnitFactors":{"UF1":{"FilterIDs":null,"Factor":100}},"Rating":{"877a74e":{"IntervalStart":null,"Increments":[{"IncrementStart":null,"RateIntervalIndex":0,"RateID":"3365d99","CompressFactor":1,"Usage":null}],"CompressFactor":1}},"Rates":{"3365d99":{"IntervalStart":null,"FixedFee":null,"RecurrentFee":0,"Unit":null,"Increment":null}},"Accounts":{"2343000000000123":{"Tenant":"cgrates.org","ID":"2343000000000123","FilterIDs":["*string:~*req.IMSI:2343000000000123"],"Weights":null,"Blockers":null,"Opts":null,"Balances":{"DATA1":{"ID":"DATA1","FilterIDs":null,"Weights":[{"FilterIDs":null,"Weight":5}],"Blockers":null,"Type":"*abstract","Units":700000,"UnitFactors":null,"Opts":null,"CostIncrements":[{"FilterIDs":null,"Increment":1,"FixedFee":null,"RecurrentFee":null}],"AttributeIDs":null,"RateProfileIDs":null}},"ThresholdIDs":null}}}`
+	exp := `{"Abstracts":300000,"Concretes":null,"Charges":[{"ChargingID":"97aa08e","CompressFactor":1}],"Accounting":{"97aa08e":{"AccountID":"2343000000000123","BalanceID":"DATA1","Units":50000,"BalanceLimit":0,"UnitFactorID":"UF2","AttributeIDs":null,"RatingID":"877a74e","JoinedChargeIDs":null}},"UnitFactors":{"UF1":{"FilterIDs":null,"Factor":100}},"Rating":{"877a74e":{"IntervalStart":null,"Increments":[{"IncrementStart":null,"RateIntervalIndex":0,"RateID":"3365d99","CompressFactor":1,"Usage":null}],"CompressFactor":1}},"Rates":{"3365d99":{"IntervalStart":null,"FixedFee":null,"RecurrentFee":0,"Unit":null,"Increment":null}},"Accounts":{"2343000000000123":{"Tenant":"cgrates.org","ID":"2343000000000123","FilterIDs":["*string:~*req.IMSI:2343000000000123"],"Weights":null,"Blockers":null,"Opts":null,"Balances":{"DATA1":{"ID":"DATA1","FilterIDs":null,"Weights":[{"FilterIDs":null,"Weight":5}],"Blockers":null,"Type":"*abstract","Units":700000,"UnitFactors":null,"Opts":null,"CostIncrements":[{"FilterIDs":null,"FixedFee":null,"RecurrentFee":null,"Unit":null,"Increment":1}],"AttributeIDs":null,"RateProfileIDs":null}},"ThresholdIDs":null}}}`
 	rcv := ec.String()
 	if !reflect.DeepEqual(rcv, exp) {
 		t.Errorf("Expected %v, \n recieved %v", exp, rcv)

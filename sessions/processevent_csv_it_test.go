@@ -39,7 +39,7 @@ func TestSessionSv1ProcessEventDebitAbstractCSV(t *testing.T) {
 			utils.ChargersCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,RunID,AttributeIDs
 cgrates.org,DEFAULT,,,,*default,*none`,
 			utils.AccountsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,,,,,Balance1,,;10,,*abstract,300s,,,;1s;0;0,,,`,
+cgrates.org,1001,,,,,Balance1,,;10,,*abstract,300s,,,;0;0;;1s,,,`,
 		},
 		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,

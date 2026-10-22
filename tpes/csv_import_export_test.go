@@ -56,7 +56,7 @@ func TestCSVImportExport(t *testing.T) {
 				utils.BalanceUnits:          "10",
 				utils.BalanceUnitFactors:    "uf1&uf2;1.5;uf3;2",
 				utils.BalanceOpts:           "balanceOpt:balanceVal;zOpt:zVal",
-				utils.BalanceCostIncrements: "ci1&ci2;1;0.1;0.01;ci3;2;0.2;0.02",
+				utils.BalanceCostIncrements: "ci1&ci2;0.1;0.01;60;1;ci3;0.2;0.02;;2",
 				utils.BalanceAttributeIDs:   "attr1;attr2",
 				utils.BalanceRateProfileIDs: "rp1;rp2",
 				utils.ThresholdIDs:          "th1;th2",

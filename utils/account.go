@@ -173,9 +173,10 @@ func (bL *Balance) Equals(bal *Balance) (eq bool) {
 // CostIncrement enforces cost calculation to specific balance increments
 type CostIncrement struct {
 	FilterIDs    []string
-	Increment    *Decimal // RoundingIncrement
 	FixedFee     *Decimal // Flat fee for the usage charged
-	RecurrentFee *Decimal // The fee applied for each number of increments charged
+	RecurrentFee *Decimal // The fee applied per Unit
+	Unit         *Decimal // Defaults to Increment when nil
+	Increment    *Decimal // RoundingIncrement
 }
 
 // Equals returns the equality between two CostIncrement
@@ -183,18 +184,22 @@ func (cI *CostIncrement) Equals(ctIn *CostIncrement) (eq bool) {
 	if cI.FilterIDs == nil && ctIn.FilterIDs != nil ||
 		cI.FilterIDs != nil && ctIn.FilterIDs == nil ||
 		len(cI.FilterIDs) != len(ctIn.FilterIDs) ||
-		(cI.Increment == nil && ctIn.Increment != nil ||
-			cI.Increment != nil && ctIn.Increment == nil ||
-			cI.Increment != nil && ctIn.Increment != nil &&
-				cI.Increment.Compare(ctIn.Increment) != 0) ||
+		(cI.FixedFee == nil && ctIn.FixedFee != nil ||
+			cI.FixedFee != nil && ctIn.FixedFee == nil ||
+			cI.FixedFee != nil && ctIn.FixedFee != nil &&
+				cI.FixedFee.Compare(ctIn.FixedFee) != 0) ||
 		(cI.RecurrentFee == nil && ctIn.RecurrentFee != nil ||
 			cI.RecurrentFee != nil && ctIn.RecurrentFee == nil ||
 			cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
 				cI.RecurrentFee.Compare(ctIn.RecurrentFee) != 0) ||
-		(cI.FixedFee == nil && ctIn.FixedFee != nil ||
-			cI.FixedFee != nil && ctIn.FixedFee == nil ||
-			cI.FixedFee != nil && ctIn.FixedFee != nil &&
-				cI.FixedFee.Compare(ctIn.FixedFee) != 0) {
+		(cI.Unit == nil && ctIn.Unit != nil ||
+			cI.Unit != nil && ctIn.Unit == nil ||
+			cI.Unit != nil && ctIn.Unit != nil &&
+				cI.Unit.Compare(ctIn.Unit) != 0) ||
+		(cI.Increment == nil && ctIn.Increment != nil ||
+			cI.Increment != nil && ctIn.Increment == nil ||
+			cI.Increment != nil && ctIn.Increment != nil &&
+				cI.Increment.Compare(ctIn.Increment) != 0) {
 		return
 	}
 	for i, val := range cI.FilterIDs {
@@ -212,14 +217,17 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 		cIcln.FilterIDs = make([]string, len(cI.FilterIDs))
 		copy(cIcln.FilterIDs, cI.FilterIDs)
 	}
-	if cI.Increment != nil {
-		cIcln.Increment = cI.Increment.Clone()
-	}
 	if cI.FixedFee != nil {
 		cIcln.FixedFee = cI.FixedFee.Clone()
 	}
 	if cI.RecurrentFee != nil {
 		cIcln.RecurrentFee = cI.RecurrentFee.Clone()
+	}
+	if cI.Unit != nil {
+		cIcln.Unit = cI.Unit.Clone()
+	}
+	if cI.Increment != nil {
+		cIcln.Increment = cI.Increment.Clone()
 	}
 	return
 }
@@ -534,13 +542,16 @@ func InterfaceToCostIncrements(v any) ([]*CostIncrement, error) {
 				}
 
 				var err error
-				if ci.Increment, err = NewDecimalFromInterface(ciMap[Increment]); err != nil {
-					return nil, err
-				}
 				if ci.FixedFee, err = NewDecimalFromInterface(ciMap[FixedFee]); err != nil {
 					return nil, err
 				}
 				if ci.RecurrentFee, err = NewDecimalFromInterface(ciMap[RecurrentFee]); err != nil {
+					return nil, err
+				}
+				if ci.Unit, err = NewDecimalFromInterface(ciMap[Unit]); err != nil {
+					return nil, err
+				}
+				if ci.Increment, err = NewDecimalFromInterface(ciMap[Increment]); err != nil {
 					return nil, err
 				}
 
@@ -850,26 +861,31 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 		case CostIncrements:
 			if ciStr := IfaceAsString(val); len(ciStr) != 0 {
 				sls := strings.Split(ciStr, InfieldSep)
-				if len(sls)%4 != 0 {
+				if len(sls)%5 != 0 {
 					return fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", IfaceAsString(val))
 				}
-				for j := 0; j < len(sls); j += 4 {
+				for j := 0; j < len(sls); j += 5 {
 					cI := new(CostIncrement)
 					if len(sls[j]) != 0 {
 						cI.FilterIDs = strings.Split(sls[j], ANDSep)
 					}
 					if len(sls[j+1]) != 0 {
-						if cI.Increment, err = NewDecimalFromString(sls[j+1]); err != nil {
+						if cI.FixedFee, err = NewDecimalFromString(sls[j+1]); err != nil {
 							return
 						}
 					}
 					if len(sls[j+2]) != 0 {
-						if cI.FixedFee, err = NewDecimalFromString(sls[j+2]); err != nil {
+						if cI.RecurrentFee, err = NewDecimalFromString(sls[j+2]); err != nil {
 							return
 						}
 					}
 					if len(sls[j+3]) != 0 {
-						if cI.RecurrentFee, err = NewDecimalFromString(sls[j+3]); err != nil {
+						if cI.Unit, err = NewDecimalFromString(sls[j+3]); err != nil {
+							return
+						}
+					}
+					if len(sls[j+4]) != 0 {
+						if cI.Increment, err = NewDecimalFromString(sls[j+4]); err != nil {
 							return
 						}
 					}
@@ -915,12 +931,6 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 				var valA []string
 				valA, err = IfaceAsStringSlice(val)
 				cI.FilterIDs = append(cI.FilterIDs, valA...)
-			case Increment:
-				if val != EmptyString {
-					var valB *Decimal
-					valB, err = IfaceAsDecimal(val)
-					cI.Increment = valB
-				}
 			case FixedFee:
 				if val != EmptyString {
 					var valB *Decimal
@@ -932,6 +942,16 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 					var valB *Decimal
 					valB, err = IfaceAsDecimal(val)
 					cI.RecurrentFee = valB
+				}
+			case Unit:
+				if val != EmptyString {
+					cI.Unit, err = IfaceAsDecimal(val)
+				}
+			case Increment:
+				if val != EmptyString {
+					var valB *Decimal
+					valB, err = IfaceAsDecimal(val)
+					cI.Increment = valB
 				}
 			}
 			return
@@ -1304,12 +1324,14 @@ func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ any, err error) {
 		return nil, ErrNotFound
 	case FilterIDs:
 		return cI.FilterIDs, nil
-	case Increment:
-		return cI.Increment, nil
 	case FixedFee:
 		return cI.FixedFee, nil
 	case RecurrentFee:
 		return cI.RecurrentFee, nil
+	case Unit:
+		return cI.Unit, nil
+	case Increment:
+		return cI.Increment, nil
 	}
 }
 
