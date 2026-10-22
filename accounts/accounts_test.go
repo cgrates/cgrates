@@ -1498,6 +1498,7 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 		increment *utils.Decimal
 		factor    *utils.Decimal
 		limit     float64
+		fixedFee  float64
 		unlimited bool
 		wantUsage float64
 		wantUnits float64
@@ -1676,6 +1677,16 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 			wantUnits: 2,
 		},
 		{
+			name:      "balanceLimitWithFixedFee",
+			units:     1,
+			usage:     1,
+			increment: newDecimal(1),
+			limit:     1,
+			fixedFee:  1,
+			wantUsage: 0,
+			wantUnits: 1,
+		},
+		{
 			name:      "balanceBelowLimit",
 			units:     1,
 			usage:     1,
@@ -1693,7 +1704,7 @@ func TestAccountsDebitAbstractIncrements(t *testing.T) {
 				Opts:  map[string]any{utils.MetaBalanceLimit: tc.limit},
 				CostIncrements: []*utils.CostIncrement{{
 					Increment:    tc.increment,
-					FixedFee:     newDecimal(0),
+					FixedFee:     newDecimal(tc.fixedFee),
 					RecurrentFee: newDecimal(0),
 				}},
 			}
@@ -6481,5 +6492,72 @@ func TestRefundChargesSetAccountError(t *testing.T) {
 	err := accnts.refundCharges(context.Background(), "cgrates.org", ec)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestAccountsDebitBalanceLimitWithFixedFee(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+
+	account := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "test",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(1, 0),
+				Opts:  map[string]any{utils.MetaBalanceLimit: float64(1)},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(1, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	cgrEvent := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(1, 0),
+		},
+	}
+	evChExp := &utils.EventCharges{
+		Abstracts:   utils.NewDecimal(0, 0),
+		Accounting:  map[string]*utils.AccountCharge{},
+		UnitFactors: map[string]*utils.UnitFactor{},
+		Rating:      map[string]*utils.RateSInterval{},
+		Rates:       map[string]*utils.IntervalRate{},
+		Accounts: map[string]*utils.Account{
+			"test": {
+				Tenant: "cgrates.org",
+				ID:     "test",
+				Balances: map[string]*utils.Balance{
+					"AbstractBalance1": {
+						ID:    "AbstractBalance1",
+						Type:  utils.MetaAbstract,
+						Units: utils.NewDecimal(1, 0),
+						Opts:  map[string]any{utils.MetaBalanceLimit: float64(1)},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								FixedFee:     utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	charges, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, cgrEvent, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !charges.Equals(evChExp) {
+		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(charges))
 	}
 }
