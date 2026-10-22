@@ -45,6 +45,11 @@ func TestAccountsSetGetAccount(t *testing.T) {
 						"Destination": 10,
 					},
 					Units: utils.NewDecimal(0, 0),
+					CostIncrements: []*utils.CostIncrement{{
+						RecurrentFee: utils.NewDecimal(15, 0),
+						Unit:         utils.NewDecimal(1073741824, 0),
+						Increment:    utils.NewDecimal(1048576, 0),
+					}},
 				},
 			},
 			Weights: utils.DynamicWeights{
@@ -95,6 +100,11 @@ func TestAccountsSetGetAccount(t *testing.T) {
 					"Destination": 10,
 				},
 				Units: utils.NewDecimal(0, 0),
+				CostIncrements: []*utils.CostIncrement{{
+					RecurrentFee: utils.NewDecimal(15, 0),
+					Unit:         utils.NewDecimal(1073741824, 0),
+					Increment:    utils.NewDecimal(1048576, 0),
+				}},
 			},
 		},
 		Weights: utils.DynamicWeights{

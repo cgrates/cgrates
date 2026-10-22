@@ -175,7 +175,8 @@ type CostIncrement struct {
 	FilterIDs    []string
 	Increment    *Decimal // RoundingIncrement
 	FixedFee     *Decimal // Flat fee for the usage charged
-	RecurrentFee *Decimal // The fee applied for each number of increments charged
+	RecurrentFee *Decimal // The fee applied per Unit
+	Unit         *Decimal // Defaults to Increment when nil
 }
 
 // Equals returns the equality between two CostIncrement
@@ -187,6 +188,10 @@ func (cI *CostIncrement) Equals(ctIn *CostIncrement) (eq bool) {
 			cI.Increment != nil && ctIn.Increment == nil ||
 			cI.Increment != nil && ctIn.Increment != nil &&
 				cI.Increment.Compare(ctIn.Increment) != 0) ||
+		(cI.Unit == nil && ctIn.Unit != nil ||
+			cI.Unit != nil && ctIn.Unit == nil ||
+			cI.Unit != nil && ctIn.Unit != nil &&
+				cI.Unit.Compare(ctIn.Unit) != 0) ||
 		(cI.RecurrentFee == nil && ctIn.RecurrentFee != nil ||
 			cI.RecurrentFee != nil && ctIn.RecurrentFee == nil ||
 			cI.RecurrentFee != nil && ctIn.RecurrentFee != nil &&
@@ -220,6 +225,9 @@ func (cI *CostIncrement) Clone() (cIcln *CostIncrement) {
 	}
 	if cI.RecurrentFee != nil {
 		cIcln.RecurrentFee = cI.RecurrentFee.Clone()
+	}
+	if cI.Unit != nil {
+		cIcln.Unit = cI.Unit.Clone()
 	}
 	return
 }
@@ -541,6 +549,9 @@ func InterfaceToCostIncrements(v any) ([]*CostIncrement, error) {
 					return nil, err
 				}
 				if ci.RecurrentFee, err = NewDecimalFromInterface(ciMap[RecurrentFee]); err != nil {
+					return nil, err
+				}
+				if ci.Unit, err = NewDecimalFromInterface(ciMap[Unit]); err != nil {
 					return nil, err
 				}
 
@@ -915,6 +926,10 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 				var valA []string
 				valA, err = IfaceAsStringSlice(val)
 				cI.FilterIDs = append(cI.FilterIDs, valA...)
+			case Unit:
+				if val != EmptyString {
+					cI.Unit, err = IfaceAsDecimal(val)
+				}
 			case Increment:
 				if val != EmptyString {
 					var valB *Decimal
@@ -1304,6 +1319,8 @@ func (cI *CostIncrement) FieldAsInterface(fldPath []string) (_ any, err error) {
 		return nil, ErrNotFound
 	case FilterIDs:
 		return cI.FilterIDs, nil
+	case Unit:
+		return cI.Unit, nil
 	case Increment:
 		return cI.Increment, nil
 	case FixedFee:
