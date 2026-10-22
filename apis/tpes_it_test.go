@@ -1039,11 +1039,11 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 		},
 		utils.AccountsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceBlockers", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"},
-			{"cgrates.org", "Account_balances", "", ";10", "", "ab2", "", ";20", "", "*abstract", "60000000000", "", "", ";1000000000;;0;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "ab3", "*string:*~req.Account:AnotherAccount", ";10", "", "*abstract", "60000000000", "", "", ";1000000000;;1;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "cb2", "", "", "", "*concrete", "1.25", "", "", ";1000000000;;;", "*none", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "AB1", "", ";40", ";false", "*abstract", "130000000000", "", "", ";60000000000;0.4;0.2;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "CB1", "", ";30", "", "*concrete", "80", ";100", "*balanceLimit:-200", ";1000000000;;0.1;", "", "", ""},
+			{"cgrates.org", "Account_balances", "", ";10", "", "ab2", "", ";20", "", "*abstract", "60000000000", "", "", ";;0;;1000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "ab3", "*string:*~req.Account:AnotherAccount", ";10", "", "*abstract", "60000000000", "", "", ";;1;;1000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "cb2", "", "", "", "*concrete", "1.25", "", "", ";;;;1000000000", "*none", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "AB1", "", ";40", ";false", "*abstract", "130000000000", "", "", ";0.4;0.2;;60000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "CB1", "", ";30", "", "*concrete", "80", ";100", "*balanceLimit:-200", ";;0.1;;1000000000", "", "", ""},
 		},
 		utils.StatsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "QueueLength", "TTL", "MinItems", "Stored", "ThresholdIDs", "MetricIDs", "MetricFilterIDs", "MetricBlockers"},
@@ -1165,11 +1165,11 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 		},
 		utils.AccountsCsv: {
 			{"#Tenant", "ID", "FilterIDs", "Weights", "Blockers", "Opts", "BalanceID", "BalanceFilterIDs", "BalanceWeights", "BalanceBlockers", "BalanceType", "BalanceUnits", "BalanceUnitFactors", "BalanceOpts", "BalanceCostIncrements", "BalanceAttributeIDs", "BalanceRateProfileIDs", "ThresholdIDs"},
-			{"cgrates.org", "Account_balances", "", ";10", "*string:~*req.Destination:1002;true;;false", "", "ab2", "", ";20", "", "*abstract", "60000000000", "", "", ";1000000000;;0;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "", "ab3", "*string:*~req.Account:AnotherAccount", ";10", "", "*abstract", "60000000000", "", "", ";1000000000;;1;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "", "cb2", "", "", "", "*concrete", "1.25", "", "", ";1000000000;;;", "*none", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "", "AB1", "", ";40", ";false", "*abstract", "130000000000", "", "", ";60000000000;0.4;0.2;", "", "", ""},
-			{"cgrates.org", "Account_balances", "", "", "", "", "CB1", "", ";30", "", "*concrete", "80", ";100", "*balanceLimit:-200", ";1000000000;;0.1;", "", "", ""},
+			{"cgrates.org", "Account_balances", "", ";10", "*string:~*req.Destination:1002;true;;false", "", "ab2", "", ";20", "", "*abstract", "60000000000", "", "", ";;0;;1000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "", "ab3", "*string:*~req.Account:AnotherAccount", ";10", "", "*abstract", "60000000000", "", "", ";;1;;1000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "", "cb2", "", "", "", "*concrete", "1.25", "", "", ";;;;1000000000", "*none", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "", "AB1", "", ";40", ";false", "*abstract", "130000000000", "", "", ";0.4;0.2;;60000000000", "", "", ""},
+			{"cgrates.org", "Account_balances", "", "", "", "", "CB1", "", ";30", "", "*concrete", "80", ";100", "*balanceLimit:-200", ";;0.1;;1000000000", "", "", ""},
 			{"cgrates.org", "Account_simple", "", ";10", "", "", "VoiceBalance", "*string:~*req.Account:1001", ";12", "*prefix:~*req.Destination:+443;true;;false", "*abstract", "0", "", "Destination:10", "", "", "", ""},
 		},
 		utils.StatsCsv: {

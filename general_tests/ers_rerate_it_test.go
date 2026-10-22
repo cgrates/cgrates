@@ -380,8 +380,8 @@ func TestERSReRate(t *testing.T) {
 
 	// check if anything happend to accounts (should be same as coming from tariffplans)
 	// 	#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-	// cgrates.org,1001,*string:~*req.Account:1001,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;1s;;;,,RP_2,
-	// cgrates.org,1002,*string:~*req.Account:1002,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;1s;;;,,RP_2,
+	// cgrates.org,1001,*string:~*req.Account:1001,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;;;;1s,,RP_2,
+	// cgrates.org,1002,*string:~*req.Account:1002,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;;;;1s,,RP_2,
 
 	var acnts []*utils.Account
 	if err := client.Call(context.Background(), utils.AdminSv1GetAccounts,
@@ -1299,8 +1299,8 @@ func TestERSReRateEventOpts(t *testing.T) {
 
 	// check if anything happend to accounts (should be same as coming from tariffplans)
 	// 	#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-	// cgrates.org,1001,*string:~*req.Account:1001,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;1s;;;,,RP_2,
-	// cgrates.org,1002,*string:~*req.Account:1002,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;1s;;;,,RP_2,
+	// cgrates.org,1001,*string:~*req.Account:1001,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;;;;1s,,RP_2,
+	// cgrates.org,1002,*string:~*req.Account:1002,;10,,,MonetaryBalance,,;10,,*concrete,10,,,;;;;1s,,RP_2,
 
 	var acnts []*utils.Account
 	if err := client.Call(context.Background(), utils.AdminSv1GetAccounts,

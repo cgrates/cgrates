@@ -69,7 +69,7 @@ cgrates.org,ATTR_Blacklist,FLTR_CLI_BL;*string:~*req.Destination:111,;20,,,,*req
 			utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
 cgrates.org,RES_1001,*string:~*req.CLI:1001,;10,-1,2,,false,true,*none`,
 			utils.AccountsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
-cgrates.org,1001,*string:~*req.CLI:1001,;10,,,MONETARY,,;10,,*concrete,10,,,;1s;;;,,RP_CUSTOMER,`,
+cgrates.org,1001,*string:~*req.CLI:1001,;10,,,MONETARY,,;10,,*concrete,10,,,;;;;1s,,RP_CUSTOMER,`,
 			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
 cgrates.org,RP_CUSTOMER,*string:~*req.Category:Customer,;10,,,,RT1,*string:~*req.Destination:Blacklisted,,,,0s,,0.6,1m,1s
 cgrates.org,RP_CUSTOMER,,,,,,RT2,*prefix:~*req.Destination:22,,,,0s,,0.3,1m,1s`,
