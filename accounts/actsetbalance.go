@@ -203,23 +203,23 @@ func actNewCostIncrementsFromString(value string) (costs []*utils.CostIncrement,
 		if sls[j] != utils.EmptyString {
 			cost.FilterIDs = strings.Split(sls[j], utils.ANDSep)
 		}
-		if incrementStr := sls[j+1]; incrementStr != utils.EmptyString {
-			if cost.Increment, err = utils.NewDecimalFromString(incrementStr); err != nil {
-				return
-			}
-		}
-		if fixedFeeStr := sls[j+2]; fixedFeeStr != utils.EmptyString {
+		if fixedFeeStr := sls[j+1]; fixedFeeStr != utils.EmptyString {
 			if cost.FixedFee, err = utils.NewDecimalFromString(fixedFeeStr); err != nil {
 				return
 			}
 		}
-		if recurrentFeeStr := sls[j+3]; recurrentFeeStr != utils.EmptyString {
+		if recurrentFeeStr := sls[j+2]; recurrentFeeStr != utils.EmptyString {
 			if cost.RecurrentFee, err = utils.NewDecimalFromString(recurrentFeeStr); err != nil {
 				return
 			}
 		}
-		if unitStr := sls[j+4]; unitStr != "" {
+		if unitStr := sls[j+3]; unitStr != "" {
 			if cost.Unit, err = utils.NewDecimalFromString(unitStr); err != nil {
+				return
+			}
+		}
+		if incrementStr := sls[j+4]; incrementStr != utils.EmptyString {
+			if cost.Increment, err = utils.NewDecimalFromString(incrementStr); err != nil {
 				return
 			}
 		}
@@ -289,14 +289,14 @@ func actSetCostIncrement(cIs []*utils.CostIncrement, path []string, value string
 	switch path[1] {
 	case utils.FilterIDs:
 		cIs[idx].FilterIDs = utils.NewStringSet(strings.Split(value, utils.InfieldSep)).AsSlice()
-	case utils.Unit:
-		cIs[idx].Unit, err = utils.NewDecimalFromString(value)
-	case utils.Increment:
-		cIs[idx].Increment, err = utils.NewDecimalFromString(value)
 	case utils.FixedFee:
 		cIs[idx].FixedFee, err = utils.NewDecimalFromString(value)
 	case utils.RecurrentFee:
 		cIs[idx].RecurrentFee, err = utils.NewDecimalFromString(value)
+	case utils.Unit:
+		cIs[idx].Unit, err = utils.NewDecimalFromString(value)
+	case utils.Increment:
+		cIs[idx].Increment, err = utils.NewDecimalFromString(value)
 	default:
 		err = utils.ErrWrongPath
 	}

@@ -113,7 +113,7 @@ func TestDynThdIT(t *testing.T) {
 								ID: "SetMonetaryCostIncrements",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.MONETARY.CostIncrements",
-									"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01;`",
+									"*balanceValue": "`*string:~*req.ToR:*data;0;0.01;;1024`",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -196,7 +196,7 @@ func TestDynThdIT(t *testing.T) {
 								ID: "AddVoiceCostIncrements",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.VOICE.CostIncrements",
-									"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01;`",
+									"*balanceValue": "`*string:~*req.ToR:*voice;0;0.01;;1000000000`",
 								},
 							},
 						},
@@ -2747,7 +2747,7 @@ func TestDynThdIT(t *testing.T) {
 								ID: "SetMonetaryCostIncrements",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.MONETARY.CostIncrements",
-									"*balanceValue": "`*string:~*req.ToR:*data;1024;0;0.01;`",
+									"*balanceValue": "`*string:~*req.ToR:*data;0;0.01;;1024`",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -2829,7 +2829,7 @@ func TestDynThdIT(t *testing.T) {
 								ID: "AddVoiceCostIncrements",
 								Opts: map[string]any{
 									"*balancePath":  "*balance.VOICE.CostIncrements",
-									"*balanceValue": "`*string:~*req.ToR:*voice;1000000000;0;0.01;`",
+									"*balanceValue": "`*string:~*req.ToR:*voice;0;0.01;;1000000000`",
 								},
 							},
 						},

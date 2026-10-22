@@ -87,10 +87,10 @@ func costIncrementsRecordValue(increments []*utils.CostIncrement) string {
 	for _, increment := range increments {
 		fields = append(fields,
 			strings.Join(increment.FilterIDs, utils.ANDSep),
-			decimalRecordValue(increment.Increment),
 			decimalRecordValue(increment.FixedFee),
 			decimalRecordValue(increment.RecurrentFee),
 			decimalRecordValue(increment.Unit),
+			decimalRecordValue(increment.Increment),
 		)
 	}
 	return strings.Join(fields, utils.InfieldSep)
