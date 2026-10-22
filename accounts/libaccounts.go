@@ -80,6 +80,9 @@ func roundUnitsWithIncrements(roundMode decimal.RoundingMode, usage, incrm *util
 // roundUnitsWithIncrementsAndLimit rounds the usage based on increments, returning the highest value under limit
 func roundUnitsWithIncrementsAndLimit(usage, incrm, limit *utils.Decimal) *utils.Decimal {
 	if incrm == nil || incrm.Compare(utils.NewDecimal(0, 0)) == 0 {
+		if usage.Compare(limit) > 0 {
+			return limit
+		}
 		return usage
 	}
 	if usage.Compare(incrm) == -1 {
