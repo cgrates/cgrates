@@ -857,7 +857,7 @@ func TestAccountSet(t *testing.T) {
 					{FilterIDs: []string{"fltr1"}, Factor: NewDecimal(101, 0)},
 				},
 				CostIncrements: []*CostIncrement{
-					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0)},
+					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(10, 0), FixedFee: NewDecimal(10, 0), RecurrentFee: NewDecimal(10, 0), Unit: NewDecimal(60, 0)},
 					{FilterIDs: []string{"fltr1"}, Increment: NewDecimal(101, 0), FixedFee: NewDecimal(101, 0), RecurrentFee: NewDecimal(101, 0), Unit: NewDecimal(101, 0)},
 				},
 			},
@@ -976,17 +976,30 @@ func TestAccountSet(t *testing.T) {
 		t.Error(err)
 	}
 	expErr = `can't convert <a> to decimal`
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;a;10", false); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;a;10;", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;a;10;10", false); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;a;10;10;", false); err == nil || err.Error() != expErr {
 		t.Error(err)
 	}
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;a", false); err == nil || err.Error() != expErr {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;a;", false); err == nil || err.Error() != expErr {
 		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10;a", false); err == nil || err.Error() != expErr {
+		t.Error(err)
+	}
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10", false); err == nil {
+		t.Error("accepted four-field CostIncrements")
 	}
 
-	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10", false); err != nil {
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10;", false); err != nil {
+		t.Error(err)
+	}
+	if acc.Balances["bal1"].CostIncrements[0].Unit != nil {
+		t.Error("empty Unit should remain nil")
+	}
+	acc.Balances["bal1"].CostIncrements = nil
+	if err := acc.Set([]string{Balances, "bal1", CostIncrements}, "fltr1;10;10;10;60", false); err != nil {
 		t.Error(err)
 	}
 

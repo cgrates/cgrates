@@ -234,7 +234,7 @@ func TestActSetBalanceFields(t *testing.T) {
 		t.Error(err)
 	} else if err := actSetBalance(bal, []string{utils.Opts, utils.AccountField}, "1004", true); err != nil {
 		t.Error(err)
-	} else if err := actSetBalance(bal, []string{utils.CostIncrements}, "fltr1;1;0;1", true); err != nil {
+	} else if err := actSetBalance(bal, []string{utils.CostIncrements}, "fltr1;1;0;1;", true); err != nil {
 		t.Error(err)
 	} else if err := actSetBalance(bal, []string{utils.AttributeIDs}, "ATTR_ID", true); err != nil {
 		t.Error(err)
@@ -282,20 +282,38 @@ func TestActNewCostIncrementsFromString(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	value = ";invalid_decimal;;"
+	value = ";invalid_decimal;;;"
 	expected = "can't convert <invalid_decimal> to decimal"
 	if _, err := actNewCostIncrementsFromString(value); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	value = ";;invalid_decimal;"
+	value = ";;invalid_decimal;;"
 	if _, err := actNewCostIncrementsFromString(value); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 
-	value = ";;;invalid_decimal"
+	value = ";;;invalid_decimal;"
 	if _, err := actNewCostIncrementsFromString(value); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	value = ";;;;invalid_decimal"
+	if _, err := actNewCostIncrementsFromString(value); err == nil || err.Error() != expected {
+		t.Errorf("Expected %+v, received %+v", expected, err)
+	}
+	if _, err := actNewCostIncrementsFromString(";1048576;;15"); err == nil {
+		t.Error("accepted four-field CostIncrements")
+	}
+
+	value = ";1048576;;15;1073741824;fltr1;1;0;1;"
+	expectedCosts := []*utils.CostIncrement{
+		{RecurrentFee: utils.NewDecimal(15, 0), Unit: utils.NewDecimal(1073741824, 0), Increment: utils.NewDecimal(1048576, 0)},
+		{FilterIDs: []string{"fltr1"}, FixedFee: utils.NewDecimal(0, 0), RecurrentFee: utils.NewDecimal(1, 0), Increment: utils.NewDecimal(1, 0)},
+	}
+	if costs, err := actNewCostIncrementsFromString(value); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(expectedCosts, costs) {
+		t.Errorf("Expected %+v, received %+v", utils.ToJSON(expectedCosts), utils.ToJSON(costs))
 	}
 }
 

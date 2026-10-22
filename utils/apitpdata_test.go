@@ -146,8 +146,9 @@ func TestNewTPBalanceCostIncrement(t *testing.T) {
 		Increment:    "20",
 		FixedFee:     Float64Pointer(10),
 		RecurrentFee: Float64Pointer(0.4),
+		Unit:         "60",
 	}
-	if rcv, err := NewTPBalanceCostIncrement(filterStr, incrementStr, fixedFeeStr, recurentFeeStr); err != nil {
+	if rcv, err := NewTPBalanceCostIncrement(filterStr, incrementStr, fixedFeeStr, recurentFeeStr, "60"); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(rcv, expected) {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
@@ -157,10 +158,10 @@ func TestNewTPBalanceCostIncrement(t *testing.T) {
 func TestNewTPBalanceCostIncrementErrors(t *testing.T) {
 	invalidStr := "not_float64"
 	expectedErr := "strconv.ParseFloat: parsing \"not_float64\": invalid syntax"
-	if _, err := NewTPBalanceCostIncrement(EmptyString, EmptyString, invalidStr, EmptyString); err == nil || err.Error() != expectedErr {
+	if _, err := NewTPBalanceCostIncrement(EmptyString, EmptyString, invalidStr, EmptyString, ""); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
-	if _, err := NewTPBalanceCostIncrement(EmptyString, EmptyString, EmptyString, invalidStr); err == nil || err.Error() != expectedErr {
+	if _, err := NewTPBalanceCostIncrement(EmptyString, EmptyString, EmptyString, invalidStr, ""); err == nil || err.Error() != expectedErr {
 		t.Errorf("Expected %+v, received %+v", expectedErr, err)
 	}
 }
@@ -172,7 +173,12 @@ func TestTPBalanceCostIncrementAsString(t *testing.T) {
 		FixedFee:     Float64Pointer(10),
 		RecurrentFee: Float64Pointer(0.4),
 	}
-	expected := "*string:*Account:1001;20;10;0.4"
+	expected := "*string:*Account:1001;20;10;0.4;"
+	if rcv := costIncr.AsString(); expected != rcv {
+		t.Errorf("Expected %+v, received %+v", expected, rcv)
+	}
+	costIncr.Unit = "60"
+	expected = "*string:*Account:1001;20;10;0.4;60"
 	if rcv := costIncr.AsString(); expected != rcv {
 		t.Errorf("Expected %+v, received %+v", expected, rcv)
 	}
