@@ -861,10 +861,10 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 		case CostIncrements:
 			if ciStr := IfaceAsString(val); len(ciStr) != 0 {
 				sls := strings.Split(ciStr, InfieldSep)
-				if len(sls)%4 != 0 {
+				if len(sls)%5 != 0 {
 					return fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", IfaceAsString(val))
 				}
-				for j := 0; j < len(sls); j += 4 {
+				for j := 0; j < len(sls); j += 5 {
 					cI := new(CostIncrement)
 					if len(sls[j]) != 0 {
 						cI.FilterIDs = strings.Split(sls[j], ANDSep)
@@ -881,6 +881,11 @@ func (bL *Balance) Set(path []string, val any, newBranch bool) (err error) {
 					}
 					if len(sls[j+3]) != 0 {
 						if cI.RecurrentFee, err = NewDecimalFromString(sls[j+3]); err != nil {
+							return
+						}
+					}
+					if len(sls[j+4]) != 0 {
+						if cI.Unit, err = NewDecimalFromString(sls[j+4]); err != nil {
 							return
 						}
 					}

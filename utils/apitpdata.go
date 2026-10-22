@@ -612,9 +612,10 @@ type TPAccountBalance struct {
 	Units          string
 }
 
-func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr string) (costIncrement *TPBalanceCostIncrement, err error) {
+func NewTPBalanceCostIncrement(filtersStr, incrementStr, fixedFeeStr, recurrentFeeStr, unitStr string) (costIncrement *TPBalanceCostIncrement, err error) {
 	costIncrement = &TPBalanceCostIncrement{
 		Increment: incrementStr,
+		Unit:      unitStr,
 	}
 	if filtersStr != EmptyString {
 		costIncrement.FilterIDs = strings.Split(filtersStr, ANDSep)
@@ -641,6 +642,7 @@ type TPBalanceCostIncrement struct {
 	Increment    string
 	FixedFee     *float64
 	RecurrentFee *float64
+	Unit         string
 }
 
 func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
@@ -659,6 +661,7 @@ func (costIncr *TPBalanceCostIncrement) AsString() (s string) {
 	if costIncr.RecurrentFee != nil {
 		s += strconv.FormatFloat(*costIncr.RecurrentFee, 'f', -1, 64)
 	}
+	s += InfieldSep + costIncr.Unit
 	return
 }
 
