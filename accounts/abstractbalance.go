@@ -80,14 +80,8 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	if blncLmt, err = balanceLimit(aB.blnCfg.Opts); err != nil {
 		return
 	}
-	var hasLmt bool
-	if blncLmt != nil && blncLmt.Compare(utils.NewDecimal(0, 0)) != 0 {
-		aB.blnCfg.Units = utils.SubstractDecimal(aB.blnCfg.Units, blncLmt) // reserve the limit
-		hasLmt = true
-	}
-
 	if blncLmt != nil {
-		maxBlcDbt := aB.blnCfg.Units.Clone()
+		maxBlcDbt := utils.SubstractDecimal(aB.blnCfg.Units, blncLmt)
 		if maxBlcDbt.Compare(utils.NewDecimal(0, 0)) <= 0 {
 			maxBlcDbt = utils.NewDecimal(0, 0) // maxBlcDbt should always be positive since limit was deducted already
 		}
@@ -129,10 +123,6 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 	}
 	if dbtUnits.Compare(utils.NewDecimal(0, 0)) != 0 {
 		aB.blnCfg.Units = utils.SubstractDecimal(aB.blnCfg.Units, dbtUnits)
-	}
-
-	if hasLmt { // put back the limit
-		aB.blnCfg.Units = utils.SumDecimal(aB.blnCfg.Units, blncLmt)
 	}
 
 	// EvenCharges building
