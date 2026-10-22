@@ -194,11 +194,11 @@ func actNewUnitFactorsFromString(value string) (units []*utils.UnitFactor, err e
 // similar to the how the TP are loaded from CSV
 func actNewCostIncrementsFromString(value string) (costs []*utils.CostIncrement, err error) {
 	sls := strings.Split(value, utils.InfieldSep)
-	if len(sls)%4 != 0 {
+	if len(sls)%5 != 0 {
 		return nil, fmt.Errorf("invalid key: <%s> for BalanceCostIncrements", value)
 	}
-	costs = make([]*utils.CostIncrement, 0, len(sls)/4)
-	for j := 0; j < len(sls); j += 4 {
+	costs = make([]*utils.CostIncrement, 0, len(sls)/5)
+	for j := 0; j < len(sls); j += 5 {
 		cost := &utils.CostIncrement{}
 		if sls[j] != utils.EmptyString {
 			cost.FilterIDs = strings.Split(sls[j], utils.ANDSep)
@@ -215,6 +215,11 @@ func actNewCostIncrementsFromString(value string) (costs []*utils.CostIncrement,
 		}
 		if recurrentFeeStr := sls[j+3]; recurrentFeeStr != utils.EmptyString {
 			if cost.RecurrentFee, err = utils.NewDecimalFromString(recurrentFeeStr); err != nil {
+				return
+			}
+		}
+		if unitStr := sls[j+4]; unitStr != "" {
+			if cost.Unit, err = utils.NewDecimalFromString(unitStr); err != nil {
 				return
 			}
 		}
