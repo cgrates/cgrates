@@ -689,7 +689,11 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 		ActionType: utils.MetaRemoveBalance,
 		Balance:    balance,
 	}
-	at.SetActions(engine.Actions{a})
+	acts := engine.Actions{a}
+	if attr.Cdrlog {
+		acts = append(acts, &engine.Action{ActionType: utils.CDRLog})
+	}
+	at.SetActions(acts)
 	if err := at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
 		*reply = err.Error()
 		return err

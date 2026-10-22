@@ -1329,14 +1329,46 @@ func testAccITMultipleBalanceWithoutTenant(t *testing.T) {
 }
 
 func testAccITRemoveBalances(t *testing.T) {
+	extraData := map[string]any{
+		"Description": "remove voice balances",
+	}
 	var reply string
 	if err := accRPC.Call(context.Background(), utils.APIerSv1RemoveBalances,
-		&utils.AttrSetBalance{Account: "testAccITMultipleBalance", BalanceType: utils.MetaVoice},
-		&reply); err != nil {
-		t.Error(err)
+		&utils.AttrSetBalance{
+			Account:         "testAccITMultipleBalance",
+			BalanceType:     utils.MetaVoice,
+			Cdrlog:          true,
+			ActionExtraData: &extraData,
+		}, &reply); err != nil {
+		t.Fatal(err)
 	} else if reply != utils.OK {
-		t.Errorf("Received: %s", reply)
+		t.Fatalf("Received: %s", reply)
 	}
+
+	var cdrs []*engine.ExternalCDR
+	req := utils.RPCCDRsFilter{
+		Sources:  []string{utils.CDRLog},
+		RunIDs:   []string{utils.MetaRemoveBalance},
+		Accounts: []string{"testAccITMultipleBalance"},
+	}
+	if err := accRPC.Call(context.Background(), utils.APIerSv2GetCDRs, &req, &cdrs); err != nil {
+		t.Fatal(err)
+	} else if len(cdrs) != 2 {
+		t.Fatalf("Expected 2 CDRs, received: %d", len(cdrs))
+	}
+	balances := map[string]float64{
+		"Balance1": 2 * float64(time.Second),
+		"Balance2": 10 * float64(time.Second),
+	}
+	for _, cdr := range cdrs {
+		value, found := balances[cdr.ExtraFields[utils.BalanceID]]
+		if !found || cdr.Cost != value || cdr.ToR != utils.MetaVoice ||
+			cdr.ExtraFields["Description"] != "remove voice balances" {
+			t.Errorf("Unexpected CDR: %s", utils.ToJSON(cdr))
+		}
+		delete(balances, cdr.ExtraFields[utils.BalanceID])
+	}
+
 	attrs := &AttrAddBalance{
 		Account:     "testAccITMultipleBalance",
 		BalanceType: utils.MetaMonetary,
