@@ -1335,6 +1335,14 @@ const (
 	AdminSv1BackupDB                  = "AdminSv1.BackupDB"
 	AdminSv1RestoreDB                 = "AdminSv1.RestoreDB"
 	AdminSv1SnapshotDB                = "AdminSv1.SnapshotDB"
+	AdminSv1GetDBStats                = "AdminSv1.GetDBStats"
+	AdminSv1GetDBItemIDs              = "AdminSv1.GetDBItemIDs"
+	AdminSv1HasDBItem                 = "AdminSv1.HasDBItem"
+	AdminSv1GetDBItem                 = "AdminSv1.GetDBItem"
+	AdminSv1GetDBItemWithRemote       = "AdminSv1.GetDBItemWithRemote"
+	AdminSv1GetDBItemExpiryTime       = "AdminSv1.GetDBItemExpiryTime"
+	AdminSv1HasDBGroup                = "AdminSv1.HasDBGroup"
+	AdminSv1GetDBGroupItemIDs         = "AdminSv1.GetDBGroupItemIDs"
 )
 
 const (
