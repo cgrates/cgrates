@@ -1495,3 +1495,103 @@ func TestV1CostForEventRateProfileSelection(t *testing.T) {
 		t.Errorf("Expected cost 0.6, received %v", rpCost.Cost)
 	}
 }
+
+func TestOrderRatesOnIntervalsRateChangeDuringCall(t *testing.T) {
+	startTime := time.Date(2026, time.October, 22, 12, 30, 0, 0, time.UTC)
+	rate1 := &utils.Rate{
+		ID: "rate1",
+	}
+	rate2 := &utils.Rate{
+		ID: "rate2",
+	}
+	for _, tc := range []struct {
+		name         string
+		r2ActiveTime string
+		weights      []float64
+		usage        time.Duration
+		expIDs       []string
+		expOrdered   []*orderedRate
+	}{
+		{
+			name:         "Higher weight starts during call",
+			r2ActiveTime: "* 13 * * *",
+			weights:      []float64{10, 20},
+			usage:        time.Hour,
+			expIDs:       []string{"rate1", "rate2"},
+			expOrdered: []*orderedRate{
+				{
+					utils.NewDecimal(0, 0),
+					rate1,
+				},
+				{
+					utils.NewDecimal(int64(30*time.Minute), 0),
+					rate2,
+				},
+			},
+		},
+		{
+			name:         "Higher weight expires during call",
+			r2ActiveTime: "* 12 * * *",
+			weights:      []float64{10, 20},
+			usage:        time.Hour,
+			expIDs:       []string{"rate2", "rate1"},
+			expOrdered: []*orderedRate{
+				{
+					utils.NewDecimal(0, 0),
+					rate2,
+				},
+				{
+					utils.NewDecimal(int64(30*time.Minute), 0),
+					rate1,
+				},
+			},
+		},
+		{
+			name:         "Lower weight starts during call",
+			r2ActiveTime: "* 13 * * *",
+			weights:      []float64{20, 10},
+			usage:        time.Hour,
+			expIDs:       []string{"rate1"},
+			expOrdered: []*orderedRate{
+				{
+					utils.NewDecimal(0, 0),
+					rate1,
+				},
+			},
+		},
+		{
+			name:         "Higher weight starts and expires during call",
+			r2ActiveTime: "* 13 * * *",
+			weights:      []float64{10, 20},
+			usage:        2 * time.Hour,
+			expIDs:       []string{"rate1", "rate2", "rate1"},
+			expOrdered: []*orderedRate{
+				{
+					utils.NewDecimal(0, 0),
+					rate1,
+				},
+				{
+					utils.NewDecimal(int64(30*time.Minute), 0),
+					rate2,
+				},
+				{
+					utils.NewDecimal(int64(90*time.Minute), 0),
+					rate1,
+				},
+			},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			rate1.ActivationTimes = "* * * * *"
+			rate2.ActivationTimes = tc.r2ActiveTime
+			rate1.Compile()
+			rate2.Compile()
+			if ordRts, err := orderRatesOnIntervals([]*utils.Rate{rate1, rate2}, tc.weights, startTime, utils.NewDecimal(int64(tc.usage), 0), true, 10); err != nil {
+				t.Error(err)
+			} else if !reflect.DeepEqual(tc.expOrdered, ordRts) {
+				t.Log(ordRts)
+				t.Errorf("expecting: %v\n, received: %v", tc.expOrdered, ordRts)
+			}
+		})
+	}
+}
