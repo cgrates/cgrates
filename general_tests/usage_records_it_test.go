@@ -17,6 +17,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/utils"
@@ -485,7 +486,10 @@ func TestUsageRecordsRerating(t *testing.T) {
 	testEngine := engine.TestEngine{
 		ConfigJSON: `{
 "admins": {
-	"enabled": true
+	"enabled": true,
+	"conns": {
+		"*ers": [{"connIDs": ["*localhost"]}]
+	}
 },
 "rates": {
 	"enabled": true
@@ -543,7 +547,19 @@ func TestUsageRecordsRerating(t *testing.T) {
 				{"tag": "Refund", "path": "*opts.*refund", "type": "*constant", "value": "true"},
 				{"tag": "BlockerError", "path": "*opts.*blockerError", "type": "*constant", "value": "true"}
 			]
-		}
+		},
+		{
+			"id": "GetURs",
+			"runDelay": "0",
+			"type": "*cgrur",
+			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"processedPath": "",
+			"flags": ["*sessions"],
+			"opts": {
+				"sqlDBName": "cgrates",
+				"sqlTableName": "urs"
+			},
+		},
 	]
 },
 "httpAgent": [
@@ -677,9 +693,12 @@ func TestUsageRecordsRerating(t *testing.T) {
 	}
 	getURs := func() map[string]usageRecord {
 		t.Helper()
-		var rows []*utils.UR
+		time.Sleep(10 * time.Second)
+		var rows []map[string]*utils.CGREvent
 		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
-			&utils.URFilters{Tenant: "cgrates.org"}, &rows); err != nil {
+			&apis.URFiltersFromReader{
+				ReaderID: "GetURs", // call reader that  only gets urs without refunding/rerating
+			}, &rows); err != nil {
 			t.Fatal(err)
 		}
 		if len(rows) != len(records) {
@@ -687,14 +706,14 @@ func TestUsageRecordsRerating(t *testing.T) {
 		}
 		urs := make(map[string]usageRecord, len(rows))
 		for _, ur := range rows {
-			urID := utils.IfaceAsString(ur.Opts[utils.MetaURID])
+			urID := utils.IfaceAsString(ur[utils.MetaPrimary].APIOpts[utils.MetaURID])
 			if urID == "" {
 				t.Fatal("UR has no *urID")
 			}
 			if _, has := urs[urID]; has {
 				t.Fatalf("duplicate *urID %q", urID)
 			}
-			value, has := ur.Opts[utils.MetaAccountsCost]
+			value, has := ur[utils.MetaPrimary].APIOpts[utils.MetaAccountsCost]
 			if !has {
 				t.Fatalf("UR %q has no *accountsCost", urID)
 			}
@@ -707,7 +726,7 @@ func TestUsageRecordsRerating(t *testing.T) {
 				t.Fatal(err)
 			}
 			urs[urID] = usageRecord{
-				account: utils.IfaceAsString(ur.Event[utils.AccountField]),
+				account: utils.IfaceAsString(ur[utils.MetaPrimary].Event[utils.AccountField]),
 				cost:    accountsCost.Concretes,
 			}
 		}
@@ -756,6 +775,330 @@ func TestUsageRecordsRerating(t *testing.T) {
 			ReaderID: "cgrur",
 			Filters:  []string{"*string:~*req.event.Account:1001"},
 		}, new(string)); err != nil {
+		t.Fatal(err)
+	}
+	waitFor(t, func() bool {
+		urs := getURs()
+		for _, record := range records {
+			if record.account != "1001" {
+				continue
+			}
+			ur := urs[record.urID]
+			if ur.cost == nil || ur.cost.Compare(utils.NewDecimal(2, 0)) != 0 {
+				return false
+			}
+		}
+		return true
+	}, "not all URs for 1001 cost 2", 5*time.Second)
+
+	checkURs(map[string]int64{"1001": 2, "1002": 1})
+	checkBalance("1001", 6)
+	checkBalance("1002", 8)
+}
+
+func TestUsageRecordsGetURsRerating(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaMySQL:
+	case utils.MetaInternal, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	testEngine := engine.TestEngine{
+		ConfigJSON: `{
+"logger": {
+	"level": 7,	
+},
+"admins": {
+	"enabled": true,
+	"conns": {
+		"*ers": [{"connIDs": ["*localhost"]}],
+	}
+},
+"rates": {
+	"enabled": true
+},
+"accounts": {
+	"enabled": true,
+	"conns": {
+		"*rates": [{"connIDs": ["*localhost"]}]
+	}
+},
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*accounts": [{"connIDs": ["*localhost"]}],
+		"*rates": [{"connIDs": ["*localhost"]}],
+		"*ees": [{"connIDs": ["*localhost"]}]
+	}
+},
+"ees": {
+	"enabled": true,
+	"exporters": [
+		{
+			"id": "usage_records",
+			"type": "*cgrur",
+			"exportPath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"opts": {
+				"sqlDBName": "cgrates",
+				"sqlTableName": "urs"
+			},
+			"synchronous": true,
+			"blocker": true,
+			"attempts": 1,
+			"failedPostsDir": "*none"
+		}
+	]
+},
+"ers": {
+	"enabled": true,
+	"conns": {
+		"*sessions": [{"connIDs": ["*localhost"]}]
+	},
+	"readers": [
+		{
+			"id": "cgrur",
+			"runDelay": "0",
+			"type": "*cgrur",
+			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"processedPath": "",
+			"flags": ["*sessions"],
+			"opts": {
+				"sqlDBName": "cgrates",
+				"sqlTableName": "urs"
+			},
+			"fields": [
+				{"tag": "Refund", "path": "*opts.*refund", "type": "*constant", "value": "true"},
+				{"tag": "BlockerError", "path": "*opts.*blockerError", "type": "*constant", "value": "true"}
+			]
+		},
+		{
+			"id": "GetURs",
+			"runDelay": "0",
+			"type": "*cgrur",
+			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
+			"processedPath": "",
+			"flags": ["*sessions"],
+			"opts": {
+				"sqlDBName": "cgrates",
+				"sqlTableName": "urs"
+			},
+		},
+	]
+},
+"httpAgent": [
+	{
+		"id": "usage_records",
+		"url": "/usage-records",
+		"conns": {
+			"*sessions": [{"connIDs": ["*localhost"]}]
+		},
+		"requestPayload": "*url",
+		"replyPayload": "*text",
+		"requestProcessors": [
+			{
+				"id": "usage_record",
+				"flags": ["*sessions"],
+				"requestFields": [
+					{"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.account", "mandatory": true},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.urID", "mandatory": true},
+					{"tag": "URID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.urID", "mandatory": true},
+					{"tag": "Usage", "path": "*opts.*usage", "type": "*variable", "value": "~*req.usage", "mandatory": true},
+					{"tag": "Rates", "path": "*opts.*rates", "type": "*constant", "value": "true"},
+					{"tag": "Accounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+					{"tag": "Debit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+					{"tag": "UR", "path": "*opts.*ur", "type": "*constant", "value": "true"},
+					{"tag": "EEs", "path": "*opts.*ees", "type": "*constant", "value": "true"}
+				],
+				"replyFields": [
+					{
+						"tag": "Error",
+						"path": "*rep.Error",
+						"type": "*variable",
+						"value": "~*cgrep.Error",
+						"filters": ["*notempty:~*cgrep.Error:"],
+						"blocker": true
+					},
+					{"tag": "OK", "path": "*rep.OK", "type": "*constant", "value": "1"}
+				]
+			}
+		]
+	}
+]
+}`,
+		DBCfg:            engine.MySQLDBCfg,
+		Encoding:         *utils.Encoding,
+		GracefulShutdown: true,
+	}
+	client, cfg := testEngine.Run(t)
+	usageRecordsURL := "http://" + cfg.ListenCfg().HTTPListen + "/usage-records"
+
+	setRate := func(cost int64) {
+		t.Helper()
+		if err := client.Call(context.Background(), utils.AdminSv1SetRateProfile,
+			&utils.APIRateProfile{
+				RateProfile: &utils.RateProfile{
+					ID: "RP_USAGE_RECORD",
+					Rates: map[string]*utils.Rate{
+						"RT_USAGE_RECORD": {
+							ID: "RT_USAGE_RECORD",
+							IntervalRates: []*utils.IntervalRate{
+								{
+									IntervalStart: utils.NewDecimal(0, 0),
+									RecurrentFee:  utils.NewDecimal(cost, 0),
+									Unit:          utils.NewDecimal(int64(time.Minute), 0),
+									Increment:     utils.NewDecimal(int64(time.Minute), 0),
+								},
+							},
+						},
+					},
+				},
+				APIOpts: map[string]any{utils.MetaRateSOverwrite: true},
+			}, new(string)); err != nil {
+			t.Fatal(err)
+		}
+	}
+	setRate(1)
+
+	for _, accountID := range []string{"1001", "1002"} {
+		if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+			&utils.AccountWithAPIOpts{
+				Account: &utils.Account{
+					ID:        accountID,
+					FilterIDs: []string{fmt.Sprintf("*string:~*req.Account:%s", accountID)},
+					Balances: map[string]*utils.Balance{
+						"MONETARY": {
+							ID:    "MONETARY",
+							Type:  utils.MetaConcrete,
+							Units: utils.NewDecimal(10, 0),
+						},
+					},
+				},
+			}, new(string)); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	records := []struct {
+		account string
+		urID    string
+	}{
+		{account: "1001", urID: "usage-record-1001-1"},
+		{account: "1001", urID: "usage-record-1001-2"},
+		{account: "1002", urID: "usage-record-1002-1"},
+		{account: "1002", urID: "usage-record-1002-2"},
+	}
+	httpClient := &http.Client{Timeout: 5 * time.Second}
+	for _, record := range records {
+		resp, err := httpClient.PostForm(usageRecordsURL, url.Values{
+			"account": {record.account},
+			"urID":    {record.urID},
+			"usage":   {"1m"},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		body, err := io.ReadAll(resp.Body)
+		_ = resp.Body.Close()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if resp.StatusCode != http.StatusOK {
+			t.Fatalf("PostForm returned %s: %s", resp.Status, body)
+		}
+		if !strings.Contains(string(body), "OK=1") {
+			t.Fatalf("PostForm returned %q", body)
+		}
+	}
+
+	type usageRecord struct {
+		account string
+		cost    *utils.Decimal
+	}
+	getURs := func() map[string]usageRecord {
+		t.Helper()
+		var rows []map[string]*utils.CGREvent
+		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
+			&apis.URFiltersFromReader{
+				ReaderID: "GetURs", // call reader that  only gets urs without refunding/rerating
+			}, &rows); err != nil {
+			t.Fatal(err)
+		}
+		if len(rows) != len(records) {
+			t.Fatalf("got %d URs, want %d", len(rows), len(records))
+		}
+		urs := make(map[string]usageRecord, len(rows))
+		for _, ur := range rows {
+			urID := utils.IfaceAsString(ur[utils.MetaPrimary].APIOpts[utils.MetaURID])
+			if urID == "" {
+				t.Fatal("UR has no *urID")
+			}
+			if _, has := urs[urID]; has {
+				t.Fatalf("duplicate *urID %q", urID)
+			}
+			value, has := ur[utils.MetaPrimary].APIOpts[utils.MetaAccountsCost]
+			if !has {
+				t.Fatalf("UR %q has no *accountsCost", urID)
+			}
+			b, err := json.Marshal(value)
+			if err != nil {
+				t.Fatal(err)
+			}
+			var accountsCost utils.EventCharges
+			if err := json.Unmarshal(b, &accountsCost); err != nil {
+				t.Fatal(err)
+			}
+			urs[urID] = usageRecord{
+				account: utils.IfaceAsString(ur[utils.MetaPrimary].Event[utils.AccountField]),
+				cost:    accountsCost.Concretes,
+			}
+		}
+		return urs
+	}
+	checkURs := func(want map[string]int64) {
+		t.Helper()
+		urs := getURs()
+		for _, record := range records {
+			ur, has := urs[record.urID]
+			if !has {
+				t.Errorf("UR %q not found", record.urID)
+				continue
+			}
+			if ur.account != record.account {
+				t.Errorf("%s Account = %q, want %q", record.urID, ur.account, record.account)
+			}
+			cost := want[record.account]
+			if ur.cost == nil || ur.cost.Compare(utils.NewDecimal(cost, 0)) != 0 {
+				t.Errorf("%s *accountsCost.Concretes = %v, want %d", record.urID, ur.cost, cost)
+			}
+		}
+	}
+	checkBalance := func(accountID string, want int64) {
+		t.Helper()
+		var account utils.Account
+		if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{ID: accountID},
+			}, &account); err != nil {
+			t.Fatal(err)
+		}
+		balance := account.Balances["MONETARY"]
+		if balance == nil || balance.Units == nil || balance.Units.Compare(utils.NewDecimal(want, 0)) != 0 {
+			t.Errorf("%s balance = %v, want %d", accountID, balance, want)
+		}
+	}
+
+	checkURs(map[string]int64{"1001": 1, "1002": 1})
+	checkBalance("1001", 8)
+	checkBalance("1002", 8)
+
+	setRate(2)
+	if err := client.Call(context.Background(), utils.AdminSv1GetURs,
+		&apis.URFiltersFromReader{
+			ReaderID:  "cgrur", // reader that gets and refunds/rerates URs
+			FilterIDs: []string{"*string:~*req.event.Account:1001"},
+		}, new([]map[string]*utils.CGREvent)); err != nil {
 		t.Fatal(err)
 	}
 	waitFor(t, func() bool {

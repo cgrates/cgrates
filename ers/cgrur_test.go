@@ -129,10 +129,10 @@ func TestCgrURProcessMessageFields(t *testing.T) {
 			utils.Destination:  "1002",
 		},
 	}
-	if err := rdr.(*CgrUR).processMessage(urSQL, nil); err != nil {
+	event, err := rdr.(*CgrUR).processMessage(urSQL, nil)
+	if err != nil {
 		t.Fatalf("message processing failed: %v", err)
 	}
-	event := <-events
 	if got := event.cgrEvent.APIOpts[utils.OriginID]; got != "usage-record" {
 		t.Errorf("expected OriginID %q, got %#v", "usage-record", got)
 	}
