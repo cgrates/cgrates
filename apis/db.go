@@ -4,8 +4,12 @@
 package apis
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 // DumpDB will dump all of offline internal DB from memory to a file
@@ -62,4 +66,108 @@ func (adms *AdminSv1) SnapshotDB(ctx *context.Context, params BackupParams, repl
 	}
 	*reply = utils.OK
 	return
+}
+
+// GetCacheStats returns CacheStats filtered by cacheIDs
+func (adms *AdminSv1) GetCacheStats(ctx *context.Context, args *utils.AttrCacheIDsDB,
+	rply *map[string]*ltcache.CacheStats) (err error) {
+	chS, err := adms.dm.GetCacheStats(args)
+	if err != nil {
+		return
+	}
+	*rply = chS
+	return nil
+}
+
+// GetStats returns CacheStats filtered by cacheIDs
+func (adms *AdminSv1) GetStats(ctx *context.Context, args *utils.AttrCacheIDsDB,
+	rply *engine.CacheStatsWithMetadata) (err error) {
+	chSt, err := adms.dm.GetCacheStats(args)
+	if err != nil {
+		return
+	}
+	*rply = engine.CacheStatsWithMetadata{
+		CacheStatistics: chSt,
+		Metadata: map[string]any{
+			utils.NodeID: adms.cfg.GeneralCfg().NodeID,
+		},
+	}
+	return nil
+}
+
+// GetItemIDs returns the IDs for cacheID with given prefix
+func (adms *AdminSv1) GetItemIDs(ctx *context.Context, args *utils.ArgsGetCacheItemIDsDB,
+	rply *[]string) (err error) {
+	itmIDs, err := adms.dm.GetItemIDs(args)
+	if err != nil {
+		return
+	}
+	*rply = itmIDs
+	return nil
+}
+
+// HasItem verifies the existence of an Item in db
+func (adms *AdminSv1) HasItem(ctx *context.Context, args *utils.ArgsGetCacheItemDB,
+	rply *bool) (err error) {
+	has, err := adms.dm.HasItem(args)
+	if err != nil {
+		return
+	}
+	*rply = has
+	return nil
+}
+
+// GetItem returns an Item from the db
+func (adms *AdminSv1) GetItem(ctx *context.Context, args *utils.ArgsGetCacheItemDB,
+	rply *any) (err error) {
+	itm, err := adms.dm.GetItem(args)
+	if err != nil {
+		return
+	}
+	*rply = itm
+	return nil
+}
+
+// GetItemWithRemote returns an Item from local or remote db
+func (adms *AdminSv1) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemDB,
+	rply *any) (err error) {
+	itm, err := adms.dm.GetItemWithRemote(ctx, args)
+	if err != nil {
+		return
+	}
+	*rply = itm
+	return nil
+}
+
+// GetItemExpiryTime returns the expiryTime for an item
+func (adms *AdminSv1) GetItemExpiryTime(ctx *context.Context, args *utils.ArgsGetCacheItemDB,
+	rply *time.Time) (err error) {
+	expTime, err := adms.dm.GetItemExpiryTime(args)
+	if err != nil {
+		return
+	}
+	*rply = expTime
+	return nil
+}
+
+// HasGroup checks existence of a group in db
+func (adms *AdminSv1) HasGroup(ctx *context.Context, args *utils.ArgsGetGroupDB,
+	rply *bool) (err error) {
+	has, err := adms.dm.HasGroup(args)
+	if err != nil {
+		return
+	}
+	*rply = has
+	return nil
+}
+
+// GetGroupItemIDs returns a list of itemIDs in a db group
+func (adms *AdminSv1) GetGroupItemIDs(ctx *context.Context, args *utils.ArgsGetGroupDB,
+	rply *[]string) (err error) {
+	itmIDs, err := adms.dm.GetGroupItemIDs(args)
+	if err != nil {
+		return
+	}
+	*rply = itmIDs
+	return nil
 }

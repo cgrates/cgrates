@@ -326,10 +326,20 @@ type ArgsGetCacheItemIDsWithAPIOpts struct {
 	ArgsGetCacheItemIDs
 }
 
+type ArgsGetCacheItemIDsDB struct {
+	ArgsGetCacheItemIDsWithAPIOpts
+	DBConnID string
+}
+
 type ArgsGetCacheItemWithAPIOpts struct {
 	APIOpts map[string]any
 	Tenant  string
 	ArgsGetCacheItem
+}
+
+type ArgsGetCacheItemDB struct {
+	ArgsGetCacheItemWithAPIOpts
+	DBConnID string
 }
 
 // NewAttrReloadCacheWithOpts returns the ArgCache populated with nil
@@ -489,10 +499,20 @@ type AttrCacheIDsWithAPIOpts struct {
 	CacheIDs []string
 }
 
+type AttrCacheIDsDB struct {
+	AttrCacheIDsWithAPIOpts
+	DBConnID string
+}
+
 type ArgsGetGroupWithAPIOpts struct {
 	APIOpts map[string]any
 	Tenant  string
 	ArgsGetGroup
+}
+
+type ArgsGetGroupDB struct {
+	ArgsGetGroupWithAPIOpts
+	DBConnID string
 }
 
 type ArgsGetCacheItemIDs struct {
