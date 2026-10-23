@@ -18,6 +18,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/bsoncodec"
@@ -1631,4 +1632,32 @@ func (ms *MongoStorage) RestoreDB(backupFolderPath string) (err error) {
 // SnapshotDB only for InternalDB
 func (ms *MongoStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) GetCacheStats(utils.AttrCacheIDsWithAPIOpts) (map[string]*ltcache.CacheStats, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) GetItemIDs(utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) HasItem(utils.ArgsGetCacheItemWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) GetItem(utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
+	return nil, false
+}
+
+func (ms *MongoStorage) GetItemExpiryTime(utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error) {
+	return time.Time{}, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) HasGroup(utils.ArgsGetGroupWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (ms *MongoStorage) GetGroupItemIDs(utils.ArgsGetGroupWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
 }

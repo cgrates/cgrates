@@ -4,9 +4,12 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type Storage interface {
@@ -98,6 +101,13 @@ type DataDB interface {
 	BackupDB(string, bool) error
 	RestoreDB(string) error
 	SnapshotDB(string, bool) error
+	GetCacheStats(utils.AttrCacheIDsWithAPIOpts) (map[string]*ltcache.CacheStats, error)
+	GetItemIDs(utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error)
+	HasItem(utils.ArgsGetCacheItemWithAPIOpts) (bool, error)
+	GetItem(utils.ArgsGetCacheItemWithAPIOpts) (any, bool)
+	GetItemExpiryTime(utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error)
+	HasGroup(utils.ArgsGetGroupWithAPIOpts) (bool, error)
+	GetGroupItemIDs(utils.ArgsGetGroupWithAPIOpts) ([]string, error)
 }
 
 // DBDriver used as a DataDB but also as a ConfigProvider

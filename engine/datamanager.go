@@ -8,12 +8,14 @@ import (
 	"slices"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/cgrates/baningo"
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
+	"github.com/cgrates/ltcache"
 )
 
 var (
@@ -3673,4 +3675,124 @@ func (dm *DataManager) SnapshotDB(backupFolderPath string, zip bool) error {
 		}
 	}
 	return nil
+}
+
+func (dm *DataManager) GetCacheStats(args *utils.AttrCacheIDsDB,
+) (chS map[string]*ltcache.CacheStats, err error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return nil, err
+	}
+	chS, err = db.GetCacheStats(args.AttrCacheIDsWithAPIOpts)
+	if err != nil {
+		return nil, err
+	}
+	return
+}
+
+func (dm *DataManager) GetItemIDs(args *utils.ArgsGetCacheItemIDsDB) ([]string, error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return nil, err
+	}
+	return db.GetItemIDs(args.ArgsGetCacheItemIDsWithAPIOpts)
+}
+
+func (dm *DataManager) HasItem(args *utils.ArgsGetCacheItemDB) (bool, error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return false, err
+	}
+	return db.HasItem(args.ArgsGetCacheItemWithAPIOpts)
+}
+
+func (dm *DataManager) GetItem(args *utils.ArgsGetCacheItemDB) (itm any, err error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return nil, err
+	}
+	var has bool
+	itm, has = db.GetItem(args.ArgsGetCacheItemWithAPIOpts)
+	if !has {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (dm *DataManager) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemDB) (itm any, err error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return nil, err
+	}
+	var has bool
+	if itm, has = db.GetItem(args.ArgsGetCacheItemWithAPIOpts); has {
+		return
+	}
+	dbcfg := dm.DBConns().dbCfg.DBConns[args.DBConnID]
+	if itmcfg, has := dm.cfg.DbCfg().Items[args.CacheID]; !has || !itmcfg.Remote || len(dbcfg.RmtConns) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	if err = dm.connMgr.Call(ctx, dbcfg.RmtConns,
+		utils.AdminSv1GetItem, args, &itm); err != nil && err.Error() == utils.ErrNotFound.Error() {
+		return nil, utils.ErrNotFound
+	}
+	return
+}
+
+func (dm *DataManager) GetItemExpiryTime(args *utils.ArgsGetCacheItemDB) (time.Time, error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return time.Time{}, err
+	}
+	return db.GetItemExpiryTime(args.ArgsGetCacheItemWithAPIOpts)
+}
+
+func (dm *DataManager) HasGroup(args *utils.ArgsGetGroupDB) (bool, error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return false, err
+	}
+	return db.HasGroup(args.ArgsGetGroupWithAPIOpts)
+}
+
+func (dm *DataManager) GetGroupItemIDs(args *utils.ArgsGetGroupDB) ([]string, error) {
+	if args.DBConnID == utils.EmptyString {
+		args.DBConnID = utils.MetaDefault
+	}
+	db, err := dm.getDB(args.DBConnID)
+	if err != nil {
+		return nil, err
+	}
+	return db.GetGroupItemIDs(args.ArgsGetGroupWithAPIOpts)
+}
+
+func (dm *DataManager) getDB(dbConnID string) (DataDB, error) {
+	dm.DBConns().RLock()
+	defer dm.DBConns().RUnlock()
+	db, has := dm.DBConns().dbs[dbConnID]
+	if !has {
+		return nil, fmt.Errorf("couldn't find DB with dbConnID: <%s>", dbConnID)
+	}
+	return db, nil
 }

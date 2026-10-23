@@ -9,9 +9,11 @@ import (
 	"os"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"gorm.io/gorm"
 )
 
@@ -1466,4 +1468,32 @@ func (sqls *SQLStorage) RestoreDB(backupFolderPath string) (err error) {
 // SnapshotDB used only for InternalDB
 func (sqls *SQLStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) GetCacheStats(utils.AttrCacheIDsWithAPIOpts) (map[string]*ltcache.CacheStats, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) GetItemIDs(utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) HasItem(utils.ArgsGetCacheItemWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) GetItem(utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
+	return nil, false
+}
+
+func (sqls *SQLStorage) GetItemExpiryTime(utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error) {
+	return time.Time{}, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) HasGroup(utils.ArgsGetGroupWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) GetGroupItemIDs(utils.ArgsGetGroupWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
 }
