@@ -11,9 +11,7 @@ import (
 
 // V1GetRoutes returns the list of valid routes.
 func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
-	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
-		return utils.NewErrMandatoryIeMissing(missing...)
-	} else if args.Event == nil {
+	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
 	tnt := args.Tenant

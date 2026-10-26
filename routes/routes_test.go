@@ -723,7 +723,7 @@ func TestRoutesSortedForEventWithLimitAndOffset2(t *testing.T) {
 	}
 }
 
-func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
+func TestRoutesV1GetRoutesNoIDNotFoundError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
@@ -743,8 +743,8 @@ func TestRoutesV1GetRoutesMsnStructFieldIDError(t *testing.T) {
 		Event:  map[string]any{},
 	}
 	err = routeService.V1GetRoutes(context.Background(), args, &reply)
-	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
 }
 
@@ -2675,5 +2675,33 @@ func TestRouteSV1GetRoutesListOK(t *testing.T) {
 		t.Error(err)
 	} else if !reflect.DeepEqual(utils.ToJSON(exp), utils.ToJSON(reply)) {
 		t.Errorf("Expecting: \n%+v,\n received: \n%+v", utils.ToJSON(exp), utils.ToJSON(reply))
+	}
+}
+
+func TestRoutesV1GetRoutesNoIDNoMandatoryError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
+	cacheS.Clear(nil)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dmSPP := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dmSPP.SetCache(cacheS)
+	fltrs := engine.NewFilterS(cfg, nil, dmSPP)
+	routeService := NewRouteService(dmSPP, fltrs, cfg, nil)
+	var reply utils.SortedRoutesList
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{},
+	}
+	err = routeService.V1GetRoutes(context.Background(), args, &reply)
+	if err == nil || err.Error() == "MANDATORY_IE_MISSING: [ID]" {
+		t.Errorf("\nDid not expect <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	}
+	if err != utils.ErrNotFound {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", utils.ErrNotFound, err)
 	}
 }
