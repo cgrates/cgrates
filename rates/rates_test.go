@@ -1595,3 +1595,221 @@ func TestOrderRatesOnIntervalsRateChangeDuringCall(t *testing.T) {
 		})
 	}
 }
+
+func TestMatchingRateProfileWeightsWithFilterIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rp1 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rateProfileID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*prefix:~*req.Destination:+49"},
+				Weight:    50,
+			},
+			{
+				FilterIDs: []string{"*prefix:~*req.Destination:+44"},
+				Weight:    40,
+			},
+		},
+	}
+	rp2 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rateProfileID2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rp1, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRateProfile(context.Background(), rp2, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name        string
+		destination string
+		expID       string
+	}{
+		{
+			name:        "first filter with higher weight than rp2",
+			destination: "+4930123456",
+			expID:       "rateProfileID1",
+		},
+		{
+			name:        "second filter with higher weight than rp2",
+			destination: "+4430123456",
+			expID:       "rateProfileID1",
+		},
+		{
+			name:        "destination that doesn't belong to any filter",
+			destination: "+3312345678",
+			expID:       "rateProfileID2",
+		},
+		{
+			name:        "empty destination",
+			destination: "",
+			expID:       "rateProfileID2",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "rpID",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  tc.destination,
+				},
+			}
+			rp, err := rateS.matchingRateProfileForEvent(context.Background(), "cgrates.org", nil, ev, false, nil)
+			if err != nil {
+				t.Error(err)
+			}
+			if rp.ID != tc.expID {
+				t.Errorf("Expected %v, received %v", tc.expID, rp.ID)
+			}
+		})
+	}
+}
+
+func TestMatchingRateProfileWeightsFilterIdsAreIgnored(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rp1 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rateProfileID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*prefix:~*req.Destination:+49"},
+				Weight:    50,
+			},
+			{
+				FilterIDs: []string{"*prefix:~*req.Destination:+44"},
+				Weight:    40,
+			},
+			{
+				FilterIDs: []string{"*prefix:~*req.Destination:+40"},
+				Weight:    70,
+			},
+		},
+	}
+	rp2 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rateProfileID2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 60,
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rp1, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRateProfile(context.Background(), rp2, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name        string
+		destination string
+		expID       string
+	}{
+		{
+			name:        "first filter with lower weight than the rp2",
+			destination: "+49220344445",
+			expID:       "rateProfileID2",
+		},
+		{
+			name:        "second filter with lower weight than the rp2",
+			destination: "+44334564777",
+			expID:       "rateProfileID2",
+		},
+		{
+			name:        "third filter with higher weight than the rp2",
+			destination: "+40445632229",
+			expID:       "rateProfileID1",
+		},
+		{
+			name:        "destination that doesn't have a filter",
+			destination: "+30556798955",
+			expID:       "rateProfileID2",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "rpID",
+				Event: map[string]any{
+					utils.AccountField: "1001",
+					utils.Destination:  tc.destination,
+				},
+			}
+			rp, err := rateS.matchingRateProfileForEvent(context.Background(), "cgrates.org", nil, ev, false, nil)
+			if err != nil {
+				t.Error(err)
+			}
+			if rp.ID != tc.expID {
+				t.Errorf("Expected %v, received %v", tc.expID, rp.ID)
+			}
+		})
+	}
+}
+
+func TestMatchingRateProfileWeightsUnsupportedType(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rp := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rateProfileID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				FilterIDs: []string{"*inv:~*req.Destination:+49"},
+				Weight:    50,
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rp, false, true); err != nil {
+		t.Fatal(err)
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "rpID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "+4930123456",
+		},
+	}
+	expErr := "Unsupported filter Type: *inv"
+	if _, err := rateS.matchingRateProfileForEvent(context.Background(), "cgrates.org", nil, ev, false, nil); err == nil || err.Error() != expErr {
+		t.Errorf("Expected error %v, recieved %v", expErr, err)
+	}
+}
