@@ -57,6 +57,7 @@ var (
 		// Route blocker behaviour test
 		testRoutesBlockerSetRouteProfile,
 		testRoutesBlockerGetRoutes,
+		testRoutesGetRoutesNoEventID,
 
 		testRoutesKillEngine,
 	}
@@ -981,6 +982,53 @@ func testRoutesBlockerGetRoutes(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRoutes",
+		Event: map[string]any{
+			"TestCase": "RouteBlockerBehaviour",
+		},
+		APIOpts: map[string]any{},
+	}
+	expected := utils.SortedRoutesList{
+		{
+			ProfileID: "ROUTE_BLOCKER_TEST",
+			Sorting:   utils.MetaWeight,
+			Routes: []*utils.SortedRoute{
+				{
+					RouteID:         "route3",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]any{
+						utils.Weight: 40.,
+					},
+				},
+				{
+					RouteID:         "route4",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]any{
+						utils.Weight: 35.,
+					},
+				},
+				{
+					RouteID:         "route2",
+					RouteParameters: utils.EmptyString,
+					SortingData: map[string]any{
+						utils.Weight:  20.,
+						utils.Blocker: true,
+					},
+				},
+			},
+		},
+	}
+
+	var reply utils.SortedRoutesList
+	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRoutes, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testRoutesGetRoutesNoEventID(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"TestCase": "RouteBlockerBehaviour",
 		},
