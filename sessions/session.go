@@ -4,7 +4,6 @@
 package sessions
 
 import (
-	"fmt"
 	"sync"
 	"time"
 
@@ -210,7 +209,7 @@ func (sr *SRun) Clone() (clsr *SRun) {
 
 // computeUsage will consider all the usage opts and update SRun counters acordingly
 func (sr *SRun) computeUsages(interimConsumed, interimUsage, totalUsage *utils.Decimal) {
-	utils.Logger.Info(fmt.Sprintf("### IN: interimConsumed: %s, interimUsage: %s, totalUsage: %s, sRun: %s\n", utils.ToIJSON(interimConsumed), utils.ToIJSON(interimUsage), utils.ToIJSON(totalUsage), utils.ToIJSON(sr)))
+	// utils.Logger.Info(fmt.Sprintf("### IN: interimConsumed: %s, interimUsage: %s, totalUsage: %s, sRun: %s\n", utils.ToIJSON(interimConsumed), utils.ToIJSON(interimUsage), utils.ToIJSON(totalUsage), utils.ToIJSON(sr)))
 	sr.nextDebit = utils.NewDecimal(0, 0)
 	sr.lclDebit = nil // this are always valid for one run only
 
@@ -246,7 +245,7 @@ func (sr *SRun) computeUsages(interimConsumed, interimUsage, totalUsage *utils.D
 	// Save the interim and totalUsage
 	sr.InterimUsage = interimUsage.Clone()
 	sr.TotalUsage = utils.SumDecimal(sr.TotalUsage, interimUsage)
-	utils.Logger.Info(fmt.Sprintf("### OUT: interimConsumed: %s, interimUsage: %s, totalUsage: %s, localDebit: %s, sRun: %s\n", utils.ToIJSON(interimConsumed), utils.ToIJSON(interimUsage), utils.ToIJSON(totalUsage), utils.ToIJSON(sr.lclDebit), utils.ToIJSON(sr)))
+	// utils.Logger.Info(fmt.Sprintf("### OUT: interimConsumed: %s, interimUsage: %s, totalUsage: %s, localDebit: %s, sRun: %s\n", utils.ToIJSON(interimConsumed), utils.ToIJSON(interimUsage), utils.ToIJSON(totalUsage), utils.ToIJSON(sr.lclDebit), utils.ToIJSON(sr)))
 
 }
 
