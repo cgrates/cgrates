@@ -10,7 +10,6 @@ import (
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-	"github.com/cgrates/ltcache"
 )
 
 // actionTarget returns the target attached to an action
@@ -55,7 +54,6 @@ func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID string,
 		ignFilters: ignFilters,
 		data:       data,
 		acts:       acts,
-		cch:        ltcache.NewTransCache(map[string]*ltcache.CacheConfig{}, false),
 	}
 }
 
@@ -68,8 +66,6 @@ type scheduledActs struct {
 	ignFilters bool
 	data       utils.MapStorage
 	acts       []actioner
-
-	cch *ltcache.TransCache // cache data between actions here
 }
 
 // Execute notifies possible errors on execution
