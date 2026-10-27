@@ -14,6 +14,29 @@ import (
 	"github.com/cgrates/cgrates/engine"
 )
 
+func TestFilterAndSortDiktats(t *testing.T) {
+	filters := engine.NewFilterS(config.NewDefaultCGRConfig(), nil, nil)
+	data := utils.MapStorage{utils.MetaReq: map[string]any{utils.AccountField: "1001"}}
+	diktats := []*utils.APDiktat{
+		{ID: "low", Weights: utils.DynamicWeights{{Weight: 10}}},
+		{ID: "filtered", FilterIDs: []string{"*string:~*req.Account:1002"}},
+		{ID: "high", Weights: utils.DynamicWeights{{Weight: 20}}},
+	}
+	got, err := filterAndSortDiktats(context.Background(), utils.CGRateSorg, diktats, filters, data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []*utils.APDiktat{diktats[2], diktats[0]}; !reflect.DeepEqual(got, want) {
+		t.Errorf("Expected %+v, received %+v", want, got)
+	}
+	if diktats[0].ID != "low" || diktats[1].ID != "filtered" || diktats[2].ID != "high" {
+		t.Errorf("Input diktats were reordered: %+v", diktats)
+	}
+	if empty, err := filterAndSortDiktats(context.Background(), utils.CGRateSorg, nil, filters, data); err != nil || empty == nil || len(empty) != 0 {
+		t.Errorf("Expected an empty non-nil slice, received %+v, error: %v", empty, err)
+	}
+}
+
 func TestACExecuteURLog(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)

@@ -4,9 +4,7 @@
 package actions
 
 import (
-	"cmp"
 	"fmt"
-	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
@@ -43,25 +41,10 @@ func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 		return fmt.Errorf("no connection with AccountS")
 	}
 
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
-	for _, diktat := range aL.cfg().Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.cfg().Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	args := &utils.ArgsActSetBalance{
 		Tenant:    aL.tnt,
 		AccountID: trgID,
@@ -118,25 +101,10 @@ func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, tr
 		return fmt.Errorf("no connection with AccountS")
 	}
 
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
-	for _, diktat := range aL.cfg().Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.cfg().Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	args := &utils.ArgsActRemoveBalances{
 		Tenant:     aL.tnt,
 		AccountID:  trgID,
