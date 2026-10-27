@@ -32,7 +32,7 @@ type reqDetails struct {
 
 // newActHTTPGeneric creates a new action that performs HTTP requests
 func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
-	cache *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTP, err error) {
+	_ *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTP, err error) {
 	weights := make(map[string]float64)
 	diktats := make([]*utils.APDiktat, 0)
 	data := cgrEv.AsDataProvider()
@@ -157,7 +157,11 @@ func (aL *actHTTP) execute(ctx *context.Context, data utils.MapStorage, _ string
 	var partExec bool
 	for _, reqD := range aL.reqDetails {
 		if reqD.StaticBody != nil {
-			data = reqD.StaticBody
+			body, err := utils.GetDynamicPathValueFromMapStringAny(reqD.StaticBody, data, false)
+			if err != nil {
+				return err
+			}
+			data = body
 		}
 		var body io.Reader
 		// build body depending on ContentType
