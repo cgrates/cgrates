@@ -1228,7 +1228,6 @@ func TestACScheduledActions(t *testing.T) {
 
 	schedActs[0].trgID = "ID_TEST"
 	schedActs[0].acts = nil
-	schedActs[0].cch = nil
 	if !reflect.DeepEqual(schedActs, expectedSChed) {
 		t.Errorf("Expected %+v, \nreceived %+v", expectedSChed[0], schedActs[0])
 	}
