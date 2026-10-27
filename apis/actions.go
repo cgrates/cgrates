@@ -226,6 +226,11 @@ func (aS *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 	return aS.acts.V1ScheduleActions(ctx, args, rpl)
 }
 
+// GetScheduledActions returns the registered cron batches for a tenant.
+func (aS *ActionSv1) GetScheduledActions(ctx *context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
+	return aS.acts.V1GetScheduledActions(ctx, args, reply)
+}
+
 // ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	return aS.acts.V1ExecuteActions(ctx, args, rpl)

@@ -344,6 +344,13 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	if want := map[string]int{"account1": 1, "account2": 1, "account3": 1}; !reflect.DeepEqual(executed, want) {
 		t.Fatalf("expected %v, received %v", want, executed)
 	}
+	var batches []utils.ScheduledActionBatch
+	if err := acts.V1GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{}, &batches); err != nil {
+		t.Fatal(err)
+	}
+	if len(batches) != 2 {
+		t.Fatalf("expected two registered batches, received %s", utils.ToJSON(batches))
+	}
 
 	profile.Targets[utils.MetaAccounts] = utils.NewStringSet([]string{"account2"})
 	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
@@ -361,6 +368,12 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	if want := map[string]int{"account2": 1}; !reflect.DeepEqual(executed, want) {
 		t.Fatalf("expected %v, received %v", want, executed)
 	}
+	if err := acts.V1GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{}, &batches); err != nil {
+		t.Fatal(err)
+	}
+	if len(batches) != 1 || !reflect.DeepEqual(batches[0].Targets[utils.MetaAccounts], []string{"account2"}) {
+		t.Fatalf("unexpected overwrite result: %s", utils.ToJSON(batches))
+	}
 
 	profile.Targets = nil
 	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
@@ -372,6 +385,9 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	}
 	if entries := acts.crn.Entries(); len(entries) != 0 {
 		t.Fatalf("empty-target overwrite retained jobs: %v", entries)
+	}
+	if err := acts.V1GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{}, &batches); err != utils.ErrNotFound {
+		t.Fatalf("empty-target overwrite: expected NOT_FOUND, received %v", err)
 	}
 }
 

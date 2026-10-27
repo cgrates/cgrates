@@ -4,6 +4,8 @@
 package actions
 
 import (
+	"slices"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -37,6 +39,51 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 	}
 	*rpl = utils.OK
 	return
+}
+
+// V1GetScheduledActions returns the registered cron batches for a tenant.
+func (aS *ActionS) V1GetScheduledActions(_ *context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
+	tenant := args.Tenant
+	if tenant == "" {
+		tenant = aS.cfg.GeneralCfg().DefaultTenant
+	}
+	aS.crnLk.RLock()
+	entries := aS.crn.Entries()
+	aS.crnLk.RUnlock()
+
+	var batches []utils.ScheduledActionBatch
+	for _, entry := range entries {
+		job := entry.Job.(*actionJob)
+		first := job.batch[0]
+		if first.tenant != tenant {
+			continue
+		}
+		if len(args.ActionProfileIDs) != 0 && !slices.Contains(args.ActionProfileIDs, first.apID) {
+			continue
+		}
+		targets := make(map[string][]string)
+		for _, target := range job.batch {
+			targets[target.trgTyp] = append(targets[target.trgTyp], target.trgID)
+		}
+		for _, ids := range targets {
+			slices.Sort(ids)
+		}
+		batches = append(batches, utils.ScheduledActionBatch{
+			Tenant:          first.tenant,
+			ActionProfileID: first.apID,
+			Schedule:        job.schedule,
+			Targets:         targets,
+			NextRun:         entry.Next,
+		})
+	}
+	if len(batches) == 0 {
+		return utils.ErrNotFound
+	}
+	slices.SortFunc(batches, func(a, b utils.ScheduledActionBatch) int {
+		return a.NextRun.Compare(b.NextRun)
+	})
+	*reply = batches
+	return nil
 }
 
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field

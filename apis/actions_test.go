@@ -10,10 +10,61 @@ import (
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func TestActionSv1GetScheduledActions(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	acts := actions.NewActionS(cfg, cacheS, filters, dm, nil)
+	t.Cleanup(acts.Shutdown)
+	api := NewActionSv1(acts)
+	ctx := context.Background()
+	profile := &utils.ActionProfile{
+		Tenant:   "cgrates.org",
+		ID:       "renew",
+		Schedule: "@every 1h",
+		Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"account1": {}, "account2": {}}},
+		Actions:  []*utils.APAction{{ID: "balance", Type: utils.MetaSetBalance}},
+	}
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := api.ScheduleActions(ctx, &utils.CGREvent{
+		APIOpts: map[string]any{utils.OptsActionsProfileIDs: []string{profile.ID}},
+	}, new(string)); err != nil {
+		t.Fatal(err)
+	}
+	profile.Schedule = "@every 2h"
+	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
+		t.Fatal(err)
+	}
+	var batches []utils.ScheduledActionBatch
+	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{
+		ActionProfileIDs: []string{profile.ID},
+	}, &batches); err != nil {
+		t.Fatal(err)
+	}
+	if len(batches) != 1 {
+		t.Fatalf("expected one registered batch, received %s", utils.ToJSON(batches))
+	}
+	batch := batches[0]
+	if batch.Tenant != profile.Tenant || batch.ActionProfileID != profile.ID || batch.Schedule != "@every 1h" || batch.NextRun.IsZero() {
+		t.Fatalf("unexpected registration: %s", utils.ToJSON(batch))
+	}
+	if want := map[string][]string{utils.MetaAccounts: {"account1", "account2"}}; !reflect.DeepEqual(batch.Targets, want) {
+		t.Fatalf("expected targets %v, received %v", want, batch.Targets)
+	}
+}
 
 func TestActionsSetGetRemActionProfile(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()

@@ -48,6 +48,16 @@ type profileSchedule struct {
 	targets  map[string]utils.StringSet
 }
 
+type actionJob struct {
+	service  *ActionS
+	schedule string
+	batch    []*scheduledActs
+}
+
+func (j *actionJob) Run() {
+	j.service.cronExecuteActions(j.batch)
+}
+
 // Shutdown is called to shutdown the service
 func (aS *ActionS) Shutdown() {
 	aS.crnLk.RLock()
@@ -131,7 +141,11 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 					scheduled = &profileSchedule{targets: make(map[string]utils.StringSet)}
 					aS.profileSchedules[key] = scheduled
 				}
-				entryID := crn.Schedule(schedule, cron.FuncJob(func() { aS.cronExecuteActions(schedActs) }))
+				entryID := crn.Schedule(schedule, &actionJob{
+					service:  aS,
+					schedule: profile.Schedule,
+					batch:    schedActs,
+				})
 				scheduled.entryIDs = append(scheduled.entryIDs, entryID)
 				for _, sActs := range schedActs {
 					if scheduled.targets[sActs.trgTyp] == nil {
