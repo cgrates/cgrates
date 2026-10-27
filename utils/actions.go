@@ -68,6 +68,19 @@ type ActionProfileWithAPIOpts struct {
 	APIOpts   map[string]any
 }
 
+type GetScheduledActionsArgs struct {
+	Tenant           string
+	ActionProfileIDs []string
+}
+
+type ScheduledActionBatch struct {
+	Tenant          string
+	ActionProfileID string
+	Schedule        string
+	Targets         map[string][]string
+	NextRun         time.Time
+}
+
 // TenantID returns the concatenated tenant and ID.
 func (ap *ActionProfile) TenantID() string {
 	return ConcatenatedKey(ap.Tenant, ap.ID)

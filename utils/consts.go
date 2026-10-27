@@ -2722,10 +2722,11 @@ var AnzIndexType = StringSet{ // AnzIndexType are the analyzers possible index t
 
 // ActionSv1
 const (
-	ActionSv1                = "ActionSv1"
-	ActionSv1Ping            = "ActionSv1.Ping"
-	ActionSv1ScheduleActions = "ActionSv1.ScheduleActions"
-	ActionSv1ExecuteActions  = "ActionSv1.ExecuteActions"
+	ActionSv1                    = "ActionSv1"
+	ActionSv1Ping                = "ActionSv1.Ping"
+	ActionSv1ScheduleActions     = "ActionSv1.ScheduleActions"
+	ActionSv1ExecuteActions      = "ActionSv1.ExecuteActions"
+	ActionSv1GetScheduledActions = "ActionSv1.GetScheduledActions"
 )
 
 // StringTmplType a string set used, by agentRequest and eventRequest to determine if the returned template type is string

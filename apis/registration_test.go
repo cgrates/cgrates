@@ -40,9 +40,10 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 			name: utils.ActionSv1,
 			rcvr: apis.NewActionSv1(nil),
 			consts: map[string]string{
-				"ExecuteActions":  utils.ActionSv1ExecuteActions,
-				"Ping":            utils.ActionSv1Ping,
-				"ScheduleActions": utils.ActionSv1ScheduleActions,
+				"ExecuteActions":      utils.ActionSv1ExecuteActions,
+				"GetScheduledActions": utils.ActionSv1GetScheduledActions,
+				"Ping":                utils.ActionSv1Ping,
+				"ScheduleActions":     utils.ActionSv1ScheduleActions,
 			},
 		},
 		{
