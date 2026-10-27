@@ -112,23 +112,16 @@ func testtrendAuQRpcConn(t *testing.T) {
 }
 
 func testtrendAuQFromFolder(t *testing.T) {
-	wchan := make(chan struct{}, 1)
-	go func() {
-		loaderPath, err := exec.LookPath("cgr-loader")
-		if err != nil {
-			t.Error(err)
-		}
-		loader := exec.Command(loaderPath, "-config_path", trendAuQCfgPath, "-path", path.Join(*utils.DataDir, "tariffplans", "tuttrends"))
-		if err := loader.Start(); err != nil {
-			t.Error(err)
-		}
-		loader.Wait()
-		wchan <- struct{}{}
-	}()
-	select {
-	case <-wchan:
-	case <-time.After(1 * time.Second):
-		t.Errorf("cgr-loader failed: ")
+	loaderPath, err := exec.LookPath("cgr-loader")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	loader := exec.CommandContext(ctx, loaderPath, "-config_path", trendAuQCfgPath,
+		"-path", path.Join(*utils.DataDir, "tariffplans", "tuttrends"), "-caches_address=")
+	if output, err := loader.CombinedOutput(); err != nil {
+		t.Fatalf("cgr-loader failed: %v\n%s", err, output)
 	}
 }
 

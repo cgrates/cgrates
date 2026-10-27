@@ -19,7 +19,7 @@
           "*string:~*req.Acct-Status-Type:Stop"
         ],
         "flags": [
-          "*event",
+          "*sessions",
           "*continue"
         ],
         "requestFields": [

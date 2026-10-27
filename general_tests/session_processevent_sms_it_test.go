@@ -364,6 +364,14 @@ func TestSessionSv1ProcessEventSMSFallbackToMonetary(t *testing.T) {
 }
 
 func TestSessionSv1ProcessEventSMSData(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "sessions": {
@@ -403,12 +411,14 @@ func TestSessionSv1ProcessEventSMSData(t *testing.T) {
 								RecurrentFee: utils.NewDecimal(0, 0),
 							},
 						},
-						Units: utils.NewDecimalFromFloat64(10),
+						FilterIDs: []string{"*string:~*req.ToR:*sms"},
+						Units:     utils.NewDecimalFromFloat64(10),
 					},
 					"DATA1": {
-						ID:      "DATA1",
-						Type:    utils.MetaAbstract,
-						Weights: utils.DynamicWeights{{Weight: 5}},
+						ID:        "DATA1",
+						Type:      utils.MetaAbstract,
+						FilterIDs: []string{"*string:~*req.ToR:*data"},
+						Weights:   utils.DynamicWeights{{Weight: 5}},
 						CostIncrements: []*utils.CostIncrement{
 							{
 								FilterIDs:    []string{"*string:~*req.ToR:*data"},

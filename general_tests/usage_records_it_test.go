@@ -20,6 +20,8 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/utils"
+	"gorm.io/driver/mysql"
+	"gorm.io/gorm"
 )
 
 func TestUsageRecordsSessionDebit(t *testing.T) {
@@ -592,6 +594,15 @@ func TestUsageRecordsRerating(t *testing.T) {
 	}
 	client, cfg := testEngine.Run(t)
 	usageRecordsURL := "http://" + cfg.ListenCfg().HTTPListen + "/usage-records"
+	db, err := gorm.Open(mysql.Open(fmt.Sprintf(dbConnString, "cgrates")), &gorm.Config{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	sqlDB, err := db.DB()
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(func() { _ = sqlDB.Close() })
 
 	setRate := func(cost int64) {
 		t.Helper()
@@ -677,9 +688,8 @@ func TestUsageRecordsRerating(t *testing.T) {
 	}
 	getURs := func() map[string]usageRecord {
 		t.Helper()
-		var rows []*utils.UR
-		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
-			&utils.URFilters{Tenant: "cgrates.org"}, &rows); err != nil {
+		var rows []*utils.URSQLTable
+		if err := db.Table(utils.URsTBL).Where("tenant = ?", "cgrates.org").Find(&rows).Error; err != nil {
 			t.Fatal(err)
 		}
 		if len(rows) != len(records) {

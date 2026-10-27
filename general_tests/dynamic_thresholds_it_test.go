@@ -2537,7 +2537,7 @@ func TestDynThdIT(t *testing.T) {
 						TTL:  10 * time.Second,
 						Type: utils.MetaAddBalance,
 						Opts: map[string]any{
-							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*cgrSource\":\"*thresholds\",\"*usage\":5000000000}",
 						},
 						Weights: utils.DynamicWeights{
 							{
@@ -2628,7 +2628,7 @@ func TestDynThdIT(t *testing.T) {
 						TTL:  10 * time.Second,
 						Type: utils.MetaAddBalance,
 						Opts: map[string]any{
-							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*usage\":5000000000}",
+							"{\"*accountsProfileIDs\"": "\"1002\",\"*actionsProfileIDs\":[\"DYNAMIC_THRESHOLD_ACTION\"],\"*cgrSource\":\"*thresholds\",\"*usage\":5000000000}",
 						},
 						Weights: utils.DynamicWeights{
 							{

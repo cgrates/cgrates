@@ -92,6 +92,7 @@
         "id": "radius_usage",
         "type": "*fileCSV",
         "synchronous": true,
+        "filters": ["*notstring:~*req.Source:*urLog"],
         "fields": [
           {
             "tag": "Account",
