@@ -112,19 +112,12 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 		}
 		// populate Threshold's Weight
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Threshold's MaxHits
@@ -280,36 +273,22 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 		}
 		// populate Stat's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Stat's Blockers
 		if params[4] != utils.EmptyString {
-			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			blckrSplit := strings.Split(params[4], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+			if strings.Count(params[4], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if blckrSplit[0] != utils.EmptyString {
-				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-			}
-			if blckrSplit[1] != utils.EmptyString {
-				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-				if err != nil {
-					return err
-				}
+			args.Blockers, err = utils.NewDynamicBlockersFromString(params[4], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Stat's QueueLengh
@@ -361,20 +340,13 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 		}
 		// populate Stat's metricBlockers
 		if params[12] != utils.EmptyString {
-			blckrSplit := strings.Split(params[12], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+			if strings.Count(params[12], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
 			for i := range args.Metrics {
-				args.Metrics[i].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-				if blckrSplit[0] != utils.EmptyString {
-					args.Metrics[i].Blockers[0].FilterIDs = []string{blckrSplit[0]}
-				}
-				if blckrSplit[1] != utils.EmptyString {
-					args.Metrics[i].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-					if err != nil {
-						return err
-					}
+				args.Metrics[i].Blockers, err = utils.NewDynamicBlockersFromString(params[12], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 		}
@@ -480,36 +452,22 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 		}
 		// populate Attribute's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Attribute's Blockers
 		if params[4] != utils.EmptyString {
-			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			blckrSplit := strings.Split(params[4], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+			if strings.Count(params[4], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if blckrSplit[0] != utils.EmptyString {
-				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-			}
-			if blckrSplit[1] != utils.EmptyString {
-				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-				if err != nil {
-					return err
-				}
+			args.Blockers, err = utils.NewDynamicBlockersFromString(params[4], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Attribute's Attributes
@@ -520,19 +478,12 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 			}
 			var attrFltrBlckrs utils.DynamicBlockers
 			if params[6] != utils.EmptyString {
-				attrFltrBlckrs = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-				blckrSplit := strings.Split(params[6], utils.ANDSep)
-				if len(blckrSplit) > 2 {
+				if strings.Count(params[6], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if blckrSplit[0] != utils.EmptyString {
-					attrFltrBlckrs[0].FilterIDs = []string{blckrSplit[0]}
-				}
-				if blckrSplit[1] != utils.EmptyString {
-					attrFltrBlckrs[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-					if err != nil {
-						return err
-					}
+				attrFltrBlckrs, err = utils.NewDynamicBlockersFromString(params[6], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 			args.Attributes = append(args.Attributes, &utils.ExternalAttribute{
@@ -646,19 +597,12 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 		}
 		// populate Resource's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate Resource's UsageTTL
@@ -1188,38 +1132,24 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 		}
 		// populate RouteProfile's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		} else {
 			args.Weights = routeProfileFound.Weights
 		}
 		// populate RouteProfile's Blockers
 		if params[4] != utils.EmptyString {
-			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			blckrSplit := strings.Split(params[4], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+			if strings.Count(params[4], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if blckrSplit[0] != utils.EmptyString {
-				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-			}
-			if blckrSplit[1] != utils.EmptyString {
-				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-				if err != nil {
-					return err
-				}
+			args.Blockers, err = utils.NewDynamicBlockersFromString(params[4], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		} else {
 			args.Blockers = routeProfileFound.Blockers
@@ -1258,36 +1188,22 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 					}
 					// populate RouteProfile's RouteWeight
 					if params[13] != utils.EmptyString {
-						existingRoute.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-						wghtSplit := strings.Split(params[13], utils.ANDSep)
-						if len(wghtSplit) > 2 {
+						if strings.Count(params[13], utils.ANDSep) > 1 {
 							return utils.ErrUnsupportedFormat
 						}
-						if wghtSplit[0] != utils.EmptyString {
-							existingRoute.Weights[0].FilterIDs = []string{wghtSplit[0]}
-						}
-						if wghtSplit[1] != utils.EmptyString {
-							existingRoute.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-							if err != nil {
-								return err
-							}
+						existingRoute.Weights, err = utils.NewDynamicWeightsFromString(params[13], utils.ANDSep, utils.ANDSep)
+						if err != nil {
+							return err
 						}
 					}
 					// populate RouteProfile's RouteBlocker
 					if params[14] != utils.EmptyString {
-						existingRoute.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-						blckrSplit := strings.Split(params[14], utils.ANDSep)
-						if len(blckrSplit) > 2 {
+						if strings.Count(params[14], utils.ANDSep) > 1 {
 							return utils.ErrUnsupportedFormat
 						}
-						if blckrSplit[0] != utils.EmptyString {
-							existingRoute.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-						}
-						if blckrSplit[1] != utils.EmptyString {
-							existingRoute.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-							if err != nil {
-								return err
-							}
+						existingRoute.Blockers, err = utils.NewDynamicBlockersFromString(params[14], utils.ANDSep, utils.ANDSep)
+						if err != nil {
+							return err
 						}
 					}
 					// populate RouteProfile's RouteParameters
@@ -1324,36 +1240,22 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 				}
 				// populate RouteProfile's RouteWeight
 				if params[13] != utils.EmptyString {
-					appendRoute.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-					wghtSplit := strings.Split(params[13], utils.ANDSep)
-					if len(wghtSplit) > 2 {
+					if strings.Count(params[13], utils.ANDSep) > 1 {
 						return utils.ErrUnsupportedFormat
 					}
-					if wghtSplit[0] != utils.EmptyString {
-						appendRoute.Weights[0].FilterIDs = []string{wghtSplit[0]}
-					}
-					if wghtSplit[1] != utils.EmptyString {
-						appendRoute.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-						if err != nil {
-							return err
-						}
+					appendRoute.Weights, err = utils.NewDynamicWeightsFromString(params[13], utils.ANDSep, utils.ANDSep)
+					if err != nil {
+						return err
 					}
 				}
 				// populate RouteProfile's RouteBlocker
 				if params[14] != utils.EmptyString {
-					appendRoute.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-					blckrSplit := strings.Split(params[14], utils.ANDSep)
-					if len(blckrSplit) > 2 {
+					if strings.Count(params[14], utils.ANDSep) > 1 {
 						return utils.ErrUnsupportedFormat
 					}
-					if blckrSplit[0] != utils.EmptyString {
-						appendRoute.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-					}
-					if blckrSplit[1] != utils.EmptyString {
-						appendRoute.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-						if err != nil {
-							return err
-						}
+					appendRoute.Blockers, err = utils.NewDynamicBlockersFromString(params[14], utils.ANDSep, utils.ANDSep)
+					if err != nil {
+						return err
 					}
 				}
 				// populate RouteProfile's RouteParameters
@@ -1480,19 +1382,12 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 		}
 		// populate RateProfile's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate RateProfile's MinCost
@@ -1517,19 +1412,12 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 			}
 			// populate Rate's Weights
 			if params[10] != utils.EmptyString {
-				args.Rates[params[7]].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-				wghtSplit := strings.Split(params[10], utils.ANDSep)
-				if len(wghtSplit) > 2 {
+				if strings.Count(params[10], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if wghtSplit[0] != utils.EmptyString {
-					args.Rates[params[7]].Weights[0].FilterIDs = []string{wghtSplit[0]}
-				}
-				if wghtSplit[1] != utils.EmptyString {
-					args.Rates[params[7]].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-					if err != nil {
-						return err
-					}
+				args.Rates[params[7]].Weights, err = utils.NewDynamicWeightsFromString(params[10], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 			// populate Rate's Blocker
@@ -1690,19 +1578,12 @@ func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trg
 		}
 		// populate IPProfile's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate IPProfile's TTL
@@ -1727,36 +1608,22 @@ func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trg
 			}
 			// populate Pool's Weights
 			if params[12] != utils.EmptyString {
-				args.Pools[0].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-				wghtSplit := strings.Split(params[12], utils.ANDSep)
-				if len(wghtSplit) > 2 {
+				if strings.Count(params[12], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if wghtSplit[0] != utils.EmptyString {
-					args.Pools[0].Weights[0].FilterIDs = []string{wghtSplit[0]}
-				}
-				if wghtSplit[1] != utils.EmptyString {
-					args.Pools[0].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-					if err != nil {
-						return err
-					}
+				args.Pools[0].Weights, err = utils.NewDynamicWeightsFromString(params[12], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 			// populate Pool's Blocker
 			if params[13] != utils.EmptyString {
-				args.Pools[0].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-				blckrSplit := strings.Split(params[13], utils.ANDSep)
-				if len(blckrSplit) > 2 {
+				if strings.Count(params[13], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if blckrSplit[0] != utils.EmptyString {
-					args.Pools[0].Blockers[0].FilterIDs = []string{blckrSplit[0]}
-				}
-				if blckrSplit[1] != utils.EmptyString {
-					args.Pools[0].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-					if err != nil {
-						return err
-					}
+				args.Pools[0].Blockers, err = utils.NewDynamicBlockersFromString(params[13], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 		}
@@ -1888,36 +1755,22 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 		}
 		// populate ActionProfile's Weights
 		if params[3] != utils.EmptyString {
-			args.Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-			wghtSplit := strings.Split(params[3], utils.ANDSep)
-			if len(wghtSplit) > 2 {
+			if strings.Count(params[3], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if wghtSplit[0] != utils.EmptyString {
-				args.Weights[0].FilterIDs = []string{wghtSplit[0]}
-			}
-			if wghtSplit[1] != utils.EmptyString {
-				args.Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-				if err != nil {
-					return err
-				}
+			args.Weights, err = utils.NewDynamicWeightsFromString(params[3], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate ActionProfile's Blockers
 		if params[4] != utils.EmptyString {
-			args.Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-			blckrSplit := strings.Split(params[4], utils.ANDSep)
-			if len(blckrSplit) > 2 {
+			if strings.Count(params[4], utils.ANDSep) > 1 {
 				return utils.ErrUnsupportedFormat
 			}
-			if blckrSplit[0] != utils.EmptyString {
-				args.Blockers[0].FilterIDs = []string{blckrSplit[0]}
-			}
-			if blckrSplit[1] != utils.EmptyString {
-				args.Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-				if err != nil {
-					return err
-				}
+			args.Blockers, err = utils.NewDynamicBlockersFromString(params[4], utils.ANDSep, utils.ANDSep)
+			if err != nil {
+				return err
 			}
 		}
 		// populate ActionProfile's Targets
@@ -1945,36 +1798,22 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 			}
 			// populate Action's Weights
 			if params[13] != utils.EmptyString {
-				args.Actions[0].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-				wghtSplit := strings.Split(params[13], utils.ANDSep)
-				if len(wghtSplit) > 2 {
+				if strings.Count(params[13], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if wghtSplit[0] != utils.EmptyString {
-					args.Actions[0].Weights[0].FilterIDs = []string{wghtSplit[0]}
-				}
-				if wghtSplit[1] != utils.EmptyString {
-					args.Actions[0].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-					if err != nil {
-						return err
-					}
+				args.Actions[0].Weights, err = utils.NewDynamicWeightsFromString(params[13], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 			// populate Action's Blocker
 			if params[14] != utils.EmptyString {
-				args.Actions[0].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-				blckrSplit := strings.Split(params[14], utils.ANDSep)
-				if len(blckrSplit) > 2 {
+				if strings.Count(params[14], utils.ANDSep) > 1 {
 					return utils.ErrUnsupportedFormat
 				}
-				if blckrSplit[0] != utils.EmptyString {
-					args.Actions[0].Blockers[0].FilterIDs = []string{blckrSplit[0]}
-				}
-				if blckrSplit[1] != utils.EmptyString {
-					args.Actions[0].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-					if err != nil {
-						return err
-					}
+				args.Actions[0].Blockers, err = utils.NewDynamicBlockersFromString(params[14], utils.ANDSep, utils.ANDSep)
+				if err != nil {
+					return err
 				}
 			}
 			// populate Action's Diktat
@@ -1991,36 +1830,22 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 				}
 				// populate Diktat's Weights
 				if params[18] != utils.EmptyString {
-					args.Actions[0].Diktats[0].Weights = utils.DynamicWeights{&utils.DynamicWeight{}}
-					wghtSplit := strings.Split(params[18], utils.ANDSep)
-					if len(wghtSplit) > 2 {
+					if strings.Count(params[18], utils.ANDSep) > 1 {
 						return utils.ErrUnsupportedFormat
 					}
-					if wghtSplit[0] != utils.EmptyString {
-						args.Actions[0].Diktats[0].Weights[0].FilterIDs = []string{wghtSplit[0]}
-					}
-					if wghtSplit[1] != utils.EmptyString {
-						args.Actions[0].Diktats[0].Weights[0].Weight, err = strconv.ParseFloat(wghtSplit[1], 64)
-						if err != nil {
-							return err
-						}
+					args.Actions[0].Diktats[0].Weights, err = utils.NewDynamicWeightsFromString(params[18], utils.ANDSep, utils.ANDSep)
+					if err != nil {
+						return err
 					}
 				}
 				// populate Diktat's Blocker
 				if params[19] != utils.EmptyString {
-					args.Actions[0].Diktats[0].Blockers = utils.DynamicBlockers{&utils.DynamicBlocker{}}
-					blckrSplit := strings.Split(params[19], utils.ANDSep)
-					if len(blckrSplit) > 2 {
+					if strings.Count(params[19], utils.ANDSep) > 1 {
 						return utils.ErrUnsupportedFormat
 					}
-					if blckrSplit[0] != utils.EmptyString {
-						args.Actions[0].Diktats[0].Blockers[0].FilterIDs = []string{blckrSplit[0]}
-					}
-					if blckrSplit[1] != utils.EmptyString {
-						args.Actions[0].Diktats[0].Blockers[0].Blocker, err = strconv.ParseBool(blckrSplit[1])
-						if err != nil {
-							return err
-						}
+					args.Actions[0].Diktats[0].Blockers, err = utils.NewDynamicBlockersFromString(params[19], utils.ANDSep, utils.ANDSep)
+					if err != nil {
+						return err
 					}
 				}
 			}
