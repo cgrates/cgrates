@@ -29,7 +29,7 @@ func ProcessFieldPath(fldPath, sep string, dP DataProvider) (newPath string, err
 		return
 	}
 	newPath = fldPath[:startIdx]
-	for _, path := range strings.Split(fldPath[startIdx+1:endIdx], sep) { // proccess the found path
+	for path := range strings.SplitSeq(fldPath[startIdx+1:endIdx], sep) { // proccess the found path
 		var val string
 		if strings.HasPrefix(path, MetaNow) || strings.HasPrefix(path, MetaTenant) {
 			if val, err = dP.FieldAsString(SplitPath(path, NestingSep[0], -1)); err != nil {
@@ -65,8 +65,13 @@ func ParseParamForDataProvider(param string, dP DataProvider, onlyEncapsulatead 
 		// Join all processed parts with &
 		return strings.Join(results, ANDSep), nil
 	}
-	if !onlyEncapsulatead {
-		switch {
+	return GetValueFromDynamicPath(param, dP, onlyEncapsulatead)
+}
+
+// GetValueFromDynamicPath will parse a param string with prefix "~*req.", "~*otps.", "*tenant" or "*now"; or strings containing dynamic paths between "<" ">" signs. If none match, it returns the original string
+func GetValueFromDynamicPath(param string, dP DataProvider, onlyEncapsulatead bool) (string, error) {
+	if !onlyEncapsulatead { // dont check of non-encapsulated dynamic paths if onlyEncapsulatead is true
+		switch { // check for dynamic paths with special prefixes, if not found any, fall down to encapsulated dynamic paths
 		case strings.HasPrefix(param, MetaDynReq) || strings.HasPrefix(param, DynamicDataPrefix+MetaOpts):
 			return DPDynamicString(param, dP)
 		case strings.HasPrefix(param, MetaNow) || strings.HasPrefix(param, MetaTenant):
@@ -81,5 +86,42 @@ func ParseParamForDataProvider(param string, dP DataProvider, onlyEncapsulatead 
 		return newParam, nil
 	}
 
+	return param, nil
+}
+
+// GetDynamicPathValueFromMapStringAny will parse a map[string]any for dynamic paths in keys and values, and return a new map[string]any with the parsed values. It will recursively parse nested maps. If onlyEncapsulatead is true, it will only parse dynamic paths that are encapsulated between "<" and ">" signs.
+func GetDynamicPathValueFromMapStringAny(param map[string]any, dP DataProvider, onlyEncapsulatead bool) (map[string]any, error) {
+	for key, val := range param {
+		// parse the key for dynamic paths
+		keyProcessed, err := GetValueFromDynamicPath(key, dP, onlyEncapsulatead)
+		if err != nil {
+			return nil, err
+		}
+		// parse the value for dynamic paths, if the value is a map[string]any, recursively call this function to process the nested map
+		if valMap, ok := val.(map[string]any); ok {
+			valProcessed, err := GetDynamicPathValueFromMapStringAny(valMap, dP, onlyEncapsulatead)
+			if err != nil {
+				return nil, err
+			}
+			param[keyProcessed] = valProcessed
+			if keyProcessed != key {
+				delete(param, key) // remove the old key if it was changed
+			}
+		} else if valStr, ok := val.(string); ok { // parse the value for dynamic paths if it is a string
+			valProcessed, err := GetValueFromDynamicPath(valStr, dP, onlyEncapsulatead)
+			if err != nil {
+				return nil, err
+			}
+			param[keyProcessed] = valProcessed
+			if keyProcessed != key {
+				delete(param, key) // remove the old key if it was changed
+			}
+		} else { // if the value is not a string or a map[string]any, just keep it as is
+			param[keyProcessed] = val
+			if keyProcessed != key {
+				delete(param, key) // remove the old key if it was changed
+			}
+		}
+	}
 	return param, nil
 }
