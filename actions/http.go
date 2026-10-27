@@ -298,6 +298,7 @@ func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 		if blocker, err := engine.BlockerFromDynamics(ctx, actD.Blockers, aL.fltrS, aL.config.GeneralCfg().DefaultTenant, data); err != nil {
 			return nil, err
 		} else if blocker {
+			aL.pstrs = aL.pstrs[:i+1]
 			break
 		}
 	}

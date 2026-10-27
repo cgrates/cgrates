@@ -21,9 +21,19 @@ func TestACHTTPPostExecute(t *testing.T) {
 	cfg.EFsCfg().PosterAttempts = 1
 	apAction := &utils.APAction{
 		ID:   "TEST_ACTION_HTTPPOST",
-		Type: utils.MetaURLog,
+		Type: utils.MetaHTTPPost,
 		Diktats: []*utils.APDiktat{
 			{
+				ID:       "first",
+				Weights:  utils.DynamicWeights{{Weight: 20}},
+				Blockers: utils.DynamicBlockers{{Blocker: true}},
+				Opts: map[string]any{
+					utils.MetaHTTPurl: "~*balance.TestBalance.Value",
+				},
+			},
+			{
+				ID:      "second",
+				Weights: utils.DynamicWeights{{Weight: 10}},
 				Opts: map[string]any{
 					utils.MetaHTTPurl: "~*balance.TestBalance.Value",
 				},
@@ -34,7 +44,10 @@ func TestACHTTPPostExecute(t *testing.T) {
 	http, err := newActHTTPPost(context.Background(), "cgrates.org", new(utils.CGREvent),
 		cacheS, new(engine.FilterS), cfg, apAction)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
+	}
+	if len(http.pstrs) != 1 || http.pstrs[0] == nil {
+		t.Fatalf("expected one non-nil poster, received %v", http.pstrs)
 	}
 
 	dataStorage := utils.MapStorage{
