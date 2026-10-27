@@ -5,6 +5,10 @@ package actions
 
 import (
 	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -90,6 +94,73 @@ func TestACHTTPPostExecute(t *testing.T) {
 	http.config.EFsCfg().FailedPostsDir = utils.MetaNone
 	if err := http.execute(context.Background(), dataStorage, utils.EmptyString); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestACHTTPExecuteDiktats(t *testing.T) {
+	type request struct {
+		path string
+		body map[string]any
+	}
+	received := make(chan request, 2)
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var body map[string]any
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Error(err)
+		}
+		received <- request{path: r.URL.Path, body: body}
+		w.WriteHeader(http.StatusNoContent)
+	}))
+	defer server.Close()
+
+	cfg := config.NewDefaultCGRConfig()
+	filters := engine.NewFilterS(cfg, nil, nil)
+	event := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event:  map[string]any{utils.AccountField: "1001"},
+	}
+	action := &utils.APAction{
+		ID:   "http",
+		Type: utils.MetaHTTP,
+		Diktats: []*utils.APDiktat{
+			{
+				ID:      "second",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Opts: map[string]any{
+					utils.MetaHTTPurl:    server.URL + "/second",
+					utils.MetaHTTPMethod: http.MethodPost,
+					utils.MetaHTTPBody:   map[string]any{"Second": "~*req.Account"},
+				},
+			},
+			{
+				ID:      "first",
+				Weights: utils.DynamicWeights{{Weight: 20}},
+				Opts: map[string]any{
+					utils.MetaHTTPurl:    server.URL + "/first",
+					utils.MetaHTTPMethod: http.MethodPost,
+					utils.MetaHTTPBody:   map[string]any{"First": "~*req.Account"},
+				},
+			},
+		},
+	}
+	ctx := context.Background()
+	act, err := newActHTTP(ctx, event.Tenant, event, nil, filters, cfg, action)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(act.reqDetails) != 2 {
+		t.Fatalf("expected two requests, received %d", len(act.reqDetails))
+	}
+	if err := act.execute(ctx, event.AsDataProvider(), ""); err != nil {
+		t.Fatal(err)
+	}
+	for _, want := range []request{
+		{path: "/first", body: map[string]any{"First": "1001"}},
+		{path: "/second", body: map[string]any{"Second": "1001"}},
+	} {
+		if got := <-received; !reflect.DeepEqual(got, want) {
+			t.Errorf("expected %v, received %v", want, got)
+		}
 	}
 }
 
