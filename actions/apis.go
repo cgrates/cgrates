@@ -114,9 +114,8 @@ func (aS *ActionS) V1GetScheduledActions(_ *context.Context, args *utils.GetSche
 
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
 func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
-	tnt := args.Tenant
-	if tnt == utils.EmptyString {
-		tnt = aS.cfg.GeneralCfg().DefaultTenant
+	if args.Tenant == utils.EmptyString {
+		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
 	}
 	var actPrfIDs []string
 	if actPrfIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.ActionSCfg().Opts.ProfileIDs,
