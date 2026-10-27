@@ -336,6 +336,41 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "ExportersWithoutAsyncOrAPIOpts",
+			expTpwo: &utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
+					Tenant:           "cgrates.org",
+					ID:               "THD_ACNT_1001",
+					ActionProfileIDs: []string{"ACT_LOG_WARNING"},
+					EeIDs:            []string{"eeID1", "eeID2"},
+				},
+				APIOpts: map[string]any{},
+			},
+			diktats: []*utils.APDiktat{{
+				ID: "d1",
+				Opts: map[string]any{
+					utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;;;;;;;;ACT_LOG_WARNING;;eeID1&eeID2;",
+				},
+			}},
+		},
+		{
+			name: "AsyncAndAPIOptsWithoutExporters",
+			expTpwo: &utils.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &utils.ThresholdProfile{
+					Tenant: "cgrates.org",
+					ID:     "THD_ACNT_1001",
+					Async:  true,
+				},
+				APIOpts: map[string]any{"key": "value"},
+			},
+			diktats: []*utils.APDiktat{{
+				ID: "d1",
+				Opts: map[string]any{
+					utils.MetaTemplate: "cgrates.org;THD_ACNT_1001;;;;;;;;;true;;key:value",
+				},
+			}},
+		},
+		{
 			name:    "EmptyDiktats",
 			diktats: []*utils.APDiktat{},
 			wantErr: true,

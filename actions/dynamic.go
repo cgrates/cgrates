@@ -157,20 +157,20 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 			args.ActionProfileIDs = strings.Split(params[9], utils.ANDSep)
 		}
 		// populate Threshold's Async bool
-		if params[9] != utils.EmptyString {
+		if params[10] != utils.EmptyString {
 			args.Async, err = strconv.ParseBool(params[10])
 			if err != nil {
 				return err
 			}
 		}
 		// populate Threshold's EeIDs
-		if params[10] != utils.EmptyString {
+		if params[11] != utils.EmptyString {
 			args.EeIDs = strings.Split(params[11], utils.ANDSep)
 			utils.Logger.Crit(args.EeIDs[0])
 
 		}
 		// populate Threshold's APIOpts
-		if params[11] != utils.EmptyString {
+		if params[12] != utils.EmptyString {
 			if err := parseParamStringToMap(params[12], args.APIOpts); err != nil {
 				return err
 			}
