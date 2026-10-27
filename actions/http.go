@@ -47,7 +47,6 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	}
 
 	dP := cgrEv.AsDataProvider() // convert event to data provider
-	reqD := make([]*reqDetails, 0)
 	for _, actD := range diktats {
 		// get value of opts *httpURL and parse it
 		urlOpts, err := engine.GetStringOpts(ctx, tnt, dP, actD.Opts, fltrS, cfg.ActionSCfg().Opts.HttpURL,
@@ -120,7 +119,7 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 			return nil, fmt.Errorf("failed to cast body <%#v> of type <%T>", staticBodyAny, staticBodyAny)
 		}
 		// populate request details
-		aL.reqDetails = append(reqD, &reqDetails{
+		aL.reqDetails = append(aL.reqDetails, &reqDetails{
 			StaticBody:  staticBody,
 			ContentType: contentType,
 			Method:      strings.ToUpper(method),
@@ -140,24 +139,25 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 func (aL *actHTTP) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
 	var partExec bool
 	for _, reqD := range aL.reqDetails {
+		payload := data
 		if reqD.StaticBody != nil {
 			body, err := utils.GetDynamicPathValueFromMapStringAny(reqD.StaticBody, data, false)
 			if err != nil {
 				return err
 			}
-			data = body
+			payload = body
 		}
 		var body io.Reader
 		// build body depending on ContentType
 		if reqD.ContentType == utils.ContentForm {
 			urlVals := url.Values{}
-			for k, v := range data {
+			for k, v := range payload {
 				urlVals.Set(k, utils.IfaceAsString(v))
 			}
 			body = strings.NewReader(urlVals.Encode())
 			reqD.Headers.Set("Content-Type", "application/x-www-form-urlencoded")
 		} else {
-			jsonBody, err := json.Marshal(data)
+			jsonBody, err := json.Marshal(payload)
 			if err != nil {
 				return err
 			}
@@ -167,7 +167,7 @@ func (aL *actHTTP) execute(ctx *context.Context, data utils.MapStorage, _ string
 
 		req, rerr := http.NewRequestWithContext(context.Background(), reqD.Method, reqD.URL, body)
 		if rerr != nil {
-			utils.Logger.Warning(fmt.Sprintf("<ActionS> failed to create <%v> request <%v> to URL <%v> with error <%v>", reqD.Method, data, reqD.URL, rerr))
+			utils.Logger.Warning(fmt.Sprintf("<ActionS> failed to create <%v> request <%v> to URL <%v> with error <%v>", reqD.Method, payload, reqD.URL, rerr))
 			partExec = true
 			continue
 		}
