@@ -394,7 +394,7 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;THD_ACNT_1010;;w1&w2&w3;1;1;1s;true;;ACT_LOG_WARNING;true;eeID10;key:value",
+						utils.MetaTemplate: "cgrates.org;THD_ACNT_1010;;&20&&30;1;1;1s;true;;ACT_LOG_WARNING;true;eeID10;key:value",
 					},
 				},
 			},
@@ -4055,7 +4055,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 				},
 			},
 			wantErr:           true,
-			expectErrContains: "strconv.ParseFloat",
+			expectErrContains: "invalid Weight <invalid_weight>",
 		},
 		{
 			name: "InvalidActionBlockerFormat",
@@ -4071,7 +4071,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 				},
 			},
 			wantErr:           true,
-			expectErrContains: "strconv.ParseBool",
+			expectErrContains: "cannot convert bool with value: <invalid_bool> into Blocker",
 		},
 		{
 			name: "InvalidDiktatWeightFormat",
@@ -4087,7 +4087,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 				},
 			},
 			wantErr:           true,
-			expectErrContains: "strconv.ParseFloat",
+			expectErrContains: "invalid Weight <invalid_weight>",
 		},
 		{
 			name: "InvalidDiktatBlockerFormat",
@@ -4103,7 +4103,7 @@ func TestActDynamicActionExecute(t *testing.T) {
 				},
 			},
 			wantErr:           true,
-			expectErrContains: "strconv.ParseBool",
+			expectErrContains: "cannot convert bool with value: <invalid_bool> into Blocker",
 		},
 		{
 			name: "InvalidOptsFormat",
