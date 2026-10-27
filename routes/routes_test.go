@@ -880,7 +880,7 @@ func TestRoutesV1GetRouteProfilesForEventError(t *testing.T) {
 	}
 }
 
-func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
+func TestRoutesV1GetRouteProfilesForEventNoIDNotFoundError(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
@@ -902,8 +902,8 @@ func TestRoutesV1GetRouteProfilesForEventMsnIDError(t *testing.T) {
 		Event:  map[string]any{},
 	}
 	err = routeService.V1GetRouteProfilesForEvent(context.Background(), args, &reply)
-	if err == nil || err.Error() != "MANDATORY_IE_MISSING: [ID]" {
-		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "MANDATORY_IE_MISSING: [ID]", err)
+	if err == nil || err.Error() != "NOT_FOUND" {
+		t.Errorf("\nExpected <%+v>, \nReceived <%+v>", "NOT_FOUND", err)
 	}
 }
 

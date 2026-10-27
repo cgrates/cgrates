@@ -53,6 +53,7 @@ var (
 		testRoutesBlockerRemoveRouteProfiles,
 		testRoutesBlockerSetRouteProfiles,
 		testRoutesBlockerGetRouteProfilesForEvent,
+		testRoutesGetRouteProfilesForEventNoEventID,
 
 		// Route blocker behaviour test
 		testRoutesBlockerSetRouteProfile,
@@ -833,6 +834,85 @@ func testRoutesBlockerGetRouteProfilesForEvent(t *testing.T) {
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
 		ID:     "EventGetRouteProfiles",
+		Event: map[string]any{
+			"TestCase": "RouteProfileBlockerBehaviour",
+		},
+		APIOpts: map[string]any{},
+	}
+	expected := []*utils.RouteProfile{
+		{
+			ID:        "ROUTE_TEST_1",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 30,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: false,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*utils.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "ROUTE_TEST_3",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 20,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*utils.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+		{
+			ID:        "ROUTE_TEST_2",
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.TestCase:RouteProfileBlockerBehaviour"},
+			Weights: utils.DynamicWeights{
+				{
+					Weight: 10,
+				},
+			},
+			Blockers: utils.DynamicBlockers{
+				{
+					Blocker: true,
+				},
+			},
+			Sorting:           utils.MetaWeight,
+			SortingParameters: []string{},
+			Routes: []*utils.Route{
+				{
+					ID: "routeTest",
+				},
+			},
+		},
+	}
+	var reply []*utils.RouteProfile
+	if err := roRPC.Call(context.Background(), utils.RouteSv1GetRouteProfilesForEvent, args, &reply); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(reply, expected) {
+		t.Errorf("expected: <%+v>, \nreceived: <%+v>", utils.ToJSON(expected), utils.ToJSON(reply))
+	}
+}
+
+func testRoutesGetRouteProfilesForEventNoEventID(t *testing.T) {
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
 		Event: map[string]any{
 			"TestCase": "RouteProfileBlockerBehaviour",
 		},
