@@ -552,6 +552,15 @@ func TestV1ExecuteActions(t *testing.T) {
 		t.Errorf("Unexpected reply %+v", reply)
 	}
 
+	ev.Tenant = ""
+	reply = ""
+	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err != nil {
+		t.Error(err)
+	} else if reply != utils.OK {
+		t.Errorf("Unexpected reply %+v", reply)
+	}
+	ev.Tenant = actPrf.Tenant
+
 	ev.APIOpts[utils.OptsActionsProfileIDs] = []string{"invalid_id"}
 	if err := acts.V1ExecuteActions(context.Background(), ev, &reply); err == nil || err != utils.ErrNotFound {
 		t.Errorf("Expected %+v, received %+v", utils.ErrNotFound, err)
