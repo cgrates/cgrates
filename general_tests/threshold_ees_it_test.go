@@ -7,66 +7,36 @@
 package general_tests
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestThresholdEES(t *testing.T) {
 	switch *utils.DBType {
-	case utils.MetaRedis:
-		t.SkipNow()
-	case utils.MetaMySQL:
-	case utils.MetaPostgres, utils.MetaInternal, utils.MetaMongo:
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
 		t.SkipNow()
 	default:
-		t.Fatal("Unknown Database type")
+		t.Fatal("unsupported dbtype value")
 	}
 
 	content := `{
 "logger": {
 	"level": 7
 },
-"db": {
-	"dbConns": {
-		"*default": {
-			"dbType": "redis",
-			"dbHost": "127.0.0.1",
-			"dbPort": 6379,
-			"dbName": "10",
-			"dbUser": "cgrates"
-		},
-		"StorDB": {
-			"dbType": "mysql",
-			"dbHost": "127.0.0.1",
-			"dbPort": 3306,
-			"dbName": "cgrates",
-			"dbUser": "cgrates",
-			"dbPassword": "CGRateS.org"
-		}
-	},
-	"items": {
-		"*cdrs": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "StorDB"}
-	}
-},
-"cdrs": {
+"sessions": {
 	"enabled": true,
 	"conns": {
 		"*thresholds": [{"connIDs": ["*localhost"]}]
-	},
+	}
 },
-"chargers": {
+"actions": {
 	"enabled": true,
-	"conns": {
-		"*attributes": [{"connIDs": ["*localhost"]}]
-	},
-},
-"attributes": {
-	"enabled": false,
 },
 "thresholds": {
 	"enabled": true,
@@ -74,7 +44,8 @@ func TestThresholdEES(t *testing.T) {
 	"scheduledIDs": {},
 	"indexedSelects": false,
 	"conns": {
-		"*ees": [{"connIDs": ["*localhost"]}]
+		"*ees": [{"connIDs": ["*localhost"]}],
+		"*actions": [{"connIDs": ["*localhost"]}]
 	},
 
 },
@@ -84,6 +55,7 @@ func TestThresholdEES(t *testing.T) {
 	      {
             "id": "exporter1",
             "type": "*virt",
+            "synchronous": true,
 			"fields":[
 				{"tag": "ID", "path": "*uch.ID", "type": "*variable", "value": "~*req.ID"},
 				{"tag": "EventType", "path": "*uch.EventType", "type": "*variable", "value": "~*req.EventType"},
@@ -101,37 +73,40 @@ func TestThresholdEES(t *testing.T) {
 
 	ng := engine.TestEngine{
 		ConfigJSON: content,
+		DBCfg:      engine.InternalDBCfg,
 		Encoding:   utils.MetaJSON,
 		TpFiles: map[string]string{
 			utils.ActionsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Schedule,TargetType,TargetIDs,ActionID,ActionFilterIDs,ActionTTL,ActionType,ActionOpts,ActionPath,ActionValue
 cgrates.org,*log,,,,,,,,,,,,,`,
 			utils.ThresholdsCsv: `#Tenant[0],Id[1],FilterIDs[2],Weight[3],MaxHits[4],MinHits[5],MinSleep[6],Blocker[7],AttributeIDs[8],ActionProfileIDs[9],Async[10],EeIDs[11]
-cgrates.org,Threshold1,*string:~*opts.*account:1001;*string:~*req.RequestType:*prepaid,;20,1,0,1s,false,,*log,true,exporter1`,
+cgrates.org,Threshold1,*string:~*opts.*account:1001;*string:~*req.RequestType:*prepaid,;20,1,0,1s,false,,*log,false,exporter1`,
 		},
-		LogBuffer: bytes.NewBuffer(nil),
 	}
-	client, _ := ng.Run(t)
-	time.Sleep(200 * time.Millisecond)
+	client, cfg := ng.Run(t)
+	engine.WaitForServiceStart(t, client, utils.SessionS, cfg.GeneralCfg().ConnectTimeout)
 	t.Run("ThresholdEES", func(t *testing.T) {
-		// unfinished , to be redone using sessions processevent or ees with cgrur
-		// ev := &utils.CGREvent{
-		// 	Tenant: "cgrates.org",
-		// 	ID:     "Event1",
-		// 	Event: map[string]any{
-		// 		utils.RequestType:  utils.MetaPrepaid,
-		// 		utils.AccountField: "1001",
-		// 		utils.Destination:  "1002",
-		// 		utils.Usage:        time.Minute,
-		// 	},
-		// 	APIOpts: map[string]any{
-		// 		utils.MetaAccount:    "1001",
-		// 		utils.MetaThresholds: true,
-		// 	},
-		// }
-		// var rply string
-		// if err := client.Call(context.Background(), utils.CDRsV1ProcessEvent, ev, &rply); err != nil {
-		// 	t.Error(err)
-		// }
+		ev := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "Event1",
+			Event: map[string]any{
+				utils.RequestType:  utils.MetaPrepaid,
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.Usage:        time.Minute,
+			},
+			APIOpts: map[string]any{
+				utils.MetaAccount:    "1001",
+				utils.MetaThresholds: true,
+				utils.MetaOriginID:   "Event1",
+			},
+		}
+		var reply sessions.V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent, ev, &reply); err != nil {
+			t.Fatal(err)
+		}
+		if got := reply.ThresholdIDs[utils.MetaPrimary]; len(got) != 1 || got[0] != "Threshold1" {
+			t.Fatalf("expected Threshold1 in SessionS reply, got %v", reply.ThresholdIDs)
+		}
 	})
 
 	t.Run("ThresholdEESCheck", func(t *testing.T) {

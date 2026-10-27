@@ -7,7 +7,7 @@
           "*string:~*req.Acct-Status-Type:Start"
         ],
         "flags": [
-          "*event"
+          "*sessions"
         ],
         "requestFields": [
           {
@@ -183,7 +183,7 @@
           "*string:~*req.Acct-Status-Type:Alive"
         ],
         "flags": [
-          "*event"
+          "*sessions"
         ],
         "requestFields": [
           {
@@ -326,7 +326,7 @@
           "*string:~*req.Acct-Status-Type:Stop"
         ],
         "flags": [
-          "*event"
+          "*sessions"
         ],
         "requestFields": [
           {

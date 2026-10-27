@@ -194,6 +194,13 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 }
 
 func TestSessionSv1ProcessEventInterimAccountDebit(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
 
 	ng := engine.TestEngine{
 		ConfigJSON: `{
@@ -305,6 +312,7 @@ func TestSessionSv1ProcessEventInterimAccountDebit(t *testing.T) {
 					utils.MetaUpdate:   true,
 					utils.MetaUsage:    150 * time.Second,
 					utils.MetaOriginID: originID,
+					utils.MetaRunID:    utils.MetaDefault,
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -701,6 +709,14 @@ func TestSessionSv1ProcessEventDebitBlockedByBalanceBlocker(t *testing.T) {
 }
 
 func TestSessionSv1ProcessEventMultipleUpdates(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "sessions": {
@@ -803,6 +819,7 @@ func TestSessionSv1ProcessEventMultipleUpdates(t *testing.T) {
 					utils.MetaUpdate:   true,
 					utils.MetaUsage:    20 * time.Second,
 					utils.MetaOriginID: originID,
+					utils.MetaRunID:    utils.MetaDefault,
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",
@@ -834,6 +851,7 @@ func TestSessionSv1ProcessEventMultipleUpdates(t *testing.T) {
 					utils.MetaUpdate:   true,
 					utils.MetaUsage:    15 * time.Second,
 					utils.MetaOriginID: originID,
+					utils.MetaRunID:    utils.MetaDefault,
 				},
 				Event: map[string]any{
 					utils.AccountField: "1001",

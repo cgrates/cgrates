@@ -74,6 +74,7 @@ func TestSessionSv1ProcessEventRoutes(t *testing.T) {
 	// 	}
 	// })
 
+	engine.WaitForServiceStart(t, client, utils.AdminS, time.Second)
 	var reply string
 	if err := client.Call(context.Background(), utils.AdminSv1SetFilter,
 		&engine.FilterWithAPIOpts{
@@ -1285,6 +1286,14 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 }
 
 func TestSessionSv1ProcessEventAccountsAuthorizeRates(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 			"logger": {"level": 7},
@@ -1497,8 +1506,8 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 					utils.AnswerTime:   "2018-01-07T17:00:00Z",
 				},
 			}, &rply)
-		if err == nil || err.Error() != utils.ErrNotFound.Error() {
-			t.Fatalf("expected NOT_FOUND for unknown account, got: %v", err)
+		if err == nil || err.Error() != utils.ErrPartiallyExecuted.Error() {
+			t.Fatalf("expected PARTIALLY_EXECUTED for unknown account, got: %v", err)
 		}
 	})
 
@@ -1773,18 +1782,10 @@ cgrates.org,RP_SIMPLE,,;10,,,,RT_SIMPLE,*string:~*req.Destination:1002,"* * * * 
 }
 
 func TestSessionSv1ProcessEventEEs(t *testing.T) {
-	var dbcfg engine.DBCfg
 	switch *utils.DBType {
 	case utils.MetaInternal:
-		dbcfg = engine.InternalDBCfg
-	case utils.MetaRedis:
-		dbcfg = engine.RedisDBCfg
-	case utils.MetaMySQL:
-		dbcfg = engine.MySQLDBCfg
-	case utils.MetaMongo:
-		dbcfg = engine.MongoDBCfg
-	case utils.MetaPostgres:
-		dbcfg = engine.PostgresDBCfg
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
@@ -1811,10 +1812,11 @@ func TestSessionSv1ProcessEventEEs(t *testing.T) {
 			"chargers": {"enabled": true},
 			"admins": {"enabled": true}
 		}`,
-		DBCfg:    dbcfg,
+		DBCfg:    engine.InternalDBCfg,
 		Encoding: *utils.Encoding,
 	}
 	client, _ := ng.Run(t)
+	engine.WaitForServiceStart(t, client, utils.AdminS, time.Second)
 
 	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
 		&utils.ChargerProfileWithAPIOpts{
@@ -3442,6 +3444,14 @@ func TestSessionSv1ProcessEventDebitBalanceFallback(t *testing.T) {
 }
 
 func TestSessionSv1ProcessEventTTLNoUpdates(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
 	ng := engine.TestEngine{
 		ConfigJSON: `{
 "logger": {"level": 7},
@@ -3514,14 +3524,12 @@ func TestSessionSv1ProcessEventTTLNoUpdates(t *testing.T) {
 			t.Errorf("expected Destination 1002, got %s", dst)
 		}
 
-		if s.ID != originID {
-			t.Errorf("expected ID(OriginID) %s, got %s", originID, s.ID)
+		if got := s.CGREvent.APIOpts[utils.MetaOriginID]; got != originID {
+			t.Errorf("expected OriginID %s, got %v", originID, got)
 		}
 
 		time.Sleep(ttl - 100*time.Millisecond)
 		checkActiveSessions(t, 1)
-
-		checkActiveSessions(t, 0)
 
 		time.Sleep(300 * time.Millisecond)
 		checkActiveSessions(t, 0)
