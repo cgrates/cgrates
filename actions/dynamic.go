@@ -4,9 +4,7 @@
 package actions
 
 import (
-	"cmp"
 	"fmt"
-	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -84,25 +82,10 @@ func (aL *actDynamicThreshold) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -267,25 +250,10 @@ func (aL *actDynamicStats) execute(ctx *context.Context, data utils.MapStorage, 
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -482,25 +450,10 @@ func (aL *actDynamicAttribute) execute(ctx *context.Context, data utils.MapStora
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -662,25 +615,10 @@ func (aL *actDynamicResource) execute(ctx *context.Context, data utils.MapStorag
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -829,25 +767,10 @@ func (aL *actDynamicTrend) execute(ctx *context.Context, data utils.MapStorage, 
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -985,25 +908,10 @@ func (aL *actDynamicRanking) execute(ctx *context.Context, data utils.MapStorage
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -1116,25 +1024,10 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -1247,25 +1140,10 @@ func (aL *actDynamicRoute) execute(ctx *context.Context, data utils.MapStorage, 
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -1564,25 +1442,10 @@ func (aL *actDynamicRate) execute(ctx *context.Context, data utils.MapStorage, t
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -1788,25 +1651,10 @@ func (aL *actDynamicIP) execute(ctx *context.Context, data utils.MapStorage, trg
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
@@ -1994,25 +1842,10 @@ func (aL *actDynamicAction) execute(ctx *context.Context, data utils.MapStorage,
 	if len(aL.aCfg.Diktats) == 0 {
 		return fmt.Errorf("No diktats were specified for action <%v>", aL.aCfg.ID)
 	}
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *template in opts, will be weight sorted later
-	for _, diktat := range aL.aCfg.Diktats {
-		if pass, err := aL.fltrS.Pass(ctx, aL.tnt, diktat.FilterIDs, data); err != nil {
-			return err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, aL.fltrS, aL.tnt, data)
-		if err != nil {
-			return err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, aL.tnt, aL.aCfg.Diktats, aL.fltrS, data)
+	if err != nil {
+		return err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)

@@ -5,13 +5,11 @@ package actions
 
 import (
 	"bytes"
-	"cmp"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
-	"slices"
 	"strings"
 
 	"github.com/cgrates/birpc/context"
@@ -33,25 +31,11 @@ type reqDetails struct {
 // newActHTTPGeneric creates a new action that performs HTTP requests
 func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	_ *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTP, err error) {
-	weights := make(map[string]float64)
-	diktats := make([]*utils.APDiktat, 0)
 	data := cgrEv.AsDataProvider()
-	for _, diktat := range aCfg.Diktats {
-		if pass, err := fltrS.Pass(ctx, cfg.GeneralCfg().DefaultTenant, diktat.FilterIDs, data); err != nil {
-			return nil, err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, fltrS, cfg.GeneralCfg().DefaultTenant, data)
-		if err != nil {
-			return nil, err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, cfg.GeneralCfg().DefaultTenant, aCfg.Diktats, fltrS, data)
+	if err != nil {
+		return nil, err
 	}
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 
 	client := &http.Client{Transport: cfg.HTTPCfg().ClientOpts, Timeout: cfg.GeneralCfg().ReplyTimeout} // shared http.Client for connection reuse
 
@@ -254,26 +238,11 @@ func (aL *actHTTP) cfg() *utils.APAction {
 
 func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 	cache *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
-	weights := make(map[string]float64)   // stores sorting weights by Diktat ID
-	diktats := make([]*utils.APDiktat, 0) // list of diktats which have *balancePath in opts, will be weight sorted later
 	data := cgrEv.AsDataProvider()
-	for _, diktat := range aCfg.Diktats {
-		if pass, err := fltrS.Pass(ctx, cfg.GeneralCfg().DefaultTenant, diktat.FilterIDs, data); err != nil {
-			return nil, err
-		} else if !pass {
-			continue
-		}
-		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, fltrS, cfg.GeneralCfg().DefaultTenant, data)
-		if err != nil {
-			return nil, err
-		}
-		weights[diktat.ID] = weight
-		diktats = append(diktats, diktat)
+	diktats, err := filterAndSortDiktats(ctx, cfg.GeneralCfg().DefaultTenant, aCfg.Diktats, fltrS, data)
+	if err != nil {
+		return nil, err
 	}
-	// Sort by weight (higher values first).
-	slices.SortFunc(diktats, func(a, b *utils.APDiktat) int {
-		return cmp.Compare(weights[b.ID], weights[a.ID])
-	})
 	aL = &actHTTPPost{
 		config: cfg,
 		aCfg:   aCfg,

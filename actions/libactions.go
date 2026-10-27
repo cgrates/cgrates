@@ -4,13 +4,38 @@
 package actions
 
 import (
+	"cmp"
 	"fmt"
+	"slices"
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func filterAndSortDiktats(ctx *context.Context, tenant string, diktats []*utils.APDiktat,
+	filters *engine.FilterS, data utils.DataProvider) ([]*utils.APDiktat, error) {
+	weights := make(map[string]float64)
+	selected := make([]*utils.APDiktat, 0)
+	for _, diktat := range diktats {
+		if pass, err := filters.Pass(ctx, tenant, diktat.FilterIDs, data); err != nil {
+			return nil, err
+		} else if !pass {
+			continue
+		}
+		weight, err := engine.WeightFromDynamics(ctx, diktat.Weights, filters, tenant, data)
+		if err != nil {
+			return nil, err
+		}
+		weights[diktat.ID] = weight
+		selected = append(selected, diktat)
+	}
+	slices.SortFunc(selected, func(a, b *utils.APDiktat) int {
+		return cmp.Compare(weights[b.ID], weights[a.ID])
+	})
+	return selected, nil
+}
 
 // actionTarget returns the target attached to an action
 func actionTarget(act string) string {
