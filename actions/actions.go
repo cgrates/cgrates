@@ -40,12 +40,7 @@ type ActionS struct {
 	dm               *engine.DataManager
 	crn              *cron.Cron
 	crnLk            *sync.RWMutex
-	profileSchedules map[string]*profileSchedule
-}
-
-type profileSchedule struct {
-	entryIDs []cron.EntryID
-	targets  map[string]utils.StringSet
+	profileSchedules map[string]cron.EntryID
 }
 
 type actionJob struct {
@@ -82,17 +77,17 @@ func (aS *ActionS) schedInit() {
 			},
 		}
 	}
-	aS.scheduleActions(context.Background(), cgrEvs, nil, false, false, true)
+	_ = aS.scheduleActions(context.Background(), cgrEvs, nil, false, true)
 }
 
-// scheduleActions will set up cron and load the matching data
-func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, overwrite, crnReset bool) error {
+// scheduleActions loads matching profiles and schedules their actions.
+func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, crnReset bool) error {
 	aS.crnLk.Lock()
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
 	if crnReset {
 		crn = cron.New()
-		aS.profileSchedules = make(map[string]*profileSchedule)
+		aS.profileSchedules = make(map[string]cron.EntryID)
 	}
 	ignFilters = ignFilters && len(aPrflIDs) != 0
 	var partExec bool
@@ -108,56 +103,11 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 			continue
 		}
 		for _, profile := range profiles {
-			schedActs, err := aS.scheduledActionsForProfile(ctx, cgrEv.Tenant, cgrEv, profile, evNm, ignFilters)
-			if err != nil {
-				continue
-			}
-			key := profile.TenantID()
-			scheduled := aS.profileSchedules[key]
-			if !overwrite && scheduled != nil {
-				schedActs = slices.DeleteFunc(schedActs, func(sActs *scheduledActs) bool {
-					return scheduled.targets[sActs.trgTyp].Has(sActs.trgID)
-				})
-			}
-			var schedule cron.Schedule
-			if len(schedActs) != 0 && profile.Schedule != utils.MetaASAP {
-				if schedule, err = cron.ParseStandard(profile.Schedule); err != nil {
-					utils.Logger.Warning(fmt.Sprintf(
-						"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
-						utils.ActionS, profile.Tenant, profile.ID, err))
-					partExec = true
-					continue
-				}
-			}
-			if overwrite && scheduled != nil {
-				for _, entryID := range scheduled.entryIDs {
-					crn.Remove(entryID)
-				}
-				delete(aS.profileSchedules, key)
-				scheduled = nil
-			}
-			if schedule != nil {
-				if scheduled == nil {
-					scheduled = &profileSchedule{targets: make(map[string]utils.StringSet)}
-					aS.profileSchedules[key] = scheduled
-				}
-				entryID := crn.Schedule(schedule, &actionJob{
-					service:  aS,
-					schedule: profile.Schedule,
-					batch:    schedActs,
-				})
-				scheduled.entryIDs = append(scheduled.entryIDs, entryID)
-				for _, sActs := range schedActs {
-					if scheduled.targets[sActs.trgTyp] == nil {
-						scheduled.targets[sActs.trgTyp] = make(utils.StringSet)
-					}
-					scheduled.targets[sActs.trgTyp].Add(sActs.trgID)
-				}
-			}
-			if profile.Schedule == utils.MetaASAP {
-				for _, sActs := range schedActs {
-					go aS.asapExecuteActions(context.Background(), sActs)
-				}
+			if err := aS.scheduleActionProfile(ctx, crn, cgrEv, profile, evNm, ignFilters, true); err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> scheduling ActionProfile with id: <%s:%s>, error: <%s>",
+					utils.ActionS, profile.Tenant, profile.ID, err))
+				partExec = true
 			}
 		}
 	}
@@ -170,6 +120,43 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 	}
 	if partExec {
 		return utils.ErrPartiallyExecuted
+	}
+	return nil
+}
+
+// scheduleActionProfile schedules a profile's actions, replacing any existing job.
+// The caller must hold crnLk.
+func (aS *ActionS) scheduleActionProfile(ctx *context.Context, crn *cron.Cron, cgrEv *utils.CGREvent,
+	profile *utils.ActionProfile, evNm utils.MapStorage, ignoreFilters, executeASAP bool) error {
+	var schedActs []*scheduledActs
+	var schedule cron.Schedule
+	if profile.Schedule != utils.MetaASAP || executeASAP {
+		var err error
+		if schedActs, err = aS.scheduledActionsForProfile(ctx, profile.Tenant, cgrEv, profile, evNm, ignoreFilters); err != nil {
+			return err
+		}
+		if len(schedActs) != 0 && profile.Schedule != utils.MetaASAP {
+			if schedule, err = cron.ParseStandard(profile.Schedule); err != nil {
+				return err
+			}
+		}
+	}
+	key := profile.TenantID()
+	if entryID, has := aS.profileSchedules[key]; has {
+		crn.Remove(entryID)
+		delete(aS.profileSchedules, key)
+	}
+	if schedule != nil {
+		aS.profileSchedules[key] = crn.Schedule(schedule, &actionJob{
+			service:  aS,
+			schedule: profile.Schedule,
+			batch:    schedActs,
+		})
+	}
+	if profile.Schedule == utils.MetaASAP && executeASAP {
+		for _, sActs := range schedActs {
+			go aS.asapExecuteActions(context.Background(), sActs)
+		}
 	}
 	return nil
 }

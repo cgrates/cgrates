@@ -350,6 +350,7 @@ const (
 	MetaRates                = "*rates"
 	MetaRateSOverwrite       = "*rateSOverwrite"
 	MetaOverwrite            = "*overwrite"
+	MetaReschedule           = "*reschedule"
 	MetaContinue             = "*continue"
 	Migrator                 = "migrator"
 	UnsupportedMigrationTask = "unsupported migration task"
@@ -2728,6 +2729,7 @@ const (
 	ActionSv1                    = "ActionSv1"
 	ActionSv1Ping                = "ActionSv1.Ping"
 	ActionSv1ScheduleActions     = "ActionSv1.ScheduleActions"
+	ActionSv1Reschedule          = "ActionSv1.Reschedule"
 	ActionSv1ExecuteActions      = "ActionSv1.ExecuteActions"
 	ActionSv1GetScheduledActions = "ActionSv1.GetScheduledActions"
 )
