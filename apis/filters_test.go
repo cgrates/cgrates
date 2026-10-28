@@ -6,7 +6,9 @@ package apis
 import (
 	"fmt"
 	"reflect"
+	"slices"
 	"sort"
+	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
@@ -15,6 +17,64 @@ import (
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
+
+func TestFiltersUpdateFilterRuleValues(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	locker := engine.NewLocker(cfg)
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cm := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg()), cfg, cm, locker)
+	cache := engine.NewCacheS(cfg, dm, cm, nil, locker)
+	dm.SetCache(cache)
+	cm.SetCache(cache)
+	admin := NewAdminSv1(cfg, dm, cm, nil, locker)
+	ctx := context.Background()
+	filter := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "members",
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaString, Element: "~*req.IMSI", Values: []string{"1001", "1002"}},
+			{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"US"}},
+			{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"UK"}},
+		},
+	}
+	var reply string
+	if err := admin.SetFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	args := &engine.UpdateFilterRuleValuesArgs{
+		Tenant:       "cgrates.org",
+		ID:           "members",
+		Type:         utils.MetaString,
+		Element:      "~*req.IMSI",
+		AddValues:    []string{"1003"},
+		RemoveValues: []string{"1001"},
+	}
+	if err := admin.UpdateFilterRuleValues(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if want := []string{"1002", "1003"}; !slices.Equal(stored.Rules[0].Values, want) {
+		t.Errorf("values = %v, want %v", stored.Rules[0].Values, want)
+	}
+
+	args.Element = "~*req.Other"
+	if err := admin.UpdateFilterRuleValues(ctx, args, &reply); err == nil || err.Error() != "NOT_FOUND:FilterRule" {
+		t.Errorf("missing rule: error = %v", err)
+	}
+
+	args.Element = "~*req.Country"
+	if err := admin.UpdateFilterRuleValues(ctx, args, &reply); err == nil || !strings.Contains(err.Error(), "multiple filter rules") {
+		t.Errorf("multiple matching rules: error = %v", err)
+	}
+}
 
 func TestFiltersSetGetGetCountFilters(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
@@ -843,7 +903,7 @@ func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args
 func TestFiltersSetFilterReloadCache(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
-	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.GeneralCfg().DefaultCaching = utils.MetaReload
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{
 		{
 			ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaCaches)},
@@ -985,35 +1045,54 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		t.Error(err)
 	}
 
-	arg = &engine.FilterWithAPIOpts{
-		Filter: &engine.Filter{
-			ID: "FLTR_ID",
-			Rules: []*engine.FilterRule{
-				{
-					Type:    utils.MetaString,
-					Element: "~*req.Account",
-					Values:  []string{"1002"},
-				},
-			},
-		},
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaReload,
-		},
+	ctx := context.Background()
+	if err := dm.SetAccount(ctx, &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACC_ID",
+		FilterIDs: []string{"FLTR_ID"},
+	}, true); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := dm.GetFilter(ctx, "cgrates.org", "FLTR_ID", true, true, utils.NonTransactional); err != nil {
+		t.Fatal(err)
+	}
+	args := &engine.UpdateFilterRuleValuesArgs{
+		ID:        "FLTR_ID",
+		Type:      utils.MetaString,
+		Element:   "~*req.Account",
+		AddValues: []string{"1000"},
+		APIOpts:   map[string]any{utils.MetaCache: utils.MetaNone},
+	}
+	if err := adms.UpdateFilterRuleValues(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	indexIDs := []string{
+		"cgrates.org:*string:*req.Account:1001",
+		"cgrates.org:*string:*req.Account:1000",
+		"cgrates.org:*string:*req.Account:1002",
 	}
 	expArgs = &utils.AttrReloadCacheWithAPIOpts{
-		APIOpts: map[string]any{
-			utils.MetaCache: utils.MetaReload,
-		},
 		Tenant:                  "cgrates.org",
 		FilterIDs:               []string{"cgrates.org:FLTR_ID"},
-		AttributeFilterIndexIDs: []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		ResourceFilterIndexIDs:  []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		StatFilterIndexIDs:      []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
-		ThresholdFilterIndexIDs: []string{"cgrates.org:*string:*req.Account:1001", "cgrates.org:*string:*req.Account:1002"},
+		AttributeFilterIndexIDs: indexIDs,
+		ResourceFilterIndexIDs:  indexIDs,
+		StatFilterIndexIDs:      indexIDs,
+		ThresholdFilterIndexIDs: indexIDs,
+		AccountsFilterIndexIDs:  indexIDs,
 	}
-
-	if err := adms.SetFilter(context.Background(), arg, &reply); err != nil {
-		t.Error(err)
+	args.AddValues = []string{"1002"}
+	args.RemoveValues = []string{"1001", "1000"}
+	args.APIOpts = nil
+	if err := adms.UpdateFilterRuleValues(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	indexes, err := dm.GetIndexes(ctx, utils.CacheAccountsFilterIndexes, "cgrates.org", utils.NonTransactional, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := map[string]utils.StringSet{"*string:*req.Account:1002": {"ACC_ID": {}}}
+	if !reflect.DeepEqual(indexes, want) {
+		t.Errorf("indexes = %v, want %v", indexes, want)
 	}
 
 	dm.DB()[utils.MetaDefault].Flush(utils.EmptyString)

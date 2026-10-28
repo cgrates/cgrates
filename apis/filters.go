@@ -5,6 +5,8 @@ package apis
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -26,18 +28,25 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
-	if len(arg.Rules) == 0 {
-		return utils.NewErrMandatoryIeMissing("Filter Rules")
-	}
-	if err = validateFilterRules(arg.Rules); err != nil {
-		return utils.APIErrorHandler(err)
-	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, arg.TenantID()))
+	defer unlock()
+	return adms.setFilter(ctx, arg, reply)
+}
+
+func (adms *AdminSv1) setFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
+	if len(arg.Rules) == 0 {
+		return utils.NewErrMandatoryIeMissing("Filter Rules")
+	}
+	if err := validateFilterRules(arg.Rules); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	tntID := arg.TenantID()
 	argC := map[string][]string{utils.CacheFilters: {tntID}}
-	if fltr, err := adms.dm.GetFilter(ctx, arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
+	fltr, err := adms.dm.GetFilter(ctx, arg.Tenant, arg.ID, false, false, utils.NonTransactional)
+	if err != nil {
 		if err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -67,7 +76,64 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return
+	return nil
+}
+
+// UpdateFilterRuleValues adds and removes values from a filter rule selected by Type and Element.
+// It returns an error unless exactly one rule matches.
+func (adms *AdminSv1) UpdateFilterRuleValues(ctx *context.Context, arg *engine.UpdateFilterRuleValuesArgs, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if strings.HasPrefix(arg.ID, utils.Meta) {
+		return utils.APIErrorHandler(fmt.Errorf("cannot update values of an inline filter"))
+	}
+	if arg.Tenant == "" {
+		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
+	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, arg.Tenant, arg.ID))
+	defer unlock()
+	filter, err := adms.dm.GetFilter(ctx, arg.Tenant, arg.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		return utils.APIErrorHandler(err)
+	}
+	// InternalDB can return the stored filter, so copy it before changing values.
+	filterCopy := *filter
+	filterCopy.Rules = make([]*engine.FilterRule, len(filter.Rules))
+	for i, rule := range filter.Rules {
+		filterCopy.Rules[i] = &engine.FilterRule{
+			Type:    rule.Type,
+			Element: rule.Element,
+			Values:  slices.Clone(rule.Values),
+		}
+	}
+	filter = &filterCopy
+	var selected *engine.FilterRule
+	for _, rule := range filter.Rules {
+		if rule.Type != arg.Type || rule.Element != arg.Element {
+			continue
+		}
+		if selected != nil {
+			return utils.APIErrorHandler(fmt.Errorf("multiple filter rules match Type <%s> and Element <%s>", arg.Type, arg.Element))
+		}
+		selected = rule
+	}
+	if selected == nil {
+		return utils.ErrPrefixNotFound("FilterRule")
+	}
+	remove := utils.NewStringSet(arg.RemoveValues)
+	selected.Values = slices.DeleteFunc(selected.Values, remove.Has)
+	present := utils.NewStringSet(selected.Values)
+	for _, value := range arg.AddValues {
+		if !present.Has(value) {
+			selected.Values = append(selected.Values, value)
+			present.Add(value)
+		}
+	}
+	return adms.setFilter(ctx, &engine.FilterWithAPIOpts{
+		Filter:  filter,
+		APIOpts: arg.APIOpts,
+	}, reply)
 }
 
 // GetFilter returns a Filter
@@ -148,6 +214,8 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, tnt, arg.ID))
+	defer unlock()
 	if err := adms.dm.RemoveFilter(ctx, tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}

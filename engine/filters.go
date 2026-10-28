@@ -235,6 +235,16 @@ type FilterWithAPIOpts struct {
 	APIOpts map[string]any
 }
 
+type UpdateFilterRuleValuesArgs struct {
+	Tenant       string
+	ID           string
+	Type         string
+	Element      string
+	AddValues    []string
+	RemoveValues []string
+	APIOpts      map[string]any
+}
+
 // TenantID returns the tenant wit the ID
 func (fltr *Filter) TenantID() string {
 	return utils.ConcatenatedKey(fltr.Tenant, fltr.ID)

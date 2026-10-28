@@ -158,6 +158,7 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"SetThresholdProfile":      utils.AdminSv1SetThresholdProfile,
 				"SetTrendProfile":          utils.AdminSv1SetTrendProfile,
 				"SnapshotDB":               utils.AdminSv1SnapshotDB,
+				"UpdateFilterRuleValues":   utils.AdminSv1UpdateFilterRuleValues,
 			},
 		},
 		{
