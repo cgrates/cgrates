@@ -626,7 +626,7 @@
 								"{{jsonrpc_url}}"
 							]
 						},
-						"description": "`ScheduleActions` adds only accounts not already scheduled for this profile. Set `APIOpts.*overwrite` to `true` to replace its existing jobs."
+						"description": "`ScheduleActions` replaces the matched profiles' scheduled jobs using their saved actions, schedule and targets. Set `ReloadScheduler` to `true` in `SetActionProfile` to refresh a profile's cron jobs when saving, without executing `*asap` actions."
 					},
 					"response": []
 				}

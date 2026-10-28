@@ -44,6 +44,7 @@ func TestRegisteredAPIMethodConstants(t *testing.T) {
 				"GetScheduledActions": utils.ActionSv1GetScheduledActions,
 				"Ping":                utils.ActionSv1Ping,
 				"ScheduleActions":     utils.ActionSv1ScheduleActions,
+				"ReloadScheduler":     utils.ActionSv1ReloadScheduler,
 			},
 		},
 		{

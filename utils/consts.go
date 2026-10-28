@@ -2726,6 +2726,7 @@ const (
 	ActionSv1                    = "ActionSv1"
 	ActionSv1Ping                = "ActionSv1.Ping"
 	ActionSv1ScheduleActions     = "ActionSv1.ScheduleActions"
+	ActionSv1ReloadScheduler     = "ActionSv1.ReloadScheduler"
 	ActionSv1ExecuteActions      = "ActionSv1.ExecuteActions"
 	ActionSv1GetScheduledActions = "ActionSv1.GetScheduledActions"
 )

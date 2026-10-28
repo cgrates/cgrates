@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"sort"
 	"testing"
+	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -69,6 +70,142 @@ func TestActionSv1GetScheduledActions(t *testing.T) {
 		Targets: map[string][]string{utils.MetaAccounts: {"missing"}},
 	}, &batches); err != utils.ErrNotFound {
 		t.Fatalf("expected NOT_FOUND, received %v", err)
+	}
+}
+
+func TestSetActionProfileReloadScheduler(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cfg.AdminSCfg().Conns[utils.MetaActions] = []*config.DynamicConns{{ConnIDs: []string{"*internal:*actions"}}}
+	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{"*internal:*accounts"}}}
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	filters := engine.NewFilterS(cfg, nil, dm)
+	cm := engine.NewConnManager(cfg)
+	cm.SetCache(cacheS)
+	acts := actions.NewActionS(cfg, cacheS, filters, dm, cm)
+	acts.Shutdown()
+	api := NewActionSv1(acts)
+	executed := make(chan struct{}, 1)
+	rpc := make(chan birpc.ClientConnector, 1)
+	rpc <- &mockClientConn{calls: map[string]func(*context.Context, any, any) error{
+		utils.ActionSv1ReloadScheduler: func(ctx *context.Context, args, reply any) error {
+			return api.ReloadScheduler(ctx, args.(*utils.TenantIDWithAPIOpts), reply.(*string))
+		},
+		utils.AccountSv1ActionSetBalance: func(*context.Context, any, any) error {
+			executed <- struct{}{}
+			return nil
+		},
+	}}
+	cm.AddInternalConn("*internal:*actions", utils.ActionSv1, rpc)
+	cm.AddInternalConn("*internal:*accounts", utils.AccountSv1, rpc)
+	admin := NewAdminSv1(cfg, dm, cm, filters, locker)
+	ctx := context.Background()
+	var reply string
+	profile := &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
+			ID:       "renew",
+			Schedule: "@monthly",
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"account1": {}}},
+			Actions:  []*utils.APAction{{ID: "balance", Type: utils.MetaSetBalance}},
+		},
+		ReloadScheduler: true,
+	}
+	if err := admin.SetActionProfile(ctx, profile, &reply); err != nil {
+		t.Fatal(err)
+	}
+	checkSchedule := func(schedule string, targets []string) {
+		t.Helper()
+		var batches []utils.ScheduledActionBatch
+		if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{ActionProfileIDs: []string{"renew"}}, &batches); err != nil {
+			t.Fatal(err)
+		}
+		if len(batches) != 1 || batches[0].Schedule != schedule || !reflect.DeepEqual(batches[0].Targets[utils.MetaAccounts], targets) {
+			t.Fatalf("unexpected registration: %s", utils.ToJSON(batches))
+		}
+	}
+	checkSchedule("@monthly", []string{"account1"})
+
+	unscheduled := &utils.ActionProfileWithAPIOpts{ActionProfile: profile.ActionProfile.Clone()}
+	unscheduled.ID = "unscheduled"
+	if err := admin.SetActionProfile(ctx, unscheduled, &reply); err != nil {
+		t.Fatal(err)
+	}
+	var batches []utils.ScheduledActionBatch
+	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{ActionProfileIDs: []string{unscheduled.ID}}, &batches); err != utils.ErrNotFound {
+		t.Fatalf("save-only profile: expected NOT_FOUND, received %v", err)
+	}
+	unscheduled.ReloadScheduler = true
+	if err := admin.SetActionProfile(ctx, unscheduled, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := admin.SetActionProfile(ctx, &utils.ActionProfileWithAPIOpts{
+		ActionProfile: &utils.ActionProfile{
+			ID:       profile.ID,
+			Schedule: "@weekly",
+			Targets:  map[string]utils.StringSet{utils.MetaAccounts: {"account2": {}}},
+		},
+		ReloadScheduler: true,
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	checkSchedule("@weekly", []string{"account1", "account2"})
+
+	profile.Overwrite = true
+	profile.Schedule = "@yearly"
+	profile.Targets[utils.MetaAccounts] = utils.StringSet{"account3": {}}
+	if err := dm.Guard(ctx, func(ctx *context.Context) error {
+		return admin.SetActionProfile(ctx, profile, &reply)
+	}, utils.ActionProfilePrefix+profile.TenantID()); err != nil {
+		t.Fatal(err)
+	}
+	checkSchedule("@yearly", []string{"account3"})
+
+	update := &utils.ActionProfileWithAPIOpts{ActionProfile: &utils.ActionProfile{ID: profile.ID, Schedule: "@daily"}}
+	if err := admin.SetActionProfile(ctx, update, &reply); err != nil {
+		t.Fatal(err)
+	}
+	checkSchedule("@yearly", []string{"account3"})
+	update.Schedule = "invalid"
+	update.ReloadScheduler = true
+	if err := admin.SetActionProfile(ctx, update, &reply); err == nil {
+		t.Fatal("expected reload to reject the invalid schedule")
+	}
+	checkSchedule("@yearly", []string{"account3"})
+	stored, err := dm.GetActionProfile(ctx, profile.Tenant, profile.ID, false, false, utils.NonTransactional)
+	if err != nil || stored.Schedule != "invalid" {
+		t.Fatalf("reload failure should not roll back the save: %v, %v", stored, err)
+	}
+
+	profile.Schedule = utils.MetaASAP
+	if err := admin.SetActionProfile(ctx, profile, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{ActionProfileIDs: []string{profile.ID}}, &batches); err != utils.ErrNotFound {
+		t.Fatalf("ASAP reload: expected NOT_FOUND, received %v", err)
+	}
+	select {
+	case <-executed:
+		t.Fatal("reload executed an ASAP action")
+	case <-time.After(20 * time.Millisecond):
+	}
+	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{ActionProfileIDs: []string{unscheduled.ID}}, &batches); err != nil {
+		t.Fatalf("reload changed the other profile: %v", err)
+	}
+	if err := api.ScheduleActions(ctx, &utils.CGREvent{
+		APIOpts: map[string]any{utils.OptsActionsProfileIDs: []string{profile.ID}},
+	}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	select {
+	case <-executed:
+	case <-time.After(time.Second):
+		t.Fatal("ScheduleActions did not execute the ASAP action")
 	}
 }
 

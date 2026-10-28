@@ -10,6 +10,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/actions"
+	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -109,7 +110,8 @@ func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.A
 	return
 }
 
-// SetActionProfile add/update a new Action Profile
+// SetActionProfile saves an Action Profile and optionally reloads its scheduled actions.
+// Reloading does not execute *asap actions.
 func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionProfileWithAPIOpts, reply *string) error {
 	ap.ID = strings.TrimSpace(ap.ID)
 	for _, action := range ap.Actions {
@@ -177,6 +179,19 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionPro
 		ap.TenantID(), utils.EmptyString, &ap.FilterIDs, ap.APIOpts); err != nil {
 		return utils.APIErrorHandler(err)
 	}
+	if ap.ReloadScheduler {
+		connIDs, err := engine.GetConnIDs(ctx, admS.cfg.AdminSCfg().Conns, utils.MetaActions,
+			ap.Tenant, utils.MapStorage{}, nil, admS.fltrS)
+		if err != nil {
+			return utils.APIErrorHandler(err)
+		}
+		if err := admS.connMgr.Call(ctx, connIDs, utils.ActionSv1ReloadScheduler, &utils.TenantIDWithAPIOpts{
+			TenantID: &utils.TenantID{Tenant: ap.Tenant, ID: ap.ID},
+			APIOpts:  ap.APIOpts,
+		}, reply); err != nil {
+			return utils.APIErrorHandler(err)
+		}
+	}
 	*reply = utils.OK
 	return nil
 }
@@ -221,9 +236,16 @@ type ActionSv1 struct {
 	acts *actions.ActionS
 }
 
-// ScheduleActions will be called to schedule actions matching the arguments
+// ScheduleActions schedules actions for matching profiles, replacing existing jobs.
+// *asap actions run immediately.
 func (aS *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	return aS.acts.V1ScheduleActions(ctx, args, rpl)
+}
+
+// ReloadScheduler reloads scheduled actions for one saved profile.
+// It does not execute *asap actions.
+func (aS *ActionSv1) ReloadScheduler(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	return aS.acts.V1ReloadScheduler(ctx, args, reply)
 }
 
 // GetScheduledActions returns the registered cron batches for a tenant.

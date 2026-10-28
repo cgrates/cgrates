@@ -64,8 +64,9 @@ func (ap *ActionProfile) Clone() *ActionProfile {
 // ActionProfileWithAPIOpts wraps ActionProfile with APIOpts.
 type ActionProfileWithAPIOpts struct {
 	*ActionProfile
-	Overwrite bool
-	APIOpts   map[string]any
+	Overwrite       bool
+	ReloadScheduler bool
+	APIOpts         map[string]any
 }
 
 type GetScheduledActionsArgs struct {

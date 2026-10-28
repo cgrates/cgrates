@@ -251,12 +251,12 @@ func TestScheduleAction(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
 	}
 
 	//Cannot schedule an action if the ID is invalid
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{"INVALID_ID1"}, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{"INVALID_ID1"}, false, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Errorf("Expected %+v, received %+v", utils.ErrPartiallyExecuted, err)
 	}
 
@@ -265,7 +265,7 @@ func TestScheduleAction(t *testing.T) {
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err != nil {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err != nil {
 		t.Error(err)
 	}
 	cacheS.Clear(nil)
@@ -274,12 +274,12 @@ func TestScheduleAction(t *testing.T) {
 	if err := acts.dm.SetActionProfile(context.Background(), actPrf, true); err != nil {
 		t.Error(err)
 	}
-	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, false, true); err == nil || err != utils.ErrPartiallyExecuted {
+	if err := acts.scheduleActions(context.Background(), cgrEv, []string{}, false, true); err == nil || err != utils.ErrPartiallyExecuted {
 		t.Error(err)
 	}
 }
 
-func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
+func TestScheduleActionsReplacement(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.ActionSCfg().Conns[utils.MetaAccounts] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaAccounts)}}}
 	locker := engine.NewLocker(cfg)
@@ -294,7 +294,11 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	rpcInternal <- &mockClientConn{
 		calls: map[string]func(*context.Context, any, any) error{
 			utils.AccountSv1ActionSetBalance: func(_ *context.Context, args, reply any) error {
-				executed[args.(*utils.ArgsActSetBalance).AccountID]++
+				balance := args.(*utils.ArgsActSetBalance)
+				if balance.Reset {
+					t.Error("executed the old setBalance action instead of addBalance")
+				}
+				executed[balance.AccountID]++
 				return nil
 			},
 		},
@@ -326,6 +330,8 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	originalID := acts.crn.Entries()[0].ID
 
 	profile.Targets[utils.MetaAccounts].Add("account3")
+	profile.Actions = []*utils.APAction{{ID: "balance", Type: utils.MetaAddBalance}}
+	profile.Schedule = "@weekly"
 	if err := dm.SetActionProfile(ctx, profile, true); err != nil {
 		t.Fatal(err)
 	}
@@ -335,8 +341,8 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if !acts.crn.Entry(originalID).Valid() {
-		t.Fatal("incremental scheduling removed the original job")
+	if acts.crn.Entry(originalID).Valid() {
+		t.Fatal("scheduling retained the original job")
 	}
 	for _, entry := range acts.crn.Entries() {
 		entry.Job.Run()
@@ -348,8 +354,8 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 	if err := acts.V1GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{}, &batches); err != nil {
 		t.Fatal(err)
 	}
-	if len(batches) != 2 {
-		t.Fatalf("expected two registered batches, received %s", utils.ToJSON(batches))
+	if len(batches) != 1 || batches[0].Schedule != "@weekly" {
+		t.Fatalf("unexpected replacement: %s", utils.ToJSON(batches))
 	}
 
 	profile.Targets[utils.MetaAccounts] = utils.NewStringSet([]string{"account2"})
@@ -357,7 +363,6 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	cacheS.Clear(nil)
-	event.APIOpts[utils.MetaOverwrite] = true
 	if err := acts.V1ScheduleActions(ctx, event, &reply); err != nil {
 		t.Fatal(err)
 	}
@@ -372,7 +377,7 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	if len(batches) != 1 || !reflect.DeepEqual(batches[0].Targets[utils.MetaAccounts], []string{"account2"}) {
-		t.Fatalf("unexpected overwrite result: %s", utils.ToJSON(batches))
+		t.Fatalf("unexpected replacement: %s", utils.ToJSON(batches))
 	}
 
 	profile.Targets = nil
@@ -384,10 +389,10 @@ func TestScheduleActionsIncrementalOverwrite(t *testing.T) {
 		t.Fatal(err)
 	}
 	if entries := acts.crn.Entries(); len(entries) != 0 {
-		t.Fatalf("empty-target overwrite retained jobs: %v", entries)
+		t.Fatalf("empty-target replacement retained jobs: %v", entries)
 	}
 	if err := acts.V1GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{}, &batches); err != utils.ErrNotFound {
-		t.Fatalf("empty-target overwrite: expected NOT_FOUND, received %v", err)
+		t.Fatalf("empty-target replacement: expected NOT_FOUND, received %v", err)
 	}
 }
 

@@ -12,7 +12,8 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
-// V1ScheduleActions will be called to schedule actions matching the arguments
+// V1ScheduleActions schedules actions for matching profiles, replacing existing jobs.
+// *asap actions run immediately.
 func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
@@ -27,18 +28,38 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 		utils.MetaProfileIgnoreFilters); err != nil {
 		return
 	}
-	var overwrite bool
-	if value, has := args.APIOpts[utils.MetaOverwrite]; has {
-		if overwrite, err = utils.IfaceAsBool(value); err != nil {
-			return err
-		}
-	}
 	if err = aS.scheduleActions(ctx, []*utils.CGREvent{args},
-		actPrfIDs, ignFilters, overwrite, false); err != nil {
+		actPrfIDs, ignFilters, false); err != nil {
 		return
 	}
 	*rpl = utils.OK
 	return
+}
+
+// V1ReloadScheduler reloads scheduled actions for one saved profile.
+// It does not execute *asap actions.
+func (aS *ActionS) V1ReloadScheduler(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	tenant := args.Tenant
+	if tenant == "" {
+		tenant = aS.cfg.GeneralCfg().DefaultTenant
+	}
+	aS.crnLk.Lock()
+	defer aS.crnLk.Unlock()
+	profile, err := aS.dm.GetActionProfile(ctx, tenant, args.ID, false, true, utils.NonTransactional)
+	if err != nil {
+		return err
+	}
+	event := &utils.CGREvent{Tenant: tenant, APIOpts: args.APIOpts}
+	data := event.AsDataProvider()
+	data[utils.MetaCfg] = aS.cfg.GetDataProvider()
+	if err := aS.scheduleActionProfile(ctx, aS.crn, event, profile, data, false, false); err != nil {
+		return err
+	}
+	*reply = utils.OK
+	return nil
 }
 
 // V1GetScheduledActions returns the registered cron batches for a tenant.

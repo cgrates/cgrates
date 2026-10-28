@@ -25,7 +25,16 @@ func TestScheduleAddedAccount(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigJSON: `{
   "admins": {
-    "enabled": true
+    "enabled": true,
+    "conns": {
+      "*actions": [
+        {
+          "ConnIDs": [
+            "*internal"
+          ]
+        }
+      ]
+    }
   },
   "accounts": {
     "enabled": true
@@ -109,11 +118,22 @@ func TestScheduleAddedAccount(t *testing.T) {
 			Targets: map[string]utils.StringSet{
 				utils.MetaAccounts: {"account2": {}},
 			},
+			Actions: []*utils.APAction{
+				{
+					ID: "add",
+					Diktats: []*utils.APDiktat{
+						{
+							ID: "add",
+							Opts: map[string]any{
+								"*balanceValue": 2,
+							},
+						},
+					},
+				},
+			},
 		},
+		ReloadScheduler: true,
 	}, &reply); err != nil {
-		t.Fatal(err)
-	}
-	if err := client.Call(ctx, utils.ActionSv1ScheduleActions, event, &reply); err != nil {
 		t.Fatal(err)
 	}
 
@@ -128,8 +148,8 @@ func TestScheduleAddedAccount(t *testing.T) {
 		}, &account); err != nil {
 			t.Fatal(err)
 		}
-		if got := account.Balances["balance"].Units; got.Big.Cmp(utils.NewDecimal(1, 0).Big) != 0 {
-			t.Errorf("account %s: expected 1, received %s", id, got)
+		if got := account.Balances["balance"].Units; got.Big.Cmp(utils.NewDecimal(2, 0).Big) != 0 {
+			t.Errorf("account %s: expected 2, received %s", id, got)
 		}
 	}
 }
