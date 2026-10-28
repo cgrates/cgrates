@@ -1813,3 +1813,57 @@ func TestMatchingRateProfileWeightsUnsupportedType(t *testing.T) {
 		t.Errorf("Expected error %v, recieved %v", expErr, err)
 	}
 }
+
+func TestMatchingRateProfileForEventNilEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rpID1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID1",
+		Event:  nil,
+	}
+	_, err := rateS.matchingRateProfileForEvent(context.Background(), "cgrates.org", []string{"rpID1"}, ev, false, nil)
+	if err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v, received %v", utils.ErrNotFound, err)
+	}
+}
