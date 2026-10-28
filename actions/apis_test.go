@@ -43,9 +43,11 @@ func TestActionsAPIs(t *testing.T) {
 			Tenant:    "cgrates.org",
 			ID:        "actPrfID",
 			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Schedule:  "@monthly",
 			Actions: []*utils.APAction{
 				{
-					ID: "actID",
+					ID:   "actID",
+					Type: utils.MetaLog,
 				},
 			},
 		}, true); err != nil {
