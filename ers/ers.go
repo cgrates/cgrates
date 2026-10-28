@@ -92,7 +92,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 			erS.closeAllRdrs()
 			return nil
 		case erEv := <-erS.rdrEvents:
-			err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg)
+			_, err := erS.processEvent(erEv.cgrEvent, erEv.rdrCfg)
 			if err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> reading event: <%s> from reader: <%s> got error: <%v>",
@@ -120,7 +120,7 @@ func (erS *ERService) ListenAndServe(stopChan, cfgRldChan chan struct{}) error {
 				continue
 			}
 			// if event is complete, process it immediately instead of sending it back to erS.rdrEvents to not block both channels and avoid needless goroutine
-			if err = erS.processEvent(completeCgrEv, pEv.rdrCfg); err != nil {
+			if _, err = erS.processEvent(completeCgrEv, pEv.rdrCfg); err != nil {
 				utils.Logger.Warning(fmt.Sprintf(
 					"<%s> reading event: <%s> from reader: <%s> got error: <%v>",
 					utils.ERs, utils.ToJSON(completeCgrEv), pEv.rdrCfg.ID, err))
@@ -190,7 +190,7 @@ func (erS *ERService) addReader(rdrID string, cfgIdx int) (err error) {
 
 // processEvent will be called each time a new event is received from readers
 func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
-	rdrCfg *config.EventReaderCfg) (err error) {
+	rdrCfg *config.EventReaderCfg) (reply *sessions.V1ProcessEventReply, err error) {
 	startTime := time.Now()
 	replyState := utils.OK
 
@@ -275,18 +275,18 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 	// execute the action based on reqType
 	switch reqType {
 	default:
-		return fmt.Errorf("unsupported reqType: <%s>", reqType)
+		return nil, fmt.Errorf("unsupported reqType: <%s>", reqType)
 	case utils.MetaNone: // do nothing on CGRateS side
 	case utils.MetaDryRun: // do nothing on CGRateS side, logging handled above
 	case utils.MetaSessionS:
-		rply := new(sessions.V1ProcessEventReply)
+		reply = new(sessions.V1ProcessEventReply)
 		var sessionConns []string
 		sessionConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaSessionS, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)
 		if err != nil {
 			return
 		}
 		err = erS.connMgr.Call(context.TODO(), sessionConns, utils.SessionSv1ProcessEvent,
-			cgrEv, rply)
+			cgrEv, reply)
 		if err != nil {
 			return
 		}
@@ -295,9 +295,9 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		return
 	}
 	if rdrCfg.Flags.Has(utils.MetaDryRun) {
-		return nil
+		return
 	}
-	return nil
+	return
 }
 
 func (erS *ERService) closeAllRdrs() {

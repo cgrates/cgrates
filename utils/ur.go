@@ -68,20 +68,20 @@ func GetUniqueURID(cgrEv *CGREvent) string {
 	return UUIDSha1Prefix()
 }
 
-func (cdr *UR) CGREvent() *CGREvent {
+func (ur *UR) CGREvent() *CGREvent {
 	return &CGREvent{
-		Tenant:  cdr.Tenant,
+		Tenant:  ur.Tenant,
 		ID:      Sha1(),
-		Event:   cdr.Event,
-		APIOpts: cdr.Opts,
+		Event:   ur.Event,
+		APIOpts: ur.Opts,
 	}
 }
 
-// CDRsToCGREvents converts a slice of *CDR to a slice of *utils.CGREvent.
-func CDRsToCGREvents(cdrs []*UR) []*CGREvent {
-	cgrEvs := make([]*CGREvent, 0, len(cdrs))
-	for _, cdr := range cdrs {
-		cgrEvs = append(cgrEvs, cdr.CGREvent())
+// URsToCGREvents converts a slice of *UR to a slice of *utils.CGREvent.
+func URsToCGREvents(urs []*UR) []*CGREvent {
+	cgrEvs := make([]*CGREvent, 0, len(urs))
+	for _, ur := range urs {
+		cgrEvs = append(cgrEvs, ur.CGREvent())
 	}
 	return cgrEvs
 }
