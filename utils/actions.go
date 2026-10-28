@@ -71,6 +71,7 @@ type ActionProfileWithAPIOpts struct {
 type GetScheduledActionsArgs struct {
 	Tenant           string
 	ActionProfileIDs []string
+	Targets          map[string][]string
 }
 
 type ScheduledActionBatch struct {

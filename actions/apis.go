@@ -61,6 +61,11 @@ func (aS *ActionS) V1GetScheduledActions(_ *context.Context, args *utils.GetSche
 		if len(args.ActionProfileIDs) != 0 && !slices.Contains(args.ActionProfileIDs, first.apID) {
 			continue
 		}
+		if len(args.Targets) != 0 && !slices.ContainsFunc(job.batch, func(target *scheduledActs) bool {
+			return slices.Contains(args.Targets[target.trgTyp], target.trgID)
+		}) {
+			continue
+		}
 		targets := make(map[string][]string)
 		for _, target := range job.batch {
 			targets[target.trgTyp] = append(targets[target.trgTyp], target.trgID)

@@ -51,6 +51,7 @@ func TestActionSv1GetScheduledActions(t *testing.T) {
 	var batches []utils.ScheduledActionBatch
 	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{
 		ActionProfileIDs: []string{profile.ID},
+		Targets:          map[string][]string{utils.MetaAccounts: {"account1"}},
 	}, &batches); err != nil {
 		t.Fatal(err)
 	}
@@ -63,6 +64,11 @@ func TestActionSv1GetScheduledActions(t *testing.T) {
 	}
 	if want := map[string][]string{utils.MetaAccounts: {"account1", "account2"}}; !reflect.DeepEqual(batch.Targets, want) {
 		t.Fatalf("expected targets %v, received %v", want, batch.Targets)
+	}
+	if err := api.GetScheduledActions(ctx, &utils.GetScheduledActionsArgs{
+		Targets: map[string][]string{utils.MetaAccounts: {"missing"}},
+	}, &batches); err != utils.ErrNotFound {
+		t.Fatalf("expected NOT_FOUND, received %v", err)
 	}
 }
 
