@@ -653,7 +653,7 @@ func TestThresholdsProcessEventStoreThOK(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH2"},
+			utils.OptsThresholdProfileIDs: []string{"TH2"},
 		},
 	}
 	exp := &utils.Threshold{
@@ -736,7 +736,7 @@ func TestThresholdsProcessEventMaxHitsDMErr(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH3"},
+			utils.OptsThresholdProfileIDs: []string{"TH3"},
 		},
 	}
 
@@ -792,7 +792,7 @@ func TestThresholdsProcessEventNotFound(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH6"},
+			utils.OptsThresholdProfileIDs: []string{"TH6"},
 		},
 	}
 
@@ -851,7 +851,7 @@ func TestThresholdMatchingThresholdForEventLocks2(t *testing.T) {
 	ids.Add(thPrf.ID)
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
+			utils.OptsThresholdProfileIDs: ids.AsSlice(),
 		},
 	}
 	_, _, err = tS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -903,7 +903,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
+			utils.OptsThresholdProfileIDs: ids.AsSlice(),
 		},
 	}
 	_, _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org", ev)
@@ -949,7 +949,7 @@ func TestThresholdMatchingThresholdForEventLocks5(t *testing.T) {
 	}
 	ev := &utils.CGREvent{
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: ids.AsSlice(),
+			utils.OptsThresholdProfileIDs: ids.AsSlice(),
 		},
 	}
 	dm.RemoveThreshold(context.Background(), "cgrates.org", "TH1")
@@ -1157,7 +1157,7 @@ func TestThreholdsMatchingThresholdsForEventDoesNotPass(t *testing.T) {
 			utils.AccountField: "1002",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH1"},
+			utils.OptsThresholdProfileIDs: []string{"TH1"},
 		},
 	}
 	if _, _, err := tS.matchingThresholdsForEvent(context.Background(), "cgrates.org",
@@ -1203,7 +1203,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 			"Threshold": "testThresholdValue",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.OptsThresholdProfileIDs:  []string{"TH"},
 			utils.MetaProfileIgnoreFilters: false,
 		},
 	}
@@ -1221,7 +1221,7 @@ func TestThresholdsProcessEventIgnoreFilters(t *testing.T) {
 			"Threshold": "testThresholdValue2",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.OptsThresholdProfileIDs:  []string{"TH"},
 			utils.MetaProfileIgnoreFilters: true,
 		},
 	}
@@ -1269,7 +1269,7 @@ func TestThresholdsProcessEventIgnoreFiltersErr(t *testing.T) {
 			"Threshold": "testThresholdValue",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"TH"},
+			utils.OptsThresholdProfileIDs:  []string{"TH"},
 			utils.MetaProfileIgnoreFilters: time.Second,
 		},
 	}

@@ -167,7 +167,7 @@ func (t *TrendS) processThresholds(trnd *utils.Trend) (err error) {
 		thIDs = make([]string, len(trnd.Config().ThresholdIDs))
 		copy(thIDs, trnd.Config().ThresholdIDs)
 	}
-	opts[utils.OptsThresholdsProfileIDs] = thIDs
+	opts[utils.OptsThresholdProfileIDs] = thIDs
 	ts := trnd.AsTrendSummary()
 	trndEv := &utils.CGREvent{
 		Tenant:  trnd.Tenant,

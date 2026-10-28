@@ -154,7 +154,7 @@ func (rkS *RankingS) processThresholds(rk *utils.Ranking) (err error) {
 		thIDs = make([]string, len(rk.Config().ThresholdIDs))
 		copy(thIDs, rk.Config().ThresholdIDs)
 	}
-	opts[utils.OptsThresholdsProfileIDs] = thIDs
+	opts[utils.OptsThresholdProfileIDs] = thIDs
 	sortedStatIDs := make([]string, len(rk.SortedStatIDs))
 	copy(sortedStatIDs, rk.SortedStatIDs)
 	ev := &utils.CGREvent{

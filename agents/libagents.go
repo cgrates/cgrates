@@ -131,7 +131,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	}
 	if rawThIDs != "" {
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		ev.APIOpts[utils.OptsThresholdProfileIDs] = thIDs
 		var reply []string
 		if err := connMgr.Call(ctx, thConns, utils.ThresholdSv1ProcessEvent,
 			ev, &reply); err != nil {

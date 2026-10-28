@@ -328,7 +328,7 @@ func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *util
 			r.profile.ThresholdIDs[0] == utils.MetaNone {
 			continue
 		}
-		opts[utils.OptsThresholdsProfileIDs] = r.profile.ThresholdIDs
+		opts[utils.OptsThresholdProfileIDs] = r.profile.ThresholdIDs
 
 		thEv := &utils.CGREvent{
 			Tenant: r.resource.Tenant,

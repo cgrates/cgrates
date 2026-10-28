@@ -1366,7 +1366,7 @@ func testStatsProcessEvent(t *testing.T) {
 		},
 	}
 	expected := []string{"SQ_3"}
-	expBody := `,"*opts":{"*actionsProfileIDs":["actPrfID"],"*cgrSource":"*thresholds","*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"],"*usage":30000000000},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
+	expBody := `,"*opts":{"*actionsProfileIDs":["actPrfID"],"*eventSource":"*thresholds","*eventType":"StatUpdate","*statsProfileIDs":["SQ_3"],"*thdProfileIDs":["THD_ID"],"*usage":30000000000},"*req":{"*tcd":30000000000,"EventType":"StatUpdate","StatID":"SQ_3"}}`
 	var reply []string
 	if err := sqRPC.Call(context.Background(), utils.StatSv1ProcessEvent,
 		args, &reply); err != nil {

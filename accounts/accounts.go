@@ -383,3 +383,43 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 	}
 	return
 }
+
+// processThreshold will receive the account and send it to ThresholdS to be processed
+func (aS *AccountS) processThresholds(ctx *context.Context, origEv *utils.CGREvent, acnt *utils.Account) (tIDs []string, err error) {
+	origDP := origEv.AsDataProvider()
+	// Check if ThresholdS should be called
+	if thdS, errThdS := engine.GetBoolOpts(ctx, origEv.Tenant, origDP, nil,
+		aS.fltrS, aS.cfg.AccountSCfg().Opts.Thresholds,
+		utils.MetaThresholds, utils.MetaAccountThresholds); errThdS != nil {
+		return nil, errThdS
+	} else if !thdS {
+		return
+	}
+	// Selective profiles
+	var thdIDs []string
+	if len(acnt.ThresholdIDs) != 0 {
+		thdIDs = make([]string, len(acnt.ThresholdIDs))
+		copy(acnt.ThresholdIDs, thdIDs)
+	} else if thdIDs, err = engine.GetStringSliceOpts(ctx, origEv.Tenant, origDP, nil,
+		aS.fltrS, aS.cfg.AccountSCfg().Opts.ThresholdIDs,
+		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdProfileIDs); err != nil {
+		return
+	}
+	// Event being sent to ThresholdS
+	cgrEv := acnt.AsCGREvent(map[string]any{utils.EventSource: utils.MetaAccounts})
+	if len(thdIDs) != 0 {
+		cgrEv.APIOpts[utils.OptsThresholdProfileIDs] = thdIDs
+	}
+
+	var conns []string
+	if conns, err = engine.GetConnIDs(ctx, aS.cfg.AccountSCfg().Conns, utils.MetaThresholds,
+		acnt.Tenant, cgrEv.AsDataProvider(), nil, aS.fltrS); err != nil {
+		return
+	}
+	if len(conns) == 0 {
+		return nil, utils.NewErrNotConnected(utils.ThresholdS)
+	}
+	//initialize the returned variable
+	err = aS.connMgr.Call(ctx, conns, utils.ThresholdSv1ProcessEvent, cgrEv, &tIDs)
+	return
+}

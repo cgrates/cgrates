@@ -302,7 +302,7 @@ func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue,
 			m.profile.ThresholdIDs[0] == utils.MetaNone {
 			continue
 		}
-		opts[utils.OptsThresholdsProfileIDs] = m.profile.ThresholdIDs
+		opts[utils.OptsThresholdProfileIDs] = m.profile.ThresholdIDs
 		thEv := &utils.CGREvent{
 			Tenant: m.statQueue.Tenant,
 			ID:     utils.GenUUID(),

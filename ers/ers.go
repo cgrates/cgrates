@@ -241,7 +241,7 @@ func (erS *ERService) processEvent(cgrEv *utils.CGREvent,
 		}
 		if rawThIDs != "" {
 			thIDs := strings.Split(rawThIDs, utils.ANDSep)
-			ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+			ev.APIOpts[utils.OptsThresholdProfileIDs] = thIDs
 			var reply []string
 			var thresholdConns []string
 			thresholdConns, err = engine.GetConnIDs(context.TODO(), erS.cfg.ERsCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, erS.fltrS)

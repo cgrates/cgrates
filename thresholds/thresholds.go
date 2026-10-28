@@ -186,7 +186,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 		utils.MetaOpts: args.APIOpts,
 	}
 	thIDs, err := engine.GetStringSliceOpts(ctx, tnt, evNm, nil, s.filters, s.cfg.ThresholdSCfg().Opts.ProfileIDs,
-		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdsProfileIDs)
+		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdProfileIDs)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -309,7 +309,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 			if args.APIOpts == nil {
 				args.APIOpts = make(map[string]any)
 			}
-			args.APIOpts[utils.MetaCGRSource] = utils.MetaThresholds
+			args.APIOpts[utils.MetaEventSource] = utils.MetaThresholds
 			args.APIOpts[utils.OptsActionsProfileIDs] = mt.profile.ActionProfileIDs
 			evNm := utils.MapStorage{
 				utils.MetaReq:  args.Event,
@@ -376,7 +376,7 @@ func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *mat
 	if err != nil {
 		return nil, err
 	}
-	cgrEv.APIOpts[utils.OptsThresholdsProfileIDs] = []string{mt.profile.ID}
+	cgrEv.APIOpts[utils.OptsThresholdProfileIDs] = []string{mt.profile.ID}
 	cgrEv.APIOpts[utils.OptsAttributesProfileIDs] = mt.profile.AttributeIDs
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),

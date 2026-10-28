@@ -615,9 +615,9 @@ func TestThresholdsAPIs(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
-			utils.OptsActionsProfileIDs:    []string{"actPrfID"},
-			utils.MetaCGRSource:            utils.MetaThresholds,
+			utils.OptsThresholdProfileIDs: []string{"thd1", "thd2"},
+			utils.OptsActionsProfileIDs:   []string{"actPrfID"},
+			utils.MetaEventSource:         utils.MetaThresholds,
 		},
 	}
 	mCC := &mockClientConn{
@@ -709,7 +709,7 @@ func TestThresholdsAPIs(t *testing.T) {
 		},
 		ID: "EventTest",
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"thd1", "thd2"},
+			utils.OptsThresholdProfileIDs: []string{"thd1", "thd2"},
 		},
 	}
 

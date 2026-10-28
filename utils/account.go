@@ -1356,3 +1356,27 @@ func (bL *Balance) Merge(vi *Balance) {
 		bL.Opts[k] = v
 	}
 }
+
+// AsCGREvent converts an Account to an CGREvent
+func (ap *Account) AsCGREvent(apiOpts map[string]any) (cgrEv *CGREvent) {
+	cgrEv = &CGREvent{
+		Tenant: ap.Tenant,
+		ID:     UUIDSha1Prefix(),
+		APIOpts: map[string]any{
+			MetaEventType: MetaAccount,
+		},
+		Event: make(map[string]any),
+	}
+	for k, v := range apiOpts {
+		cgrEv.APIOpts[k] = v
+	}
+	cgrEv.Event[ID] = ap.ID
+	cgrEv.Event[FilterIDs] = ap.FilterIDs
+	cgrEv.Event[Weights] = ap.Weights
+	cgrEv.Event[Blockers] = ap.Blockers
+	cgrEv.Event[Opts] = ap.Opts
+	cgrEv.Event[Balances] = ap.Balances
+	cgrEv.Event[ThresholdIDs] = ap.ThresholdIDs
+
+	return
+}

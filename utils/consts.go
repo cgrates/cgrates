@@ -814,7 +814,7 @@ const (
 	Length                  = "Length"
 	V1Prfx                  = "V1"
 	Ping                    = "Ping"
-	MetaCGRSource           = "*cgrSource"
+	MetaEventSource         = "*eventSource"
 
 	// dns
 	DNSQueryType          = "QueryType"
@@ -958,6 +958,7 @@ const (
 	MetaChargerProfiles   = "*chargerProfiles"
 	MetaIPAllocations     = "*ipAllocations"
 	MetaThresholds        = "*thresholds"
+	MetaAccountThresholds = "*accountThresholds"
 	MetaRoutes            = "*routes"
 	MetaAttributes        = "*attributes"
 	MetaActionProfiles    = "*actionProfiles"
@@ -2342,7 +2343,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsStirOriginatorTn, OptsStirOriginatorURI, OptsStirDestinationTn, OptsStirDestinationURI,
 	OptsStirPublicKeyPath, OptsStirPrivateKeyPath, OptsAPIKey, OptsRouteID, OptsContext, OptsAttributesProfileIDs,
 	OptsAttributesProcessRuns, OptsAttributesProfileRuns, OptsRoutesLimit, OptsRoutesOffset, OptsRoutesMaxItems,
-	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdsProfileIDs, OptsRoutesProfilesCount,
+	OptsSesChargeable, RemoteHostOpt, MetaCache, OptsThresholdProfileIDs, OptsRoutesProfilesCount,
 	OptsSesAttributeSDerivedReply, OptsSesBlockerError, OptsRoutesUsage,
 	MetaCDRs, OptsSesCDRsDerivedReply, MetaResources, MetaIPs, OptsSesResourceSAuthorize,
 	OptsSesResourceSAllocate, OptsSesResourceSRelease, OptsSesResourceSDerivedReply, MetaRoutes,
@@ -2435,10 +2436,10 @@ const (
 	Compressed           = "Compressed"
 
 	// Thresholds
-	Hits                     = "Hits"
-	Snooze                   = "Snooze"
-	ThresholdConfig          = "Config"
-	OptsThresholdsProfileIDs = "*thdProfileIDs"
+	Hits                    = "Hits"
+	Snooze                  = "Snooze"
+	ThresholdConfig         = "Config"
+	OptsThresholdProfileIDs = "*thresholdProfileIDs"
 
 	// STIR
 	OptsStirATest              = "*stirATest"

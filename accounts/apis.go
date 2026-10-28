@@ -4,6 +4,8 @@
 package accounts
 
 import (
+	"fmt"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -34,6 +36,19 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 		return
 	}
 	*aps = acnts
+
+	// Process ThresholdS here
+	var withErrors bool
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -69,6 +84,18 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 		return
 	}
 	*eEc = *procEC
+	// Process ThresholdS here
+	var withErrors bool
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -104,6 +131,18 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	*eEc = *procEC
+	// Process ThresholdS here
+	var withErrors bool
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -139,6 +178,19 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 		return
 	}
 	*eEc = *procEC
+
+	// Process ThresholdS here
+	var withErrors bool
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -174,6 +226,18 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 		return
 	}
 	*eEc = *procEC
+	// Process ThresholdS here
+	var withErrors bool
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -190,6 +254,8 @@ func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCh
 		return
 	}
 	*rply = utils.OK
+
+	// ToDo: add ThresholdS
 	return
 }
 
@@ -210,8 +276,9 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 	}, utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
-
 	*rply = utils.OK
+
+	// ToDo: Add ThresholdS
 	return
 }
 
@@ -240,6 +307,8 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 		return
 	}
 	*rply = utils.OK
+
+	// ToDO: Add ThresholdS
 	return
 }
 
@@ -259,5 +328,15 @@ func (aS *AccountS) V1GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 		return err
 	}
 	*reply = *ap
+
+	// Process ThresholdS here
+	cgrEv := &utils.CGREvent{Tenant: arg.Tenant, ID: utils.UUIDSha1Prefix(), APIOpts: arg.APIOpts, Event: make(map[string]any)}
+	if _, errThds := aS.processThresholds(ctx, cgrEv, ap); errThds != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+				utils.AccountS, err.Error(), ap, utils.ThresholdS))
+		return utils.ErrPartiallyExecuted
+	}
+
 	return nil
 }

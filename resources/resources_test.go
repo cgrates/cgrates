@@ -1452,8 +1452,8 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 						utils.Usage:      0.,
 					},
 					APIOpts: map[string]any{
-						utils.MetaEventType:            utils.ResourceUpdate,
-						utils.OptsThresholdsProfileIDs: []string{"THD_1"},
+						utils.MetaEventType:           utils.ResourceUpdate,
+						utils.OptsThresholdProfileIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {
@@ -1518,8 +1518,8 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 						utils.Usage:      0.,
 					},
 					APIOpts: map[string]any{
-						utils.MetaEventType:            utils.ResourceUpdate,
-						utils.OptsThresholdsProfileIDs: []string{"THD_1"},
+						utils.MetaEventType:           utils.ResourceUpdate,
+						utils.OptsThresholdProfileIDs: []string{"THD_1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {

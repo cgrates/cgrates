@@ -2025,8 +2025,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 						"testMetricType": utils.NewDecimal(int64(time.Hour), 0),
 					},
 					APIOpts: map[string]any{
-						utils.MetaEventType:            utils.StatUpdate,
-						utils.OptsThresholdsProfileIDs: []string{"TH1"},
+						utils.MetaEventType:           utils.StatUpdate,
+						utils.OptsThresholdProfileIDs: []string{"TH1"},
 					},
 				}
 				if !reflect.DeepEqual(exp, args) {

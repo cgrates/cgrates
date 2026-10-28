@@ -535,7 +535,7 @@ func (da *DiameterAgent) sendConnStatusReport(metadata *smpeer.Metadata, status,
 		delete(ev.APIOpts, utils.OptsStatsProfileIDs)
 	}
 	if len(threshConns) != 0 {
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = daCfg.ConnStatusThresholdIDs
+		ev.APIOpts[utils.OptsThresholdProfileIDs] = daCfg.ConnStatusThresholdIDs
 		var reply []string
 		if err := da.connMgr.Call(context.TODO(), threshConns,
 			utils.ThresholdSv1ProcessEvent, ev, &reply); err != nil {

@@ -483,7 +483,7 @@ func (sa *SIPAgent) processRequest(reqProcessor *config.RequestProcessor,
 	}
 	if rawThIDs != "" {
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		ev.APIOpts[utils.OptsThresholdProfileIDs] = thIDs
 		var reply []string
 		var thrConns []string
 		thrConns, err = engine.GetConnIDs(context.TODO(), sa.cfg.SIPAgentCfg().Conns, utils.MetaThresholds, ev.Tenant, ev.AsDataProvider(), nil, sa.fltrS)

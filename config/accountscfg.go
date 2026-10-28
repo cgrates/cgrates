@@ -18,10 +18,13 @@ var (
 
 const AccountsProfileIgnoreFiltersDftOpt = false
 
+// AccountsOpts are the dynamic options for AccountS
 type AccountsOpts struct {
 	ProfileIDs           []*DynamicStringSliceOpt
 	Usage                []*DynamicDecimalOpt
 	ProfileIgnoreFilters []*DynamicBoolOpt
+	Thresholds           []*DynamicBoolOpt
+	ThresholdIDs         []*DynamicStringSliceOpt
 }
 
 // AccountSCfg is the configuration of ActionS

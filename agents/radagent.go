@@ -418,7 +418,7 @@ func (ra *RadiusAgent) processRequest(req *radigo.Packet, reqProcessor *config.R
 	}
 	if rawThIDs != "" {
 		thIDs := strings.Split(rawThIDs, utils.ANDSep)
-		ev.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		ev.APIOpts[utils.OptsThresholdProfileIDs] = thIDs
 		var reply []string
 		var thresholdConns []string
 		thresholdConns, err = engine.GetConnIDs(ra.ctx, ra.cfg.RadiusAgentCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, ra.fltrS)

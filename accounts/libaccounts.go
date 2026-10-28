@@ -110,7 +110,7 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 	cgrEv.APIOpts[utils.OptsContext] = utils.FirstNonEmpty(
 		utils.IfaceAsString(cgrEv.APIOpts[utils.OptsContext]),
 		utils.MetaAccounts)
-	cgrEv.APIOpts[utils.MetaCGRSource] = utils.MetaAccounts
+	cgrEv.APIOpts[utils.MetaEventSource] = utils.MetaAccounts
 	var tmpReply utils.AttributesProcessEventReply
 	if err = connMgr.Call(ctx, attrSConns, utils.AttributeSv1ProcessEvent,
 		cgrEv, &tmpReply); err != nil {
