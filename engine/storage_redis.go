@@ -14,6 +14,7 @@ import (
 
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/mediocregopher/radix/v3"
 )
 
@@ -1062,4 +1063,32 @@ func (rs *RedisStorage) RestoreDB(backupFolderPath string) (err error) {
 // SnapshotDB is intended only for InternalDB
 func (rs *RedisStorage) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) GetCacheStats(utils.AttrCacheIDsWithAPIOpts) (map[string]*ltcache.CacheStats, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) GetItemIDs(utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) HasItem(utils.ArgsGetCacheItemWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) GetItem(utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
+	return nil, false
+}
+
+func (rs *RedisStorage) GetItemExpiryTime(utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error) {
+	return time.Time{}, utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) HasGroup(utils.ArgsGetGroupWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (rs *RedisStorage) GetGroupItemIDs(utils.ArgsGetGroupWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
 }

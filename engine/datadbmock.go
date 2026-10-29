@@ -4,8 +4,11 @@
 package engine
 
 import (
+	"time"
+
 	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 )
 
 type DataDBMock struct {
@@ -568,4 +571,32 @@ func (dbM *DataDBMock) RestoreDB(backupFolderPath string) (err error) {
 
 func (dbM *DataDBMock) SnapshotDB(backupFolderPath string, zip bool) (err error) {
 	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetCacheStats(args utils.AttrCacheIDsWithAPIOpts) (map[string]*ltcache.CacheStats, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetItemIDs(args utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) HasItem(args utils.ArgsGetCacheItemWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetItem(args utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
+	return nil, false
+}
+
+func (dbM *DataDBMock) GetItemExpiryTime(args utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error) {
+	return time.Time{}, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) HasGroup(args utils.ArgsGetGroupWithAPIOpts) (bool, error) {
+	return false, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) GetGroupItemIDs(args utils.ArgsGetGroupWithAPIOpts) ([]string, error) {
+	return nil, utils.ErrNotImplemented
 }

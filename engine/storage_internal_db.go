@@ -772,3 +772,44 @@ func (iDB *InternalDB) RewriteDB() (err error) {
 func (iDB *InternalDB) BackupDB(backupFolderPath string, zip bool) (err error) {
 	return iDB.db.BackupDumpFolder(backupFolderPath, zip)
 }
+
+func (iDB *InternalDB) GetCacheStats(args utils.AttrCacheIDsWithAPIOpts) (
+	map[string]*ltcache.CacheStats, error) {
+	chS := iDB.db.GetCacheStats(args.CacheIDs)
+	return chS, nil
+}
+
+func (iDB *InternalDB) GetItemIDs(args utils.ArgsGetCacheItemIDsWithAPIOpts) ([]string, error) {
+	itmIDs := iDB.db.GetItemIDs(args.CacheID, args.ItemIDPrefix)
+	if len(itmIDs) == 0 {
+		return nil, utils.ErrNotFound
+	}
+	return itmIDs, nil
+}
+
+func (iDB *InternalDB) HasItem(args utils.ArgsGetCacheItemWithAPIOpts) (bool, error) {
+	return iDB.db.HasItem(args.CacheID, args.ItemID), nil
+}
+
+func (iDB *InternalDB) GetItem(args utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
+	return iDB.db.Get(args.CacheID, args.ItemID)
+}
+
+func (iDB *InternalDB) GetItemExpiryTime(args utils.ArgsGetCacheItemWithAPIOpts) (time.Time, error) {
+	expTime, has := iDB.db.GetItemExpiryTime(args.CacheID, args.ItemID)
+	if !has {
+		return time.Time{}, utils.ErrNotFound
+	}
+	return expTime, nil
+}
+
+func (iDB *InternalDB) HasGroup(args utils.ArgsGetGroupWithAPIOpts) (bool, error) {
+	return iDB.db.HasGroup(args.CacheID, args.GroupID), nil
+}
+
+func (iDB *InternalDB) GetGroupItemIDs(args utils.ArgsGetGroupWithAPIOpts) ([]string, error) {
+	if has := iDB.db.HasGroup(args.CacheID, args.GroupID); !has {
+		return nil, utils.ErrNotFound
+	}
+	return iDB.db.GetGroupItemIDs(args.CacheID, args.GroupID), nil
+}
