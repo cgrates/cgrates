@@ -457,6 +457,40 @@ func testFiltersGetFiltersAfterSet(t *testing.T) {
 				utils.ToJSON(expectedFilters), utils.ToJSON(replyFilters))
 		}
 	}
+
+	var reply string
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1SetFilterRule,
+		&engine.SetFilterRuleArgs{
+			Tenant:  "cgrates.org",
+			ID:      "TestA_FILTER2",
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1004"},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1RemoveFilterRule,
+		&engine.RemoveFilterRuleArgs{
+			Tenant:  "cgrates.org",
+			ID:      "TestA_FILTER2",
+			Type:    utils.MetaString,
+			Element: "~*req.Account",
+			Values:  []string{"1002"},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	var updated engine.Filter
+	if err := fltrRPC.Call(context.Background(), utils.AdminSv1GetFilter,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "TestA_FILTER2",
+		}}, &updated); err != nil {
+		t.Fatal(err)
+	}
+	expectedFilters[1].Rules[0].Values = []string{"1004"}
+	if !reflect.DeepEqual(&updated, expectedFilters[1]) {
+		t.Errorf("filter = %s, want %s", utils.ToJSON(updated), utils.ToJSON(expectedFilters[1]))
+	}
 }
 
 func testFiltersRemoveFilter(t *testing.T) {

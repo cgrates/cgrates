@@ -542,7 +542,7 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 		return utils.ErrNoDatabaseConn
 	}
 	var oldFlt *Filter
-	if oldFlt, err = dm.GetFilter(ctx, fltr.Tenant, fltr.ID, true, false,
+	if oldFlt, err = dm.GetFilter(ctx, fltr.Tenant, fltr.ID, false, false,
 		utils.NonTransactional); err != nil && err != utils.ErrNotFound {
 		return err
 	}
