@@ -123,11 +123,9 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionPro
 	if ap.Tenant == "" {
 		ap.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
-	if admS.dm != nil {
-		// ActionS can call this API while holding the profile lock.
-		unlock := admS.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetActionProfile, ap.TenantID()))
-		defer unlock()
-	}
+	// ActionS can call this API while holding the profile lock.
+	unlock := admS.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetActionProfile, ap.TenantID()))
+	defer unlock()
 	if !ap.Overwrite && ap.ID != "" {
 		stored, err := admS.dm.GetActionProfile(ctx, ap.Tenant, ap.ID, false, false, utils.NonTransactional)
 		if err != nil && err != utils.ErrNotFound {

@@ -1250,6 +1250,8 @@ const (
 	AdminSv1RemoveFilterIndexes = "AdminSv1.RemoveFilterIndexes"
 	AdminSv1RemoveFilter        = "AdminSv1.RemoveFilter"
 	AdminSv1SetFilter           = "AdminSv1.SetFilter"
+	AdminSv1SetFilterRule       = "AdminSv1.SetFilterRule"
+	AdminSv1RemoveFilterRule    = "AdminSv1.RemoveFilterRule"
 	AdminSv1GetFilterIDs        = "AdminSv1.GetFilterIDs"
 	AdminSv1GetFiltersCount     = "AdminSv1.GetFiltersCount"
 	AdminSv1GetFilters          = "AdminSv1.GetFilters"

@@ -5,6 +5,8 @@ package apis
 
 import (
 	"fmt"
+	"slices"
+	"strings"
 	"time"
 
 	"github.com/cgrates/birpc/context"
@@ -22,22 +24,29 @@ func validateFilterRules(rules []*engine.FilterRule) error {
 }
 
 // SetFilter add a new Filter
-func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
-	}
-	if len(arg.Rules) == 0 {
-		return utils.NewErrMandatoryIeMissing("Filter Rules")
-	}
-	if err = validateFilterRules(arg.Rules); err != nil {
-		return utils.APIErrorHandler(err)
 	}
 	if arg.Tenant == utils.EmptyString {
 		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, arg.TenantID()))
+	defer unlock()
+	return adms.setFilter(ctx, arg, reply)
+}
+
+func (adms *AdminSv1) setFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
+	if len(arg.Rules) == 0 {
+		return utils.NewErrMandatoryIeMissing("Filter Rules")
+	}
+	if err := validateFilterRules(arg.Rules); err != nil {
+		return utils.APIErrorHandler(err)
+	}
 	tntID := arg.TenantID()
 	argC := map[string][]string{utils.CacheFilters: {tntID}}
-	if fltr, err := adms.dm.GetFilter(ctx, arg.Filter.Tenant, arg.Filter.ID, true, false, utils.NonTransactional); err != nil {
+	fltr, err := adms.dm.GetFilter(ctx, arg.Tenant, arg.ID, false, false, utils.NonTransactional)
+	if err != nil {
 		if err != utils.ErrNotFound {
 			return utils.APIErrorHandler(err)
 		}
@@ -67,7 +76,91 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 		return utils.APIErrorHandler(err)
 	}
 	*reply = utils.OK
-	return
+	return nil
+}
+
+// SetFilterRule adds values to a filter rule, or replaces them when Overwrite is set.
+// Type and Element must match exactly one rule.
+func (adms *AdminSv1) SetFilterRule(ctx *context.Context, arg *engine.SetFilterRuleArgs, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == "" {
+		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
+	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, arg.Tenant, arg.ID))
+	defer unlock()
+	filter, rule, err := adms.getFilterRule(ctx, arg.Tenant, arg.ID, arg.Type, arg.Element)
+	if err != nil {
+		return err
+	}
+	if arg.Overwrite {
+		rule.Values = arg.Values
+	} else {
+		present := utils.NewStringSet(rule.Values)
+		for _, value := range arg.Values {
+			if !present.Has(value) {
+				rule.Values = append(rule.Values, value)
+				present.Add(value)
+			}
+		}
+	}
+	return adms.setFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter, APIOpts: arg.APIOpts}, reply)
+}
+
+// RemoveFilterRule removes values from a filter rule selected by Type and Element.
+// It returns an error unless exactly one rule matches.
+func (adms *AdminSv1) RemoveFilterRule(ctx *context.Context, arg *engine.RemoveFilterRuleArgs, reply *string) error {
+	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element, utils.Values}); len(missing) != 0 {
+		return utils.NewErrMandatoryIeMissing(missing...)
+	}
+	if arg.Tenant == "" {
+		arg.Tenant = adms.cfg.GeneralCfg().DefaultTenant
+	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, arg.Tenant, arg.ID))
+	defer unlock()
+	filter, rule, err := adms.getFilterRule(ctx, arg.Tenant, arg.ID, arg.Type, arg.Element)
+	if err != nil {
+		return err
+	}
+	remove := utils.NewStringSet(arg.Values)
+	rule.Values = slices.DeleteFunc(rule.Values, remove.Has)
+	return adms.setFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter, APIOpts: arg.APIOpts}, reply)
+}
+
+func (adms *AdminSv1) getFilterRule(ctx *context.Context, tenant, id, ruleType, element string) (*engine.Filter, *engine.FilterRule, error) {
+	if strings.HasPrefix(id, utils.Meta) {
+		return nil, nil, utils.APIErrorHandler(fmt.Errorf("cannot update values of an inline filter"))
+	}
+	filter, err := adms.dm.GetFilter(ctx, tenant, id, false, false, utils.NonTransactional)
+	if err != nil {
+		return nil, nil, utils.APIErrorHandler(err)
+	}
+	// InternalDB can return the stored filter, so copy it before changing values.
+	filterCopy := *filter
+	filterCopy.Rules = make([]*engine.FilterRule, len(filter.Rules))
+	for i, rule := range filter.Rules {
+		filterCopy.Rules[i] = &engine.FilterRule{
+			Type:    rule.Type,
+			Element: rule.Element,
+			Values:  slices.Clone(rule.Values),
+		}
+	}
+	filter = &filterCopy
+	var selected *engine.FilterRule
+	for _, rule := range filter.Rules {
+		if rule.Type != ruleType || rule.Element != element {
+			continue
+		}
+		if selected != nil {
+			return nil, nil, utils.APIErrorHandler(fmt.Errorf("multiple filter rules match Type <%s> and Element <%s>", ruleType, element))
+		}
+		selected = rule
+	}
+	if selected == nil {
+		return nil, nil, utils.ErrPrefixNotFound("FilterRule")
+	}
+	return filter, selected, nil
 }
 
 // GetFilter returns a Filter
@@ -148,6 +241,8 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
 	}
+	unlock := adms.dm.Lock(utils.ConcatenatedKey(utils.AdminSv1SetFilter, tnt, arg.ID))
+	defer unlock()
 	if err := adms.dm.RemoveFilter(ctx, tnt, arg.ID, true); err != nil {
 		return utils.APIErrorHandler(err)
 	}
