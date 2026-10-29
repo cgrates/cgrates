@@ -419,7 +419,7 @@ func testThresholdsGetThresholdsForEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
+			utils.OptsThresholdProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
 	expThs := []*utils.Threshold{
@@ -479,7 +479,7 @@ func testThresholdsGetThresholdsAfterRemove(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
+			utils.OptsThresholdProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
 
@@ -576,7 +576,7 @@ func testThresholdsProcessEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
+			utils.OptsThresholdProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
 
@@ -601,7 +601,7 @@ func testThresholdsGetThresholdsAfterFirstEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
+			utils.OptsThresholdProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
 	expThs := []*utils.Threshold{
@@ -640,7 +640,7 @@ func testThresholdsGetThresholdsAfterSecondEvent(t *testing.T) {
 			utils.AccountField: "1001",
 		},
 		APIOpts: map[string]any{
-			utils.OptsThresholdsProfileIDs: []string{"THD_1", "THD_2"},
+			utils.OptsThresholdProfileIDs: []string{"THD_1", "THD_2"},
 		},
 	}
 	expThs := []*utils.Threshold{

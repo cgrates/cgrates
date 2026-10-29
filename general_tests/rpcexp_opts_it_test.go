@@ -184,7 +184,7 @@ func exportRPCEvent(t *testing.T, client *birpc.Client, exporterID string, thIDs
 		},
 	}
 	if len(thIDs) != 0 {
-		args.APIOpts[utils.OptsThresholdsProfileIDs] = thIDs
+		args.APIOpts[utils.OptsThresholdProfileIDs] = thIDs
 	}
 	method := utils.EeSv1ProcessEvent
 	var reply map[string]map[string]any
@@ -212,7 +212,7 @@ func checkThresholdsHits(t *testing.T, client *birpc.Client, expectedThHits map[
 				utils.AccountField: "1001",
 			},
 			APIOpts: map[string]any{
-				utils.OptsThresholdsProfileIDs: thIDs,
+				utils.OptsThresholdProfileIDs: thIDs,
 			},
 		}, &reply); err != nil {
 		t.Errorf("%s unexpected err received: %v", method, err)
