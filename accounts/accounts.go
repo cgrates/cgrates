@@ -313,7 +313,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 }
 
 // refundCharges implements the mechanism of refunding the charges into accounts
-func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (err error) {
+func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (accounts []*utils.Account, err error) {
 	acnts := make([]*utils.Account, 0, len(ecs.Accounts))
 	unlocks := make([]func(), 0, len(ecs.Accounts))
 	unlockAll := func() {
@@ -380,6 +380,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 			restoreAccounts(ctx, aS.dm, acnts, acntBkps)
 			return
 		}
+		accounts = append(accounts, acntsIdxed[acntID])
 	}
 	return
 }

@@ -6409,7 +6409,7 @@ func TestRefundChargesJoinedChargeSameAccountBalances(t *testing.T) {
 		},
 	}
 
-	if err := accnts.refundCharges(context.Background(), "cgrates.org", ec); err != nil {
+	if _, err := accnts.refundCharges(context.Background(), "cgrates.org", ec); err != nil {
 		t.Error(err)
 	}
 
@@ -6488,7 +6488,7 @@ func TestRefundChargesSetAccountError(t *testing.T) {
 		},
 	}
 
-	err := accnts.refundCharges(context.Background(), "cgrates.org", ec)
+	_, err := accnts.refundCharges(context.Background(), "cgrates.org", ec)
 	if err == nil || err != utils.ErrNotImplemented {
 		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
 	}

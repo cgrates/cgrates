@@ -31,7 +31,7 @@ func TestActSetAccountBalance(t *testing.T) {
 	}
 
 	expected := utils.ErrNoDatabaseConn.Error()
-	if err := actSetAccount(context.Background(), nil, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), nil, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -40,13 +40,13 @@ func TestActSetAccountBalance(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	expected = "WRONG_PATH"
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*balance.Concrete1.NOT_A_FIELD"
 
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -85,7 +85,7 @@ func TestActSetAccountBalance(t *testing.T) {
 			},
 		},
 	}
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err != nil {
 		t.Error(err)
 	} else if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", acntID); err != nil {
@@ -113,20 +113,20 @@ func TestActSetAccount(t *testing.T) {
 	}
 
 	expected := "WRONG_PATH"
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*account"
 
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 	diktats[0].Path = "*account.Weights"
 
 	expected = "invalid DynamicWeight format for string <10>"
-	if err := actSetAccount(context.Background(), dm, "cgrates.org",
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org",
 		acntID, diktats, false); err == nil || err.Error() != expected {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
@@ -141,7 +141,7 @@ func TestActSetAccount(t *testing.T) {
 			},
 		},
 	}
-	if err := actSetAccount(context.Background(), dm, "cgrates.org", acntID, diktats, false); err != nil {
+	if _, err := actSetAccount(context.Background(), dm, "cgrates.org", acntID, diktats, false); err != nil {
 		t.Error(err)
 	} else if rcv, err := dm.GetAccount(context.Background(), "cgrates.org", acntID); err != nil {
 		t.Error(err)
