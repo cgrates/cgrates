@@ -41,9 +41,10 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 	var withErrors bool
 	for _, acnt := range acnts {
 		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
 		}
 	}
 	if withErrors {
@@ -88,9 +89,10 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 	var withErrors bool
 	for _, acnt := range acnts {
 		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
 		}
 	}
 	if withErrors {
@@ -135,9 +137,10 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 	var withErrors bool
 	for _, acnt := range acnts {
 		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
 		}
 	}
 	if withErrors {
@@ -183,9 +186,10 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 	var withErrors bool
 	for _, acnt := range acnts {
 		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
 		}
 	}
 	if withErrors {
@@ -230,9 +234,10 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 	var withErrors bool
 	for _, acnt := range acnts {
 		if _, errThds := aS.processThresholds(ctx, args, acnt); errThds != nil {
+			withErrors = true
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-					utils.AccountS, err.Error(), acnt, utils.ThresholdS))
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
 		}
 	}
 	if withErrors {
@@ -253,9 +258,36 @@ func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCh
 	if err = aS.refundCharges(ctx, tnt, args.EventCharges); err != nil {
 		return
 	}
+
+	var acnts []*utils.Account
+	for _, acnt := range args.EventCharges.Accounts {
+		qAcnt, err := aS.dm.GetAccount(ctx, tnt, acnt.ID)
+		if err != nil {
+			if err == utils.ErrNotFound { // Account was removed in the mean time
+				err = nil
+				continue
+			}
+			return err
+		}
+		acnts = append(acnts, qAcnt)
+	}
 	*rply = utils.OK
 
-	// ToDo: add ThresholdS
+	// Process ThresholdS here
+	var withErrors bool
+	cgrEv := &utils.CGREvent{Tenant: args.Tenant, ID: utils.UUIDSha1Prefix(), APIOpts: args.APIOpts, Event: make(map[string]any)}
+	for _, acnt := range acnts {
+		if _, errThds := aS.processThresholds(ctx, cgrEv, acnt); errThds != nil {
+			withErrors = true
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+					utils.AccountS, errThds.Error(), acnt, utils.ThresholdS))
+		}
+	}
+	if withErrors {
+		err = utils.ErrPartiallyExecuted
+	}
+
 	return
 }
 
@@ -276,9 +308,21 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 	}, utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
 		return
 	}
+
+	qAcnt, err := aS.dm.GetAccount(ctx, tnt, args.AccountID)
+	if err != nil {
+		return err
+	}
 	*rply = utils.OK
 
-	// ToDo: Add ThresholdS
+	// Process ThresholdS here
+	cgrEv := &utils.CGREvent{Tenant: args.Tenant, ID: utils.UUIDSha1Prefix(), APIOpts: args.APIOpts, Event: make(map[string]any)}
+	if _, errThds := aS.processThresholds(ctx, cgrEv, qAcnt); errThds != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+				utils.AccountS, errThds.Error(), qAcnt, utils.ThresholdS))
+		return utils.ErrPartiallyExecuted
+	}
 	return
 }
 
@@ -294,8 +338,9 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
+	var qAcnt *utils.Account
 	if err = aS.dm.Guard(ctx, func(ctx *context.Context) error {
-		qAcnt, err := aS.dm.GetAccount(ctx, tnt, args.AccountID)
+		qAcnt, err = aS.dm.GetAccount(ctx, tnt, args.AccountID)
 		if err != nil {
 			return err
 		}
@@ -308,7 +353,15 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	}
 	*rply = utils.OK
 
-	// ToDO: Add ThresholdS
+	// Process ThresholdS here
+	cgrEv := &utils.CGREvent{Tenant: args.Tenant, ID: utils.UUIDSha1Prefix(), APIOpts: args.APIOpts, Event: make(map[string]any)}
+	if _, errThds := aS.processThresholds(ctx, cgrEv, qAcnt); errThds != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
+				utils.AccountS, errThds.Error(), qAcnt, utils.ThresholdS))
+		return utils.ErrPartiallyExecuted
+	}
+
 	return
 }
 
@@ -334,7 +387,7 @@ func (aS *AccountS) V1GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 	if _, errThds := aS.processThresholds(ctx, cgrEv, ap); errThds != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s processing account: %+v with <%s>",
-				utils.AccountS, err.Error(), ap, utils.ThresholdS))
+				utils.AccountS, errThds.Error(), ap, utils.ThresholdS))
 		return utils.ErrPartiallyExecuted
 	}
 

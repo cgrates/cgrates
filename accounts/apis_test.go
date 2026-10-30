@@ -1032,3 +1032,490 @@ func TestV1RefundCharges(t *testing.T) {
 		t.Errorf("expected balance2 %v, got %v", expected2, acc2After.Balances["balance2"].Units)
 	}
 }
+
+func TestV1AccountsForEventThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	var reply []*utils.Account
+	err := accnts.V1AccountsForEvent(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestV1MaxAbstractsThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(100, 0),
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    utils.NewDecimal(1, 0),
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				}},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+			utils.MetaUsage:      "0",
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	var reply utils.EventCharges
+	err := accnts.V1MaxAbstracts(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestV1DebitAbstractsThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:    "AbstractBalance1",
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(100, 0),
+				CostIncrements: []*utils.CostIncrement{{
+					Increment:    utils.NewDecimal(1, 0),
+					FixedFee:     utils.NewDecimal(0, 0),
+					RecurrentFee: utils.NewDecimal(1, 0),
+				}},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+			utils.MetaUsage:      "0",
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	var reply utils.EventCharges
+	err := accnts.V1DebitAbstracts(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestV1MaxConcretesThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+			utils.MetaUsage:      "0",
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	var reply utils.EventCharges
+	err := accnts.V1MaxConcretes(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestV1DebitConcretesThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "event1",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+			utils.MetaUsage:      "0",
+		},
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	var reply utils.EventCharges
+	err := accnts.V1DebitConcretes(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestAccountSV1RefundChargesThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, true); err != nil {
+		t.Fatal(err)
+	}
+
+	var reply string
+	args := &utils.APIEventCharges{
+		Tenant: "cgrates.org",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+		EventCharges: &utils.EventCharges{
+			Accounts: map[string]*utils.Account{
+				"acc": {
+					Tenant: "cgrates.org",
+					ID:     "acc1",
+				},
+			},
+		},
+	}
+
+	err := accnts.V1RefundCharges(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestAccountSV1ActionSetBalanceThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "acc1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, false); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.ArgsActSetBalance{
+		Tenant:    "cgrates.org",
+		AccountID: "acc1",
+		APIOpts: map[string]any{
+			utils.AccountField:   "1001",
+			utils.MetaThresholds: true,
+		},
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.AbstractBalance1.Units",
+				Value: "10",
+			},
+		},
+	}
+
+	var reply string
+	err := accnts.V1ActionSetBalance(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestAccountSV1ActionRemoveBalanceThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "acc1",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, false); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.ArgsActRemoveBalances{
+		Tenant:     "cgrates.org",
+		AccountID:  "acc1",
+		BalanceIDs: []string{"AbstractBalance1"},
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+	}
+
+	var reply string
+	err := accnts.V1ActionRemoveBalance(ctx, args, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
+
+func TestV1GetAccountThresholdError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+	ctx := context.Background()
+
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "tnID",
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID:      "AbstractBalance1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(ctx, acc, false); err != nil {
+		t.Fatal(err)
+	}
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			Tenant: "cgrates.org",
+			ID:     "tnID",
+		},
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+	}
+
+	var reply utils.Account
+	err := accnts.V1GetAccount(ctx, arg, &reply)
+	if err != utils.ErrPartiallyExecuted {
+		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
+	}
+}
