@@ -248,6 +248,7 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdS
 			}
 			transactionFailed := false
 			removeAccountActionFound := false
+			publish := false
 			sharedData := NewSharedActionsData(acts)
 			for i, act := range acts {
 				// check action filter
@@ -298,11 +299,21 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdS
 					transactionFailed = true
 					break
 				}
+				switch act.ActionType {
+				case utils.MetaTopUp, utils.MetaTopUpReset, utils.MetaDebit, utils.MetaDebitReset,
+					utils.MetaSetBalance, utils.MetaRemoveBalance:
+					publish = true
+				case utils.MetaPublishAccount:
+					publish = false // already publishes
+				}
 				if act.ActionType == utils.MetaRemoveAccount {
 					removeAccountActionFound = true
 				}
 			}
 			if !transactionFailed && !removeAccountActionFound {
+				if publish {
+					_ = publishAccount(acc, nil, acts, fltrS, nil, sharedData, ActionConnCfg{})
+				}
 				dm.SetAccount(acc)
 			}
 			return nil
