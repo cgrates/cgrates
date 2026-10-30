@@ -14,8 +14,7 @@ import (
 )
 
 // actSetAccount updates the balances base on the diktat
-func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (err error) {
-	var qAcnt *utils.Account
+func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (qAcnt *utils.Account, err error) {
 	if qAcnt, err = dm.GetAccount(ctx, tnt, acntID); err != nil {
 		if err != utils.ErrNotFound {
 			return
@@ -34,7 +33,7 @@ func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID str
 		switch path[0] {
 		case utils.MetaBalance:
 			if len(path) < 3 {
-				return utils.ErrWrongPath
+				return nil, utils.ErrWrongPath
 			}
 			bal, has := qAcnt.Balances[path[1]]
 			if !has {
@@ -52,16 +51,16 @@ func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID str
 		case utils.MetaAccount:
 			// special case in order to handle account field set in *set_balance/*add_balance action
 			if len(path) < 2 {
-				return utils.ErrWrongPath
+				return nil, utils.ErrWrongPath
 			}
 			if err = actSetAccountFields(qAcnt, path[1:], dk.Value); err != nil {
 				return
 			}
 		default:
-			return utils.ErrWrongPath
+			return nil, utils.ErrWrongPath
 		}
 	}
-	return dm.SetAccount(ctx, qAcnt, false)
+	return qAcnt, dm.SetAccount(ctx, qAcnt, false)
 }
 
 // actSetAccountFields sets the fields inside the account
