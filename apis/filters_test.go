@@ -110,9 +110,30 @@ func TestFiltersSetRemoveFilterRule(t *testing.T) {
 		t.Errorf("values after rejected removal = %v, want %v", stored.Rules[0].Values, want)
 	}
 
-	args.Element = "~*req.Other"
-	if err := admin.SetFilterRule(ctx, args, &reply); err == nil || err.Error() != "NOT_FOUND:FilterRule" {
+	remove.Element = "~*req.Other"
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err == nil || err.Error() != "NOT_FOUND:FilterRule" {
 		t.Errorf("missing rule: error = %v", err)
+	}
+
+	args.Element = "~*req.Other"
+	args.Values = []string{"1005"}
+	args.Overwrite = false
+	if err := admin.SetFilterRule(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(stored.Rules) != 5 {
+		t.Fatalf("rules = %d, want 5", len(stored.Rules))
+	}
+	rule := stored.Rules[4]
+	if rule.Type != args.Type || rule.Element != args.Element {
+		t.Errorf("new rule = %s", utils.ToJSON(rule))
+	}
+	if !slices.Equal(rule.Values, args.Values) {
+		t.Errorf("values = %v, want %v", rule.Values, args.Values)
 	}
 
 	args.Element = "~*req.Country"

@@ -80,7 +80,8 @@ func (adms *AdminSv1) setFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 }
 
 // SetFilterRule adds values to a filter rule, or replaces them when Overwrite is set.
-// Type and Element must match exactly one rule.
+// A rule is added if Type and Element do not match an existing rule.
+// Multiple matches return an error.
 func (adms *AdminSv1) SetFilterRule(ctx *context.Context, arg *engine.SetFilterRuleArgs, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
@@ -93,6 +94,13 @@ func (adms *AdminSv1) SetFilterRule(ctx *context.Context, arg *engine.SetFilterR
 	filter, rule, err := adms.getFilterRule(ctx, arg.Tenant, arg.ID, arg.Type, arg.Element)
 	if err != nil {
 		return err
+	}
+	if rule == nil {
+		rule = &engine.FilterRule{
+			Type:    arg.Type,
+			Element: arg.Element,
+		}
+		filter.Rules = append(filter.Rules, rule)
 	}
 	if arg.Overwrite {
 		rule.Values = arg.Values
@@ -122,6 +130,9 @@ func (adms *AdminSv1) RemoveFilterRule(ctx *context.Context, arg *engine.RemoveF
 	filter, rule, err := adms.getFilterRule(ctx, arg.Tenant, arg.ID, arg.Type, arg.Element)
 	if err != nil {
 		return err
+	}
+	if rule == nil {
+		return utils.ErrPrefixNotFound("FilterRule")
 	}
 	remove := utils.NewStringSet(arg.Values)
 	rule.Values = slices.DeleteFunc(rule.Values, remove.Has)
@@ -156,9 +167,6 @@ func (adms *AdminSv1) getFilterRule(ctx *context.Context, tenant, id, ruleType, 
 			return nil, nil, utils.APIErrorHandler(fmt.Errorf("multiple filter rules match Type <%s> and Element <%s>", ruleType, element))
 		}
 		selected = rule
-	}
-	if selected == nil {
-		return nil, nil, utils.ErrPrefixNotFound("FilterRule")
 	}
 	return filter, selected, nil
 }
