@@ -18,6 +18,83 @@ import (
 	"github.com/cgrates/cgrates/utils"
 )
 
+func TestFiltersSetFilterRules(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	locker := engine.NewLocker(cfg)
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cm := engine.NewConnManager(cfg)
+	dm := engine.NewDataManager(engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg()), cfg, cm, locker)
+	cache := engine.NewCacheS(cfg, dm, cm, nil, locker)
+	dm.SetCache(cache)
+	cm.SetCache(cache)
+	admin := NewAdminSv1(cfg, dm, cm, nil, locker)
+	ctx := context.Background()
+	filter := &engine.Filter{
+		Tenant: "cgrates.org",
+		ID:     "members",
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"a"}},
+			{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"b"}},
+			{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"United States"}},
+			{Type: utils.MetaPrefix, Element: "~*req.Account", Values: []string{"100"}},
+		},
+	}
+	var reply string
+	if err := admin.SetFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	args := &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: filter.Tenant,
+			ID:     filter.ID,
+			Rules: []*engine.FilterRule{
+				{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"c"}},
+				{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"d"}},
+				{Type: utils.MetaString, Element: "~*req.IMSI", Values: []string{"2001"}},
+			},
+		},
+	}
+	if err := admin.SetFilter(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err := dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*engine.FilterRule{
+		{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"United States"}},
+		{Type: utils.MetaPrefix, Element: "~*req.Account", Values: []string{"100"}},
+		{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"c"}},
+		{Type: utils.MetaContains, Element: "~*req.Account", Values: []string{"d"}},
+		{Type: utils.MetaString, Element: "~*req.IMSI", Values: []string{"2001"}},
+	}
+	if utils.ToJSON(stored.Rules) != utils.ToJSON(want) {
+		t.Fatalf("rules = %s, want %s", utils.ToJSON(stored.Rules), utils.ToJSON(want))
+	}
+
+	args.Overwrite = true
+	if err := admin.SetFilter(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if utils.ToJSON(stored.Rules) != utils.ToJSON(args.Rules) {
+		t.Fatalf("rules = %s, want %s", utils.ToJSON(stored.Rules), utils.ToJSON(args.Rules))
+	}
+
+	if err := admin.SetFilter(ctx, &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{Tenant: filter.Tenant, ID: filter.ID},
+	}, &reply); err == nil {
+		t.Fatal("expected an error for empty rules")
+	}
+}
+
 func TestFiltersSetRemoveFilterRule(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
@@ -52,7 +129,7 @@ func TestFiltersSetRemoveFilterRule(t *testing.T) {
 		ID:      "members",
 		Type:    utils.MetaString,
 		Element: "~*req.IMSI",
-		Values:  []string{"1002", "1004", "1003", "1003"},
+		Values:  []string{"1002", "1003", "1003"},
 	}
 	if err := admin.SetFilterRule(ctx, args, &reply); err != nil {
 		t.Fatal(err)
@@ -61,20 +138,8 @@ func TestFiltersSetRemoveFilterRule(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"1001", "1002", "1004", "1003"}; !slices.Equal(stored.Rules[0].Values, want) {
+	if want := []string{"1001", "1002", "1003"}; !slices.Equal(stored.Rules[0].Values, want) {
 		t.Errorf("values = %v, want %v", stored.Rules[0].Values, want)
-	}
-
-	args.Overwrite = true
-	if err := admin.SetFilterRule(ctx, args, &reply); err != nil {
-		t.Fatal(err)
-	}
-	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !slices.Equal(stored.Rules[0].Values, args.Values) {
-		t.Errorf("values = %v, want %v", stored.Rules[0].Values, args.Values)
 	}
 
 	remove := &engine.RemoveFilterRuleArgs{
@@ -91,33 +156,95 @@ func TestFiltersSetRemoveFilterRule(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if want := []string{"1002", "1004"}; !slices.Equal(stored.Rules[0].Values, want) {
+	if want := []string{"1001", "1002"}; !slices.Equal(stored.Rules[0].Values, want) {
 		t.Errorf("values = %v, want %v", stored.Rules[0].Values, want)
 	}
 
-	remove.Values = []string{"1002", "1004"}
-	if err := admin.RemoveFilterRule(ctx, remove, &reply); err == nil {
-		t.Fatal("expected an error when removing all values")
+	remove.Values = []string{"1001", "1002"}
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err != nil {
+		t.Fatal(err)
 	}
 	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(stored.Rules) != 4 {
-		t.Fatalf("rules = %d, want 4", len(stored.Rules))
+	if utils.ToJSON(stored.Rules) != utils.ToJSON(filter.Rules[1:]) {
+		t.Fatalf("rules after removing last values = %s", utils.ToJSON(stored.Rules))
 	}
-	if want := []string{"1002", "1004"}; !slices.Equal(stored.Rules[0].Values, want) {
-		t.Errorf("values after rejected removal = %v, want %v", stored.Rules[0].Values, want)
+
+	remove.Element = "~*req.Other"
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err == nil || err.Error() != "NOT_FOUND:FilterRule" {
+		t.Errorf("missing rule: error = %v", err)
 	}
 
 	args.Element = "~*req.Other"
-	if err := admin.SetFilterRule(ctx, args, &reply); err == nil || err.Error() != "NOT_FOUND:FilterRule" {
-		t.Errorf("missing rule: error = %v", err)
+	args.Values = []string{"1005"}
+	if err := admin.SetFilterRule(ctx, args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []*engine.FilterRule{
+		{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"US"}},
+		{Type: utils.MetaString, Element: "~*req.Country", Values: []string{"UK"}},
+		{Type: utils.MetaPrefix, Element: "~*req.IMSI", Values: []string{"100"}},
+		{Type: utils.MetaString, Element: "~*req.Other", Values: []string{"1005"}},
+	}
+	if utils.ToJSON(stored.Rules) != utils.ToJSON(want) {
+		t.Fatalf("rules = %s, want %s", utils.ToJSON(stored.Rules), utils.ToJSON(want))
+	}
+
+	remove.Values = nil
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err != nil {
+		t.Fatal(err)
+	}
+	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if utils.ToJSON(stored.Rules) != utils.ToJSON(filter.Rules[1:]) {
+		t.Fatalf("rules after removal without values = %s", utils.ToJSON(stored.Rules))
 	}
 
 	args.Element = "~*req.Country"
 	if err := admin.SetFilterRule(ctx, args, &reply); err == nil || !strings.Contains(err.Error(), "multiple filter rules") {
 		t.Errorf("multiple matching rules: error = %v", err)
+	}
+
+	single := &engine.Filter{
+		Tenant: filter.Tenant,
+		ID:     filter.ID,
+		Rules: []*engine.FilterRule{
+			{Type: utils.MetaExists, Element: "~*req.Flag"},
+		},
+	}
+	if err := admin.SetFilter(ctx, &engine.FilterWithAPIOpts{Filter: single, Overwrite: true}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	before := utils.ToJSON(single)
+	remove.Type = utils.MetaExists
+	remove.Element = "~*req.Flag"
+	remove.Values = []string{"unused"}
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err != nil {
+		t.Fatal(err)
+	}
+	remove.Values = nil
+	if err := admin.RemoveFilterRule(ctx, remove, &reply); err == nil {
+		t.Fatal("expected an error when removing the final filter rule")
+	}
+	stored, err = dm.GetFilter(ctx, filter.Tenant, filter.ID, false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if utils.ToJSON(stored) != before {
+		t.Fatalf("filter changed after rejected removal: %s", utils.ToJSON(stored))
+	}
+
+	args.ID = "missing"
+	if err := admin.SetFilterRule(ctx, args, &reply); err == nil || err.Error() != utils.ErrNotFound.Error() {
+		t.Errorf("missing filter: error = %v", err)
 	}
 }
 
@@ -1127,11 +1254,16 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 		ThresholdFilterIndexIDs: indexIDs,
 		AccountsFilterIndexIDs:  indexIDs,
 	}
-	args.Values = []string{"1002"}
-	args.Overwrite = true
-	args.APIOpts = nil
 	reloadCalled = false
-	if err := adms.SetFilterRule(ctx, args, &reply); err != nil {
+	if err := adms.SetFilter(ctx, &engine.FilterWithAPIOpts{
+		Filter: &engine.Filter{
+			Tenant: "cgrates.org",
+			ID:     args.ID,
+			Rules: []*engine.FilterRule{
+				{Type: args.Type, Element: args.Element, Values: []string{"1002"}},
+			},
+		},
+	}, &reply); err != nil {
 		t.Fatal(err)
 	}
 	if !reloadCalled {
