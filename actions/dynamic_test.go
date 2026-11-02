@@ -2533,6 +2533,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 		{
 			name: "SuccessfulRequest",
 			expFwo: &engine.FilterWithAPIOpts{
+				Overwrite: true,
 				Filter: &engine.Filter{
 					Tenant: "cgrates.org",
 					ID:     "FLTR_ACNT_1001",
@@ -2563,6 +2564,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 		{
 			name: "SuccessfulRequestWithDynamicPaths",
 			expFwo: &engine.FilterWithAPIOpts{
+				Overwrite: true,
 				Filter: &engine.Filter{
 					Tenant: "cgrates.org",
 					ID:     "FLTR_ACNT_1001",
@@ -2593,6 +2595,7 @@ func TestActDynamicFilterExecute(t *testing.T) {
 		{
 			name: "SuccessfulRequestEmptyFields",
 			expFwo: &engine.FilterWithAPIOpts{
+				Overwrite: true,
 				Filter: &engine.Filter{
 					Tenant: "cgrates.org",
 					ID:     "FLTR_EMPTY",

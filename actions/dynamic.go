@@ -1161,7 +1161,8 @@ func (aL *actDynamicFilter) execute(ctx *context.Context, data utils.MapStorage,
 					Element: params[3],
 				}},
 			},
-			APIOpts: make(map[string]any),
+			Overwrite: true,
+			APIOpts:   make(map[string]any),
 		}
 		// populate Filter's Values
 		if params[4] != utils.EmptyString {

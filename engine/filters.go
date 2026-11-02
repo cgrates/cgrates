@@ -232,17 +232,17 @@ func (fltr *Filter) Clone() *Filter {
 // FilterWithOpts the arguments for the replication
 type FilterWithAPIOpts struct {
 	*Filter
-	APIOpts map[string]any
+	Overwrite bool
+	APIOpts   map[string]any
 }
 
 type SetFilterRuleArgs struct {
-	Tenant    string
-	ID        string
-	Type      string
-	Element   string
-	Values    []string
-	Overwrite bool
-	APIOpts   map[string]any
+	Tenant  string
+	ID      string
+	Type    string
+	Element string
+	Values  []string
+	APIOpts map[string]any
 }
 
 type RemoveFilterRuleArgs struct {
