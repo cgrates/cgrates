@@ -329,8 +329,8 @@ func (rdr *CgrUR) setURL(inURL string, opts *config.EventReaderOpts) error {
 	return nil
 }
 
-// GetReaderEvents will gather all *cgrur reader events found using the filter
-func (rdr *CgrUR) GetReaderEvents(filters []string) ([]*erEvent, error) {
+// getReaderEvents will gather all *cgrur reader events found using the filter
+func (rdr *CgrUR) getReaderEvents(filters []string) ([]*erEvent, error) {
 	if rdr.connType != utils.MySQL {
 		return nil, errors.New("manual cgrur processing supports only mysql")
 	}

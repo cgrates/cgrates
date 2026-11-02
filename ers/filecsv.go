@@ -113,7 +113,29 @@ func (rdr *CSVFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *CSVFileER) processFile(fName string, filters []string) (err error) {
+func (rdr *CSVFileER) processFile(fName string, filters []string) error {
+	return rdr.processCSVFile(fName, filters, func(ev *erEvent) {
+		// send any event it finds to rdrEvents or partialEvents channels
+		rdrEv := rdr.rdrEvents
+		if _, isPartial := ev.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+			rdrEv = rdr.partialEvents
+		}
+		rdrEv <- ev
+	})
+
+}
+
+// getReaderEvents gathers the events from a CSV file that pass the supplied filters.
+func (rdr *CSVFileER) getReaderEvents(fName string, filters []string) (erEvs []*erEvent, err error) {
+	erEvs = make([]*erEvent, 0)
+	err = rdr.processCSVFile(fName, filters, func(ev *erEvent) {
+		// if it finds events, append them
+		erEvs = append(erEvs, ev)
+	})
+	return erEvs, err
+}
+
+func (rdr *CSVFileER) processCSVFile(fName string, filters []string, handleEvent func(*erEvent)) (err error) {
 	if cap(rdr.conReqs) != 0 {
 		rdr.conReqs <- struct{}{}
 		defer func() { <-rdr.conReqs }()
@@ -200,14 +222,10 @@ func (rdr *CSVFileER) processFile(fName string, filters []string) (err error) {
 			return
 		}
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-		rdrEv := rdr.rdrEvents
-		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
-			rdrEv = rdr.partialEvents
-		}
-		rdrEv <- &erEvent{
+		handleEvent(&erEvent{ // decide what to do with the event based on the function passed in
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
-		}
+		})
 		evsPosted++
 	}
 	if rdr.Config().ProcessedPath != "" {

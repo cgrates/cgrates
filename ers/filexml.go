@@ -135,6 +135,28 @@ func (rdr *XMLFileER) Serve() (err error) {
 
 // processFile is called for each file in a directory and dispatches erEvents from it
 func (rdr *XMLFileER) processFile(fName string, filters []string) error {
+	return rdr.processXMLFile(fName, filters, func(ev *erEvent) {
+		// send any event it finds to rdrEvents or partialEvents channels
+		rdrEv := rdr.rdrEvents
+		if _, isPartial := ev.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+			rdrEv = rdr.partialEvents
+		}
+		rdrEv <- ev
+	})
+
+}
+
+// getReaderEvents gathers the events from a XML file that pass the supplied filters.
+func (rdr *XMLFileER) getReaderEvents(fName string, filters []string) (erEvs []*erEvent, err error) {
+	erEvs = make([]*erEvent, 0)
+	err = rdr.processXMLFile(fName, filters, func(ev *erEvent) {
+		// if it finds events, append them
+		erEvs = append(erEvs, ev)
+	})
+	return erEvs, err
+}
+
+func (rdr *XMLFileER) processXMLFile(fName string, filters []string, handleEvent func(*erEvent)) error {
 	if cap(rdr.conReqs) != 0 {
 		rdr.conReqs <- struct{}{}
 		defer func() { <-rdr.conReqs }()
@@ -189,14 +211,10 @@ func (rdr *XMLFileER) processFile(fName string, filters []string) error {
 			continue
 		}
 		cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-		rdrEv := rdr.rdrEvents
-		if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
-			rdrEv = rdr.partialEvents
-		}
-		rdrEv <- &erEvent{
+		handleEvent(&erEvent{
 			cgrEvent: cgrEv,
 			rdrCfg:   rdr.Config(),
-		}
+		})
 		evsPosted++
 	}
 
@@ -210,6 +228,6 @@ func (rdr *XMLFileER) processFile(fName string, filters []string) error {
 
 	utils.Logger.Info(
 		fmt.Sprintf("%s finished processing file <%s>. Total records processed: %d, events posted: %d, run duration: %s",
-			utils.ERs, absPath, rowNr, evsPosted, time.Now().Sub(timeStart)))
+			utils.ERs, absPath, rowNr, evsPosted, time.Since(timeStart)))
 	return nil
 }
