@@ -843,6 +843,17 @@ func TestNewTimeStringConverter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
 	}
 
+	eOut = &TimeStringConverter{"20060102"}
+	if rcv = NewTimeStringConverter("20060102"); !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "20261019"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
 	//wrong cases
 	eOut = &TimeStringConverter{"not really a good time"}
 	if rcv = NewTimeStringConverter("not really a good time"); !reflect.DeepEqual(eOut, rcv) {

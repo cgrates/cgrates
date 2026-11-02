@@ -119,3 +119,40 @@ func processReaderDir(dirPath, suffix string, f func(fn string) error) {
 	}
 	wg.Wait()
 }
+
+// getReaderEventsFromDir finds all entries within dirPath, filters only the ones
+// whose name ends with the specified suffix and executes function f on them.
+// Returns a slice of all the events it read from f.
+func getReaderEventsFromDir(dirPath, suffix string, f func(fn string) ([]*erEvent, error)) []*erEvent {
+	filesInDir, err := os.ReadDir(dirPath)
+	if err != nil {
+		utils.Logger.Notice(fmt.Sprintf(
+			"<%s> encountered error while reading entries from directory %s: %v",
+			utils.ERs, dirPath, err))
+		// os.ReadDir may return partial results even on error, so we continue processing.
+	}
+	fileReplies := make([]*erEvent, 0)
+	var wg sync.WaitGroup
+	for i, file := range filesInDir {
+		if !strings.HasSuffix(file.Name(), suffix) {
+			// Ignore any entries that don't end in the specified suffix.
+			continue
+		}
+		wg.Add(1)
+		go func(i int, fileName string) {
+			defer wg.Done()
+			erEvents, err := f(fileName)
+			if erEvents != nil {
+				fileReplies = append(fileReplies, erEvents...)
+			}
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> processing file %s, error: %v",
+					utils.ERs, fileName, err))
+			}
+		}(i, file.Name())
+	}
+	wg.Wait()
+
+	return fileReplies
+}

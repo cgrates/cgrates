@@ -114,7 +114,28 @@ func (rdr *JSONFileER) Serve() (err error) {
 }
 
 // processFile is called for each file in a directory and dispatches erEvents from it
-func (rdr *JSONFileER) processFile(fName string, filters []string) (err error) {
+func (rdr *JSONFileER) processFile(fName string, filters []string) error {
+	return rdr.processJSONFile(fName, filters, func(ev *erEvent) {
+		// send any event it finds to rdrEvents or partialEvents channels
+		rdrEv := rdr.rdrEvents
+		if _, isPartial := ev.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+			rdrEv = rdr.partialEvents
+		}
+		rdrEv <- ev
+	})
+
+}
+
+// getReaderEvents gathers the events from a *fileJSON file that pass the supplied filters.
+func (rdr *JSONFileER) getReaderEvents(fName string, filters []string) (erEvs *erEvent, err error) {
+	err = rdr.processJSONFile(fName, filters, func(ev *erEvent) {
+		// if it finds event return it
+		erEvs = ev
+	})
+	return erEvs, err
+}
+
+func (rdr *JSONFileER) processJSONFile(fName string, filters []string, handleEvent func(*erEvent)) (err error) {
 	if cap(rdr.conReqs) != 0 {
 		rdr.conReqs <- struct{}{}
 		defer func() { <-rdr.conReqs }()
@@ -138,7 +159,6 @@ func (rdr *JSONFileER) processFile(fName string, filters []string) (err error) {
 		return
 	}
 
-	evsPosted := 0
 	reqVars := &utils.DataNode{Type: utils.NMMapType, Map: map[string]*utils.DataNode{utils.MetaFileName: utils.NewLeafNode(fName), utils.MetaReaderID: utils.NewLeafNode(rdr.cgrCfg.ERsCfg().Readers[rdr.cfgIdx].ID)}}
 
 	agReq := agents.NewAgentRequest(
@@ -164,15 +184,10 @@ func (rdr *JSONFileER) processFile(fName string, filters []string) (err error) {
 		return
 	}
 	cgrEv := utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
-	rdrEv := rdr.rdrEvents
-	if _, isPartial := cgrEv.APIOpts[utils.PartialOpt]; isPartial {
-		rdrEv = rdr.partialEvents
-	}
-	rdrEv <- &erEvent{
+	handleEvent(&erEvent{
 		cgrEvent: cgrEv,
 		rdrCfg:   rdr.Config(),
-	}
-	evsPosted++
+	})
 
 	if rdr.Config().ProcessedPath != "" {
 		// Finished with file, move it to processed folder
@@ -183,7 +198,7 @@ func (rdr *JSONFileER) processFile(fName string, filters []string) (err error) {
 	}
 
 	utils.Logger.Info(
-		fmt.Sprintf("%s finished processing file <%s>. Events posted: %d, run duration: %s",
-			utils.ERs, absPath, evsPosted, time.Since(timeStart)))
+		fmt.Sprintf("%s finished processing file <%s>. Run duration: %s",
+			utils.ERs, absPath, time.Since(timeStart)))
 	return
 }

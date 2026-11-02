@@ -34,7 +34,7 @@ func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams
 		return utils.ErrNotFound
 	}
 	if rdrCfg.RunDelay != 0 {
-		return errors.New("readers with RunDelay different from 0 are not supported")
+		return errors.New("readers with a non-zero RunDelay are not supported")
 	}
 	filters := slices.Concat(rdrCfg.Filters, params.Filters)
 	switch rdr := er.(type) {
@@ -69,15 +69,28 @@ func (erS *ERService) V1ProcessReaderEvents(ctx *context.Context, params V1RunRe
 		return utils.ErrNotFound
 	}
 	if rdrCfg.RunDelay != 0 {
-		return errors.New("readers with RunDelay different from 0 are not supported")
+		return errors.New("readers with a non-zero RunDelay are not supported")
 	}
 	filters := slices.Concat(rdrCfg.Filters, params.Filters)
 	var rdrEvents []*erEvent
 	switch rdr := er.(type) {
-	// more types could be added in the future
+	case *CSVFileER:
+		rdrEvents = getReaderEventsFromDir(rdr.sourceDir, utils.CSVSuffix,
+			func(fileName string) ([]*erEvent, error) { return rdr.getReaderEvents(fileName, filters) })
+	case *XMLFileER:
+		rdrEvents = getReaderEventsFromDir(rdr.sourceDir, utils.XMLSuffix,
+			func(fileName string) ([]*erEvent, error) { return rdr.getReaderEvents(fileName, filters) })
+	case *FWVFileER:
+		rdrEvents = getReaderEventsFromDir(rdr.sourceDir, utils.FWVSuffix,
+			func(fileName string) ([]*erEvent, error) { return rdr.getReaderEvents(fileName, filters) })
+	case *JSONFileER:
+		rdrEvents = getReaderEventsFromDir(rdr.sourceDir, utils.JSONSuffix,
+			func(fileName string) ([]*erEvent, error) {
+				ev, err := rdr.getReaderEvents(fileName, filters)
+				return []*erEvent{ev}, err
+			})
 	case *CgrUR:
-		// find events from the reader matching the filters
-		rdrEvents, err = rdr.GetReaderEvents(filters)
+		rdrEvents, err = rdr.getReaderEvents(filters)
 		if err != nil {
 			return err
 		}
@@ -87,6 +100,20 @@ func (erS *ERService) V1ProcessReaderEvents(ctx *context.Context, params V1RunRe
 
 	sessReplies := make([]*sessions.V1ProcessEventReply, 0) // gather all replies from processEvent (when event is passed through readers)
 	for _, rdrEv := range rdrEvents {
+		// if event is partial, proccess it, if it becomes complete after processing, process normaly the completed event
+		if _, isPartial := rdrEv.cgrEvent.APIOpts[utils.PartialOpt]; isPartial {
+			rdrEv.cgrEvent, err = erS.processPartialEvent(rdrEv.cgrEvent, rdrEv.rdrCfg)
+			if err != nil {
+				utils.Logger.Warning(fmt.Sprintf(
+					"<%s> reading partial event: <%s> from reader: <%s> got error: <%v>",
+					utils.ERs, utils.ToJSON(rdrEv.cgrEvent), rdrEv.rdrCfg.ID, err))
+				return err
+			}
+			if rdrEv.cgrEvent == nil {
+				continue
+			}
+		}
+		// process either a normal full event, or the completed event (from partials)
 		sessReply, err := erS.processEvent(rdrEv.cgrEvent, rdrEv.rdrCfg)
 		if err != nil {
 			utils.Logger.Warning(fmt.Sprintf(

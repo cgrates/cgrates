@@ -433,7 +433,7 @@ const CGRATES_CFG_JSON = `
 			
 				// Partial
 				// "partialPath": "/",			// the path were the partial events will be sent
-				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*postCDR|*dumpToFile>
+				"partialCacheAction": "*none",		// the action that will be executed for the partial CSVs that are not matched<*none|*postUR|*dumpToFile>
 				"partialOrderField": "~*req.AnswerTime",// the field after what the events are order when merged
 				// "partialcsvFieldSeparator": ","	// separator used when dumping the fields
 

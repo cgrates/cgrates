@@ -371,7 +371,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 	}
 	switch action {
 	case utils.MetaNone: // do nothing with the events
-	case utils.MetaPostCDR: // merge the events and post the to erS
+	case utils.MetaPostUR: // merge the events and post the to erS
 		cgrEv, err := mergePartialEvents(eEvs.events, eEvs.rdrCfg, erS.cfg, erS.cache, erS.fltrS,
 			erS.cfg.GeneralCfg().DefaultTenant,
 			erS.cfg.GeneralCfg().DefaultTimezone)
