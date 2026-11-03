@@ -156,3 +156,23 @@ func TestDynamicWeightEquals(t *testing.T) {
 		t.Error("FilterIDs should not match")
 	}
 }
+
+func TestHTTPBodyTemplate(t *testing.T) {
+	body := map[string]any{
+		"Account": "~*req.Account",
+	}
+	for _, account := range []string{"1001", "1002"} {
+		data := MapStorage{
+			MetaReq: map[string]any{
+				"Account": account,
+			},
+		}
+		got, err := GetDynamicPathValueFromMapStringAny(body, data, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if got["Account"] != account {
+			t.Fatalf("expected Account %s, got %v", account, got["Account"])
+		}
+	}
+}

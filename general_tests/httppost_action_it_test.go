@@ -1408,3 +1408,369 @@ func TestHTTPActionWithOptsFromConfigsPUTDynamicBody(t *testing.T) {
 	})
 
 }
+
+func TestHTTPActionWithOptsFromActionPUTDynamicBodyFormMultipleDictats(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	var rsSrv *httptest.Server
+
+	cfgJSON := fmt.Sprintf(`{
+	"logger": {
+		"level": 7
+	},
+	"actions": {
+		"enabled": true,
+	},
+	"admins": {
+		"enabled": true
+	}
+}`)
+
+	ng := engine.TestEngine{
+		ConfigJSON: cfgJSON,
+		DBCfg:      engine.InternalDBCfg,
+		// LogBuffer:  &bytes.Buffer{},
+	}
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	client, _ := ng.Run(t)
+
+	time.Sleep(200 * time.Millisecond)
+
+	t.Run("StartHttpServer", func(t *testing.T) {
+		rsSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			exp := http.Header{
+				"Accept-Encoding": []string{"gzip"},
+				"Content-Length":  []string{"57"},
+				"Content-Type":    []string{"application/x-www-form-urlencoded"},
+				"Authorization":   []string{"Bearer", "KeyID"},
+				"User-Agent":      []string{"Go-http-client/1.1"},
+			}
+			exp2 := http.Header{
+				"Accept-Encoding": []string{"gzip"},
+				"Content-Length":  []string{"48"},
+				"Content-Type":    []string{"application/json"},
+				"Authorization":   []string{"Bearer", "KeyID2"},
+				"User-Agent":      []string{"Go-http-client/1.1"},
+			}
+			switch {
+			case fmt.Sprintln(r.Header) == fmt.Sprintln(exp):
+				exp = nil // remove to make sure to not match the next trigger
+				sqBody, err := io.ReadAll(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusNotFound)
+				}
+				decoded, err := url.QueryUnescape(string(sqBody))
+				if err != nil {
+					t.Fatal(err)
+				}
+				expBody := `data={"active_throttling":"SPEED_100_KBPS"}`
+				if decoded != expBody {
+					t.Fatalf("expected <%v>, \nreceived <%v>", expBody, decoded)
+				}
+
+			case fmt.Sprintln(r.Header) == fmt.Sprintln(exp2):
+				exp2 = nil // remove to make sure to not match the next trigger
+				sqBody, err := io.ReadAll(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusNotFound)
+				}
+				decoded, err := url.QueryUnescape(string(sqBody))
+				if err != nil {
+					t.Fatal(err)
+				}
+				expBody := `{"data":{"active_throttling2":"SPEED_200_KBPS"}}`
+				if decoded != expBody {
+					t.Fatalf("expected <%v>, \nreceived <%v>", expBody, decoded)
+				}
+
+			default:
+				t.Fatalf("expected <%+v> or  <%+v>, \nreceived \n<%+v>", exp, exp2, r.Header)
+				// ignore the httptest related panic if this error fails, fixing the error will fix the panic
+			}
+		}))
+	})
+
+	t.Run("SetHTTPPostAction", func(t *testing.T) {
+		actPrf := &utils.ActionProfileWithAPIOpts{
+			ActionProfile: &utils.ActionProfile{
+				Tenant: "cgrates.org",
+				ID:     "actPrfID",
+				Actions: []*utils.APAction{
+					{
+						ID:   "actID",
+						Type: utils.MetaHTTP,
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "HttpsPost",
+								Opts: map[string]any{
+									// *httpMethod
+									utils.MetaHTTPMethod: "PUT",
+									// *httpURL
+									utils.MetaHTTPurl: "<~*req.url>",
+									// "*httpHdrs"
+									utils.MetaHTTPHdrs: map[string]any{
+										"Authorization": []string{"Bearer", "<~*req.Authorization>"},
+									},
+									// *httpBody
+									utils.MetaHTTPBody: map[string]any{
+										"data": map[string]any{
+											"<~*req.ThrottlingField>": "~*req.Throttling",
+										},
+									},
+									utils.MetaHTTPContentType: "form",
+								},
+							},
+						},
+						TTL: time.Duration(time.Minute),
+					},
+					{
+						ID:   "actID2",
+						Type: utils.MetaHTTP,
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "HttpsPost",
+								Opts: map[string]any{
+									// *httpMethod
+									utils.MetaHTTPMethod: "post",
+									// *httpURL
+									utils.MetaHTTPurl: "<~*req.url>",
+									// "*httpHdrs"
+									utils.MetaHTTPHdrs: map[string]any{
+										"Authorization": []string{"Bearer", "<~*req.Authorization2>"},
+									},
+									// *httpBody
+									utils.MetaHTTPBody: map[string]any{
+										"data": map[string]any{
+											"<~*req.ThrottlingField2>": "~*req.Throttling2",
+										},
+									},
+									utils.MetaHTTPContentType: "json",
+								},
+							},
+						},
+						TTL: time.Duration(2 * time.Minute),
+					},
+				},
+			},
+		}
+
+		var reply *string
+		if err := client.Call(context.Background(), utils.AdminSv1SetActionProfile,
+			actPrf, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ExecuteHTTPPostAction", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.ActionSv1ExecuteActions,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "plan_1001",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1001",
+					utils.Cost:         float64(30),
+					"Authorization":    "KeyID",
+					"Authorization2":   "KeyID2",
+					"Throttling":       "SPEED_100_KBPS",
+					"ThrottlingField":  "active_throttling",
+					"Throttling2":      "SPEED_200_KBPS",
+					"ThrottlingField2": "active_throttling2",
+					"url":              rsSrv.URL,
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
+		}
+	})
+
+	t.Run("StopHttpServer", func(t *testing.T) {
+		rsSrv.Close()
+	})
+
+}
+
+func TestHTTPActionWithOptsFromActionPUTDynamicBodyFormMultipleExecutions(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	var rsSrv *httptest.Server
+
+	cfgJSON := fmt.Sprintf(`{
+	"logger": {
+		"level": 7
+	},
+	"actions": {
+		"enabled": true,
+	},
+	"admins": {
+		"enabled": true
+	}
+}`)
+
+	ng := engine.TestEngine{
+		ConfigJSON: cfgJSON,
+		DBCfg:      engine.InternalDBCfg,
+		// LogBuffer:  &bytes.Buffer{},
+	}
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	client, _ := ng.Run(t)
+
+	time.Sleep(200 * time.Millisecond)
+
+	t.Run("StartHttpServer", func(t *testing.T) {
+		rsSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			exp := http.Header{
+				"Accept-Encoding": []string{"gzip"},
+				"Content-Length":  []string{"57"},
+				"Content-Type":    []string{"application/x-www-form-urlencoded"},
+				"Authorization":   []string{"Bearer", "KeyID"},
+				"User-Agent":      []string{"Go-http-client/1.1"},
+			}
+			exp2 := http.Header{
+				"Accept-Encoding": []string{"gzip"},
+				"Content-Length":  []string{"58"},
+				"Content-Type":    []string{"application/x-www-form-urlencoded"},
+				"Authorization":   []string{"Bearer", "KeyID2"},
+				"User-Agent":      []string{"Go-http-client/1.1"},
+			}
+			switch {
+			case fmt.Sprintln(r.Header) == fmt.Sprintln(exp):
+				exp = nil // remove to make sure to not match the next trigger
+				sqBody, err := io.ReadAll(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusNotFound)
+				}
+				decoded, err := url.QueryUnescape(string(sqBody))
+				if err != nil {
+					t.Fatal(err)
+				}
+				expBody := `data={"active_throttling":"SPEED_100_KBPS"}`
+				if decoded != expBody {
+					t.Fatalf("expected <%v>, \nreceived <%v>", expBody, decoded)
+				}
+
+			case fmt.Sprintln(r.Header) == fmt.Sprintln(exp2):
+				exp2 = nil // remove to make sure to not match the next trigger
+				sqBody, err := io.ReadAll(r.Body)
+				if err != nil {
+					w.WriteHeader(http.StatusNotFound)
+				}
+				decoded, err := url.QueryUnescape(string(sqBody))
+				if err != nil {
+					t.Fatal(err)
+				}
+				expBody := `data={"active_throttling2":"SPEED_200_KBPS"}`
+				if decoded != expBody {
+					t.Fatalf("expected <%v>, \nreceived <%v>", expBody, decoded)
+				}
+
+			default:
+				t.Fatalf("expected <%+v> or  <%+v>, \nreceived \n<%+v>", exp, exp2, r.Header)
+				// ignore the httptest related panic if this error fails, fixing the error will fix the panic
+			}
+		}))
+	})
+
+	t.Run("SetHTTPPostAction", func(t *testing.T) {
+		actPrf := &utils.ActionProfileWithAPIOpts{
+			ActionProfile: &utils.ActionProfile{
+				Tenant: "cgrates.org",
+				ID:     "actPrfID",
+				Actions: []*utils.APAction{
+					{
+						ID:   "actID",
+						Type: utils.MetaHTTP,
+						Diktats: []*utils.APDiktat{
+							{
+								ID: "HttpsPost",
+								Opts: map[string]any{
+									// *httpMethod
+									utils.MetaHTTPMethod: "PUT",
+									// *httpURL
+									utils.MetaHTTPurl: "<~*req.url>",
+									// "*httpHdrs"
+									utils.MetaHTTPHdrs: map[string]any{
+										"Authorization": []string{"Bearer", "<~*req.Authorization>"},
+									},
+									// *httpBody
+									utils.MetaHTTPBody: map[string]any{
+										"data": map[string]any{
+											"<~*req.ThrottlingField>": "~*req.Throttling",
+										},
+									},
+									utils.MetaHTTPContentType: "form",
+								},
+							},
+						},
+						TTL: time.Duration(time.Minute),
+					},
+				},
+			},
+		}
+
+		var reply *string
+		if err := client.Call(context.Background(), utils.AdminSv1SetActionProfile,
+			actPrf, &reply); err != nil {
+			t.Error(err)
+		}
+	})
+
+	t.Run("ExecuteHTTPPostAction", func(t *testing.T) {
+		var reply string
+		if err := client.Call(context.Background(), utils.ActionSv1ExecuteActions,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "plan_1001",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1001",
+					utils.Cost:         float64(30),
+					"Authorization":    "KeyID",
+					"Throttling":       "SPEED_100_KBPS",
+					"ThrottlingField":  "active_throttling",
+					"url":              rsSrv.URL,
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
+		}
+		if err := client.Call(context.Background(), utils.ActionSv1ExecuteActions,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "plan_1002",
+				Event: map[string]any{
+					utils.Tenant:       "cgrates.org",
+					utils.AccountField: "1002",
+					utils.Cost:         float64(330),
+					"Authorization":    "KeyID2",
+					"Throttling":       "SPEED_200_KBPS",
+					"ThrottlingField":  "active_throttling2",
+					"url":              rsSrv.URL,
+				},
+			}, &reply); err != nil {
+			t.Error(err)
+		} else if reply != utils.OK {
+			t.Error("Unexpected reply returned", reply)
+		}
+	})
+
+	t.Run("StopHttpServer", func(t *testing.T) {
+		rsSrv.Close()
+	})
+
+}
