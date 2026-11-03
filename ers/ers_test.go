@@ -212,7 +212,7 @@ func TestErsOnEvictedMetaDumpToFileSetFieldsErr(t *testing.T) {
 		rdrEvents: make(chan *erEvent, 1),
 		fltrS:     fltrS,
 	}
-	expLog := `[WARNING] <ERs> Converting CDR with originID: <ID> to record , ignoring due to error: <unsupported type: <>>
+	expLog := `[WARNING] <ERs> Converting UR with originID: <ID> to record , ignoring due to error: <unsupported type: <>>
 `
 	erS.onEvicted("ID", value)
 
