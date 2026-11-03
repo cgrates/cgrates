@@ -959,6 +959,7 @@ const (
 	MetaChargerProfiles   = "*chargerProfiles"
 	MetaIPAllocations     = "*ipAllocations"
 	MetaThresholds        = "*thresholds"
+	MetaThresholdIDs      = "*thresholdIDs"
 	MetaAccountThresholds = "*accountThresholds"
 	MetaRoutes            = "*routes"
 	MetaAttributes        = "*attributes"

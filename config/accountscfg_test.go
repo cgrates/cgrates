@@ -47,6 +47,18 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 					Value:  true,
 				},
 			},
+			Thresholds: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
+				},
+			},
 		},
 	}
 	usage, err := utils.NewDecimalFromUsage("200h")
@@ -87,6 +99,18 @@ func TestAccountSCfgLoadFromJSONCfg(t *testing.T) {
 					value:     true,
 				},
 				{},
+			},
+			Thresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
+				},
 			},
 		},
 	}
@@ -177,6 +201,27 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 	"nestedFields": true,
     "maxIterations": 100,
     "maxUsage": "72h",
+	"opts": {
+		"*profileIDs": [
+			{
+				"tenant": "cgrates.org", 
+				"values": ["ACC1"]
+			}
+		],
+		"*profileIgnoreFilters": [{"value": false}],
+		"*thresholdIDs": [
+			{
+				"tenant": "cgrates.org", 
+				"values": ["THR1"]
+			}
+		],
+		"*thresholds": [
+			{
+				"tenant": "cgrates.org", 
+				"value": true
+			}
+		]
+	}
 },
 }`
 
@@ -197,9 +242,31 @@ func TestAccountSCfgAsMapInterface(t *testing.T) {
 		utils.MaxIterations:             100,
 		utils.MaxUsage:                  "259200000000000", // 72h in ns
 		utils.OptsCfg: map[string]any{
-			utils.MetaProfileIDs:           []*DynamicStringSliceOpt{},
-			utils.MetaUsage:                []*DynamicDecimalOpt{NewDynamicDecimalOpt(nil, "", AccountsUsageDftOpt, nil)},
-			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{{}},
+			utils.MetaProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"ACC1"},
+				},
+			},
+			utils.MetaUsage: []*DynamicDecimalOpt{NewDynamicDecimalOpt(nil, "", AccountsUsageDftOpt, nil)},
+			utils.MetaProfileIgnoreFilters: []*DynamicBoolOpt{
+				{
+					value: false,
+				},
+				{},
+			},
+			utils.MetaThresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+			},
+			utils.MetaThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
+				},
+			},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -228,7 +295,36 @@ func TestAccountSCfgClone(t *testing.T) {
 		NestedFields:        true,
 		MaxIterations:       1000,
 		MaxUsage:            usage,
-		Opts:                &AccountsOpts{},
+		Opts: &AccountsOpts{
+			ProfileIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"ACC1"},
+				},
+			},
+			Usage: []*DynamicDecimalOpt{
+				NewDynamicDecimalOpt(nil, "cgrates.org", utils.NewDecimal(1, 0), nil),
+			},
+			ProfileIgnoreFilters: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+				{},
+			},
+			Thresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
+				},
+			},
+		},
 	}
 	rcv := ban.Clone()
 	if !reflect.DeepEqual(ban, rcv) {
@@ -250,6 +346,21 @@ func TestAccountSCfgClone(t *testing.T) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 	if (*rcv.SuffixIndexedFields)[0] = utils.EmptyString; (*ban.SuffixIndexedFields)[0] != "*req.index1" {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if !reflect.DeepEqual(*rcv.Opts.ProfileIDs[0], *ban.Opts.ProfileIDs[0]) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if !reflect.DeepEqual(*rcv.Opts.Usage[0], *ban.Opts.Usage[0]) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if !reflect.DeepEqual(*rcv.Opts.ProfileIgnoreFilters[0], *ban.Opts.ProfileIgnoreFilters[0]) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if !reflect.DeepEqual(*rcv.Opts.Thresholds[0], *ban.Opts.Thresholds[0]) {
+		t.Errorf("Expected clone to not modify the cloned")
+	}
+	if !reflect.DeepEqual(*rcv.Opts.ThresholdIDs[0], *ban.Opts.ThresholdIDs[0]) {
 		t.Errorf("Expected clone to not modify the cloned")
 	}
 }
@@ -287,6 +398,18 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 					value:  true,
 				},
 			},
+			Thresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates",
+					value:  false,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates",
+					Values: []string{"TH1"},
+				},
+			},
 		},
 	}
 
@@ -318,6 +441,18 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 				{
 					Tenant: "cgrates.net",
 					value:  false,
+				},
+			},
+			Thresholds: []*DynamicBoolOpt{
+				{
+					Tenant: "cgrates.org",
+					value:  true,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
 				},
 			},
 		},
@@ -355,6 +490,18 @@ func TestDiffAccountSJsonCfg(t *testing.T) {
 				{
 					Tenant: "cgrates.net",
 					Value:  false,
+				},
+			},
+			Thresholds: []*DynamicInterfaceOpt{
+				{
+					Tenant: "cgrates.org",
+					Value:  true,
+				},
+			},
+			ThresholdIDs: []*DynamicStringSliceOpt{
+				{
+					Tenant: "cgrates.org",
+					Values: []string{"THR1"},
 				},
 			},
 		},
@@ -413,5 +560,70 @@ func TestAccountSCloneSection(t *testing.T) {
 	rcv := acS.CloneSection()
 	if !reflect.DeepEqual(acS, rcv.(*AccountSCfg)) {
 		t.Errorf("Expected %v \n but received \n %v", acS, rcv.(*AccountSCfg))
+	}
+}
+
+func TestAccountSCfgThresholdsOpts(t *testing.T) {
+	cfgJSONStr := `{
+"accounts": {
+	"opts": {
+		"*thresholdIDs": [
+			{
+				"tenant": "cgrates.org",
+				"values": ["THR_ACC1","THR_ACC2"]
+			}
+		],
+		"*thresholds": [
+         {
+             "tenant": "cgrates.org",
+             "filterIDs": ["*string:~*req.Account:1001"],
+             "value": true
+         }
+        ]
+	}
+}
+}`
+	expThresholds := []*DynamicBoolOpt{
+		{
+			Tenant:    "cgrates.org",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			value:     true,
+		},
+	}
+	expThresholdIDs := []*DynamicStringSliceOpt{
+		{
+			Tenant: "cgrates.org",
+			Values: []string{"THR_ACC1", "THR_ACC2"},
+		},
+	}
+	cfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(expThresholds, cfg.accountSCfg.Opts.Thresholds) {
+		t.Errorf("Expecting %v,\n received %v", utils.ToJSON(expThresholds), utils.ToJSON(cfg.accountSCfg.Opts.Thresholds))
+	}
+	if !reflect.DeepEqual(expThresholdIDs, cfg.accountSCfg.Opts.ThresholdIDs) {
+		t.Errorf("Expecting %v,\n received %v", utils.ToJSON(expThresholdIDs), utils.ToJSON(cfg.accountSCfg.Opts.ThresholdIDs))
+	}
+}
+
+func TestAccountsOptsLoadFromJSONCfgThresholdsErr(t *testing.T) {
+	accOpts := &AccountsOpts{}
+	jsnCfg := &AccountsOptsJson{
+		Thresholds: []*DynamicInterfaceOpt{
+			{
+				Value: "error",
+			},
+		},
+		ThresholdIDs: []*DynamicStringSliceOpt{
+			{
+				Values: []string{"THD1"},
+			},
+		},
+	}
+	expErr := `strconv.ParseBool: parsing "error": invalid syntax`
+	if err := accOpts.loadFromJSONCfg(jsnCfg); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %v, recieved %v", expErr, err)
 	}
 }
