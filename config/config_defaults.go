@@ -2724,7 +2724,21 @@ const CGRATES_CFG_JSON = `
 		// 		"filterIDs": [],
 		// 		"value": "72h"
 		// 	}
-		// ]
+		// ],
+		// "*thresholdIDs": [
+		// 	{
+		// 		"tenant": "*any",
+		// 		"filterIDs": [],
+		// 		"values": []
+		// 	}
+		// ],
+		// "*thresholds": [
+        //  {
+        //      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "value": "false"
+        //  }
+        // ]
 	}
 },
 

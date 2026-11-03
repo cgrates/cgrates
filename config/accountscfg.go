@@ -71,6 +71,14 @@ func (accOpts *AccountsOpts) loadFromJSONCfg(jsnCfg *AccountsOptsJson) (err erro
 		prfIgnFltrs, err = IfaceToBoolDynamicOpts(jsnCfg.ProfileIgnoreFilters)
 		accOpts.ProfileIgnoreFilters = append(prfIgnFltrs, accOpts.ProfileIgnoreFilters...)
 	}
+	if jsnCfg.Thresholds != nil {
+		var thresholds []*DynamicBoolOpt
+		thresholds, err = IfaceToBoolDynamicOpts(jsnCfg.Thresholds)
+		accOpts.Thresholds = append(thresholds, accOpts.Thresholds...)
+	}
+	if jsnCfg.ThresholdIDs != nil {
+		accOpts.ThresholdIDs = append(accOpts.ThresholdIDs, jsnCfg.ThresholdIDs...)
+	}
 	return
 }
 
@@ -128,6 +136,8 @@ func (acS AccountSCfg) AsMapInterface() any {
 		utils.MetaProfileIDs:           acS.Opts.ProfileIDs,
 		utils.MetaUsage:                acS.Opts.Usage,
 		utils.MetaProfileIgnoreFilters: acS.Opts.ProfileIgnoreFilters,
+		utils.MetaThresholds:           acS.Opts.Thresholds,
+		utils.MetaThresholdIDs:         acS.Opts.ThresholdIDs,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:        acS.Enabled,
@@ -171,10 +181,21 @@ func (accOpts *AccountsOpts) Clone() *AccountsOpts {
 	if accOpts.ProfileIgnoreFilters != nil {
 		profileIgnoreFilters = CloneDynamicBoolOpt(accOpts.ProfileIgnoreFilters)
 	}
+	var thresholds []*DynamicBoolOpt
+	if accOpts.Thresholds != nil {
+		thresholds = CloneDynamicBoolOpt(accOpts.Thresholds)
+	}
+	var thresholdIDs []*DynamicStringSliceOpt
+	if accOpts.ThresholdIDs != nil {
+		thresholdIDs = CloneDynamicStringSliceOpt(accOpts.ThresholdIDs)
+	}
+
 	return &AccountsOpts{
 		ProfileIDs:           accIDs,
 		Usage:                usage,
 		ProfileIgnoreFilters: profileIgnoreFilters,
+		Thresholds:           thresholds,
+		ThresholdIDs:         thresholdIDs,
 	}
 }
 func (AccountSCfg) SName() string             { return AccountSJSON }
@@ -213,6 +234,8 @@ type AccountsOptsJson struct {
 	ProfileIDs           []*DynamicStringSliceOpt `json:"*profileIDs"`
 	Usage                []*DynamicInterfaceOpt   `json:"*usage"`
 	ProfileIgnoreFilters []*DynamicInterfaceOpt   `json:"*profileIgnoreFilters"`
+	Thresholds           []*DynamicInterfaceOpt   `json:"*thresholds"`
+	ThresholdIDs         []*DynamicStringSliceOpt `json:"*thresholdIDs"`
 }
 
 // Account service config section
@@ -243,6 +266,12 @@ func diffAccountsOptsJsonCfg(d *AccountsOptsJson, v1, v2 *AccountsOpts) *Account
 	}
 	if !DynamicBoolOptEqual(v1.ProfileIgnoreFilters, v2.ProfileIgnoreFilters) {
 		d.ProfileIgnoreFilters = BoolToIfaceDynamicOpts(v2.ProfileIgnoreFilters)
+	}
+	if !DynamicBoolOptEqual(v1.Thresholds, v2.Thresholds) {
+		d.Thresholds = BoolToIfaceDynamicOpts(v2.Thresholds)
+	}
+	if !DynamicStringSliceOptEqual(v1.ThresholdIDs, v2.ThresholdIDs) {
+		d.ThresholdIDs = v2.ThresholdIDs
 	}
 	return d
 }

@@ -274,6 +274,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 				ProfileIDs:           []*DynamicStringSliceOpt{},
 				Usage:                []*DynamicDecimalOpt{{value: AccountsUsageDftOpt}},
 				ProfileIgnoreFilters: []*DynamicBoolOpt{{value: AccountsProfileIgnoreFiltersDftOpt}},
+				Thresholds:           []*DynamicBoolOpt{},
+				ThresholdIDs:         []*DynamicStringSliceOpt{},
 			}},
 		configDBCfg: &ConfigDBCfg{
 			Opts: &DBOpts{},
