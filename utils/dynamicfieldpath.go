@@ -4,6 +4,7 @@
 package utils
 
 import (
+	"maps"
 	"strings"
 )
 
@@ -91,7 +92,8 @@ func GetValueFromDynamicPath(param string, dP DataProvider, onlyEncapsulatead bo
 
 // GetDynamicPathValueFromMapStringAny will parse a map[string]any for dynamic paths in keys and values, and return a new map[string]any with the parsed values. It will recursively parse nested maps. If onlyEncapsulatead is true, it will only parse dynamic paths that are encapsulated between "<" and ">" signs.
 func GetDynamicPathValueFromMapStringAny(param map[string]any, dP DataProvider, onlyEncapsulatead bool) (map[string]any, error) {
-	for key, val := range param {
+	paramCp := maps.Clone(param) // dont modify the original param map
+	for key, val := range paramCp {
 		// parse the key for dynamic paths
 		keyProcessed, err := GetValueFromDynamicPath(key, dP, onlyEncapsulatead)
 		if err != nil {
@@ -103,25 +105,25 @@ func GetDynamicPathValueFromMapStringAny(param map[string]any, dP DataProvider, 
 			if err != nil {
 				return nil, err
 			}
-			param[keyProcessed] = valProcessed
+			paramCp[keyProcessed] = valProcessed
 			if keyProcessed != key {
-				delete(param, key) // remove the old key if it was changed
+				delete(paramCp, key) // remove the old key if it was changed
 			}
 		} else if valStr, ok := val.(string); ok { // parse the value for dynamic paths if it is a string
 			valProcessed, err := GetValueFromDynamicPath(valStr, dP, onlyEncapsulatead)
 			if err != nil {
 				return nil, err
 			}
-			param[keyProcessed] = valProcessed
+			paramCp[keyProcessed] = valProcessed
 			if keyProcessed != key {
-				delete(param, key) // remove the old key if it was changed
+				delete(paramCp, key) // remove the old key if it was changed
 			}
 		} else { // if the value is not a string or a map[string]any, just keep it as is
-			param[keyProcessed] = val
+			paramCp[keyProcessed] = val
 			if keyProcessed != key {
-				delete(param, key) // remove the old key if it was changed
+				delete(paramCp, key) // remove the old key if it was changed
 			}
 		}
 	}
-	return param, nil
+	return paramCp, nil
 }
