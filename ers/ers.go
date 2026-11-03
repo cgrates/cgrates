@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -380,6 +381,23 @@ func (erS *ERService) onEvicted(id string, value any) {
 					utils.ERs, utils.ToJSON(eEvs.events), err.Error()))
 			return
 		}
+		if len(eEvs.rdrCfg.CacheDumpFields) != 0 {
+			agReq := agents.NewAgentRequest(
+				utils.MapStorage(cgrEv.Event), nil,
+				nil, nil, cgrEv.APIOpts, eEvs.rdrCfg.Tenant,
+				erS.cfg.GeneralCfg().DefaultTenant,
+				utils.FirstNonEmpty(eEvs.rdrCfg.Timezone,
+					erS.cfg.GeneralCfg().DefaultTimezone),
+				erS.cfg, erS.cache, erS.fltrS, nil) // create an AgentRequest
+
+			if err = agReq.SetFields(eEvs.rdrCfg.CacheDumpFields); err != nil {
+				utils.Logger.Warning(
+					fmt.Sprintf("<%s> Converting UR with originID: <%s> to record , ignoring due to error: <%s>",
+						utils.ERs, id, err.Error()))
+				return
+			}
+			cgrEv = utils.NMAsCGREvent(agReq.CGRRequest, agReq.Tenant, utils.NestingSep, agReq.Opts)
+		}
 		erS.rdrEvents <- &erEvent{cgrEvent: cgrEv, rdrCfg: eEvs.rdrCfg}
 	case utils.MetaDumpToFile: // apply the cacheDumpFields to the united events and write the record to file
 		var expPath string
@@ -412,7 +430,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting CDR with originID: <%s> to record , ignoring due to error: <%s>",
+					fmt.Sprintf("<%s> Converting UR with originID: <%s> to record , ignoring due to error: <%s>",
 						utils.ERs, id, err.Error()))
 				return
 			}
@@ -480,7 +498,7 @@ func (erS *ERService) onEvicted(id string, value any) {
 
 			if err = eeReq.SetFields(context.Background(), eEvs.rdrCfg.CacheDumpFields); err != nil {
 				utils.Logger.Warning(
-					fmt.Sprintf("<%s> Converting CDR with originID: <%s> to record , ignoring due to error: <%s>",
+					fmt.Sprintf("<%s> Converting UR with originID: <%s> to record , ignoring due to error: <%s>",
 						utils.ERs, id, err.Error()))
 				return
 			}

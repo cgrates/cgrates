@@ -1173,7 +1173,7 @@ func TestERsOnEvictedDumpToJSONWithCacheDumpFieldsErrPrefix(t *testing.T) {
 		fltrS:     fltrS,
 	}
 
-	expLog := `Converting CDR with originID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
+	expLog := `Converting UR with originID: <ID_JSON> to record , ignoring due to error: <unsupported field prefix: <~*req> when set field>`
 	erS.onEvicted("ID_JSON", value)
 	rcvLog := buf.String()
 	if !strings.Contains(rcvLog, expLog) {
