@@ -24,6 +24,8 @@ const (
 	ARIChannelStateChange = "ChannelStateChange"
 	ARIChannelDestroyed   = "ChannelDestroyed"
 	ARIRESTResponse       = "RESTResponse"
+	ARIChannel            = "channel"
+	ARIChannelVars        = "channelvars"
 )
 
 // NewAsteriskAgent constructs a new Asterisk Agent
@@ -161,15 +163,20 @@ func (sma *AsteriskAgent) handleSMAsteriskEvent(ev *SMAsteriskEvent) {
 	var processed bool
 	var err error
 	for _, reqProcessor := range sma.cgrCfg.AsteriskAgentCfg().RequestProcessors {
+		agReq := NewAgentRequest(
+			ev, reqVars, cgrRplyNM, rply, opts,
+			reqProcessor.Tenant, sma.cgrCfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				sma.cgrCfg.GeneralCfg().DefaultTimezone),
+			sma.cgrCfg, nil, sma.fltrS, nil)
+		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it originated from Asterisk
+			if err = ev.setCGRRequest(agReq.CGRRequest, agReq.Opts); err != nil {
+				break
+			}
+		}
 		var lclProcessed bool
 		lclProcessed, err = processAgRequest(
-			sma.ctx, reqProcessor,
-			NewAgentRequest(
-				ev, reqVars, cgrRplyNM, rply, opts,
-				reqProcessor.Tenant, sma.cgrCfg.GeneralCfg().DefaultTenant,
-				utils.FirstNonEmpty(reqProcessor.Timezone,
-					sma.cgrCfg.GeneralCfg().DefaultTimezone),
-				sma.cgrCfg, nil, sma.fltrS, nil),
+			sma.ctx, reqProcessor, agReq,
 			utils.AsteriskAgent, sma.connMgr,
 			sessConns, sma.fltrS)
 		if lclProcessed {

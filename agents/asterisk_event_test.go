@@ -6,6 +6,9 @@ package agents
 import (
 	"encoding/json"
 	"testing"
+
+	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 var (
@@ -67,5 +70,56 @@ func TestSMAEventChannelState(t *testing.T) {
 	smaEv = NewSMAsteriskEvent(ev)
 	if smaEv.ChannelState() != "" {
 		t.Error("Received:", smaEv.ChannelState())
+	}
+}
+
+func TestSMAEventSetCGRRequest(t *testing.T) {
+	stasisStartChanVars := `{"application":"cgratesAuth","type":"StasisStart","channel":{"id":"1562345428.6","state":"Ring","caller":{"name":"1001","number":"1001"},"channelvars":{"*originID":"1562345428.6","*interimUsage":"50","*authorize":"true"}}}`
+	var ev map[string]any
+	if err := json.Unmarshal([]byte(stasisStartChanVars), &ev); err != nil {
+		t.Fatal(err)
+	}
+	nm := utils.NewOrderedNavigableMap()
+	opts := make(utils.MapStorage)
+	if err := NewSMAsteriskEvent(ev).setCGRRequest(nm, opts); err != nil {
+		t.Fatal(err)
+	}
+	rcv := nm.AsMap()
+	if diff := cmp.Diff(ev, rcv); diff != "" {
+		t.Errorf("(-expected +got):\n%s", diff)
+	}
+	eopts := utils.MapStorage{
+		"*originID":     "1562345428.6",
+		"*interimUsage": "50",
+		"*authorize":    "true",
+	}
+	if diff := cmp.Diff(eopts, opts); diff != "" {
+		t.Errorf("(-expected +got):\n%s", diff)
+	}
+}
+
+func TestSMAEventSetCGRRequestChannelVars(t *testing.T) {
+	for _, evStr := range []string{
+		channelStateChange,
+		`{"type":"ChannelDestroyed","channel":{"channelvars":null}}`,
+		`{"type":"ChannelDestroyed","channel":null}`,
+		`{"type":"ChannelDestroyed"}`,
+	} {
+		var ev map[string]any
+		if err := json.Unmarshal([]byte(evStr), &ev); err != nil {
+			t.Fatal(err)
+		}
+		nm := utils.NewOrderedNavigableMap()
+		opts := make(utils.MapStorage)
+		if err := NewSMAsteriskEvent(ev).setCGRRequest(nm, opts); err != nil {
+			t.Fatal(err)
+		}
+		rcv := nm.AsMap()
+		if diff := cmp.Diff(ev, rcv); diff != "" {
+			t.Errorf("(-expected +got):\n%s", diff)
+		}
+		if len(opts) != 0 {
+			t.Errorf("expected no opts, received %s", utils.ToJSON(opts))
+		}
 	}
 }
