@@ -82,7 +82,7 @@ information, please see the [`CONTRIBUTING.md`](CONTRIBUTING.md) file.
 | @ionutboangiu | Boangiu Silviu Ionut |
 | @nickolasdaniel | Filip Nickolas Daniel |
 | @arberkatellari | Arber Katellari |
-
+| @hamidzr | Hamid Zare |
 <!-- to sign, include a single line above this comment containing the following text:
 | @username | First Last |
 -->
