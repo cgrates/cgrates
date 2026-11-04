@@ -238,8 +238,12 @@ func (acc *Account) setBalanceAction(a *Action, fltrS *FilterS) error {
 			return err
 		}
 	}
+	inTrgs := acc.executingTriggers
 	acc.InitCounters()
 	acc.ExecuteActionTriggers(nil, fltrS)
+	if !inTrgs {
+		acc.Publish(nil)
+	}
 	return nil
 }
 
@@ -330,8 +334,12 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, f
 			return err
 		}
 	}
+	inTrgs := acc.executingTriggers
 	acc.InitCounters()
 	acc.ExecuteActionTriggers(nil, fltrS)
+	if !inTrgs {
+		acc.Publish(nil)
+	}
 	return nil
 }
 
@@ -1293,7 +1301,11 @@ func (acc *Account) AsAccountSummary() *AccountSummary {
 func (acc *Account) Publish(initBal map[string]float64) {
 	acntSummary := acc.AsAccountSummary()
 	for _, currentBal := range acntSummary.BalanceSummaries {
-		currentBal.Initial = initBal[currentBal.UUID]
+		if initBal == nil {
+			currentBal.Initial = currentBal.Value
+		} else {
+			currentBal.Initial = initBal[currentBal.UUID]
+		}
 	}
 	cgrEv := &utils.CGREvent{
 		Tenant: acntSummary.Tenant,
