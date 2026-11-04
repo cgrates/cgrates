@@ -5588,6 +5588,25 @@ func TestCGRConfigGetDP(t *testing.T) {
 	}
 }
 
+// Run with -race to detect races during concurrent cache initialization.
+func TestCGRConfigGetDPConcurrent(t *testing.T) {
+	cfg := NewDefaultCGRConfig()
+	exp := utils.MapStorage(cfg.AsMapInterface())
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	for range 8 {
+		wg.Go(func() {
+			<-start
+			dp := cfg.GetDataProvider()
+			if !reflect.DeepEqual(dp, exp) {
+				t.Errorf("Expected %+v, received %+v", exp, dp)
+			}
+		})
+	}
+	close(start)
+	wg.Wait()
+}
+
 func TestStoreCfgInDb(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	db := &CgrJsonCfg{}

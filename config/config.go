@@ -1088,10 +1088,18 @@ func (cfg *CGRConfig) Clone() (cln *CGRConfig) {
 // GetDataProvider returns the config as a data provider interface
 func (cfg *CGRConfig) GetDataProvider() utils.MapStorage {
 	cfg.cacheDPMux.RLock()
+	if len(cfg.cacheDP) >= len(cfg.sections) {
+		mp := cfg.cacheDP.Clone()
+		cfg.cacheDPMux.RUnlock()
+		return mp
+	}
+	cfg.cacheDPMux.RUnlock()
+
+	cfg.cacheDPMux.Lock()
 	if len(cfg.cacheDP) < len(cfg.sections) {
 		cfg.cacheDP = cfg.AsMapInterface()
 	}
 	mp := cfg.cacheDP.Clone()
-	cfg.cacheDPMux.RUnlock()
+	cfg.cacheDPMux.Unlock()
 	return mp
 }
