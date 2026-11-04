@@ -5,6 +5,7 @@ package agents
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -28,13 +29,13 @@ func (smaEv *SMAsteriskEvent) EventType() string {
 
 // ChannelID returns the id of the channel the event refers to.
 func (smaEv *SMAsteriskEvent) ChannelID() string {
-	channelData, _ := smaEv.ariEv["channel"].(map[string]any)
+	channelData, _ := smaEv.ariEv[ARIChannel].(map[string]any)
 	chID, _ := channelData["id"].(string)
 	return chID
 }
 
 func (smaEv *SMAsteriskEvent) ChannelState() string {
-	channelData, _ := smaEv.ariEv["channel"].(map[string]any)
+	channelData, _ := smaEv.ariEv[ARIChannel].(map[string]any)
 	state, _ := channelData["state"].(string)
 	return state
 }
@@ -48,6 +49,22 @@ func (smaEv *SMAsteriskEvent) FieldAsInterface(fldPath []string) (any, error) {
 		return nil, errors.New("empty field path")
 	}
 	return utils.MapStorage(smaEv.ariEv).FieldAsInterface(fldPath)
+}
+
+func (smaEv *SMAsteriskEvent) setCGRRequest(nm *utils.OrderedNavigableMap, opts utils.MapStorage) (err error) {
+	chnl, _ := smaEv.ariEv[ARIChannel].(map[string]any)
+	chVars, _ := chnl[ARIChannelVars].(map[string]any)
+	for k, v := range chVars {
+		if strings.HasPrefix(k, utils.Meta) {
+			opts[k] = v
+		}
+	}
+	for k, v := range smaEv.ariEv {
+		if err = nm.Set(&utils.FullPath{Path: k, PathSlice: []string{k}}, v); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (smaEv *SMAsteriskEvent) FieldAsString(fldPath []string) (string, error) {

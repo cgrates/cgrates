@@ -28,6 +28,7 @@ const (
 	SIP_REQ_USER  = "variable_sip_req_user"
 	AUTH_OK       = "AUTH_OK"
 	FsConnID      = "FsConnID" // used to share connID info in event for remote disconnects
+	FsVarPrefix   = "variable_"
 )
 
 func NewFSsessions(cgrcfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS,
@@ -133,15 +134,20 @@ func (fsa *FSsessions) handleFSEvent(fsev map[string]string, connIdx int) {
 	var processed bool
 	var err error
 	for _, reqProcessor := range fsa.cfg.RequestProcessors {
+		agReq := NewAgentRequest(
+			dP, reqVars, cgrRplyNM, rply, opts,
+			reqProcessor.Tenant, fsa.cgrcfg.GeneralCfg().DefaultTenant,
+			utils.FirstNonEmpty(reqProcessor.Timezone,
+				fsa.cgrcfg.GeneralCfg().DefaultTimezone),
+			fsa.cgrcfg, fsa.cache, fsa.fltrS, nil)
+		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it originated from Freeswitch
+			if err = setFSCGRRequest(fsev, agReq.CGRRequest, agReq.Opts); err != nil {
+				continue
+			}
+		}
 		var lclProcessed bool
 		lclProcessed, err = processRequest(
-			fsa.ctx, reqProcessor,
-			NewAgentRequest(
-				dP, reqVars, cgrRplyNM, rply, opts,
-				reqProcessor.Tenant, fsa.cgrcfg.GeneralCfg().DefaultTenant,
-				utils.FirstNonEmpty(reqProcessor.Timezone,
-					fsa.cgrcfg.GeneralCfg().DefaultTimezone),
-				fsa.cgrcfg, fsa.cache, fsa.fltrS, nil),
+			fsa.ctx, reqProcessor, agReq,
 			utils.FreeSWITCHAgent, fsa.connMgr,
 			sessConns, nil, nil, fsa.fltrS)
 		if lclProcessed {
@@ -178,6 +184,19 @@ func (fsa *FSsessions) handleFSEvent(fsev map[string]string, connIdx int) {
 		fsa.authorizePark(uuid, connIdx,
 			utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER]), cgrRplyNM)
 	}
+}
+
+func setFSCGRRequest(fsev map[string]string, nm *utils.OrderedNavigableMap, opts utils.MapStorage) (err error) {
+	for k, v := range fsev {
+		if opt, isvar := strings.CutPrefix(k, FsVarPrefix); isvar && strings.HasPrefix(opt, utils.Meta) {
+			opts[opt] = v
+			continue
+		}
+		if err = nm.Set(&utils.FullPath{Path: k, PathSlice: []string{k}}, v); err != nil {
+			return
+		}
+	}
+	return
 }
 
 func (fsa *FSsessions) dispatchErr(uuid string, connIdx int, eventName string, fsev map[string]string, err error) {

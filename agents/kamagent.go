@@ -154,7 +154,7 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 			utils.FirstNonEmpty(reqProcessor.Timezone, ka.timezone,
 				ka.cfg.GeneralCfg().DefaultTimezone),
 			ka.cfg, nil, ka.fltrS, nil)
-		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it came from Kamailio
+		if len(reqProcessor.RequestFields) == 0 { // no templates, pass the event as it originated from Kamailio
 			if err = kev.setCGRRequest(agReq.CGRRequest, agReq.Opts); err != nil {
 				break
 			}

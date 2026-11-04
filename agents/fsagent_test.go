@@ -9,6 +9,7 @@ import (
 
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestFAsSessionSClientIface(t *testing.T) {
@@ -28,5 +29,41 @@ func TestMinAccountUsageProcessEventReply(t *testing.T) {
 	})
 	if !found || got != time.Minute {
 		t.Fatalf("minAccountUsage() = %v, %t, want %v, true", got, found, time.Minute)
+	}
+}
+
+func TestSetFSSetCGRRequest(t *testing.T) {
+	uid := utils.GenUUID()
+	fsev := map[string]string{
+		EventName:              FsAnswerEvent,
+		UUID:                   uid,
+		"variable_cgr_account": "1001",
+		"variable_*originID":   uid,
+		"variable_*sessions":   "true",
+		"variable_*totalUsage": "100",
+		"variable_*sesTTL":     "540",
+	}
+	nm := utils.NewOrderedNavigableMap()
+	opts := make(utils.MapStorage)
+	if err := setFSCGRRequest(fsev, nm, opts); err != nil {
+		t.Fatal(err)
+	}
+	eEv := map[string]any{
+		EventName:              FsAnswerEvent,
+		UUID:                   uid,
+		"variable_cgr_account": "1001",
+	}
+	rcv := nm.AsMap()
+	if diff := cmp.Diff(rcv, eEv); diff != "" {
+		t.Errorf("(-expected +got):\n%s", diff)
+	}
+	eopts := utils.MapStorage{
+		"*originID":   uid,
+		"*totalUsage": "100",
+		"*sessions":   "true",
+		"*sesTTL":     "540",
+	}
+	if diff := cmp.Diff(opts, eopts); diff != "" {
+		t.Errorf("(-expected +got):\n%s", diff)
 	}
 }
