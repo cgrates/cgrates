@@ -40,7 +40,7 @@
         "fields": [
           {"tag": "Account", "path": "*exp.Account", "type": "*variable", "value": "~*req.Account"},
           {"tag": "URID", "path": "*exp.*urID", "type": "*variable", "value": "~*opts.*urID"},
-          {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*req.Usage"},
+          {"tag": "Usage", "path": "*exp.Usage", "type": "*variable", "value": "~*opts.*accountsCost.Abstracts"},
           {"tag": "Cost", "path": "*exp.Cost", "type": "*variable", "value": "~*opts.*accountsCost.Concretes"}
         ]
       }
@@ -79,6 +79,83 @@
           {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
           {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]", "mandatory": true},
           {"tag": "Usage", "path": "*cgreq.Usage", "type": "*variable", "value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true}
+        ],
+        "replyFields": [
+          {"tag": "CCATemplate", "type": "*template", "value": "*cca"}
+        ]
+      },
+      {
+        "id": "session_initiate",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.Service-Context-Id:voice@diambench",
+          "*string:~*req.CC-Request-Type:1"
+        ],
+        "flags": ["*sessions"],
+        "requestFields": [
+          {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+          {"tag": "OptAuthorize", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+          {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+          {"tag": "OptSessionBlockerError", "path": "*opts.*sesBlockerError", "type": "*constant", "value": "true"},
+          {"tag": "OptOriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptUsage", "path": "*opts.*usage", "type": "*variable", "value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+          {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+          {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]", "mandatory": true}
+        ],
+        "replyFields": [
+          {"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+          {"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable", "value": "~*cgrep.MaxUsage.*primary{*durationSeconds}", "mandatory": true}
+        ]
+      },
+      {
+        "id": "session_update",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.Service-Context-Id:voice@diambench",
+          "*string:~*req.CC-Request-Type:2"
+        ],
+        "flags": ["*sessions"],
+        "requestFields": [
+          {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+          {"tag": "OptAccounts", "path": "*opts.*accounts", "type": "*constant", "value": "true"},
+          {"tag": "OptAuthorize", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+          {"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
+          {"tag": "OptSessionBlockerError", "path": "*opts.*sesBlockerError", "type": "*constant", "value": "true"},
+          {"tag": "OptOriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptUsage", "path": "*opts.*usage", "type": "*variable", "value": "~*req.Requested-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+          {"tag": "OptInterimConsumed", "path": "*opts.*interimConsumed", "type": "*variable", "value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+          {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+          {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]", "mandatory": true}
+        ],
+        "replyFields": [
+          {"tag": "CCATemplate", "type": "*template", "value": "*cca"},
+          {"tag": "GrantedUnits", "path": "*rep.Granted-Service-Unit.CC-Time", "type": "*variable", "value": "~*cgrep.MaxUsage.*primary{*durationSeconds}", "mandatory": true}
+        ]
+      },
+      {
+        "id": "session_terminate",
+        "filters": [
+          "*string:~*vars.*cmd:CCR",
+          "*string:~*req.Service-Context-Id:voice@diambench",
+          "*string:~*req.CC-Request-Type:3"
+        ],
+        "flags": ["*sessions"],
+        "requestFields": [
+          {"tag": "OptSession", "path": "*opts.*session", "type": "*constant", "value": "true"},
+          {"tag": "OptTerminate", "path": "*opts.*terminate", "type": "*constant", "value": "true"},
+          {"tag": "OptUR", "path": "*opts.*ur", "type": "*constant", "value": "true"},
+          {"tag": "OptEEs", "path": "*opts.*ees", "type": "*constant", "value": "true"},
+          {"tag": "OptSessionBlockerError", "path": "*opts.*sesBlockerError", "type": "*constant", "value": "true"},
+          {"tag": "OptOriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptURID", "path": "*opts.*urID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "OptUsage", "path": "*opts.*usage", "type": "*constant", "value": "0s"},
+          {"tag": "OptInterimConsumed", "path": "*opts.*interimConsumed", "type": "*variable", "value": "~*req.Used-Service-Unit.CC-Time:s/(.*)/${1}s/", "mandatory": true},
+          {"tag": "ToR", "path": "*cgreq.ToR", "type": "*constant", "value": "*voice"},
+          {"tag": "OriginID", "path": "*cgreq.OriginID", "type": "*variable", "value": "~*req.Session-Id", "mandatory": true},
+          {"tag": "Account", "path": "*cgreq.Account", "type": "*variable", "value": "~*req.Subscription-Id.Subscription-Id-Data[~Subscription-Id-Type(0)]", "mandatory": true}
         ],
         "replyFields": [
           {"tag": "CCATemplate", "type": "*template", "value": "*cca"}
