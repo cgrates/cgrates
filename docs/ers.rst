@@ -130,7 +130,7 @@ readers
 	List of reader profiles which ERs manages. Simultaneous readers of the same type are possible.
 
 id
-	Reader identificator, used mostly for debug. The id should be unique per each reader since it can influence updating configuration from different *.json* configuration.
+	Reader identifier, used mostly for debug. The id should be unique per each reader since it can influence updating configuration from different *.json* configuration.
 
 type
 	Reader type. Following types are implemented:
@@ -205,7 +205,7 @@ filters
 	List of filters to pass for the reader to process the event. For the dynamic content (prefixed with *~*) following special variables are available:
 
 	**\*vars**
-		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transfered into requests sent to CGRateS, unless instructed inside templates.
+		Request related shared variables between processors, populated especially by core functions. The data put inthere is not automatically transferred into requests sent to CGRateS, unless instructed inside templates.
 
 	**\*tmp**
 		Temporary container to be used when exchanging information between fields.
@@ -234,10 +234,10 @@ flags
 		Logs the Event read. Can be used together with other *main* flags.
 
 	**\*none**
-		Disable transfering the Event from *Reader* to *CGRateS* side.
+		Disable transferring the Event from *Reader* to *CGRateS* side.
 
 	**\*dryRun**
-		Together with not transfering the Event on CGRateS side will also log it, useful for troubleshooting.
+		Together with not transferring the Event on CGRateS side will also log it, useful for troubleshooting.
 
 	**\*authorize**
 		Sends the Event for authorization on CGRateS.
@@ -286,7 +286,7 @@ maxReconnectInterval
 
 
 eesSuccessIDs
-	When an ERs reader processes an event successfuly, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `eesSuccessIDs`.
+	When an ERs reader processes an event successfully, it will send the raw(unprocessed) event that it read, to the specified EEs exporter IDs matching the `eesSuccessIDs`.
 
 
 eesFailedIDs
@@ -322,7 +322,7 @@ opts
 	FileCSV:
 
 	**csvRowLength**
-		Number of fields from csv file, `-1` to disable checking, `0` to inherit the lenght of first record.
+		Number of fields from csv file, `-1` to disable checking, `0` to inherit the length of first record.
 
 	**csvFieldSeparator**
 		Define what separator is used in the CSV fields that will be read.
@@ -581,7 +581,7 @@ fields
 
 
 partialCommitFields
-	The fields are written in the same way as import fields template. The fields are used for events which were read but werent fully processed. If the coming events that are being read, match the filters set in these partialCommitFields, they will be used to fully create and process that partial event.
+	The fields are written in the same way as import fields template. The fields are used for events which were read but weren't fully processed. If the coming events that are being read, match the filters set in these partialCommitFields, they will be used to fully create and process that partial event.
 
 
 cacheDumpFields
