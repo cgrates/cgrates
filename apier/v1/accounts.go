@@ -480,12 +480,9 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 		ActionType: aType,
 		Balance:    balance,
 	}
-	publishAction := &engine.Action{
-		ActionType: utils.MetaPublishAccount,
-	}
-	acts := engine.Actions{a, publishAction}
+	acts := engine.Actions{a}
 	if attr.Cdrlog {
-		acts = engine.Actions{a, publishAction, &engine.Action{
+		acts = engine.Actions{a, &engine.Action{
 			ActionType: utils.CDRLog,
 		}}
 	}
@@ -558,12 +555,9 @@ func (apierSv1 *APIerSv1) SetBalance(ctx *context.Context, attr *utils.AttrSetBa
 		ActionType: utils.MetaSetBalance,
 		Balance:    balance,
 	}
-	publishAction := &engine.Action{
-		ActionType: utils.MetaPublishAccount,
-	}
-	acts := engine.Actions{a, publishAction}
+	acts := engine.Actions{a}
 	if attr.Cdrlog {
-		acts = engine.Actions{a, publishAction, &engine.Action{
+		acts = engine.Actions{a, &engine.Action{
 			ActionType: utils.CDRLog,
 		}}
 	}
@@ -640,12 +634,9 @@ func (apierSv1 *APIerSv1) SetBalances(ctx *context.Context, attr *utils.AttrSetB
 			ActionType: utils.MetaSetBalance,
 			Balance:    balFltr,
 		}
-		publishAction := &engine.Action{
-			ActionType: utils.MetaPublishAccount,
-		}
-		acts := engine.Actions{a, publishAction}
+		acts := engine.Actions{a}
 		if bal.Cdrlog {
-			acts = engine.Actions{a, publishAction, &engine.Action{
+			acts = engine.Actions{a, &engine.Action{
 				ActionType: utils.CDRLog,
 			}}
 		}

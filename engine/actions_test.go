@@ -8111,3 +8111,52 @@ func TestSetBalanceAction(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountPublishInitial(t *testing.T) {
+	tmpC := config.CgrConfig()
+	tmpCM := connMgr
+	defer func() {
+		config.SetCgrConfig(tmpC)
+		SetConnManager(tmpCM)
+	}()
+
+	cfg := config.NewDefaultCGRConfig()
+	cfg.RalsCfg().ThresholdSConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg)}
+	var initial float64
+	clientConn := make(chan birpc.ClientConnector, 1)
+	clientConn <- &ccMock{
+		calls: map[string]func(ctx *context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+				cgrEv := args.(*utils.CGREvent)
+				initial = cgrEv.Event[utils.BalanceSummaries].(BalanceSummaries)[0].Initial
+				return nil
+			},
+		},
+	}
+	SetConnManager(NewConnManager(cfg, map[string]chan birpc.ClientConnector{
+		utils.ConcatenatedKey(utils.MetaInternal, utils.ThreshSConnsCfg): clientConn,
+	}))
+	config.SetCgrConfig(cfg)
+
+	acc := &Account{
+		ID: "cgrates.org:1001",
+		BalanceMap: map[string]Balances{
+			utils.MetaMonetary: {&Balance{Uuid: "uuid1", ID: "BAL1", Value: 150}},
+		},
+	}
+
+	acc.Publish(nil)
+	if initial != 150 {
+		t.Errorf("Expecting: 150, received: %v", initial)
+	}
+
+	acc.Publish(map[string]float64{"uuid1": 100})
+	if initial != 100 {
+		t.Errorf("Expecting: 100, received: %v", initial)
+	}
+
+	acc.Publish(map[string]float64{})
+	if initial != 0 {
+		t.Errorf("Expecting: 0, received: %v", initial)
+	}
+}

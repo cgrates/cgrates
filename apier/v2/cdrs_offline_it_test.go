@@ -234,6 +234,8 @@ func testV2CDRsOfflineExpiryBalance(t *testing.T) {
 		t.Errorf("Calling APIerSv2.SetAccount received: %s", reply)
 	}
 
+	time.Sleep(500 * time.Millisecond)
+
 	var acnt *engine.Account
 	//verify if the third balance was added
 	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2GetAccount,
@@ -336,6 +338,7 @@ func testV2CDRsBalancesWithSameWeight(t *testing.T) {
 	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2SetBalance, attrs, &reply); err != nil {
 		t.Fatal(err)
 	}
+	// time.Sleep(500 * time.Millisecond)
 	var acnt *engine.Account
 	if err := cdrsOfflineRpc.Call(context.Background(), utils.APIerSv2GetAccount,
 		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "specialTest"}, &acnt); err != nil {
