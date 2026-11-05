@@ -391,6 +391,7 @@
 		{
 			"id": "SQLExporterFull",
 			"type": "*sql",
+			"synchronous": true,
 			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
@@ -415,6 +416,7 @@
 		{
 			"id": "SQLExporterPartial",
 			"type": "*sql",
+			"synchronous": true,
 			"exportPath": "mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"attempts": 1,
 			"opts": {
@@ -426,7 +428,7 @@
 				"sqlConnMaxLifetime": "0",
 			},
 			"fields":[ // the path constains *exp.columnName
-				{"tag": "*originID", "path": "*exp.*originID", "type": "*variable", "value": "~*opts.*originID"},
+				{"tag": "*originID", "path": "*exp.origin_id", "type": "*variable", "value": "~*opts.*originID"},
 				{"tag": "AnswerTime", "path": "*exp.answer_time", "type": "*variable", "value": "~*req.AnswerTime"},
 				{"tag": "Cost", "path": "*exp.cost", "type": "*variable", "value": "~*req.Cost{*round:4}"},
 				{"tag": "Usage", "path": "*exp.`usage`", "type": "*variable", "value": "~*req.Usage"},

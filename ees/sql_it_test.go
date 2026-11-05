@@ -56,7 +56,7 @@ func TestSqlEeExport(t *testing.T) {
 
 // create a struct serve as model for *sql exporter
 type testModelSql struct {
-	Cgrid      string
+	OriginID   string
 	AnswerTime time.Time
 	Usage      int64
 	Cost       float64
@@ -158,7 +158,6 @@ func testSqlEeExportEventFull(t *testing.T) {
 	if err := sqlEeRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(10 * time.Millisecond)
 }
 
 func testSqlEeExportEventPartial(t *testing.T) {
@@ -196,7 +195,6 @@ func testSqlEeExportEventPartial(t *testing.T) {
 	if err := sqlEeRpc.Call(context.Background(), utils.EeSv1ProcessEvent, eventVoice, &reply); err != nil {
 		t.Error(err)
 	}
-	time.Sleep(10 * time.Millisecond)
 }
 
 func testSqlEeVerifyExportedEvent(t *testing.T) {
@@ -211,7 +209,7 @@ func testSqlEeVerifyExportedEvent2(t *testing.T) {
 	var result int64
 	db2.Table("expTable").Count(&result)
 	if result != 2 {
-		t.Fatal("Expected table to have only one result ", result)
+		t.Fatal("Expected table to have two results ", result)
 	}
 }
 
@@ -249,9 +247,10 @@ func TestOpenDB3(t *testing.T) {
 }
 
 func TestSQLExportEvent1(t *testing.T) {
+	testSqlEeCreateTable(t)
 	cgrCfg := config.NewDefaultCGRConfig()
 	cgrCfg.EEsCfg().Exporters[0].Opts.SQLTableName = utils.StringPointer("expTable")
-	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates")
+	cgrCfg.EEsCfg().Exporters[0].Opts.SQLDBName = utils.StringPointer("cgrates2")
 	cgrCfg.EEsCfg().Exporters[0].ExportPath = `mysql://cgrates:CGRateS.org@127.0.0.1:3306`
 	sqlEe, err := NewSQLEe(cgrCfg.EEsCfg().Exporters[0], nil)
 	if err != nil {
@@ -260,7 +259,7 @@ func TestSQLExportEvent1(t *testing.T) {
 	if err := sqlEe.Connect(); err != nil {
 		t.Fatal(err)
 	}
-	if err := sqlEe.ExportEvent(context.Background(), &sqlPosterRequest{Querry: "INSERT INTO cdrs VALUES (); ", Values: []any{}}, ""); err != nil {
+	if err := sqlEe.ExportEvent(context.Background(), &sqlPosterRequest{Querry: "INSERT INTO expTable VALUES (); ", Values: []any{}}, ""); err != nil {
 		t.Error(err)
 	}
 	sqlEe.Close()
