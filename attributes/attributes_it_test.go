@@ -2194,6 +2194,7 @@ func testAttributeSCheckIndexesAddIndexedFilters(t *testing.T) {
 
 func testAttributeSCheckIndexesModifyIndexedFilter(t *testing.T) {
 	filter := &engine.FilterWithAPIOpts{
+		Overwrite: true,
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "INDEXED_FLTR_TYPE",

@@ -162,6 +162,7 @@ var (
 		},
 	}
 	fltrSameID = &engine.FilterWithAPIOpts{
+		Overwrite: true,
 		Filter: &engine.Filter{
 			Tenant: utils.CGRateSorg,
 			ID:     "fltr_for_attr",
@@ -362,7 +363,7 @@ func testV1FIdxSetAttributeSProfileWithFltr(t *testing.T) {
 
 	//back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -874,7 +875,7 @@ func testV1FIdxSetAccountWithFltr(t *testing.T) {
 	}
 	//back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Errorf("%q", err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -1373,7 +1374,7 @@ func testV1FIdxSetActionProfileWithFltr(t *testing.T) {
 
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -1868,7 +1869,7 @@ func testV1FIdxSetChargerSProfileWithFltr(t *testing.T) {
 
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -2319,7 +2320,7 @@ func testV1FIdxSetRateSProfileWithFltr(t *testing.T) {
 
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -2809,7 +2810,7 @@ func testV1FIdxRateSProfileRatesWithFltr(t *testing.T) {
 
 	//back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -3411,7 +3412,7 @@ func testV1FIdxSetResourceSProfileWithFltr(t *testing.T) {
 
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -3871,7 +3872,7 @@ func testV1FIdxSetRouteSProfileWithFltr(t *testing.T) {
 	}
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -4361,7 +4362,7 @@ func testV1FIdxSetStatSProfileWithFltr(t *testing.T) {
 	}
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -4822,7 +4823,7 @@ func testV1FIdxSetThresholdProfileWithFltr(t *testing.T) {
 	}
 	// back to our initial filter
 	if err := tFIdxRpc.Call(context.Background(), utils.AdminSv1SetFilter,
-		fltr, &reply); err != nil {
+		&engine.FilterWithAPIOpts{Filter: fltr.Filter, Overwrite: true}, &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Error("Unexpected reply result", reply)
@@ -5333,6 +5334,7 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 
 	// FLTR_Charger, FLTR_Charger12312 and FLTR_Charger4564 will be changed
 	filter1 = &engine.FilterWithAPIOpts{
+		Overwrite: true,
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_Charger",
@@ -5351,6 +5353,7 @@ func testV1FidxSetProfilesWithFltrsAndOverwriteThemFIdx(t *testing.T) {
 		},
 	}
 	filter2 = &engine.FilterWithAPIOpts{
+		Overwrite: true,
 		Filter: &engine.Filter{
 			Tenant: "cgrates.org",
 			ID:     "FLTR_Charger2",
