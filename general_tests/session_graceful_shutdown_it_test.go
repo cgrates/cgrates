@@ -11,7 +11,6 @@ import (
 	"reflect"
 	"syscall"
 	"testing"
-	"time"
 
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/birpc/context"
@@ -190,11 +189,9 @@ func testSessionSRplcApierGetActiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
 			//CGRID:         "testSessionRplCGRID",
-			ID:            "1001",
-			RunID:         "",
-			NodeID:        "MasterReplication",
-			DebitInterval: 0,
-			NextAutoDebit: time.Time{},
+			ID:     "1001",
+			RunID:  "",
+			NodeID: "MasterReplication",
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
@@ -211,11 +208,9 @@ func testSessionSRplcApierGetPassiveSessions(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
 			//CGRID:         "testSessionRplCGRID",
-			ID:            "1001",
-			RunID:         "",
-			NodeID:        "MasterReplication",
-			DebitInterval: 0,
-			NextAutoDebit: time.Time{},
+			ID:     "1001",
+			RunID:  "",
+			NodeID: "MasterReplication",
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
@@ -243,11 +238,9 @@ func testSessionSRplcApierGetPassiveSessionsAfterStop(t *testing.T) {
 	expected := []*sessions.ExternalSession{
 		{
 			//CGRID:         "testSessionRplCGRID",
-			ID:            "1001",
-			RunID:         "",
-			NodeID:        "MasterReplication",
-			DebitInterval: 0,
-			NextAutoDebit: time.Time{},
+			ID:     "1001",
+			RunID:  "",
+			NodeID: "MasterReplication",
 		},
 	}
 	aSessions2 := make([]*sessions.ExternalSession, 0)
