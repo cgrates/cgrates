@@ -71,7 +71,7 @@ func TestRPCExpIT(t *testing.T) {
 				"rpcConnTimeout": "1s",
 				"rpcReplyTimeout": "5s",
 				"rpcAPIOpts": {
-					"*thdProfileIDs": ["THD_3"]
+					"*thresholdProfileIDs": ["THD_3"]
 				}
 			}
 		}
@@ -141,7 +141,7 @@ cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,,*none,true,`,
 	time.Sleep(10 * time.Millisecond) // wait for ThresholdProfiles to load
 
 	// Send the request to thProcessEv1 exporter without specifying any
-	// *thdProfileIDs. On the receiving engine, thresholds is configured to
+	// *thresholdProfileIDs. On the receiving engine, thresholds is configured to
 	// hit only "THD_1" (through *profileIDs config opt).
 	exportRPCEvent(t, clientNg1, "thProcessEv1")
 	checkThresholdsHits(t, clientNg2, map[string]int{
@@ -150,7 +150,7 @@ cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,,*none,true,`,
 		"cgrates.org:THD_3": 0,
 	})
 
-	// Same as above, but this time specify "THD_2" under *thdProfileIDs,
+	// Same as above, but this time specify "THD_2" under *thresholdProfileIDs,
 	// which ignores the configured *profileOpts, and will only hit "THD_2".
 	exportRPCEvent(t, clientNg1, "thProcessEv1", "THD_2")
 	checkThresholdsHits(t, clientNg2, map[string]int{
@@ -159,7 +159,7 @@ cgrates.org,THD_3,*string:~*req.Account:1001,;15,4,1,,,,*none,true,`,
 		"cgrates.org:THD_3": 0,
 	})
 
-	// Same as above, but this time overwrite *thdProfileIDs through the
+	// Same as above, but this time overwrite *thresholdProfileIDs through the
 	// *rpc exporter configuration ("THD_2" -> "THD_3"). This will only hit
 	// "THD_3".
 	exportRPCEvent(t, clientNg1, "thProcessEv2", "THD_2")

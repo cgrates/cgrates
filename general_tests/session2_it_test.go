@@ -186,7 +186,7 @@ func testSes2StirInit(t *testing.T) {
 	}
 	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheS := engine.NewCacheS(ses2Cfg, nil, nil, nil, locker)
-	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply.STIRIdentity[utils.MetaRaw], "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute, ses2Cfg.GeneralCfg().ReplyTimeout); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -227,7 +227,7 @@ func testSes2STIRIdentity(t *testing.T) {
 	}
 	locker := engine.NewLocker(config.NewDefaultCGRConfig())
 	cacheS := engine.NewCacheS(ses2Cfg, nil, nil, nil, locker)
-	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute); err != nil {
+	if err := sessions.AuthStirShaken(context.Background(), cacheS, rply, "1001", "", "1002", "", utils.NewStringSet([]string{"A"}), 10*time.Minute, ses2Cfg.GeneralCfg().ReplyTimeout); err != nil {
 		t.Fatal(err)
 	}
 }

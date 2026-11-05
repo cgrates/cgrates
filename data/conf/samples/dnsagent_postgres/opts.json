@@ -25,7 +25,7 @@
                 "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174967"],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
-                    {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domanin", "path": "*cgreq.Domanin", "type": "*variable", "value": "~*vars.QueryName{*e164Domain}"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
                 ],
@@ -62,7 +62,7 @@
                 "filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:opendns.com."],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
-                    {"tag": "Origin", "path": "*cgreq.AOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Origin", "path": "*cgreq.AOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domain", "path": "*cgreq.ASIPDomain", "type": "*variable", "value": "~*vars.QueryName"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
                 ],
@@ -98,7 +98,7 @@
                 "filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_sip._udp.opensips.org."],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
-                    {"tag": "Origin", "path": "*cgreq.SRVOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuri_user}"},
+                    {"tag": "Origin", "path": "*cgreq.SRVOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domain", "path": "*cgreq.SRVDomain", "type": "*variable", "value": "~*vars.QueryName"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
                 ],

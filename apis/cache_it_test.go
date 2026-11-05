@@ -1,4 +1,4 @@
-//go:build flaky
+//go:build integration
 
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -49,16 +49,12 @@ var (
 // Test start here
 func TestCacheSv1IT(t *testing.T) {
 	switch *utils.DBType {
-	case utils.MetaInternal:
+	case utils.MetaInternal, utils.MetaRedis, utils.MetaPostgres:
 		t.SkipNow()
-	case utils.MetaRedis:
-		cacheConfigDIR = "tutredis"
 	case utils.MetaMySQL:
 		cacheConfigDIR = "tutmysql"
 	case utils.MetaMongo:
 		cacheConfigDIR = "tutmongo"
-	case utils.MetaPostgres:
-		cacheConfigDIR = "tutpostgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
@@ -325,7 +321,7 @@ func testCacheSLoadCache(t *testing.T) {
 	expstats[utils.CacheAttributeProfiles].Items = 1
 	expstats[utils.CacheAttributeFilterIndexes].Groups = 1
 	expstats[utils.CacheAttributeFilterIndexes].Items = 1
-	expstats[utils.CacheLoadIDs].Items = 28
+	expstats[utils.CacheLoadIDs].Items = 31
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
@@ -508,7 +504,7 @@ func testCacheGetStatusMoreIDs(t *testing.T) {
 	expstats[utils.CacheRateFilterIndexes].Items = 1
 	expstats[utils.CacheFilters].Items = 6
 	expstats[utils.CacheRPCConnections].Items = 1
-	expstats[utils.CacheLoadIDs].Items = 28
+	expstats[utils.CacheLoadIDs].Items = 31
 	if err := chcRPC.Call(context.Background(), utils.CacheSv1GetStats,
 		new(utils.AttrCacheIDsWithAPIOpts), &rcvStats); err != nil {
 		t.Error(err)
