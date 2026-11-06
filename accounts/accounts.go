@@ -400,7 +400,7 @@ func (aS *AccountS) processThresholds(ctx *context.Context, origEv *utils.CGREve
 	var thdIDs []string
 	if len(acnt.ThresholdIDs) != 0 {
 		thdIDs = make([]string, len(acnt.ThresholdIDs))
-		copy(acnt.ThresholdIDs, thdIDs)
+		copy(thdIDs, acnt.ThresholdIDs)
 	} else if thdIDs, err = engine.GetStringSliceOpts(ctx, origEv.Tenant, origDP, nil,
 		aS.fltrS, aS.cfg.AccountSCfg().Opts.ThresholdIDs,
 		config.ThresholdsProfileIDsDftOpt, utils.OptsThresholdProfileIDs); err != nil {
