@@ -761,6 +761,33 @@ RP_1001,DR_DATA,*any,10`,
 	} else if len(tIDs) != 0 {
 		t.Errorf("expected no Threshold profiles, received <%v>", tIDs)
 	}
+
+	// Sy opens a BiRPC connection from SessionS to ThresholdS.
+	// SessionS must not call AgentV1 methods on that connection.
+	t.Run("DisconnectPeer", func(t *testing.T) {
+		done := make(chan error, 1)
+		// The API waits for a DPA, so answer the DPR while it runs.
+		go func() {
+			var reply string
+			// Use the Sy peer's address because the Ro peer has the same
+			// OriginHost and OriginRealm.
+			done <- client.Call(context.Background(), utils.SessionSv1DisconnectPeer,
+				&utils.DPRArgs{RemoteAddr: diamClientSy.conn.LocalAddr().String()}, &reply)
+		}()
+		dpr := diamClientSy.ReceivedMessage(2 * time.Second)
+		if dpr == nil {
+			t.Fatal("DiameterAgent did not send a DPR to the diameter peer")
+		}
+		dpa := dpr.Answer(diam.Success)
+		dpa.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("localhost"))
+		dpa.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity(cfg.DiameterAgentCfg().OriginRealm))
+		if err := diamClientSy.SendMessage(dpa); err != nil {
+			t.Fatal(err)
+		}
+		if err := <-done; err != nil {
+			t.Fatalf("SessionSv1.DisconnectPeer: %v", err)
+		}
+	})
 }
 
 func TestDiamSyRestart(t *testing.T) {
