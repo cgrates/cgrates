@@ -2433,3 +2433,182 @@ func TestAccountSv1DebitMaxAbstracts(t *testing.T) {
 		t.Errorf("AbstractBal = %+v, want 29000", acnt.Balances["AbstractBal"].Units)
 	}
 }
+
+func TestSessionSv1ProcessEventForceUsageTwoAccounts(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"sessions": {
+    "enabled": true,
+    "conns": {
+        "*chargers": [{"connIDs": ["*localhost"]}],
+        "*accounts": [{"connIDs": ["*localhost"]}]
+    }
+},
+"chargers": {
+    "enabled": true
+},
+"accounts": {
+    "enabled": true
+},
+"admins": {
+    "enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetChargerProfile,
+		&utils.ChargerProfileWithAPIOpts{
+			ChargerProfile: &utils.ChargerProfile{
+				Tenant:       "cgrates.org",
+				ID:           "DEFAULT",
+				RunID:        utils.MetaDefault,
+				AttributeIDs: []string{utils.MetaNone},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetChargerProfile: %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:  "cgrates.org",
+				ID:      "ACNT_1",
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				Balances: map[string]*utils.Balance{
+					"VoiceBal": {
+						ID:      "VoiceBal",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(2 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount(ACNT_1): %v", err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetAccount,
+		&utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:  "cgrates.org",
+				ID:      "ACNT_2",
+				Weights: utils.DynamicWeights{{Weight: 5}},
+				Balances: map[string]*utils.Balance{
+					"VoiceBal": {
+						ID:      "VoiceBal",
+						Type:    utils.MetaAbstract,
+						Weights: utils.DynamicWeights{{Weight: 10}},
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(1, 0),
+								RecurrentFee: utils.NewDecimal(0, 0),
+							},
+						},
+						Units: utils.NewDecimalFromFloat64(float64(3 * time.Second)),
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetAccount(ACNT_2): %v", err)
+	}
+
+	var rply V1ProcessEventReply
+	err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ForceUsageTooMuch",
+			APIOpts: map[string]any{
+				utils.MetaChargers:           true,
+				utils.MetaAccounts:           true,
+				utils.MetaDebit:              true,
+				utils.MetaUsage:              10 * time.Second,
+				utils.OptsAccountsForceUsage: true,
+				utils.MetaOriginID:           "OriginIDForceUsageTooMuch",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply)
+	if err == nil {
+		t.Fatal("expected an err got nil")
+	}
+	if err.Error() != utils.ErrPartiallyExecuted.Error() {
+		t.Errorf("ProcessEvent error = %q, want %q", err.Error(), utils.ErrPartiallyExecuted.Error())
+	}
+
+	var acnt1 utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACNT_1"}},
+		&acnt1); err != nil {
+		t.Fatalf("AdminSv1GetAccount(ACNT_1): %v", err)
+	}
+	if want := utils.NewDecimalFromFloat64(float64(2 * time.Second)); acnt1.Balances["VoiceBal"].Units.Compare(want) != 0 {
+		t.Errorf("ACNT_1 VoiceBal = %+v, want 2s", acnt1.Balances["VoiceBal"].Units)
+	}
+
+	var acnt2 utils.Account
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACNT_2"}},
+		&acnt2); err != nil {
+		t.Fatalf("AdminSv1GetAccount(ACNT_2): %v", err)
+	}
+	if want := utils.NewDecimalFromFloat64(float64(3 * time.Second)); acnt2.Balances["VoiceBal"].Units.Compare(want) != 0 {
+		t.Errorf("ACNT_2 VoiceBal = %+v, want 3s", acnt2.Balances["VoiceBal"].Units)
+	}
+
+	rply = V1ProcessEventReply{}
+	if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+		&utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ForceUsageSpread",
+			APIOpts: map[string]any{
+				utils.MetaChargers:           true,
+				utils.MetaAccounts:           true,
+				utils.MetaDebit:              true,
+				utils.MetaUsage:              4 * time.Second,
+				utils.OptsAccountsForceUsage: true,
+				utils.MetaOriginID:           "OriginIDForceUsageSpread",
+			},
+			Event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "1002",
+				utils.AnswerTime:   "2018-01-07T17:00:00Z",
+			},
+		}, &rply); err != nil {
+		t.Fatalf("ProcessEvent(spread): %v", err)
+	}
+	if usage := rply.AccountsUsage[utils.MetaDefault]; usage != 4*time.Second {
+		t.Errorf("AccountsUsage[*default] = %v, want 4s", usage)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACNT_1"}},
+		&acnt1); err != nil {
+		t.Fatalf("AdminSv1GetAccount(ACNT_1): %v", err)
+	}
+	if acnt1.Balances["VoiceBal"].Units.Compare(utils.NewDecimal(0, 0)) != 0 {
+		t.Errorf("ACNT_1 VoiceBal = %+v, want 0", acnt1.Balances["VoiceBal"].Units)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1GetAccount,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ACNT_2"}},
+		&acnt2); err != nil {
+		t.Fatalf("AdminSv1GetAccount(ACNT_2): %v", err)
+	}
+	if want := utils.NewDecimalFromFloat64(float64(1 * time.Second)); acnt2.Balances["VoiceBal"].Units.Compare(want) != 0 {
+		t.Errorf("ACNT_2 VoiceBal = %+v, want 1s", acnt2.Balances["VoiceBal"].Units)
+	}
+}
