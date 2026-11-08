@@ -7,10 +7,10 @@
 package config
 
 import (
+	"context"
 	"path"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 

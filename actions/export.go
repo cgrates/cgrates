@@ -4,17 +4,17 @@
 package actions
 
 import (
+	"context"
 	"encoding/json"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func newActHTTPPost(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func newActHTTPPost(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	cache *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTPPost, err error) {
 	data := cgrEv.AsDataProvider()
 	diktats, err := filterAndSortDiktats(ctx, cfg.GeneralCfg().DefaultTenant, aCfg.Diktats, fltrS, data)
@@ -100,7 +100,7 @@ func (aL *actHTTPPost) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actHTTPPost) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actHTTPPost) execute(ctx context.Context, data utils.MapStorage, _ string) (err error) {
 	var body []byte
 	if body, err = json.Marshal(data); err != nil {
 		return
@@ -142,7 +142,7 @@ func (aL *actExport) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actExport) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actExport) execute(ctx context.Context, data utils.MapStorage, _ string) (err error) {
 	var exporterIDs []string
 	if expIDs, has := aL.cfg().Opts[utils.MetaExporterIDs]; has {
 		exporterIDs = strings.Split(utils.IfaceAsString(expIDs), utils.InfieldSep)

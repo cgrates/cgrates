@@ -4,13 +4,13 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -150,20 +150,20 @@ func TestAttributesSetAttributeProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -305,28 +305,28 @@ func TestAttributesRemoveAttributeProfileMockErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				"testIndex": {},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -359,20 +359,20 @@ func TestAttributesGetAttributeProfileIDsMockErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -402,7 +402,7 @@ func TestAttributesGetAttributeProfileIDsMockErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -432,20 +432,20 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 			attrPRf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPRf, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -467,7 +467,7 @@ func TestAttributesGetAttributeProfilesCountMockErr(t *testing.T) {
 	}
 
 	dbMockNew := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -692,13 +692,13 @@ func TestAttributesGetAttributeProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
-		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+		RemoveAttributeProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -730,20 +730,20 @@ func TestAttributesGetAttributeProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(context.Context, string, string) (*utils.AttributeProfile, error) {
 			attrPrf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPrf, nil
 		},
-		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
-		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+		RemoveAttributeProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
 		},
 	}
@@ -778,20 +778,20 @@ func TestAttributesGetAttributeProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAttributeProfileDrvF: func(*context.Context, string, string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(context.Context, string, string) (*utils.AttributeProfile, error) {
 			attrPrf := &utils.AttributeProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return attrPrf, nil
 		},
-		SetAttributeProfileDrvF: func(*context.Context, *utils.AttributeProfile) error {
+		SetAttributeProfileDrvF: func(context.Context, *utils.AttributeProfile) error {
 			return nil
 		},
-		RemoveAttributeProfileDrvF: func(*context.Context, string, string) error {
+		RemoveAttributeProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"alp_cgrates.org:key1", "alp_cgrates.org:key2", "alp_cgrates.org:key3"}, nil
 		},
 	}

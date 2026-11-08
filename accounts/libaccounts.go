@@ -4,11 +4,11 @@
 package accounts
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/cgrates/engine"
@@ -18,7 +18,7 @@ import (
 
 // newAccountBalances constructs accountBalances
 // expects the balances to be ordered and it will keep them that way
-func newBalanceOperators(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfgs []*utils.Balance,
+func newBalanceOperators(ctx context.Context, cfg *config.CGRConfig, acntID string, blnCfgs []*utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (blncOpers []balanceOperator, err error) {
 
@@ -45,7 +45,7 @@ func newBalanceOperators(ctx *context.Context, cfg *config.CGRConfig, acntID str
 
 // newBalanceOperator instantiates balanceOperator interface
 // cncrtBlncs are needed for abstract balance debits
-func newBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
+func newBalanceOperator(ctx context.Context, cfg *config.CGRConfig, acntID string, blncCfg *utils.Balance, cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) (bP balanceOperator, err error) {
 	switch blncCfg.Type {
@@ -61,8 +61,8 @@ func newBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID stri
 // balanceOperator is the implementation of a balance type
 type balanceOperator interface {
 	id() string // balance id
-	debitAbstracts(ctx *context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
-	debitConcretes(ctx *context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
+	debitAbstracts(ctx context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
+	debitConcretes(ctx context.Context, usage *utils.Decimal, cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error)
 	balanceCfg() (bal *utils.Balance)
 }
 
@@ -101,7 +101,7 @@ func roundUnitsWithIncrementsAndLimit(usage, incrm, limit *utils.Decimal) *utils
 }
 
 // processAttributeS will process the event with AttributeS
-func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+func processAttributeS(ctx context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attrIDs []string) (rplyEv *utils.AttributesProcessEventReply, err error) {
 	if len(attrSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.AttributeS)
@@ -120,7 +120,7 @@ func processAttributeS(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 }
 
 // ratesCostForEvent will process the event with RateS in order to get the cost
-func ratesCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
+func ratesCostForEvent(ctx context.Context, connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	rateSConns, rpIDs []string) (_ *utils.RateProfileCost, err error) {
 	if len(rateSConns) == 0 {
 		return nil, utils.NewErrNotConnected(utils.RateS)
@@ -138,7 +138,7 @@ func ratesCostForEvent(ctx *context.Context, connMgr *engine.ConnManager, cgrEv 
 }
 
 // costIncrement computes the costIncrement for the event
-func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
+func costIncrement(ctx context.Context, cfgCostIncrmts []*utils.CostIncrement,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (costIcrm *utils.CostIncrement, err error) {
 	// no cost increment in our balance, return a default increment to query to rateS
 	for _, costIcrm = range cfgCostIncrmts {
@@ -155,7 +155,7 @@ func costIncrement(ctx *context.Context, cfgCostIncrmts []*utils.CostIncrement,
 }
 
 // unitFactor detects the unitFactor for the event
-func unitFactor(ctx *context.Context, cfgUnitFactors []*utils.UnitFactor,
+func unitFactor(ctx context.Context, cfgUnitFactors []*utils.UnitFactor,
 	fltrS *engine.FilterS, tnt string, ev utils.DataProvider) (uF *utils.UnitFactor, err error) {
 	for _, uFcfg := range cfgUnitFactors {
 		var pass bool
@@ -189,7 +189,7 @@ func balanceLimit(optsCfg map[string]any) (bL *utils.Decimal, err error) {
 
 // debitConcreteUnits debits concrete units out of concrete balances
 // returns utils.ErrInsufficientCredit if complete usage cannot be debited
-func debitConcreteUnits(ctx *context.Context, cUnits *utils.Decimal,
+func debitConcreteUnits(ctx context.Context, cUnits *utils.Decimal,
 	acntID string, cncrtBlncs []*concreteBalance,
 	cgrEv *utils.CGREvent) (ec *utils.EventCharges, err error) {
 
@@ -218,7 +218,7 @@ func debitConcreteUnits(ctx *context.Context, cUnits *utils.Decimal,
 }
 
 // maxDebitAbstractsFromConcretes will debit the maximum possible abstract units out of concretes
-func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
+func maxDebitAbstractsFromConcretes(ctx context.Context, aUnits *utils.Decimal,
 	acntID string, cncrtBlncs []*concreteBalance,
 	connMgr *engine.ConnManager, cgrEv *utils.CGREvent,
 	attrSConns, attributeIDs, rateSConns, rpIDs []string,
@@ -341,7 +341,7 @@ func maxDebitAbstractsFromConcretes(ctx *context.Context, aUnits *utils.Decimal,
 }
 
 // restoreAccounts will restore the accounts in DB out of their backups if present
-func restoreAccounts(ctx *context.Context, dm *engine.DataManager,
+func restoreAccounts(ctx context.Context, dm *engine.DataManager,
 	acnts []*utils.Account, bkps []utils.AccountBalancesBackup) {
 	for i, bkp := range bkps {
 		if bkp == nil ||

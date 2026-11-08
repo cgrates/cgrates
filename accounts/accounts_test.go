@@ -5,13 +5,13 @@ package accounts
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -3201,7 +3201,7 @@ func TestV1ActionRemoveBalance(t *testing.T) {
 
 	expected = utils.ErrNoDatabaseConn.Error()
 	dbMock := &engine.DataDBMock{
-		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+		GetAccountDrvF: func(context.Context, string, string) (*utils.Account, error) {
 			return nil, utils.ErrNoDatabaseConn
 		},
 	}
@@ -6430,7 +6430,7 @@ func TestRefundChargesSetAccountError(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+		GetAccountDrvF: func(context.Context, string, string) (*utils.Account, error) {
 			accPrf := &utils.Account{
 				Tenant: "cgrates.org",
 				ID:     "ACCOUNT1",
@@ -6450,7 +6450,7 @@ func TestRefundChargesSetAccountError(t *testing.T) {
 			}
 			return accPrf, nil
 		},
-		SetAccountDrvF: func(*context.Context, *utils.Account) error {
+		SetAccountDrvF: func(context.Context, *utils.Account) error {
 			return utils.ErrNotImplemented
 		},
 	}

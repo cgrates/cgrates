@@ -4,13 +4,13 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -18,7 +18,7 @@ import (
 )
 
 // NewRPCPool returns a new pool of connection with the given configuration
-func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
+func NewRPCPool(ctx context.Context, dispatchStrategy string, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, rpcConnCfgs []*config.RemoteHost,
 	internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient any, poolID string, connCache *ltcache.Cache) (rpcPool *rpcclient.RPCPool, err error) {
@@ -50,7 +50,7 @@ func NewRPCPool(ctx *context.Context, dispatchStrategy string, keyPath, certPath
 
 // NewRPCConnection creates a new connection based on the RemoteHost structure
 // connCache is used to cache the connection with ID
-func NewRPCConnection(ctx *context.Context, cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
+func NewRPCConnection(ctx context.Context, cfg *config.RemoteHost, keyPath, certPath, caPath string, connAttempts, reconnects int,
 	maxReconnectInterval, connectTimeout, replyTimeout time.Duration, internalConnChan chan birpc.ClientConnector, lazyConnect bool,
 	biRPCClient any, poolID, connID string, connCache *ltcache.Cache) (client birpc.ClientConnector, err error) {
 	var id string
@@ -115,7 +115,7 @@ func (s *RPCClientSet) GetInternalChanel() chan birpc.ClientConnector {
 }
 
 // Call the implementation of the birpc.ClientConnector interface
-func (s *RPCClientSet) Call(ctx *context.Context, method string, args any, reply any) error {
+func (s *RPCClientSet) Call(ctx context.Context, method string, args any, reply any) error {
 	methodSplit := strings.Split(method, ".")
 	if len(methodSplit) != 2 {
 		return rpcclient.ErrUnsupporteServiceMethod

@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -24,7 +24,7 @@ type LoaderCgrCfg struct {
 }
 
 // loadLoaderCgrCfg loads the Loader section of the configuration
-func (ld *LoaderCgrCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (ld *LoaderCgrCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnLoaderCgrCfg := new(LoaderCfgJson)
 	if err = jsnCfg.GetSection(ctx, LoaderJSON, jsnLoaderCgrCfg); err != nil {
 		return

@@ -4,11 +4,11 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -92,7 +92,7 @@ func (eeR *ExportRequest) FieldAsString(fldPath []string) (val string, err error
 }
 
 // SetFields will populate fields of AgentRequest out of templates
-func (eeR *ExportRequest) SetFields(ctx *context.Context, tplFlds []*config.FCTemplate) (err error) {
+func (eeR *ExportRequest) SetFields(ctx context.Context, tplFlds []*config.FCTemplate) (err error) {
 	for _, tplFld := range tplFlds {
 		if pass, err := eeR.filterS.Pass(ctx, eeR.tnt,
 			tplFld.Filters, eeR); err != nil {

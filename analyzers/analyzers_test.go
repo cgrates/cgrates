@@ -4,7 +4,7 @@
 package analyzers
 
 import (
-	stdctx "context"
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -17,7 +17,6 @@ import (
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -32,7 +31,7 @@ type indexWithInsert struct {
 	doc any
 }
 
-func (idx *indexWithInsert) SearchInContext(ctx stdctx.Context, req *bleve.SearchRequest) (*bleve.SearchResult, error) {
+func (idx *indexWithInsert) SearchInContext(ctx context.Context, req *bleve.SearchRequest) (*bleve.SearchResult, error) {
 	result, err := idx.baseIndex.SearchInContext(ctx, req)
 	if err == nil && idx.doc != nil {
 		doc := idx.doc

@@ -4,11 +4,11 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -92,16 +92,16 @@ func TestChargerSSetChargerProfileSetLoadIDsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) {
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) {
 			return nil
 		},
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return nil, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -143,22 +143,22 @@ func TestChargerSSetChargerProfileCallCacheErr(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) {
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) {
 			return nil
 		},
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return nil, utils.ErrNotFound
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -283,7 +283,7 @@ func TestChargerSSetGetChargerProfileIDsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -565,21 +565,21 @@ func TestChargerSRmvChargerProfileErrSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveChargerProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveChargerProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 			}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) {
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -611,27 +611,27 @@ func TestChargerSRmvChargerProfileErrRemoveCallCache(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		RemoveChargerProfileDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveChargerProfileDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 			}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) {
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -820,13 +820,13 @@ func TestChargersGetChargerProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetChargerProfileDrvF: func(*context.Context, *utils.ChargerProfile) error {
+		SetChargerProfileDrvF: func(context.Context, *utils.ChargerProfile) error {
 			return nil
 		},
-		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+		RemoveChargerProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"chp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -858,20 +858,20 @@ func TestChargersGetChargerProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetChargerProfileDrvF: func(*context.Context, string, string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(context.Context, string, string) (*utils.ChargerProfile, error) {
 			chrgPrf := &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return chrgPrf, nil
 		},
-		SetChargerProfileDrvF: func(*context.Context, *utils.ChargerProfile) error {
+		SetChargerProfileDrvF: func(context.Context, *utils.ChargerProfile) error {
 			return nil
 		},
-		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+		RemoveChargerProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -906,20 +906,20 @@ func TestChargersGetChargerProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetChargerProfileDrvF: func(*context.Context, string, string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(context.Context, string, string) (*utils.ChargerProfile, error) {
 			chrgPrf := &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return chrgPrf, nil
 		},
-		SetChargerProfileDrvF: func(*context.Context, *utils.ChargerProfile) error {
+		SetChargerProfileDrvF: func(context.Context, *utils.ChargerProfile) error {
 			return nil
 		},
-		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+		RemoveChargerProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"cpp_cgrates.org:key1", "cpp_cgrates.org:key2", "cpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -956,17 +956,17 @@ func TestChargersGetChargerProfilesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetChargerProfileDrvF: func(*context.Context, string, string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(context.Context, string, string) (*utils.ChargerProfile, error) {
 			chrgPrf := &utils.ChargerProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return chrgPrf, nil
 		},
-		SetChargerProfileDrvF: func(*context.Context, *utils.ChargerProfile) error {
+		SetChargerProfileDrvF: func(context.Context, *utils.ChargerProfile) error {
 			return nil
 		},
-		RemoveChargerProfileDrvF: func(*context.Context, string, string) error {
+		RemoveChargerProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -994,7 +994,7 @@ func TestChargersGetChargerProfilesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}

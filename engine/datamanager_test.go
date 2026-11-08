@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
@@ -15,7 +16,6 @@ import (
 
 	"github.com/cgrates/baningo"
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -153,7 +153,7 @@ func TestDataManagerSetFilterErrSetFilterDrv(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
 		},
 	}
@@ -187,10 +187,10 @@ func TestDataManagerSetFilterErrUpdateFilterIndex(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
-		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
+		SetFilterDrvF: func(ctx context.Context, fltr *Filter) error { return nil },
 	}
 	fltr := &Filter{
 		Tenant: "cgrates.org",
@@ -222,10 +222,10 @@ func TestDataManagerSetFilterErrItemReplicate(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return nil },
+		SetFilterDrvF: func(ctx context.Context, fltr *Filter) error { return nil },
 	}
 	dm.dbConns.replicators[utils.MetaDefault] = newReplicator(cfg.DbCfg().DBConns[utils.MetaDefault], cM,
 		locker)
@@ -273,7 +273,7 @@ func TestDataManagerRemoveFilterErrGetFilter(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -301,7 +301,7 @@ func TestDataManagerRemoveFilterErrGetIndexes(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1, str2 string) (*Filter, error) {
 			return nil, utils.ErrNotFound
 		},
 	}
@@ -329,7 +329,7 @@ func TestDataManagerRemoveFilterErrGetIndexesBrokenReference(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 	}
@@ -358,13 +358,13 @@ func TestDataManagerRemoveFilterErrRemoveFilterDrv(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
-		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -419,11 +419,11 @@ func TestDataManagerRemoveFilterReplicateTrue(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*Filter, error) {
 			return &Filter{}, nil
 		},
 
-		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -463,7 +463,7 @@ func TestDataManagerRemoveAccountErrGetAccount(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -491,10 +491,10 @@ func TestDataManagerRemoveAccountErrRemoveAccountDrv(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1, str2 string) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -547,13 +547,13 @@ func TestDataManagerRemoveAccountErrRemoveItemFromFilterIndex(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1, str2 string) error {
 			return nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -583,15 +583,15 @@ func TestDataManagerRemoveAccountErrRemoveIndexFiltersItem(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				FilterIDs: []string{"fltr1"},
 			}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1, str2 string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -622,10 +622,10 @@ func TestDataManagerRemoveAccountReplicateTrue(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1, str2 string) error {
 			return nil
 		},
 	}
@@ -654,10 +654,10 @@ func TestDMRemoveAccountReplicate(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1, str2 string) error {
 			return nil
 		},
 	}
@@ -747,7 +747,7 @@ func TestDMSetAccountGetAccountErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -808,12 +808,12 @@ func TestDMSetAccountSetAccountDrvErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				Tenant: "cgrates.org",
 			}, nil
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -874,12 +874,12 @@ func TestDMSetAccountupdatedIndexesErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{
 				Tenant: "cgrates.org",
 			}, nil
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
 	}
@@ -944,7 +944,7 @@ func TestDMSetAccountReplicateTrue(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
 		SetAccountDrvF: data.SetAccountDrv,
@@ -1022,7 +1022,7 @@ func TestDMRemoveThresholdProfileGetErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1045,10 +1045,10 @@ func TestDMRemoveThresholdProfileRmvErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
 		},
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
+		RemThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
 	}
 
 	expErr := utils.ErrNotImplemented
@@ -1069,10 +1069,10 @@ func TestDMRemoveThresholdProfileOldThrNil(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, nil
 		},
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+		RemThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (err error) { return nil },
 	}
 
 	expErr := utils.ErrNotFound
@@ -1093,7 +1093,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
@@ -1109,7 +1109,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr1(t *testing.T) {
 				Async: true,
 			}, nil
 		},
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+		RemThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (err error) { return nil },
 	}
 
 	expErr := utils.ErrNotImplemented
@@ -1130,7 +1130,7 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
@@ -1146,8 +1146,8 @@ func TestDMRemoveThresholdProfileIndxTrueErr2(t *testing.T) {
 				Async: true,
 			}, nil
 		},
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		RemThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (err error) { return nil },
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1174,7 +1174,7 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
@@ -1190,7 +1190,7 @@ func TestDMRemoveThresholdProfileReplicateTrue(t *testing.T) {
 				Async: true,
 			}, nil
 		},
-		RemThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (err error) { return nil },
+		RemThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (err error) { return nil },
 	}
 
 	// tests replicate
@@ -1210,7 +1210,7 @@ func TestDMSetThresholdErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		SetThresholdDrvF: func(ctx *context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
+		SetThresholdDrvF: func(ctx context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
 	}
 
 	th := &utils.Threshold{
@@ -1339,8 +1339,8 @@ func TestDMGetThresholdCacheGetErr(t *testing.T) {
 // 	}
 
 // 	cc := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.ReplicatorSv1GetThreshold: func(ctx context.Context, args, reply any) error {
 // 				rplCast, canCast := reply.(*Threshold)
 // 				if !canCast {
 // 					t.Errorf("Wrong argument type : %T", reply)
@@ -1376,8 +1376,8 @@ func TestDMGetThresholdSetThCacheSetErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -1437,7 +1437,7 @@ func TestDMSetStatQueueSetDrvErr(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, cM, locker)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
+		SetStatQueueDrvF: func(ctx context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1518,7 +1518,7 @@ func TestDMRemoveStatQueueErrDrv(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
+		RemStatQueueDrvF: func(ctx context.Context, tenant, id string) (err error) { return utils.ErrNotImplemented },
 	}
 
 	if err := dm.RemoveStatQueue(context.Background(), utils.CGRateSorg, "SQ99"); err != utils.ErrNotImplemented {
@@ -1541,8 +1541,8 @@ func TestDMRemoveStatQueueReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetStatQueue: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueue: func(ctx context.Context, args, reply any) error {
 
 				return nil
 			},
@@ -1638,8 +1638,8 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueueProfile: func(ctx context.Context, args, reply any) error {
 
 				return nil
 			},
@@ -1675,10 +1675,10 @@ func TestDMGetStatQueueProfileErrRemote(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
+		SetStatQueueProfileDrvF: func(ctx context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
 
 	if _, err := dm.GetStatQueueProfile(context.Background(), utils.CGRateSorg, "sqp99", false, false, utils.NonTransactional); err != utils.ErrNotImplemented {
@@ -1698,8 +1698,8 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -1733,7 +1733,7 @@ func TestDMGetStatQueueProfileErrCacheWrite(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotFound
 		},
 	}
@@ -1758,8 +1758,8 @@ func TestDMGetStatQueueProfileErr2CacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -1816,8 +1816,8 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -1832,7 +1832,7 @@ func TestDMGetThresholdProfileSetThErr2(t *testing.T) {
 	cM.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+		GetThresholdDrvF: func(ctx context.Context, tenant, id string) (*utils.Threshold, error) {
 			return &utils.Threshold{}, nil
 		},
 	}
@@ -1903,8 +1903,8 @@ func TestDMGetThresholdProfileDMErr(t *testing.T) {
 // 	}
 
 // 	cc := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.ReplicatorSv1GetThresholdProfile: func(ctx context.Context, args, reply any) error {
 // 				rplCast, canCast := reply.(*Threshold)
 // 				if !canCast {
 // 					t.Errorf("Wrong argument type : %T", reply)
@@ -1940,8 +1940,8 @@ func TestDMGetThresholdProfileSetThPrfErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -1975,8 +1975,8 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -1991,7 +1991,7 @@ func TestDMGetThresholdProfileSetThPrfErr2(t *testing.T) {
 	cM.SetCache(cacheS)
 	dm.SetCache(cacheS)
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{}, nil
 		},
 	}
@@ -3063,8 +3063,8 @@ func TestDMGetAccountReplicate(t *testing.T) {
 	data, _ := NewInternalDB(nil, cfg.DbCfg().Items)
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAccount: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -3118,10 +3118,10 @@ func TestDMGetAccountReplicate(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1, str2 string) (*utils.Account, error) {
 			return ap, utils.ErrNotFound
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
 	}
@@ -3228,7 +3228,7 @@ func TestDMSetLoadIDsDrvErr(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
 	}
 
 	itmLIDs := map[string]int64{
@@ -3279,8 +3279,8 @@ func TestDMSetLoadIDsReplicationFailure(t *testing.T) {
 
 	failingConn := make(chan birpc.ClientConnector, 1)
 	failingConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetLoadIDs: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetLoadIDs: func(ctx context.Context, args, reply any) error {
 				return errors.New("replication failed")
 			},
 		},
@@ -3385,7 +3385,7 @@ func TestDMCheckFiltersErrCall(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		HasDataDrvF: func(ctx *context.Context, category, subject, tenant string) (bool, error) {
+		HasDataDrvF: func(ctx context.Context, category, subject, tenant string) (bool, error) {
 			return false, utils.ErrNotFound
 		},
 	}
@@ -3441,8 +3441,8 @@ func TestGetAPIBanErrSingleCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3507,8 +3507,8 @@ func TestGetAPIBanErrMultipleCacheWrite(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3574,8 +3574,8 @@ func TestGetAPIBanErrNoBanCacheSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3619,7 +3619,7 @@ func TestDMRemoveIndexesErrDrv(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		RemoveIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
+		RemoveIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -3693,8 +3693,8 @@ func TestDMSetIndexesReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetIndexes: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetIndexes: func(ctx context.Context, args, reply any) error {
 				return nil
 
 			},
@@ -3734,8 +3734,8 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetIndexes: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetIndexes: func(ctx context.Context, args, reply any) error {
 				return nil
 
 			},
@@ -3754,11 +3754,11 @@ func TestDMGetIndexesErrSetIdxDrv(t *testing.T) {
 	indexes2 := map[string]utils.StringSet{"*string:*req.Account:1002": {"ATTR1": {}, "ATTR2": {}}}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return indexes2, utils.ErrNotFound
 		},
 
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotFound
 		},
 	}
@@ -3779,8 +3779,8 @@ func TestDMGetIndexesErrCacheSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3812,8 +3812,8 @@ func TestDMGetIndexesErrCacheWriteSet(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -3864,7 +3864,7 @@ func TestDMRemoveActionProfileErrGetActionProf(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -3903,10 +3903,10 @@ func TestDMRemoveActionProfileErrRemvProfDrv(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, nil
 		},
-		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error {
+		RemoveActionProfileDrvF: func(ctx context.Context, tenant, ID string) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -3930,7 +3930,7 @@ func TestDMCacheDataFromDBPrefixKeysErr(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx context.Context, s string, srch string) ([]string, error) {
 			return []string{}, utils.ErrNotImplemented
 		},
 	}
@@ -3985,8 +3985,8 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetThresholdProfile: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThresholdProfile: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -4015,7 +4015,7 @@ func TestDMGetThresholdSetThPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return th, utils.ErrNotFound
 		},
 	}
@@ -4096,7 +4096,7 @@ func TestDMSetThresholdProfileGetThPrfErr(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -4150,10 +4150,10 @@ func TestDMSetThresholdProfileSetThPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return th, nil
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return utils.ErrNotFound },
+		SetThresholdProfileDrvF: func(ctx context.Context, tp *utils.ThresholdProfile) (err error) { return utils.ErrNotFound },
 	}
 
 	if err := dm.SetThresholdProfile(context.Background(), th, false); err != utils.ErrNotFound {
@@ -4175,12 +4175,12 @@ func TestDMSetThresholdProfileUpdatedIndexesErr(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
 				Tenant: utils.CGRateSorg,
 			}, nil
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
+		SetThresholdProfileDrvF: func(ctx context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
 	}
 
 	th := &utils.ThresholdProfile{
@@ -4217,8 +4217,8 @@ func TestDMSetThresholdProfileReplicateErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetThresholdProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -4300,8 +4300,8 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4312,7 +4312,7 @@ func TestDMGetStatQueueNewStoredStatQueueErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+		GetStatQueueDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 			return stq, utils.ErrNotFound
 		},
 	}
@@ -4353,8 +4353,8 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetStatQueue: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetStatQueue: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4365,10 +4365,10 @@ func TestDMGetStatQueueSetStatQueueDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+		GetStatQueueDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 			return stq, utils.ErrNotFound
 		},
-		SetStatQueueDrvF: func(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
+		SetStatQueueDrvF: func(ctx context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -4394,8 +4394,8 @@ func TestDMGetStatQueueCacheWriteErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -4585,7 +4585,7 @@ func TestDMSetStatQueueProfileGetStatQProflErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, utils.ErrNotImplemented
 		},
 	}
@@ -4631,8 +4631,8 @@ func TestDMSetStatQueueProfileSetStatQPrflDrvErr(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) { return sqp, nil },
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) { return sqp, nil },
+		SetStatQueueProfileDrvF: func(ctx context.Context, sq *utils.StatQueueProfile) (err error) { return utils.ErrNotImplemented },
 	}
 
 	expErr := utils.ErrNotImplemented
@@ -4687,8 +4687,8 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResource: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4699,10 +4699,10 @@ func TestDMGetResourceSetResourceDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetResourceDrvF: func(ctx *context.Context, tenant, id string) (*utils.Resource, error) {
+		GetResourceDrvF: func(ctx context.Context, tenant, id string) (*utils.Resource, error) {
 			return &utils.Resource{}, utils.ErrNotFound
 		},
-		SetResourceDrvF: func(ctx *context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
+		SetResourceDrvF: func(ctx context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -4726,8 +4726,8 @@ func TestDMGetResourceCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -4759,8 +4759,8 @@ func TestDMGetResourceCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -4802,7 +4802,7 @@ func TestDMSetResourceSetResourceDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		SetResourceDrvF: func(ctx *context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
+		SetResourceDrvF: func(ctx context.Context, r *utils.Resource) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -4844,7 +4844,7 @@ func TestDMRemoveResourceRemoveResourceDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		RemoveResourceDrvF: func(ctx *context.Context, tnt, id string) error { return utils.ErrNotImplemented },
+		RemoveResourceDrvF: func(ctx context.Context, tnt, id string) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -4873,8 +4873,8 @@ func TestDMRemoveResourceReplicateErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveResource: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4939,8 +4939,8 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetResourceProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetResourceProfile: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -4951,10 +4951,10 @@ func TestDMGetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, utils.ErrNotFound
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
+		SetResourceProfileDrvF: func(ctx context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -4978,8 +4978,8 @@ func TestDMGetResourceProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5011,8 +5011,8 @@ func TestDMGetResourceProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5062,8 +5062,8 @@ func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetFilter: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetFilter: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -5072,8 +5072,8 @@ func TestDMGetFilterSetFilterDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1, str2 string) (*Filter, error) { return &Filter{}, utils.ErrNotFound },
-		SetFilterDrvF: func(ctx *context.Context, fltr *Filter) error { return utils.ErrNotImplemented },
+		GetFilterDrvF: func(ctx context.Context, str1, str2 string) (*Filter, error) { return &Filter{}, utils.ErrNotFound },
+		SetFilterDrvF: func(ctx context.Context, fltr *Filter) error { return utils.ErrNotImplemented },
 	}
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -5098,8 +5098,8 @@ func TestDMGetFilterCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5131,8 +5131,8 @@ func TestDMGetFilterCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5180,8 +5180,8 @@ func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetThreshold: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetThreshold: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -5190,10 +5190,10 @@ func TestDMGetThresholdSetThresholdDrvErr(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 
 	data := &DataDBMock{
-		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+		GetThresholdDrvF: func(ctx context.Context, tenant, id string) (*utils.Threshold, error) {
 			return &utils.Threshold{}, utils.ErrNotFound
 		},
-		SetThresholdDrvF: func(ctx *context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
+		SetThresholdDrvF: func(ctx context.Context, t *utils.Threshold) error { return utils.ErrNotImplemented },
 	}
 
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
@@ -5222,7 +5222,7 @@ func TestDMSetResourceProfileGetResourceProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -5243,10 +5243,10 @@ func TestDMSetResourceProfileSetResourceProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, nil
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
+		SetResourceProfileDrvF: func(ctx context.Context, rp *utils.ResourceProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -5266,10 +5266,10 @@ func TestDMSetResourceProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, nil
 		},
-		SetResourceProfileDrvF: func(ctx *context.Context, rp *utils.ResourceProfile) error { return nil },
+		SetResourceProfileDrvF: func(ctx context.Context, rp *utils.ResourceProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -5311,8 +5311,8 @@ func TestDMSetResourceProfileErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5347,7 +5347,7 @@ func TestDMRemoveResourceProfileGetResourceProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -5369,10 +5369,10 @@ func TestDMRemoveResourceProfileRemoveResourceProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			return &utils.ResourceProfile{}, nil
 		},
-		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error { return utils.ErrNotImplemented },
+		RemoveResourceProfileDrvF: func(ctx context.Context, tnt, id string) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -5425,8 +5425,8 @@ func TestDMRemoveResourceProfileRemoveItemFromFilterIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
-		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx context.Context, tnt, id string) error {
 			return nil
 		},
 	}
@@ -5463,8 +5463,8 @@ func TestDMRemoveResourceProfileRemoveIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
-		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx context.Context, tnt, id string) error {
 			return nil
 		},
 	}
@@ -5507,8 +5507,8 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetResourceProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5516,8 +5516,8 @@ func TestDMRemoveResourceProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetResourceProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
-		RemoveResourceProfileDrvF: func(ctx *context.Context, tnt, id string) error {
+		GetResourceProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) { return rp, nil },
+		RemoveResourceProfileDrvF: func(ctx context.Context, tnt, id string) error {
 			return nil
 		},
 	}
@@ -5647,8 +5647,8 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetRouteProfile: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetRouteProfile: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -5656,8 +5656,8 @@ func TestDMGetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
+		SetRouteProfileDrvF: func(ctx context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -5704,8 +5704,8 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -5716,7 +5716,7 @@ func TestDMGetRouteProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) { return rp, utils.ErrNotFound },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -5744,8 +5744,8 @@ func TestDMGetRouteProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -5850,7 +5850,7 @@ func TestDMSetRouteProfileGetRouteProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -5895,10 +5895,10 @@ func TestDMSetRouteProfileSetRouteProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, nil
 		},
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
+		SetRouteProfileDrvF: func(ctx context.Context, rtPrf *utils.RouteProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -5941,10 +5941,10 @@ func TestDMSetRouteProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, nil
 		},
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return nil },
+		SetRouteProfileDrvF: func(ctx context.Context, rtPrf *utils.RouteProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6018,8 +6018,8 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRouteProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6027,8 +6027,8 @@ func TestDMSetRouteProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
-		SetRouteProfileDrvF: func(ctx *context.Context, rtPrf *utils.RouteProfile) error { return nil },
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
+		SetRouteProfileDrvF: func(ctx context.Context, rtPrf *utils.RouteProfile) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -6055,7 +6055,7 @@ func TestDMRemoveRouteProfileGetRouteProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -6102,7 +6102,7 @@ func TestDMRemoveRouteProfileRemoveRouteProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, nil
 		},
 	}
@@ -6170,10 +6170,10 @@ func TestDMRemoveRouteProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 			return &utils.RouteProfile{}, nil
 		},
-		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
+		RemoveRouteProfileDrvF: func(ctx context.Context, tnt, id string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6242,8 +6242,8 @@ func TestDMRemoveRouteProfileRmvIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
-		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
+		GetRouteProfileDrvF:    func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
+		RemoveRouteProfileDrvF: func(ctx context.Context, tnt, id string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6295,8 +6295,8 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRouteProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6304,8 +6304,8 @@ func TestDMRemoveRouteProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRouteProfileDrvF:    func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
-		RemoveRouteProfileDrvF: func(ctx *context.Context, tnt, id string) error { return nil },
+		GetRouteProfileDrvF:    func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) { return rpp, nil },
+		RemoveRouteProfileDrvF: func(ctx context.Context, tnt, id string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -6330,7 +6330,7 @@ func TestDMRemoveAttributeProfileGetAttributeProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -6366,7 +6366,7 @@ func TestDMRemoveAttributeProfileRemoveAttributeProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, nil
 		},
 	}
@@ -6423,10 +6423,10 @@ func TestDMRemoveAttributeProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, nil
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6473,10 +6473,10 @@ func TestDMRemoveAttributeProfileRmvIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6517,8 +6517,8 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveRouteProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRouteProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6526,10 +6526,10 @@ func TestDMRemoveAttributeProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
-		RemoveAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) error { return nil },
+		RemoveAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -6554,7 +6554,7 @@ func TestDMRemoveChargerProfileGetChargerProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -6590,7 +6590,7 @@ func TestDMRemoveChargerProfileRemoveChargerProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, nil
 		},
 	}
@@ -6647,10 +6647,10 @@ func TestDMRemoveChargerProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, nil
 		},
-		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+		RemoveChargerProfileDrvF: func(ctx context.Context, chr, rpl string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6697,10 +6697,10 @@ func TestDMRemoveChargerProfileRmvIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
-		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+		RemoveChargerProfileDrvF: func(ctx context.Context, chr, rpl string) error { return nil },
 	}
 
 	cM := NewConnManager(cfg)
@@ -6742,8 +6742,8 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveChargerProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveChargerProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -6751,10 +6751,10 @@ func TestDMRemoveChargerProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
-		RemoveChargerProfileDrvF: func(ctx *context.Context, chr, rpl string) error { return nil },
+		RemoveChargerProfileDrvF: func(ctx context.Context, chr, rpl string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -6779,7 +6779,7 @@ func TestDMRemoveRateProfileGetRateProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -6821,7 +6821,7 @@ func TestDMRemoveRateProfileRemoveRateProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{}, nil
 		},
 	}
@@ -6904,10 +6904,10 @@ func TestDMRemoveRateProfileRemoveIndexFiltersItemErr1(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+		RemoveRateProfileDrvF: func(ctx context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -6933,10 +6933,10 @@ func TestDMRemoveRateProfileRemoveIndexFiltersItemErr2(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+		RemoveRateProfileDrvF: func(ctx context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
 	}
 
 	cM := NewConnManager(cfg)
@@ -6958,10 +6958,10 @@ func TestDMRemoveRateProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{}, nil
 		},
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+		RemoveRateProfileDrvF: func(ctx context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7020,10 +7020,10 @@ func TestDMRemoveRateProfileRmvIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+		RemoveRateProfileDrvF: func(ctx context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
 	}
 
 	cM := NewConnManager(cfg)
@@ -7071,8 +7071,8 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveRateProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveRateProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7080,10 +7080,10 @@ func TestDMRemoveRateProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
+		RemoveRateProfileDrvF: func(ctx context.Context, str1, str2 string, rateIDs *[]string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -7121,10 +7121,10 @@ func TestDMRemoveActionProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return &utils.ActionProfile{}, nil
 		},
-		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		RemoveActionProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7175,8 +7175,8 @@ func TestDMRemoveActionProfileRmvIndexFiltersItemErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
-		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		GetActionProfileDrvF:    func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
+		RemoveActionProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 
 	cM := NewConnManager(cfg)
@@ -7220,8 +7220,8 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveActionProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveActionProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7229,8 +7229,8 @@ func TestDMRemoveActionProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF:    func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
-		RemoveActionProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		GetActionProfileDrvF:    func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) { return ap, nil },
+		RemoveActionProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -7286,7 +7286,7 @@ func TestDMSetAttributeProfileGetAttributeProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -7320,10 +7320,10 @@ func TestDMSetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7354,10 +7354,10 @@ func TestDMSetAttributeProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return nil },
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7409,8 +7409,8 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetAttributeProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetAttributeProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7418,10 +7418,10 @@ func TestDMSetAttributeProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, nil
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return nil },
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -7470,8 +7470,8 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetAttributeProfile: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetAttributeProfile: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -7479,10 +7479,10 @@ func TestDMGetAttributeProfileSetAttributeProfileDrvErr(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, utils.ErrNotFound
 		},
-		SetAttributeProfileDrvF: func(ctx *context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
+		SetAttributeProfileDrvF: func(ctx context.Context, attr *utils.AttributeProfile) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -7500,7 +7500,7 @@ func TestDMSetAttributeProfileComputeHashErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return &utils.AttributeProfile{}, nil
 		},
 	}
@@ -7576,7 +7576,7 @@ func TestDMSetChargerProfileGetChargerProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -7610,10 +7610,10 @@ func TestDMSetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7644,10 +7644,10 @@ func TestDMSetChargerProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{}, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return nil },
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7699,8 +7699,8 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetChargerProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetChargerProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7708,10 +7708,10 @@ func TestDMSetChargerProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, nil
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return nil },
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -7772,7 +7772,7 @@ func TestDMSetActionProfileGetActionProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return &utils.ActionProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -7808,10 +7808,10 @@ func TestDMSetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return &utils.ActionProfile{}, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
+		SetActionProfileDrvF: func(ctx context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7844,10 +7844,10 @@ func TestDMSetActionProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return &utils.ActionProfile{}, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return nil },
+		SetActionProfileDrvF: func(ctx context.Context, ap *utils.ActionProfile) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -7903,8 +7903,8 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetActionProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetActionProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -7912,10 +7912,10 @@ func TestDMSetActionProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, nil
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return nil },
+		SetActionProfileDrvF: func(ctx context.Context, ap *utils.ActionProfile) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -8020,7 +8020,7 @@ func TestDMSetRateProfileGetRateProfileErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -8060,7 +8060,7 @@ func TestDMSetRateProfileUpdatedIndexesErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{}, nil
 		},
 	}
@@ -8107,7 +8107,7 @@ func TestDMSetRateProfileRatesSetRateProfileDrvErr(t *testing.T) {
 	locker := NewLocker(cfg)
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
 	}
@@ -8142,8 +8142,8 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetRateProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetRateProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8151,10 +8151,10 @@ func TestDMSetRateProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetRateProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.RateProfile, error) {
 			return rpp, nil
 		},
-		SetRateProfileDrvF: func(ctx *context.Context, rp *utils.RateProfile, b bool) error { return nil },
+		SetRateProfileDrvF: func(ctx context.Context, rp *utils.RateProfile, b bool) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -8263,8 +8263,8 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetActionProfile: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetActionProfile: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -8272,10 +8272,10 @@ func TestDMGetActionProfileSetActionProfileDrvErr(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, utils.ErrNotFound
 		},
-		SetActionProfileDrvF: func(ctx *context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
+		SetActionProfileDrvF: func(ctx context.Context, ap *utils.ActionProfile) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -8312,8 +8312,8 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -8324,7 +8324,7 @@ func TestDMGetActionProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetActionProfileDrvF: func(ctx *context.Context, tenant, ID string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(ctx context.Context, tenant, ID string) (*utils.ActionProfile, error) {
 			return ap, utils.ErrNotFound
 		},
 	}
@@ -8352,8 +8352,8 @@ func TestDMGetActionProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8437,8 +8437,8 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -8449,7 +8449,7 @@ func TestDMGetAttributeProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetAttributeProfileDrvF: func(ctx *context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
+		GetAttributeProfileDrvF: func(ctx context.Context, str1, str2 string) (*utils.AttributeProfile, error) {
 			return attrPrfl, utils.ErrNotFound
 		},
 	}
@@ -8477,8 +8477,8 @@ func TestDMGetAttributeProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8554,10 +8554,10 @@ func TestDMSetStatQueueProfileUpdatedIndexesErr(t *testing.T) {
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return &utils.StatQueueProfile{}, nil
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
+		SetStatQueueProfileDrvF: func(ctx context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -8626,8 +8626,8 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1SetStatQueueProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8636,10 +8636,10 @@ func TestDMSetStatQueueProfileReplicate(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
 
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
-		SetStatQueueProfileDrvF: func(ctx *context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
+		SetStatQueueProfileDrvF: func(ctx context.Context, sq *utils.StatQueueProfile) (err error) { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -8763,7 +8763,7 @@ func TestDMRemoveStatQueueProfileGetStatQueueProfileErr(t *testing.T) {
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return &utils.StatQueueProfile{}, utils.ErrNotImplemented
 		},
 	}
@@ -8787,7 +8787,7 @@ func TestDMRemoveStatQueueProfileRemStatQueueProfileDrvErr(t *testing.T) {
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return &utils.StatQueueProfile{}, nil
 		},
 	}
@@ -8854,10 +8854,10 @@ func TestDMRemoveStatQueueProfileRmvItemFromFiltrIndexErr(t *testing.T) {
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return &utils.StatQueueProfile{}, nil
 		},
-		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		RemStatQueueProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 	cM := NewConnManager(cfg)
 	cM.SetCache(cacheS)
@@ -8921,10 +8921,10 @@ func TestDMRemoveStatQueueProfileRmvIndexFiltersItemErr(t *testing.T) {
 	cacheS := NewCacheS(cfg, nil, nil, nil, locker)
 
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
-		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		RemStatQueueProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 
 	cM := NewConnManager(cfg)
@@ -8974,8 +8974,8 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1RemoveStatQueueProfile: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -8983,10 +8983,10 @@ func TestDMRemoveStatQueueProfileReplicate(t *testing.T) {
 	cM.SetCache(cacheS)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 			return sqp, nil
 		},
-		RemStatQueueProfileDrvF: func(ctx *context.Context, tenant, ID string) error { return nil },
+		RemStatQueueProfileDrvF: func(ctx context.Context, tenant, ID string) error { return nil },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -9018,8 +9018,8 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9030,7 +9030,7 @@ func TestDMGetStatQueueCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetStatQueueDrvF: func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+		GetStatQueueDrvF: func(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 			return sq, utils.ErrNotFound
 		},
 	}
@@ -9069,18 +9069,18 @@ func TestDMGetChargerProfileSetChargerProfileDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetChargerProfile: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetChargerProfile: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, utils.ErrNotFound
 		},
-		SetChargerProfileDrvF: func(ctx *context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
+		SetChargerProfileDrvF: func(ctx context.Context, chr *utils.ChargerProfile) (err error) { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -9117,8 +9117,8 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9129,7 +9129,7 @@ func TestDMGetChargerProfileCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 			return cpp, utils.ErrNotFound
 		},
 	}
@@ -9157,8 +9157,8 @@ func TestDMGetChargerProfileCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9215,8 +9215,8 @@ func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetItemLoadIDs: func(ctx *context.Context, args, reply any) error { return nil },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetItemLoadIDs: func(ctx context.Context, args, reply any) error { return nil },
 		},
 	}
 
@@ -9227,10 +9227,10 @@ func TestDMGetItemLoadIDsSetSetLoadIDsDrvErr(t *testing.T) {
 	cM := NewConnManager(cfg)
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.RemoteConnsCfg), utils.ReplicatorSv1, cc)
 	data := &DataDBMock{
-		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+		GetItemLoadIDsDrvF: func(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 			return itmLIDs, utils.ErrNotFound
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error { return utils.ErrNotImplemented },
 	}
 	dbCM := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := NewDataManager(dbCM, cfg, cM, locker)
@@ -9258,8 +9258,8 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -9270,7 +9270,7 @@ func TestDMGetItemLoadIDsCacheWriteErr1(t *testing.T) {
 	cM.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaReplicator), utils.CacheSv1, cc)
 
 	data := &DataDBMock{
-		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+		GetItemLoadIDsDrvF: func(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 			return itmLIDs, utils.ErrNotFound
 		},
 	}
@@ -9299,8 +9299,8 @@ func TestDMGetItemLoadIDsCacheWriteErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -9653,8 +9653,8 @@ func TestDMGetTrend(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ReplicatorSv1GetTrend: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ReplicatorSv1GetTrend: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -9672,7 +9672,7 @@ func TestDMGetTrend(t *testing.T) {
 }
 
 func TestDataDBGetIPProfileDrv(t *testing.T) {
-	ctx := &context.Context{}
+	ctx := context.Background()
 	tenant := "cgrates.org"
 	id := "ip1"
 
@@ -9696,7 +9696,7 @@ func TestDataDBGetIPProfileDrv(t *testing.T) {
 	}
 
 	dbMock := &DataDBMock{
-		GetIPProfileDrvF: func(ctx *context.Context, tnt, iid string) (*utils.IPProfile, error) {
+		GetIPProfileDrvF: func(ctx context.Context, tnt, iid string) (*utils.IPProfile, error) {
 			if tnt != tenant || iid != id {
 				t.Errorf("unexpected arguments: got %s, %s", tnt, iid)
 			}
@@ -9714,7 +9714,7 @@ func TestDataDBGetIPProfileDrv(t *testing.T) {
 }
 
 func TestDataDBSetIPProfileDrv(t *testing.T) {
-	ctx := &context.Context{}
+	ctx := context.Background()
 	ipp := &utils.IPProfile{
 		Tenant:    "cgrates.org",
 		ID:        "ip1",
@@ -9731,7 +9731,7 @@ func TestDataDBSetIPProfileDrv(t *testing.T) {
 
 	called := false
 	dbMock := &DataDBMock{
-		SetIPProfileDrvF: func(ctx *context.Context, ip *utils.IPProfile) error {
+		SetIPProfileDrvF: func(ctx context.Context, ip *utils.IPProfile) error {
 			called = true
 			if ip != ipp {
 				t.Errorf("expected IPProfile %+v, got %+v", ipp, ip)
@@ -9750,7 +9750,7 @@ func TestDataDBSetIPProfileDrv(t *testing.T) {
 
 	expectedErr := utils.ErrNotFound
 	dbMock2 := &DataDBMock{
-		SetIPProfileDrvF: func(ctx *context.Context, ip *utils.IPProfile) error {
+		SetIPProfileDrvF: func(ctx context.Context, ip *utils.IPProfile) error {
 			return expectedErr
 		},
 	}
@@ -9762,7 +9762,7 @@ func TestDataDBSetIPProfileDrv(t *testing.T) {
 }
 
 func TestDataDBRemoveIPProfileDrv(t *testing.T) {
-	ctx := &context.Context{}
+	ctx := context.Background()
 	tenant := "cgrates.org"
 	id := "ip1"
 
@@ -9774,7 +9774,7 @@ func TestDataDBRemoveIPProfileDrv(t *testing.T) {
 
 	called := false
 	dbMock := &DataDBMock{
-		RemoveIPProfileDrvF: func(ctx *context.Context, tntArg, idArg string) error {
+		RemoveIPProfileDrvF: func(ctx context.Context, tntArg, idArg string) error {
 			called = true
 			if tntArg != tenant || idArg != id {
 				t.Errorf("unexpected arguments: got %s, %s", tntArg, idArg)
@@ -9793,7 +9793,7 @@ func TestDataDBRemoveIPProfileDrv(t *testing.T) {
 
 	expectedErr := utils.ErrNotFound
 	dbMock2 := &DataDBMock{
-		RemoveIPProfileDrvF: func(ctx *context.Context, tntArg, idArg string) error {
+		RemoveIPProfileDrvF: func(ctx context.Context, tntArg, idArg string) error {
 			return expectedErr
 		},
 	}

@@ -5,6 +5,7 @@ package stats
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"maps"
 	"runtime"
@@ -12,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -59,7 +59,7 @@ type StatS struct {
 }
 
 // Reload restarts the backup loop. No-op after Shutdown.
-func (s *StatS) Reload(ctx *context.Context) {
+func (s *StatS) Reload(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -72,13 +72,13 @@ func (s *StatS) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the goroutine with the backup loop
-func (s *StatS) StartLoop(ctx *context.Context) {
+func (s *StatS) StartLoop(ctx context.Context) {
 	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (s *StatS) Shutdown(ctx *context.Context) {
+func (s *StatS) Shutdown(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -91,7 +91,7 @@ func (s *StatS) Shutdown(ctx *context.Context) {
 }
 
 // runBackup will regularly store statQueues changed to DB
-func (s *StatS) runBackup(ctx *context.Context) {
+func (s *StatS) runBackup(ctx context.Context) {
 	defer s.backupLoop.Done()
 	storeInterval := s.cfg.StatSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -108,7 +108,7 @@ func (s *StatS) runBackup(ctx *context.Context) {
 }
 
 // storeStats represents one task of complete backup
-func (s *StatS) storeStats(ctx *context.Context) {
+func (s *StatS) storeStats(ctx context.Context) {
 	var failedSqIDs []string
 	for { // don't stop untill we store all dirty statQueues
 		s.storedMu.Lock()
@@ -144,7 +144,7 @@ func (s *StatS) storeStats(ctx *context.Context) {
 }
 
 // storeStatQueue stores the statQueue in DB
-func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) error {
+func (s *StatS) storeStatQueue(ctx context.Context, sq *utils.StatQueue) error {
 	if err := s.dm.SetStatQueue(ctx, sq); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed saving StatQueue with ID: %s, error: %v",
@@ -165,7 +165,7 @@ func (s *StatS) storeStatQueue(ctx *context.Context, sq *utils.StatQueue) error 
 }
 
 // matchingStatQueuesForEvent returns ordered list of matching statQueues which are active by the time of the call
-func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
+func (s *StatS) matchingStatQueuesForEvent(ctx context.Context, tnt string,
 	args *utils.CGREvent) (sqs []*matchedStatQueue, unlock func(), err error) {
 	unlockAll := func() {
 		for _, m := range sqs {
@@ -272,7 +272,7 @@ func (s *StatS) matchingStatQueuesForEvent(ctx *context.Context, tnt string,
 	return sqs, unlockAll, nil
 }
 
-func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (*utils.StatQueue, error) {
+func (s *StatS) getStatQueue(ctx context.Context, tnt, id string) (*utils.StatQueue, error) {
 	sq, err := s.dm.GetStatQueue(ctx, tnt, id, true, true, utils.EmptyString)
 	if err != nil {
 		return nil, err
@@ -284,7 +284,7 @@ func (s *StatS) getStatQueue(ctx *context.Context, tnt, id string) (*utils.StatQ
 }
 
 // processThresholds will pass the event for statQueue to ThresholdS
-func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
+func (s *StatS) processThresholds(ctx context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
 	threshConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns, utils.MetaThresholds, tnt, dP, nil, s.filters)
 	if err != nil {
 		return err
@@ -332,7 +332,7 @@ func (s *StatS) processThresholds(ctx *context.Context, sQs []*matchedStatQueue,
 }
 
 // processEEs will pass the event for statQueue to EEs
-func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
+func (s *StatS) processEEs(ctx context.Context, sQs []*matchedStatQueue, opts map[string]any, tnt string, dP utils.DataProvider) error {
 	eesConns, err := engine.GetConnIDs(ctx, s.cfg.StatSCfg().Conns, utils.MetaEEs, tnt, dP, nil, s.filters)
 	if err != nil {
 		return err
@@ -382,7 +382,7 @@ func (s *StatS) processEEs(ctx *context.Context, sQs []*matchedStatQueue, opts m
 
 // processEvent processes a new event, dispatching to matching queues.
 // Queues matching are also cached to speed up
-func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
+func (s *StatS) processEvent(ctx context.Context, tnt string, args *utils.CGREvent) (statQueueIDs []string, err error) {
 	matchSQs, unlock, err := s.matchingStatQueuesForEvent(ctx, tnt, args)
 	if err != nil {
 		return nil, err
@@ -429,7 +429,7 @@ func (s *StatS) processEvent(ctx *context.Context, tnt string, args *utils.CGREv
 }
 
 // processEvent processes a utils.CGREvent, returns true if processed
-func (m *matchedStatQueue) processEvent(ctx *context.Context, tnt, evID string, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) processEvent(ctx context.Context, tnt, evID string, evNm utils.MapStorage) error {
 
 	//processing metrics without storing in the queue
 	if oneEv := m.isOneEvent(); oneEv {
@@ -497,7 +497,7 @@ func (m *matchedStatQueue) remOnQueueLength() error {
 }
 
 // addStatEvent computes metrics for an event
-func (m *matchedStatQueue) addStatEvent(ctx *context.Context, tnt, evID string, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) addStatEvent(ctx context.Context, tnt, evID string, evNm utils.MapStorage) error {
 	var expTime *time.Time
 	if m.ttl != nil {
 		expTime = utils.TimePointer(time.Now().Add(*m.ttl))
@@ -537,7 +537,7 @@ func (m *matchedStatQueue) isOneEvent() bool {
 	return m.ttl != nil && *m.ttl == -1
 }
 
-func (m *matchedStatQueue) addStatOneEvent(ctx *context.Context, tnt string, evNm utils.MapStorage) error {
+func (m *matchedStatQueue) addStatOneEvent(ctx context.Context, tnt string, evNm utils.MapStorage) error {
 	metricEvNm := utils.MapStorage{utils.MetaReq: evNm[utils.MetaReq], utils.MetaOpts: evNm[utils.MetaOpts]}
 	dDP := engine.NewDynamicDP(ctx, m.cfg, tnt, metricEvNm, m.filters)
 

@@ -5,6 +5,7 @@ package resources
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"maps"
 	"runtime"
@@ -12,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -179,7 +179,7 @@ type ResourceS struct {
 }
 
 // Reload restarts the backup loop. No-op after Shutdown.
-func (s *ResourceS) Reload(ctx *context.Context) {
+func (s *ResourceS) Reload(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -192,13 +192,13 @@ func (s *ResourceS) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the goroutine with the backup loop
-func (s *ResourceS) StartLoop(ctx *context.Context) {
+func (s *ResourceS) StartLoop(ctx context.Context) {
 	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (s *ResourceS) Shutdown(ctx *context.Context) {
+func (s *ResourceS) Shutdown(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -211,7 +211,7 @@ func (s *ResourceS) Shutdown(ctx *context.Context) {
 }
 
 // backup will regularly store resources changed to DB
-func (s *ResourceS) runBackup(ctx *context.Context) {
+func (s *ResourceS) runBackup(ctx context.Context) {
 	defer s.backupLoop.Done()
 	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -228,7 +228,7 @@ func (s *ResourceS) runBackup(ctx *context.Context) {
 }
 
 // storeResources represents one task of complete backup
-func (s *ResourceS) storeResources(ctx *context.Context) {
+func (s *ResourceS) storeResources(ctx context.Context) {
 	var failedRIDs []string
 	for { // don't stop until we store all pending resources
 		s.storedMu.Lock()
@@ -262,7 +262,7 @@ func (s *ResourceS) storeResources(ctx *context.Context) {
 }
 
 // storeResource stores the resource in DB and updates cache.
-func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error {
+func (s *ResourceS) storeResource(ctx context.Context, r *utils.Resource) error {
 	if err := s.dm.SetResource(ctx, r); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed saving Resource with ID: %s, error: %v",
@@ -283,7 +283,7 @@ func (s *ResourceS) storeResource(ctx *context.Context, r *utils.Resource) error
 }
 
 // storeMatchedResources will store the list of resources based on the StoreInterval
-func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedResources) error {
+func (s *ResourceS) storeMatchedResources(ctx context.Context, mtcRLs matchedResources) error {
 	storeInterval := s.cfg.ResourceSCfg().StoreInterval
 	if storeInterval == 0 {
 		return nil
@@ -308,7 +308,7 @@ func (s *ResourceS) storeMatchedResources(ctx *context.Context, mtcRLs matchedRe
 }
 
 // processThresholds will pass the event for resource to ThresholdS
-func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *utils.CGREvent, rs matchedResources) error {
+func (s *ResourceS) processThresholds(ctx context.Context, tnt string, ev *utils.CGREvent, rs matchedResources) error {
 	threshConns, err := engine.GetConnIDs(ctx, s.cfg.ResourceSCfg().Conns, utils.MetaThresholds, tnt, ev.AsDataProvider(), nil, s.filters)
 	if err != nil {
 		return err
@@ -357,7 +357,7 @@ func (s *ResourceS) processThresholds(ctx *context.Context, tnt string, ev *util
 }
 
 // matchingResourcesForEvent returns ordered list of matching resources which are active by the time of the call
-func (s *ResourceS) matchingResourcesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent,
+func (s *ResourceS) matchingResourcesForEvent(ctx context.Context, tnt string, ev *utils.CGREvent,
 	evUUID string, usageTTL *time.Duration) (rs matchedResources, unlock func(), err error) {
 
 	unlockAll := func() {

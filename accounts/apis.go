@@ -4,16 +4,16 @@
 package accounts
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1AccountsForEvent returns the matching Accounts for Event
-func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
+func (aS *AccountS) V1AccountsForEvent(ctx context.Context, args *utils.CGREvent, aps *[]*utils.Account) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -54,7 +54,7 @@ func (aS *AccountS) V1AccountsForEvent(ctx *context.Context, args *utils.CGREven
 }
 
 // V1MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountS) V1MaxAbstracts(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
 		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
@@ -102,7 +102,7 @@ func (aS *AccountS) V1MaxAbstracts(ctx *context.Context, args *utils.CGREvent, e
 }
 
 // V1DebitAbstracts performs debit for the provided event
-func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountS) V1DebitAbstracts(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
 		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
@@ -150,7 +150,7 @@ func (aS *AccountS) V1DebitAbstracts(ctx *context.Context, args *utils.CGREvent,
 }
 
 // V1MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
-func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountS) V1MaxConcretes(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
 		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
@@ -199,7 +199,7 @@ func (aS *AccountS) V1MaxConcretes(ctx *context.Context, args *utils.CGREvent, e
 }
 
 // V1DebitConcretes performs debit of concrete units for the provided event
-func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountS) V1DebitConcretes(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	var accIDs []string
 	if accIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, aS.fltrS, aS.cfg.AccountSCfg().Opts.ProfileIDs,
 		config.AccountsProfileIDsDftOpt, utils.OptsAccountsProfileIDs); err != nil {
@@ -247,7 +247,7 @@ func (aS *AccountS) V1DebitConcretes(ctx *context.Context, args *utils.CGREvent,
 }
 
 // V1RefundCharges will refund charges recorded inside EventCharges
-func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+func (aS *AccountS) V1RefundCharges(ctx context.Context, args *utils.APIEventCharges, rply *string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
@@ -280,7 +280,7 @@ func (aS *AccountS) V1RefundCharges(ctx *context.Context, args *utils.APIEventCh
 }
 
 // V1ActionSetBalance performs an update for a specific balance in account
-func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
+func (aS *AccountS) V1ActionSetBalance(ctx context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}
@@ -292,7 +292,7 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
 	var qAcnt *utils.Account
-	if err = aS.dm.Guard(ctx, func(ctx *context.Context) error {
+	if err = aS.dm.Guard(ctx, func(ctx context.Context) error {
 		qAcnt, err = actSetAccount(ctx, aS.dm, tnt, args.AccountID, args.Diktats, args.Reset)
 		return err
 	}, utils.ConcatenatedKey(utils.CacheAccounts, tnt, args.AccountID)); err != nil {
@@ -312,7 +312,7 @@ func (aS *AccountS) V1ActionSetBalance(ctx *context.Context, args *utils.ArgsAct
 }
 
 // V1RemoveBalance removes a balance for a specific account
-func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
+func (aS *AccountS) V1ActionRemoveBalance(ctx context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
 	if args.AccountID == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing(utils.AccountID)
 	}
@@ -324,7 +324,7 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 		tnt = aS.cfg.GeneralCfg().DefaultTenant
 	}
 	var qAcnt *utils.Account
-	if err = aS.dm.Guard(ctx, func(ctx *context.Context) error {
+	if err = aS.dm.Guard(ctx, func(ctx context.Context) error {
 		qAcnt, err = aS.dm.GetAccount(ctx, tnt, args.AccountID)
 		if err != nil {
 			return err
@@ -350,7 +350,7 @@ func (aS *AccountS) V1ActionRemoveBalance(ctx *context.Context, args *utils.Args
 	return
 }
 
-func (aS *AccountS) V1GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+func (aS *AccountS) V1GetAccount(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/resources"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetResourceProfile returns a resource configuration
-func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
+func (adms *AdminSv1) GetResourceProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -30,7 +30,7 @@ func (adms *AdminSv1) GetResourceProfile(ctx *context.Context, arg *utils.Tenant
 }
 
 // GetResourceProfileIDs returns list of resourceProfile IDs registered for a tenant
-func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetResourceProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, rsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -61,7 +61,7 @@ func (adms *AdminSv1) GetResourceProfileIDs(ctx *context.Context, args *utils.Ar
 }
 
 // GetResourceProfiles returns a list of resource profiles registered for a tenant
-func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*utils.ResourceProfile) (err error) {
+func (admS *AdminSv1) GetResourceProfiles(ctx context.Context, args *utils.ArgsItemIDs, rsPrfs *[]*utils.ResourceProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -84,7 +84,7 @@ func (admS *AdminSv1) GetResourceProfiles(ctx *context.Context, args *utils.Args
 
 // GetResourceProfilesCount returns the total number of ResourceProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ResourceProfileIDs
-func (admS *AdminSv1) GetResourceProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetResourceProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -106,7 +106,7 @@ func (admS *AdminSv1) GetResourceProfilesCount(ctx *context.Context, args *utils
 }
 
 // SetResourceProfile adds a new resource configuration
-func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *utils.ResourceProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetResourceProfile(ctx context.Context, arg *utils.ResourceProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.ResourceProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -139,7 +139,7 @@ func (adms *AdminSv1) SetResourceProfile(ctx *context.Context, arg *utils.Resour
 }
 
 // RemoveResourceProfile remove a specific resource configuration
-func (adms *AdminSv1) RemoveResourceProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveResourceProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -181,31 +181,31 @@ type ResourceSv1 struct {
 }
 
 // GetResourcesForEvent returns active resources matching the event.
-func (s *ResourceSv1) GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) error {
+func (s *ResourceSv1) GetResourcesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]*utils.Resource) error {
 	return s.rs.V1GetResourcesForEvent(ctx, args, reply)
 }
 
 // AuthorizeResources queries service to find if an Usage is allowed.
-func (s *ResourceSv1) AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (s *ResourceSv1) AuthorizeResources(ctx context.Context, args *utils.CGREvent, reply *string) error {
 	return s.rs.V1AuthorizeResources(ctx, args, reply)
 }
 
 // AllocateResources is called when a resource requires allocation.
-func (s *ResourceSv1) AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (s *ResourceSv1) AllocateResources(ctx context.Context, args *utils.CGREvent, reply *string) error {
 	return s.rs.V1AllocateResources(ctx, args, reply)
 }
 
 // ReleaseResources is called when we need to clear an allocation.
-func (s *ResourceSv1) ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (s *ResourceSv1) ReleaseResources(ctx context.Context, args *utils.CGREvent, reply *string) error {
 	return s.rs.V1ReleaseResources(ctx, args, reply)
 }
 
 // GetResource returns a resource.
-func (s *ResourceSv1) GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
+func (s *ResourceSv1) GetResource(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	return s.rs.V1GetResource(ctx, arg, reply)
 }
 
 // GetResourceWithConfig returns a resource alongside its profile.
-func (s *ResourceSv1) GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) error {
+func (s *ResourceSv1) GetResourceWithConfig(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) error {
 	return s.rs.V1GetResourceWithConfig(ctx, arg, reply)
 }

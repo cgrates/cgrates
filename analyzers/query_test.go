@@ -19,13 +19,13 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package analyzers
 
 import (
+	"context"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search/query"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )

@@ -4,6 +4,7 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"os"
 	"path"
@@ -11,7 +12,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -19,7 +19,7 @@ import (
 type LoaderSCfgs []*LoaderSCfg
 
 // loadLoaderSCfg loads the LoaderS section of the configuration
-func (ldrs *LoaderSCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (ldrs *LoaderSCfgs) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnLoaderCfg := make([]*LoaderJsonCfg, 0)
 	if err = jsnCfg.GetSection(ctx, LoaderSJSON, &jsnLoaderCfg); err != nil {
 		return

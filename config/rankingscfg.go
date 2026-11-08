@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -20,7 +20,7 @@ type RankingSCfg struct {
 	EEsExporterIDs []string
 }
 
-func (rnk *RankingSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (rnk *RankingSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRankingSCfg := new(RankingSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, RankingSJSON, jsnRankingSCfg); err != nil {
 		return

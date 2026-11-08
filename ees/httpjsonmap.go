@@ -5,6 +5,7 @@ package ees
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +13,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -73,7 +73,7 @@ func (httpEE *HTTPjsonMapEE) Cfg() *config.EventExporterCfg { return httpEE.cfg 
 
 func (httpEE *HTTPjsonMapEE) Connect() (_ error) { return }
 
-func (httpEE *HTTPjsonMapEE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
+func (httpEE *HTTPjsonMapEE) ExportEvent(ctx context.Context, content, _ any) (err error) {
 	httpEE.reqs.get()
 	defer httpEE.reqs.done()
 	pReq := content.(*HTTPPosterRequest)
@@ -107,7 +107,7 @@ func (httpEE *HTTPjsonMapEE) PrepareOrderMap(mp *utils.OrderedNavigableMap) (any
 	}, err
 }
 
-func prepareRequest(ctx *context.Context, addr, cType string, content any, hdr http.Header) (req *http.Request, err error) {
+func prepareRequest(ctx context.Context, addr, cType string, content any, hdr http.Header) (req *http.Request, err error) {
 	var body io.Reader
 	if cType == utils.ContentForm {
 		body = strings.NewReader(content.(url.Values).Encode())

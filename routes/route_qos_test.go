@@ -4,11 +4,11 @@
 package routes
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -44,8 +44,8 @@ func TestPopulatStatsForQOSRouteOK(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*map[string]*utils.Decimal)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -116,8 +116,8 @@ func TestQOSRouteSorterRoutesOK(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*map[string]*utils.Decimal)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -197,8 +197,8 @@ func TestQOSRouteSorterRoutesLazyPassErr(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*map[string]*utils.Decimal)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -260,8 +260,8 @@ func TestQOSRouteSorterRoutesIgnoreErr(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -319,8 +319,8 @@ func TestQOSRouteSorterRoutesPopulateErr(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},

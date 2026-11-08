@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 	"github.com/mediocregopher/radix/v3"
@@ -221,7 +221,7 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 	return
 }
 
-// func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix string) (keys []string, err error) {
+// func (rs *RedisStorage) GetKeysForPrefix(ctx context.Context, prefix string) (keys []string, err error) {
 // 	err = rs.Cmd(&keys, redisSCAN, "0", "MATCH", prefix+"*")
 // 	if err != nil {
 // 		return
@@ -235,7 +235,7 @@ func (rs *RedisStorage) getKeysForFilterIndexesKeys(fkeys []string) (keys []stri
 // 	return nil, nil
 // }
 
-func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix, search string) (keys []string, err error) {
+func (rs *RedisStorage) GetKeysForPrefix(ctx context.Context, prefix, search string) (keys []string, err error) {
 	if search != utils.EmptyString {
 		scanner := radix.NewScanner(rs.client, radix.ScanOpts{
 			Command: redisSCAN,
@@ -275,7 +275,7 @@ func (rs *RedisStorage) GetKeysForPrefix(ctx *context.Context, prefix, search st
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (exists bool, err error) {
+func (rs *RedisStorage) HasDataDrv(ctx context.Context, category, subject, tenant string) (exists bool, err error) {
 	var i int
 	switch category {
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
@@ -289,7 +289,7 @@ func (rs *RedisStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	return false, errors.New("unsupported HasData category")
 }
 
-func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
+func (rs *RedisStorage) GetResourceProfileDrv(ctx context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -301,7 +301,7 @@ func (rs *RedisStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id s
 	return
 }
 
-func (rs *RedisStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
+func (rs *RedisStorage) SetResourceProfileDrv(ctx context.Context, rsp *utils.ResourceProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rsp); err != nil {
 		return
@@ -309,11 +309,11 @@ func (rs *RedisStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.R
 	return rs.Cmd(nil, redisSET, utils.ResourceProfilesPrefix+rsp.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveResourceProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourceProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
+func (rs *RedisStorage) GetResourceDrv(ctx context.Context, tenant, id string) (r *utils.Resource, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -325,7 +325,7 @@ func (rs *RedisStorage) GetResourceDrv(ctx *context.Context, tenant, id string) 
 	return
 }
 
-func (rs *RedisStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
+func (rs *RedisStorage) SetResourceDrv(ctx context.Context, r *utils.Resource) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -333,11 +333,11 @@ func (rs *RedisStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) 
 	return rs.Cmd(nil, redisSET, utils.ResourcesPrefix+r.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveResourceDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
+func (rs *RedisStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
 	var values []byte
 	if err := rs.Cmd(&values, redisGET, utils.IPProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return nil, err
@@ -352,7 +352,7 @@ func (rs *RedisStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string)
 	return ipp, nil
 }
 
-func (rs *RedisStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+func (rs *RedisStorage) SetIPProfileDrv(ctx context.Context, ipp *utils.IPProfile) error {
 	result, err := rs.ms.Marshal(ipp)
 	if err != nil {
 		return err
@@ -360,11 +360,11 @@ func (rs *RedisStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfi
 	return rs.Cmd(nil, redisSET, utils.IPProfilesPrefix+ipp.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
+func (rs *RedisStorage) RemoveIPProfileDrv(ctx context.Context, tenant, id string) error {
 	return rs.Cmd(nil, redisDEL, utils.IPProfilesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+func (rs *RedisStorage) GetIPAllocationsDrv(ctx context.Context, tenant, id string) (*utils.IPAllocations, error) {
 	var values []byte
 	if err := rs.Cmd(&values, redisGET, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return nil, err
@@ -379,7 +379,7 @@ func (rs *RedisStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id str
 	return ip, nil
 }
 
-func (rs *RedisStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
+func (rs *RedisStorage) SetIPAllocationsDrv(ctx context.Context, ip *utils.IPAllocations) error {
 	result, err := rs.ms.Marshal(ip)
 	if err != nil {
 		return err
@@ -387,7 +387,7 @@ func (rs *RedisStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAl
 	return rs.Cmd(nil, redisSET, utils.IPAllocationsPrefix+ip.TenantID(), string(result))
 }
 
-func (rs *RedisStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
+func (rs *RedisStorage) RemoveIPAllocationsDrv(ctx context.Context, tenant, id string) error {
 	return rs.Cmd(nil, redisDEL, utils.IPAllocationsPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -438,7 +438,7 @@ func (rs *RedisStorage) RemoveVersions(vrs Versions) (err error) {
 }
 
 // GetStatQueueProfileDrv retrieves a StatQueueProfile from db
-func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
+func (rs *RedisStorage) GetStatQueueProfileDrv(ctx context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -451,7 +451,7 @@ func (rs *RedisStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 }
 
 // SetStatQueueProfileDrv stores a StatsQueue into db
-func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
+func (rs *RedisStorage) SetStatQueueProfileDrv(ctx context.Context, sq *utils.StatQueueProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sq); err != nil {
 		return
@@ -460,12 +460,12 @@ func (rs *RedisStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.S
 }
 
 // RemStatQueueProfileDrv removes a StatsQueue from db
-func (rs *RedisStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemStatQueueProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.StatQueueProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetStatQueueDrv retrieves the stored metrics for a StatsQueue
-func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+func (rs *RedisStorage) GetStatQueueDrv(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -482,7 +482,7 @@ func (rs *RedisStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 }
 
 // SetStatQueueDrv stores the metrics for a StatsQueue
-func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
+func (rs *RedisStorage) SetStatQueueDrv(ctx context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
 		return utils.ErrMandatoryIeMissing
 	}
@@ -494,11 +494,11 @@ func (rs *RedisStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQue
 }
 
 // RemStatQueueDrv removes a StatsQueue
-func (rs *RedisStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemStatQueueDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.StatQueuePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *utils.TrendProfile) (err error) {
+func (rs *RedisStorage) SetTrendProfileDrv(ctx context.Context, sg *utils.TrendProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
@@ -506,7 +506,7 @@ func (rs *RedisStorage) SetTrendProfileDrv(ctx *context.Context, sg *utils.Trend
 	return rs.Cmd(nil, redisSET, utils.TrendProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.TrendProfile, err error) {
+func (rs *RedisStorage) GetTrendProfileDrv(ctx context.Context, tenant string, id string) (sg *utils.TrendProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -518,11 +518,11 @@ func (rs *RedisStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, 
 	return
 }
 
-func (rs *RedisStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (rs *RedisStorage) RemTrendProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.TrendProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r *utils.Trend, err error) {
+func (rs *RedisStorage) GetTrendDrv(ctx context.Context, tenant, id string) (r *utils.Trend, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -534,7 +534,7 @@ func (rs *RedisStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (r 
 	return
 }
 
-func (rs *RedisStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err error) {
+func (rs *RedisStorage) SetTrendDrv(ctx context.Context, r *utils.Trend) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -542,11 +542,11 @@ func (rs *RedisStorage) SetTrendDrv(ctx *context.Context, r *utils.Trend) (err e
 	return rs.Cmd(nil, redisSET, utils.TrendPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveTrendDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.TrendPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *utils.RankingProfile) (err error) {
+func (rs *RedisStorage) SetRankingProfileDrv(ctx context.Context, sg *utils.RankingProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(sg); err != nil {
 		return
@@ -554,7 +554,7 @@ func (rs *RedisStorage) SetRankingProfileDrv(ctx *context.Context, sg *utils.Ran
 	return rs.Cmd(nil, redisSET, utils.RankingProfilePrefix+utils.ConcatenatedKey(sg.Tenant, sg.ID), string(result))
 }
 
-func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (sg *utils.RankingProfile, err error) {
+func (rs *RedisStorage) GetRankingProfileDrv(ctx context.Context, tenant string, id string) (sg *utils.RankingProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -566,11 +566,11 @@ func (rs *RedisStorage) GetRankingProfileDrv(ctx *context.Context, tenant string
 	return
 }
 
-func (rs *RedisStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (rs *RedisStorage) RemRankingProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RankingProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
+func (rs *RedisStorage) GetRankingDrv(ctx context.Context, tenant, id string) (rn *utils.Ranking, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -582,7 +582,7 @@ func (rs *RedisStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (
 	return rn, err
 }
 
-func (rs *RedisStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
+func (rs *RedisStorage) SetRankingDrv(_ context.Context, rn *utils.Ranking) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(rn); err != nil {
 		return
@@ -590,12 +590,12 @@ func (rs *RedisStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (er
 	return rs.Cmd(nil, redisSET, utils.RankingPrefix+utils.ConcatenatedKey(rn.Tenant, rn.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveRankingDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RankingPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetThresholdProfileDrv retrieves a ThresholdProfile from DB
-func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID string) (tp *utils.ThresholdProfile, err error) {
+func (rs *RedisStorage) GetThresholdProfileDrv(ctx context.Context, tenant, ID string) (tp *utils.ThresholdProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, ID)); err != nil {
 		return
@@ -608,7 +608,7 @@ func (rs *RedisStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, ID 
 }
 
 // SetThresholdProfileDrv stores a ThresholdProfile into DB
-func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
+func (rs *RedisStorage) SetThresholdProfileDrv(ctx context.Context, tp *utils.ThresholdProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(tp); err != nil {
 		return
@@ -617,11 +617,11 @@ func (rs *RedisStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.T
 }
 
 // RemThresholdProfileDrv removes a ThresholdProfile from DB/cache
-func (rs *RedisStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemThresholdProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (r *utils.Threshold, err error) {
+func (rs *RedisStorage) GetThresholdDrv(ctx context.Context, tenant, id string) (r *utils.Threshold, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -633,7 +633,7 @@ func (rs *RedisStorage) GetThresholdDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
-func (rs *RedisStorage) SetThresholdDrv(ctx *context.Context, r *utils.Threshold) (err error) {
+func (rs *RedisStorage) SetThresholdDrv(ctx context.Context, r *utils.Threshold) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -641,11 +641,11 @@ func (rs *RedisStorage) SetThresholdDrv(ctx *context.Context, r *utils.Threshold
 	return rs.Cmd(nil, redisSET, utils.ThresholdPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveThresholdDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ThresholdPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (r *Filter, err error) {
+func (rs *RedisStorage) GetFilterDrv(ctx context.Context, tenant, id string) (r *Filter, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -657,7 +657,7 @@ func (rs *RedisStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (r
 	return
 }
 
-func (rs *RedisStorage) SetFilterDrv(ctx *context.Context, r *Filter) (err error) {
+func (rs *RedisStorage) SetFilterDrv(ctx context.Context, r *Filter) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -665,11 +665,11 @@ func (rs *RedisStorage) SetFilterDrv(ctx *context.Context, r *Filter) (err error
 	return rs.Cmd(nil, redisSET, utils.FilterPrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveFilterDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.FilterPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (r *utils.RouteProfile, err error) {
+func (rs *RedisStorage) GetRouteProfileDrv(ctx context.Context, tenant, id string) (r *utils.RouteProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -681,7 +681,7 @@ func (rs *RedisStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (rs *RedisStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteProfile) (err error) {
+func (rs *RedisStorage) SetRouteProfileDrv(ctx context.Context, r *utils.RouteProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -689,11 +689,11 @@ func (rs *RedisStorage) SetRouteProfileDrv(ctx *context.Context, r *utils.RouteP
 	return rs.Cmd(nil, redisSET, utils.RouteProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveRouteProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.RouteProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (r *utils.AttributeProfile, err error) {
+func (rs *RedisStorage) GetAttributeProfileDrv(ctx context.Context, tenant, id string) (r *utils.AttributeProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -705,7 +705,7 @@ func (rs *RedisStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id 
 	return
 }
 
-func (rs *RedisStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.AttributeProfile) (err error) {
+func (rs *RedisStorage) SetAttributeProfileDrv(ctx context.Context, r *utils.AttributeProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -713,11 +713,11 @@ func (rs *RedisStorage) SetAttributeProfileDrv(ctx *context.Context, r *utils.At
 	return rs.Cmd(nil, redisSET, utils.AttributeProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveAttributeProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.AttributeProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetChargerProfileDrv(_ *context.Context, tenant, id string) (r *utils.ChargerProfile, err error) {
+func (rs *RedisStorage) GetChargerProfileDrv(_ context.Context, tenant, id string) (r *utils.ChargerProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -729,7 +729,7 @@ func (rs *RedisStorage) GetChargerProfileDrv(_ *context.Context, tenant, id stri
 	return
 }
 
-func (rs *RedisStorage) SetChargerProfileDrv(_ *context.Context, r *utils.ChargerProfile) (err error) {
+func (rs *RedisStorage) SetChargerProfileDrv(_ context.Context, r *utils.ChargerProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(r); err != nil {
 		return
@@ -737,7 +737,7 @@ func (rs *RedisStorage) SetChargerProfileDrv(_ *context.Context, r *utils.Charge
 	return rs.Cmd(nil, redisSET, utils.ChargerProfilePrefix+utils.ConcatenatedKey(r.Tenant, r.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveChargerProfileDrv(_ context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ChargerProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
@@ -745,7 +745,7 @@ func (rs *RedisStorage) GetStorageType() string {
 	return utils.MetaRedis
 }
 
-func (rs *RedisStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (rs *RedisStorage) GetItemLoadIDsDrv(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	if itemIDPrefix != "" {
 		var fldVal int64
 		mn := radix.MaybeNil{Rcv: &fldVal}
@@ -773,7 +773,7 @@ func (rs *RedisStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix str
 	return
 }
 
-func (rs *RedisStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+func (rs *RedisStorage) SetLoadIDsDrv(ctx context.Context, loadIDs map[string]int64) error {
 	return rs.FlatCmd(nil, redisHMSET, utils.LoadIDs, loadIDs)
 }
 
@@ -781,7 +781,7 @@ func (rs *RedisStorage) RemoveLoadIDsDrv() (err error) {
 	return rs.Cmd(nil, redisDEL, utils.LoadIDs)
 }
 
-func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
+func (rs *RedisStorage) SetRateProfileDrv(ctx context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	rpMap, err := rpp.AsDBMap(rs.ms)
 	if err != nil {
 		return
@@ -792,7 +792,7 @@ func (rs *RedisStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 	return rs.FlatCmd(nil, redisHSET, utils.RateProfilePrefix+utils.ConcatenatedKey(rpp.Tenant, rpp.ID), rpMap)
 }
 
-func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+func (rs *RedisStorage) GetRateProfileDrv(ctx context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	mapRP := make(map[string]any)
 	if err = rs.Cmd(&mapRP, redisHGETALL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -804,7 +804,7 @@ func (rs *RedisStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 }
 
 // GetRateProfileRateIDsDrv will return back all the rate IDs from a profile
-func (rs *RedisStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+func (rs *RedisStorage) GetRateProfileRatesDrv(ctx context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
 	key := utils.RateProfilePrefix + utils.ConcatenatedKey(tnt, profileID)
 	prefix := utils.Rates + utils.ConcatenatedKeySep
 	if rtPrfx != utils.EmptyString {
@@ -840,7 +840,7 @@ func (rs *RedisStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profil
 	return
 }
 
-func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+func (rs *RedisStorage) RemoveRateProfileDrv(ctx context.Context, tenant, id string, rateIDs *[]string) (err error) {
 	// if we want to remove just some rates from our profile, we will remove by their key Rates:rateID
 	if rateIDs != nil {
 		tntID := utils.ConcatenatedKey(tenant, id)
@@ -855,7 +855,7 @@ func (rs *RedisStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	return rs.Cmd(nil, redisDEL, utils.RateProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
+func (rs *RedisStorage) GetActionProfileDrv(ctx context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ActionProfilePrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -867,7 +867,7 @@ func (rs *RedisStorage) GetActionProfileDrv(ctx *context.Context, tenant, id str
 	return
 }
 
-func (rs *RedisStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
+func (rs *RedisStorage) SetActionProfileDrv(ctx context.Context, ap *utils.ActionProfile) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(ap); err != nil {
 		return
@@ -875,12 +875,12 @@ func (rs *RedisStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.Acti
 	return rs.Cmd(nil, redisSET, utils.ActionProfilePrefix+utils.ConcatenatedKey(ap.Tenant, ap.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveActionProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ActionProfilePrefix+utils.ConcatenatedKey(tenant, id))
 }
 
 // GetIndexesDrv retrieves Indexes from DB
-func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+func (rs *RedisStorage) GetIndexesDrv(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	mp := make(map[string]string)
 	dbKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	if transactionID != utils.NonTransactional {
@@ -921,7 +921,7 @@ func (rs *RedisStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 }
 
 // SetIndexesDrv stores Indexes into DB
-func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
+func (rs *RedisStorage) SetIndexesDrv(ctx context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	dbKey := originKey
@@ -967,7 +967,7 @@ func (rs *RedisStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 	return
 }
 
-func (rs *RedisStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+func (rs *RedisStorage) RemoveIndexesDrv(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	hashKey := utils.CacheInstanceToPrefix[idxItmType] + tntCtx
 	if len(idxKeys) == 0 {
 		return rs.Cmd(nil, redisDEL, hashKey)
@@ -978,7 +978,7 @@ func (rs *RedisStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCt
 	return rs.Cmd(nil, redisHDEL, args...)
 }
 
-func (rs *RedisStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+func (rs *RedisStorage) GetAccountDrv(ctx context.Context, tenant, id string) (ap *utils.Account, err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
 		return
@@ -990,7 +990,7 @@ func (rs *RedisStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (
 	return
 }
 
-func (rs *RedisStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+func (rs *RedisStorage) SetAccountDrv(ctx context.Context, ap *utils.Account) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(ap); err != nil {
 		return
@@ -998,11 +998,11 @@ func (rs *RedisStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (
 	return rs.Cmd(nil, redisSET, utils.AccountPrefix+utils.ConcatenatedKey(ap.Tenant, ap.ID), string(result))
 }
 
-func (rs *RedisStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+func (rs *RedisStorage) RemoveAccountDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.AccountPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
-func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+func (rs *RedisStorage) GetConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	sectionMap = make(map[string][]byte)
 	if len(sectionIDs) == 0 {
 		if err = rs.Cmd(&sectionMap, redisHGETALL, utils.ConfigPrefix+nodeID); err != nil {
@@ -1026,14 +1026,14 @@ func (rs *RedisStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string
 	return
 }
 
-func (rs *RedisStorage) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
+func (rs *RedisStorage) SetConfigSectionsDrv(ctx context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
 	if err = rs.FlatCmd(nil, redisHSET, utils.ConfigPrefix+nodeID, sectionsData); err != nil {
 		return
 	}
 	return
 }
 
-func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
+func (rs *RedisStorage) RemoveConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (err error) {
 	if err = rs.FlatCmd(nil, redisHDEL, utils.ConfigPrefix+nodeID, sectionIDs); err != nil {
 		return
 	}

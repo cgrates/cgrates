@@ -4,12 +4,12 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -199,20 +199,20 @@ func TestRoutesSetRouteProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -308,26 +308,26 @@ func TestRoutesRemoveRouteProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, nil
 		},
 	}
@@ -355,17 +355,17 @@ func TestRoutesGetRouteProfileIDsErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -397,7 +397,7 @@ func TestRoutesGetRouteProfileIDsErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -427,17 +427,17 @@ func TestRoutesGetRouteProfilesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			rtPrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rtPrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -465,7 +465,7 @@ func TestRoutesGetRouteProfilesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -688,13 +688,13 @@ func TestRoutesGetRouteProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -726,20 +726,20 @@ func TestRoutesGetRouteProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			routePrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return routePrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -774,20 +774,20 @@ func TestRoutesGetRouteProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRouteProfileDrvF: func(*context.Context, string, string) (*utils.RouteProfile, error) {
+		GetRouteProfileDrvF: func(context.Context, string, string) (*utils.RouteProfile, error) {
 			routePrf := &utils.RouteProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return routePrf, nil
 		},
-		SetRouteProfileDrvF: func(*context.Context, *utils.RouteProfile) error {
+		SetRouteProfileDrvF: func(context.Context, *utils.RouteProfile) error {
 			return nil
 		},
-		RemoveRouteProfileDrvF: func(*context.Context, string, string) error {
+		RemoveRouteProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rpp_cgrates.org:key1", "rpp_cgrates.org:key2", "rpp_cgrates.org:key3"}, nil
 		},
 	}

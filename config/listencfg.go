@@ -4,7 +4,8 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -19,7 +20,7 @@ type ListenCfg struct {
 }
 
 // loadListenCfg loads the Listen section of the configuration
-func (lstcfg *ListenCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (lstcfg *ListenCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnListenCfg := new(ListenJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ListenJSON, jsnListenCfg); err != nil {
 		return

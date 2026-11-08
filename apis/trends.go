@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/trends"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetTrendProfile returns a Trend profile
-func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) (err error) {
+func (adms *AdminSv1) GetTrendProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -30,7 +30,7 @@ func (adms *AdminSv1) GetTrendProfile(ctx *context.Context, arg *utils.TenantIDW
 }
 
 // GetTrendProfileIDs returns list of TrendProfile IDs registered for a tenant
-func (adms *AdminSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetTrendProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -61,7 +61,7 @@ func (adms *AdminSv1) GetTrendProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetTrendProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.TrendProfile) (err error) {
+func (admS *AdminSv1) GetTrendProfiles(ctx context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.TrendProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -84,7 +84,7 @@ func (admS *AdminSv1) GetTrendProfiles(ctx *context.Context, args *utils.ArgsIte
 
 // GetTrendProfilesCount returns the total number of TrendProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 TrendProfileIDs
-func (admS *AdminSv1) GetTrendProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetTrendProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -106,7 +106,7 @@ func (admS *AdminSv1) GetTrendProfilesCount(ctx *context.Context, args *utils.Ar
 }
 
 // SetTrendProfile alters/creates a TrendProfile
-func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetTrendProfile(ctx context.Context, arg *utils.TrendProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.TrendProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -136,7 +136,7 @@ func (adms *AdminSv1) SetTrendProfile(ctx *context.Context, arg *utils.TrendProf
 }
 
 // RemoveTrendProfile remove a specific stat configuration
-func (adms *AdminSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveTrendProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -177,21 +177,21 @@ type TrendSv1 struct {
 }
 
 // V1ScheduleQueries manually schedules or reschedules trend queries.
-func (tS *TrendSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
+func (tS *TrendSv1) ScheduleQueries(ctx context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
 	return tS.trndS.V1ScheduleQueries(ctx, args, scheduled)
 }
 
 // V1GetTrend retrieves trend metrics with optional time and index filtering.
-func (tS *TrendSv1) GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
+func (tS *TrendSv1) GetTrend(ctx context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
 	return tS.trndS.V1GetTrend(ctx, arg, retTrend)
 }
 
 // V1GetScheduledTrends retrieves information about currently scheduled trends.
-func (tS *TrendSv1) GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
+func (tS *TrendSv1) GetScheduledTrends(ctx context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
 	return tS.trndS.V1GetScheduledTrends(ctx, args, schedTrends)
 }
 
 // V1GetTrendSummary retrieves the most recent trend summary.
-func (tS *TrendSv1) GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
+func (tS *TrendSv1) GetTrendSummary(ctx context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
 	return tS.trndS.V1GetTrendSummary(ctx, arg, reply)
 }

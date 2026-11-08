@@ -4,6 +4,7 @@
 package agents
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"regexp"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -38,7 +38,7 @@ func NewKamailioAgent(cfg *config.CGRConfig,
 		activeSessionIDs: make(chan []*sessions.SessionID),
 	}
 	srv, _ := birpc.NewService(ka, "", false)
-	ka.ctx = context.WithClient(context.TODO(), srv)
+	ka.ctx = birpc.WithClient(context.TODO(), srv)
 	msgTemplates := cfg.TemplatesCfg()
 	for _, procsr := range ka.kamCfg.RequestProcessors {
 		var tpls []*config.FCTemplate
@@ -65,7 +65,7 @@ type KamailioAgent struct {
 	fltrS            *engine.FilterS
 	conns            []*kamevapi.KamEvapi
 	activeSessionIDs chan []*sessions.SessionID
-	ctx              *context.Context
+	ctx              context.Context
 }
 
 func (self *KamailioAgent) Connect() (err error) {
@@ -265,7 +265,7 @@ func (self *KamailioAgent) disconnectSession(connIdx int, dscEv *KamSessionDisco
 }
 
 // Internal method to disconnect session in Kamailio
-func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (ka *KamailioAgent) V1DisconnectSession(ctx context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	hEntry := utils.IfaceAsString(cgrEv.Event[KamHashEntry])
 	hID := utils.IfaceAsString(cgrEv.Event[KamHashID])
 	connIdxIface, has := cgrEv.Event[EvapiConnID]
@@ -295,7 +295,7 @@ func (ka *KamailioAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.C
 }
 
 // V1GetActiveSessionIDs returns a list of originIDs based on active sessions from agent
-func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx *context.Context, _ string, sessionIDs *[]*sessions.SessionID) (err error) {
+func (ka *KamailioAgent) V1GetActiveSessionIDs(ctx context.Context, _ string, sessionIDs *[]*sessions.SessionID) (err error) {
 	kamEv := utils.ToJSON(map[string]string{utils.Event: CGR_DLG_LIST})
 	var sentDLG int
 	for i, evapi := range ka.conns {
@@ -332,16 +332,16 @@ func (ka *KamailioAgent) Reload() {
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*KamailioAgent) V1AlterSession(context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+func (*KamailioAgent) V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*KamailioAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+func (*KamailioAgent) V1WarnDisconnect(context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

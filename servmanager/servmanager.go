@@ -4,11 +4,11 @@
 package servmanager
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -189,7 +189,7 @@ type ArgsServiceID struct {
 }
 
 // V1StartService starts a service with ID
-func (m *ServiceManager) V1StartService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+func (m *ServiceManager) V1StartService(ctx context.Context, args *ArgsServiceID, reply *string) (err error) {
 	err = toggleService(args.ServiceID, true, m)
 	if err != nil {
 		return
@@ -199,7 +199,7 @@ func (m *ServiceManager) V1StartService(ctx *context.Context, args *ArgsServiceI
 }
 
 // V1StopService shuts-down a service with ID
-func (m *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID, reply *string) (err error) {
+func (m *ServiceManager) V1StopService(ctx context.Context, args *ArgsServiceID, reply *string) (err error) {
 	err = toggleService(args.ServiceID, false, m)
 	if err != nil {
 		return
@@ -209,7 +209,7 @@ func (m *ServiceManager) V1StopService(ctx *context.Context, args *ArgsServiceID
 }
 
 // V1ServiceStatus returns the current state of the specified services.
-func (m *ServiceManager) V1ServiceStatus(ctx *context.Context, args *ArgsServiceID, reply *map[string]string) error {
+func (m *ServiceManager) V1ServiceStatus(ctx context.Context, args *ArgsServiceID, reply *map[string]string) error {
 	states := make(map[string]string)
 	switch args.ServiceID {
 	case utils.MetaAll:

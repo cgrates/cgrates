@@ -4,10 +4,10 @@
 package actions
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"

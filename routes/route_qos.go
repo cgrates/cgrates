@@ -4,10 +4,10 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"math"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -24,7 +24,7 @@ type QOSRouteSorter struct {
 	fltrS   *engine.FilterS
 }
 
-func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
+func (qos *QOSRouteSorter) SortRoutes(ctx context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	statSConns, err := engine.GetConnIDs(ctx, qos.cfg.RouteSCfg().Conns, utils.MetaStats, ev.Tenant, ev.AsDataProvider(), nil, qos.fltrS)
 	if err != nil {
@@ -94,7 +94,7 @@ func (qos *QOSRouteSorter) SortRoutes(ctx *context.Context, prflID string, route
 
 // populatStatsForQOSRoute will query a list of statIDs and return composed metric values
 // first metric found is always returned
-func populatStatsForQOSRoute(ctx *context.Context, cfg *config.CGRConfig,
+func populatStatsForQOSRoute(ctx context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, statIDs []string, tenant string) (stsMetric map[string]*utils.Decimal, err error) {
 	type metric struct {
 		sum *utils.Decimal

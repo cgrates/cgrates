@@ -5,6 +5,7 @@ package attributes
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"math"
 	"slices"
@@ -13,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -39,7 +39,7 @@ type AttributeS struct {
 }
 
 // attributeProfileForEvent returns the matching attribute
-func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string, attrIDs []string,
+func (alS *AttributeS) attributeProfileForEvent(ctx context.Context, tnt string, attrIDs []string,
 	evNm utils.MapStorage, lastID string, processedPrfNo map[string]int, profileRuns int, ignoreFilters bool) (matchedProfile *utils.AttributeProfile, err error) {
 	if len(attrIDs) == 0 {
 		ignoreFilters = false
@@ -98,7 +98,7 @@ func (alS *AttributeS) attributeProfileForEvent(ctx *context.Context, tnt string
 }
 
 // processEvent will match event with attribute profile and do the necessary replacements
-func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
+func (alS *AttributeS) processEvent(ctx context.Context, tnt string, args *utils.CGREvent, evNm utils.MapStorage, dynDP utils.DataProvider,
 	lastID string, processedPrfNo map[string]int, profileRuns int) (rply *utils.AttributesProcessEventReply, err error) {
 	var attrIDs []string
 	if attrIDs, err = engine.GetStringSliceOpts(ctx, args.Tenant, args.AsDataProvider(), nil, alS.fltrS, alS.cfg.AttributeSCfg().Opts.ProfileIDs,
@@ -190,7 +190,7 @@ func (alS *AttributeS) processEvent(ctx *context.Context, tnt string, args *util
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent,
+func (alS *AttributeS) V1GetAttributeForEvent(ctx context.Context, args *utils.CGREvent,
 	attrPrfl *utils.APIAttributeProfile) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -229,7 +229,7 @@ func (alS *AttributeS) V1GetAttributeForEvent(ctx *context.Context, args *utils.
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (alS *AttributeS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (alS *AttributeS) V1ProcessEvent(ctx context.Context, args *utils.CGREvent,
 	reply *utils.AttributesProcessEventReply) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {

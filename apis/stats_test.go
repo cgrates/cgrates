@@ -4,6 +4,7 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/stats"
@@ -182,20 +182,20 @@ func TestStatsSetStatQueueProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -293,29 +293,29 @@ func TestStatsRemoveStatQueueProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		RemStatQueueDrvF: func(ctx *context.Context, tenant, id string) (err error) {
+		RemStatQueueDrvF: func(ctx context.Context, tenant, id string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, nil
 		},
 	}
@@ -342,17 +342,17 @@ func TestStatsGetStatQueueProfileIDsErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -384,7 +384,7 @@ func TestStatsGetStatQueueProfileIDsErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -414,20 +414,20 @@ func TestStatQueuesGetStatQueueProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:key1", "thp_cgrates.org:key2", "thp_cgrates.org:key3"}, nil
 		},
 	}
@@ -462,20 +462,20 @@ func TestStatQueuesGetStatQueueProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"dpp_cgrates.org:key1", "dpp_cgrates.org:key2", "dpp_cgrates.org:key3"}, nil
 		},
 	}
@@ -512,17 +512,17 @@ func TestStatsGetStatQueueProfilesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(*context.Context, string, string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(context.Context, string, string) (*utils.StatQueueProfile, error) {
 			sqPrf := &utils.StatQueueProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return sqPrf, nil
 		},
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -550,7 +550,7 @@ func TestStatsGetStatQueueProfilesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -620,8 +620,8 @@ func TestStatsAPIs(t *testing.T) {
 		},
 	}
 	mCC := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				expThEv.ID = args.(*utils.CGREvent).ID
 				if !reflect.DeepEqual(args.(*utils.CGREvent), expThEv) {
 					t.Errorf("expected: <%+v>, \nreceived: <%+v>",
@@ -1091,13 +1091,13 @@ func TestStatQueuesGetStatQueueProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetStatQueueProfileDrvF: func(*context.Context, *utils.StatQueueProfile) error {
+		SetStatQueueProfileDrvF: func(context.Context, *utils.StatQueueProfile) error {
 			return nil
 		},
-		RemStatQueueProfileDrvF: func(*context.Context, string, string) error {
+		RemStatQueueProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"thp_cgrates.org:TEST"}, nil
 		},
 	}

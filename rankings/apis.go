@@ -4,16 +4,16 @@
 package rankings
 
 import (
+	"context"
 	"slices"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
 )
 
 // V1ScheduleQueries manually schedules or reschedules ranking queries.
-func (rkS *RankingS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
+func (rkS *RankingS) V1ScheduleQueries(ctx context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant
@@ -27,7 +27,7 @@ func (rkS *RankingS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgSche
 }
 
 // V1GetRanking retrieves ranking metrics with optional filtering.
-func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
+func (rkS *RankingS) V1GetRanking(ctx context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -62,7 +62,7 @@ func (rkS *RankingS) V1GetRanking(ctx *context.Context, arg *utils.TenantIDWithA
 }
 
 // V1GetSchedule retrieves information about currently scheduled rankings.
-func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
+func (rkS *RankingS) V1GetSchedule(ctx context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant
@@ -111,7 +111,7 @@ func (rkS *RankingS) V1GetSchedule(ctx *context.Context, args *utils.ArgSchedule
 }
 
 // V1GetRankingSummary retrieves the most recent ranking summary.
-func (rkS *RankingS) V1GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+func (rkS *RankingS) V1GetRankingSummary(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
 		tnt = rkS.cgrcfg.GeneralCfg().DefaultTenant

@@ -4,12 +4,12 @@
 package routes
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
@@ -1006,10 +1006,10 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr1(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -1032,8 +1032,8 @@ func TestRouteSMatchingRouteProfilesForEventGetRouteProfileErr2(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(ctx *context.Context, args, reply any) error { return utils.ErrNotImplemented },
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(ctx context.Context, args, reply any) error { return utils.ErrNotImplemented },
 		},
 	}
 
@@ -1935,8 +1935,8 @@ func TestRoutesV1GetRoutesCallWithAlteredFields(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				*reply.(*utils.AttributesProcessEventReply) = utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{utils.AccountField},

@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -90,7 +90,7 @@ type FsAgentCfg struct {
 }
 
 // loadFreeswitchAgentCfg loads the FreeswitchAgent section of the configuration
-func (fscfg *FsAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (fscfg *FsAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSmFsCfg := new(FreeswitchAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, FreeSWITCHAgentJSON, jsnSmFsCfg); err != nil {
 		return

@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -228,7 +228,7 @@ type indexConnector struct {
 	calls []*utils.SetIndexesArg
 }
 
-func (c *indexConnector) Call(_ *context.Context, method string, args, _ any) error {
+func (c *indexConnector) Call(_ context.Context, method string, args, _ any) error {
 	if method != utils.ReplicatorSv1SetIndexes {
 		return c.err
 	}

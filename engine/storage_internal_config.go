@@ -4,13 +4,13 @@
 package engine
 
 import (
+	"context"
 	"encoding/json"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (iDB *InternalDB) GetSection(_ *context.Context, section string, val any) error {
+func (iDB *InternalDB) GetSection(_ context.Context, section string, val any) error {
 	result, ok := iDB.db.Get(utils.CacheConfig, section)
 	if !ok || result == nil {
 		return nil
@@ -21,7 +21,7 @@ func (iDB *InternalDB) GetSection(_ *context.Context, section string, val any) e
 	}
 	return json.Unmarshal(b, val)
 }
-func (iDB *InternalDB) SetSection(_ *context.Context, section string, val any) error {
+func (iDB *InternalDB) SetSection(_ context.Context, section string, val any) error {
 	iDB.db.Set(utils.CacheConfig, section, val, nil,
 		true, utils.NonTransactional)
 	return nil

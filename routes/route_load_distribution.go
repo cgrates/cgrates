@@ -4,10 +4,9 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"strings"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -27,7 +26,7 @@ type LoadDistributionSorter struct {
 }
 
 // SortRoutes .
-func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string,
+func (ws *LoadDistributionSorter) SortRoutes(ctx context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,
@@ -89,7 +88,7 @@ func (ws *LoadDistributionSorter) SortRoutes(ctx *context.Context, prflID string
 
 // populateStatsForLoadRoute will query a list of statIDs and return the sum of metrics
 // first metric found is always returned
-func populateStatsForLoadRoute(ctx *context.Context, cfg *config.CGRConfig,
+func populateStatsForLoadRoute(ctx context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, statIDs []string, tenant string) (result *utils.Decimal, err error) {
 	connIDs, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaStats, tenant, utils.MapStorage{}, nil, fltrS)
 	if err != nil {

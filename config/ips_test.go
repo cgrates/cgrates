@@ -4,13 +4,13 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"slices"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,10 +40,10 @@ func TestIPsCfgLoad(t *testing.T) {
 		}
 
 		cfg := &IPsCfg{Opts: &IPsOpts{}}
-		ctx := &context.Context{}
+		ctx := context.Background()
 
 		db := &mockDb{
-			GetSectionF: func(_ *context.Context, section string, out any) error {
+			GetSectionF: func(_ context.Context, section string, out any) error {
 				if section != IPsJSON {
 					return errors.New("unexpected section")
 				}
@@ -61,10 +61,10 @@ func TestIPsCfgLoad(t *testing.T) {
 
 	t.Run("GetSection returns error", func(t *testing.T) {
 		cfg := &IPsCfg{Opts: &IPsOpts{}}
-		ctx := &context.Context{}
+		ctx := context.Background()
 
 		db := &mockDb{
-			GetSectionF: func(_ *context.Context, _ string, _ any) error {
+			GetSectionF: func(_ context.Context, _ string, _ any) error {
 				return errors.New("error")
 			},
 		}

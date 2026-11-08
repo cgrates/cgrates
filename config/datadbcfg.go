@@ -4,6 +4,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"slices"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -174,7 +174,7 @@ type DbCfg struct {
 }
 
 // loadDBCfg loads the DB section of the configuration
-func (dbcfg *DbCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (dbcfg *DbCfg) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnDbCfg := new(DbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, DBJSON, jsnDbCfg); err != nil {
 		return

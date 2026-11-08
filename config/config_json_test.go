@@ -4,13 +4,13 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -2846,7 +2846,7 @@ func TestSetSection(t *testing.T) {
 	}
 	payload := make(chan struct{})
 	errExpect := "json: unsupported type: chan struct {}"
-	if err := jsnCfg.SetSection(&context.Context{}, "general", payload); err == nil || err.Error() != errExpect {
+	if err := jsnCfg.SetSection(context.Background(), "general", payload); err == nil || err.Error() != errExpect {
 		t.Error(err)
 	}
 }

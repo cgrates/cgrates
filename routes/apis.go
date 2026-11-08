@@ -4,13 +4,14 @@
 package routes
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1GetRoutes returns the list of valid routes.
-func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
+func (rpS *RouteS) V1GetRoutes(ctx context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -54,7 +55,7 @@ func (rpS *RouteS) V1GetRoutes(ctx *context.Context, args *utils.CGREvent, reply
 }
 
 // V1GetRouteProfilesForEvent returns the list of valid route profiles.
-func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.RouteProfile) (_ error) {
+func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]*utils.RouteProfile) (_ error) {
 	if args.Event == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -74,7 +75,7 @@ func (rpS *RouteS) V1GetRouteProfilesForEvent(ctx *context.Context, args *utils.
 }
 
 // V1GetRoutesList returns the list of valid routes.
-func (rpS *RouteS) V1GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (rpS *RouteS) V1GetRoutesList(ctx context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	sR := new(utils.SortedRoutesList)
 	if err = rpS.V1GetRoutes(ctx, args, sR); err != nil {
 		return

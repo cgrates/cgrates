@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -45,7 +45,7 @@ type ActionSCfg struct {
 }
 
 // loadActionSCfg loads the ActionS section of the configuration
-func (acS *ActionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (acS *ActionSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnActionCfg := new(ActionSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ActionSJSON, jsnActionCfg); err != nil {
 		return

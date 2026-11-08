@@ -4,11 +4,11 @@
 package engine
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -17,7 +17,7 @@ type mockConnector struct {
 	err error
 }
 
-func (c *mockConnector) Call(_ *context.Context, _ string, _, _ any) error {
+func (c *mockConnector) Call(_ context.Context, _ string, _, _ any) error {
 	return c.err
 }
 

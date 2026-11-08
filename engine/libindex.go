@@ -4,11 +4,11 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -23,7 +23,7 @@ var (
 
 // newFilterIndex will get the index from DataManager if is not found it will create it
 // is used to update the mentioned index
-func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID, transactionID string, filterIDs []string, newFlt *Filter) (map[string]utils.StringSet, error) {
+func newFilterIndex(ctx context.Context, dm *DataManager, idxItmType, tnt, grp, itemID, transactionID string, filterIDs []string, newFlt *Filter) (map[string]utils.StringSet, error) {
 	tntGrp := tnt
 	if grp != "" {
 		tntGrp = utils.ConcatenatedKey(tnt, grp)
@@ -94,7 +94,7 @@ func newFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp,
 }
 
 // addItemToFilterIndex will add the itemID to the existing/created index and set it in the DB
-func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
+func addItemToFilterIndex(ctx context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
 	tntGrp := tnt
 	if grp != utils.EmptyString {
 		tntGrp = utils.ConcatenatedKey(tnt, grp)
@@ -124,7 +124,7 @@ func addItemToFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt
 }
 
 // removeItemFromFilterIndex will remove the itemID from the existing/created index and set it in the DB
-func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
+func removeItemFromFilterIndex(ctx context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, filterIDs []string) (err error) {
 	tntGrp := tnt
 	if grp != utils.EmptyString {
 		tntGrp = utils.ConcatenatedKey(tnt, grp)
@@ -164,7 +164,7 @@ func removeItemFromFilterIndex(ctx *context.Context, dm *DataManager, idxItmType
 // useGrp - in case of subindexes(e.g. Rate from RateProfiles) need to add the grp to the itemID when reverse filter indexes are set
 //
 //	used when updating the filters
-func updatedIndexes(ctx *context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, oldFilterIds *[]string, newFilterIDs []string, useGrp bool) (err error) {
+func updatedIndexes(ctx context.Context, dm *DataManager, idxItmType, tnt, grp, itemID string, oldFilterIds *[]string, newFilterIDs []string, useGrp bool) (err error) {
 	itmGrp := itemID
 	if useGrp {
 		itmGrp = utils.ConcatenatedKey(itemID, grp)
@@ -240,7 +240,7 @@ func splitFilterIndex(tntGrpIdxKey string) (tntGrp, idxKey string, err error) {
 
 // ComputeIndexes gets the indexes from the DB and ensure that the items are indexed
 // getFilters returns a list of filters IDs for the given profile id
-func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType string, IDs *[]string,
+func ComputeIndexes(ctx context.Context, dm *DataManager, tnt, grp, idxItmType string, IDs *[]string,
 	transactionID string, getFilters func(tnt, id, grp string) (*[]string, error), newFltr *Filter) (indexes utils.StringSet, err error) {
 	indexes = make(utils.StringSet)
 	var profilesIDs []string
@@ -294,7 +294,7 @@ func ComputeIndexes(ctx *context.Context, dm *DataManager, tnt, grp, idxItmType 
 }
 
 // addIndexFiltersItem will add a reference for the items in the reverse filter index
-func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
+func addIndexFiltersItem(ctx context.Context, dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
 	for _, ID := range filterIDs {
 		if strings.HasPrefix(ID, utils.Meta) { // skip inline
 			continue
@@ -330,7 +330,7 @@ func addIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt,
 }
 
 // removeIndexFiltersItem will removes a reference for the items in the reverse filter index
-func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
+func removeIndexFiltersItem(ctx context.Context, dm *DataManager, idxItmType, tnt, itemID string, filterIDs []string) (err error) {
 	for _, ID := range filterIDs {
 		if strings.HasPrefix(ID, utils.Meta) { // skip inline
 			continue
@@ -367,7 +367,7 @@ func removeIndexFiltersItem(ctx *context.Context, dm *DataManager, idxItmType, t
 // UpdateFilterIndex  will update the indexes for the new Filter
 // we do not care what is added
 // exported for the migrator
-func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Filter) (err error) {
+func UpdateFilterIndex(ctx context.Context, dm *DataManager, oldFlt, newFlt *Filter) (err error) {
 	if oldFlt == nil { // no filter before so no index to update
 		return // nothing to update
 	}
@@ -711,7 +711,7 @@ func UpdateFilterIndex(ctx *context.Context, dm *DataManager, oldFlt, newFlt *Fi
 
 // removeFilterIndexesForFilter removes itemIDs from the specified filter index keys.
 // Used to update the index map when a filter is modified.
-func removeFilterIndexesForFilter(ctx *context.Context, dm *DataManager, idxItmType, tnt string,
+func removeFilterIndexesForFilter(ctx context.Context, dm *DataManager, idxItmType, tnt string,
 	removeIndexKeys []string, itemIDs utils.StringSet) error {
 	if len(removeIndexKeys) == 0 {
 		return nil // no indexes to remove

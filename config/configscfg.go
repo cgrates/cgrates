@@ -4,13 +4,13 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
 	"path"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -21,7 +21,7 @@ type ConfigSCfg struct {
 	RootDir string
 }
 
-func (cScfg *ConfigSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (cScfg *ConfigSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnConfigSCfg := new(ConfigSCfgJson)
 	if err = jsnCfg.GetSection(ctx, ConfigSJSON, jsnConfigSCfg); err != nil {
 		return
@@ -66,14 +66,14 @@ func HandlerConfigS(cfg *CGRConfig) http.HandlerFunc {
 		}
 		switch mode := fi.Mode(); {
 		case mode.IsDir():
-			handleConfigSFolder(&context.Context{Context: r.Context()}, pth, w)
+			handleConfigSFolder(r.Context(), pth, w)
 		case mode.IsRegular():
 			handleConfigSFile(pth, w)
 		}
 	}
 }
 
-func handleConfigSFolder(ctx *context.Context, path string, w http.ResponseWriter) {
+func handleConfigSFolder(ctx context.Context, path string, w http.ResponseWriter) {
 	// if the path is a directory, read the directory, construct the config and load it in memory
 	cfg, err := newCGRConfigFromPathWithoutEnv(ctx, path)
 	if err != nil {

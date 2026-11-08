@@ -4,7 +4,8 @@
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/servmanager"
 )
 
@@ -16,14 +17,14 @@ type ServiceManagerV1 struct {
 	sm *servmanager.ServiceManager
 }
 
-func (servManager *ServiceManagerV1) StartService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
+func (servManager *ServiceManagerV1) StartService(ctx context.Context, args *servmanager.ArgsServiceID, reply *string) error {
 	return servManager.sm.V1StartService(ctx, args, reply)
 }
 
-func (servManager *ServiceManagerV1) StopService(ctx *context.Context, args *servmanager.ArgsServiceID, reply *string) error {
+func (servManager *ServiceManagerV1) StopService(ctx context.Context, args *servmanager.ArgsServiceID, reply *string) error {
 	return servManager.sm.V1StopService(ctx, args, reply)
 }
 
-func (servManager *ServiceManagerV1) ServiceStatus(ctx *context.Context, args *servmanager.ArgsServiceID, reply *map[string]string) error {
+func (servManager *ServiceManagerV1) ServiceStatus(ctx context.Context, args *servmanager.ArgsServiceID, reply *map[string]string) error {
 	return servManager.sm.V1ServiceStatus(ctx, args, reply)
 }

@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -24,7 +24,7 @@ type ChargerSCfg struct {
 }
 
 // loadChargerSCfg loads the ChargerS section of the configuration
-func (cS *ChargerSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (cS *ChargerSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnChargerSCfg := new(ChargerSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ChargerSJSON, jsnChargerSCfg); err != nil {
 		return

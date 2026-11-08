@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/accounts"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetAccount returns an Account
-func (admS *AdminSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+func (admS *AdminSv1) GetAccount(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -33,7 +33,7 @@ func (admS *AdminSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAP
 }
 
 // GetAccountIDs returns list of account profile IDs registered for a tenant
-func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetAccountIDs(ctx context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -64,7 +64,7 @@ func (admS *AdminSv1) GetAccountIDs(ctx *context.Context, args *utils.ArgsItemID
 }
 
 // GetAccounts returns a list of accounts registered for a tenant
-func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs, accs *[]*utils.Account) (err error) {
+func (admS *AdminSv1) GetAccounts(ctx context.Context, args *utils.ArgsItemIDs, accs *[]*utils.Account) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -87,7 +87,7 @@ func (admS *AdminSv1) GetAccounts(ctx *context.Context, args *utils.ArgsItemIDs,
 
 // GetAccountsCount sets in reply var the total number of AccountIDs registered for a tenant
 // returns ErrNotFound in case of 0 AccountIDs
-func (admS *AdminSv1) GetAccountsCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetAccountsCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -109,7 +109,7 @@ func (admS *AdminSv1) GetAccountsCount(ctx *context.Context, args *utils.ArgsIte
 }
 
 // SetAccount add/update a new Account
-func (admS *AdminSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) SetAccount(ctx context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.Account, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -137,7 +137,7 @@ func (admS *AdminSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAP
 }
 
 // RemoveAccount remove a specific Account
-func (admS *AdminSv1) RemoveAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) RemoveAccount(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -177,46 +177,46 @@ type AccountSv1 struct {
 }
 
 // GetAccount returns the account matching tenant and ID.
-func (aS *AccountSv1) GetAccount(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+func (aS *AccountSv1) GetAccount(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	return aS.accs.V1GetAccount(ctx, arg, reply)
 }
 
 // AccountsForEvent returns the matching Accounts for Event
-func (aS *AccountSv1) AccountsForEvent(ctx *context.Context, args *utils.CGREvent, aps *[]*utils.Account) error {
+func (aS *AccountSv1) AccountsForEvent(ctx context.Context, args *utils.CGREvent, aps *[]*utils.Account) error {
 	return aS.accs.V1AccountsForEvent(ctx, args, aps)
 }
 
 // MaxAbstracts returns the maximum abstract units for the event, based on matching Accounts
-func (aS *AccountSv1) MaxAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) error {
+func (aS *AccountSv1) MaxAbstracts(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) error {
 	return aS.accs.V1MaxAbstracts(ctx, args, eEc)
 }
 
 // DebitAbstracts performs debit for the provided event
-func (aS *AccountSv1) DebitAbstracts(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountSv1) DebitAbstracts(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	return aS.accs.V1DebitAbstracts(ctx, args, eEc)
 }
 
 // MaxConcretes returns the maximum concrete units for the event, based on matching Accounts
-func (aS *AccountSv1) MaxConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountSv1) MaxConcretes(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	return aS.accs.V1MaxConcretes(ctx, args, eEc)
 }
 
 // DebitConcretes performs debit of concrete units for the provided event
-func (aS *AccountSv1) DebitConcretes(ctx *context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
+func (aS *AccountSv1) DebitConcretes(ctx context.Context, args *utils.CGREvent, eEc *utils.EventCharges) (err error) {
 	return aS.accs.V1DebitConcretes(ctx, args, eEc)
 }
 
 // RefundCharges will refund charges recorded inside EventCharges
-func (aS *AccountSv1) RefundCharges(ctx *context.Context, args *utils.APIEventCharges, rply *string) (err error) {
+func (aS *AccountSv1) RefundCharges(ctx context.Context, args *utils.APIEventCharges, rply *string) (err error) {
 	return aS.accs.V1RefundCharges(ctx, args, rply)
 }
 
 // ActionSetBalance performs an update for a specific balance in account
-func (aS *AccountSv1) ActionSetBalance(ctx *context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
+func (aS *AccountSv1) ActionSetBalance(ctx context.Context, args *utils.ArgsActSetBalance, rply *string) (err error) {
 	return aS.accs.V1ActionSetBalance(ctx, args, rply)
 }
 
 // RemoveBalance removes a balance for a specific account
-func (aS *AccountSv1) ActionRemoveBalance(ctx *context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
+func (aS *AccountSv1) ActionRemoveBalance(ctx context.Context, args *utils.ArgsActRemoveBalances, rply *string) (err error) {
 	return aS.accs.V1ActionRemoveBalance(ctx, args, rply)
 }

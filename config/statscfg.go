@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,7 +40,7 @@ type StatSCfg struct {
 }
 
 // Load loads the StatS section of the configuration
-func (st *StatSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
+func (st *StatSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnStatSCfg := new(StatServJsonCfg)
 	if err := jsnCfg.GetSection(ctx, StatSJSON, jsnStatSCfg); err != nil {
 		return err

@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -35,7 +35,7 @@ type ConfigDbJsonCfg struct {
 }
 
 // loadConfigDBCfg loads the DB section of the configuration
-func (dbcfg *ConfigDBCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (dbcfg *ConfigDBCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnConfigDBCfg := new(ConfigDbJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ConfigDBJSON, jsnConfigDBCfg); err != nil {
 		return

@@ -7,12 +7,12 @@
 package ees
 
 import (
+	"context"
 	"path"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	amqp "github.com/rabbitmq/amqp091-go"
 
 	"github.com/cgrates/cgrates/config"

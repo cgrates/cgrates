@@ -4,14 +4,14 @@
 package thresholds
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1ProcessEvent implements ThresholdService method for processing an Event
-func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (s *ThresholdS) V1ProcessEvent(ctx context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -33,7 +33,7 @@ func (s *ThresholdS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, 
 }
 
 // V1GetThresholdsForEvent queries thresholds matching an Event
-func (s *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Threshold) error {
+func (s *ThresholdS) V1GetThresholdsForEvent(ctx context.Context, args *utils.CGREvent, reply *[]*utils.Threshold) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -60,7 +60,7 @@ func (s *ThresholdS) V1GetThresholdsForEvent(ctx *context.Context, args *utils.C
 }
 
 // V1GetThresholdIDs returns list of thresholdIDs configured for a tenant
-func (s *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) error {
+func (s *ThresholdS) V1GetThresholdIDs(ctx context.Context, args *utils.TenantWithAPIOpts, tIDs *[]string) error {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = s.cfg.GeneralCfg().DefaultTenant
@@ -83,7 +83,7 @@ func (s *ThresholdS) V1GetThresholdIDs(ctx *context.Context, args *utils.TenantW
 }
 
 // V1GetThreshold retrieves a Threshold
-func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, th *utils.Threshold) error {
+func (s *ThresholdS) V1GetThreshold(ctx context.Context, tntID *utils.TenantIDWithAPIOpts, th *utils.Threshold) error {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -103,7 +103,7 @@ func (s *ThresholdS) V1GetThreshold(ctx *context.Context, tntID *utils.TenantIDW
 }
 
 // V1ResetThreshold resets the threshold hits
-func (s *ThresholdS) V1ResetThreshold(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
+func (s *ThresholdS) V1ResetThreshold(ctx context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

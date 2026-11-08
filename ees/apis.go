@@ -6,18 +6,18 @@ package ees
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (eeS *EeS) V1ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
+func (eeS *EeS) V1ProcessEvent(ctx context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	eeS.cfg.RLocks(config.EEsJSON)
 	defer eeS.cfg.RUnlocks(config.EEsJSON)
 
@@ -160,7 +160,7 @@ type ArchiveEventsArgs struct {
 	Events  []*utils.EventsWithOpts
 }
 
-func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *engine.ConnManager,
+func exportEventWithExporter(ctx context.Context, exp EventExporter, connMngr *engine.ConnManager,
 	ev *utils.CGREvent, oneTime bool, cfg *config.CGRConfig, cache *engine.CacheS, filterS *engine.FilterS, tnt string) (err error) {
 	defer func() {
 		updateEEMetrics(exp.GetMetrics(), ev.ID, ev.Event, err != nil, utils.FirstNonEmpty(exp.Cfg().Timezone,
@@ -198,7 +198,7 @@ func exportEventWithExporter(ctx *context.Context, exp EventExporter, connMngr *
 }
 
 // V1ArchiveEventsInReply should archive the events sent with existing exporters. The zipped content should be returned back as a reply.
-func (eeS *EeS) V1ArchiveEventsInReply(ctx *context.Context, args *ArchiveEventsArgs, reply *[]byte) (err error) {
+func (eeS *EeS) V1ArchiveEventsInReply(ctx context.Context, args *ArchiveEventsArgs, reply *[]byte) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = eeS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -328,7 +328,7 @@ type V1ResetExporterMetricsParams struct {
 
 // V1ResetExporterMetrics resets the metrics for a specific exporter identified by ExporterID.
 // Returns utils.ErrNotFound if the exporter is not found in the cache.
-func (eeS *EeS) V1ResetExporterMetrics(ctx *context.Context, params V1ResetExporterMetricsParams, reply *string) error {
+func (eeS *EeS) V1ResetExporterMetrics(ctx context.Context, params V1ResetExporterMetricsParams, reply *string) error {
 	eeCfg := eeS.cfg.EEsCfg().ExporterCfg(params.ExporterID)
 	ee, ok := eeS.exporterCache[eeCfg.Type].Get(eeCfg.ID)
 	if !ok {

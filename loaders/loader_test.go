@@ -6,6 +6,7 @@ package loaders
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -20,7 +21,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -476,9 +476,9 @@ func TestLoaderStoreRemove(t *testing.T) {
 	}
 }
 
-type ccMock map[string]func(ctx *context.Context, args any, reply any) error
+type ccMock map[string]func(ctx context.Context, args any, reply any) error
 
-func (ccM ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
@@ -496,8 +496,8 @@ func TestLoaderProcessCallCahe(t *testing.T) {
 	tntID := "cgrates.org:ID"
 	iCh := make(chan birpc.ClientConnector, 1)
 	iCh <- ccMock{
-		utils.CacheSv1ReloadCache: func(_ *context.Context, args, _ any) error { reloadCache = args; return nil },
-		utils.CacheSv1Clear:       func(_ *context.Context, args, _ any) error { clearCache = args; return nil },
+		utils.CacheSv1ReloadCache: func(_ context.Context, args, _ any) error { reloadCache = args; return nil },
+		utils.CacheSv1Clear:       func(_ context.Context, args, _ any) error { clearCache = args; return nil },
 	}
 	cM.AddInternalConn(connID, utils.CacheSv1, iCh)
 	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)

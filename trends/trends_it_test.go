@@ -7,6 +7,7 @@
 package trends
 
 import (
+	"context"
 	"path"
 	"reflect"
 	"slices"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

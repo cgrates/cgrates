@@ -4,7 +4,8 @@
 package actions
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -27,7 +28,7 @@ func (aL *actResetStat) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actResetStat) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actResetStat) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
 		APIOpts:  data[utils.MetaOpts].(map[string]any),
@@ -61,7 +62,7 @@ func (aL *actResetThreshold) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actResetThreshold) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actResetThreshold) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
 	args := &utils.TenantIDWithAPIOpts{
 		TenantID: utils.NewTenantID(trgID),
 		APIOpts:  data[utils.MetaOpts].(map[string]any),

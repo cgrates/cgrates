@@ -5,6 +5,7 @@ package ees
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -16,7 +17,6 @@ import (
 
 	"github.com/elastic/elastic-transport-go/v8/elastictransport"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -175,7 +175,7 @@ func (e *ElasticEE) Connect() error {
 }
 
 // ExportEvent implements EventExporter
-func (e *ElasticEE) ExportEvent(ctx *context.Context, event, extraData any) error {
+func (e *ElasticEE) ExportEvent(ctx context.Context, event, extraData any) error {
 	e.reqs.get()
 	e.mu.RLock()
 	defer func() {

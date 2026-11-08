@@ -4,10 +4,10 @@
 package ees
 
 import (
+	"context"
 	"sync"
 
 	amqpv1 "github.com/Azure/go-amqp"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -69,7 +69,7 @@ func (pstr *AMQPv1EE) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPv1EE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
+func (pstr *AMQPv1EE) ExportEvent(ctx context.Context, content, _ any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	defer func() {

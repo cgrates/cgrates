@@ -4,6 +4,7 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"path/filepath"
 	"reflect"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -25,7 +25,7 @@ type replicationRPCRequest struct {
 
 type replicationRPCMock chan *replicationRPCRequest
 
-func (m replicationRPCMock) Call(_ *context.Context, method string, args, _ any) error {
+func (m replicationRPCMock) Call(_ context.Context, method string, args, _ any) error {
 	select {
 	case m <- &replicationRPCRequest{method: method, args: args}:
 		return nil
@@ -197,7 +197,7 @@ func TestReplicatorRemoveCacheRouting(t *testing.T) {
 	replicator := NewReplicatorSv1(dm, api)
 	tests := []struct {
 		name             string
-		remove           func(*context.Context, *utils.TenantIDWithAPIOpts, *string) error
+		remove           func(context.Context, *utils.TenantIDWithAPIOpts, *string) error
 		expectedCacheIDs []string
 	}{
 		{"Threshold", replicator.RemoveThreshold, []string{utils.CacheThresholds}},

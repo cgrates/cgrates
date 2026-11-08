@@ -4,13 +4,13 @@
 package config
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -293,21 +293,21 @@ func TestGetSectionAsMap(t *testing.T) {
 }
 
 type mockDb struct {
-	GetSectionF      func(*context.Context, string, any) error
-	SetSectionF      func(*context.Context, string, any) error
+	GetSectionF      func(context.Context, string, any) error
+	SetSectionF      func(context.Context, string, any) error
 	DumpConfigDBF    func() error
 	RewriteConfigDBF func() error
 	BackupConfigDBF  func(string, bool) error
 }
 
-func (m *mockDb) GetSection(ctx *context.Context, sec string, val any) error {
+func (m *mockDb) GetSection(ctx context.Context, sec string, val any) error {
 	if m.GetSectionF != nil {
 		return m.GetSectionF(ctx, sec, val)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (m *mockDb) SetSection(ctx *context.Context, sec string, val any) error {
+func (m *mockDb) SetSection(ctx context.Context, sec string, val any) error {
 	if m.SetSectionF != nil {
 		return m.SetSectionF(ctx, sec, val)
 	}
@@ -1130,8 +1130,8 @@ func TestCGRConfigV1StoreCfgInDB(t *testing.T) {
 	cfg := NewDefaultCGRConfig()
 	cfg.rldCh = make(chan string, 100)
 	cfg.db = &mockDb{
-		GetSectionF: func(ctx *context.Context, s string, i any) error { return nil },
-		SetSectionF: func(ctx *context.Context, s string, i any) error { return utils.ErrNotImplemented },
+		GetSectionF: func(ctx context.Context, s string, i any) error { return nil },
+		SetSectionF: func(ctx context.Context, s string, i any) error { return utils.ErrNotImplemented },
 	}
 
 	args := &SectionWithAPIOpts{

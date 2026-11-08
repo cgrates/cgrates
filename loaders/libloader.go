@@ -4,11 +4,11 @@
 package loaders
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -110,7 +110,7 @@ func (ar *record) FieldAsInterface(fldPath []string) (val any, err error) {
 }
 
 // SetFields will populate fields of record out of templates
-func (ar *record) SetFields(ctx *context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz string) (err error) {
+func (ar *record) SetFields(ctx context.Context, tmpls []*config.FCTemplate, filterS *engine.FilterS, rndDec int, dftTmz string) (err error) {
 	ar.tmp = &utils.DataNode{Type: utils.NMMapType, Map: make(map[string]*utils.DataNode)}
 	for _, fld := range tmpls {
 		if pass, err := filterS.Pass(context.TODO(), ar.tenant,

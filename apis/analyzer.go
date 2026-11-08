@@ -4,7 +4,8 @@
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/analyzers"
 )
 
@@ -16,6 +17,6 @@ type AnalyzerSv1 struct {
 	aS *analyzers.AnalyzerS
 }
 
-func (aSv1 *AnalyzerSv1) StringQuery(ctx *context.Context, search *analyzers.QueryArgs, reply *[]map[string]any) error {
+func (aSv1 *AnalyzerSv1) StringQuery(ctx context.Context, search *analyzers.QueryArgs, reply *[]map[string]any) error {
 	return aSv1.aS.V1StringQuery(ctx, search, reply)
 }

@@ -4,13 +4,13 @@
 package chargers
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
@@ -614,7 +614,7 @@ func TestChargersmatchingChargerProfilesForEventErrGetChPrf(t *testing.T) {
 	cfg.ChargerSCfg().NestedFields = false
 
 	dbm := &engine.DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx context.Context, s string, srch string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}
@@ -923,7 +923,7 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &engine.DataDBMock{
-		GetChargerProfileDrvF: func(ctx *context.Context, s1, s2 string) (*utils.ChargerProfile, error) {
+		GetChargerProfileDrvF: func(ctx context.Context, s1, s2 string) (*utils.ChargerProfile, error) {
 			return &utils.ChargerProfile{
 				Tenant:    s1,
 				ID:        s2,
@@ -931,10 +931,10 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 				FilterIDs: []string{"fltr1"},
 			}, nil
 		},
-		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx context.Context, s string, srch string) ([]string, error) {
 			return []string{s + "cgrates.org:chr1"}, nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, s1, s2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, s1, s2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -975,10 +975,10 @@ func TestChargersmatchingChargerProfilesForEventErrPass(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -1008,8 +1008,8 @@ func TestChargersprocessEventCallNilErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				rply := utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						MatchedProfileID: "attr1",
@@ -1107,8 +1107,8 @@ func TestChargersprocessEventCallErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -1196,8 +1196,8 @@ func TestChargersV1ProcessEventErrNotFound(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				rply := utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -1268,8 +1268,8 @@ func TestChargersV1ProcessEventErrOther(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			"invalidMethod": func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			"invalidMethod": func(ctx context.Context, args, reply any) error {
 				rply := utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{utils.AccountField},
@@ -1347,8 +1347,8 @@ func TestChargersV1ProcessEvent(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				rply := utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						MatchedProfileID: "attr2",
@@ -1503,7 +1503,7 @@ func TestChargersV1GetChargersForEventErr(t *testing.T) {
 	cfg.ChargerSCfg().IndexedSelects = false
 
 	dbm := &engine.DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx context.Context, s string, srch string) ([]string, error) {
 			return []string{":"}, nil
 		},
 	}

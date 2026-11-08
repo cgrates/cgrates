@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -83,7 +83,7 @@ type CacheCfg struct {
 }
 
 // loadCacheCfg loads the Cache section of the configuration
-func (cCfg *CacheCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (cCfg *CacheCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnCacheCfg := new(CacheJsonCfg)
 	if err = jsnCfg.GetSection(ctx, CacheJSON, jsnCacheCfg); err != nil {
 		return

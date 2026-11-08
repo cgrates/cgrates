@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -44,7 +44,7 @@ type AccountSCfg struct {
 }
 
 // loadAccountSCfg loads the AccountS section of the configuration
-func (acS *AccountSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (acS *AccountSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnActionCfg := new(AccountSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, AccountSJSON, jsnActionCfg); err != nil {
 		return

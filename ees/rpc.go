@@ -4,11 +4,11 @@
 package ees
 
 import (
+	"context"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -52,7 +52,7 @@ func (e *RPCee) Connect() (err error) {
 	return
 }
 
-func (e *RPCee) ExportEvent(ctx *context.Context, args, _ any) (err error) {
+func (e *RPCee) ExportEvent(ctx context.Context, args, _ any) (err error) {
 	e.Lock()
 	defer e.Unlock()
 	var rply string

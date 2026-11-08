@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"sync"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -20,7 +20,7 @@ import (
 func NewConnManager(cfg *config.CGRConfig) *ConnManager {
 	return &ConnManager{
 		cfg:         cfg,
-		rpcInternal: make(map[string]chan context.ClientConnector),
+		rpcInternal: make(map[string]chan birpc.ClientConnector),
 		dynIntCh:    newRPCClientSet(cfg),
 		connCache:   ltcache.NewCache(-1, 0, true, nil, nil),
 	}
@@ -46,7 +46,7 @@ type ConnManager struct {
 
 // getConn is used to retrieve a connection from cache
 // in case this doesn't exist create it and cache it
-func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.ClientConnector, err error) {
+func (cM *ConnManager) getConn(ctx context.Context, connID string) (conn birpc.ClientConnector, err error) {
 	//try to get the connection from cache
 	if x, ok := cM.cache.Get(utils.CacheRPCConnections, connID); ok {
 		if x == nil {
@@ -84,7 +84,7 @@ func (cM *ConnManager) getConn(ctx *context.Context, connID string) (conn birpc.
 	return
 }
 
-func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, connCfg *config.RPCConn,
+func (cM *ConnManager) getConnWithConfig(ctx context.Context, connID string, connCfg *config.RPCConn,
 	intChan chan birpc.ClientConnector) (conn birpc.ClientConnector, err error) {
 	if connCfg.Strategy == rpcclient.PoolParallel {
 		rpcConnCfg := connCfg.Conns[0] // for parallel we need only the first connection
@@ -111,7 +111,7 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 			utils.FirstNonEmpty(rpcConnCfg.CaCertificate, cM.cfg.TLSCfg().CaCertificate), utils.FirstIntNonEmpty(rpcConnCfg.ConnectAttempts, cM.cfg.GeneralCfg().ConnectAttempts),
 			utils.FirstIntNonEmpty(rpcConnCfg.Reconnects, cM.cfg.GeneralCfg().Reconnects), utils.FirstDurationNonEmpty(rpcConnCfg.MaxReconnectInterval, cM.cfg.GeneralCfg().MaxReconnectInterval),
 			utils.FibDuration, utils.FirstDurationNonEmpty(rpcConnCfg.ConnectTimeout, cM.cfg.GeneralCfg().ConnectTimeout), utils.FirstDurationNonEmpty(rpcConnCfg.ReplyTimeout, cM.cfg.GeneralCfg().ReplyTimeout),
-			codec, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false, ctx.Client); err != nil {
+			codec, intChan, int64(cM.cfg.GeneralCfg().MaxParallelConns), false, birpc.ClientFromContext(ctx)); err != nil {
 			return
 		}
 	} else {
@@ -121,12 +121,12 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 			cM.cfg.GeneralCfg().ConnectAttempts, cM.cfg.GeneralCfg().Reconnects,
 			cM.cfg.GeneralCfg().MaxReconnectInterval, cM.cfg.GeneralCfg().ConnectTimeout,
 			utils.FirstDurationNonEmpty(connCfg.ReplyTimeout, cM.cfg.GeneralCfg().ReplyTimeout),
-			connCfg.Conns, intChan, false, ctx.Client,
+			connCfg.Conns, intChan, false, birpc.ClientFromContext(ctx),
 			connID, cM.connCache); err != nil {
 			return
 		}
 	}
-	if ctx.Client != nil {
+	if birpc.ClientFromContext(ctx) != nil {
 		for _, c := range connCfg.Conns {
 			if c.Address == rpcclient.BiRPCInternal { // register only on internal
 				var rply string
@@ -144,7 +144,7 @@ func (cM *ConnManager) getConnWithConfig(ctx *context.Context, connID string, co
 }
 
 // Call gets the connection calls the method on it
-func (cM *ConnManager) Call(ctx *context.Context, connIDs []string,
+func (cM *ConnManager) Call(ctx context.Context, connIDs []string,
 	method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
@@ -162,7 +162,7 @@ func (cM *ConnManager) Call(ctx *context.Context, connIDs []string,
 }
 
 // CallWithConnIDs will call the method only on specified rpcconns
-func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx *context.Context, subsHostIDs utils.StringSet, method string, arg, reply any) (err error) {
+func (cM *ConnManager) CallWithConnIDs(connIDs []string, ctx context.Context, subsHostIDs utils.StringSet, method string, arg, reply any) (err error) {
 	if len(connIDs) == 0 {
 		return utils.NewErrMandatoryIeMissing("connIDs")
 	}

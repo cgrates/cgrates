@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -18,7 +18,7 @@ type LoggerCfg struct {
 }
 
 // Load loads the Logger section of the configuration
-func (loggCfg *LoggerCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (loggCfg *LoggerCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnLoggerCfg := new(LoggerJsonCfg)
 	if err = jsnCfg.GetSection(ctx, LoggerJSON, jsnLoggerCfg); err != nil {
 		return

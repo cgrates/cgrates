@@ -4,12 +4,12 @@
 package sessions
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -18,10 +18,10 @@ import (
 )
 
 type testMockClients struct {
-	calls map[string]func(ctx *context.Context, method string, args, reply any) error
+	calls map[string]func(ctx context.Context, method string, args, reply any) error
 }
 
-func (m *testMockClients) Call(ctx *context.Context, method string, args, reply any) error {
+func (m *testMockClients) Call(ctx context.Context, method string, args, reply any) error {
 	if calls, has := m.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -49,8 +49,8 @@ func TestSessionSBiRPCv1ProcessEventRefund(t *testing.T) {
 
 	refundCalls, debitCalls := 0, 0
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AccountSv1RefundCharges: func(_ *context.Context, _ string, args, _ any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AccountSv1RefundCharges: func(_ context.Context, _ string, args, _ any) error {
 				refundCalls++
 				charges := args.(*utils.APIEventCharges).EventCharges
 				if charges.Concretes.Compare(utils.NewDecimal(1, 0)) != 0 {
@@ -58,7 +58,7 @@ func TestSessionSBiRPCv1ProcessEventRefund(t *testing.T) {
 				}
 				return utils.ErrNotImplemented
 			},
-			utils.AccountSv1DebitAbstracts: func(_ *context.Context, _ string, _, reply any) error {
+			utils.AccountSv1DebitAbstracts: func(_ context.Context, _ string, _, reply any) error {
 				debitCalls++
 				*reply.(*utils.EventCharges) = *utils.NewEventCharges()
 				return nil
@@ -556,8 +556,8 @@ func TestSessionSBiRPCv1ProcessEventAttributes(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.TODO()
 	clnt1 := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				rply := utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						MatchedProfileID: "attr1",
@@ -645,8 +645,8 @@ func TestSessionSBiRPCv1ProcessEventCache(t *testing.T) {
 	ctx := context.TODO()
 	call := 0
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AttributeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AttributeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				call++
 				*reply.(*utils.AttributesProcessEventReply) = utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{
@@ -707,14 +707,14 @@ func TestSessionSBiRPCv1ProcessEventUsageOptions(t *testing.T) {
 	ctx := context.TODO()
 
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{
 					Abstracts: utils.NewDecimal(int64(60*time.Second), 0),
 				}
 				return nil
 			},
-			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+			utils.AccountSv1DebitAbstracts: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{
 					Abstracts: utils.NewDecimal(int64(90*time.Second), 0),
 				}
@@ -882,8 +882,8 @@ func TestSessionSBiRPCv1ProcessEventChargers(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.TODO()
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.ChargerSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{
 					{
 						ChargerSProfile: "CHRG1",
@@ -944,20 +944,20 @@ func TestSessionSBiRPCv1ProcessEventRouting(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.TODO()
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.RouteSv1GetRoutes: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{{Routes: []*utils.SortedRoute{{RouteID: "RouteID"}}}}
 				return nil
 			},
-			utils.StatSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+			utils.StatSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*[]string) = []string{"STQ1"}
 				return nil
 			},
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*[]string) = []string{"THD1"}
 				return nil
 			},
-			utils.IPsV1AuthorizeIP: func(ctx *context.Context, m string, args, reply any) error {
+			utils.IPsV1AuthorizeIP: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.AllocatedIP) = utils.AllocatedIP{ProfileID: "prfIP"}
 				return nil
 			},
@@ -1058,16 +1058,16 @@ func TestSessionSBiRPCv1ProcessEventResources(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.TODO()
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.ResourceSv1AuthorizeResources: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.ResourceSv1AuthorizeResources: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*string) = "OK"
 				return nil
 			},
-			utils.ResourceSv1AllocateResources: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ResourceSv1AllocateResources: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*string) = "OK"
 				return nil
 			},
-			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ResourceSv1ReleaseResources: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*string) = "OK"
 				return nil
 			},
@@ -1143,8 +1143,8 @@ func TestSessionSBiRPCv1ProcessEventEEs(t *testing.T) {
 		connMgr.SetCache(cacheS)
 		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 		clnt := &testMockClients{
-			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-				utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+			calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+				utils.EeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 					*reply.(*map[string]map[string]any) = map[string]map[string]any{"EXPORTER1": {}}
 					return nil
 				},
@@ -1177,8 +1177,8 @@ func TestSessionSBiRPCv1ProcessEventEEs(t *testing.T) {
 		connMgr := engine.NewConnManager(cfg)
 		connMgr.SetCache(cacheS)
 		sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
-		clnt := &testMockClients{calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		clnt := &testMockClients{calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		}}
@@ -1218,16 +1218,16 @@ func TestSessionSBiRPCv1ProcessEventAccounting(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.RateSv1CostForEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.RateSv1CostForEvent: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.RateProfileCost) = utils.RateProfileCost{Cost: utils.NewDecimalFromFloat64(1.0)}
 				return nil
 			},
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(60*time.Second), 0)}
 				return nil
 			},
-			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+			utils.AccountSv1DebitAbstracts: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(90*time.Second), 0)}
 				return nil
 			},
@@ -1365,7 +1365,8 @@ func TestSessionSBiRPCv1ProcessEventAccounting(t *testing.T) {
 }
 
 func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
-	ctx := context.TODO()
+	client := &birpc.Service{}
+	ctx := birpc.WithClient(context.TODO(), client)
 	cfg := config.NewDefaultCGRConfig()
 	cfg.CacheCfg().Partitions[utils.CacheRPCResponses].Limit = 0
 	locker := engine.NewLocker(cfg)
@@ -1382,12 +1383,12 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 	connMgr.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AccountSv1DebitAbstracts: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AccountSv1DebitAbstracts: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.EventCharges) = utils.EventCharges{Abstracts: utils.NewDecimal(int64(90*time.Second), 0)}
 				return nil
 			},
-			utils.ChargerSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ChargerSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{
 					{
 						ChargerSProfile: "CHRG1",
@@ -1422,6 +1423,7 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 	chanInternal <- clnt
 	addInternalConn(sessions, cfg, utils.MetaAccounts, utils.AccountSv1, clnt)
 	addInternalConn(sessions, cfg, utils.MetaChargers, utils.ChargerSv1, clnt)
+	sessions.RegisterIntBiJConn(client, "agent")
 
 	args := &utils.CGREvent{
 		Tenant: "cgrates.org",
@@ -1437,7 +1439,8 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 	}
 
 	expS := &Session{
-		ID: "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+		ID:           "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+		ClientConnID: "agent",
 		OriginCGREvent: &utils.CGREvent{
 			Tenant: "cgrates.org",
 			ID:     "sessInit",

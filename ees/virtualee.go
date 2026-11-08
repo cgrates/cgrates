@@ -4,7 +4,8 @@
 package ees
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -22,13 +23,13 @@ type VirtualEE struct {
 	em  *utils.ExporterMetrics
 }
 
-func (vEe *VirtualEE) Cfg() *config.EventExporterCfg                { return vEe.cfg }
-func (vEe *VirtualEE) Connect() error                               { return nil }
-func (vEe *VirtualEE) ExportEvent(*context.Context, any, any) error { return nil }
-func (vEe *VirtualEE) Close() error                                 { return nil }
-func (vEe *VirtualEE) GetMetrics() *utils.ExporterMetrics           { return vEe.em }
-func (vEe *VirtualEE) ExtraData(*utils.CGREvent) any                { return nil }
-func (vEe *VirtualEE) PrepareMap(mp *utils.CGREvent) (any, error)   { return nil, nil }
+func (vEe *VirtualEE) Cfg() *config.EventExporterCfg               { return vEe.cfg }
+func (vEe *VirtualEE) Connect() error                              { return nil }
+func (vEe *VirtualEE) ExportEvent(context.Context, any, any) error { return nil }
+func (vEe *VirtualEE) Close() error                                { return nil }
+func (vEe *VirtualEE) GetMetrics() *utils.ExporterMetrics          { return vEe.em }
+func (vEe *VirtualEE) ExtraData(*utils.CGREvent) any               { return nil }
+func (vEe *VirtualEE) PrepareMap(mp *utils.CGREvent) (any, error)  { return nil, nil }
 func (vEe *VirtualEE) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) {
 	return nil, nil
 }

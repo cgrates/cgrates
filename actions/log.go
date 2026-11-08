@@ -4,9 +4,9 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/ees"
 	"github.com/cgrates/cgrates/engine"
@@ -27,7 +27,7 @@ func (aL *actLog) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (actLog) execute(_ *context.Context, data utils.MapStorage, _ string) (err error) {
+func (actLog) execute(_ context.Context, data utils.MapStorage, _ string) (err error) {
 	utils.Logger.Info(fmt.Sprintf("LOG Event: %s", data.String()))
 	return
 }
@@ -50,7 +50,7 @@ func (aL *actURLog) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actURLog) execute(ctx *context.Context, data utils.MapStorage, tnt string) (err error) {
+func (aL *actURLog) execute(ctx context.Context, data utils.MapStorage, tnt string) (err error) {
 	eesConns, err := engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaEEs, tnt, data, nil, aL.fltrS)
 	if err != nil {
 		return

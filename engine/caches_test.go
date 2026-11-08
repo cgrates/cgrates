@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"log"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -52,8 +52,8 @@ func TestCacheSSetWithReplicateTrue(t *testing.T) {
 	dm := NewDataManager(dbCM, cfg, nil, locker)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateSet: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateSet: func(_ context.Context, args, reply any) error {
 				argCache, canCast := args.(*utils.ArgCacheReplicateSet)
 				if !canCast {
 					return errors.New("cannot cast")
@@ -140,8 +140,8 @@ func TestCacheSGetWithRemote(t *testing.T) {
 	cfg.CacheCfg().Partitions[args.CacheID].Remote = true
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ context.Context, args, reply any) error {
 				var valBack string = "test_value_was_set"
 				*reply.(*any) = valBack
 				return nil
@@ -306,8 +306,8 @@ func TestCacheSGetWithRemoteQueryErr(t *testing.T) {
 	cfg.CacheCfg().Partitions[args.CacheID].Remote = true
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ context.Context, args, reply any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -343,8 +343,8 @@ func TestCacheSGetWithRemoteTCacheGet(t *testing.T) {
 	}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1GetItem: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1GetItem: func(_ context.Context, args, reply any) error {
 				*reply.(*any) = customRply
 				return nil
 			},
@@ -380,8 +380,8 @@ func TestCacheSV1ReplicateRemove(t *testing.T) {
 	cfg.CacheCfg().ReplicationConns = []string{utils.ConcatenatedKey(utils.MetaInternal, utils.ReplicationConnsCfg)}
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(_ context.Context, args, reply any) error {
 				var valBack string = utils.OK
 				*reply.(*any) = valBack
 				return nil
@@ -412,8 +412,8 @@ func TestCacheSReplicateRemove(t *testing.T) {
 	replicaCache := NewCacheS(config.NewDefaultCGRConfig(), nil, nil, nil, locker)
 	clientconn := make(chan birpc.ClientConnector, 1)
 	clientconn <- &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(_ context.Context, args, reply any) error {
 				if err := replicaCache.Remove(context.Background(), utils.CacheAccounts, "itemId", true, utils.NonTransactional); err != nil {
 					t.Error(err)
 				}
@@ -599,7 +599,7 @@ func TestCacheScacheDataFromDBErrGetItemLoadIDs(t *testing.T) {
 	}
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetItemLoadIDsDrvF: func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+		GetItemLoadIDsDrvF: func(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1334,8 +1334,8 @@ func TestCallCacheReloadCacheFirstCallErr(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1396,11 +1396,11 @@ func TestCallCacheReloadCacheSecondCallErr(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(_ context.Context, args, reply any) error {
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
+			utils.CacheSv1Clear: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1473,8 +1473,8 @@ func TestCallCacheLoadCache(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1LoadCache: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1LoadCache: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1491,7 +1491,7 @@ func TestCallCacheLoadCache(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
+			utils.CacheSv1Clear: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1539,8 +1539,8 @@ func TestCallCacheRemoveItems(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1RemoveItems: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1RemoveItems: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrReloadCacheWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1557,7 +1557,7 @@ func TestCallCacheRemoveItems(t *testing.T) {
 				}
 				return nil
 			},
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
+			utils.CacheSv1Clear: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,
@@ -1605,8 +1605,8 @@ func TestCallCacheClear(t *testing.T) {
 	cacheConns := []string{"cacheConn1"}
 	client := make(chan birpc.ClientConnector, 1)
 	mCC := &ccMock{
-		calls: map[string]func(_ *context.Context, args any, reply any) error{
-			utils.CacheSv1Clear: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, args any, reply any) error{
+			utils.CacheSv1Clear: func(_ context.Context, args, reply any) error {
 				expArgs := &utils.AttrCacheIDsWithAPIOpts{
 					APIOpts: map[string]any{
 						utils.MetaSubsys: utils.MetaChargers,

@@ -5,9 +5,9 @@ package accounts
 
 import (
 	"cmp"
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -28,7 +28,7 @@ type AccountS struct {
 }
 
 // matchingAccountsForEvent returns the matched Accounts for the given event.
-func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func (aS *AccountS) matchingAccountsForEvent(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	accIDs []string, ignoreFilters bool) ([]*utils.Account, error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
@@ -66,7 +66,7 @@ func (aS *AccountS) matchingAccountsForEvent(ctx *context.Context, tnt string, c
 }
 
 // matchingLockedAccountsForEvent returns matched Accounts and an unlock function.
-func (aS *AccountS) matchingLockedAccountsForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func (aS *AccountS) matchingLockedAccountsForEvent(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	accIDs []string, ignoreFilters bool) ([]*utils.Account, func(), error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
@@ -118,7 +118,7 @@ func (aS *AccountS) matchingLockedAccountsForEvent(ctx *context.Context, tnt str
 	return accs, unlockAll, nil
 }
 
-func (aS *AccountS) matchingAccountIDsForEvent(ctx *context.Context, tnt string,
+func (aS *AccountS) matchingAccountIDsForEvent(ctx context.Context, tnt string,
 	evNm utils.MapStorage) ([]string, error) {
 	accIDs, err := engine.MatchingItemIDsForEvent(
 		ctx,
@@ -140,7 +140,7 @@ func (aS *AccountS) matchingAccountIDsForEvent(ctx *context.Context, tnt string,
 	return accIDs.AsSlice(), nil
 }
 
-func (aS *AccountS) matchingAccountForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func (aS *AccountS) matchingAccountForEvent(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	evNm utils.MapStorage, accID string, ignoreFilters bool) (*utils.Account, float64, error) {
 	acc, err := aS.dm.GetAccount(ctx, tnt, accID)
 	if err != nil {
@@ -168,7 +168,7 @@ func (aS *AccountS) matchingAccountForEvent(ctx *context.Context, tnt string, cg
 // accountsDebit will debit an usage out of multiple accounts
 // concretes parameter limits the debits to concrete only balances
 // store is used for simulate only or complete debit
-func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
+func (aS *AccountS) accountsDebit(ctx context.Context, acnts []*utils.Account,
 	cgrEv *utils.CGREvent, concretes, store bool) (ec *utils.EventCharges, err error) {
 	ec = utils.NewEventCharges()
 	cgrEvDP := cgrEv.AsDataProvider()
@@ -237,7 +237,7 @@ func (aS *AccountS) accountsDebit(ctx *context.Context, acnts []*utils.Account,
 
 // accountDebit will debit the usage out of an Account
 // dbted: used to populate incrementStart so we can properly identify the rate from RateS
-func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usage *utils.Decimal,
+func (aS *AccountS) accountDebit(ctx context.Context, acnt *utils.Account, usage *utils.Decimal,
 	cgrEv *utils.CGREvent, concretes bool, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	// Find balances matching event
 	blcsWithWeight := make(utils.BalancesWithWeight, 0, len(acnt.Balances))
@@ -313,7 +313,7 @@ func (aS *AccountS) accountDebit(ctx *context.Context, acnt *utils.Account, usag
 }
 
 // refundCharges implements the mechanism of refunding the charges into accounts
-func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.EventCharges) (accounts []*utils.Account, err error) {
+func (aS *AccountS) refundCharges(ctx context.Context, tnt string, ecs *utils.EventCharges) (accounts []*utils.Account, err error) {
 	acnts := make([]*utils.Account, 0, len(ecs.Accounts))
 	unlocks := make([]func(), 0, len(ecs.Accounts))
 	unlockAll := func() {
@@ -386,7 +386,7 @@ func (aS *AccountS) refundCharges(ctx *context.Context, tnt string, ecs *utils.E
 }
 
 // processThreshold will receive the account and send it to ThresholdS to be processed
-func (aS *AccountS) processThresholds(ctx *context.Context, origEv *utils.CGREvent, acnt *utils.Account) (tIDs []string, err error) {
+func (aS *AccountS) processThresholds(ctx context.Context, origEv *utils.CGREvent, acnt *utils.Account) (tIDs []string, err error) {
 	origDP := origEv.AsDataProvider()
 	// Check if ThresholdS should be called
 	if thdS, errThdS := engine.GetBoolOpts(ctx, origEv.Tenant, origDP, nil,

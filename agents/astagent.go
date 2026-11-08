@@ -4,13 +4,13 @@
 package agents
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 
 	"github.com/cgrates/aringo"
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -39,7 +39,7 @@ func NewAsteriskAgent(cgrCfg *config.CGRConfig, astConnIdx int,
 		fltrS:      fltrS,
 	}
 	srv, _ := birpc.NewService(sma, "", false)
-	sma.ctx = context.WithClient(context.TODO(), srv)
+	sma.ctx = birpc.WithClient(context.TODO(), srv)
 	msgTemplates := cgrCfg.TemplatesCfg()
 	for _, procsr := range cgrCfg.AsteriskAgentCfg().RequestProcessors {
 		if tpls, err := config.InflateTemplates(procsr.RequestFields, msgTemplates); err != nil {
@@ -71,7 +71,7 @@ type AsteriskAgent struct {
 	astConn    ARIConnector
 	astEvChan  chan map[string]any
 	astErrChan chan error
-	ctx        *context.Context
+	ctx        context.Context
 }
 
 func (sma *AsteriskAgent) connectAsterisk(stopChan <-chan struct{}) (err error) {
@@ -269,7 +269,7 @@ func (sma *AsteriskAgent) continueChannel(chID string) {
 }
 
 // V1DisconnectSession is internal method to disconnect session in asterisk
-func (sma *AsteriskAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (sma *AsteriskAgent) V1DisconnectSession(_ context.Context, cgrEv utils.CGREvent, reply *string) error {
 	channelID := engine.NewMapEvent(cgrEv.Event).GetStringIgnoreErrors(utils.OriginID)
 	sma.hangupChannel(channelID, "")
 	*reply = utils.OK
@@ -277,7 +277,7 @@ func (sma *AsteriskAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CG
 }
 
 // V1GetActiveSessionIDs is internal method to  get all active sessions in asterisk
-func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ *context.Context, _ string,
+func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ context.Context, _ string,
 	sessionIDs *[]*sessions.SessionID) error {
 	var slMpIface []map[string]any // decode the result from ari into a slice of map[string]any
 	restResp, err := sma.astConn.Call(aringo.HTTP_GET, "channels", nil, nil)
@@ -303,17 +303,17 @@ func (sma *AsteriskAgent) V1GetActiveSessionIDs(_ *context.Context, _ string,
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*AsteriskAgent) V1AlterSession(context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*AsteriskAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+func (*AsteriskAgent) V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (sma *AsteriskAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+func (sma *AsteriskAgent) V1WarnDisconnect(context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }
 

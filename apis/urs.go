@@ -4,7 +4,8 @@
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/ers"
 	"github.com/cgrates/cgrates/sessions"
@@ -26,7 +27,7 @@ type URFiltersFromReader struct {
 // }
 
 // GetURs retrieves a list of URs matching the specified filters.
-func (admS *AdminSv1) GetURs(ctx *context.Context, args *URFiltersFromReader, reply *[]map[string]*utils.CGREvent) error {
+func (admS *AdminSv1) GetURs(ctx context.Context, args *URFiltersFromReader, reply *[]map[string]*utils.CGREvent) error {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -58,7 +59,7 @@ func (admS *AdminSv1) GetURs(ctx *context.Context, args *URFiltersFromReader, re
 }
 
 // // SetURs sets or overwrites URs matching the specified filters.
-// func (admS *AdminSv1) SetURs(ctx *context.Context, args *URFiltersFromExporter, reply *string) (err error) {
+// func (admS *AdminSv1) SetURs(ctx context.Context, args *URFiltersFromExporter, reply *string) (err error) {
 // 	if args.URFilters.Tenant == utils.EmptyString {
 // 		args.URFilters.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 // 	}
@@ -74,7 +75,7 @@ func (admS *AdminSv1) GetURs(ctx *context.Context, args *URFiltersFromReader, re
 // }
 
 // // RemoveURs removes URs matching the specified filters.
-// func (admS *AdminSv1) RemoveURs(ctx *context.Context, args *URFiltersFromExporter, reply *string) (err error) {
+// func (admS *AdminSv1) RemoveURs(ctx context.Context, args *URFiltersFromExporter, reply *string) (err error) {
 // 	if args.URFilters.Tenant == utils.EmptyString {
 // 		args.URFilters.Tenant = admS.cfg.GeneralCfg().DefaultTenant
 // 	}

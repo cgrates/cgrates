@@ -4,13 +4,13 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"os"
 	"path"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -97,7 +97,7 @@ func (fFwv *FileFWVee) Cfg() *config.EventExporterCfg { return fFwv.cfg }
 
 func (fFwv *FileFWVee) Connect() (_ error) { return }
 
-func (fFwv *FileFWVee) ExportEvent(_ *context.Context, records, _ any) (err error) {
+func (fFwv *FileFWVee) ExportEvent(_ context.Context, records, _ any) (err error) {
 	fFwv.Lock() // make sure that only one event is writen in file at once
 	defer fFwv.Unlock()
 	for _, record := range records.([]string) {

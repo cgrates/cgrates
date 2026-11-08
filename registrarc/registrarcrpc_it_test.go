@@ -7,6 +7,7 @@
 package registrarc
 
 import (
+	"context"
 	"os/exec"
 	"path"
 	"reflect"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

@@ -4,16 +4,15 @@
 package routes
 
 import (
+	"context"
 	"fmt"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func populateResourcesForRoutes(ctx *context.Context, cfg *config.CGRConfig,
+func populateResourcesForRoutes(ctx context.Context, cfg *config.CGRConfig,
 	connMgr *engine.ConnManager, fltrS *engine.FilterS, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes []*utils.SortedRoute, err error) {
 	resSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaResources, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
@@ -79,7 +78,7 @@ type ResourceAscendentSorter struct {
 	fltrS   *engine.FilterS
 }
 
-func (ws *ResourceAscendentSorter) SortRoutes(ctx *context.Context, prflID string,
+func (ws *ResourceAscendentSorter) SortRoutes(ctx context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {
@@ -105,7 +104,7 @@ type ResourceDescendentSorter struct {
 	fltrS   *engine.FilterS
 }
 
-func (ws *ResourceDescendentSorter) SortRoutes(ctx *context.Context, prflID string,
+func (ws *ResourceDescendentSorter) SortRoutes(ctx context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateResourcesForRoutes(ctx, ws.cfg, ws.connMgr, ws.fltrS, routes, ev, extraOpts); err != nil {

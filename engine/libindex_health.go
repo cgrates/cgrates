@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -47,7 +47,7 @@ type ReverseFilterIHReply struct {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // getFilters returns the filtreIDs and context(if any) for that object
-func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string) (filterIDs []string, err error) { // add contexts
+func getFilters(ctx context.Context, dm *DataManager, indxType, tnt, id string) (filterIDs []string, err error) { // add contexts
 	switch indxType {
 	case utils.CacheResourceFilterIndexes:
 		var rs *utils.ResourceProfile
@@ -120,7 +120,7 @@ func getFilters(ctx *context.Context, dm *DataManager, indxType, tnt, id string)
 
 // getIHObjFromCache returns all information that is needed from the mentioned object
 // uses an extra cache(controled by the API) to optimize data management
-func getIHObjFromCache(ctx *context.Context, dm *DataManager, objCache *ltcache.Cache, indxType, tnt, id string) (filtIDs []string, err error) {
+func getIHObjFromCache(ctx context.Context, dm *DataManager, objCache *ltcache.Cache, indxType, tnt, id string) (filtIDs []string, err error) {
 	cacheKey := utils.ConcatenatedKey(tnt, id)
 	if objVal, ok := objCache.Get(cacheKey); ok {
 		if objVal == nil {
@@ -140,7 +140,7 @@ func getIHObjFromCache(ctx *context.Context, dm *DataManager, objCache *ltcache.
 
 // getIHFltrFromCache returns the Filter
 // uses an extra cache(controled by the API) to optimize data management
-func getIHFltrFromCache(ctx *context.Context, dm *DataManager, fltrCache *ltcache.Cache, tnt, id string) (fltr *Filter, err error) {
+func getIHFltrFromCache(ctx context.Context, dm *DataManager, fltrCache *ltcache.Cache, tnt, id string) (fltr *Filter, err error) {
 	cacheKey := utils.ConcatenatedKey(tnt, id)
 	if fltrVal, ok := fltrCache.Get(cacheKey); ok {
 		if fltrVal == nil {
@@ -161,7 +161,7 @@ func getIHFltrFromCache(ctx *context.Context, dm *DataManager, fltrCache *ltcach
 
 // getIHFltrIdxFromCache returns the Filter index
 // uses an extra cache(controled by the API) to optimize data management
-func getIHFltrIdxFromCache(ctx *context.Context, dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmType, tntGrp, idxKey string) (idx utils.StringSet, err error) {
+func getIHFltrIdxFromCache(ctx context.Context, dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmType, tntGrp, idxKey string) (idx utils.StringSet, err error) {
 	cacheKey := utils.ConcatenatedKey(tntGrp, idxKey)
 	if fltrVal, ok := fltrIdxCache.Get(cacheKey); ok {
 		if fltrVal == nil {
@@ -182,7 +182,7 @@ func getIHFltrIdxFromCache(ctx *context.Context, dm *DataManager, fltrIdxCache *
 }
 
 // getFilterAsIndexSet will parse the rules of filter and add them to the index map
-func getFilterAsIndexSet(ctx *context.Context, dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmType, tntGrp string, fltr *Filter) (indexes map[string]utils.StringSet, err error) {
+func getFilterAsIndexSet(ctx context.Context, dm *DataManager, fltrIdxCache *ltcache.Cache, idxItmType, tntGrp string, fltr *Filter) (indexes map[string]utils.StringSet, err error) {
 	indexes = make(map[string]utils.StringSet)
 	for _, flt := range fltr.Rules {
 		if !FilterIndexTypes.Has(flt.Type) ||
@@ -222,7 +222,7 @@ func getFilterAsIndexSet(ctx *context.Context, dm *DataManager, fltrIdxCache *lt
 }
 
 // updateFilterIHMisingIndx updates the reply with the missing indexes for a specific object( obj->filter->index relation)
-func updateFilterIHMisingIndx(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxCache *ltcache.Cache, filterIDs []string, indxType, tnt, tntGrp, itmID string, rply *FilterIHReply) (_ *FilterIHReply, err error) {
+func updateFilterIHMisingIndx(ctx context.Context, dm *DataManager, fltrCache, fltrIdxCache *ltcache.Cache, filterIDs []string, indxType, tnt, tntGrp, itmID string, rply *FilterIHReply) (_ *FilterIHReply, err error) {
 	if len(filterIDs) == 0 { // no filter so check the *none:*any:*any index
 		idxKey := utils.ConcatenatedKey(utils.MetaNone, utils.MetaAny, utils.MetaAny)
 		var rcvIndx utils.StringSet
@@ -264,7 +264,7 @@ func updateFilterIHMisingIndx(ctx *context.Context, dm *DataManager, fltrCache, 
 }
 
 // GetFltrIdxHealth returns the missing indexes for all objects
-func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcache.Cache, indxType string) (rply *FilterIHReply, err error) {
+func GetFltrIdxHealth(ctx context.Context, dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcache.Cache, indxType string) (rply *FilterIHReply, err error) {
 	// check the objects ( obj->filter->index relation)
 	rply = &FilterIHReply{ // prepare the reply
 		MissingIndexes: make(map[string][]string),
@@ -362,7 +362,7 @@ func GetFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxC
 }
 
 // getRevFltrIdxHealthFromObj returns the missing reverse indexes for all objects of the given type
-func getRevFltrIdxHealthFromObj(ctx *context.Context, dm *DataManager, fltrCache, revFltrIdxCache, objCache *ltcache.Cache, indxType string) (rply *ReverseFilterIHReply, err error) {
+func getRevFltrIdxHealthFromObj(ctx context.Context, dm *DataManager, fltrCache, revFltrIdxCache, objCache *ltcache.Cache, indxType string) (rply *ReverseFilterIHReply, err error) {
 	// check the objects ( obj->filter->index relation)
 	rply = &ReverseFilterIHReply{ // prepare the reply
 		MissingReverseIndexes: make(map[string][]string),
@@ -417,7 +417,7 @@ func getRevFltrIdxHealthFromObj(ctx *context.Context, dm *DataManager, fltrCache
 }
 
 // getRevFltrIdxHealthFromReverse parses the reverse indexes and updates the reply
-func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache, rply map[string]*ReverseFilterIHReply) (_ map[string]*ReverseFilterIHReply, err error) {
+func getRevFltrIdxHealthFromReverse(ctx context.Context, dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache, rply map[string]*ReverseFilterIHReply) (_ map[string]*ReverseFilterIHReply, err error) {
 	db, _, err := dm.DBConns().GetConn(utils.CacheReverseFilterIndexes)
 	if err != nil {
 		return
@@ -489,7 +489,7 @@ func getRevFltrIdxHealthFromReverse(ctx *context.Context, dm *DataManager, fltrC
 }
 
 // GetRevFltrIdxHealth will return all the broken indexes
-func GetRevFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache) (rply map[string]*ReverseFilterIHReply, err error) {
+func GetRevFltrIdxHealth(ctx context.Context, dm *DataManager, fltrCache, revFltrIdxCache *ltcache.Cache, objCaches map[string]*ltcache.Cache) (rply map[string]*ReverseFilterIHReply, err error) {
 	rply = make(map[string]*ReverseFilterIHReply)
 	for indxType := range utils.CacheIndexesToPrefix { // parse all posible filter indexes
 		if indxType == utils.CacheReverseFilterIndexes { // ommit the reverse indexes
@@ -516,7 +516,7 @@ func GetRevFltrIdxHealth(ctx *context.Context, dm *DataManager, fltrCache, revFl
 
 // getRatesFromCache returns all rates from rateprofile
 // uses an extra cache(controled by the API) to optimize data management
-func getRatesFromCache(ctx *context.Context, dm *DataManager, objCache *ltcache.Cache, tnt, rprfID string) (_ map[string]*utils.Rate, err error) {
+func getRatesFromCache(ctx context.Context, dm *DataManager, objCache *ltcache.Cache, tnt, rprfID string) (_ map[string]*utils.Rate, err error) {
 	cacheKey := utils.ConcatenatedKey(tnt, rprfID)
 	if objVal, ok := objCache.Get(cacheKey); ok {
 		if objVal == nil {
@@ -538,7 +538,7 @@ func getRatesFromCache(ctx *context.Context, dm *DataManager, objCache *ltcache.
 }
 
 // GetFltrIdxHealth returns the missing indexes for all objects
-func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcache.Cache) (rply *FilterIHReply, err error) {
+func GetFltrIdxHealthForRateRates(ctx context.Context, dm *DataManager, fltrCache, fltrIdxCache, objCache *ltcache.Cache) (rply *FilterIHReply, err error) {
 	// check the objects ( obj->filter->index relation)
 	rply = &FilterIHReply{
 		MissingIndexes: make(map[string][]string),
@@ -643,7 +643,7 @@ func GetFltrIdxHealthForRateRates(ctx *context.Context, dm *DataManager, fltrCac
 	return
 }
 
-func getRevFltrIdxHealthFromRateRates(ctx *context.Context, dm *DataManager, fltrCache, revFltrIdxCache, objCache *ltcache.Cache) (rply *ReverseFilterIHReply, err error) {
+func getRevFltrIdxHealthFromRateRates(ctx context.Context, dm *DataManager, fltrCache, revFltrIdxCache, objCache *ltcache.Cache) (rply *ReverseFilterIHReply, err error) {
 	// check the objects ( obj->filter->index relation)
 	rply = &ReverseFilterIHReply{
 		MissingReverseIndexes: make(map[string][]string),

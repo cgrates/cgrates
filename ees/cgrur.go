@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -15,7 +16,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -110,7 +110,7 @@ func (cgr *CgrUR) PrepareMap(*utils.CGREvent) (any, error) { return nil, nil }
 
 func (cgr *CgrUR) PrepareOrderMap(*utils.OrderedNavigableMap) (any, error) { return nil, nil }
 
-func (cgr *CgrUR) ExportEvent(_ *context.Context, _, extraData any) error {
+func (cgr *CgrUR) ExportEvent(_ context.Context, _, extraData any) error {
 	cgrEv, ok := extraData.(*utils.CGREvent)
 	if !ok {
 		return fmt.Errorf("unexpected extraData type %T", extraData)

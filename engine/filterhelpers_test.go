@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -174,7 +174,7 @@ func TestMatchingItemIDsForEventGetKeysForPrefixErr(t *testing.T) {
 		"Field":          "profile",
 	}}
 	data := &DataDBMock{
-		GetKeysForPrefixF: func(ctx *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(ctx context.Context, s string, srch string) ([]string, error) {
 			return []string{}, utils.ErrNotImplemented
 		},
 	}

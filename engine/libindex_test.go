@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"slices"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -655,7 +655,7 @@ func TestUpdateFilterIndexGetIndexErr(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -731,7 +731,7 @@ func TestUpdateFilterIndexGetIndexErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
 	}
@@ -808,14 +808,14 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -863,14 +863,14 @@ func TestUpdateFilterIndexRemoveIndexesFromThresholdErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheThresholdFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1019,14 +1019,14 @@ func TestUpdateFilterIndexStatErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1070,14 +1070,14 @@ func TestUpdateFilterIndexStatErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheStatFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1212,14 +1212,14 @@ func TestUpdateFilterIndexResourcetErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1263,14 +1263,14 @@ func TestUpdateFilterIndexResourceErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheResourceFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1414,14 +1414,14 @@ func TestUpdateFilterIndexRouteErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1465,14 +1465,14 @@ func TestUpdateFilterIndexRouteErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRouteFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1606,14 +1606,14 @@ func TestUpdateFilterIndexChargerErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1657,14 +1657,14 @@ func TestUpdateFilterIndexChargerErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheChargerFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1810,14 +1810,14 @@ func TestUpdateFilterIndexAccountsErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1861,14 +1861,14 @@ func TestUpdateFilterIndexAccountsErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAccountsFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1912,14 +1912,14 @@ func TestUpdateFilterIndexAttributeErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -1963,14 +1963,14 @@ func TestUpdateFilterIndexAttributeErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheAttributeFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -2117,14 +2117,14 @@ func TestUpdateFilterActionProfilesIndexErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -2168,14 +2168,14 @@ func TestUpdateFilterIndexActionProfilesErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheActionProfilesFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -2322,14 +2322,14 @@ func TestUpdateFilterRateProfilesIndexErr1(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -2373,14 +2373,14 @@ func TestUpdateFilterIndexRateProfilesErr2(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateProfilesFilterIndexes: {
 					"ATTR_TEST": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -2424,7 +2424,7 @@ func TestRemoveFilterIndexesForFilterErr(t *testing.T) {
 	setTestCache(dm, cfg, locker)
 
 	dm.dbConns.dbs[utils.MetaDefault] = &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return make(map[string]utils.StringSet), utils.ErrNotImplemented
 		},
 	}
@@ -2462,8 +2462,8 @@ func TestRemoveIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2494,7 +2494,7 @@ func TestRemoveIndexFiltersItemSetIndexesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -2521,7 +2521,7 @@ func TestAddIndexFiltersItemGetIndexesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -2547,8 +2547,8 @@ func TestAddIndexFiltersItemCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2578,7 +2578,7 @@ func TestAddIndexFiltersItemSetIndexesErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -2598,7 +2598,7 @@ func TestAddItemToFilterIndexNewFilterIndexErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -2619,7 +2619,7 @@ func TestNewFilterIndexGetIdxErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
 	}
@@ -2662,8 +2662,8 @@ func TestAddItemToFilterIndexCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2709,8 +2709,8 @@ func TestRemoveItemFromFilterIndexCacheRemoveErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReplicateRemove: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReplicateRemove: func(ctx context.Context, args, reply any) error {
 
 				return utils.ErrNotImplemented
 			},
@@ -2749,7 +2749,7 @@ func TestUpdatedIndexesAddIndexFiltersItemErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -2768,7 +2768,7 @@ func TestUpdatedIndexesRemoveIndexFiltersItemErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -2875,11 +2875,11 @@ func TestComputeIndexesNewFilterIndexErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	data := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotImplemented
 		},
-		SetThresholdProfileDrvF: func(ctx *context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		SetThresholdProfileDrvF: func(ctx context.Context, tp *utils.ThresholdProfile) (err error) { return nil },
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return thd, nil
 		},
 	}
@@ -2997,14 +2997,14 @@ func TestUpdateFilterIndexRatedRemoveFilterErr(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	locker := NewLocker(cfg)
 	dataDB := &DataDBMock{
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{
 				utils.CacheRateFilterIndexes: {
 					"CUSTOM_RATE2:RP2": {},
 				},
 			}, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotImplemented
 		},
 	}

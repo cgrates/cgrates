@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"errors"
 	"os"
@@ -15,7 +16,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -33,7 +33,7 @@ type countingConnector struct {
 	err   error
 }
 
-func (c *countingConnector) Call(_ *context.Context, _ string, _, _ any) error {
+func (c *countingConnector) Call(_ context.Context, _ string, _, _ any) error {
 	c.calls.Add(1)
 	return c.err
 }

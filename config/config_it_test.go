@@ -7,6 +7,7 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"io"
 	"net"
@@ -19,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )

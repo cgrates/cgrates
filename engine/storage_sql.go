@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -11,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 	"gorm.io/gorm"
@@ -54,7 +54,7 @@ func (sqls *SQLStorage) SelectDatabase(dbName string) (err error) {
 }
 
 // returns all keys in table matching the Tenant and ID
-func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table string, tntID *utils.TenantID, search string) (ids []string, err error) {
+func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ context.Context, table string, tntID *utils.TenantID, search string) (ids []string, err error) {
 	var binary string // add case sensitivity for mysql
 	if sqls.DataDB.GetStorageType() == utils.MetaMySQL {
 		binary = "BINARY"
@@ -75,7 +75,7 @@ func (sqls *SQLStorage) getAllKeysMatchingTenantID(_ *context.Context, table str
 }
 
 // GetKeysForPrefix will look for keys matching the prefix given
-func (sqls *SQLStorage) GetKeysForPrefix(ctx *context.Context, prefix, search string) (keys []string, err error) {
+func (sqls *SQLStorage) GetKeysForPrefix(ctx context.Context, prefix, search string) (keys []string, err error) {
 	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		return nil, fmt.Errorf("unsupported prefix in GetKeysForPrefix: %q", prefix)
@@ -241,7 +241,7 @@ func (sqls *SQLStorage) RemoveVersions(vrs Versions) (err error) {
 // GetAccountDrv will get the account from the DB matching the tenant and id provided.
 // Decimal fields ending in `.0` will be read as whole numbers but still in decimal type.
 // (50.0 -> 50)
-func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+func (sqls *SQLStorage) GetAccountDrv(ctx context.Context, tenant, id string) (ap *utils.Account, err error) {
 	var result []*AccountJSONMdl
 	if err = sqls.db.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -254,7 +254,7 @@ func (sqls *SQLStorage) GetAccountDrv(ctx *context.Context, tenant, id string) (
 }
 
 // SetAccountDrv will set in DB the provided Account
-func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (err error) {
+func (sqls *SQLStorage) SetAccountDrv(ctx context.Context, ap *utils.Account) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &AccountJSONMdl{
 		Tenant:  ap.Tenant,
@@ -276,7 +276,7 @@ func (sqls *SQLStorage) SetAccountDrv(ctx *context.Context, ap *utils.Account) (
 }
 
 // RemoveAccountDrv will remove from DB the account matching the tenamt and id provided
-func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveAccountDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&AccountJSONMdl{}).Where(&AccountJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&AccountJSONMdl{}).Error; err != nil {
@@ -287,7 +287,7 @@ func (sqls *SQLStorage) RemoveAccountDrv(ctx *context.Context, tenant, id string
 	return
 }
 
-func (sqls *SQLStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string) (*utils.IPProfile, error) {
+func (sqls *SQLStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
 	var result []*IPProfileMdl
 	if err := sqls.db.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -299,7 +299,7 @@ func (sqls *SQLStorage) GetIPProfileDrv(ctx *context.Context, tenant, id string)
 	return utils.MapStringInterfaceToIPProfile(result[0].IPProfile)
 }
 
-func (sqls *SQLStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+func (sqls *SQLStorage) SetIPProfileDrv(ctx context.Context, ipp *utils.IPProfile) error {
 	tx := sqls.db.Begin()
 	mdl := &IPProfileMdl{
 		Tenant:    ipp.Tenant,
@@ -320,7 +320,7 @@ func (sqls *SQLStorage) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfi
 	return nil
 }
 
-func (sqls *SQLStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id string) error {
+func (sqls *SQLStorage) RemoveIPProfileDrv(ctx context.Context, tenant, id string) error {
 	tx := sqls.db.Begin()
 	if err := tx.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&IPProfileMdl{}).Error; err != nil {
@@ -331,7 +331,7 @@ func (sqls *SQLStorage) RemoveIPProfileDrv(ctx *context.Context, tenant, id stri
 	return nil
 }
 
-func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+func (sqls *SQLStorage) GetIPAllocationsDrv(ctx context.Context, tenant, id string) (*utils.IPAllocations, error) {
 	var result []*IPAllocationMdl
 	if err := sqls.db.Model(&IPAllocationMdl{}).Where(&IPAllocationMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -343,7 +343,7 @@ func (sqls *SQLStorage) GetIPAllocationsDrv(ctx *context.Context, tenant, id str
 	return utils.MapStringInterfaceToIPAllocations(result[0].IPAllocation), nil
 }
 
-func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
+func (sqls *SQLStorage) SetIPAllocationsDrv(ctx context.Context, ip *utils.IPAllocations) error {
 	tx := sqls.db.Begin()
 	mdl := &IPAllocationMdl{
 		Tenant:       ip.Tenant,
@@ -364,7 +364,7 @@ func (sqls *SQLStorage) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAl
 	return nil
 }
 
-func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id string) error {
+func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx context.Context, tenant, id string) error {
 	tx := sqls.db.Begin()
 	if err := tx.Model(&IPAllocationMdl{}).Where(&IPAllocationMdl{Tenant: tenant, ID: id}).
 		Delete(&IPAllocationMdl{}).Error; err != nil {
@@ -375,7 +375,7 @@ func (sqls *SQLStorage) RemoveIPAllocationsDrv(ctx *context.Context, tenant, id 
 	return nil
 }
 
-func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
+func (sqls *SQLStorage) GetActionProfileDrv(ctx context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
 	var result []*ActionProfileJSONMdl
 	if err := sqls.db.Model(&ActionProfileJSONMdl{}).Where(&ActionProfileJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -387,7 +387,7 @@ func (sqls *SQLStorage) GetActionProfileDrv(ctx *context.Context, tenant, id str
 	return utils.MapStringInterfaceToActionProfile(result[0].ActionProfile)
 }
 
-func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) (err error) {
+func (sqls *SQLStorage) SetActionProfileDrv(ctx context.Context, ap *utils.ActionProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ActionProfileJSONMdl{
 		Tenant:        ap.Tenant,
@@ -408,7 +408,7 @@ func (sqls *SQLStorage) SetActionProfileDrv(ctx *context.Context, ap *utils.Acti
 	return nil
 }
 
-func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveActionProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err := tx.Model(&ActionProfileJSONMdl{}).Where(&ActionProfileJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&ActionProfileJSONMdl{}).Error; err != nil {
@@ -419,7 +419,7 @@ func (sqls *SQLStorage) RemoveActionProfileDrv(ctx *context.Context, tenant, id 
 	return nil
 }
 
-func (sqls *SQLStorage) GetChargerProfileDrv(_ *context.Context, tenant, id string) (cp *utils.ChargerProfile, err error) {
+func (sqls *SQLStorage) GetChargerProfileDrv(_ context.Context, tenant, id string) (cp *utils.ChargerProfile, err error) {
 	var result []*ChargerProfileMdl
 	if err := sqls.db.Model(&ChargerProfileMdl{}).Where(&ChargerProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -432,7 +432,7 @@ func (sqls *SQLStorage) GetChargerProfileDrv(_ *context.Context, tenant, id stri
 	return utils.MapStringInterfaceToChargerProfile(result[0].ChargerProfile)
 }
 
-func (sqls *SQLStorage) SetChargerProfileDrv(_ *context.Context, cp *utils.ChargerProfile) (err error) {
+func (sqls *SQLStorage) SetChargerProfileDrv(_ context.Context, cp *utils.ChargerProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ChargerProfileMdl{
 		Tenant:         cp.Tenant,
@@ -453,7 +453,7 @@ func (sqls *SQLStorage) SetChargerProfileDrv(_ *context.Context, cp *utils.Charg
 	return nil
 }
 
-func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveChargerProfileDrv(_ context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err := tx.Model(&ChargerProfileMdl{}).Where(&ChargerProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&ChargerProfileMdl{}).Error; err != nil {
@@ -464,7 +464,7 @@ func (sqls *SQLStorage) RemoveChargerProfileDrv(_ *context.Context, tenant, id s
 	return nil
 }
 
-func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id string) (ap *utils.AttributeProfile, err error) {
+func (sqls *SQLStorage) GetAttributeProfileDrv(ctx context.Context, tenant, id string) (ap *utils.AttributeProfile, err error) {
 	var result []*AttributeProfileMdl
 	if err := sqls.db.Model(&AttributeProfileMdl{}).Where(&AttributeProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -476,7 +476,7 @@ func (sqls *SQLStorage) GetAttributeProfileDrv(ctx *context.Context, tenant, id 
 	return utils.MapStringInterfaceToAttributeProfile(result[0].AttributeProfile)
 }
 
-func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, ap *utils.AttributeProfile) (err error) {
+func (sqls *SQLStorage) SetAttributeProfileDrv(ctx context.Context, ap *utils.AttributeProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &AttributeProfileMdl{
 		Tenant:           ap.Tenant,
@@ -497,7 +497,7 @@ func (sqls *SQLStorage) SetAttributeProfileDrv(ctx *context.Context, ap *utils.A
 	return
 }
 
-func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&AttributeProfileMdl{}).Where(&AttributeProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&AttributeProfileMdl{}).Error; err != nil {
@@ -508,7 +508,7 @@ func (sqls *SQLStorage) RemoveAttributeProfileDrv(ctx *context.Context, tenant, 
 	return
 }
 
-func (sqls *SQLStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
+func (sqls *SQLStorage) GetResourceProfileDrv(ctx context.Context, tenant, id string) (rsp *utils.ResourceProfile, err error) {
 	var result []*ResourceProfileMdl
 	if err = sqls.db.Model(&ResourceProfileMdl{}).Where(&ResourceProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -520,7 +520,7 @@ func (sqls *SQLStorage) GetResourceProfileDrv(ctx *context.Context, tenant, id s
 	return utils.MapStringInterfaceToResourceProfile(result[0].ResourceProfile)
 }
 
-func (sqls *SQLStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.ResourceProfile) (err error) {
+func (sqls *SQLStorage) SetResourceProfileDrv(ctx context.Context, rsp *utils.ResourceProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ResourceProfileMdl{
 		Tenant:          rsp.Tenant,
@@ -541,7 +541,7 @@ func (sqls *SQLStorage) SetResourceProfileDrv(ctx *context.Context, rsp *utils.R
 	return
 }
 
-func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&ResourceProfileMdl{}).Where(&ResourceProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&ResourceProfileMdl{}).Error; err != nil {
@@ -552,7 +552,7 @@ func (sqls *SQLStorage) RemoveResourceProfileDrv(ctx *context.Context, tenant, i
 	return
 }
 
-func (sqls *SQLStorage) GetResourceDrv(ctx *context.Context, tenant, id string) (r *utils.Resource, err error) {
+func (sqls *SQLStorage) GetResourceDrv(ctx context.Context, tenant, id string) (r *utils.Resource, err error) {
 	var result []*ResourceJSONMdl
 	if err = sqls.db.Model(&ResourceJSONMdl{}).Where(&ResourceJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -564,7 +564,7 @@ func (sqls *SQLStorage) GetResourceDrv(ctx *context.Context, tenant, id string) 
 	return utils.MapStringInterfaceToResource(result[0].Resource), nil
 }
 
-func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) (err error) {
+func (sqls *SQLStorage) SetResourceDrv(ctx context.Context, r *utils.Resource) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ResourceJSONMdl{
 		Tenant:   r.Tenant,
@@ -585,7 +585,7 @@ func (sqls *SQLStorage) SetResourceDrv(ctx *context.Context, r *utils.Resource) 
 	return
 }
 
-func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveResourceDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&ResourceJSONMdl{}).Where(&ResourceJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&ResourceJSONMdl{}).Error; err != nil {
@@ -596,7 +596,7 @@ func (sqls *SQLStorage) RemoveResourceDrv(ctx *context.Context, tenant, id strin
 	return
 }
 
-func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
+func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	var result []*StatQueueProfileMdl
 	if err = sqls.db.Model(&StatQueueProfileMdl{}).Where(&StatQueueProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -608,7 +608,7 @@ func (sqls *SQLStorage) GetStatQueueProfileDrv(ctx *context.Context, tenant stri
 	return utils.MapStringInterfaceToStatQueueProfile(result[0].StatQueueProfile)
 }
 
-func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
+func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx context.Context, sq *utils.StatQueueProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &StatQueueProfileMdl{
 		Tenant:           sq.Tenant,
@@ -629,7 +629,7 @@ func (sqls *SQLStorage) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.S
 	return
 }
 
-func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&StatQueueProfileMdl{}).Where(&StatQueueProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&StatQueueProfileMdl{}).Error; err != nil {
@@ -640,7 +640,7 @@ func (sqls *SQLStorage) RemStatQueueProfileDrv(ctx *context.Context, tenant, id 
 	return
 }
 
-func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+func (sqls *SQLStorage) GetStatQueueDrv(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	var result []*StatQueueMdl
 	if err = sqls.db.Model(&StatQueueMdl{}).Where(&StatQueueMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -656,7 +656,7 @@ func (sqls *SQLStorage) GetStatQueueDrv(ctx *context.Context, tenant, id string)
 	return ssq.AsStatQueue(sqls.ms)
 }
 
-func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
+func (sqls *SQLStorage) SetStatQueueDrv(ctx context.Context, ssq *StoredStatQueue, _ *utils.StatQueue) error {
 	if ssq == nil {
 		return utils.ErrMandatoryIeMissing
 	}
@@ -680,7 +680,7 @@ func (sqls *SQLStorage) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQue
 	return nil
 }
 
-func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemStatQueueDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&StatQueueMdl{}).Where(&StatQueueMdl{Tenant: tenant, ID: id}).
 		Delete(&StatQueueMdl{}).Error; err != nil {
@@ -691,7 +691,7 @@ func (sqls *SQLStorage) RemStatQueueDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
-func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+func (sqls *SQLStorage) GetThresholdProfileDrv(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	var result []*ThresholdProfileMdl
 	if err = sqls.db.Model(&ThresholdProfileMdl{}).Where(&ThresholdProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -703,7 +703,7 @@ func (sqls *SQLStorage) GetThresholdProfileDrv(ctx *context.Context, tenant, id 
 	return utils.MapStringInterfaceToThresholdProfile(result[0].ThresholdProfile)
 }
 
-func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
+func (sqls *SQLStorage) SetThresholdProfileDrv(ctx context.Context, tp *utils.ThresholdProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ThresholdProfileMdl{
 		Tenant:           tp.Tenant,
@@ -724,7 +724,7 @@ func (sqls *SQLStorage) SetThresholdProfileDrv(ctx *context.Context, tp *utils.T
 	return
 }
 
-func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemThresholdProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&ThresholdProfileMdl{}).Where(&ThresholdProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&ThresholdProfileMdl{}).Error; err != nil {
@@ -735,7 +735,7 @@ func (sqls *SQLStorage) RemThresholdProfileDrv(ctx *context.Context, tenant, id 
 	return
 }
 
-func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string) (tp *utils.Threshold, err error) {
+func (sqls *SQLStorage) GetThresholdDrv(ctx context.Context, tenant, id string) (tp *utils.Threshold, err error) {
 	var result []*ThresholdJSONMdl
 	if err = sqls.db.Model(&ThresholdJSONMdl{}).Where(&ThresholdJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -747,7 +747,7 @@ func (sqls *SQLStorage) GetThresholdDrv(ctx *context.Context, tenant, id string)
 	return utils.MapStringInterfaceToThreshold(result[0].Threshold)
 }
 
-func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, t *utils.Threshold) (err error) {
+func (sqls *SQLStorage) SetThresholdDrv(ctx context.Context, t *utils.Threshold) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &ThresholdJSONMdl{
 		Tenant:    t.Tenant,
@@ -768,7 +768,7 @@ func (sqls *SQLStorage) SetThresholdDrv(ctx *context.Context, t *utils.Threshold
 	return
 }
 
-func (sqls *SQLStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveThresholdDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&ThresholdJSONMdl{}).Where(&ThresholdJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&ThresholdJSONMdl{}).Error; err != nil {
@@ -779,7 +779,7 @@ func (sqls *SQLStorage) RemoveThresholdDrv(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (sqls *SQLStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (f *Filter, err error) {
+func (sqls *SQLStorage) GetFilterDrv(ctx context.Context, tenant, id string) (f *Filter, err error) {
 	var result []*FilterJSONMdl
 	if err = sqls.db.Model(&FilterJSONMdl{}).Where(&FilterJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -791,7 +791,7 @@ func (sqls *SQLStorage) GetFilterDrv(ctx *context.Context, tenant, id string) (f
 	return MapStringInterfaceToFilter(result[0].Filter)
 }
 
-func (sqls *SQLStorage) SetFilterDrv(ctx *context.Context, f *Filter) (err error) {
+func (sqls *SQLStorage) SetFilterDrv(ctx context.Context, f *Filter) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &FilterJSONMdl{
 		Tenant: f.Tenant,
@@ -812,7 +812,7 @@ func (sqls *SQLStorage) SetFilterDrv(ctx *context.Context, f *Filter) (err error
 	return
 }
 
-func (sqls *SQLStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveFilterDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&FilterJSONMdl{}).Where(&FilterJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&FilterJSONMdl{}).Error; err != nil {
@@ -823,7 +823,7 @@ func (sqls *SQLStorage) RemoveFilterDrv(ctx *context.Context, tenant, id string)
 	return
 }
 
-func (sqls *SQLStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id string) (rp *utils.RouteProfile, err error) {
+func (sqls *SQLStorage) GetRouteProfileDrv(ctx context.Context, tenant, id string) (rp *utils.RouteProfile, err error) {
 	var result []*RouteProfileMdl
 	if err = sqls.db.Model(&RouteProfileMdl{}).Where(&RouteProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -835,7 +835,7 @@ func (sqls *SQLStorage) GetRouteProfileDrv(ctx *context.Context, tenant, id stri
 	return utils.MapStringInterfaceToRouteProfile(result[0].RouteProfile), nil
 }
 
-func (sqls *SQLStorage) SetRouteProfileDrv(ctx *context.Context, rp *utils.RouteProfile) (err error) {
+func (sqls *SQLStorage) SetRouteProfileDrv(ctx context.Context, rp *utils.RouteProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &RouteProfileMdl{
 		Tenant:       rp.Tenant,
@@ -856,7 +856,7 @@ func (sqls *SQLStorage) SetRouteProfileDrv(ctx *context.Context, rp *utils.Route
 	return
 }
 
-func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&RouteProfileMdl{}).Where(&RouteProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&RouteProfileMdl{}).Error; err != nil {
@@ -867,7 +867,7 @@ func (sqls *SQLStorage) RemoveRouteProfileDrv(ctx *context.Context, tenant, id s
 	return
 }
 
-func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
+func (sqls *SQLStorage) SetRateProfileDrv(ctx context.Context, rpp *utils.RateProfile, optOverwrite bool) (err error) {
 	tx := sqls.db.Begin()
 	rpMdl := &RateProfileJSONMdl{
 		Tenant:      rpp.Tenant,
@@ -927,7 +927,7 @@ func (sqls *SQLStorage) SetRateProfileDrv(ctx *context.Context, rpp *utils.RateP
 	return
 }
 
-func (sqls *SQLStorage) GetRateProfileDrv(ctx *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+func (sqls *SQLStorage) GetRateProfileDrv(ctx context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	var rpResult []*RateProfileJSONMdl
 	if err = sqls.db.Model(&RateProfileJSONMdl{}).Where(&RateProfileJSONMdl{Tenant: tenant,
 		ID: id}).Find(&rpResult).Error; err != nil {
@@ -960,7 +960,7 @@ func (sqls *SQLStorage) GetRateProfileDrv(ctx *context.Context, tenant, id strin
 }
 
 // GetRateProfileRatesDrv will return back all the RateIDs and Rates from a RateProfile
-func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx context.Context, tnt, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
 	tx := sqls.db.Model(&RateMdl{}).Where(&RateMdl{RateProfileID: profileID})
 	if rtPrfx != utils.EmptyString {
 		tx = tx.Where("id LIKE ?", rtPrfx+"%")
@@ -989,7 +989,7 @@ func (sqls *SQLStorage) GetRateProfileRatesDrv(ctx *context.Context, tnt, profil
 	return
 }
 
-func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+func (sqls *SQLStorage) RemoveRateProfileDrv(ctx context.Context, tenant, id string, rateIDs *[]string) (err error) {
 	tx := sqls.db.Begin()
 	if rateIDs != nil {
 		for _, rateID := range *rateIDs {
@@ -1017,7 +1017,7 @@ func (sqls *SQLStorage) RemoveRateProfileDrv(ctx *context.Context, tenant, id st
 	return
 }
 
-func (sqls *SQLStorage) SetRankingProfileDrv(ctx *context.Context, rp *utils.RankingProfile) (err error) {
+func (sqls *SQLStorage) SetRankingProfileDrv(ctx context.Context, rp *utils.RankingProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &RankingProfileMdl{
 		Tenant:         rp.Tenant,
@@ -1038,7 +1038,7 @@ func (sqls *SQLStorage) SetRankingProfileDrv(ctx *context.Context, rp *utils.Ran
 	return
 }
 
-func (sqls *SQLStorage) GetRankingProfileDrv(ctx *context.Context, tenant string, id string) (rp *utils.RankingProfile, err error) {
+func (sqls *SQLStorage) GetRankingProfileDrv(ctx context.Context, tenant string, id string) (rp *utils.RankingProfile, err error) {
 	var result []*RankingProfileMdl
 	if err = sqls.db.Model(&RankingProfileMdl{}).Where(&RankingProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -1050,7 +1050,7 @@ func (sqls *SQLStorage) GetRankingProfileDrv(ctx *context.Context, tenant string
 	return utils.MapStringInterfaceToRankingProfile(result[0].RankingProfile), nil
 }
 
-func (sqls *SQLStorage) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (sqls *SQLStorage) RemRankingProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&RankingProfileMdl{}).Where(&RankingProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&RankingProfileMdl{}).Error; err != nil {
@@ -1061,7 +1061,7 @@ func (sqls *SQLStorage) RemRankingProfileDrv(ctx *context.Context, tenant string
 	return
 }
 
-func (sqls *SQLStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
+func (sqls *SQLStorage) GetRankingDrv(ctx context.Context, tenant, id string) (rn *utils.Ranking, err error) {
 	var result []*RankingJSONMdl
 	if err = sqls.db.Model(&RankingJSONMdl{}).Where(&RankingJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -1073,7 +1073,7 @@ func (sqls *SQLStorage) GetRankingDrv(ctx *context.Context, tenant, id string) (
 	return utils.MapStringInterfaceToRanking(result[0].Ranking), nil
 }
 
-func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
+func (sqls *SQLStorage) SetRankingDrv(_ context.Context, rn *utils.Ranking) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &RankingJSONMdl{
 		Tenant:  rn.Tenant,
@@ -1094,7 +1094,7 @@ func (sqls *SQLStorage) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (er
 	return
 }
 
-func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveRankingDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&RankingJSONMdl{}).Where(&RankingJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&RankingJSONMdl{}).Error; err != nil {
@@ -1105,7 +1105,7 @@ func (sqls *SQLStorage) RemoveRankingDrv(ctx *context.Context, tenant, id string
 	return
 }
 
-func (sqls *SQLStorage) SetTrendProfileDrv(ctx *context.Context, tp *utils.TrendProfile) (err error) {
+func (sqls *SQLStorage) SetTrendProfileDrv(ctx context.Context, tp *utils.TrendProfile) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &TrendProfileMdl{
 		Tenant:       tp.Tenant,
@@ -1127,7 +1127,7 @@ func (sqls *SQLStorage) SetTrendProfileDrv(ctx *context.Context, tp *utils.Trend
 
 }
 
-func (sqls *SQLStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, id string) (tp *utils.TrendProfile, err error) {
+func (sqls *SQLStorage) GetTrendProfileDrv(ctx context.Context, tenant string, id string) (tp *utils.TrendProfile, err error) {
 	var result []*TrendProfileMdl
 	if err = sqls.db.Model(&TrendProfileMdl{}).Where(&TrendProfileMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -1139,7 +1139,7 @@ func (sqls *SQLStorage) GetTrendProfileDrv(ctx *context.Context, tenant string, 
 	return utils.MapStringInterfaceToTrendProfile(result[0].TrendProfile)
 }
 
-func (sqls *SQLStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (sqls *SQLStorage) RemTrendProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&TrendProfileMdl{}).Where(&TrendProfileMdl{Tenant: tenant, ID: id}).
 		Delete(&TrendProfileMdl{}).Error; err != nil {
@@ -1150,7 +1150,7 @@ func (sqls *SQLStorage) RemTrendProfileDrv(ctx *context.Context, tenant string, 
 	return
 }
 
-func (sqls *SQLStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (t *utils.Trend, err error) {
+func (sqls *SQLStorage) GetTrendDrv(ctx context.Context, tenant, id string) (t *utils.Trend, err error) {
 	var result []*TrendJSONMdl
 	if err = sqls.db.Model(&TrendJSONMdl{}).Where(&TrendJSONMdl{Tenant: tenant,
 		ID: id}).Find(&result).Error; err != nil {
@@ -1162,7 +1162,7 @@ func (sqls *SQLStorage) GetTrendDrv(ctx *context.Context, tenant, id string) (t 
 	return utils.MapStringInterfaceToTrend(result[0].Trend)
 }
 
-func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, t *utils.Trend) (err error) {
+func (sqls *SQLStorage) SetTrendDrv(ctx context.Context, t *utils.Trend) (err error) {
 	tx := sqls.db.Begin()
 	mdl := &TrendJSONMdl{
 		Tenant: t.Tenant,
@@ -1183,7 +1183,7 @@ func (sqls *SQLStorage) SetTrendDrv(ctx *context.Context, t *utils.Trend) (err e
 	return
 }
 
-func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) (err error) {
+func (sqls *SQLStorage) RemoveTrendDrv(ctx context.Context, tenant, id string) (err error) {
 	tx := sqls.db.Begin()
 	if err = tx.Model(&TrendJSONMdl{}).Where(&TrendJSONMdl{Tenant: tenant, ID: id}).
 		Delete(&TrendJSONMdl{}).Error; err != nil {
@@ -1195,7 +1195,7 @@ func (sqls *SQLStorage) RemoveTrendDrv(ctx *context.Context, tenant, id string) 
 }
 
 // Used to check if specific subject is stored using prefix key attached to entity
-func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tenant string) (has bool, err error) {
+func (sqls *SQLStorage) HasDataDrv(ctx context.Context, category, subject, tenant string) (has bool, err error) {
 	var categoryModelMap = map[string]any{
 		utils.AccountPrefix:          &AccountJSONMdl{},
 		utils.ActionProfilePrefix:    &ActionProfileJSONMdl{},
@@ -1228,7 +1228,7 @@ func (sqls *SQLStorage) HasDataDrv(ctx *context.Context, category, subject, tena
 	return count > 0, err
 }
 
-func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	var mdl []LoadIDMdl
 	tx := sqls.db.Table(utils.TBLLoadIDs)
 	if err := tx.Find(&mdl).Error; err != nil {
@@ -1255,7 +1255,7 @@ func (sqls *SQLStorage) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix str
 	return loadIDs, nil
 }
 
-func (sqls *SQLStorage) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+func (sqls *SQLStorage) SetLoadIDsDrv(ctx context.Context, loadIDs map[string]int64) error {
 	return sqls.db.Transaction(func(tx *gorm.DB) error {
 		var existing []*LoadIDMdl
 		if err := tx.Table(utils.TBLLoadIDs).Find(&existing).Error; err != nil {
@@ -1303,7 +1303,7 @@ func (sqls *SQLStorage) getAllIndexKeys(tenant, typePrefix string) ([]string, er
 
 // GetIndexesDrv retrieves Indexes from DB
 // tenants, item types, keys and values are stored in seperate columns
-func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+func (sqls *SQLStorage) GetIndexesDrv(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	originItemType := utils.CacheInstanceToPrefix[idxItmType]
 	itemType := originItemType
 	if transactionID != utils.EmptyString {
@@ -1331,7 +1331,7 @@ func (sqls *SQLStorage) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, 
 
 // SetIndexesDrv stores Indexes into DB
 // tenants, item types, keys and values are stored in seperate columns
-func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
+func (sqls *SQLStorage) SetIndexesDrv(ctx context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	originItemType := utils.CacheInstanceToPrefix[idxItmType]
 	itemType := originItemType
@@ -1390,7 +1390,7 @@ func (sqls *SQLStorage) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx s
 }
 
 // RemoveIndexesDrv removes the indexes
-func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+func (sqls *SQLStorage) RemoveIndexesDrv(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	itemType := utils.CacheInstanceToPrefix[idxItmType]
 	if len(idxKeys) != 0 {
 		return sqls.db.Transaction(func(tx *gorm.DB) error {
@@ -1406,27 +1406,27 @@ func (sqls *SQLStorage) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCt
 }
 
 // DataDB not implemented yet
-func (sqls *SQLStorage) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+func (sqls *SQLStorage) GetConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	return nil, utils.ErrNotImplemented
 }
 
 // DataDB method not implemented yet
-func (sqls *SQLStorage) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
+func (sqls *SQLStorage) SetConfigSectionsDrv(ctx context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // DataDB method not implemented yet
-func (sqls *SQLStorage) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
+func (sqls *SQLStorage) RemoveConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // ConfigDB method not implemented yet
-func (sqls *SQLStorage) GetSection(ctx *context.Context, section string, val any) (err error) {
+func (sqls *SQLStorage) GetSection(ctx context.Context, section string, val any) (err error) {
 	return utils.ErrNotImplemented
 }
 
 // ConfigDB method not implemented yet
-func (sqls *SQLStorage) SetSection(_ *context.Context, section string, jsn any) (err error) {
+func (sqls *SQLStorage) SetSection(_ context.Context, section string, jsn any) (err error) {
 	return utils.ErrNotImplemented
 }
 

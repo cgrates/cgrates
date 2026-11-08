@@ -7,6 +7,7 @@
 package ees
 
 import (
+	"context"
 	"flag"
 	"path"
 	"testing"
@@ -14,7 +15,6 @@ import (
 
 	amqpv1 "github.com/Azure/go-amqp"
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

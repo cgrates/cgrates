@@ -7,6 +7,7 @@
 package analyzers
 
 import (
+	"context"
 	"os"
 	"path"
 	"reflect"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -53,7 +53,7 @@ var (
 
 type smock struct{}
 
-func (*smock) DisconnectPeer(ctx *context.Context,
+func (*smock) DisconnectPeer(ctx context.Context,
 	args *utils.AttrDisconnectSession, reply *string) error {
 	return utils.ErrNotFound
 }

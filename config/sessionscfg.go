@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"strconv"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -122,7 +122,7 @@ type SessionSCfg struct {
 }
 
 // loadSessionSCfg loads the SessionS section of the configuration
-func (scfg *SessionSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (scfg *SessionSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSessionSCfg := new(SessionSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, SessionSJSON, jsnSessionSCfg); err != nil {
 		return

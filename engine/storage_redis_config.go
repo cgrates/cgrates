@@ -4,11 +4,12 @@
 package engine
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
-func (rs *RedisStorage) GetSection(ctx *context.Context, section string, val any) (err error) {
+func (rs *RedisStorage) GetSection(ctx context.Context, section string, val any) (err error) {
 	var values []byte
 	if err = rs.Cmd(&values, redisGET, utils.ConfigPrefix+section); err != nil || len(values) == 0 {
 		return
@@ -17,7 +18,7 @@ func (rs *RedisStorage) GetSection(ctx *context.Context, section string, val any
 	return
 }
 
-func (rs *RedisStorage) SetSection(_ *context.Context, section string, jsn any) (err error) {
+func (rs *RedisStorage) SetSection(_ context.Context, section string, jsn any) (err error) {
 	var result []byte
 	if result, err = rs.ms.Marshal(jsn); err != nil {
 		return

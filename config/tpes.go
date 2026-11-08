@@ -4,7 +4,7 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -17,7 +17,7 @@ type TpeSCfgJson struct {
 	Enabled *bool
 }
 
-func (tp *TpeSCfg) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) (err error) {
+func (tp *TpeSCfg) Load(ctx context.Context, db ConfigDB, _ *CGRConfig) (err error) {
 	jsn := new(TpeSCfgJson)
 	if err = db.GetSection(ctx, tp.SName(), jsn); err != nil {
 		return

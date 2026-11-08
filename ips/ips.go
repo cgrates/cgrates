@@ -5,6 +5,7 @@ package ips
 
 import (
 	"cmp"
+	"context"
 	"errors"
 	"fmt"
 	"maps"
@@ -14,7 +15,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -237,7 +237,7 @@ func NewIPService(cfg *config.CGRConfig, dm *engine.DataManager,
 }
 
 // Reload restarts the backup loop. No-op after Shutdown.
-func (s *IPs) Reload(ctx *context.Context) {
+func (s *IPs) Reload(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -250,13 +250,13 @@ func (s *IPs) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the goroutine with the backup loop
-func (s *IPs) StartLoop(ctx *context.Context) {
+func (s *IPs) StartLoop(ctx context.Context) {
 	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (s *IPs) Shutdown(ctx *context.Context) {
+func (s *IPs) Shutdown(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -269,7 +269,7 @@ func (s *IPs) Shutdown(ctx *context.Context) {
 }
 
 // backup will regularly store IP allocations changed to DB
-func (s *IPs) runBackup(ctx *context.Context) {
+func (s *IPs) runBackup(ctx context.Context) {
 	defer s.backupLoop.Done()
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -286,7 +286,7 @@ func (s *IPs) runBackup(ctx *context.Context) {
 }
 
 // storeIPAllocationsList represents one task of complete backup
-func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
+func (s *IPs) storeIPAllocationsList(ctx context.Context) {
 	var failedRIDs []string
 	for { // don't stop until we store all dirty IP allocations
 		s.storedMu.Lock()
@@ -322,7 +322,7 @@ func (s *IPs) storeIPAllocationsList(ctx *context.Context) {
 }
 
 // storeIPAllocations stores the IP allocations in DB.
-func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocations) error {
+func (s *IPs) storeIPAllocations(ctx context.Context, allocs *utils.IPAllocations) error {
 	if err := s.dm.SetIPAllocations(ctx, allocs); err != nil {
 		utils.Logger.Warning(fmt.Sprintf(
 			"<%s> could not save IP allocations %q: %v", utils.IPs, allocs.ID, err))
@@ -341,7 +341,7 @@ func (s *IPs) storeIPAllocations(ctx *context.Context, allocs *utils.IPAllocatio
 }
 
 // storeMatchedIPAllocations will store the list of IP allocations based on the StoreInterval
-func (s *IPs) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPAllocations) error {
+func (s *IPs) storeMatchedIPAllocations(ctx context.Context, matched *utils.IPAllocations) error {
 	storeInterval := s.cfg.IPsCfg().StoreInterval
 	if storeInterval == 0 {
 		return nil
@@ -360,7 +360,7 @@ func (s *IPs) storeMatchedIPAllocations(ctx *context.Context, matched *utils.IPA
 
 // matchingIPAllocationsForEvent returns the IP allocation with the highest
 // weight matching the event. Callers must release the lock via unlock.
-func (s *IPs) matchingIPAllocationsForEvent(ctx *context.Context, tnt string,
+func (s *IPs) matchingIPAllocationsForEvent(ctx context.Context, tnt string,
 	ev *utils.CGREvent, evUUID string) (matched *matchedIPAllocs, unlock func(), err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
@@ -484,7 +484,7 @@ func findPoolByID(pools []*utils.IPPool, id string) *utils.IPPool {
 // (highest first), and truncates at the first blocking pool.
 // TODO: check whether pre-allocating filteredPools & poolIDs improves
 // performance or wastes memory when filtering is aggressive.
-func filterAndSortPools(ctx *context.Context, tenant string, pools []*utils.IPPool,
+func filterAndSortPools(ctx context.Context, tenant string, pools []*utils.IPPool,
 	filters *engine.FilterS, ev utils.DataProvider) ([]string, error) {
 	var filteredPools []*utils.IPPool
 	weights := make(map[string]float64) // stores sorting weights by pool ID

@@ -21,6 +21,7 @@ package general_tests
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"path/filepath"
 	"reflect"
@@ -29,7 +30,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"gorm.io/gorm"

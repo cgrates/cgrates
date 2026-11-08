@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"log/syslog"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/twmb/franz-go/pkg/kgo"
@@ -20,7 +20,7 @@ type ExportLogger struct {
 	sync.Mutex
 	efsConns []string
 	connMgr  *ConnManager
-	ctx      *context.Context
+	ctx      context.Context
 
 	LogLevel   int
 	FldPostDir string
@@ -33,7 +33,7 @@ type ExportLogger struct {
 }
 
 // NewExportLogger will export loggers to kafka
-func NewExportLogger(ctx *context.Context, tenant string, connMgr *ConnManager,
+func NewExportLogger(ctx context.Context, tenant string, connMgr *ConnManager,
 	cfg *config.CGRConfig) (*ExportLogger, error) {
 	client, err := kgo.NewClient(
 		kgo.SeedBrokers(cfg.LoggerCfg().Opts.KafkaConn),

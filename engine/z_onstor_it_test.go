@@ -7,13 +7,13 @@
 package engine
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/ericlagergren/decimal"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )

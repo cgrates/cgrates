@@ -5,6 +5,7 @@ package thresholds
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"testing/synctest"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -867,7 +867,7 @@ func TestThresholdMatchingThresholdForEventLocks3(t *testing.T) {
 
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.ThresholdProfile, error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.ThresholdProfile, error) {
 			if id == "TH1" {
 				return nil, utils.ErrNotImplemented
 			}
@@ -1344,7 +1344,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	cM.SetCache(cacheS)
 	db := &engine.DataDBMock{
-		GetThresholdProfileDrvF: func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+		GetThresholdProfileDrvF: func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 			return &utils.ThresholdProfile{
 				Tenant:           "cgrates.org",
 				ID:               "THD_2",
@@ -1361,7 +1361,7 @@ func TestThresholdSmatchingThresholdsForEventWeightErr(t *testing.T) {
 				Async: true,
 			}, nil
 		},
-		GetThresholdDrvF: func(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+		GetThresholdDrvF: func(ctx context.Context, tenant, id string) (*utils.Threshold, error) {
 			return &utils.Threshold{}, nil
 		},
 	}

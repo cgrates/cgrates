@@ -5,6 +5,7 @@ package resources
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"reflect"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/guardian"
@@ -1274,7 +1274,7 @@ func TestResourcesStoreResources(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetResourceDrvF: func(*context.Context, *utils.Resource) error {
+		SetResourceDrvF: func(context.Context, *utils.Resource) error {
 			return utils.ErrNoDatabaseConn
 		},
 	}
@@ -1441,8 +1441,8 @@ func TestResourcesProcessThresholdsOK(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -1507,8 +1507,8 @@ func TestResourcesProcessThresholdsCallErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -1709,7 +1709,7 @@ func TestResourceMatchingResourcesForEventLocks3(t *testing.T) {
 	prfs := make([]*utils.ResourceProfile, 0)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(_ *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(_ context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 			if id == "RES1" {
 				return nil, utils.ErrNotImplemented
 			}

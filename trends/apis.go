@@ -4,17 +4,17 @@
 package trends
 
 import (
+	"context"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
 )
 
 // V1ScheduleQueries manually schedules or reschedules trend queries.
-func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
+func (tS *TrendS) V1ScheduleQueries(ctx context.Context, args *utils.ArgScheduleTrendQueries, scheduled *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = tS.cfg.GeneralCfg().DefaultTenant
@@ -28,7 +28,7 @@ func (tS *TrendS) V1ScheduleQueries(ctx *context.Context, args *utils.ArgSchedul
 }
 
 // V1GetTrend retrieves trend metrics with optional time and index filtering.
-func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
+func (tS *TrendS) V1GetTrend(ctx context.Context, arg *utils.ArgGetTrend, retTrend *utils.Trend) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -86,7 +86,7 @@ func (tS *TrendS) V1GetTrend(ctx *context.Context, arg *utils.ArgGetTrend, retTr
 }
 
 // V1GetScheduledTrends retrieves information about currently scheduled trends.
-func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
+func (tS *TrendS) V1GetScheduledTrends(ctx context.Context, args *utils.ArgScheduledTrends, schedTrends *[]utils.ScheduledTrend) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = tS.cfg.GeneralCfg().DefaultTenant
@@ -134,7 +134,7 @@ func (tS *TrendS) V1GetScheduledTrends(ctx *context.Context, args *utils.ArgSche
 }
 
 // V1GetTrendSummary retrieves the most recent trend summary.
-func (tS *TrendS) V1GetTrendSummary(ctx *context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
+func (tS *TrendS) V1GetTrendSummary(ctx context.Context, arg utils.TenantIDWithAPIOpts, reply *utils.TrendSummary) (err error) {
 	tnt := arg.Tenant
 	if tnt == utils.EmptyString {
 		tnt = tS.cfg.GeneralCfg().DefaultTenant

@@ -4,13 +4,13 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -414,10 +414,10 @@ func TestCMCallWithConnIDsInternallyDCed(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -438,8 +438,8 @@ func TestCMCallWithConnIDsErrNotNetwork(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			"testMethod": func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			"testMethod": func(ctx context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},

@@ -5,13 +5,13 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
@@ -445,8 +445,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaStats(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -506,8 +506,8 @@ func TestDynamicDPfieldAsInterfaceErrMetaAccounts(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1GetAccount: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Account)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -577,8 +577,8 @@ func TestDynamicDPfieldAsInterfaceMetaResources(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResourceWithConfig: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResourceWithConfig: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.ResourceWithConfig)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -627,8 +627,8 @@ func TestDynamicDPfieldAsInterfaceMetaStats(t *testing.T) {
 	}
 
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1GetQueueDecimalMetrics: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1GetQueueDecimalMetrics: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*map[string]*utils.Decimal)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -670,8 +670,8 @@ func TestDPFilterSConns(t *testing.T) {
 
 	registerAccountsMock := func(cM *ConnManager, connName string) {
 		cc := &ccMock{
-			calls: map[string]func(ctx *context.Context, args any, reply any) error{
-				utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+			calls: map[string]func(ctx context.Context, args any, reply any) error{
+				utils.AccountSv1GetAccount: func(ctx context.Context, args, reply any) error {
 					rpl, ok := reply.(*utils.Account)
 					if !ok {
 						return fmt.Errorf("wrong reply type %T", reply)

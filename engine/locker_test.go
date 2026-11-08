@@ -19,9 +19,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>
 package engine
 
 import (
+	"context"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -36,6 +38,23 @@ func newLockerTestDataManager(t *testing.T, cfg *config.CGRConfig,
 	}
 	dbConns := NewDBConnManager(map[string]DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	return NewDataManager(dbConns, cfg, nil, locker)
+}
+
+func TestDataManagerGuardContext(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	dm := newLockerTestDataManager(t, cfg, NewLocker(cfg))
+	client := &birpc.Service{}
+	ctx, cancel := context.WithTimeout(birpc.WithClient(context.Background(), client), time.Minute)
+	defer cancel()
+
+	if err := dm.Guard(ctx, func(ctx context.Context) error {
+		if got := birpc.ClientFromContext(ctx); got != client {
+			t.Errorf("expected client %p, got %v", client, got)
+		}
+		return nil
+	}, "callback"); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestDataManagerCacheLockCoordination(t *testing.T) {

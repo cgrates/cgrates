@@ -4,10 +4,10 @@
 package agents
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"

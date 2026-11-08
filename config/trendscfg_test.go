@@ -4,12 +4,12 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -390,7 +390,7 @@ func TestTrendSCfgCloneSection(t *testing.T) {
 func TestTrendSCfgLoadError(t *testing.T) {
 	ctx := context.Background()
 	mockDB := &mockDb{
-		GetSectionF: func(ctx *context.Context, section string, val any) error {
+		GetSectionF: func(ctx context.Context, section string, val any) error {
 			return errors.New("mock error")
 		},
 	}

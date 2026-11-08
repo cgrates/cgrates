@@ -4,7 +4,8 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -20,7 +21,7 @@ type TLSCfg struct {
 }
 
 // loadTLSCgrCfg loads the Tls section of the configuration
-func (tls *TLSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (tls *TLSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnTLSCgrCfg := new(TlsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, TlsJSON, jsnTLSCgrCfg); err != nil {
 		return

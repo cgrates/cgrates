@@ -4,7 +4,8 @@
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/efs"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -20,11 +21,11 @@ type EfSv1 struct {
 }
 
 // ProcessEvent writes failed export events.
-func (s *EfSv1) ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts, reply *string) error {
+func (s *EfSv1) ProcessEvent(ctx context.Context, args *utils.ArgsFailedPosts, reply *string) error {
 	return s.efS.V1ProcessEvent(ctx, args, reply)
 }
 
 // ReplayEvents replays failed export events.
-func (s *EfSv1) ReplayEvents(ctx *context.Context, args efs.ReplayEventsParams, reply *string) error {
+func (s *EfSv1) ReplayEvents(ctx context.Context, args efs.ReplayEventsParams, reply *string) error {
 	return s.efS.V1ReplayEvents(ctx, args, reply)
 }

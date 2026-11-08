@@ -4,19 +4,18 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strings"
 	"time"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRateProfile returns a Rate Profile based on tenant and id
-func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
+func (admS *AdminSv1) GetRateProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -66,7 +65,7 @@ func (admS *AdminSv1) GetRateProfile(ctx *context.Context, arg *utils.TenantIDWi
 }
 
 // GetRateProfile returns the rates of a profile based on their profile. Those rates will be returned back by matching a prefix.
-func (admS *AdminSv1) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs, reply *[]*utils.Rate) (err error) {
+func (admS *AdminSv1) GetRateProfileRates(ctx context.Context, args *utils.ArgsSubItemIDs, reply *[]*utils.Rate) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -85,7 +84,7 @@ func (admS *AdminSv1) GetRateProfileRates(ctx *context.Context, args *utils.Args
 }
 
 // GetRateProfileIDs returns a list of rate profile IDs registered for a tenant
-func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetRateProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, ratePrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -116,7 +115,7 @@ func (admS *AdminSv1) GetRateProfileIDs(ctx *context.Context, args *utils.ArgsIt
 }
 
 // GetRateProfileRateIDs returns a list of rates from a specific RateProfile  registered for a tenant. RateIDs are returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be returned all RateIDs.
-func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
+func (admS *AdminSv1) GetRateProfileRateIDs(ctx context.Context, args *utils.ArgsSubItemIDs, rateIDs *[]string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -140,7 +139,7 @@ func (admS *AdminSv1) GetRateProfileRateIDs(ctx *context.Context, args *utils.Ar
 }
 
 // GetRateProfiles returns a list of rate profiles registered for a tenant
-func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItemIDs, ratePrfs *[]*utils.RateProfile) (err error) {
+func (admS *AdminSv1) GetRateProfiles(ctx context.Context, args *utils.ArgsItemIDs, ratePrfs *[]*utils.RateProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -163,7 +162,7 @@ func (admS *AdminSv1) GetRateProfiles(ctx *context.Context, args *utils.ArgsItem
 
 // GetRateProfilesCount returns the total number of RateProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RateProfileIDs
-func (admS *AdminSv1) GetRateProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetRateProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -185,7 +184,7 @@ func (admS *AdminSv1) GetRateProfilesCount(ctx *context.Context, args *utils.Arg
 }
 
 // GetRateProfileRatesCount count the rates from a specific RateProfile  registered for a tenant. The number of rates is returned back by matching a pattern given by ItemPrefix. If the ItemPrefix is not there, it will be counted all the rates.
-func (admS *AdminSv1) GetRateProfileRatesCount(ctx *context.Context, args *utils.ArgsSubItemIDs, countIDs *int) (err error) {
+func (admS *AdminSv1) GetRateProfileRatesCount(ctx context.Context, args *utils.ArgsSubItemIDs, countIDs *int) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ProfileID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -206,7 +205,7 @@ func (admS *AdminSv1) GetRateProfileRatesCount(ctx *context.Context, args *utils
 }
 
 // SetRateProfile add/update a new Rate Profile
-func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRateProfile, reply *string) (err error) {
+func (admS *AdminSv1) SetRateProfile(ctx context.Context, args *utils.APIRateProfile, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID, utils.Rates}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -242,7 +241,7 @@ func (admS *AdminSv1) SetRateProfile(ctx *context.Context, args *utils.APIRatePr
 }
 
 // RemoveRateProfileRates removes the rates from the Rate Profile
-func (admS *AdminSv1) RemoveRateProfileRates(ctx *context.Context, args *utils.RemoveRPrfRates, reply *string) (err error) {
+func (admS *AdminSv1) RemoveRateProfileRates(ctx context.Context, args *utils.RemoveRPrfRates, reply *string) (err error) {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -271,7 +270,7 @@ func (admS *AdminSv1) RemoveRateProfileRates(ctx *context.Context, args *utils.R
 }
 
 // RemoveRateProfile remove a specific Rate Profile specified by tenant and id
-func (admS *AdminSv1) RemoveRateProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) RemoveRateProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -311,12 +310,12 @@ type RateSv1 struct {
 }
 
 // V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
-func (rtS *RateSv1) RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+func (rtS *RateSv1) RateProfilesForEvent(ctx context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
 	return rtS.rtS.V1RateProfilesForEvent(ctx, args, rpIDs)
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rS *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
+func (rS *RateSv1) RateProfileRatesForEvent(ctx context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
 	return rS.rtS.V1RateProfileRatesForEvent(ctx, args, rtIDs)
 }
 
@@ -324,6 +323,6 @@ func (rS *RateSv1) RateProfileRatesForEvent(ctx *context.Context, args *utils.CG
 // profiles. If a higher priority profile fails, it tries the next matching
 // profile. This continues until a valid cost is found or all profiles are
 // exhausted.
-func (rS *RateSv1) CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
+func (rS *RateSv1) CostForEvent(ctx context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	return rS.rtS.V1CostForEvent(ctx, args, rpCost)
 }

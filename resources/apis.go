@@ -4,13 +4,14 @@
 package resources
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1GetResourcesForEvent returns active resources matching the event
-func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
+func (s *ResourceS) V1GetResourcesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]*utils.Resource) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -73,7 +74,7 @@ func (s *ResourceS) V1GetResourcesForEvent(ctx *context.Context, args *utils.CGR
 }
 
 // V1AuthorizeResources queries service to find if an Usage is allowed
-func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (s *ResourceS) V1AuthorizeResources(ctx context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -150,7 +151,7 @@ func (s *ResourceS) V1AuthorizeResources(ctx *context.Context, args *utils.CGREv
 }
 
 // V1AllocateResources is called when a resource requires allocation
-func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (s *ResourceS) V1AllocateResources(ctx context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -229,7 +230,7 @@ func (s *ResourceS) V1AllocateResources(ctx *context.Context, args *utils.CGREve
 }
 
 // V1ReleaseResources is called when we need to clear an allocation
-func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (s *ResourceS) V1ReleaseResources(ctx context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -301,7 +302,7 @@ func (s *ResourceS) V1ReleaseResources(ctx *context.Context, args *utils.CGREven
 }
 
 // V1GetResource returns a resource.
-func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
+func (s *ResourceS) V1GetResource(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -323,7 +324,7 @@ func (s *ResourceS) V1GetResource(ctx *context.Context, arg *utils.TenantIDWithA
 }
 
 // V1GetResourceWithConfig returns a resource alongside its profile.
-func (s *ResourceS) V1GetResourceWithConfig(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
+func (s *ResourceS) V1GetResourceWithConfig(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ResourceWithConfig) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

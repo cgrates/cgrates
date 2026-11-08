@@ -4,7 +4,8 @@
 package attributes
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -12,7 +13,7 @@ import (
 
 // cfg.SessionSCfg().Conns[utils.MetaAttributes]
 // AttributeCProcessEvent is a wrapper to unify processing from the client side from multiple subsystems
-func AttributeScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
+func AttributeScProcessEvent(ctx context.Context, fltrS *engine.FilterS,
 	connsCfg map[string][]*config.DynamicConns, connMgr *engine.ConnManager, subsys string,
 	cgrEv *utils.CGREvent) (reply *utils.AttributesProcessEventReply, err error) {
 	var conns []string

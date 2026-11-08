@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -22,7 +22,7 @@ type SIPAgentCfg struct {
 }
 
 // loadSIPAgentCfg loads the sip_agent section of the configuration
-func (sa *SIPAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (sa *SIPAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSIPAgentCfg := new(SIPAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, SIPAgentJSON, jsnSIPAgentCfg); err != nil {
 		return

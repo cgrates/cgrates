@@ -5,6 +5,7 @@ package stats
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -15,7 +16,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -822,7 +822,7 @@ func TestStatQueueMatchingStatQueuesForEventLocks3(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	db := &engine.DataDBMock{
-		GetStatQueueProfileDrvF: func(ctx *context.Context, tnt, id string) (*utils.StatQueueProfile, error) {
+		GetStatQueueProfileDrvF: func(ctx context.Context, tnt, id string) (*utils.StatQueueProfile, error) {
 			if id == "STS1" {
 				return nil, utils.ErrNotImplemented
 			}
@@ -2014,8 +2014,8 @@ func TestStatQueueProcessThresholdsOK(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				exp := &utils.CGREvent{
 					Tenant: "cgrates.org",
 					ID:     args.(*utils.CGREvent).ID,
@@ -2115,8 +2115,8 @@ func TestStatQueueProcessThresholdsErrPartExec(t *testing.T) {
 	dm.SetCache(cacheS)
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
@@ -2323,7 +2323,7 @@ func TestStatQueueV1GetQueueFloatMetricsErrGetStats(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueDrvF: func(*context.Context, string, string) (*utils.StatQueue, error) {
+		GetStatQueueDrvF: func(context.Context, string, string) (*utils.StatQueue, error) {
 			return nil, utils.ErrNoDatabaseConn
 		},
 	}
@@ -2478,7 +2478,7 @@ func TestStatQueueV1GetQueueStringMetricsErrGetStats(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueDrvF: func(*context.Context, string, string) (*utils.StatQueue, error) {
+		GetStatQueueDrvF: func(context.Context, string, string) (*utils.StatQueue, error) {
 			return nil, utils.ErrNoDatabaseConn
 		},
 	}
@@ -2882,7 +2882,7 @@ func TestStatV1GetQueueDecimalMetricsErrGetStats(t *testing.T) {
 	cfg.StatSCfg().StoreInterval = 1
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetStatQueueDrvF: func(*context.Context, string, string) (*utils.StatQueue, error) {
+		GetStatQueueDrvF: func(context.Context, string, string) (*utils.StatQueue, error) {
 			return nil, utils.ErrNoDatabaseConn
 		},
 	}
@@ -4093,10 +4093,10 @@ func TestStatQAddStatEventBlockNotLast(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {

@@ -7,6 +7,7 @@
 package general_tests
 
 // import (
+// 	"context"
 // 	"fmt"
 // 	"os"
 // 	"path"
@@ -17,7 +18,6 @@ package general_tests
 // 	"time"
 
 // 	"github.com/cgrates/birpc"
-// 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/ees"
 // 	"github.com/cgrates/cgrates/engine"

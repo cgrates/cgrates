@@ -5,11 +5,11 @@ package config
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +32,7 @@ type ReloadArgs struct {
 }
 
 // V1ReloadConfig reloads the configuration
-func (cfg *CGRConfig) V1ReloadConfig(ctx *context.Context, args *ReloadArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1ReloadConfig(ctx context.Context, args *ReloadArgs, reply *string) (err error) {
 	cfgV := cfg
 	if args.DryRun {
 		cfgV = cfg.Clone()
@@ -78,7 +78,7 @@ type SectionWithAPIOpts struct {
 }
 
 // V1GetConfig will retrieve from CGRConfig a section
-func (cfg *CGRConfig) V1GetConfig(ctx *context.Context, args *SectionWithAPIOpts, reply *map[string]any) (err error) {
+func (cfg *CGRConfig) V1GetConfig(ctx context.Context, args *SectionWithAPIOpts, reply *map[string]any) (err error) {
 	if len(args.Sections) == 0 ||
 		args.Sections[0] == utils.MetaAll {
 		args.Sections = cfg.GetAllSectionIDs()
@@ -125,7 +125,7 @@ type SetConfigArgs struct {
 }
 
 // V1SetConfig reloads the sections of config
-func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfig(ctx context.Context, args *SetConfigArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return
@@ -183,7 +183,7 @@ func (cfg *CGRConfig) V1SetConfig(ctx *context.Context, args *SetConfigArgs, rep
 }
 
 // V1GetConfigAsJSON will retrieve from CGRConfig a section as a string
-func (cfg *CGRConfig) V1GetConfigAsJSON(ctx *context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
+func (cfg *CGRConfig) V1GetConfigAsJSON(ctx context.Context, args *SectionWithAPIOpts, reply *string) (err error) {
 	var mp map[string]any
 	if err = cfg.V1GetConfig(ctx, args, &mp); err != nil {
 		return
@@ -201,7 +201,7 @@ type SetConfigFromJSONArgs struct {
 }
 
 // V1SetConfigFromJSON reloads the sections of config
-func (cfg *CGRConfig) V1SetConfigFromJSON(ctx *context.Context, args *SetConfigFromJSONArgs, reply *string) (err error) {
+func (cfg *CGRConfig) V1SetConfigFromJSON(ctx context.Context, args *SetConfigFromJSONArgs, reply *string) (err error) {
 	if len(args.Config) == 0 {
 		*reply = utils.OK
 		return
@@ -255,7 +255,7 @@ func (cfg *CGRConfig) reloadDPCache(sections ...string) {
 
 // loadFromJSONDB Loads from json configuration object, will be used for defaults, config from file and reload
 // this function ignores the config_db section
-func (cfg *CGRConfig) LoadFromDB(ctx *context.Context, jsnCfg ConfigDB) (err error) {
+func (cfg *CGRConfig) LoadFromDB(ctx context.Context, jsnCfg ConfigDB) (err error) {
 	// Load sections out of JSON config, stop on error
 	cfg.lockSections()
 	defer cfg.unlockSections()
@@ -267,7 +267,7 @@ func (cfg *CGRConfig) LoadFromDB(ctx *context.Context, jsnCfg ConfigDB) (err err
 }
 
 // LoadFromPath reads all json files out of a folder/subfolders and loads them up in lexical order
-func (cfg *CGRConfig) LoadFromPath(ctx *context.Context, path string) (err error) {
+func (cfg *CGRConfig) LoadFromPath(ctx context.Context, path string) (err error) {
 	cfg.ConfigPath = path
 	if err = loadConfigFromPath(ctx, path, cfg.sections, false, cfg); err != nil {
 		return
@@ -275,7 +275,7 @@ func (cfg *CGRConfig) LoadFromPath(ctx *context.Context, path string) (err error
 	return cfg.checkConfigSanity()
 }
 
-func (cfg *CGRConfig) loadCfgFromDB(ctx *context.Context, db ConfigDB, sections []string, ignoreConfigDB bool) (err error) {
+func (cfg *CGRConfig) loadCfgFromDB(ctx context.Context, db ConfigDB, sections []string, ignoreConfigDB bool) (err error) {
 	for _, section := range sections {
 		if section == ConfigDBJSON {
 			if ignoreConfigDB {
@@ -297,7 +297,7 @@ func (cfg *CGRConfig) loadCfgFromDB(ctx *context.Context, db ConfigDB, sections 
 	return
 }
 
-func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIOpts, rply *string) (err error) {
+func (cfg *CGRConfig) V1StoreCfgInDB(ctx context.Context, args *SectionWithAPIOpts, rply *string) (err error) {
 	if cfg.db == nil {
 		return errors.New("no DB connection for config")
 	}
@@ -316,7 +316,7 @@ func (cfg *CGRConfig) V1StoreCfgInDB(ctx *context.Context, args *SectionWithAPIO
 	return
 }
 
-func storeDiffSections(ctx *context.Context, sections []string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
+func storeDiffSections(ctx context.Context, sections []string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
 	for _, section := range sections {
 		if err = storeDiffSection(ctx, section, db, v1, v2); err != nil {
 			return
@@ -325,7 +325,7 @@ func storeDiffSections(ctx *context.Context, sections []string, db ConfigDB, v1,
 	return
 }
 
-func storeDiffSection(ctx *context.Context, section string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
+func storeDiffSection(ctx context.Context, section string, db ConfigDB, v1, v2 *CGRConfig) (err error) {
 	switch section {
 	case GeneralJSON:
 		jsn := new(GeneralJsonCfg)

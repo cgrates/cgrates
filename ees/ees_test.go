@@ -5,6 +5,7 @@ package ees
 
 import (
 	"bytes"
+	"context"
 	"os"
 	"reflect"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -21,10 +21,10 @@ import (
 )
 
 type testMockEvent struct {
-	calls map[string]func(_ *context.Context, _, _ any) error
+	calls map[string]func(_ context.Context, _, _ any) error
 }
 
-func (sT *testMockEvent) Call(ctx *context.Context, method string, arg, rply any) error {
+func (sT *testMockEvent) Call(ctx context.Context, method string, arg, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -33,8 +33,8 @@ func (sT *testMockEvent) Call(ctx *context.Context, method string, arg, rply any
 }
 func TestAttrSProcessEvent(t *testing.T) {
 	testMock := &testMockEvent{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ context.Context, args, reply any) error {
 				rplyEv := &utils.AttributesProcessEventReply{
 					AlteredFields: []*utils.FieldsAltered{{
 						Fields: []string{"testcase"},
@@ -77,8 +77,8 @@ func TestAttrSProcessEvent(t *testing.T) {
 
 func TestAttrSProcessEvent2(t *testing.T) {
 	testMock := &testMockEvent{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ context.Context, _, _ any) error {
 				return utils.ErrNotFound
 			},
 		},
@@ -258,8 +258,8 @@ func TestV1ProcessEvent3(t *testing.T) {
 
 func TestV1ProcessEvent4(t *testing.T) {
 	testMock := &testMockEvent{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.EfSv1ProcessEvent: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.EfSv1ProcessEvent: func(_ context.Context, args, reply any) error {
 				*reply.(*string) = utils.EmptyString
 				return utils.ErrUnsupportedFormat
 			},
@@ -335,10 +335,10 @@ func (m mockEventExporter) GetMetrics() *utils.ExporterMetrics {
 	return m.em
 }
 
-func (mockEventExporter) Cfg() *config.EventExporterCfg                { return new(config.EventExporterCfg) }
-func (mockEventExporter) Connect() error                               { return nil }
-func (mockEventExporter) ExportEvent(*context.Context, any, any) error { return nil }
-func (mockEventExporter) ExtraData(*utils.CGREvent) any                { return nil }
+func (mockEventExporter) Cfg() *config.EventExporterCfg               { return new(config.EventExporterCfg) }
+func (mockEventExporter) Connect() error                              { return nil }
+func (mockEventExporter) ExportEvent(context.Context, any, any) error { return nil }
+func (mockEventExporter) ExtraData(*utils.CGREvent) any               { return nil }
 func (mockEventExporter) Close() error {
 	utils.Logger.Warning("NOT IMPLEMENTED")
 	return nil

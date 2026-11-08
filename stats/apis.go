@@ -4,13 +4,14 @@
 package stats
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1ProcessEvent implements StatV1 method for processing an Event
-func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (s *StatS) V1ProcessEvent(ctx context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -32,7 +33,7 @@ func (s *StatS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply
 }
 
 // V1GetStatQueuesForEvent implements StatV1 method for processing an Event
-func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (s *StatS) V1GetStatQueuesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]string) error {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -55,7 +56,7 @@ func (s *StatS) V1GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREve
 }
 
 // V1GetStatQueue returns a StatQueue object
-func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
+func (s *StatS) V1GetStatQueue(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -75,7 +76,7 @@ func (s *StatS) V1GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPI
 }
 
 // V1GetQueueStringMetrics returns the metrics of a Queue as string values
-func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
+func (s *StatS) V1GetQueueStringMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -108,7 +109,7 @@ func (s *StatS) V1GetQueueStringMetrics(ctx *context.Context, args *utils.Tenant
 }
 
 // V1GetQueueFloatMetrics returns the metrics as float64 values
-func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
+func (s *StatS) V1GetQueueFloatMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -139,7 +140,7 @@ func (s *StatS) V1GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantI
 }
 
 // V1GetQueueDecimalMetrics returns the metrics as decimal values
-func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
+func (s *StatS) V1GetQueueDecimalMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -166,7 +167,7 @@ func (s *StatS) V1GetQueueDecimalMetrics(ctx *context.Context, args *utils.Tenan
 }
 
 // V1GetQueueIDs returns list of queueIDs registered for a tenant
-func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
+func (s *StatS) V1GetQueueIDs(ctx context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
 	tenant := args.Tenant
 	if tenant == utils.EmptyString {
 		tenant = s.cfg.GeneralCfg().DefaultTenant
@@ -189,7 +190,7 @@ func (s *StatS) V1GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpt
 }
 
 // V1ResetStatQueue resets the stat queue
-func (s *StatS) V1ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
+func (s *StatS) V1ResetStatQueue(ctx context.Context, tntID *utils.TenantIDWithAPIOpts, rply *string) error {
 	if missing := utils.MissingStructFields(tntID, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

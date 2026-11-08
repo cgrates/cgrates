@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/ips"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetIPProfile returns an IP configuration
-func (s *AdminSv1) GetIPProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPProfile) error {
+func (s *AdminSv1) GetIPProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -30,7 +30,7 @@ func (s *AdminSv1) GetIPProfile(ctx *context.Context, arg *utils.TenantIDWithAPI
 }
 
 // GetIPProfileIDs returns list of IPProfile IDs registered for a tenant
-func (s *AdminSv1) GetIPProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, ippIDs *[]string) error {
+func (s *AdminSv1) GetIPProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, ippIDs *[]string) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
@@ -61,7 +61,7 @@ func (s *AdminSv1) GetIPProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs
 }
 
 // GetIPProfiles returns a list of IPProfiles registered for a tenant.
-func (s *AdminSv1) GetIPProfiles(ctx *context.Context, args *utils.ArgsItemIDs, ipps *[]*utils.IPProfile) error {
+func (s *AdminSv1) GetIPProfiles(ctx context.Context, args *utils.ArgsItemIDs, ipps *[]*utils.IPProfile) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
@@ -83,7 +83,7 @@ func (s *AdminSv1) GetIPProfiles(ctx *context.Context, args *utils.ArgsItemIDs, 
 
 // GetIPProfilesCount returns the total number of IPProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 IPProfileIDs
-func (s *AdminSv1) GetIPProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) error {
+func (s *AdminSv1) GetIPProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) error {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = s.cfg.GeneralCfg().DefaultTenant
@@ -105,7 +105,7 @@ func (s *AdminSv1) GetIPProfilesCount(ctx *context.Context, args *utils.ArgsItem
 }
 
 // SetIPProfile adds a new IP configuration.
-func (s *AdminSv1) SetIPProfile(ctx *context.Context, arg *utils.IPProfileWithAPIOpts, reply *string) error {
+func (s *AdminSv1) SetIPProfile(ctx context.Context, arg *utils.IPProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.IPProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -138,7 +138,7 @@ func (s *AdminSv1) SetIPProfile(ctx *context.Context, arg *utils.IPProfileWithAP
 }
 
 // RemoveIPProfile remove a specific IP configuration.
-func (s *AdminSv1) RemoveIPProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (s *AdminSv1) RemoveIPProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -180,32 +180,32 @@ type IPSv1 struct {
 }
 
 // V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
-func (ipS *IPSv1) GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) error {
+func (ipS *IPSv1) GetIPAllocationForEvent(ctx context.Context, args *utils.CGREvent, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocationForEvent(ctx, args, reply)
 }
 
 // V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
-func (ipS *IPSv1) AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
+func (ipS *IPSv1) AuthorizeIP(ctx context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AuthorizeIP(ctx, args, reply)
 }
 
 // V1AllocateIP allocates an IP address for the given event.
-func (ipS *IPSv1) AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
+func (ipS *IPSv1) AllocateIP(ctx context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) error {
 	return ipS.ips.V1AllocateIP(ctx, args, reply)
 }
 
 // V1ReleaseIP releases an allocated IP address for the given event.
-func (ipS *IPSv1) ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) error {
+func (ipS *IPSv1) ReleaseIP(ctx context.Context, args *utils.CGREvent, reply *string) error {
 	return ipS.ips.V1ReleaseIP(ctx, args, reply)
 }
 
 // V1GetIPAllocations returns all IP allocations for a tenantID.
-func (ipS *IPSv1) GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
+func (ipS *IPSv1) GetIPAllocations(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	return ipS.ips.V1GetIPAllocations(ctx, arg, reply)
 }
 
 // V1ClearIPAllocations clears IP allocations from an IPAllocations object.
 // If args.AllocationIDs is empty or nil, all allocations will be cleared.
-func (ipS *IPSv1) ClearIPAllocations(ctx *context.Context, arg *utils.ClearIPAllocationsArgs, reply *string) error {
+func (ipS *IPSv1) ClearIPAllocations(ctx context.Context, arg *utils.ClearIPAllocationsArgs, reply *string) error {
 	return ipS.ips.V1ClearIPAllocations(ctx, arg, reply)
 }

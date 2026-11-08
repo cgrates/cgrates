@@ -8,6 +8,7 @@ package general_tests
 
 import (
 	"bytes"
+	"context"
 	"flag"
 	"fmt"
 	"slices"
@@ -16,7 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )

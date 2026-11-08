@@ -4,15 +4,15 @@
 package ips
 
 import (
+	"context"
 	"errors"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1GetIPAllocationForEvent returns the IPAllocations object matching the event.
-func (s *IPs) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREvent, reply *utils.IPAllocations) (err error) {
+func (s *IPs) V1GetIPAllocationForEvent(ctx context.Context, args *utils.CGREvent, reply *utils.IPAllocations) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -64,7 +64,7 @@ func (s *IPs) V1GetIPAllocationForEvent(ctx *context.Context, args *utils.CGREve
 }
 
 // V1AuthorizeIP checks if it's able to allocate an IP address for the given event.
-func (s *IPs) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
+func (s *IPs) V1AuthorizeIP(ctx context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -131,7 +131,7 @@ func (s *IPs) V1AuthorizeIP(ctx *context.Context, args *utils.CGREvent, reply *u
 }
 
 // V1AllocateIP allocates an IP address for the given event.
-func (s *IPs) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
+func (s *IPs) V1AllocateIP(ctx context.Context, args *utils.CGREvent, reply *utils.AllocatedIP) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -199,7 +199,7 @@ func (s *IPs) V1AllocateIP(ctx *context.Context, args *utils.CGREvent, reply *ut
 }
 
 // V1ReleaseIP releases an allocated IP address for the given event.
-func (s *IPs) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *string) (err error) {
+func (s *IPs) V1ReleaseIP(ctx context.Context, args *utils.CGREvent, reply *string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.Event)
 	}
@@ -261,7 +261,7 @@ func (s *IPs) V1ReleaseIP(ctx *context.Context, args *utils.CGREvent, reply *str
 }
 
 // V1GetIPAllocations returns all IP allocations for a tenantID.
-func (s *IPs) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
+func (s *IPs) V1GetIPAllocations(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -284,7 +284,7 @@ func (s *IPs) V1GetIPAllocations(ctx *context.Context, arg *utils.TenantIDWithAP
 
 // V1ClearIPAllocations clears IP allocations from an IPAllocations object.
 // If args.AllocationIDs is empty or nil, all allocations will be cleared.
-func (s *IPs) V1ClearIPAllocations(ctx *context.Context, args *utils.ClearIPAllocationsArgs, reply *string) error {
+func (s *IPs) V1ClearIPAllocations(ctx context.Context, args *utils.ClearIPAllocationsArgs, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}

@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/rankings"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRankingProfile returns a Ranking profile
-func (adms *AdminSv1) GetRankingProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingProfile) (err error) {
+func (adms *AdminSv1) GetRankingProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -31,7 +31,7 @@ func (adms *AdminSv1) GetRankingProfile(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetRankingProfileIDs returns list of RankingProfile IDs registered for a tenant
-func (adms *AdminSv1) GetRankingProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, rngPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetRankingProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, rngPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -62,7 +62,7 @@ func (adms *AdminSv1) GetRankingProfileIDs(ctx *context.Context, args *utils.Arg
 }
 
 // GetRankingProfiles returns a list of ranking profiles registered for a tenant
-func (admS *AdminSv1) GetRankingProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rgPrfs *[]*utils.RankingProfile) (err error) {
+func (admS *AdminSv1) GetRankingProfiles(ctx context.Context, args *utils.ArgsItemIDs, rgPrfs *[]*utils.RankingProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,7 +85,7 @@ func (admS *AdminSv1) GetRankingProfiles(ctx *context.Context, args *utils.ArgsI
 
 // GetRankingProfilesCount returns the total number of RankingProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 RankingProfileIDs
-func (admS *AdminSv1) GetRankingProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetRankingProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -107,7 +107,7 @@ func (admS *AdminSv1) GetRankingProfilesCount(ctx *context.Context, args *utils.
 }
 
 // SetRankingProfile alters/creates a RankingProfile
-func (adms *AdminSv1) SetRankingProfile(ctx *context.Context, arg *utils.RankingProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetRankingProfile(ctx context.Context, arg *utils.RankingProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.RankingProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -137,7 +137,7 @@ func (adms *AdminSv1) SetRankingProfile(ctx *context.Context, arg *utils.Ranking
 }
 
 // RemoveRankingProfile remove a specific ranking configuration
-func (adms *AdminSv1) RemoveRankingProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveRankingProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -178,21 +178,21 @@ type RankingSv1 struct {
 }
 
 // V1ScheduleQueries manually schedules or reschedules ranking queries.
-func (rnkS *RankingSv1) ScheduleQueries(ctx *context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
+func (rnkS *RankingSv1) ScheduleQueries(ctx context.Context, args *utils.ArgScheduleRankingQueries, scheduled *int) (err error) {
 	return rnkS.rnkS.V1ScheduleQueries(ctx, args, scheduled)
 }
 
 // V1GetRanking retrieves ranking metrics with optional filtering.
-func (rnkS *RankingSv1) GetRanking(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
+func (rnkS *RankingSv1) GetRanking(ctx context.Context, arg *utils.TenantIDWithAPIOpts, retRanking *utils.Ranking) (err error) {
 	return rnkS.rnkS.V1GetRanking(ctx, arg, retRanking)
 }
 
 // V1GetSchedule retrieves information about currently scheduled rankings.
-func (rnkS *RankingSv1) GetSchedule(ctx *context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
+func (rnkS *RankingSv1) GetSchedule(ctx context.Context, args *utils.ArgScheduledRankings, schedRankings *[]utils.ScheduledRanking) (err error) {
 	return rnkS.rnkS.V1GetSchedule(ctx, args, schedRankings)
 }
 
 // V1GetRankingSummary retrieves the most recent ranking summary.
-func (rnkS *RankingSv1) GetRankingSummary(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
+func (rnkS *RankingSv1) GetRankingSummary(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RankingSummary) (err error) {
 	return rnkS.rnkS.V1GetRankingSummary(ctx, arg, reply)
 }

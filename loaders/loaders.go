@@ -6,12 +6,12 @@ package loaders
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -60,7 +60,7 @@ type ArgsProcessFolder struct {
 	APIOpts  map[string]any
 }
 
-func (ldrS *LoaderS) V1Run(ctx *context.Context, args *ArgsProcessFolder,
+func (ldrS *LoaderS) V1Run(ctx context.Context, args *ArgsProcessFolder,
 	rply *map[string]int) (err error) {
 	ldrS.RLock()
 	defer ldrS.RUnlock()
@@ -123,7 +123,7 @@ type ArgsProcessZip struct {
 	APIOpts  map[string]any
 }
 
-func (ldrS *LoaderS) V1ImportZip(ctx *context.Context, args *ArgsProcessZip,
+func (ldrS *LoaderS) V1ImportZip(ctx context.Context, args *ArgsProcessZip,
 	rply *string) (err error) {
 	var zipR *zip.Reader
 	if zipR, err = zip.NewReader(bytes.NewReader(args.Data), int64(len(args.Data))); err != nil {

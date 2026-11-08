@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +52,7 @@ func (mfi *MigratorFromItem) AsMapInterface() (initialMP map[string]any) {
 }
 
 // loadMigratorCgrCfg loads the Migrator section of the configuration
-func (mg *MigratorCgrCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (mg *MigratorCgrCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnMigratorCgrCfg := new(MigratorCfgJson)
 	if err = jsnCfg.GetSection(ctx, MigratorJSON, jsnMigratorCgrCfg); err != nil {
 		return

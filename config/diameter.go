@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,7 +40,7 @@ type DiameterAgentCfg struct {
 }
 
 // loadDiameterAgentCfg loads the DiameterAgent section of the configuration
-func (da *DiameterAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (da *DiameterAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnDACfg := new(DiameterAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, DiameterAgentJSON, jsnDACfg); err != nil {
 		return

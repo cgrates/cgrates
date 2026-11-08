@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -247,8 +247,8 @@ func TestDynamicFiltersConns2(t *testing.T) {
 		},
 	}
 	cc := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1GetAccount: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1GetAccount: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Account)
 				if !canCast {
 					t.Errorf("Wrong argument type: %T", reply)

@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -117,7 +117,7 @@ func (sqlEe *SQLEe) Connect() (err error) {
 	return
 }
 
-func (sqlEe *SQLEe) ExportEvent(_ *context.Context, req, _ any) error {
+func (sqlEe *SQLEe) ExportEvent(_ context.Context, req, _ any) error {
 	sqlEe.reqs.get()
 	sqlEe.RLock()
 	defer func() {

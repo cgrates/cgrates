@@ -4,6 +4,7 @@
 package agents
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -46,7 +46,7 @@ func NewDiameterAgent(cgrCfg *config.CGRConfig, cache *engine.CacheS, filterS *e
 		dictionary: dict.Default,
 	}
 	srv, _ := birpc.NewService(da, "", false)
-	da.ctx = context.WithClient(context.TODO(), srv)
+	da.ctx = birpc.WithClient(context.TODO(), srv)
 	dictsPath := cgrCfg.DiameterAgentCfg().DictionariesPath
 	if len(dictsPath) != 0 {
 		if !cgrCfg.DiameterAgentCfg().DictionariesAppendDefaults {
@@ -92,7 +92,7 @@ type DiameterAgent struct {
 	dpa        map[string]chan *diam.Message
 	dictionary *dict.Parser // Holds the dictionary to be used by the agent
 
-	ctx *context.Context
+	ctx context.Context
 }
 
 // ListenAndServe is called when DiameterAgent is started, usually from within cmd/cgr-engine
@@ -332,7 +332,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 }
 
 // V1DisconnectSession is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (da *DiameterAgent) V1DisconnectSession(ctx context.Context, cgrEv utils.CGREvent, reply *string) error {
 	ssID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		utils.Logger.Info(
@@ -355,7 +355,7 @@ func (da *DiameterAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.C
 }
 
 // V1GetActiveSessionIDs is part of the sessions.BiRPClient
-func (da *DiameterAgent) V1GetActiveSessionIDs(*context.Context, string, *[]*sessions.SessionID) error {
+func (da *DiameterAgent) V1GetActiveSessionIDs(context.Context, string, *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
 }
 
@@ -398,7 +398,7 @@ func (da *DiameterAgent) sendASR(originID string, reply *string) (err error) {
 }
 
 // V1AlterSession sends a rar message to diameter client
-func (da *DiameterAgent) V1AlterSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (da *DiameterAgent) V1AlterSession(ctx context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)
@@ -615,7 +615,7 @@ func (da *DiameterAgent) handleDPA(c diam.Conn, m *diam.Message) {
 
 // V1DisconnectPeer sends a DPR message to diameter client.
 // Looks up connection by RemoteAddr if provided, otherwise by OriginHost+OriginRealm.
-func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRArgs, reply *string) (err error) {
+func (da *DiameterAgent) V1DisconnectPeer(ctx context.Context, args *utils.DPRArgs, reply *string) (err error) {
 	if args == nil {
 		utils.Logger.Info(
 			fmt.Sprintf("<%s> cannot send DPR, missing arguments",
@@ -700,6 +700,6 @@ func (da *DiameterAgent) V1DisconnectPeer(ctx *context.Context, args *utils.DPRA
 }
 
 // V1WarnDisconnect is used to implement the sessions.BiRPClient interface
-func (*DiameterAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+func (*DiameterAgent) V1WarnDisconnect(context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

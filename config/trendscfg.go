@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -20,7 +20,7 @@ type TrendSCfg struct {
 	EEsExporterIDs         []string
 }
 
-func (t *TrendSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (t *TrendSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnTrendSCfg := new(TrendSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, TrendSJSON, jsnTrendSCfg); err != nil {
 		return

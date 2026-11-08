@@ -4,13 +4,13 @@
 package engine
 
 import (
+	"context"
 	"math/rand"
 	"slices"
 	"sort"
 	"strconv"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -102,7 +102,7 @@ func (dH *DispatcherHost) TenantID() string {
 }
 
 // GetConn will build and cache the connection if it is not defined yet
-func (dH *DispatcherHost) GetConn(ctx *context.Context, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector) (_ birpc.ClientConnector, err error) {
+func (dH *DispatcherHost) GetConn(ctx context.Context, cfg *config.CGRConfig, iPRCCh chan birpc.ClientConnector) (_ birpc.ClientConnector, err error) {
 	if dH.rpcConn == nil {
 		// connect the rpcConn
 		if dH.rpcConn, err = NewRPCConnection(ctx, dH.RemoteHost,

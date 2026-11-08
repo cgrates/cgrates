@@ -6,6 +6,7 @@
 package general_tests
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"path/filepath"
@@ -14,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/general_tests/calltest"
 	"github.com/cgrates/cgrates/utils"

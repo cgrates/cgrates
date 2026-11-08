@@ -4,7 +4,8 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -18,7 +19,7 @@ type SentryPeerCfg struct {
 	GrantType    string
 }
 
-func (sentrypeer *SentryPeerCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (sentrypeer *SentryPeerCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSentryPeerCfg := new(SentryPeerJsonCfg)
 	if err = jsnCfg.GetSection(ctx, SentryPeerJSON, jsnSentryPeerCfg); err != nil {
 		return

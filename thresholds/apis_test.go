@@ -5,12 +5,12 @@ package thresholds
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -642,7 +642,7 @@ func TestThresholdsV1ResetThresholdNegativeStoreIntervalErr(t *testing.T) {
 	dm.SetCache(cacheS)
 	filterS := engine.NewFilterS(cfg, nil, dm)
 	dbMock := &engine.DataDBMock{
-		GetThresholdDrvF: func(*context.Context, string, string) (*utils.Threshold, error) {
+		GetThresholdDrvF: func(context.Context, string, string) (*utils.Threshold, error) {
 			return nil, utils.ErrNoDatabaseConn
 		},
 	}

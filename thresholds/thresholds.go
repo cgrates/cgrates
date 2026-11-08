@@ -5,6 +5,7 @@ package thresholds
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"maps"
 	"runtime"
@@ -12,7 +13,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -69,7 +69,7 @@ type ThresholdS struct {
 }
 
 // Reload restarts the backup loop. No-op after Shutdown.
-func (s *ThresholdS) Reload(ctx *context.Context) {
+func (s *ThresholdS) Reload(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -82,13 +82,13 @@ func (s *ThresholdS) Reload(ctx *context.Context) {
 }
 
 // StartLoop starts the goroutine with the backup loop
-func (s *ThresholdS) StartLoop(ctx *context.Context) {
+func (s *ThresholdS) StartLoop(ctx context.Context) {
 	s.backupLoop.Add(1)
 	go s.runBackup(ctx)
 }
 
 // Shutdown is called to shutdown the service
-func (s *ThresholdS) Shutdown(ctx *context.Context) {
+func (s *ThresholdS) Shutdown(ctx context.Context) {
 	s.stateMu.Lock()
 	defer s.stateMu.Unlock()
 	if s.stopBackup == nil {
@@ -101,7 +101,7 @@ func (s *ThresholdS) Shutdown(ctx *context.Context) {
 }
 
 // backup will regularly store thresholds changed to DB
-func (s *ThresholdS) runBackup(ctx *context.Context) {
+func (s *ThresholdS) runBackup(ctx context.Context) {
 	defer s.backupLoop.Done()
 	storeInterval := s.cfg.ThresholdSCfg().StoreInterval
 	if storeInterval <= 0 {
@@ -118,7 +118,7 @@ func (s *ThresholdS) runBackup(ctx *context.Context) {
 }
 
 // storeThresholds represents one task of complete backup
-func (s *ThresholdS) storeThresholds(ctx *context.Context) {
+func (s *ThresholdS) storeThresholds(ctx context.Context) {
 	var failedThresholds []string
 	for {
 		s.storedMu.Lock()
@@ -152,7 +152,7 @@ func (s *ThresholdS) storeThresholds(ctx *context.Context) {
 }
 
 // storeThreshold stores the threshold in DB
-func (s *ThresholdS) storeThreshold(ctx *context.Context, t *utils.Threshold) error {
+func (s *ThresholdS) storeThreshold(ctx context.Context, t *utils.Threshold) error {
 	if err := s.dm.SetThreshold(ctx, t); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> failed saving Threshold with tenant: %s and ID: %s, error: %v",
@@ -173,7 +173,7 @@ func (s *ThresholdS) storeThreshold(ctx *context.Context, t *utils.Threshold) er
 }
 
 // matchingThresholdsForEvent returns ordered list of matching thresholds which are active for an Event
-func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string,
+func (s *ThresholdS) matchingThresholdsForEvent(ctx context.Context, tnt string,
 	args *utils.CGREvent) (ts []*matchedThreshold, unlock func(), err error) {
 	unlockAll := func() {
 		for _, mt := range ts {
@@ -289,7 +289,7 @@ func (s *ThresholdS) matchingThresholdsForEvent(ctx *context.Context, tnt string
 }
 
 // processEvent processes a new event, dispatching to matching thresholds
-func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (thIDs []string, err error) {
+func (s *ThresholdS) processEvent(ctx context.Context, tnt string, args *utils.CGREvent) (thIDs []string, err error) {
 	matchTs, unlock, err := s.matchingThresholdsForEvent(ctx, tnt, args)
 	if err != nil {
 		return nil, err
@@ -371,7 +371,7 @@ func (s *ThresholdS) processEvent(ctx *context.Context, tnt string, args *utils.
 }
 
 // processAttributeS will process the event with AttributeS
-func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttributesProcessEventReply, error) {
+func (s *ThresholdS) processAttributeS(ctx context.Context, tnt string, mt *matchedThreshold, cgrEv *utils.CGREvent) (*utils.AttributesProcessEventReply, error) {
 	attrConns, err := engine.GetConnIDs(ctx, s.cfg.ThresholdSCfg().Conns, utils.MetaAttributes, tnt, cgrEv.AsDataProvider(), nil, s.filters)
 	if err != nil {
 		return nil, err
@@ -390,7 +390,7 @@ func (s *ThresholdS) processAttributeS(ctx *context.Context, tnt string, mt *mat
 	return &rplyAttr, nil
 }
 
-func (s *ThresholdS) processEEs(ctx *context.Context, opts map[string]any, mt *matchedThreshold, tnt string, dP utils.DataProvider) error {
+func (s *ThresholdS) processEEs(ctx context.Context, opts map[string]any, mt *matchedThreshold, tnt string, dP utils.DataProvider) error {
 	var targetEeIDs []string
 	if len(mt.profile.EeIDs) > 0 {
 		targetEeIDs = mt.profile.EeIDs

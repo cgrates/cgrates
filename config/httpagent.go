@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"maps"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -14,7 +14,7 @@ import (
 type HTTPAgentCfgs []*HTTPAgentCfg
 
 // loadHTTPAgentCfg loads the HttpAgent section of the configuration
-func (hcfgs *HTTPAgentCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (hcfgs *HTTPAgentCfgs) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnHTTPAgntCfg := new([]*HttpAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, HTTPAgentJSON, jsnHTTPAgntCfg); err != nil {
 		return

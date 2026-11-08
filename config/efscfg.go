@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -28,7 +28,7 @@ type EFsCfg struct {
 
 func (EFsCfg) SName() string { return EFsJSON }
 
-func (c *EFsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (c *EFsCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsonEFsCfg := new(EfsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, EFsJSON, jsonEFsCfg); err != nil {
 		return

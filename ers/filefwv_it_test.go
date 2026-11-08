@@ -8,6 +8,7 @@ package ers
 
 /*
 import (
+	"context"
 	"fmt"
 	"net/rpc"
 	"os"
@@ -16,7 +17,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

@@ -5,9 +5,9 @@ package chargers
 
 import (
 	"cmp"
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -28,7 +28,7 @@ func NewChargerService(dm *engine.DataManager, filterS *engine.FilterS,
 }
 
 // matchingChargingProfilesForEvent returns ordered list of matching chargers which are active by the time of the function call
-func (cS *ChargerS) matchingChargerProfilesForEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (cPs []*utils.ChargerProfile, err error) {
+func (cS *ChargerS) matchingChargerProfilesForEvent(ctx context.Context, tnt string, cgrEv *utils.CGREvent) (cPs []*utils.ChargerProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  cgrEv.Event,
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -103,7 +103,7 @@ var ChargerSDefaultAlteredFields = []string{utils.MetaOptsRunID,
 	utils.MetaOpts + utils.NestingSep + utils.MetaChargeID,
 	utils.MetaOpts + utils.NestingSep + utils.MetaSubsys}
 
-func (cS *ChargerS) processEvent(ctx *context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
+func (cS *ChargerS) processEvent(ctx context.Context, tnt string, cgrEv *utils.CGREvent) (rply []*ChrgSProcessEventReply, err error) {
 	cPs, err := cS.matchingChargerProfilesForEvent(ctx, tnt, cgrEv)
 	if err != nil {
 		return nil, err

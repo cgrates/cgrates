@@ -4,11 +4,10 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/utils"
 
@@ -257,7 +256,7 @@ func TestRatesGetRateProfileErr2(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDBMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(*context.Context, string, string) ([]string, error) {
+		GetKeysForPrefixF: func(context.Context, string, string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -394,7 +393,7 @@ func TestRatesGetRateProfilesCountKeysLenError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDBMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(*context.Context, string, string) ([]string, error) {
+		GetKeysForPrefixF: func(context.Context, string, string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -1371,16 +1370,16 @@ func TestRatesSetRateProfileErrorSetLoadIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1419,7 +1418,7 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				ID:        "2",
 				Tenant:    "cgrates.org",
@@ -1427,13 +1426,13 @@ func TestRatesSetRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 				Rates:     map[string]*utils.Rate{},
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1472,21 +1471,21 @@ func TestRatesRemoveRateProfileRatesErrorSetLoadIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rtIDs *[]string) error {
+		RemoveRateProfileDrvF: func(ctx context.Context, str1 string, str2 string, rtIDs *[]string) error {
 			return nil
 		},
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1517,21 +1516,21 @@ func TestRatesRemoveRateProfileErrorSetLoadIDs(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
+		RemoveRateProfileDrvF: func(ctx context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
 	}
@@ -1564,22 +1563,22 @@ func TestRatesSetRateProfileErrorCache(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return nil, utils.ErrNotFound
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1622,7 +1621,7 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				ID:        "2",
 				Tenant:    "cgrates.org",
@@ -1630,16 +1629,16 @@ func TestRatesSetRateProfileRatesErrorCache(t *testing.T) {
 				Rates:     map[string]*utils.Rate{},
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -1679,24 +1678,24 @@ func TestRatesRemoveRateProfileRatesErrorCache(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
+		RemoveRateProfileDrvF: func(ctx context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -1728,24 +1727,24 @@ func TestRatesRemoveRateProfileErrorSetCache(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		RemoveRateProfileDrvF: func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
+		RemoveRateProfileDrvF: func(ctx context.Context, str1 string, str2 string, rateIDs *[]string) error {
 			return nil
 		},
-		GetRateProfileDrvF: func(c *context.Context, s string, s2 string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(c context.Context, s string, s2 string) (*utils.RateProfile, error) {
 			return &utils.RateProfile{
 				Tenant: "tenant",
 			}, nil
 		},
-		SetRateProfileDrvF: func(c *context.Context, profile *utils.RateProfile, overWrite bool) error {
+		SetRateProfileDrvF: func(c context.Context, profile *utils.RateProfile, overWrite bool) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -1963,13 +1962,13 @@ func TestRatesGetRateProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
+		SetRateProfileDrvF: func(context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
-		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+		RemoveRateProfileDrvF: func(context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -2001,20 +2000,20 @@ func TestRatesGetRateProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(context.Context, string, string) (*utils.RateProfile, error) {
 			ratePrf := &utils.RateProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
+		SetRateProfileDrvF: func(context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
-		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+		RemoveRateProfileDrvF: func(context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
 		},
 	}
@@ -2049,20 +2048,20 @@ func TestRatesGetRateProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(context.Context, string, string) (*utils.RateProfile, error) {
 			ratePrf := &utils.RateProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
+		SetRateProfileDrvF: func(context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
-		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+		RemoveRateProfileDrvF: func(context.Context, string, string, *[]string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rtp_cgrates.org:key1", "rtp_cgrates.org:key2", "rtp_cgrates.org:key3"}, nil
 		},
 	}
@@ -2265,17 +2264,17 @@ func TestRatesGetRateProfileRatesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileDrvF: func(*context.Context, string, string) (*utils.RateProfile, error) {
+		GetRateProfileDrvF: func(context.Context, string, string) (*utils.RateProfile, error) {
 			ratePrf := &utils.RateProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return ratePrf, nil
 		},
-		SetRateProfileDrvF: func(*context.Context, *utils.RateProfile, bool) error {
+		SetRateProfileDrvF: func(context.Context, *utils.RateProfile, bool) error {
 			return nil
 		},
-		RemoveRateProfileDrvF: func(*context.Context, string, string, *[]string) error {
+		RemoveRateProfileDrvF: func(context.Context, string, string, *[]string) error {
 			return nil
 		},
 	}
@@ -2304,7 +2303,7 @@ func TestRatesGetRateProfileRatesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileRatesDrvF: func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error) {
+		GetRateProfileRatesDrvF: func(context.Context, string, string, string, bool) ([]string, []*utils.Rate, error) {
 			return []string{}, nil, nil
 		},
 	}
@@ -2386,7 +2385,7 @@ func TestRatesGetRateProfileRateIDsErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileRatesDrvF: func(ctx *context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
+		GetRateProfileRatesDrvF: func(ctx context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
 			return []string{}, nil, nil
 		},
 	}
@@ -2417,7 +2416,7 @@ func TestRatesGetRateProfileRateIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileRatesDrvF: func(ctx *context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
+		GetRateProfileRatesDrvF: func(ctx context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
 			return []string{"RATE1", "RATE2"}, []*utils.Rate{
 				{
 					ID: "RATE1",
@@ -2460,7 +2459,7 @@ func TestRatesGetRateProfileRateIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetRateProfileRatesDrvF: func(ctx *context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
+		GetRateProfileRatesDrvF: func(ctx context.Context, s1, s2, s3 string, b bool) ([]string, []*utils.Rate, error) {
 			return []string{"RATE1", "RATE2"}, []*utils.Rate{
 				{
 					ID: "RATE1",

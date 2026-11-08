@@ -4,17 +4,16 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 	"slices"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func populateCostForRoutes(ctx *context.Context, cfg *config.CGRConfig, connMgr *engine.ConnManager,
+func populateCostForRoutes(ctx context.Context, cfg *config.CGRConfig, connMgr *engine.ConnManager,
 	fltrS *engine.FilterS, routes map[string]*RouteWithWeight, ev *utils.CGREvent,
 	extraOpts *optsGetRoutes) (sortedRoutes []*utils.SortedRoute, err error) {
 	rateSConns, err := engine.GetConnIDs(ctx, cfg.RouteSCfg().Conns, utils.MetaRates, ev.Tenant, ev.AsDataProvider(), nil, fltrS)
@@ -129,7 +128,7 @@ type HightCostSorter struct {
 	fltrS   *engine.FilterS
 }
 
-func (hcs *HightCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
+func (hcs *HightCostSorter) SortRoutes(ctx context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateCostForRoutes(ctx, hcs.cfg, hcs.connMgr, hcs.fltrS, routes, ev, extraOpts); err != nil {
@@ -156,7 +155,7 @@ type LeastCostSorter struct {
 	fltrS   *engine.FilterS
 }
 
-func (lcs *LeastCostSorter) SortRoutes(ctx *context.Context, prflID string, routes map[string]*RouteWithWeight,
+func (lcs *LeastCostSorter) SortRoutes(ctx context.Context, prflID string, routes map[string]*RouteWithWeight,
 	ev *utils.CGREvent, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	var sRoutes []*utils.SortedRoute
 	if sRoutes, err = populateCostForRoutes(ctx, lcs.cfg, lcs.connMgr, lcs.fltrS, routes, ev, extraOpts); err != nil {

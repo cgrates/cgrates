@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"maps"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -67,7 +67,7 @@ type DAClientOpts struct {
 }
 
 // loadRadiusAgentCfg loads the RadiusAgent section of the configuration
-func (ra *RadiusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (ra *RadiusAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRACfg := new(RadiusAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, RadiusAgentJSON, jsnRACfg); err != nil {
 		return

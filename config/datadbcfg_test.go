@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 

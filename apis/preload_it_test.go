@@ -7,6 +7,7 @@
 package apis
 
 import (
+	"context"
 	"os"
 	"os/exec"
 	"path"
@@ -14,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

@@ -8,6 +8,7 @@ package ers
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -20,7 +21,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 
 	"github.com/cgrates/cgrates/config"
@@ -521,10 +521,10 @@ func TestERsProcessEvent3(t *testing.T) {
 }
 
 type testMockClients struct {
-	calls map[string]func(ctx *context.Context, args, reply any) error
+	calls map[string]func(ctx context.Context, args, reply any) error
 }
 
-func (sT *testMockClients) Call(ctx *context.Context, method string, arg any, rply any) error {
+func (sT *testMockClients) Call(ctx context.Context, method string, arg any, rply any) error {
 	if call, has := sT.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -544,8 +544,8 @@ func TestERsProcessEventSessionSErrorPropagation(t *testing.T) {
 	cfg.ERsCfg().Conns[utils.MetaSessionS] = []*config.DynamicConns{{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS)}}}
 	fltrS := &engine.FilterS{}
 	testMockClient := &testMockClients{
-		calls: map[string]func(ctx *context.Context, args, reply any) error{
-			utils.SessionSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args, reply any) error{
+			utils.SessionSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				return errors.New("RALS_ERROR")
 			},
 		},

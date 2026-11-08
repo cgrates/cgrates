@@ -4,7 +4,8 @@
 package accounts
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -12,7 +13,7 @@ import (
 )
 
 // newAbstractBalance constructs an abstractBalanceOperator
-func newAbstractBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
+func newAbstractBalanceOperator(ctx context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
 	cncrtBlncs []*concreteBalance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
@@ -27,7 +28,7 @@ type abstractBalance struct {
 	cncrtBlncs []*concreteBalance // paying balances
 	fltrS      *engine.FilterS
 	connMgr    *engine.ConnManager
-	ctx        *context.Context
+	ctx        context.Context
 	attrSConns []string
 	rateSConns []string
 }
@@ -39,7 +40,7 @@ func (aB *abstractBalance) id() string {
 
 // debitAbstracts implements the balanceOperator interface
 // it will debit the abstracts out of a single abstractBalance or pay it with one or multiple concrete balances
-func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Decimal,
+func (aB *abstractBalance) debitAbstracts(ctx context.Context, usage *utils.Decimal,
 	cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaOpts: cgrEv.APIOpts,
@@ -192,7 +193,7 @@ func (aB *abstractBalance) debitAbstracts(ctx *context.Context, usage *utils.Dec
 }
 
 // debitConcretes implements the balanceOperator interface
-func (aB *abstractBalance) debitConcretes(_ *context.Context, _ *utils.Decimal,
+func (aB *abstractBalance) debitConcretes(_ context.Context, _ *utils.Decimal,
 	_ *utils.CGREvent, _ *utils.Decimal) (ec *utils.EventCharges, err error) {
 	return nil, utils.ErrNotImplemented
 }

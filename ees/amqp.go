@@ -4,10 +4,10 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -122,7 +122,7 @@ func (pstr *AMQPee) Connect() (err error) {
 	return
 }
 
-func (pstr *AMQPee) ExportEvent(_ *context.Context, content, _ any) (err error) {
+func (pstr *AMQPee) ExportEvent(_ context.Context, content, _ any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	if pstr.postChan == nil {

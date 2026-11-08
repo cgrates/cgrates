@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"crypto/tls"
 	"net"
 	"net/http"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +27,7 @@ type HTTPCfg struct {
 }
 
 // loadHTTPCfg loads the Http section of the configuration
-func (httpcfg *HTTPCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (httpcfg *HTTPCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnHTTPCfg := new(HTTPJsonCfg)
 	if err = jsnCfg.GetSection(ctx, HTTPJSON, jsnHTTPCfg); err != nil {
 		return

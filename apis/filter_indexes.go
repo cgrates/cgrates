@@ -4,11 +4,11 @@
 package apis
 
 import (
+	"context"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
@@ -31,7 +31,7 @@ type AttrRemFilterIndexes struct {
 	APIOpts  map[string]any
 }
 
-func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilterIndexes, reply *string) (err error) {
+func (adms *AdminSv1) RemoveFilterIndexes(ctx context.Context, arg *AttrRemFilterIndexes, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{"ItemType"}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -84,7 +84,7 @@ func (adms *AdminSv1) RemoveFilterIndexes(ctx *context.Context, arg *AttrRemFilt
 	return
 }
 
-func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterIndexes, reply *[]string) (err error) {
+func (adms *AdminSv1) GetFilterIndexes(ctx context.Context, arg *AttrGetFilterIndexes, reply *[]string) (err error) {
 	var indexes map[string]utils.StringSet
 	var indexedSlice []string
 	indexesFilter := make(map[string]utils.StringSet)
@@ -213,7 +213,7 @@ func (adms *AdminSv1) GetFilterIndexes(ctx *context.Context, arg *AttrGetFilterI
 }
 
 // ComputeFilterIndexes selects which index filters to recompute
-func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.ArgsComputeFilterIndexes, reply *string) (err error) {
+func (adms *AdminSv1) ComputeFilterIndexes(ctx context.Context, args *utils.ArgsComputeFilterIndexes, reply *string) (err error) {
 	transactionID := utils.GenUUID()
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
@@ -473,7 +473,7 @@ func (adms *AdminSv1) ComputeFilterIndexes(ctx *context.Context, args *utils.Arg
 }
 
 // ComputeFilterIndexIDs computes specific filter indexes
-func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
+func (adms *AdminSv1) ComputeFilterIndexIDs(ctx context.Context, args *utils.ArgsComputeFilterIndexIDs, reply *string) (err error) {
 	transactionID := utils.NonTransactional
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
@@ -660,7 +660,7 @@ func (adms *AdminSv1) ComputeFilterIndexIDs(ctx *context.Context, args *utils.Ar
 	return nil
 }
 
-func (adms *AdminSv1) GetReverseFilterHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *map[string]*engine.ReverseFilterIHReply) (err error) {
+func (adms *AdminSv1) GetReverseFilterHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *map[string]*engine.ReverseFilterIHReply) (err error) {
 	objCaches := map[string]*ltcache.Cache{utils.CacheRateFilterIndexes: ltcache.NewCache(-1, 0, false, nil, nil)}
 	for indxType := range utils.CacheIndexesToPrefix {
 		objCaches[indxType] = ltcache.NewCache(-1, 0, false, nil, nil)
@@ -674,7 +674,7 @@ func (adms *AdminSv1) GetReverseFilterHealth(ctx *context.Context, args *engine.
 	return
 }
 
-func (adms *AdminSv1) GetThresholdsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetThresholdsIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -688,7 +688,7 @@ func (adms *AdminSv1) GetThresholdsIndexesHealth(ctx *context.Context, args *eng
 	return nil
 }
 
-func (adms *AdminSv1) GetResourcesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetResourcesIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -702,7 +702,7 @@ func (adms *AdminSv1) GetResourcesIndexesHealth(ctx *context.Context, args *engi
 	return nil
 }
 
-func (adms *AdminSv1) GetIPsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetIPsIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	iph, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -716,7 +716,7 @@ func (adms *AdminSv1) GetIPsIndexesHealth(ctx *context.Context, args *engine.Ind
 	return nil
 }
 
-func (adms *AdminSv1) GetStatsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetStatsIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -730,7 +730,7 @@ func (adms *AdminSv1) GetStatsIndexesHealth(ctx *context.Context, args *engine.I
 	return nil
 }
 
-func (adms *AdminSv1) GetRoutesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetRoutesIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -744,7 +744,7 @@ func (adms *AdminSv1) GetRoutesIndexesHealth(ctx *context.Context, args *engine.
 	return nil
 }
 
-func (adms *AdminSv1) GetAttributesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetAttributesIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -758,7 +758,7 @@ func (adms *AdminSv1) GetAttributesIndexesHealth(ctx *context.Context, args *eng
 	return nil
 }
 
-func (adms *AdminSv1) GetChargersIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetChargersIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -772,7 +772,7 @@ func (adms *AdminSv1) GetChargersIndexesHealth(ctx *context.Context, args *engin
 	return nil
 }
 
-func (adms *AdminSv1) GetRateProfilesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetRateProfilesIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -786,7 +786,7 @@ func (adms *AdminSv1) GetRateProfilesIndexesHealth(ctx *context.Context, args *e
 	return nil
 }
 
-func (adms *AdminSv1) GetActionsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetActionsIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -800,7 +800,7 @@ func (adms *AdminSv1) GetActionsIndexesHealth(ctx *context.Context, args *engine
 	return nil
 }
 
-func (adms *AdminSv1) GetAccountsIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetAccountsIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealth(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),
@@ -814,7 +814,7 @@ func (adms *AdminSv1) GetAccountsIndexesHealth(ctx *context.Context, args *engin
 	return nil
 }
 
-func (adms *AdminSv1) GetRateRatesIndexesHealth(ctx *context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
+func (adms *AdminSv1) GetRateRatesIndexesHealth(ctx context.Context, args *engine.IndexHealthArgs, reply *engine.FilterIHReply) error {
 	rp, err := engine.GetFltrIdxHealthForRateRates(ctx, adms.dm,
 		ltcache.NewCache(args.FilterCacheLimit, args.FilterCacheTTL, args.FilterCacheStaticTTL, nil, nil),
 		ltcache.NewCache(args.IndexCacheLimit, args.IndexCacheTTL, args.IndexCacheStaticTTL, nil, nil),

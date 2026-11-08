@@ -4,6 +4,7 @@
 package console
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -12,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/rpcconsole"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"

@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +33,7 @@ type PrometheusAgentCfg struct {
 }
 
 // Load loads the PrometheusAgent section of the configuration.
-func (c *PrometheusAgentCfg) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) error {
+func (c *PrometheusAgentCfg) Load(ctx context.Context, db ConfigDB, _ *CGRConfig) error {
 	jc := new(PrometheusAgentJsonCfg)
 	if err := db.GetSection(ctx, PrometheusAgentJSON, jc); err != nil {
 		return err

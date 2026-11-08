@@ -4,17 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetChargerProfile returns a Charger Profile
-func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
+func (adms *AdminSv1) GetChargerProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -31,7 +30,7 @@ func (adms *AdminSv1) GetChargerProfile(ctx *context.Context, arg *utils.TenantI
 }
 
 // GetChargerProfileIDs returns list of chargerProfile IDs registered for a tenant
-func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, chPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetChargerProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, chPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -62,7 +61,7 @@ func (adms *AdminSv1) GetChargerProfileIDs(ctx *context.Context, args *utils.Arg
 }
 
 // GetChargerProfiles returns a list of charger profiles registered for a tenant
-func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*utils.ChargerProfile) (err error) {
+func (admS *AdminSv1) GetChargerProfiles(ctx context.Context, args *utils.ArgsItemIDs, chrgPrfs *[]*utils.ChargerProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,7 +84,7 @@ func (admS *AdminSv1) GetChargerProfiles(ctx *context.Context, args *utils.ArgsI
 
 // GetChargerProfilesCount returns the total number of ChargerProfiles registered for a tenant
 // returns ErrNotFound in case of 0 ChargerProfiles
-func (admS *AdminSv1) GetChargerProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetChargerProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -107,7 +106,7 @@ func (admS *AdminSv1) GetChargerProfilesCount(ctx *context.Context, args *utils.
 }
 
 // SetChargerProfile add/update a new Charger Profile
-func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *utils.ChargerProfileWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetChargerProfile(ctx context.Context, arg *utils.ChargerProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.ChargerProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -136,7 +135,7 @@ func (adms *AdminSv1) SetChargerProfile(ctx *context.Context, arg *utils.Charger
 }
 
 // RemoveChargerProfile remove a specific Charger Profile
-func (adms *AdminSv1) RemoveChargerProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveChargerProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -177,11 +176,11 @@ type ChargerSv1 struct {
 }
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (chgS *ChargerSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*chargers.ChrgSProcessEventReply) (err error) {
+func (chgS *ChargerSv1) ProcessEvent(ctx context.Context, args *utils.CGREvent, reply *[]*chargers.ChrgSProcessEventReply) (err error) {
 	return chgS.chgs.V1ProcessEvent(ctx, args, reply)
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (chgS *ChargerSv1) GetChargersForEvent(ctx *context.Context, args *utils.CGREvent, rply *[]*utils.ChargerProfile) (err error) {
+func (chgS *ChargerSv1) GetChargersForEvent(ctx context.Context, args *utils.CGREvent, rply *[]*utils.ChargerProfile) (err error) {
 	return chgS.chgs.V1GetChargersForEvent(ctx, args, rply)
 }

@@ -4,16 +4,16 @@
 package config
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestTpeSCfgLoad(t *testing.T) {
 	tp := &TpeSCfg{}
-	ctx := &context.Context{}
+	ctx := context.Background()
 	jsnCfg := new(mockDb)
 	cgrcfg := &CGRConfig{}
 	if err := tp.Load(ctx, jsnCfg, cgrcfg); err != utils.ErrNotImplemented {
