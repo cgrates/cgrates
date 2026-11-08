@@ -80,8 +80,8 @@ package engine
 
 // 	rpcInternal := make(chan birpc.ClientConnector, 1)
 // 	rpcInternal <- &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EfSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				return nil
 // 			},
 // 		},
@@ -144,8 +144,8 @@ package engine
 
 // // 	rpcInternal := make(chan birpc.ClientConnector, 1)
 // // 	rpcInternal <- &ccMock{
-// // 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// // 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// // 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// // 			utils.EfSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // // 				return nil
 // // 			},
 // // 		},
@@ -191,8 +191,8 @@ package engine
 // 		Cache = NewCacheS(cfg, dm, nil, nil)
 // 		newCDRSrv := NewCDRServer(cfg, dm, fltrs, cM)
 // 		ccM := &ccMock{
-// 			calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 			calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 				utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 					*reply.(*map[string]map[string]any) = map[string]map[string]any{}
 // 					return utils.ErrNotFound
 // 				},
@@ -225,8 +225,8 @@ package engine
 // 		Cache = NewCacheS(cfg, nil, nil)
 // 		cM := NewConnManager(cfg)
 // 		ccM := &ccMock{
-// 			calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 				utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 			calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 				utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 					delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 					exp := &utils.CGREventWithEeIDs{
 // 						CGREvent: &utils.CGREvent{
@@ -272,8 +272,8 @@ package engine
 // // 	Cache = NewCacheS(cfg, nil, nil, nil)
 // // 	cM := NewConnManager(cfg)
 // // 	ccM := &ccMock{
-// // 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// // 			utils.EfSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// // 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// // 			utils.EfSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // // 				exp := &utils.CGREventWithEeIDs{
 // // 					CGREvent: &utils.CGREvent{
@@ -320,8 +320,8 @@ package engine
 // 	Cache = NewCacheS(cfg, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{
@@ -367,8 +367,8 @@ package engine
 // 	Cache = NewCacheS(cfg, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{
@@ -414,8 +414,8 @@ package engine
 // 	Cache = NewCacheS(cfg, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{
@@ -461,8 +461,8 @@ package engine
 // 	Cache = NewCacheS(cfg, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{
@@ -532,8 +532,8 @@ package engine
 // 	Cache = NewCacheS(cfg, nil, nil)
 // 	cM := NewConnManager(cfg)
 // 	ccM := &ccMock{
-// 		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-// 			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+// 		calls: map[string]func(ctx context.Context, args any, reply any) error{
+// 			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 // 				delete(args.(*utils.CGREventWithEeIDs).Event, "Timestamp")
 // 				exp := &utils.CGREventWithEeIDs{
 // 					CGREvent: &utils.CGREvent{

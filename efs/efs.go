@@ -4,13 +4,13 @@
 package efs
 
 import (
+	"context"
 	"fmt"
 	"io/fs"
 	"path/filepath"
 	"slices"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +30,7 @@ func NewEfs(cfg *config.CGRConfig, connMgr *engine.ConnManager) *EfS {
 }
 
 // V1ProcessEvent will write into gob formnat file the Events that were failed to be exported.
-func (efs *EfS) V1ProcessEvent(ctx *context.Context, args *utils.ArgsFailedPosts, reply *string) error {
+func (efs *EfS) V1ProcessEvent(ctx context.Context, args *utils.ArgsFailedPosts, reply *string) error {
 	var format string
 	if _, has := args.APIOpts[utils.Format]; has {
 		format = utils.IfaceAsString(args.APIOpts[utils.Format])
@@ -92,7 +92,7 @@ type ReplayEventsParams struct {
 }
 
 // V1ReplayEvents will read the Events from gob files that were failed to be exported and try to re-export them again.
-func (efS *EfS) V1ReplayEvents(ctx *context.Context, args ReplayEventsParams, reply *string) error {
+func (efS *EfS) V1ReplayEvents(ctx context.Context, args ReplayEventsParams, reply *string) error {
 
 	// Set default tenant and directories if not provided.
 	if args.Tenant == "" {

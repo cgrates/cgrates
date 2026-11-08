@@ -4,14 +4,15 @@
 package rates
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1RateProfilesForEvent will be called to list the RateProfilesIDs that are matching the event
-func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
+func (rS *RateS) V1RateProfilesForEvent(ctx context.Context, args *utils.CGREvent, rpIDs *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -61,7 +62,7 @@ func (rS *RateS) V1RateProfilesForEvent(ctx *context.Context, args *utils.CGREve
 }
 
 // RateProfilesForEvent returns the list of rates that are matching the event from a specific profile
-func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
+func (rS *RateS) V1RateProfileRatesForEvent(ctx context.Context, args *utils.CGREventWithRateProfile, rtIDs *[]string) (err error) {
 	if args == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
 	}
@@ -118,7 +119,7 @@ func (rS *RateS) V1RateProfileRatesForEvent(ctx *context.Context, args *utils.CG
 // profiles. If a higher priority profile fails, it tries the next matching
 // profile. This continues until a valid cost is found or all profiles are
 // exhausted.
-func (rS *RateS) V1CostForEvent(ctx *context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
+func (rS *RateS) V1CostForEvent(ctx context.Context, args *utils.CGREvent, rpCost *utils.RateProfileCost) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = rS.cfg.GeneralCfg().DefaultTenant
 	}

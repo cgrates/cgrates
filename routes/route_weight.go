@@ -4,7 +4,8 @@
 package routes
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -20,7 +21,7 @@ type WeightSorter struct {
 	fS  *engine.FilterS
 }
 
-func (ws *WeightSorter) SortRoutes(ctx *context.Context, prflID string,
+func (ws *WeightSorter) SortRoutes(ctx context.Context, prflID string,
 	routes map[string]*RouteWithWeight, ev *utils.CGREvent, _ *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	sortedRoutes = &utils.SortedRoutes{
 		ProfileID: prflID,

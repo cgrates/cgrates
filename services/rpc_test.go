@@ -4,9 +4,9 @@
 package services
 
 import (
+	"context"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -29,7 +29,7 @@ func TestNewRPCServiceAddsPing(t *testing.T) {
 
 type rpcTestReceiver struct{}
 
-func (*rpcTestReceiver) Status(_ *context.Context, _ *utils.CGREvent, reply *string) error {
+func (*rpcTestReceiver) Status(_ context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.OK
 	return nil
 }

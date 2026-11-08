@@ -5,12 +5,12 @@ package actions
 
 import (
 	"cmp"
+	"context"
 	"errors"
 	"fmt"
 	"slices"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -81,7 +81,7 @@ func (aS *ActionS) schedInit() {
 }
 
 // scheduleActions loads matching profiles and schedules their actions.
-func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, crnReset bool) error {
+func (aS *ActionS) scheduleActions(ctx context.Context, cgrEvs []*utils.CGREvent, aPrflIDs []string, ignFilters, crnReset bool) error {
 	aS.crnLk.Lock()
 	defer aS.crnLk.Unlock()
 	crn := aS.crn
@@ -126,7 +126,7 @@ func (aS *ActionS) scheduleActions(ctx *context.Context, cgrEvs []*utils.CGREven
 
 // scheduleActionProfile schedules a profile's actions, replacing any existing job.
 // The caller must hold crnLk.
-func (aS *ActionS) scheduleActionProfile(ctx *context.Context, crn *cron.Cron, cgrEv *utils.CGREvent,
+func (aS *ActionS) scheduleActionProfile(ctx context.Context, crn *cron.Cron, cgrEv *utils.CGREvent,
 	profile *utils.ActionProfile, evNm utils.MapStorage, ignoreFilters, executeASAP bool) error {
 	var schedActs []*scheduledActs
 	var schedule cron.Schedule
@@ -162,7 +162,7 @@ func (aS *ActionS) scheduleActionProfile(ctx *context.Context, crn *cron.Cron, c
 }
 
 // matchingActionProfilesForEvent returns the matched ActionProfiles for the given event
-func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt string,
+func (aS *ActionS) matchingActionProfilesForEvent(ctx context.Context, tnt string,
 	evNm utils.MapStorage, aPrflIDs []string, ignoreFilters bool) (aPfs []*utils.ActionProfile, err error) {
 	if len(aPrflIDs) == 0 {
 		var aPfIDMp utils.StringSet
@@ -233,7 +233,7 @@ func (aS *ActionS) matchingActionProfilesForEvent(ctx *context.Context, tnt stri
 }
 
 // scheduledActions is responsible for scheduling the action profiles matching cgrEv
-func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
+func (aS *ActionS) scheduledActions(ctx context.Context, tnt string, cgrEv *utils.CGREvent, aPrflIDs []string,
 	ignoreFilters bool) (schedActs []*scheduledActs, err error) {
 	evNm := cgrEv.AsDataProvider()
 	evNm[utils.MetaCfg] = aS.cfg.GetDataProvider() // add *cfg dataprovider for *cfg filters
@@ -252,7 +252,7 @@ func (aS *ActionS) scheduledActions(ctx *context.Context, tnt string, cgrEv *uti
 	return
 }
 
-func (aS *ActionS) scheduledActionsForProfile(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func (aS *ActionS) scheduledActionsForProfile(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	profile *utils.ActionProfile, evNm utils.MapStorage, ignoreFilters bool) ([]*scheduledActs, error) {
 	trgActs := make(map[string][]actioner)
 	for _, aCfg := range profile.Actions {
@@ -283,8 +283,8 @@ func (aS *ActionS) scheduledActionsForProfile(ctx *context.Context, tnt string, 
 
 // asapExecuteActions executes the scheduledActs and removes the executed from database
 // uses locks to avoid concurrent access
-func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs) error {
-	return aS.dm.Guard(ctx, func(ctx *context.Context) (err error) {
+func (aS *ActionS) asapExecuteActions(ctx context.Context, sActs *scheduledActs) error {
+	return aS.dm.Guard(ctx, func(ctx context.Context) (err error) {
 		var ap *utils.ActionProfile
 		if ap, err = aS.dm.GetActionProfile(ctx, sActs.tenant, sActs.apID, true, true, utils.NonTransactional); err != nil {
 			utils.Logger.Warning(
@@ -311,7 +311,7 @@ func (aS *ActionS) asapExecuteActions(ctx *context.Context, sActs *scheduledActs
 func (aS *ActionS) cronExecuteActions(schedActs []*scheduledActs) {
 	ctx := context.Background()
 	first := schedActs[0]
-	err := aS.dm.Guard(ctx, func(ctx *context.Context) error {
+	err := aS.dm.Guard(ctx, func(ctx context.Context) error {
 		if !first.ignFilters {
 			ap, err := aS.dm.GetActionProfile(ctx, first.tenant, first.apID, true, true, utils.NonTransactional)
 			if err != nil {

@@ -4,12 +4,12 @@
 package rankings
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -56,7 +56,7 @@ func NewRankingS(dm *engine.DataManager,
 
 // computeRanking queries stats and builds the Ranking based on RankingProfile configuration.
 // Called by Cron service at scheduled intervals.
-func (rkS *RankingS) computeRanking(ctx *context.Context, rkP *utils.RankingProfile) {
+func (rkS *RankingS) computeRanking(ctx context.Context, rkP *utils.RankingProfile) {
 	rk, err := rkS.dm.GetRanking(ctx, rkP.Tenant, rkP.ID, true, true, utils.NonTransactional)
 	if err != nil {
 		utils.Logger.Warning(
@@ -222,7 +222,7 @@ func (rkS *RankingS) processEEs(rk *utils.Ranking) (err error) {
 }
 
 // storeRanking stores or schedules the ranking for storage based on "storeInterval".
-func (rkS *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err error) {
+func (rkS *RankingS) storeRanking(ctx context.Context, rk *utils.Ranking) (err error) {
 	if rkS.cgrcfg.RankingSCfg().StoreInterval == 0 {
 		return
 	}
@@ -239,7 +239,7 @@ func (rkS *RankingS) storeRanking(ctx *context.Context, rk *utils.Ranking) (err 
 // storeRankings stores modified rankings from cache in DB
 // Reschedules failed ranking IDs for next storage cycle.
 // This function is safe for concurrent use.
-func (rkS *RankingS) storeRankings(ctx *context.Context) {
+func (rkS *RankingS) storeRankings(ctx context.Context) {
 	var failedRkIDs []string
 	for {
 		rkS.sRksMux.Lock()
@@ -279,7 +279,7 @@ func (rkS *RankingS) storeRankings(ctx *context.Context) {
 }
 
 // asyncStoreRankings runs as a background process that periodically calls storeRankings.
-func (rkS *RankingS) asyncStoreRankings(ctx *context.Context) {
+func (rkS *RankingS) asyncStoreRankings(ctx context.Context) {
 	storeInterval := rkS.cgrcfg.RankingSCfg().StoreInterval
 	if storeInterval <= 0 {
 		close(rkS.storingStopped)
@@ -297,7 +297,7 @@ func (rkS *RankingS) asyncStoreRankings(ctx *context.Context) {
 }
 
 // StartRankingS activates the Cron service with scheduled ranking queries.
-func (rkS *RankingS) StartRankingS(ctx *context.Context) (err error) {
+func (rkS *RankingS) StartRankingS(ctx context.Context) (err error) {
 	if err = rkS.scheduleAutomaticQueries(ctx); err != nil {
 		return
 	}
@@ -336,7 +336,7 @@ func (rkS *RankingS) StopRankingS() {
 }
 
 // Reload restarts ranking services with updated configuration.
-func (rkS *RankingS) Reload(ctx *context.Context) {
+func (rkS *RankingS) Reload(ctx context.Context) {
 	crnCtx := rkS.crn.Stop()
 	close(rkS.rankingStop)
 	<-crnCtx.Done()
@@ -348,7 +348,7 @@ func (rkS *RankingS) Reload(ctx *context.Context) {
 }
 
 // scheduleAutomaticQueries schedules initial ranking queries based on configuration.
-func (rkS *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
+func (rkS *RankingS) scheduleAutomaticQueries(ctx context.Context) error {
 	schedData := make(map[string][]string)
 	for k, v := range rkS.cgrcfg.RankingSCfg().ScheduledIDs {
 		schedData[k] = v
@@ -381,7 +381,7 @@ func (rkS *RankingS) scheduleAutomaticQueries(ctx *context.Context) error {
 
 // scheduleRankingQueries schedules or reschedules specific ranking queries.
 // Safe for concurrent use.
-func (rkS *RankingS) scheduleRankingQueries(ctx *context.Context,
+func (rkS *RankingS) scheduleRankingQueries(ctx context.Context,
 	tnt string, rkIDs []string) (scheduled int, err error) {
 	var partial bool
 	rkS.crnRQsMux.Lock()

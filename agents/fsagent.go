@@ -4,13 +4,13 @@
 package agents
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -46,7 +46,7 @@ func NewFSsessions(cgrcfg *config.CGRConfig, cache *engine.CacheS, filterS *engi
 		fltrS:       filterS,
 	}
 	srv, _ := birpc.NewService(fsa, "", false)
-	fsa.ctx = context.WithClient(context.TODO(), srv)
+	fsa.ctx = birpc.WithClient(context.TODO(), srv)
 	msgTemplates := fsa.cgrcfg.TemplatesCfg()
 	// Inflate *template field types
 	for _, procsr := range fsa.cfg.RequestProcessors {
@@ -76,7 +76,7 @@ type FSsessions struct {
 	timezone    string
 	connMgr     *engine.ConnManager
 	caps        *engine.Caps
-	ctx         *context.Context
+	ctx         context.Context
 	fltrS       *engine.FilterS
 }
 
@@ -408,7 +408,7 @@ func (fsa *FSsessions) Shutdown() (err error) {
 }
 
 // V1DisconnectSession internal method to disconnect session in FreeSWITCH
-func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (fsa *FSsessions) V1DisconnectSession(ctx context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	ev := engine.NewMapEvent(cgrEv.Event)
 	channelID := ev.GetStringIgnoreErrors(utils.OriginID)
 	disconnectCause := ev.GetStringIgnoreErrors(utils.DisconnectCause)
@@ -434,7 +434,7 @@ func (fsa *FSsessions) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGR
 }
 
 // V1GetActiveSessionIDs used to return all active sessions
-func (fsa *FSsessions) V1GetActiveSessionIDs(ctx *context.Context, _ string,
+func (fsa *FSsessions) V1GetActiveSessionIDs(ctx context.Context, _ string,
 	sessionIDs *[]*sessions.SessionID) (err error) {
 	var sIDs []*sessions.SessionID
 	for connIdx, senderPool := range fsa.senderPools {
@@ -478,17 +478,17 @@ func (fsa *FSsessions) Reload() {
 }
 
 // V1AlterSession is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (*FSsessions) V1AlterSession(context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is used to implement the sessions.BiRPClient interface
-func (*FSsessions) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+func (*FSsessions) V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1WarnDisconnect is called when call goes under the minimum duration threshold, so FreeSWITCH can play an announcement message
-func (fsa *FSsessions) V1WarnDisconnect(ctx *context.Context, args map[string]any, reply *string) (err error) {
+func (fsa *FSsessions) V1WarnDisconnect(ctx context.Context, args map[string]any, reply *string) (err error) {
 	if fsa.cfg.LowBalanceAnnFile == utils.EmptyString {
 		*reply = utils.OK
 		return

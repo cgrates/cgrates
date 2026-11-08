@@ -4,11 +4,11 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -438,16 +438,16 @@ func TestAccountsSetGetAccountErrorSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
-		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.Account, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 	}
@@ -504,19 +504,19 @@ func TestAccountsSetGetAccountErrorCallCache(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
-		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.Account, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -890,19 +890,19 @@ func TestAccountsRemoveAccountErrorSetLoadIDs(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
 	}
@@ -933,22 +933,22 @@ func TestAccountsRemoveAccountErrorCallCache(t *testing.T) {
 	cfg.AdminSCfg().Conns[utils.MetaCaches] = []*config.DynamicConns{}
 	connMgr := engine.NewConnManager(cfg)
 	dataDB := &engine.DataDBMock{
-		GetAccountDrvF: func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+		GetAccountDrvF: func(ctx context.Context, str1 string, str2 string) (*utils.Account, error) {
 			return &utils.Account{}, nil
 		},
-		RemoveAccountDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveAccountDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
-		SetAccountDrvF: func(ctx *context.Context, profile *utils.Account) error {
+		SetAccountDrvF: func(ctx context.Context, profile *utils.Account) error {
 			return nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -1172,13 +1172,13 @@ func TestAccountsGetAccountsGetErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		SetAccountDrvF: func(*context.Context, *utils.Account) error {
+		SetAccountDrvF: func(context.Context, *utils.Account) error {
 			return nil
 		},
-		RemoveAccountDrvF: func(*context.Context, string, string) error {
+		RemoveAccountDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acn_cgrates.org:TEST"}, nil
 		},
 	}
@@ -1210,20 +1210,20 @@ func TestAccountsGetAccountIDsGetOptsErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+		GetAccountDrvF: func(context.Context, string, string) (*utils.Account, error) {
 			accPrf := &utils.Account{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return accPrf, nil
 		},
-		SetAccountDrvF: func(*context.Context, *utils.Account) error {
+		SetAccountDrvF: func(context.Context, *utils.Account) error {
 			return nil
 		},
-		RemoveAccountDrvF: func(*context.Context, string, string) error {
+		RemoveAccountDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acn_cgrates.org:key1", "acn_cgrates.org:key2", "acn_cgrates.org:key3"}, nil
 		},
 	}
@@ -1258,20 +1258,20 @@ func TestAccountsGetAccountIDsPaginateErr(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	dbMock := &engine.DataDBMock{
-		GetAccountDrvF: func(*context.Context, string, string) (*utils.Account, error) {
+		GetAccountDrvF: func(context.Context, string, string) (*utils.Account, error) {
 			accPrf := &utils.Account{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return accPrf, nil
 		},
-		SetAccountDrvF: func(*context.Context, *utils.Account) error {
+		SetAccountDrvF: func(context.Context, *utils.Account) error {
 			return nil
 		},
-		RemoveAccountDrvF: func(*context.Context, string, string) error {
+		RemoveAccountDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acn_cgrates.org:key1", "acn_cgrates.org:key2", "acn_cgrates.org:key3"}, nil
 		},
 	}

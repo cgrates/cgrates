@@ -4,18 +4,18 @@
 package agents
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
+func processRequest(ctx context.Context, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, agentName string, connMgr *engine.ConnManager,
 	sessionsConns, statsConns, thConns []string,
 	filterS *engine.FilterS) (_ bool, err error) {
@@ -142,7 +142,7 @@ func processRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
 	return true, nil
 }
 
-func processAgRequest(ctx *context.Context, reqProcessor *config.RequestProcessor,
+func processAgRequest(ctx context.Context, reqProcessor *config.RequestProcessor,
 	agReq *AgentRequest, agentName string, connMgr *engine.ConnManager,
 	sessionsConns []string, filterS *engine.FilterS) (_ bool, err error) {
 	if pass, err := filterS.Pass(ctx, agReq.Tenant,

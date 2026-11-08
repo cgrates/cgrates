@@ -4,6 +4,7 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"slices"
@@ -12,7 +13,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -504,7 +504,7 @@ func TestFiltersSetFiltersGetFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -544,7 +544,7 @@ func TestFiltersSetFiltersError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{
 				Tenant: utils.CGRateSorg,
 				ID:     "fltr_for_attr",
@@ -562,7 +562,7 @@ func TestFiltersSetFiltersError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -607,10 +607,10 @@ func TestFiltersSetFiltersSetFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotFound
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -655,11 +655,11 @@ func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		SetFilterDrvF: func(ctx *context.Context, fltr *engine.Filter) error {
+		SetFilterDrvF: func(ctx context.Context, fltr *engine.Filter) error {
 
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{
 				Tenant: utils.CGRateSorg,
 				ID:     "fltr_for_attr",
@@ -677,7 +677,7 @@ func TestFiltersSetFiltersComposeCacheArgsForFilterError(t *testing.T) {
 				},
 			}, utils.ErrNotFound
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -722,10 +722,10 @@ func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		SetFilterDrvF: func(ctx *context.Context, fltr *engine.Filter) error {
+		SetFilterDrvF: func(ctx context.Context, fltr *engine.Filter) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{
 				Tenant: utils.CGRateSorg,
 				ID:     "fltr_for_attr",
@@ -743,10 +743,10 @@ func TestFiltersSetFiltersSetLoadIDsError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return utils.ErrNotImplemented
 		},
 	}
@@ -791,10 +791,10 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		SetFilterDrvF: func(ctx *context.Context, fltr *engine.Filter) error {
+		SetFilterDrvF: func(ctx context.Context, fltr *engine.Filter) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{
 				Tenant: utils.CGRateSorg,
 				ID:     "fltr_for_attr",
@@ -812,10 +812,10 @@ func TestFiltersSetFiltersCacheForFilterError(t *testing.T) {
 				},
 			}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return nil, nil
 		},
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
 	}
@@ -956,7 +956,7 @@ func TestFiltersGetFilterGetFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -986,7 +986,7 @@ func TestFiltersGetFiltersCountError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1037,7 +1037,7 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return nil, utils.ErrNotImplemented
 		},
 	}
@@ -1062,10 +1062,10 @@ func TestFiltersRemoveFilterRemoveFilterError(t *testing.T) {
 }
 
 type mockClientConn struct {
-	calls map[string]func(*context.Context, any, any) error
+	calls map[string]func(context.Context, any, any) error
 }
 
-func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (mCC *mockClientConn) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := mCC.calls[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
@@ -1095,8 +1095,8 @@ func TestFiltersSetFilterReloadCache(t *testing.T) {
 	}
 	reloadCalled := false
 	ccM := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1ReloadCache: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1ReloadCache: func(ctx context.Context, args, reply any) error {
 				reloadCalled = true
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1303,8 +1303,8 @@ func TestFiltersSetFilterClearCache(t *testing.T) {
 		CacheIDs: []string{utils.CacheFilters},
 	}
 	ccM := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.CacheSv1Clear: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.CacheSv1Clear: func(ctx context.Context, args, reply any) error {
 				sort.Strings(args.(*utils.AttrCacheIDsWithAPIOpts).CacheIDs)
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>", utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -1470,16 +1470,16 @@ func TestFiltersRemoveFilterSetLoadIDsError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotFound
 		},
-		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -1514,19 +1514,19 @@ func TestFiltersRemoveFilterCallCacheForFilterError(t *testing.T) {
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	dataDB := &engine.DataDBMock{
-		SetLoadIDsDrvF: func(ctx *context.Context, loadIDs map[string]int64) error {
+		SetLoadIDsDrvF: func(ctx context.Context, loadIDs map[string]int64) error {
 			return nil
 		},
-		GetFilterDrvF: func(ctx *context.Context, str1 string, str2 string) (*engine.Filter, error) {
+		GetFilterDrvF: func(ctx context.Context, str1 string, str2 string) (*engine.Filter, error) {
 			return &engine.Filter{}, nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, utils.ErrNotFound
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return utils.ErrNotFound
 		},
-		RemoveFilterDrvF: func(ctx *context.Context, str1 string, str2 string) error {
+		RemoveFilterDrvF: func(ctx context.Context, str1 string, str2 string) error {
 			return nil
 		},
 	}
@@ -1904,13 +1904,13 @@ func TestFiltersGetFiltersGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+		SetFilterDrvF: func(context.Context, *engine.Filter) error {
 			return nil
 		},
-		RemoveFilterDrvF: func(*context.Context, string, string) error {
+		RemoveFilterDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:TEST"}, nil
 		},
 	}
@@ -1942,20 +1942,20 @@ func TestFiltersGetFilterIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetFilterDrvF: func(*context.Context, string, string) (*engine.Filter, error) {
+		GetFilterDrvF: func(context.Context, string, string) (*engine.Filter, error) {
 			fltr := &engine.Filter{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return fltr, nil
 		},
-		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+		SetFilterDrvF: func(context.Context, *engine.Filter) error {
 			return nil
 		},
-		RemoveFilterDrvF: func(*context.Context, string, string) error {
+		RemoveFilterDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
 		},
 	}
@@ -1990,20 +1990,20 @@ func TestFiltersGetFilterIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetFilterDrvF: func(*context.Context, string, string) (*engine.Filter, error) {
+		GetFilterDrvF: func(context.Context, string, string) (*engine.Filter, error) {
 			fltr := &engine.Filter{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return fltr, nil
 		},
-		SetFilterDrvF: func(*context.Context, *engine.Filter) error {
+		SetFilterDrvF: func(context.Context, *engine.Filter) error {
 			return nil
 		},
-		RemoveFilterDrvF: func(*context.Context, string, string) error {
+		RemoveFilterDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"ftr_cgrates.org:key1", "ftr_cgrates.org:key2", "ftr_cgrates.org:key3"}, nil
 		},
 	}

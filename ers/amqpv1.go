@@ -4,13 +4,13 @@
 package ers
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"maps"
 	"time"
 
 	amqpv1 "github.com/Azure/go-amqp"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

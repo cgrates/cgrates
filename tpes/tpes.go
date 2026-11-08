@@ -6,11 +6,10 @@ package tpes
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"io"
 	"slices"
 	"time"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -38,7 +37,7 @@ type ArgsExportTP struct {
 	ExportItems map[string][]string // map[exportType][]string{"itemID1", "itemID2"}
 }
 
-func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tenant, exportType string) (profileIDs []string, err error) {
+func getTariffPlansKeys(ctx context.Context, dm *engine.DataManager, tenant, exportType string) (profileIDs []string, err error) {
 	exporter, ok := exporters[exportType]
 	if !ok {
 		return nil, utils.ErrPrefix(utils.ErrUnsupportedTPExporterType, exportType)
@@ -62,7 +61,7 @@ func getTariffPlansKeys(ctx *context.Context, dm *engine.DataManager, tenant, ex
 }
 
 // V1ExportTariffPlan is the API executed to export tariff plan items
-func (tpE *TPeS) V1ExportTariffPlan(ctx *context.Context, args *ArgsExportTP, reply *[]byte) (err error) {
+func (tpE *TPeS) V1ExportTariffPlan(ctx context.Context, args *ArgsExportTP, reply *[]byte) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = tpE.cfg.GeneralCfg().DefaultTenant
 	}

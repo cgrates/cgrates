@@ -5,6 +5,7 @@ package ees
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"fmt"
 	"net/http"
@@ -14,7 +15,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -120,7 +120,7 @@ func (pstr *S3EE) Connect() (err error) {
 	return
 }
 
-func (pstr *S3EE) ExportEvent(ctx *context.Context, message, extraData any) (err error) {
+func (pstr *S3EE) ExportEvent(ctx context.Context, message, extraData any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	sKey := extraData.(string)

@@ -4,6 +4,7 @@
 package ers
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path"
@@ -13,7 +14,6 @@ import (
 
 	"github.com/antchfx/xmlquery"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/agents"
 
 	"github.com/cgrates/cgrates/config"

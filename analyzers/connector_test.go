@@ -4,20 +4,20 @@
 package analyzers
 
 import (
+	"context"
 	"errors"
 	"os"
 	"runtime"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type mockConnector struct{}
 
-func (c *mockConnector) Call(_ *context.Context, _ string, _, _ any) (err error) {
+func (c *mockConnector) Call(_ context.Context, _ string, _, _ any) (err error) {
 	return errors.New("error")
 }
 func TestNewAnalyzeConnector(t *testing.T) {

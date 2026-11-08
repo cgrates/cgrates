@@ -5,10 +5,10 @@ package routes
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -45,7 +45,7 @@ type RouteS struct {
 }
 
 // matchingRouteProfilesForEvent returns ordered list of matching resources which are active by the time of the call
-func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf []*utils.RouteProfile, err error) {
+func (rpS *RouteS) matchingRouteProfilesForEvent(ctx context.Context, tnt string, ev *utils.CGREvent) (matchingRPrf []*utils.RouteProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  ev.Event,
 		utils.MetaOpts: ev.APIOpts,
@@ -109,7 +109,7 @@ func (rpS *RouteS) matchingRouteProfilesForEvent(ctx *context.Context, tnt strin
 	return
 }
 
-func newOptsGetRoutes(ctx *context.Context, ev *utils.CGREvent, fS *engine.FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
+func newOptsGetRoutes(ctx context.Context, ev *utils.CGREvent, fS *engine.FilterS, cfgOpts *config.RoutesOpts) (opts *optsGetRoutes, err error) {
 	var ignoreErrors bool
 	evNM := ev.AsDataProvider()
 	if ignoreErrors, err = engine.GetBoolOpts(ctx, ev.Tenant, evNM, nil, fS, cfgOpts.IgnoreErrors,
@@ -179,7 +179,7 @@ var lazyRouteFltrPrfxs = []string{utils.DynamicDataPrefix + utils.MetaReq,
 
 // sortedRoutesForEvent will return the list of valid route IDs
 // for event based on filters and sorting algorithms
-func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrfl *utils.RouteProfile, ev *utils.CGREvent,
+func (rpS *RouteS) sortedRoutesForProfile(ctx context.Context, tnt string, rPrfl *utils.RouteProfile, ev *utils.CGREvent,
 	pag utils.Paginator, extraOpts *optsGetRoutes) (sortedRoutes *utils.SortedRoutes, err error) {
 	extraOpts.sortingParameters = rPrfl.SortingParameters // populate sortingParameters in extraOpts
 	extraOpts.sortingStrategy = rPrfl.Sorting             // populate sortingStrategy in extraOpts
@@ -243,7 +243,7 @@ func (rpS *RouteS) sortedRoutesForProfile(ctx *context.Context, tnt string, rPrf
 
 // sortedRoutesForEvent will return the list of sortedRoutes
 // for event based on filters and sorting algorithms
-func (rpS *RouteS) sortedRoutesForEvent(ctx *context.Context, tnt string, args *utils.CGREvent) (sortedRoutes utils.SortedRoutesList, err error) {
+func (rpS *RouteS) sortedRoutesForEvent(ctx context.Context, tnt string, args *utils.CGREvent) (sortedRoutes utils.SortedRoutesList, err error) {
 	rPrfs, err := rpS.matchingRouteProfilesForEvent(ctx, tnt, args)
 	if err != nil {
 		return

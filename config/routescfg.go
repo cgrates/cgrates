@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -49,7 +49,7 @@ type RouteSCfg struct {
 }
 
 // loadRouteSCfg loads the RouteS section of the configuration
-func (rts *RouteSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (rts *RouteSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRouteSCfg := new(RouteSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, RouteSJSON, jsnRouteSCfg); err != nil {
 		return

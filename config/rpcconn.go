@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )
@@ -20,7 +20,7 @@ func NewDfltRPCConn() *RPCConn {
 type RPCConns map[string]*RPCConn
 
 // loadRPCConns loads the RPCConns section of the configuration
-func (rC RPCConns) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (rC RPCConns) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRPCConns := make(RPCConnsJson)
 	if err = jsnCfg.GetSection(ctx, RPCConnsJSON, &jsnRPCConns); err != nil {
 		return

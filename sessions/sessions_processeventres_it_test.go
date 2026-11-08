@@ -7,11 +7,11 @@
 package sessions
 
 import (
+	"context"
 	"strconv"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )

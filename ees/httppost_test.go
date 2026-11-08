@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -13,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

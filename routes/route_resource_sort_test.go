@@ -5,12 +5,12 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -78,8 +78,8 @@ func TestPopulateResourcesForRoutesOK(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -145,8 +145,8 @@ func TestPopulateResourcesForRoutesCallErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -213,8 +213,8 @@ func TestPopulateResourcesForRoutesLazyPassErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -352,8 +352,8 @@ func TestResourceDescendentSorterSortRoutesOK(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -452,8 +452,8 @@ func TestResourceDescendentSorterSortRoutesEmptyRoutes(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -510,8 +510,8 @@ func TestResourceDescendentSorterSortRoutesSingleRoute(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ResourceSv1GetResource: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ResourceSv1GetResource: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.Resource)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)

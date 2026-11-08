@@ -4,11 +4,11 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -91,7 +91,7 @@ func (eeS *EeS) SetupExporterCache() error {
 	return nil
 }
 
-func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
+func (eeS *EeS) attrSProcessEvent(ctx context.Context, cgrEv *utils.CGREvent, attrIDs []string, attributeSCtx string) (err error) {
 	var rplyEv utils.AttributesProcessEventReply
 	if cgrEv.APIOpts == nil {
 		cgrEv.APIOpts = make(map[string]any)
@@ -118,7 +118,7 @@ func (eeS *EeS) attrSProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent, a
 	return
 }
 
-func ExportWithAttempts(ctx *context.Context, exp EventExporter, eEv any, key any,
+func ExportWithAttempts(ctx context.Context, exp EventExporter, eEv any, key any,
 	connMngr *engine.ConnManager, tnt string, fltrS *engine.FilterS) (err error) {
 	if exp.Cfg().FailedPostsDir != utils.MetaNone {
 		defer func() {

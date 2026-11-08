@@ -7,6 +7,7 @@
 package main
 
 import (
+	"context"
 	"net"
 	"path"
 	"slices"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
 
 	"github.com/cgrates/cgrates/engine"
@@ -172,7 +172,7 @@ type testCache struct {
 	tenant chan string
 }
 
-func (recorder *testCache) ReloadCache(_ *context.Context,
+func (recorder *testCache) ReloadCache(_ context.Context,
 	args *utils.AttrReloadCacheWithAPIOpts, reply *string) error {
 	select {
 	case recorder.tenant <- args.Tenant:
@@ -182,7 +182,7 @@ func (recorder *testCache) ReloadCache(_ *context.Context,
 	return nil
 }
 
-func (*testCache) Clear(_ *context.Context, _ *utils.AttrCacheIDsWithAPIOpts,
+func (*testCache) Clear(_ context.Context, _ *utils.AttrCacheIDsWithAPIOpts,
 	reply *string) error {
 	*reply = utils.OK
 	return nil

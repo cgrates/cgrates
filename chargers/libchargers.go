@@ -4,7 +4,8 @@
 package chargers
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -12,7 +13,7 @@ import (
 
 // cfg.SessionSCfg().Conns[utils.MetaChargers]
 // ChargerScProcessEvent is a wrapper to unify processing from the client side from multiple subsystems
-func ChargerScProcessEvent(ctx *context.Context, fltrS *engine.FilterS,
+func ChargerScProcessEvent(ctx context.Context, fltrS *engine.FilterS,
 	connsCfg map[string][]*config.DynamicConns, connMgr *engine.ConnManager, cache *engine.CacheS, subsys string,
 	cgrEv *utils.CGREvent) ([]*ChrgSProcessEventReply, error) {
 	conns, err := engine.GetConnIDs(ctx, connsCfg, utils.MetaChargers,

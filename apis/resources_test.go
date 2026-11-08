@@ -4,12 +4,12 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -185,20 +185,20 @@ func TestResourcesSetResourceProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -295,29 +295,29 @@ func TestResourcesRemoveResourceProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		RemoveResourceDrvF: func(ctx *context.Context, tnt, id string) error {
+		RemoveResourceDrvF: func(ctx context.Context, tnt, id string) error {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, nil
 		},
 	}
@@ -344,17 +344,17 @@ func TestResourcesGetResourceProfileIDsErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -386,7 +386,7 @@ func TestResourcesGetResourceProfileIDsErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -416,17 +416,17 @@ func TestResourcesGetResourceProfilesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			resPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return resPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -454,7 +454,7 @@ func TestResourcesGetResourceProfilesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -659,13 +659,13 @@ func TestResourcesGetResourceProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rsp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -697,20 +697,20 @@ func TestResourcesGetResourceProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			rsPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rsPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rsp_cgrates.org:key1", "rsp_cgrates.org:key2", "rsp_cgrates.org:key3"}, nil
 		},
 	}
@@ -745,20 +745,20 @@ func TestResourcesGetResourceProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetResourceProfileDrvF: func(*context.Context, string, string) (*utils.ResourceProfile, error) {
+		GetResourceProfileDrvF: func(context.Context, string, string) (*utils.ResourceProfile, error) {
 			rsPrf := &utils.ResourceProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return rsPrf, nil
 		},
-		SetResourceProfileDrvF: func(*context.Context, *utils.ResourceProfile) error {
+		SetResourceProfileDrvF: func(context.Context, *utils.ResourceProfile) error {
 			return nil
 		},
-		RemoveResourceProfileDrvF: func(*context.Context, string, string) error {
+		RemoveResourceProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"rsp_cgrates.org:key1", "rsp_cgrates.org:key2", "rsp_cgrates.org:key3"}, nil
 		},
 	}

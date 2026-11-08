@@ -4,7 +4,8 @@
 package apis
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/loaders"
 )
 
@@ -17,12 +18,12 @@ type LoaderSv1 struct {
 	ldrS *loaders.LoaderS
 }
 
-func (ldrSv1 *LoaderSv1) Run(ctx *context.Context, args *loaders.ArgsProcessFolder,
+func (ldrSv1 *LoaderSv1) Run(ctx context.Context, args *loaders.ArgsProcessFolder,
 	rply *map[string]int) error {
 	return ldrSv1.ldrS.V1Run(ctx, args, rply)
 }
 
-func (ldrSv1 *LoaderSv1) ImportZip(ctx *context.Context, args *loaders.ArgsProcessZip,
+func (ldrSv1 *LoaderSv1) ImportZip(ctx context.Context, args *loaders.ArgsProcessZip,
 	rply *string) error {
 	return ldrSv1.ldrS.V1ImportZip(ctx, args, rply)
 }

@@ -4,7 +4,8 @@
 package accounts
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -30,7 +31,7 @@ func restoreUnitsFromClones(cBs []*concreteBalance, clnedUnts []*utils.Decimal) 
 }
 
 // newConcreteBalance constructs a concreteBalanceOperator
-func newConcreteBalanceOperator(ctx *context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
+func newConcreteBalanceOperator(ctx context.Context, cfg *config.CGRConfig, acntID string, blnCfg *utils.Balance,
 	fltrS *engine.FilterS, connMgr *engine.ConnManager,
 	attrSConns, rateSConns []string) balanceOperator {
 	return &concreteBalance{cfg, acntID, blnCfg, fltrS, connMgr, ctx, attrSConns, rateSConns}
@@ -43,7 +44,7 @@ type concreteBalance struct {
 	blnCfg     *utils.Balance
 	fltrS      *engine.FilterS
 	connMgr    *engine.ConnManager
-	ctx        *context.Context
+	ctx        context.Context
 	attrSConns []string
 	rateSConns []string
 }
@@ -56,7 +57,7 @@ func (cB *concreteBalance) id() string {
 // debitAbstracts implements the balanceOperator interface
 // it will mainly debit the aUnits out of a single concrete balance
 // the abstract
-func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *utils.Decimal,
+func (cB *concreteBalance) debitAbstracts(ctx context.Context, aUnits *utils.Decimal,
 	cgrEv *utils.CGREvent, dbted *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters
@@ -138,7 +139,7 @@ func (cB *concreteBalance) debitAbstracts(ctx *context.Context, aUnits *utils.De
 
 // debitConcretes implements the balanceOperator interface
 // it will attempt to debit the amount of concrete units out of this single concrete balance
-func (cB *concreteBalance) debitConcretes(ctx *context.Context, cUnits *utils.Decimal,
+func (cB *concreteBalance) debitConcretes(ctx context.Context, cUnits *utils.Decimal,
 	cgrEv *utils.CGREvent, debited *utils.Decimal) (ec *utils.EventCharges, err error) {
 	evNm := cgrEv.AsDataProvider()
 	// pass the general balance filters

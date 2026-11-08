@@ -4,12 +4,12 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -25,7 +25,7 @@ func validateFilterRules(rules []*engine.FilterRule) error {
 
 // SetFilter replaces rules for the supplied Type and Element pairs.
 // Overwrite replaces the entire filter.
-func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetFilter(ctx context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.Filter, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -65,7 +65,7 @@ func (adms *AdminSv1) SetFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 	return adms.setFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter, APIOpts: arg.APIOpts}, reply)
 }
 
-func (adms *AdminSv1) setFilter(ctx *context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) setFilter(ctx context.Context, arg *engine.FilterWithAPIOpts, reply *string) error {
 	if len(arg.Rules) == 0 {
 		return utils.NewErrMandatoryIeMissing("Filter Rules")
 	}
@@ -110,7 +110,7 @@ func (adms *AdminSv1) setFilter(ctx *context.Context, arg *engine.FilterWithAPIO
 
 // SetFilterRule adds values to a filter rule selected by Type and Element.
 // A rule is added if Type and Element do not match an existing rule.
-func (adms *AdminSv1) SetFilterRule(ctx *context.Context, arg *engine.SetFilterRuleArgs, reply *string) error {
+func (adms *AdminSv1) SetFilterRule(ctx context.Context, arg *engine.SetFilterRuleArgs, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -142,7 +142,7 @@ func (adms *AdminSv1) SetFilterRule(ctx *context.Context, arg *engine.SetFilterR
 
 // RemoveFilterRule removes values from a filter rule selected by Type and Element.
 // Omitting Values or removing its last values deletes the rule.
-func (adms *AdminSv1) RemoveFilterRule(ctx *context.Context, arg *engine.RemoveFilterRuleArgs, reply *string) error {
+func (adms *AdminSv1) RemoveFilterRule(ctx context.Context, arg *engine.RemoveFilterRuleArgs, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID, utils.Type, utils.Element}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -169,7 +169,7 @@ func (adms *AdminSv1) RemoveFilterRule(ctx *context.Context, arg *engine.RemoveF
 	return adms.setFilter(ctx, &engine.FilterWithAPIOpts{Filter: filter, APIOpts: arg.APIOpts}, reply)
 }
 
-func (adms *AdminSv1) getFilterRule(ctx *context.Context, tenant, id, ruleType, element string) (*engine.Filter, *engine.FilterRule, error) {
+func (adms *AdminSv1) getFilterRule(ctx context.Context, tenant, id, ruleType, element string) (*engine.Filter, *engine.FilterRule, error) {
 	if strings.HasPrefix(id, utils.Meta) {
 		return nil, nil, utils.APIErrorHandler(fmt.Errorf("cannot update values of an inline filter"))
 	}
@@ -205,7 +205,7 @@ func (adms *AdminSv1) getFilterRule(ctx *context.Context, tenant, id, ruleType, 
 }
 
 // GetFilter returns a Filter
-func (adms *AdminSv1) GetFilter(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
+func (adms *AdminSv1) GetFilter(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -222,7 +222,7 @@ func (adms *AdminSv1) GetFilter(ctx *context.Context, arg *utils.TenantIDWithAPI
 }
 
 // GetFilters returns a list of filters for a tenant
-func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, fltrs *[]*engine.Filter) (err error) {
+func (adms *AdminSv1) GetFilters(ctx context.Context, args *utils.ArgsItemIDs, fltrs *[]*engine.Filter) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -243,7 +243,7 @@ func (adms *AdminSv1) GetFilters(ctx *context.Context, args *utils.ArgsItemIDs, 
 }
 
 // GetFilterIDs returns list of Filter IDs registered for a tenant
-func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs, fltrIDs *[]string) (err error) {
+func (adms *AdminSv1) GetFilterIDs(ctx context.Context, args *utils.ArgsItemIDs, fltrIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -274,7 +274,7 @@ func (adms *AdminSv1) GetFilterIDs(ctx *context.Context, args *utils.ArgsItemIDs
 }
 
 // RemoveFilter  remove a specific filter
-func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveFilter(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -308,7 +308,7 @@ func (adms *AdminSv1) RemoveFilter(ctx *context.Context, arg *utils.TenantIDWith
 
 // GetFiltersCount returns the total number of FilterIDs registered for a tenant
 // returns ErrNotFound in case of 0 FilterIDs
-func (admS *AdminSv1) GetFiltersCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetFiltersCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -330,7 +330,7 @@ func (admS *AdminSv1) GetFiltersCount(ctx *context.Context, args *utils.ArgsItem
 }
 
 // FiltersMatch checks whether a set of filter IDs passes for the provided CGREvent
-func (admS *AdminSv1) FiltersMatch(ctx *context.Context, args *engine.ArgsFiltersMatch, reply *bool) (err error) {
+func (admS *AdminSv1) FiltersMatch(ctx context.Context, args *engine.ArgsFiltersMatch, reply *bool) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant

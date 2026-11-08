@@ -5,6 +5,7 @@ package sessions
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"net/netip"
 	"reflect"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -96,12 +96,20 @@ func TestBiRPCv1RegisterInternalBiJSONConn(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, nil, nil)
 
 	client := &birpc.Service{}
+	ctx, cancel := context.WithTimeout(birpc.WithClient(context.Background(), client), time.Minute)
+	defer cancel()
 
 	var reply string
-	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(context.WithClient(context.Background(), client), utils.EmptyString, &reply); err != nil {
+	if err := sessions.BiRPCv1RegisterInternalBiJSONConn(ctx, "agent", &reply); err != nil {
 		t.Error(err)
 	} else if reply != utils.OK {
 		t.Errorf("Expected %+v, received %+v", reply, utils.OK)
+	}
+	if got := sessions.biJClnts[client]; got != "agent" {
+		t.Errorf("expected connection ID agent, got %q", got)
+	}
+	if got := sessions.biJIDs["agent"]; got == nil || got.conn != client || got.proto != cfg.SessionSCfg().ClientProtocol {
+		t.Errorf("unexpected registered client: %+v", got)
 	}
 }
 
@@ -1693,10 +1701,10 @@ dm.SetCache(engine.Cache)
 */
 
 type testMockCall struct {
-	calls map[string]func(ctx *context.Context, args, reply any) error
+	calls map[string]func(ctx context.Context, args, reply any) error
 }
 
-func (m *testMockCall) Call(ctx *context.Context, method string, args, reply any) error {
+func (m *testMockCall) Call(ctx context.Context, method string, args, reply any) error {
 	if calls, has := m.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -1745,8 +1753,8 @@ func TestSessionSRatesCost(t *testing.T) {
 
 	//Connected to Rates
 	clnt := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ context.Context, _, _ any) error {
 				return nil
 			},
 		},
@@ -1761,7 +1769,7 @@ func TestSessionSRatesCost(t *testing.T) {
 	}
 	sessions.connMgr.AddInternalConn(connID, utils.RateSv1, chanInternal)
 	t.Run("RateProfileCost with values", func(t *testing.T) {
-		clnt.calls[utils.RateSv1CostForEvent] = func(ctx *context.Context, args, reply any) error {
+		clnt.calls[utils.RateSv1CostForEvent] = func(ctx context.Context, args, reply any) error {
 			*reply.(*utils.RateProfileCost) = utils.RateProfileCost{
 				ID:              "RP_1002",
 				Cost:            utils.NewDecimalFromFloat64(2.3),
@@ -1827,7 +1835,7 @@ func TestSessionSRatesCost(t *testing.T) {
 		}
 	})
 	t.Run("Call error", func(t *testing.T) {
-		clnt.calls[utils.RateSv1CostForEvent] = func(ctx *context.Context, args, reply any) error {
+		clnt.calls[utils.RateSv1CostForEvent] = func(ctx context.Context, args, reply any) error {
 			return utils.ErrNotImplemented
 		}
 
@@ -2172,12 +2180,12 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 	sS := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.Background()
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.AccountSv1RefundCharges: func(_ *context.Context, _ string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.AccountSv1RefundCharges: func(_ context.Context, _ string, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
-			utils.AccountSv1DebitAbstracts: func(_ *context.Context, _ string, _, reply any) error {
+			utils.AccountSv1DebitAbstracts: func(_ context.Context, _ string, _, reply any) error {
 				*reply.(*utils.EventCharges) = *utils.NewEventCharges()
 				return nil
 			},
@@ -2694,8 +2702,8 @@ func TestSessionSForceSTerminate(t *testing.T) {
 	ctx := context.TODO()
 
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				argConv, can := args.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", args)
@@ -2705,11 +2713,11 @@ func TestSessionSForceSTerminate(t *testing.T) {
 				}
 				return nil
 			},
-			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ResourceSv1ReleaseResources: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
-			utils.IPsV1ReleaseIP: func(ctx *context.Context, m string, args, reply any) error {
+			utils.IPsV1ReleaseIP: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*string) = utils.OK
 				return nil
 			},
@@ -2889,14 +2897,14 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 	})
 
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx context.Context, m string, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.ResourceSv1ReleaseResources: func(ctx *context.Context, m string, args, reply any) error {
+			utils.ResourceSv1ReleaseResources: func(ctx context.Context, m string, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
-			utils.IPsV1ReleaseIP: func(ctx *context.Context, m string, args, reply any) error {
+			utils.IPsV1ReleaseIP: func(ctx context.Context, m string, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -2978,8 +2986,8 @@ func TestSessionSGetRoutes(t *testing.T) {
 	sessions := NewSessionS(cfg, dm, cacheS, fltrS, connMgr)
 	ctx := context.TODO()
 	clnt := &testMockClients{
-		calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-			utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+		calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+			utils.RouteSv1GetRoutes: func(ctx context.Context, m string, args, reply any) error {
 				*reply.(*utils.SortedRoutesList) = utils.SortedRoutesList{
 					{
 						ProfileID: "RouteProfile1",
@@ -3097,8 +3105,8 @@ func TestSessionsGetRoutesErrors(t *testing.T) {
 
 	t.Run("Call Error: NOT_IMPLEMENTED", func(t *testing.T) {
 		clnt := &testMockClients{
-			calls: map[string]func(ctx *context.Context, m string, args, reply any) error{
-				utils.RouteSv1GetRoutes: func(ctx *context.Context, m string, args, reply any) error {
+			calls: map[string]func(ctx context.Context, m string, args, reply any) error{
+				utils.RouteSv1GetRoutes: func(ctx context.Context, m string, args, reply any) error {
 					return utils.ErrNotImplemented
 				},
 			},

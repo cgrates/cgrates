@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"errors"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1912,7 +1912,7 @@ func TestConfigSanityERsXmlRootPath(t *testing.T) {
 type testSanitySection struct{ *CoreSCfg }
 
 func (*testSanitySection) SName() string { return "sanity" }
-func (s *testSanitySection) Load(ctx *context.Context, db ConfigDB, _ *CGRConfig) error {
+func (s *testSanitySection) Load(ctx context.Context, db ConfigDB, _ *CGRConfig) error {
 	return db.GetSection(ctx, s.SName(), s.CoreSCfg)
 }
 func (s *testSanitySection) CloneSection() Section {

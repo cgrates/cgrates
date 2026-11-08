@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -32,7 +32,7 @@ func (c *ERsCfg) ReaderCfg(id string) *EventReaderCfg {
 }
 
 // loadErsCfg loads the Ers section of the configuration
-func (c *ERsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (c *ERsCfg) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnERsCfg := new(ERsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, ERsJSON, jsnERsCfg); err != nil {
 		return

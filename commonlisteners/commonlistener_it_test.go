@@ -7,6 +7,7 @@ package commonlisteners
 
 import (
 	"bytes"
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -23,7 +24,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -57,11 +57,11 @@ func TestServerIT(t *testing.T) {
 
 type mockRegister struct{}
 
-func (*mockRegister) ForTest(ctx *context.Context, args, reply any) error {
+func (*mockRegister) ForTest(ctx context.Context, args, reply any) error {
 	return nil
 }
 
-func (*mockRegister) Ping(ctx *context.Context, in string, out *string) error {
+func (*mockRegister) Ping(ctx context.Context, in string, out *string) error {
 	*out = utils.Pong
 	return nil
 }

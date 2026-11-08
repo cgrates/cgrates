@@ -4,12 +4,12 @@
 package agents
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -25,14 +25,22 @@ func TestDAsSessionSClientIface(t *testing.T) {
 }
 
 type testMockSessionConn struct {
-	calls map[string]func(_ *context.Context, _, _ any) error
+	calls map[string]func(_ context.Context, _, _ any) error
 }
 
-func (s *testMockSessionConn) Call(ctx *context.Context, method string, arg, rply any) error {
+func (s *testMockSessionConn) Call(ctx context.Context, method string, arg, rply any) error {
 	if call, has := s.calls[method]; has {
 		return call(ctx, arg, rply)
 	}
 	return rpcclient.ErrUnsupporteServiceMethod
+}
+
+func (s *testMockSessionConn) RegisterInternalBiJSONConn(ctx context.Context, arg string, reply *string) error {
+	return s.Call(ctx, utils.SessionSv1RegisterInternalBiJSONConn, arg, reply)
+}
+
+func (s *testMockSessionConn) ProcessEvent(ctx context.Context, arg *utils.CGREvent, reply *sessions.V1ProcessEventReply) error {
+	return s.Call(ctx, utils.SessionSv1ProcessEvent, arg, reply)
 }
 
 func (s *testMockSessionConn) Handlers() (b map[string]any) {
@@ -115,11 +123,23 @@ func TestProcessRequest(t *testing.T) {
 	}}
 
 	expAPIOpts := map[string]any{}
-	sS := &testMockSessionConn{calls: map[string]func(_ *context.Context, _, _ any) error{
-		utils.SessionSv1RegisterInternalBiJSONConn: func(_ *context.Context, _, _ any) error {
+	var callback *birpc.Service
+	registered := false
+	sS := &testMockSessionConn{calls: map[string]func(_ context.Context, _, _ any) error{
+		utils.SessionSv1RegisterInternalBiJSONConn: func(ctx context.Context, arg, _ any) error {
+			if got := birpc.ClientFromContext(ctx); got != callback {
+				t.Errorf("expected callback %p, got %v", callback, got)
+			}
+			if want := utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS); arg != want {
+				t.Errorf("expected connection ID %q, got %v", want, arg)
+			}
+			registered = true
 			return nil
 		},
-		utils.SessionSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		utils.SessionSv1ProcessEvent: func(ctx context.Context, arg, rply any) error {
+			if got := birpc.ClientFromContext(ctx); got != callback {
+				t.Errorf("expected callback %p, got %v", callback, got)
+			}
 			var id string
 			if arg == nil {
 				t.Errorf("args is nil")
@@ -161,8 +181,12 @@ func TestProcessRequest(t *testing.T) {
 		reqProcessor.Tenant, cfg.GeneralCfg().DefaultTenant,
 		cfg.GeneralCfg().DefaultTimezone, cfg, cacheS, filters, nil)
 
+	sessionService, err := birpc.NewService(sS, utils.SessionSv1, true)
+	if err != nil {
+		t.Fatal(err)
+	}
 	internalSessionSChan := make(chan birpc.ClientConnector, 1)
-	internalSessionSChan <- sS
+	internalSessionSChan <- sessionService
 	connMgr := engine.NewConnManager(cfg)
 	connMgr.SetCache(cacheS)
 	connMgr.AddInternalConn(utils.ConcatenatedKey(utils.MetaInternal, utils.MetaSessionS), utils.SessionSv1, internalSessionSChan)
@@ -172,8 +196,13 @@ func TestProcessRequest(t *testing.T) {
 		fltrS:   filters,
 		connMgr: connMgr,
 	}
-	srv, _ := birpc.NewService(da, "", false)
-	da.ctx = context.WithClient(context.Background(), srv)
+	callback, err = birpc.NewService(da, "", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx, cancel := context.WithTimeout(birpc.WithClient(context.Background(), callback), time.Minute)
+	defer cancel()
+	da.ctx = ctx
 	tmpls := []*config.FCTemplate{
 		{Tag: "ResultCode",
 			Type: utils.MetaConstant, Path: utils.MetaRep + utils.NestingSep + "ResultCode",
@@ -221,7 +250,8 @@ func TestProcessRequest(t *testing.T) {
 		utils.MetaAttributes: "true",
 		utils.MetaSession:    "true",
 	}
-	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr, []string{"*internal"}, nil, nil, da.fltrS)
+	pr, err = processRequest(da.ctx, clnReq2, agReq, utils.DiameterAgent, connMgr,
+		[]string{utils.ConcatenatedKey(rpcclient.BiRPCInternal, utils.MetaSessionS)}, nil, nil, da.fltrS)
 	if err != nil {
 		t.Error(err)
 	} else if !pr {
@@ -230,6 +260,9 @@ func TestProcessRequest(t *testing.T) {
 		t.Errorf("Expected the reply to have 2 values received: %s", rply.String())
 	}
 
+	if !registered {
+		t.Error("internal callback connection was not registered")
+	}
 	reqProcessor.Flags = utils.FlagsWithParamsFromSlice([]string{utils.MetaSessionS})
 
 	tmpls = []*config.FCTemplate{

@@ -4,18 +4,18 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetActionProfile returns an Action Profile
-func (admS *AdminSv1) GetActionProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
+func (admS *AdminSv1) GetActionProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -35,7 +35,7 @@ func (admS *AdminSv1) GetActionProfile(ctx *context.Context, arg *utils.TenantID
 }
 
 // GetActionProfileIDs returns list of action profile IDs registered for a tenant
-func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetActionProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, actPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -66,7 +66,7 @@ func (admS *AdminSv1) GetActionProfileIDs(ctx *context.Context, args *utils.Args
 }
 
 // GetActionProfiles returns a list of action profiles registered for a tenant
-func (admS *AdminSv1) GetActionProfiles(ctx *context.Context, args *utils.ArgsItemIDs, actPrfs *[]*utils.ActionProfile) (err error) {
+func (admS *AdminSv1) GetActionProfiles(ctx context.Context, args *utils.ArgsItemIDs, actPrfs *[]*utils.ActionProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -89,7 +89,7 @@ func (admS *AdminSv1) GetActionProfiles(ctx *context.Context, args *utils.ArgsIt
 
 // GetActionProfilesCount sets in reply var the total number of ActionProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 ActionProfileIDs
-func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetActionProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -111,7 +111,7 @@ func (admS *AdminSv1) GetActionProfilesCount(ctx *context.Context, args *utils.A
 }
 
 // SetActionProfile saves an Action Profile and optionally reschedules its actions.
-func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionProfileWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) SetActionProfile(ctx context.Context, ap *utils.ActionProfileWithAPIOpts, reply *string) error {
 	var reschedule bool
 	if value, has := ap.APIOpts[utils.MetaReschedule]; has {
 		var err error
@@ -201,7 +201,7 @@ func (admS *AdminSv1) SetActionProfile(ctx *context.Context, ap *utils.ActionPro
 }
 
 // RemoveActionProfile remove a specific Action Profile
-func (admS *AdminSv1) RemoveActionProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) RemoveActionProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -242,22 +242,22 @@ type ActionSv1 struct {
 
 // ScheduleActions schedules actions for matching profiles, replacing existing jobs.
 // *asap actions run immediately.
-func (aS *ActionSv1) ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+func (aS *ActionSv1) ScheduleActions(ctx context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	return aS.acts.V1ScheduleActions(ctx, args, rpl)
 }
 
 // Reschedule reschedules actions for one saved profile.
 // It does not execute *asap actions.
-func (aS *ActionSv1) Reschedule(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (aS *ActionSv1) Reschedule(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	return aS.acts.V1Reschedule(ctx, args, reply)
 }
 
 // GetScheduledActions returns the registered cron batches for a tenant.
-func (aS *ActionSv1) GetScheduledActions(ctx *context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
+func (aS *ActionSv1) GetScheduledActions(ctx context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
 	return aS.acts.V1GetScheduledActions(ctx, args, reply)
 }
 
 // ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aS *ActionSv1) ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+func (aS *ActionSv1) ExecuteActions(ctx context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	return aS.acts.V1ExecuteActions(ctx, args, rpl)
 }

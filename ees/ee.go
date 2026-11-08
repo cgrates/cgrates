@@ -4,22 +4,22 @@
 package ees
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type EventExporter interface {
-	Cfg() *config.EventExporterCfg                                      // return the config
-	Connect() error                                                     // called before exporting an event to make sure it is connected
-	ExportEvent(ctx *context.Context, content any, extraData any) error // called on each event to be exported
-	Close() error                                                       // called when the exporter needs to terminate
-	GetMetrics() *utils.ExporterMetrics                                 // called to get metrics
+	Cfg() *config.EventExporterCfg                                     // return the config
+	Connect() error                                                    // called before exporting an event to make sure it is connected
+	ExportEvent(ctx context.Context, content any, extraData any) error // called on each event to be exported
+	Close() error                                                      // called when the exporter needs to terminate
+	GetMetrics() *utils.ExporterMetrics                                // called to get metrics
 	PrepareMap(*utils.CGREvent) (any, error)
 	PrepareOrderMap(*utils.OrderedNavigableMap) (any, error)
 	ExtraData(*utils.CGREvent) any
@@ -101,7 +101,7 @@ func (c *concReq) done() {
 }
 
 // composeHeaderTrailer will return the orderNM for *hdr or *trl
-func composeHeaderTrailer(ctx *context.Context, prfx string, fields []*config.FCTemplate, em utils.DataStorage, cfg *config.CGRConfig, cache *engine.CacheS, fltS *engine.FilterS) (*utils.OrderedNavigableMap, error) {
+func composeHeaderTrailer(ctx context.Context, prfx string, fields []*config.FCTemplate, em utils.DataStorage, cfg *config.CGRConfig, cache *engine.CacheS, fltS *engine.FilterS) (*utils.OrderedNavigableMap, error) {
 	r := utils.NewOrderedNavigableMap()
 	err := NewExportRequest(map[string]utils.DataStorage{
 		utils.MetaEM:  em,

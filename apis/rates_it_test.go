@@ -7,6 +7,7 @@
 package apis
 
 import (
+	"context"
 	"path"
 	"reflect"
 	"sort"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/utils"
 

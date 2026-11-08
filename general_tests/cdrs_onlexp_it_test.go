@@ -7,6 +7,7 @@
 package general_tests
 
 // import (
+// 	"context"
 // 	"encoding/json"
 // 	"fmt"
 // 	"net/http"
@@ -18,7 +19,6 @@ package general_tests
 // 	"testing"
 // 	"time"
 
-// 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/ees"
 // 	"github.com/cgrates/cgrates/engine"

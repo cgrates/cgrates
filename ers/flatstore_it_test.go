@@ -7,6 +7,7 @@
 package ers
 
 // import (
+// 	"context"
 // 	"net/rpc"
 // 	"os"
 // 	"path"
@@ -14,7 +15,6 @@ package ers
 // 	"testing"
 // 	"time"
 
-// 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/apis"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/engine"

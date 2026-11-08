@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -47,7 +47,7 @@ type IPsCfg struct {
 }
 
 // Load loads the IPs section of the configuration.
-func (rlcfg *IPsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (rlcfg *IPsCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRLSCfg := new(IPsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, IPsJSON, jsnRLSCfg); err != nil {
 		return

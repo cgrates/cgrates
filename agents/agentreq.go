@@ -4,11 +4,11 @@
 package agents
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

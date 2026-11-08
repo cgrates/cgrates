@@ -5,16 +5,16 @@ package actions
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func filterAndSortDiktats(ctx *context.Context, tenant string, diktats []*utils.APDiktat,
+func filterAndSortDiktats(ctx context.Context, tenant string, diktats []*utils.APDiktat,
 	filters *engine.FilterS, data utils.DataProvider) ([]*utils.APDiktat, error) {
 	weights := make(map[string]float64)
 	selected := make([]*utils.APDiktat, 0)
@@ -69,7 +69,7 @@ func actionTarget(act string) string {
 	}
 }
 
-func newScheduledActs(ctx *context.Context, tenant, apID, trgTyp, trgID string,
+func newScheduledActs(ctx context.Context, tenant, apID, trgTyp, trgID string,
 	ignFilters bool, data utils.MapStorage, acts []actioner) (sActs *scheduledActs) {
 	return &scheduledActs{
 		tenant:     tenant,
@@ -94,7 +94,7 @@ type scheduledActs struct {
 }
 
 // Execute notifies possible errors on execution
-func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
+func (s *scheduledActs) Execute(ctx context.Context) (err error) {
 	var partExec bool
 	for _, act := range s.acts {
 		//ctx, cancel := context.WithTimeout(s.ctx, act.cfg().TTL)
@@ -110,7 +110,7 @@ func (s *scheduledActs) Execute(ctx *context.Context) (err error) {
 }
 
 // newActionersFromActions constructs multiple actioners out of APAction configurations
-func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
+func newActionersFromActions(ctx context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
 	connMgr *engine.ConnManager, aCfgs []*utils.APAction, tnt string) (acts []actioner, err error) {
 	acts = make([]actioner, len(aCfgs))
 	for i, aCfg := range aCfgs {
@@ -122,7 +122,7 @@ func newActionersFromActions(ctx *context.Context, cgrEv *utils.CGREvent, cfg *c
 }
 
 // newAction is the constructor to create actioner
-func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
+func newActioner(ctx context.Context, cgrEv *utils.CGREvent, cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.FilterS, dm *engine.DataManager,
 	connMgr *engine.ConnManager, aCfg *utils.APAction, tnt string) (act actioner, err error) {
 	switch aCfg.Type {
 	case utils.MetaLog:
@@ -177,5 +177,5 @@ func newActioner(ctx *context.Context, cgrEv *utils.CGREvent, cfg *config.CGRCon
 type actioner interface {
 	id() string
 	cfg() *utils.APAction
-	execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error)
+	execute(ctx context.Context, data utils.MapStorage, trgID string) (err error)
 }

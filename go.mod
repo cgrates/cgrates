@@ -14,16 +14,16 @@ require (
 	github.com/blevesearch/bleve/v2 v2.6.1
 	github.com/cgrates/aringo v0.0.0-20260324164818-495676900dbb
 	github.com/cgrates/baningo v0.0.0-20260907204338-d8ed5b43f1b4
-	github.com/cgrates/birpc v1.3.1-0.20260701165602-b3899805c429
+	github.com/cgrates/birpc v1.3.1-0.20261110105753-635b96beece9
 	github.com/cgrates/cron v0.0.0-20201022095836-3522d5b72c70
 	github.com/cgrates/fsock v0.0.0-20260907204233-094bc3a49233
 	github.com/cgrates/go-diameter v0.0.0-20260512102405-f9dcf589d4ac
-	github.com/cgrates/guardian v0.0.0-20260717083347-4dd989a9dc8f
+	github.com/cgrates/guardian v0.0.0-20261110105916-724f48a87136
 	github.com/cgrates/janusgo v0.0.0-20240503152118-188a408d7e73
 	github.com/cgrates/kamevapi v0.0.0-20260728044114-dd837c919733
 	github.com/cgrates/ltcache v0.0.0-20261014110413-89ece1ac7ffe
 	github.com/cgrates/radigo v0.0.0-20261102185756-9979d873eb17
-	github.com/cgrates/rpcclient v0.0.0-20260910075308-4b8faf373e78
+	github.com/cgrates/rpcclient v0.0.0-20261110134125-f0ca9ac99ca5
 	github.com/cgrates/sipingo v1.0.1-0.20200514112313-699ebc1cdb8e
 	github.com/charmbracelet/bubbles v1.0.0
 	github.com/charmbracelet/bubbletea v1.3.10

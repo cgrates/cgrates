@@ -4,12 +4,12 @@
 package resources
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/rpcclient"
@@ -751,7 +751,7 @@ func TestResourcesV1AuthorizeResources(t *testing.T) {
 	}
 }
 
-type callFunc = func(*ResourceS, *context.Context, *utils.CGREvent, *string) error
+type callFunc = func(*ResourceS, context.Context, *utils.CGREvent, *string) error
 
 func TestResourcesV1CacheReplyExists(t *testing.T) {
 	tests := []struct {
@@ -768,7 +768,7 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			eventID:    "EventAuthorizeResource",
 			limit:      10,
 			cacheReply: "Approved",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1AuthorizeResources(ctx, ev, reply)
 			},
 		},
@@ -778,7 +778,7 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			eventID:    "EventAllocateResource",
 			limit:      -1,
 			cacheReply: "cacheApproved",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1AllocateResources(ctx, ev, reply)
 			},
 		},
@@ -788,7 +788,7 @@ func TestResourcesV1CacheReplyExists(t *testing.T) {
 			eventID:    "EventReleaseResource",
 			limit:      -1,
 			cacheReply: "cacheReply",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1ReleaseResources(ctx, ev, reply)
 			},
 		},
@@ -883,7 +883,7 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			units:           2,
 			wantReply:       "Approved",
 			wantCachedReply: "Approved",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1AuthorizeResources(ctx, ev, reply)
 			},
 		},
@@ -894,7 +894,7 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			units:           2,
 			wantReply:       "Approved",
 			wantCachedReply: "Approved",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1AllocateResources(ctx, ev, reply)
 			},
 		},
@@ -905,7 +905,7 @@ func TestResourcesV1CacheReplySet(t *testing.T) {
 			units:           2,
 			wantErr:         "cannot find usage record with id: RU_Test",
 			wantCachedReply: "",
-			call: func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+			call: func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 				return rS.V1ReleaseResources(ctx, ev, reply)
 			},
 		},
@@ -997,13 +997,13 @@ func TestResourcesV1MissingParameters(t *testing.T) {
 		name string
 		call callFunc
 	}{
-		{"AuthorizeResources", func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+		{"AuthorizeResources", func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 			return rS.V1AuthorizeResources(ctx, ev, reply)
 		}},
-		{"AllocateResources", func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+		{"AllocateResources", func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 			return rS.V1AllocateResources(ctx, ev, reply)
 		}},
-		{"ReleaseResources", func(rS *ResourceS, ctx *context.Context, ev *utils.CGREvent, reply *string) error {
+		{"ReleaseResources", func(rS *ResourceS, ctx context.Context, ev *utils.CGREvent, reply *string) error {
 			return rS.V1ReleaseResources(ctx, ev, reply)
 		}},
 	}
@@ -1164,10 +1164,10 @@ func TestResourcesV1AllocateResources(t *testing.T) {
 }
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -1223,8 +1223,8 @@ func TestResourcesV1AllocateResourcesProcessThErr(t *testing.T) {
 	}
 
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},
@@ -1390,8 +1390,8 @@ func TestResourcesV1ReleaseResourcesProcessThErr(t *testing.T) {
 	cacheS := engine.NewCacheS(cfg, dm, nil, nil, locker)
 	dm.SetCache(cacheS)
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				return utils.ErrExists
 			},
 		},

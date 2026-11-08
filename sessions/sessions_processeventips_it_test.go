@@ -7,13 +7,12 @@
 package sessions
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/birpc/context"
 )
 
 func TestSessionSv1ProcessEventIPsAuthorize(t *testing.T) {

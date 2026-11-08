@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -17,7 +17,7 @@ type APIBanCfg struct {
 }
 
 // loadAPIBanCgrCfg loads the Analyzer section of the configuration
-func (ban *APIBanCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (ban *APIBanCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnAPIBanCfg := new(APIBanJsonCfg)
 	if err = jsnCfg.GetSection(ctx, APIBanJSON, jsnAPIBanCfg); err != nil {
 		return

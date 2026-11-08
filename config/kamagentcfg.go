@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -69,7 +69,7 @@ type KamAgentCfg struct {
 }
 
 // loadKamAgentCfg loads the KamAgent section of the configuration
-func (ka *KamAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (ka *KamAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnKamAgentCfg := new(KamAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, KamailioAgentJSON, jsnKamAgentCfg); err != nil {
 		return

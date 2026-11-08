@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,7 +40,7 @@ type ResourceSCfg struct {
 }
 
 // Load loads the ResourceS section of the configuration
-func (c *ResourceSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
+func (c *ResourceSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnRLSCfg := new(ResourceSJsonCfg)
 	if err := jsnCfg.GetSection(ctx, ResourceSJSON, jsnRLSCfg); err != nil {
 		return err

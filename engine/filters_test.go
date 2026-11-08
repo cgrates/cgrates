@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -14,7 +15,7 @@ import (
 	"time"
 
 	"github.com/cgrates/baningo"
-	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -2588,10 +2589,10 @@ func TestHttpInlineFilter(t *testing.T) {
 }
 
 func TestFilterTrends(t *testing.T) {
-	clientConn := make(chan context.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.TrendSv1GetTrendSummary: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.TrendSv1GetTrendSummary: func(ctx context.Context, args, reply any) error {
 				argGetTrend, ok := args.(*utils.TenantIDWithAPIOpts)
 				if !ok {
 					return fmt.Errorf("wrong args")
@@ -2628,7 +2629,7 @@ func TestFilterTrends(t *testing.T) {
 	cM := NewConnManager(config.NewDefaultCGRConfig())
 	cM.SetCache(NewCacheS(cM.cfg, nil, nil, nil, locker))
 
-	cM.rpcInternal = map[string]chan context.ClientConnector{
+	cM.rpcInternal = map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaTrends): clientConn,
 	}
 	testCases := []struct {
@@ -2693,10 +2694,10 @@ func TestFilterTrends(t *testing.T) {
 }
 
 func TestFilterRanking(t *testing.T) {
-	clientConn := make(chan context.ClientConnector, 1)
+	clientConn := make(chan birpc.ClientConnector, 1)
 	clientConn <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.RankingSv1GetRankingSummary: func(ctx *context.Context, args any, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.RankingSv1GetRankingSummary: func(ctx context.Context, args any, reply any) error {
 				argTntID, ok := args.(*utils.TenantIDWithAPIOpts)
 				if !ok {
 					return fmt.Errorf("wrong args")
@@ -2720,7 +2721,7 @@ func TestFilterRanking(t *testing.T) {
 	locker := NewLocker(cfg)
 	cM := NewConnManager(config.NewDefaultCGRConfig())
 	cM.SetCache(NewCacheS(cM.cfg, nil, nil, nil, locker))
-	cM.rpcInternal = map[string]chan context.ClientConnector{
+	cM.rpcInternal = map[string]chan birpc.ClientConnector{
 		utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRankings): clientConn,
 	}
 	now := time.Now().Add(-2 * time.Second).Format(time.RFC3339)
@@ -2783,7 +2784,7 @@ func TestGetFilters(t *testing.T) {
 		},
 	}
 
-	ctx := &context.Context{}
+	ctx := context.Background()
 
 	err := dm.SetFilter(ctx, filter, true)
 	if err != nil {

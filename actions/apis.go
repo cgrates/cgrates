@@ -4,9 +4,9 @@
 package actions
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -14,7 +14,7 @@ import (
 
 // V1ScheduleActions schedules actions for matching profiles, replacing existing jobs.
 // *asap actions run immediately.
-func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+func (aS *ActionS) V1ScheduleActions(ctx context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
 	}
@@ -38,7 +38,7 @@ func (aS *ActionS) V1ScheduleActions(ctx *context.Context, args *utils.CGREvent,
 
 // V1Reschedule reschedules actions for one saved profile.
 // It does not execute *asap actions.
-func (aS *ActionS) V1Reschedule(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (aS *ActionS) V1Reschedule(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -63,7 +63,7 @@ func (aS *ActionS) V1Reschedule(ctx *context.Context, args *utils.TenantIDWithAP
 }
 
 // V1GetScheduledActions returns the registered cron batches for a tenant.
-func (aS *ActionS) V1GetScheduledActions(_ *context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
+func (aS *ActionS) V1GetScheduledActions(_ context.Context, args *utils.GetScheduledActionsArgs, reply *[]utils.ScheduledActionBatch) error {
 	tenant := args.Tenant
 	if tenant == "" {
 		tenant = aS.cfg.GeneralCfg().DefaultTenant
@@ -113,7 +113,7 @@ func (aS *ActionS) V1GetScheduledActions(_ *context.Context, args *utils.GetSche
 }
 
 // V1ExecuteActions will be called to execute ASAP action profiles, ignoring their Schedule field
-func (aS *ActionS) V1ExecuteActions(ctx *context.Context, args *utils.CGREvent, rpl *string) (err error) {
+func (aS *ActionS) V1ExecuteActions(ctx context.Context, args *utils.CGREvent, rpl *string) (err error) {
 	if args.Tenant == utils.EmptyString {
 		args.Tenant = aS.cfg.GeneralCfg().DefaultTenant
 	}

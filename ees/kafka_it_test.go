@@ -7,12 +7,12 @@
 package ees
 
 import (
+	"context"
 	"path"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

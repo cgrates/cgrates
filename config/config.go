@@ -4,6 +4,7 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"net"
@@ -15,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -310,7 +310,7 @@ func NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr string) (cfg *CGRConfig, 
 }
 
 // NewCGRConfigFromPath reads all json files out of a folder/subfolders and loads them up in lexical order
-func NewCGRConfigFromPath(ctx *context.Context, path string) (cfg *CGRConfig, err error) {
+func NewCGRConfigFromPath(ctx context.Context, path string) (cfg *CGRConfig, err error) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
@@ -323,7 +323,7 @@ func NewCGRConfigFromPath(ctx *context.Context, path string) (cfg *CGRConfig, er
 
 // newCGRConfigFromPathWithoutEnv reads all json files out of a folder/subfolders and loads them up in lexical order
 // it will not read *env variables and will not checkConfigSanity as it is not needed for configs
-func newCGRConfigFromPathWithoutEnv(ctx *context.Context, path string) (cfg *CGRConfig, err error) {
+func newCGRConfigFromPathWithoutEnv(ctx context.Context, path string) (cfg *CGRConfig, err error) {
 	cfg = NewDefaultCGRConfig()
 	cfg.ConfigPath = path
 
@@ -863,7 +863,7 @@ func (cfg *CGRConfig) UnlockSections(lkIDs ...string) {
 	}
 }
 
-func (cfg *CGRConfig) loadCfgWithLocks(ctx *context.Context, path, section string) (err error) {
+func (cfg *CGRConfig) loadCfgWithLocks(ctx context.Context, path, section string) (err error) {
 	sections := cfg.sections
 	if section == utils.EmptyString || section == utils.MetaAll {
 		cfg.lockSections()
@@ -878,7 +878,7 @@ func (cfg *CGRConfig) loadCfgWithLocks(ctx *context.Context, path, section strin
 	return loadConfigFromPath(ctx, path, sections, false, cfg)
 }
 
-func loadConfigFromReader(ctx *context.Context, rdr io.Reader, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
+func loadConfigFromReader(ctx context.Context, rdr io.Reader, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
 	jsnCfg := new(CgrJsonCfg)
 	var rjr *RjReader
 	if rjr, err = NewRjReader(rdr); err != nil {
@@ -893,7 +893,7 @@ func loadConfigFromReader(ctx *context.Context, rdr io.Reader, loadFuncs Section
 }
 
 // Reads all .json files out of a folder/subfolders and loads them up in lexical order
-func loadConfigFromPath(ctx *context.Context, path string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
+func loadConfigFromPath(ctx context.Context, path string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
 	if utils.IsURL(path) {
 		return loadConfigFromHTTP(ctx, path, loadFuncs, cfg) // prefix protocol
 	}
@@ -911,7 +911,7 @@ func loadConfigFromPath(ctx *context.Context, path string, loadFuncs Sections, e
 	return loadConfigFromFolder(ctx, path, loadFuncs, envOff, cfg)
 }
 
-func loadConfigFromFolder(ctx *context.Context, cfgDir string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
+func loadConfigFromFolder(ctx context.Context, cfgDir string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
 	jsonFilesFound := false
 	if err = filepath.Walk(cfgDir, func(path string, info os.FileInfo, err error) (werr error) {
 		if !info.IsDir() || isHidden(info.Name()) { // also ignore hidden files and folders
@@ -944,7 +944,7 @@ func loadConfigFromFolder(ctx *context.Context, cfgDir string, loadFuncs Section
 
 // loadConfigFromFile loads the config from a file
 // extracted from a loadConfigFromFolder in order to test all cases
-func loadConfigFromFile(ctx *context.Context, jsonFilePath string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
+func loadConfigFromFile(ctx context.Context, jsonFilePath string, loadFuncs Sections, envOff bool, cfg *CGRConfig) (err error) {
 	var cfgFile *os.File
 	cfgFile, err = os.Open(jsonFilePath)
 	if err != nil {
@@ -958,7 +958,7 @@ func loadConfigFromFile(ctx *context.Context, jsonFilePath string, loadFuncs Sec
 	return
 }
 
-func loadConfigFromHTTP(ctx *context.Context, urlPaths string, loadFuncs Sections, cfg *CGRConfig) (err error) {
+func loadConfigFromHTTP(ctx context.Context, urlPaths string, loadFuncs Sections, cfg *CGRConfig) (err error) {
 	for _, urlPath := range strings.Split(urlPaths, utils.InfieldSep) {
 
 		var myClient = &http.Client{

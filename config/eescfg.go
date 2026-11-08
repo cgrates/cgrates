@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"reflect"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -33,7 +33,7 @@ func (eeS *EEsCfg) ExporterCfg(id string) *EventExporterCfg {
 }
 
 // loadEesCfg loads the Ees section of the configuration
-func (eeS *EEsCfg) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (eeS *EEsCfg) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnEEsCfg := new(EEsJsonCfg)
 	if err = jsnCfg.GetSection(ctx, EEsJSON, jsnEEsCfg); err != nil {
 		return

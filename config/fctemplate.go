@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -181,7 +181,7 @@ func (fc FCTemplate) Clone() (cln *FCTemplate) {
 type FCTemplates map[string][]*FCTemplate
 
 // loadTemplateSCfg loads the Template section of the configuration
-func (sCft FCTemplates) Load(ctx *context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
+func (sCft FCTemplates) Load(ctx context.Context, jsnCfg ConfigDB, cfg *CGRConfig) (err error) {
 	jsnTemplateCfg := make(map[string][]*FcTemplateJsonCfg)
 	if err = jsnCfg.GetSection(ctx, TemplatesJSON, &jsnTemplateCfg); err != nil {
 		return

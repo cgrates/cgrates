@@ -4,73 +4,73 @@
 package engine
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
 
 type DataDBMock struct {
-	RemoveRateProfileDrvF      func(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error
-	SetRateProfileDrvF         func(*context.Context, *utils.RateProfile, bool) error
-	GetRateProfileDrvF         func(*context.Context, string, string) (*utils.RateProfile, error)
-	GetRateProfileRatesDrvF    func(*context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
-	GetKeysForPrefixF          func(*context.Context, string, string) ([]string, error)
-	GetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
-	SetIndexesDrvF             func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
-	GetAttributeProfileDrvF    func(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error)
-	SetAttributeProfileDrvF    func(ctx *context.Context, attr *utils.AttributeProfile) error
-	RemoveAttributeProfileDrvF func(ctx *context.Context, str1 string, str2 string) error
-	SetLoadIDsDrvF             func(ctx *context.Context, loadIDs map[string]int64) error
-	GetFilterDrvF              func(ctx *context.Context, str1 string, str2 string) (*Filter, error)
-	GetChargerProfileDrvF      func(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error)
-	SetChargerProfileDrvF      func(ctx *context.Context, chr *utils.ChargerProfile) (err error)
-	GetThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error)
-	SetThresholdProfileDrvF    func(ctx *context.Context, tp *utils.ThresholdProfile) (err error)
-	RemThresholdProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
-	GetThresholdDrvF           func(ctx *context.Context, tenant, id string) (*utils.Threshold, error)
-	RemoveThresholdDrvF        func(ctx *context.Context, tnt, id string) error
-	GetResourceProfileDrvF     func(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error)
-	SetResourceProfileDrvF     func(ctx *context.Context, rp *utils.ResourceProfile) error
-	RemoveResourceProfileDrvF  func(ctx *context.Context, tnt, id string) error
-	RemoveResourceDrvF         func(ctx *context.Context, tnt, id string) error
-	SetResourceDrvF            func(ctx *context.Context, r *utils.Resource) error
-	GetResourceDrvF            func(ctx *context.Context, tenant, id string) (*utils.Resource, error)
-	GetIPProfileDrvF           func(ctx *context.Context, tnt, id string) (*utils.IPProfile, error)
-	SetIPProfileDrvF           func(ctx *context.Context, ipp *utils.IPProfile) error
-	RemoveIPProfileDrvF        func(ctx *context.Context, tnt, id string) error
-	RemoveIPAllocationsDrvF    func(ctx *context.Context, tnt, id string) error
-	SetIPAllocationsDrvF       func(ctx *context.Context, ip *utils.IPAllocations) error
-	GetIPAllocationsDrvF       func(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error)
-	SetTrendProfileDrvF        func(ctx *context.Context, tr *utils.TrendProfile) (err error)
-	GetTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
-	RemTrendProfileDrvF        func(ctx *context.Context, tenant string, id string) (err error)
-	SetRankingProfileDrvF      func(ctx *context.Context, sq *utils.RankingProfile) (err error)
-	GetRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)
-	RemRankingProfileDrvF      func(ctx *context.Context, tenant string, id string) (err error)
-	GetStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error)
-	SetStatQueueProfileDrvF    func(ctx *context.Context, sq *utils.StatQueueProfile) (err error)
-	RemStatQueueProfileDrvF    func(ctx *context.Context, tenant, id string) (err error)
-	RemStatQueueDrvF           func(ctx *context.Context, tenant, id string) (err error)
-	SetFilterDrvF              func(ctx *context.Context, fltr *Filter) error
-	GetActionProfileDrvF       func(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error)
-	SetActionProfileDrvF       func(ctx *context.Context, ap *utils.ActionProfile) error
-	RemoveActionProfileDrvF    func(ctx *context.Context, tenant string, ID string) error
-	RemoveFilterDrvF           func(ctx *context.Context, str1 string, str2 string) error
-	SetAccountDrvF             func(ctx *context.Context, profile *utils.Account) error
-	GetAccountDrvF             func(ctx *context.Context, str1 string, str2 string) (*utils.Account, error)
-	RemoveAccountDrvF          func(ctx *context.Context, str1 string, str2 string) error
-	GetRouteProfileDrvF        func(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error)
-	SetRouteProfileDrvF        func(ctx *context.Context, rtPrf *utils.RouteProfile) error
-	RemoveRouteProfileDrvF     func(ctx *context.Context, tnt, id string) error
-	RemoveChargerProfileDrvF   func(ctx *context.Context, chr string, rpl string) error
-	GetItemLoadIDsDrvF         func(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
-	SetThresholdDrvF           func(*context.Context, *utils.Threshold) error
-	SetStatQueueDrvF           func(*context.Context, *StoredStatQueue, *utils.StatQueue) error
-	HasDataDrvF                func(ctx *context.Context, category, subject, tenant string) (bool, error)
-	RemoveIndexesDrvF          func(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error
-	GetStatQueueDrvF           func(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error)
+	RemoveRateProfileDrvF      func(ctx context.Context, str1 string, str2 string, rateIDs *[]string) error
+	SetRateProfileDrvF         func(context.Context, *utils.RateProfile, bool) error
+	GetRateProfileDrvF         func(context.Context, string, string) (*utils.RateProfile, error)
+	GetRateProfileRatesDrvF    func(context.Context, string, string, string, bool) ([]string, []*utils.Rate, error)
+	GetKeysForPrefixF          func(context.Context, string, string) ([]string, error)
+	GetIndexesDrvF             func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error)
+	SetIndexesDrvF             func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error)
+	GetAttributeProfileDrvF    func(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error)
+	SetAttributeProfileDrvF    func(ctx context.Context, attr *utils.AttributeProfile) error
+	RemoveAttributeProfileDrvF func(ctx context.Context, str1 string, str2 string) error
+	SetLoadIDsDrvF             func(ctx context.Context, loadIDs map[string]int64) error
+	GetFilterDrvF              func(ctx context.Context, str1 string, str2 string) (*Filter, error)
+	GetChargerProfileDrvF      func(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error)
+	SetChargerProfileDrvF      func(ctx context.Context, chr *utils.ChargerProfile) (err error)
+	GetThresholdProfileDrvF    func(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error)
+	SetThresholdProfileDrvF    func(ctx context.Context, tp *utils.ThresholdProfile) (err error)
+	RemThresholdProfileDrvF    func(ctx context.Context, tenant, id string) (err error)
+	GetThresholdDrvF           func(ctx context.Context, tenant, id string) (*utils.Threshold, error)
+	RemoveThresholdDrvF        func(ctx context.Context, tnt, id string) error
+	GetResourceProfileDrvF     func(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error)
+	SetResourceProfileDrvF     func(ctx context.Context, rp *utils.ResourceProfile) error
+	RemoveResourceProfileDrvF  func(ctx context.Context, tnt, id string) error
+	RemoveResourceDrvF         func(ctx context.Context, tnt, id string) error
+	SetResourceDrvF            func(ctx context.Context, r *utils.Resource) error
+	GetResourceDrvF            func(ctx context.Context, tenant, id string) (*utils.Resource, error)
+	GetIPProfileDrvF           func(ctx context.Context, tnt, id string) (*utils.IPProfile, error)
+	SetIPProfileDrvF           func(ctx context.Context, ipp *utils.IPProfile) error
+	RemoveIPProfileDrvF        func(ctx context.Context, tnt, id string) error
+	RemoveIPAllocationsDrvF    func(ctx context.Context, tnt, id string) error
+	SetIPAllocationsDrvF       func(ctx context.Context, ip *utils.IPAllocations) error
+	GetIPAllocationsDrvF       func(ctx context.Context, tenant, id string) (*utils.IPAllocations, error)
+	SetTrendProfileDrvF        func(ctx context.Context, tr *utils.TrendProfile) (err error)
+	GetTrendProfileDrvF        func(ctx context.Context, tenant string, id string) (sq *utils.TrendProfile, err error)
+	RemTrendProfileDrvF        func(ctx context.Context, tenant string, id string) (err error)
+	SetRankingProfileDrvF      func(ctx context.Context, sq *utils.RankingProfile) (err error)
+	GetRankingProfileDrvF      func(ctx context.Context, tenant string, id string) (sq *utils.RankingProfile, err error)
+	RemRankingProfileDrvF      func(ctx context.Context, tenant string, id string) (err error)
+	GetStatQueueProfileDrvF    func(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error)
+	SetStatQueueProfileDrvF    func(ctx context.Context, sq *utils.StatQueueProfile) (err error)
+	RemStatQueueProfileDrvF    func(ctx context.Context, tenant, id string) (err error)
+	RemStatQueueDrvF           func(ctx context.Context, tenant, id string) (err error)
+	SetFilterDrvF              func(ctx context.Context, fltr *Filter) error
+	GetActionProfileDrvF       func(ctx context.Context, tenant string, ID string) (*utils.ActionProfile, error)
+	SetActionProfileDrvF       func(ctx context.Context, ap *utils.ActionProfile) error
+	RemoveActionProfileDrvF    func(ctx context.Context, tenant string, ID string) error
+	RemoveFilterDrvF           func(ctx context.Context, str1 string, str2 string) error
+	SetAccountDrvF             func(ctx context.Context, profile *utils.Account) error
+	GetAccountDrvF             func(ctx context.Context, str1 string, str2 string) (*utils.Account, error)
+	RemoveAccountDrvF          func(ctx context.Context, str1 string, str2 string) error
+	GetRouteProfileDrvF        func(ctx context.Context, tnt, id string) (*utils.RouteProfile, error)
+	SetRouteProfileDrvF        func(ctx context.Context, rtPrf *utils.RouteProfile) error
+	RemoveRouteProfileDrvF     func(ctx context.Context, tnt, id string) error
+	RemoveChargerProfileDrvF   func(ctx context.Context, chr string, rpl string) error
+	GetItemLoadIDsDrvF         func(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error)
+	SetThresholdDrvF           func(context.Context, *utils.Threshold) error
+	SetStatQueueDrvF           func(context.Context, *StoredStatQueue, *utils.StatQueue) error
+	HasDataDrvF                func(ctx context.Context, category, subject, tenant string) (bool, error)
+	RemoveIndexesDrvF          func(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) error
+	GetStatQueueDrvF           func(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error)
 }
 
 // Storage methods
@@ -80,7 +80,7 @@ func (dbM *DataDBMock) Flush(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetKeysForPrefix(ctx *context.Context, prf, srch string) ([]string, error) {
+func (dbM *DataDBMock) GetKeysForPrefix(ctx context.Context, prf, srch string) ([]string, error) {
 	if dbM.GetKeysForPrefixF != nil {
 		return dbM.GetKeysForPrefixF(ctx, prf, srch)
 	}
@@ -108,105 +108,105 @@ func (dbM *DataDBMock) IsDBEmpty() (resp bool, err error) {
 }
 
 // DataDB methods
-func (dbM *DataDBMock) HasDataDrv(ctx *context.Context, category, subject, tenant string) (bool, error) {
+func (dbM *DataDBMock) HasDataDrv(ctx context.Context, category, subject, tenant string) (bool, error) {
 	if dbM.HasDataDrvF != nil {
 		return dbM.HasDataDrvF(ctx, category, subject, tenant)
 	}
 	return false, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceProfileDrv(ctx *context.Context, tnt, id string) (*utils.ResourceProfile, error) {
+func (dbM *DataDBMock) GetResourceProfileDrv(ctx context.Context, tnt, id string) (*utils.ResourceProfile, error) {
 	if dbM.GetResourceProfileDrvF != nil {
 		return dbM.GetResourceProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceProfileDrv(ctx *context.Context, resPrf *utils.ResourceProfile) error {
+func (dbM *DataDBMock) SetResourceProfileDrv(ctx context.Context, resPrf *utils.ResourceProfile) error {
 	if dbM.SetResourceProfileDrvF != nil {
 		return dbM.SetResourceProfileDrvF(ctx, resPrf)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceProfileDrv(ctx *context.Context, tnt string, id string) error {
+func (dbM *DataDBMock) RemoveResourceProfileDrv(ctx context.Context, tnt string, id string) error {
 	if dbM.RemoveResourceProfileDrvF != nil {
 		return dbM.RemoveResourceProfileDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetResourceDrv(ctx *context.Context, tenant, id string) (*utils.Resource, error) {
+func (dbM *DataDBMock) GetResourceDrv(ctx context.Context, tenant, id string) (*utils.Resource, error) {
 	if dbM.GetResourceDrvF != nil {
 		return dbM.GetResourceDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetResourceDrv(ctx *context.Context, r *utils.Resource) error {
+func (dbM *DataDBMock) SetResourceDrv(ctx context.Context, r *utils.Resource) error {
 	if dbM.SetResourceDrvF != nil {
 		return dbM.SetResourceDrvF(ctx, r)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveResourceDrv(ctx *context.Context, tnt, id string) error {
+func (dbM *DataDBMock) RemoveResourceDrv(ctx context.Context, tnt, id string) error {
 	if dbM.RemoveResourceDrvF != nil {
 		return dbM.RemoveResourceDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIPProfileDrv(ctx *context.Context, tnt, id string) (*utils.IPProfile, error) {
+func (dbM *DataDBMock) GetIPProfileDrv(ctx context.Context, tnt, id string) (*utils.IPProfile, error) {
 	if dbM.GetIPProfileDrvF != nil {
 		return dbM.GetIPProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetIPProfileDrv(ctx *context.Context, ipp *utils.IPProfile) error {
+func (dbM *DataDBMock) SetIPProfileDrv(ctx context.Context, ipp *utils.IPProfile) error {
 	if dbM.SetIPProfileDrvF != nil {
 		return dbM.SetIPProfileDrvF(ctx, ipp)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIPProfileDrv(ctx *context.Context, tnt string, id string) error {
+func (dbM *DataDBMock) RemoveIPProfileDrv(ctx context.Context, tnt string, id string) error {
 	if dbM.RemoveIPProfileDrvF != nil {
 		return dbM.RemoveIPProfileDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIPAllocationsDrv(ctx *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+func (dbM *DataDBMock) GetIPAllocationsDrv(ctx context.Context, tenant, id string) (*utils.IPAllocations, error) {
 	if dbM.GetIPAllocationsDrvF != nil {
 		return dbM.GetIPAllocationsDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetIPAllocationsDrv(ctx *context.Context, ip *utils.IPAllocations) error {
+func (dbM *DataDBMock) SetIPAllocationsDrv(ctx context.Context, ip *utils.IPAllocations) error {
 	if dbM.SetIPAllocationsDrvF != nil {
 		return dbM.SetIPAllocationsDrvF(ctx, ip)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIPAllocationsDrv(ctx *context.Context, tnt, id string) error {
+func (dbM *DataDBMock) RemoveIPAllocationsDrv(ctx context.Context, tnt, id string) error {
 	if dbM.RemoveIPAllocationsDrvF != nil {
 		return dbM.RemoveIPAllocationsDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *DataDBMock) GetIndexesDrv(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dbM.GetIndexesDrvF != nil {
 		return dbM.GetIndexesDrvF(ctx, idxItmType, tntCtx, transactionID, idxKeys...)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx string,
+func (dbM *DataDBMock) SetIndexesDrv(ctx context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	if dbM.SetIndexesDrvF != nil {
 		return dbM.SetIndexesDrvF(ctx, idxItmType, tntCtx, indexes, commit, transactionID)
@@ -214,233 +214,233 @@ func (dbM *DataDBMock) SetIndexesDrv(ctx *context.Context, idxItmType, tntCtx st
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveIndexesDrv(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+func (dbM *DataDBMock) RemoveIndexesDrv(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
+func (dbM *DataDBMock) GetStatQueueProfileDrv(ctx context.Context, tenant, id string) (sq *utils.StatQueueProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetStatQueueProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx *context.Context, sq *utils.StatQueueProfile) (err error) {
+func (dbM *DataDBMock) SetStatQueueProfileDrv(ctx context.Context, sq *utils.StatQueueProfile) (err error) {
 	if dbM.SetStatQueueProfileDrvF != nil {
 		return dbM.SetStatQueueProfileDrvF(ctx, sq)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (dbM *DataDBMock) RemStatQueueProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	if dbM.RemStatQueueProfileDrvF != nil {
 		return dbM.RemStatQueueProfileDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetStatQueueDrv(ctx *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+func (dbM *DataDBMock) GetStatQueueDrv(ctx context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	if dbM.GetStatQueueDrvF != nil {
 		return dbM.GetStatQueueDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetStatQueueDrv(ctx *context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
+func (dbM *DataDBMock) SetStatQueueDrv(ctx context.Context, ssq *StoredStatQueue, sq *utils.StatQueue) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemStatQueueDrv(ctx *context.Context, tenant, id string) (err error) {
+func (dbM *DataDBMock) RemStatQueueDrv(ctx context.Context, tenant, id string) (err error) {
 	if dbM.RemStatQueueDrvF != nil {
 		return dbM.RemStatQueueDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
-func (dbM *DataDBMock) GetRankingProfileDrv(ctx *context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
+func (dbM *DataDBMock) GetRankingProfileDrv(ctx context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetRankingProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRankingProfileDrv(ctx *context.Context, rg *utils.RankingProfile) (err error) {
+func (dbM *DataDBMock) SetRankingProfileDrv(ctx context.Context, rg *utils.RankingProfile) (err error) {
 	if dbM.SetRankingProfileDrvF(ctx, rg) != nil {
 		return dbM.SetRankingProfileDrvF(ctx, rg)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemRankingProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (dbM *DataDBMock) RemRankingProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	if dbM.RemRankingProfileDrvF != nil {
 		return dbM.RemRankingProfileDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRankingDrv(ctx *context.Context, tenant, id string) (*utils.Ranking, error) {
+func (dbM *DataDBMock) GetRankingDrv(ctx context.Context, tenant, id string) (*utils.Ranking, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRankingDrv(ctx *context.Context, _ *utils.Ranking) error {
+func (dbM *DataDBMock) SetRankingDrv(ctx context.Context, _ *utils.Ranking) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRankingDrv(ctx *context.Context, _ string, _ string) error {
+func (dbM *DataDBMock) RemoveRankingDrv(ctx context.Context, _ string, _ string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTrendProfileDrv(ctx *context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
+func (dbM *DataDBMock) GetTrendProfileDrv(ctx context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
 	if dbM.GetStatQueueProfileDrvF != nil {
 		return dbM.GetTrendProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetTrendProfileDrv(ctx *context.Context, trend *utils.TrendProfile) (err error) {
+func (dbM *DataDBMock) SetTrendProfileDrv(ctx context.Context, trend *utils.TrendProfile) (err error) {
 	if dbM.SetTrendProfileDrvF(ctx, trend) != nil {
 		return dbM.SetTrendProfileDrvF(ctx, trend)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemTrendProfileDrv(ctx *context.Context, tenant string, id string) (err error) {
+func (dbM *DataDBMock) RemTrendProfileDrv(ctx context.Context, tenant string, id string) (err error) {
 	if dbM.RemTrendProfileDrvF != nil {
 		return dbM.RemTrendProfileDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdProfileDrv(ctx *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+func (dbM *DataDBMock) GetThresholdProfileDrv(ctx context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	if dbM.GetThresholdProfileDrvF != nil {
 		return dbM.GetThresholdProfileDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdProfileDrv(ctx *context.Context, tp *utils.ThresholdProfile) (err error) {
+func (dbM *DataDBMock) SetThresholdProfileDrv(ctx context.Context, tp *utils.ThresholdProfile) (err error) {
 	if dbM.SetThresholdProfileDrvF != nil {
 		return dbM.SetThresholdProfileDrvF(ctx, tp)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemThresholdProfileDrv(ctx *context.Context, tenant, id string) (err error) {
+func (dbM *DataDBMock) RemThresholdProfileDrv(ctx context.Context, tenant, id string) (err error) {
 	if dbM.RemThresholdProfileDrvF != nil {
 		return dbM.RemThresholdProfileDrvF(ctx, tenant, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetThresholdDrv(ctx *context.Context, tenant, id string) (*utils.Threshold, error) {
+func (dbM *DataDBMock) GetThresholdDrv(ctx context.Context, tenant, id string) (*utils.Threshold, error) {
 	if dbM.GetThresholdDrvF != nil {
 		return dbM.GetThresholdDrvF(ctx, tenant, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetThresholdDrv(*context.Context, *utils.Threshold) error {
+func (dbM *DataDBMock) SetThresholdDrv(context.Context, *utils.Threshold) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveThresholdDrv(ctx *context.Context, tnt, id string) error {
+func (dbM *DataDBMock) RemoveThresholdDrv(ctx context.Context, tnt, id string) error {
 	if dbM.RemoveThresholdDrvF != nil {
 		return dbM.RemoveThresholdDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetFilterDrv(ctx *context.Context, str1 string, str2 string) (*Filter, error) {
+func (dbM *DataDBMock) GetFilterDrv(ctx context.Context, str1 string, str2 string) (*Filter, error) {
 	if dbM.GetFilterDrvF != nil {
 		return dbM.GetFilterDrvF(ctx, str1, str2)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetFilterDrv(ctx *context.Context, fltr *Filter) error {
+func (dbM *DataDBMock) SetFilterDrv(ctx context.Context, fltr *Filter) error {
 	if dbM.SetFilterDrvF != nil {
 		return dbM.SetFilterDrvF(ctx, fltr)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveFilterDrv(ctx *context.Context, str1 string, str2 string) error {
+func (dbM *DataDBMock) RemoveFilterDrv(ctx context.Context, str1 string, str2 string) error {
 	if dbM.RemoveFilterDrvF != nil {
 		return dbM.RemoveFilterDrvF(ctx, str1, str2)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRouteProfileDrv(ctx *context.Context, tnt, id string) (*utils.RouteProfile, error) {
+func (dbM *DataDBMock) GetRouteProfileDrv(ctx context.Context, tnt, id string) (*utils.RouteProfile, error) {
 	if dbM.GetRouteProfileDrvF != nil {
 		return dbM.GetRouteProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRouteProfileDrv(ctx *context.Context, rtPrf *utils.RouteProfile) error {
+func (dbM *DataDBMock) SetRouteProfileDrv(ctx context.Context, rtPrf *utils.RouteProfile) error {
 	if dbM.SetRouteProfileDrvF != nil {
 		return dbM.SetRouteProfileDrvF(ctx, rtPrf)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRouteProfileDrv(ctx *context.Context, tnt, id string) error {
+func (dbM *DataDBMock) RemoveRouteProfileDrv(ctx context.Context, tnt, id string) error {
 	if dbM.RemoveRouteProfileDrvF != nil {
 		return dbM.RemoveRouteProfileDrvF(ctx, tnt, id)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
+func (dbM *DataDBMock) GetAttributeProfileDrv(ctx context.Context, str1 string, str2 string) (*utils.AttributeProfile, error) {
 	if dbM.GetAttributeProfileDrvF != nil {
 		return dbM.GetAttributeProfileDrvF(ctx, str1, str2)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAttributeProfileDrv(ctx *context.Context, attr *utils.AttributeProfile) error {
+func (dbM *DataDBMock) SetAttributeProfileDrv(ctx context.Context, attr *utils.AttributeProfile) error {
 	if dbM.SetAttributeProfileDrvF != nil {
 		return dbM.SetAttributeProfileDrvF(ctx, attr)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAttributeProfileDrv(ctx *context.Context, str1 string, str2 string) error {
+func (dbM *DataDBMock) RemoveAttributeProfileDrv(ctx context.Context, str1 string, str2 string) error {
 	if dbM.RemoveAttributeProfileDrvF != nil {
 		return dbM.RemoveAttributeProfileDrvF(ctx, str1, str2)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetChargerProfileDrv(ctx *context.Context, tnt, id string) (*utils.ChargerProfile, error) {
+func (dbM *DataDBMock) GetChargerProfileDrv(ctx context.Context, tnt, id string) (*utils.ChargerProfile, error) {
 	if dbM.GetChargerProfileDrvF != nil {
 		return dbM.GetChargerProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetChargerProfileDrv(ctx *context.Context, chrg *utils.ChargerProfile) error {
+func (dbM *DataDBMock) SetChargerProfileDrv(ctx context.Context, chrg *utils.ChargerProfile) error {
 	if dbM.SetChargerProfileDrvF != nil {
 		return dbM.SetChargerProfileDrvF(ctx, chrg)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveChargerProfileDrv(ctx *context.Context, chr string, rpl string) error {
+func (dbM *DataDBMock) RemoveChargerProfileDrv(ctx context.Context, chr string, rpl string) error {
 	if dbM.RemoveChargerProfileDrvF != nil {
 		return dbM.RemoveChargerProfileDrvF(ctx, chr, rpl)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetItemLoadIDsDrv(ctx *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (dbM *DataDBMock) GetItemLoadIDsDrv(ctx context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	if dbM.GetItemLoadIDsDrvF != nil {
 		return dbM.GetItemLoadIDsDrvF(ctx, itemIDPrefix)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetLoadIDsDrv(ctx *context.Context, loadIDs map[string]int64) error {
+func (dbM *DataDBMock) SetLoadIDsDrv(ctx context.Context, loadIDs map[string]int64) error {
 	if dbM.SetLoadIDsDrvF != nil {
 		return dbM.SetLoadIDsDrvF(ctx, loadIDs)
 	}
@@ -451,82 +451,82 @@ func (dbM *DataDBMock) RemoveLoadIDsDrv() error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRateProfileDrv(ctx *context.Context, tnt string, id string) (*utils.RateProfile, error) {
+func (dbM *DataDBMock) GetRateProfileDrv(ctx context.Context, tnt string, id string) (*utils.RateProfile, error) {
 	if dbM.GetRateProfileDrvF != nil {
 		return dbM.GetRateProfileDrvF(ctx, tnt, id)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetRateProfileRatesDrv(ctx *context.Context, tnt string, id string, rtPrfx string, needIDs bool) ([]string, []*utils.Rate, error) {
+func (dbM *DataDBMock) GetRateProfileRatesDrv(ctx context.Context, tnt string, id string, rtPrfx string, needIDs bool) ([]string, []*utils.Rate, error) {
 	if dbM.GetRateProfileRatesDrvF != nil {
 		return dbM.GetRateProfileRatesDrvF(ctx, tnt, id, rtPrfx, needIDs)
 	}
 	return nil, nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetRateProfileDrv(ctx *context.Context, rt *utils.RateProfile, optOverwrite bool) error {
+func (dbM *DataDBMock) SetRateProfileDrv(ctx context.Context, rt *utils.RateProfile, optOverwrite bool) error {
 	if dbM.SetRateProfileDrvF != nil {
 		return dbM.SetRateProfileDrvF(ctx, rt, optOverwrite)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveRateProfileDrv(ctx *context.Context, str1 string, str2 string, rateIDs *[]string) error {
+func (dbM *DataDBMock) RemoveRateProfileDrv(ctx context.Context, str1 string, str2 string, rateIDs *[]string) error {
 	if dbM.RemoveRateProfileDrvF != nil {
 		return dbM.RemoveRateProfileDrvF(ctx, str1, str2, rateIDs)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetTrendDrv(ctx *context.Context, tenant, id string) (*utils.Trend, error) {
+func (dbM *DataDBMock) GetTrendDrv(ctx context.Context, tenant, id string) (*utils.Trend, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetTrendDrv(ctx *context.Context, tr *utils.Trend) error {
+func (dbM *DataDBMock) SetTrendDrv(ctx context.Context, tr *utils.Trend) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveTrendDrv(ctx *context.Context, _ string, _ string) error {
+func (dbM *DataDBMock) RemoveTrendDrv(ctx context.Context, _ string, _ string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetActionProfileDrv(ctx *context.Context, tenant string, ID string) (*utils.ActionProfile, error) {
+func (dbM *DataDBMock) GetActionProfileDrv(ctx context.Context, tenant string, ID string) (*utils.ActionProfile, error) {
 	if dbM.GetActionProfileDrvF != nil {
 		return dbM.GetActionProfileDrvF(ctx, tenant, ID)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetActionProfileDrv(ctx *context.Context, ap *utils.ActionProfile) error {
+func (dbM *DataDBMock) SetActionProfileDrv(ctx context.Context, ap *utils.ActionProfile) error {
 	if dbM.SetActionProfileDrvF != nil {
 		return dbM.SetActionProfileDrvF(ctx, ap)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveActionProfileDrv(ctx *context.Context, tenant string, ID string) error {
+func (dbM *DataDBMock) RemoveActionProfileDrv(ctx context.Context, tenant string, ID string) error {
 	if dbM.RemoveActionProfileDrvF != nil {
 		return dbM.RemoveActionProfileDrvF(ctx, tenant, ID)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetAccountDrv(ctx *context.Context, str1 string, str2 string) (*utils.Account, error) {
+func (dbM *DataDBMock) GetAccountDrv(ctx context.Context, str1 string, str2 string) (*utils.Account, error) {
 	if dbM.GetAccountDrvF != nil {
 		return dbM.GetAccountDrvF(ctx, str1, str2)
 	}
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetAccountDrv(ctx *context.Context, profile *utils.Account) error {
+func (dbM *DataDBMock) SetAccountDrv(ctx context.Context, profile *utils.Account) error {
 	if dbM.SetAccountDrvF != nil {
 		return dbM.SetAccountDrvF(ctx, profile)
 	}
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveAccountDrv(ctx *context.Context, str1 string, str2 string) error {
+func (dbM *DataDBMock) RemoveAccountDrv(ctx context.Context, str1 string, str2 string) error {
 	if dbM.RemoveAccountDrvF != nil {
 		return dbM.RemoveAccountDrvF(ctx, str1, str2)
 	}
@@ -541,15 +541,15 @@ func (dbM *DataDBMock) RemoveRatingProfileDrv(string) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (map[string][]byte, error) {
+func (dbM *DataDBMock) GetConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (map[string][]byte, error) {
 	return nil, utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) error {
+func (dbM *DataDBMock) SetConfigSectionsDrv(ctx context.Context, nodeID string, sectionsData map[string][]byte) error {
 	return utils.ErrNotImplemented
 }
 
-func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) error {
+func (dbM *DataDBMock) RemoveConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) error {
 	return utils.ErrNotImplemented
 }
 

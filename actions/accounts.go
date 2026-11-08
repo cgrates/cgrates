@@ -4,9 +4,9 @@
 package actions
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +31,7 @@ func (aL *actSetBalance) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actSetBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actSetBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
 	var conns []string
 	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAccounts, aL.tnt, data, nil, aL.fltrS)
 	if err != nil {
@@ -94,7 +94,7 @@ func (aL *actRemBalance) cfg() *utils.APAction {
 }
 
 // execute implements actioner interface
-func (aL *actRemBalance) execute(ctx *context.Context, data utils.MapStorage, trgID string) (err error) {
+func (aL *actRemBalance) execute(ctx context.Context, data utils.MapStorage, trgID string) (err error) {
 	var conns []string
 	conns, err = engine.GetConnIDs(ctx, aL.config.ActionSCfg().Conns, utils.MetaAccounts, aL.tnt, data, nil, aL.fltrS)
 	if len(conns) == 0 {

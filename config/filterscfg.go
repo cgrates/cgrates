@@ -4,7 +4,8 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -14,7 +15,7 @@ type FilterSCfg struct {
 }
 
 // loadFilterSCfg loads the FilterS section of the configuration
-func (fSCfg *FilterSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (fSCfg *FilterSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnFilterSCfg := new(FilterSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, FilterSJSON, jsnFilterSCfg); err != nil {
 		return

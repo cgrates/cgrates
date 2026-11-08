@@ -4,10 +4,11 @@
 package sessions
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
+	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/engine"
@@ -15,7 +16,7 @@ import (
 )
 
 // BiRPCv1ProcessEvent processes an CGREvent with various subsystems
-func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
+func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 	apiArgs *utils.CGREvent, apiRply *V1ProcessEventReply) (err error) {
 	if apiArgs == nil {
 		return utils.NewErrMandatoryIeMissing(utils.CGREventString)
@@ -114,7 +115,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx *context.Context,
 	var s *Session
 	if utils.OptAsBool(cch, utils.MetaSession) {
 		if s, err = sS.setSession(ctx, apiArgs, cch,
-			sS.biJClntID(ctx.Client)); err != nil {
+			sS.biJClntID(birpc.ClientFromContext(ctx))); err != nil {
 			return
 		}
 	}

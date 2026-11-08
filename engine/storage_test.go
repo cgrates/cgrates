@@ -5,11 +5,11 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/google/go-cmp/cmp"

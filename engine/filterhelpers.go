@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,7 +15,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -24,7 +24,7 @@ const matchedItemsWarningThreshold int = 100
 // MatchingItemIDsForEvent returns the list of item IDs matching fieldName/fieldValue for an event
 // fieldIDs limits the fields which are checked against indexes
 // helper on top of db.GetIndexes, adding utils.MetaAny to list of fields queried
-func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs *[]string,
+func MatchingItemIDsForEvent(ctx context.Context, ev utils.MapStorage, stringFldIDs, prefixFldIDs, suffixFldIDs, existsFldIDs, notExistsFldIDs *[]string,
 	dm *DataManager, cacheID, itemIDPrefix string, indexedSelects, nestedFields bool) (itemIDs utils.StringSet, err error) {
 	if dm == nil {
 		return nil, utils.ErrNoDatabaseConn
@@ -36,7 +36,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 	}
 	// Guard will protect the function with automatic locking
 	lockID := utils.CacheInstanceToPrefix[cacheID] + itemIDPrefix
-	dm.Guard(ctx, func(ctx *context.Context) (_ error) {
+	dm.Guard(ctx, func(ctx context.Context) (_ error) {
 		if !indexedSelects {
 			var db DataDB
 			db, _, err = dm.dbConns.GetConn(cacheID)
@@ -133,7 +133,7 @@ func MatchingItemIDsForEvent(ctx *context.Context, ev utils.MapStorage, stringFl
 }
 
 // Weight returns the weight specified by the first matching DynamicWeight
-func WeightFromDynamics(ctx *context.Context, dWs []*utils.DynamicWeight,
+func WeightFromDynamics(ctx context.Context, dWs []*utils.DynamicWeight,
 	fltrS *FilterS, tnt string, ev utils.DataProvider) (wg float64, err error) {
 	for _, dW := range dWs {
 		var pass bool
@@ -147,7 +147,7 @@ func WeightFromDynamics(ctx *context.Context, dWs []*utils.DynamicWeight,
 }
 
 // BlockerFromDynamics returns the value of the blocker specified by the first matching DynamicBlocker
-func BlockerFromDynamics(ctx *context.Context, dBs []*utils.DynamicBlocker,
+func BlockerFromDynamics(ctx context.Context, dBs []*utils.DynamicBlocker,
 	fltrS *FilterS, tnt string, ev utils.DataProvider) (blckr bool, err error) {
 	for _, dB := range dBs {
 		var pass bool
@@ -160,7 +160,7 @@ func BlockerFromDynamics(ctx *context.Context, dBs []*utils.DynamicBlocker,
 	return false, nil
 }
 
-func GetSentryPeer(ctx *context.Context, cache *CacheS, val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
+func GetSentryPeer(ctx context.Context, cache *CacheS, val string, sentryPeerCfg *config.SentryPeerCfg, dataType string) (found bool, err error) {
 	itemId := utils.ConcatenatedKey(dataType, val)
 	var (
 		isCached bool

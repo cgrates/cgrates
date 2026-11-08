@@ -4,10 +4,10 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -24,7 +24,7 @@ func NewReplicatorSv1(dm *engine.DataManager, admin *AdminSv1) *ReplicatorSv1 {
 }
 
 // GetAccount retrieves an account from the remote database.
-func (r *ReplicatorSv1) GetAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
+func (r *ReplicatorSv1) GetAccount(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Account) error {
 	r.dm.UpdateReplicationFilters(utils.AccountPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAccounts)
 	if err != nil {
@@ -39,7 +39,7 @@ func (r *ReplicatorSv1) GetAccount(ctx *context.Context, args *utils.TenantIDWit
 }
 
 // GetStatQueue retrieves a stat queue from the remote database.
-func (r *ReplicatorSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
+func (r *ReplicatorSv1) GetStatQueue(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	r.dm.UpdateReplicationFilters(utils.StatQueuePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
@@ -54,7 +54,7 @@ func (r *ReplicatorSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDW
 }
 
 // GetFilter retrieves a filter from the remote database.
-func (r *ReplicatorSv1) GetFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
+func (r *ReplicatorSv1) GetFilter(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *engine.Filter) error {
 	r.dm.UpdateReplicationFilters(utils.FilterPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaFilters)
 	if err != nil {
@@ -69,7 +69,7 @@ func (r *ReplicatorSv1) GetFilter(ctx *context.Context, args *utils.TenantIDWith
 }
 
 // GetThreshold retrieves a threshold from the remote database.
-func (r *ReplicatorSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Threshold) error {
+func (r *ReplicatorSv1) GetThreshold(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Threshold) error {
 	r.dm.UpdateReplicationFilters(utils.ThresholdPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
@@ -84,7 +84,7 @@ func (r *ReplicatorSv1) GetThreshold(ctx *context.Context, args *utils.TenantIDW
 }
 
 // GetThresholdProfile retrieves a threshold profile from the remote database.
-func (r *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ThresholdProfile) error {
+func (r *ReplicatorSv1) GetThresholdProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ThresholdProfile) error {
 	r.dm.UpdateReplicationFilters(utils.ThresholdProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
@@ -99,7 +99,7 @@ func (r *ReplicatorSv1) GetThresholdProfile(ctx *context.Context, args *utils.Te
 }
 
 // GetStatQueueProfile retrieves a stat queue profile from the remote database.
-func (r *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) error {
+func (r *ReplicatorSv1) GetStatQueueProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) error {
 	r.dm.UpdateReplicationFilters(utils.StatQueueProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
@@ -114,7 +114,7 @@ func (r *ReplicatorSv1) GetStatQueueProfile(ctx *context.Context, args *utils.Te
 }
 
 // GetTrendProfile retrieves a trend profile from the remote database.
-func (r *ReplicatorSv1) GetTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) error {
+func (r *ReplicatorSv1) GetTrendProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.TrendProfile) error {
 	r.dm.UpdateReplicationFilters(utils.TrendProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrendProfiles)
 	if err != nil {
@@ -129,7 +129,7 @@ func (r *ReplicatorSv1) GetTrendProfile(ctx *context.Context, args *utils.Tenant
 }
 
 // GetResource retrieves a resource from the remote database.
-func (r *ReplicatorSv1) GetResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
+func (r *ReplicatorSv1) GetResource(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Resource) error {
 	r.dm.UpdateReplicationFilters(utils.ResourcesPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResources)
 	if err != nil {
@@ -144,7 +144,7 @@ func (r *ReplicatorSv1) GetResource(ctx *context.Context, args *utils.TenantIDWi
 }
 
 // GetResourceProfile retrieves a resource profile from the remote database.
-func (r *ReplicatorSv1) GetResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
+func (r *ReplicatorSv1) GetResourceProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ResourceProfile) error {
 	r.dm.UpdateReplicationFilters(utils.ResourceProfilesPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResourceProfiles)
 	if err != nil {
@@ -159,7 +159,7 @@ func (r *ReplicatorSv1) GetResourceProfile(ctx *context.Context, args *utils.Ten
 }
 
 // GetIPAllocations retrieves IP allocations from the remote database.
-func (r *ReplicatorSv1) GetIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
+func (r *ReplicatorSv1) GetIPAllocations(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.IPAllocations) error {
 	r.dm.UpdateReplicationFilters(utils.IPAllocationsPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPAllocations)
 	if err != nil {
@@ -174,7 +174,7 @@ func (r *ReplicatorSv1) GetIPAllocations(ctx *context.Context, args *utils.Tenan
 }
 
 // GetIPProfile retrieves an IP profile from the remote database.
-func (r *ReplicatorSv1) GetIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.IPProfile) error {
+func (r *ReplicatorSv1) GetIPProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.IPProfile) error {
 	r.dm.UpdateReplicationFilters(utils.IPProfilesPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPProfiles)
 	if err != nil {
@@ -189,7 +189,7 @@ func (r *ReplicatorSv1) GetIPProfile(ctx *context.Context, args *utils.TenantIDW
 }
 
 // GetRankingProfile retrieves a ranking profile from the remote database.
-func (r *ReplicatorSv1) GetRankingProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RankingProfile) error {
+func (r *ReplicatorSv1) GetRankingProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RankingProfile) error {
 	r.dm.UpdateReplicationFilters(utils.RankingProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankingProfiles)
 	if err != nil {
@@ -204,7 +204,7 @@ func (r *ReplicatorSv1) GetRankingProfile(ctx *context.Context, args *utils.Tena
 }
 
 // GetRouteProfile retrieves a route profile from the remote database.
-func (r *ReplicatorSv1) GetRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
+func (r *ReplicatorSv1) GetRouteProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
 	r.dm.UpdateReplicationFilters(utils.RouteProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRouteProfiles)
 	if err != nil {
@@ -219,7 +219,7 @@ func (r *ReplicatorSv1) GetRouteProfile(ctx *context.Context, args *utils.Tenant
 }
 
 // GetAttributeProfile retrieves an attribute profile from the remote database.
-func (r *ReplicatorSv1) GetAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.AttributeProfile) error {
+func (r *ReplicatorSv1) GetAttributeProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.AttributeProfile) error {
 	r.dm.UpdateReplicationFilters(utils.AttributeProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
@@ -234,7 +234,7 @@ func (r *ReplicatorSv1) GetAttributeProfile(ctx *context.Context, args *utils.Te
 }
 
 // GetChargerProfile retrieves a charger profile from the remote database.
-func (r *ReplicatorSv1) GetChargerProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
+func (r *ReplicatorSv1) GetChargerProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ChargerProfile) error {
 	r.dm.UpdateReplicationFilters(utils.ChargerProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
@@ -249,7 +249,7 @@ func (r *ReplicatorSv1) GetChargerProfile(ctx *context.Context, args *utils.Tena
 }
 
 // GetRateProfile retrieves a rate profile from the remote database.
-func (r *ReplicatorSv1) GetRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error {
+func (r *ReplicatorSv1) GetRateProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.RateProfile) error {
 	r.dm.UpdateReplicationFilters(utils.RateProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
@@ -264,7 +264,7 @@ func (r *ReplicatorSv1) GetRateProfile(ctx *context.Context, args *utils.TenantI
 }
 
 // GetActionProfile retrieves an action profile from the remote database.
-func (r *ReplicatorSv1) GetActionProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
+func (r *ReplicatorSv1) GetActionProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.ActionProfile) error {
 	r.dm.UpdateReplicationFilters(utils.ActionProfilePrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaActionProfiles)
 	if err != nil {
@@ -282,7 +282,7 @@ func (r *ReplicatorSv1) GetActionProfile(ctx *context.Context, args *utils.Tenan
 // Unlike the standard Get pattern, Trend contains sync.RWMutex and internal
 // caches that cannot be copied with a simple dereference, so each field is
 // assigned individually.
-func (r *ReplicatorSv1) GetTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Trend) error {
+func (r *ReplicatorSv1) GetTrend(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Trend) error {
 	r.dm.UpdateReplicationFilters(utils.TrendPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrends)
 	if err != nil {
@@ -303,7 +303,7 @@ func (r *ReplicatorSv1) GetTrend(ctx *context.Context, args *utils.TenantIDWithA
 // GetRanking retrieves a ranking from the remote database.
 // Unlike the standard Get pattern, Ranking contains sync.RWMutex so each
 // field is assigned individually.
-func (r *ReplicatorSv1) GetRanking(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Ranking) error {
+func (r *ReplicatorSv1) GetRanking(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.Ranking) error {
 	r.dm.UpdateReplicationFilters(utils.RankingPrefix, args.TenantID.TenantID(), utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankings)
 	if err != nil {
@@ -324,7 +324,7 @@ func (r *ReplicatorSv1) GetRanking(ctx *context.Context, args *utils.TenantIDWit
 }
 
 // GetItemLoadIDs retrieves item load IDs from the remote database.
-func (r *ReplicatorSv1) GetItemLoadIDs(ctx *context.Context, args *utils.StringWithAPIOpts, reply *map[string]int64) error {
+func (r *ReplicatorSv1) GetItemLoadIDs(ctx context.Context, args *utils.StringWithAPIOpts, reply *map[string]int64) error {
 	r.dm.UpdateReplicationFilters(utils.LoadIDPrefix, args.Arg, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaLoadIDs)
 	if err != nil {
@@ -339,7 +339,7 @@ func (r *ReplicatorSv1) GetItemLoadIDs(ctx *context.Context, args *utils.StringW
 }
 
 // GetIndexes retrieves indexes from the remote database.
-func (r *ReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
+func (r *ReplicatorSv1) GetIndexes(ctx context.Context, args *utils.GetIndexesArg, reply *map[string]utils.StringSet) error {
 	r.dm.UpdateReplicationFilters(utils.CacheInstanceToPrefix[args.IdxItmType], args.TntCtx, utils.IfaceAsString(args.APIOpts[utils.RemoteHostOpt]))
 	db, _, err := r.dm.DBConns().GetConn(args.IdxItmType)
 	if err != nil {
@@ -354,7 +354,7 @@ func (r *ReplicatorSv1) GetIndexes(ctx *context.Context, args *utils.GetIndexesA
 }
 
 // SetAccount stores an account in the remote database.
-func (r *ReplicatorSv1) SetAccount(ctx *context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetAccount(ctx context.Context, args *utils.AccountWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
@@ -367,7 +367,7 @@ func (r *ReplicatorSv1) SetAccount(ctx *context.Context, args *utils.AccountWith
 }
 
 // SetThresholdProfile stores a threshold profile in the remote database.
-func (r *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *utils.ThresholdProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetThresholdProfile(ctx context.Context, args *utils.ThresholdProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
@@ -388,7 +388,7 @@ func (r *ReplicatorSv1) SetThresholdProfile(ctx *context.Context, args *utils.Th
 }
 
 // SetThreshold stores a threshold in the remote database.
-func (r *ReplicatorSv1) SetThreshold(ctx *context.Context, args *utils.ThresholdWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetThreshold(ctx context.Context, args *utils.ThresholdWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err
@@ -409,7 +409,7 @@ func (r *ReplicatorSv1) SetThreshold(ctx *context.Context, args *utils.Threshold
 }
 
 // SetTrendProfile stores a trend profile in the remote database.
-func (r *ReplicatorSv1) SetTrendProfile(ctx *context.Context, args *utils.TrendProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetTrendProfile(ctx context.Context, args *utils.TrendProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
@@ -430,7 +430,7 @@ func (r *ReplicatorSv1) SetTrendProfile(ctx *context.Context, args *utils.TrendP
 }
 
 // SetTrend stores a trend in the remote database.
-func (r *ReplicatorSv1) SetTrend(ctx *context.Context, args *utils.TrendWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetTrend(ctx context.Context, args *utils.TrendWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrends)
 	if err != nil {
 		return err
@@ -451,7 +451,7 @@ func (r *ReplicatorSv1) SetTrend(ctx *context.Context, args *utils.TrendWithAPIO
 }
 
 // SetStatQueueProfile stores a stat queue profile in the remote database.
-func (r *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, args *utils.StatQueueProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetStatQueueProfile(ctx context.Context, args *utils.StatQueueProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
@@ -472,7 +472,7 @@ func (r *ReplicatorSv1) SetStatQueueProfile(ctx *context.Context, args *utils.St
 }
 
 // SetFilter stores a filter in the remote database.
-func (r *ReplicatorSv1) SetFilter(ctx *context.Context, args *engine.FilterWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetFilter(ctx context.Context, args *engine.FilterWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
@@ -493,7 +493,7 @@ func (r *ReplicatorSv1) SetFilter(ctx *context.Context, args *engine.FilterWithA
 }
 
 // SetResourceProfile stores a resource profile in the remote database.
-func (r *ReplicatorSv1) SetResourceProfile(ctx *context.Context, args *utils.ResourceProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetResourceProfile(ctx context.Context, args *utils.ResourceProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
@@ -514,7 +514,7 @@ func (r *ReplicatorSv1) SetResourceProfile(ctx *context.Context, args *utils.Res
 }
 
 // SetResource stores a resource in the remote database.
-func (r *ReplicatorSv1) SetResource(ctx *context.Context, args *utils.ResourceWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetResource(ctx context.Context, args *utils.ResourceWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResources)
 	if err != nil {
 		return err
@@ -535,7 +535,7 @@ func (r *ReplicatorSv1) SetResource(ctx *context.Context, args *utils.ResourceWi
 }
 
 // SetIPProfile stores an IP profile in the remote database.
-func (r *ReplicatorSv1) SetIPProfile(ctx *context.Context, args *utils.IPProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetIPProfile(ctx context.Context, args *utils.IPProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
@@ -556,7 +556,7 @@ func (r *ReplicatorSv1) SetIPProfile(ctx *context.Context, args *utils.IPProfile
 }
 
 // SetIPAllocations stores IP allocations in the remote database.
-func (r *ReplicatorSv1) SetIPAllocations(ctx *context.Context, args *utils.IPAllocationsWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetIPAllocations(ctx context.Context, args *utils.IPAllocationsWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPAllocations)
 	if err != nil {
 		return err
@@ -577,7 +577,7 @@ func (r *ReplicatorSv1) SetIPAllocations(ctx *context.Context, args *utils.IPAll
 }
 
 // SetRankingProfile stores a ranking profile in the remote database.
-func (r *ReplicatorSv1) SetRankingProfile(ctx *context.Context, args *utils.RankingProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetRankingProfile(ctx context.Context, args *utils.RankingProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
@@ -598,7 +598,7 @@ func (r *ReplicatorSv1) SetRankingProfile(ctx *context.Context, args *utils.Rank
 }
 
 // SetRanking stores a ranking in the remote database.
-func (r *ReplicatorSv1) SetRanking(ctx *context.Context, args *utils.RankingWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetRanking(ctx context.Context, args *utils.RankingWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankings)
 	if err != nil {
 		return err
@@ -619,7 +619,7 @@ func (r *ReplicatorSv1) SetRanking(ctx *context.Context, args *utils.RankingWith
 }
 
 // SetRouteProfile stores a route profile in the remote database.
-func (r *ReplicatorSv1) SetRouteProfile(ctx *context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetRouteProfile(ctx context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
@@ -640,7 +640,7 @@ func (r *ReplicatorSv1) SetRouteProfile(ctx *context.Context, args *utils.RouteP
 }
 
 // SetAttributeProfile stores an attribute profile in the remote database.
-func (r *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, args *utils.AttributeProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetAttributeProfile(ctx context.Context, args *utils.AttributeProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
@@ -661,7 +661,7 @@ func (r *ReplicatorSv1) SetAttributeProfile(ctx *context.Context, args *utils.At
 }
 
 // SetChargerProfile stores a charger profile in the remote database.
-func (r *ReplicatorSv1) SetChargerProfile(ctx *context.Context, args *utils.ChargerProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetChargerProfile(ctx context.Context, args *utils.ChargerProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
@@ -682,7 +682,7 @@ func (r *ReplicatorSv1) SetChargerProfile(ctx *context.Context, args *utils.Char
 }
 
 // SetActionProfile stores an action profile in the remote database.
-func (r *ReplicatorSv1) SetActionProfile(ctx *context.Context, args *utils.ActionProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetActionProfile(ctx context.Context, args *utils.ActionProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
@@ -705,7 +705,7 @@ func (r *ReplicatorSv1) SetActionProfile(ctx *context.Context, args *utils.Actio
 // SetStatQueue stores a stat queue in the remote database.
 // Unlike the standard Set pattern, StatQueueWithAPIOpts uses a named field
 // (not embedded), so tenant/ID access goes through args.StatQueue.
-func (r *ReplicatorSv1) SetStatQueue(ctx *context.Context, args *utils.StatQueueWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetStatQueue(ctx context.Context, args *utils.StatQueueWithAPIOpts, reply *string) error {
 	if err := r.dm.SetStatQueueWithoutReplicate(ctx, args.StatQueue); err != nil {
 		return err
 	}
@@ -722,7 +722,7 @@ func (r *ReplicatorSv1) SetStatQueue(ctx *context.Context, args *utils.StatQueue
 }
 
 // SetLoadIDs stores load IDs in the remote database.
-func (r *ReplicatorSv1) SetLoadIDs(ctx *context.Context, args *utils.LoadIDsWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetLoadIDs(ctx context.Context, args *utils.LoadIDsWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaLoadIDs)
 	if err != nil {
 		return err
@@ -743,7 +743,7 @@ func (r *ReplicatorSv1) SetLoadIDs(ctx *context.Context, args *utils.LoadIDsWith
 }
 
 // SetIndexes stores indexes in the remote database.
-func (r *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetIndexesArg, reply *string) error {
+func (r *ReplicatorSv1) SetIndexes(ctx context.Context, args *utils.SetIndexesArg, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(args.IdxItmType)
 	if err != nil {
 		return err
@@ -789,7 +789,7 @@ func (r *ReplicatorSv1) SetIndexes(ctx *context.Context, args *utils.SetIndexesA
 // SetRateProfile stores a rate profile in the remote database.
 // Unlike the standard Set pattern, SetRateProfileDrv takes an extra overwrite
 // argument. Replication always passes false.
-func (r *ReplicatorSv1) SetRateProfile(ctx *context.Context, args *utils.RateProfileWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) SetRateProfile(ctx context.Context, args *utils.RateProfileWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
@@ -810,7 +810,7 @@ func (r *ReplicatorSv1) SetRateProfile(ctx *context.Context, args *utils.RatePro
 }
 
 // RemoveAccount removes an account from the remote database.
-func (r *ReplicatorSv1) RemoveAccount(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveAccount(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAccounts)
 	if err != nil {
 		return err
@@ -823,7 +823,7 @@ func (r *ReplicatorSv1) RemoveAccount(ctx *context.Context, args *utils.TenantID
 }
 
 // RemoveThreshold removes a threshold from the remote database.
-func (r *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveThreshold(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholds)
 	if err != nil {
 		return err
@@ -844,7 +844,7 @@ func (r *ReplicatorSv1) RemoveThreshold(ctx *context.Context, args *utils.Tenant
 }
 
 // RemoveThresholdProfile removes a threshold profile from the remote database.
-func (r *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveThresholdProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaThresholdProfiles)
 	if err != nil {
 		return err
@@ -865,7 +865,7 @@ func (r *ReplicatorSv1) RemoveThresholdProfile(ctx *context.Context, args *utils
 }
 
 // RemoveTrend removes a trend from the remote database.
-func (r *ReplicatorSv1) RemoveTrend(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveTrend(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrends)
 	if err != nil {
 		return err
@@ -886,7 +886,7 @@ func (r *ReplicatorSv1) RemoveTrend(ctx *context.Context, args *utils.TenantIDWi
 }
 
 // RemoveTrendProfile removes a trend profile from the remote database.
-func (r *ReplicatorSv1) RemoveTrendProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveTrendProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaTrendProfiles)
 	if err != nil {
 		return err
@@ -907,7 +907,7 @@ func (r *ReplicatorSv1) RemoveTrendProfile(ctx *context.Context, args *utils.Ten
 }
 
 // RemoveStatQueue removes a stat queue from the remote database.
-func (r *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveStatQueue(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueues)
 	if err != nil {
 		return err
@@ -928,7 +928,7 @@ func (r *ReplicatorSv1) RemoveStatQueue(ctx *context.Context, args *utils.Tenant
 }
 
 // RemoveStatQueueProfile removes a stat queue profile from the remote database.
-func (r *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveStatQueueProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaStatQueueProfiles)
 	if err != nil {
 		return err
@@ -949,7 +949,7 @@ func (r *ReplicatorSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils
 }
 
 // RemoveFilter removes a filter from the remote database.
-func (r *ReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveFilter(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
@@ -970,7 +970,7 @@ func (r *ReplicatorSv1) RemoveFilter(ctx *context.Context, args *utils.TenantIDW
 }
 
 // RemoveResource removes a resource from the remote database.
-func (r *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveResource(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResources)
 	if err != nil {
 		return err
@@ -991,7 +991,7 @@ func (r *ReplicatorSv1) RemoveResource(ctx *context.Context, args *utils.TenantI
 }
 
 // RemoveResourceProfile removes a resource profile from the remote database.
-func (r *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveResourceProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaResourceProfiles)
 	if err != nil {
 		return err
@@ -1012,7 +1012,7 @@ func (r *ReplicatorSv1) RemoveResourceProfile(ctx *context.Context, args *utils.
 }
 
 // RemoveIPAllocations removes IP allocations from the remote database.
-func (r *ReplicatorSv1) RemoveIPAllocations(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveIPAllocations(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPAllocations)
 	if err != nil {
 		return err
@@ -1033,7 +1033,7 @@ func (r *ReplicatorSv1) RemoveIPAllocations(ctx *context.Context, args *utils.Te
 }
 
 // RemoveIPProfile removes an IP profile from the remote database.
-func (r *ReplicatorSv1) RemoveIPProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveIPProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaIPProfiles)
 	if err != nil {
 		return err
@@ -1054,7 +1054,7 @@ func (r *ReplicatorSv1) RemoveIPProfile(ctx *context.Context, args *utils.Tenant
 }
 
 // RemoveRankingProfile removes a ranking profile from the remote database.
-func (r *ReplicatorSv1) RemoveRankingProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveRankingProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankingProfiles)
 	if err != nil {
 		return err
@@ -1075,7 +1075,7 @@ func (r *ReplicatorSv1) RemoveRankingProfile(ctx *context.Context, args *utils.T
 }
 
 // RemoveRanking removes a ranking from the remote database.
-func (r *ReplicatorSv1) RemoveRanking(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveRanking(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRankings)
 	if err != nil {
 		return err
@@ -1096,7 +1096,7 @@ func (r *ReplicatorSv1) RemoveRanking(ctx *context.Context, args *utils.TenantID
 }
 
 // RemoveRouteProfile removes a route profile from the remote database.
-func (r *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveRouteProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRouteProfiles)
 	if err != nil {
 		return err
@@ -1117,7 +1117,7 @@ func (r *ReplicatorSv1) RemoveRouteProfile(ctx *context.Context, args *utils.Ten
 }
 
 // RemoveAttributeProfile removes an attribute profile from the remote database.
-func (r *ReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveAttributeProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaAttributeProfiles)
 	if err != nil {
 		return err
@@ -1138,7 +1138,7 @@ func (r *ReplicatorSv1) RemoveAttributeProfile(ctx *context.Context, args *utils
 }
 
 // RemoveChargerProfile removes a charger profile from the remote database.
-func (r *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveChargerProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaChargerProfiles)
 	if err != nil {
 		return err
@@ -1161,7 +1161,7 @@ func (r *ReplicatorSv1) RemoveChargerProfile(ctx *context.Context, args *utils.T
 // RemoveRateProfile removes a rate profile from the remote database.
 // Unlike the standard Remove pattern, RemoveRateProfileDrv takes an extra
 // rate IDs argument. Replication always passes nil.
-func (r *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveRateProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaRateProfiles)
 	if err != nil {
 		return err
@@ -1182,7 +1182,7 @@ func (r *ReplicatorSv1) RemoveRateProfile(ctx *context.Context, args *utils.Tena
 }
 
 // RemoveActionProfile removes an action profile from the remote database.
-func (r *ReplicatorSv1) RemoveActionProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (r *ReplicatorSv1) RemoveActionProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(utils.MetaActionProfiles)
 	if err != nil {
 		return err
@@ -1203,7 +1203,7 @@ func (r *ReplicatorSv1) RemoveActionProfile(ctx *context.Context, args *utils.Te
 }
 
 // RemoveIndexes removes indexes from the remote database.
-func (r *ReplicatorSv1) RemoveIndexes(ctx *context.Context, args *utils.GetIndexesArg, reply *string) error {
+func (r *ReplicatorSv1) RemoveIndexes(ctx context.Context, args *utils.GetIndexesArg, reply *string) error {
 	db, _, err := r.dm.DBConns().GetConn(args.IdxItmType)
 	if err != nil {
 		return err

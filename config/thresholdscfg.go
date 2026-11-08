@@ -4,11 +4,11 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -38,7 +38,7 @@ type ThresholdSCfg struct {
 }
 
 // Load loads the ThresholdS section of the configuration
-func (t *ThresholdSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
+func (t *ThresholdSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) error {
 	jsnThresholdSCfg := new(ThresholdSJsonCfg)
 	if err := jsnCfg.GetSection(ctx, ThresholdSJSON, jsnThresholdSCfg); err != nil {
 		return err

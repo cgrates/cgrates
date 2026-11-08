@@ -4,10 +4,10 @@
 package services
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -20,7 +20,7 @@ func newRPCService(rcvr any, name string) (*birpc.Service, error) {
 	return srv, nil
 }
 
-func ping(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+func ping(_ any, _ context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

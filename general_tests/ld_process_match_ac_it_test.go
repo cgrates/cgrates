@@ -7,12 +7,12 @@
 package general_tests
 
 import (
+	"context"
 	"net"
 	"path"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/birpc/jsonrpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -44,7 +44,7 @@ type TestRPC1 struct {
 
 var testRPC2 TestRPC1
 
-func (rpc *TestRPC1) ProcessEvent(ctx *context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
+func (rpc *TestRPC1) ProcessEvent(ctx context.Context, cgrEv *utils.CGREventWithEeIDs, rply *map[string]map[string]any) (err error) {
 	rpc.Event = cgrEv
 	return nil
 }

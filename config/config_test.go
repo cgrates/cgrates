@@ -4,6 +4,7 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 	"os"
 	"path"
@@ -13,7 +14,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/rpcclient"
 	"github.com/google/go-cmp/cmp"
 
@@ -6153,7 +6153,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 			cfg.ipsCfg,
 		}
 
-		ctx := &context.Context{}
+		ctx := context.Background()
 		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
 
 		if err != nil {
@@ -6168,7 +6168,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 	t.Run("file does not exist", func(t *testing.T) {
 		cfg := &CGRConfig{}
 		loadFuncs := Sections{}
-		ctx := &context.Context{}
+		ctx := context.Background()
 
 		err := loadConfigFromFile(ctx, "/nonexistent/path/cgrates.json", loadFuncs, false, cfg)
 
@@ -6203,7 +6203,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 			cfg.generalCfg,
 		}
 
-		ctx := &context.Context{}
+		ctx := context.Background()
 		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
 
 		if err == nil {
@@ -6231,7 +6231,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 		loadFuncs := Sections{
 			cfg.generalCfg,
 		}
-		ctx := &context.Context{}
+		ctx := context.Background()
 
 		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
 
@@ -6261,7 +6261,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 
 		cfg := &CGRConfig{}
 		loadFuncs := Sections{}
-		ctx := &context.Context{}
+		ctx := context.Background()
 
 		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
 
@@ -6305,7 +6305,7 @@ func TestLoadConfigFromFile(t *testing.T) {
 			cfg.ipsCfg,
 		}
 
-		ctx := &context.Context{}
+		ctx := context.Background()
 		err = loadConfigFromFile(ctx, tmpFile.Name(), loadFuncs, false, cfg)
 
 		if err != nil {

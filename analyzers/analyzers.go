@@ -4,6 +4,7 @@
 package analyzers
 
 import (
+	"context"
 	"encoding/json"
 	"math/rand"
 	"os"
@@ -11,8 +12,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/blevesearch/bleve/v2"
 	"github.com/blevesearch/bleve/v2/search"
@@ -87,7 +86,7 @@ func (aS *AnalyzerS) deleteHits(hits search.DocumentMatchCollection) (err error)
 }
 
 // ListenAndServe will initialize the service
-func (aS *AnalyzerS) ListenAndServe(ctx *context.Context) (err error) {
+func (aS *AnalyzerS) ListenAndServe(ctx context.Context) (err error) {
 	if err = aS.clenaUp(); err != nil { // clean up the data at the system start
 		return
 	}
@@ -129,7 +128,7 @@ type QueryArgs struct {
 }
 
 // V1StringQuery returns RPC calls matching the filters.
-func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply *[]map[string]any) error {
+func (aS *AnalyzerS) V1StringQuery(ctx context.Context, args *QueryArgs, reply *[]map[string]any) error {
 	if len(args.Filters) == 0 {
 		return aS.queryAll(ctx, args, reply)
 	}
@@ -140,7 +139,7 @@ func (aS *AnalyzerS) V1StringQuery(ctx *context.Context, args *QueryArgs, reply 
 	return aS.queryFiltered(ctx, q, args, reply)
 }
 
-func (aS *AnalyzerS) queryAll(ctx *context.Context,
+func (aS *AnalyzerS) queryAll(ctx context.Context,
 	args *QueryArgs, reply *[]map[string]any) error {
 	s := bleve.NewSearchRequest(bleve.NewMatchAllQuery())
 	s.Fields = []string{utils.Meta}
@@ -164,7 +163,7 @@ func (aS *AnalyzerS) queryAll(ctx *context.Context,
 	return nil
 }
 
-func (aS *AnalyzerS) queryFiltered(ctx *context.Context, q query.Query,
+func (aS *AnalyzerS) queryFiltered(ctx context.Context, q query.Query,
 	args *QueryArgs, reply *[]map[string]any) error {
 	limit := args.Limit
 	if limit <= 0 {

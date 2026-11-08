@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"crypto/tls"
 	"net/http"
 	"sync"
@@ -13,7 +14,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sqs"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -137,7 +137,7 @@ func (pstr *SQSee) Connect() (err error) {
 	return
 }
 
-func (pstr *SQSee) ExportEvent(ctx *context.Context, message, _ any) (err error) {
+func (pstr *SQSee) ExportEvent(ctx context.Context, message, _ any) (err error) {
 	pstr.reqs.get()
 	pstr.RLock()
 	_, err = pstr.svc.SendMessageWithContext(ctx,

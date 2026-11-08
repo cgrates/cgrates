@@ -5,6 +5,7 @@ package sessions
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"log"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"github.com/cgrates/cgrates/config"
@@ -21,7 +21,7 @@ import (
 
 type mkCall struct{}
 
-func (sT *mkCall) Call(ctx *context.Context, method string, arg any, rply any) error {
+func (sT *mkCall) Call(ctx context.Context, method string, arg any, rply any) error {
 	if arg.(*utils.DPRArgs).OriginHost != "cgrates" {
 		return utils.ErrNoActiveSession
 	}
@@ -72,12 +72,12 @@ func TestBiRPCv1DisconnectPeer(t *testing.T) {
 
 type mkCallForces struct{}
 
-func (sT *mkCallForces) Call(ctx *context.Context, method string, arg any, rply any) error {
+func (sT *mkCallForces) Call(ctx context.Context, method string, arg any, rply any) error {
 	return utils.ErrNoActiveSession
 }
 
 func TestBiRPCv1ForceDisconnect(t *testing.T) {
-	ctx := context.WithClient(context.Background(), new(mkCall))
+	ctx := birpc.WithClient(context.Background(), new(mkCall))
 	cfg := config.NewDefaultCGRConfig()
 	locker := engine.NewLocker(cfg)
 	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)

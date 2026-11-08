@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/routes"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetRouteProfile returns a Route configuration
-func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
+func (adms *AdminSv1) GetRouteProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.RouteProfile) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -30,7 +30,7 @@ func (adms *AdminSv1) GetRouteProfile(ctx *context.Context, arg *utils.TenantIDW
 }
 
 // GetRouteProfileIDs returns list of routeProfile IDs registered for a tenant
-func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, routeProfileIDs *[]string) (err error) {
+func (adms *AdminSv1) GetRouteProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, routeProfileIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -61,7 +61,7 @@ func (adms *AdminSv1) GetRouteProfileIDs(ctx *context.Context, args *utils.ArgsI
 }
 
 // GetRouteProfiles returns a list of route profiles registered for a tenant
-func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*utils.RouteProfile) (err error) {
+func (admS *AdminSv1) GetRouteProfiles(ctx context.Context, args *utils.ArgsItemIDs, rouPrfs *[]*utils.RouteProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -84,7 +84,7 @@ func (admS *AdminSv1) GetRouteProfiles(ctx *context.Context, args *utils.ArgsIte
 
 // GetRouteProfilesCount sets in reply var the total number of RouteProfileIDs registered for the received tenant
 // returns ErrNotFound in case of 0 RouteProfileIDs
-func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (adms *AdminSv1) GetRouteProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -106,7 +106,7 @@ func (adms *AdminSv1) GetRouteProfilesCount(ctx *context.Context, args *utils.Ar
 }
 
 // SetRouteProfile add a new Route configuration
-func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) SetRouteProfile(ctx context.Context, args *utils.RouteProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args.RouteProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -138,7 +138,7 @@ func (adms *AdminSv1) SetRouteProfile(ctx *context.Context, args *utils.RoutePro
 }
 
 // RemoveRouteProfile remove a specific Route configuration
-func (adms *AdminSv1) RemoveRouteProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveRouteProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -178,16 +178,16 @@ type RouteSv1 struct {
 }
 
 // V1GetRoutes returns the list of valid routes.
-func (rpS *RouteSv1) GetRoutes(ctx *context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
+func (rpS *RouteSv1) GetRoutes(ctx context.Context, args *utils.CGREvent, reply *utils.SortedRoutesList) (err error) {
 	return rpS.rpS.V1GetRoutes(ctx, args, reply)
 }
 
 // V1GetRouteProfilesForEvent returns route profiles matching an event.
-func (rpS *RouteSv1) GetRouteProfilesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]*utils.RouteProfile) error {
+func (rpS *RouteSv1) GetRouteProfilesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]*utils.RouteProfile) error {
 	return rpS.rpS.V1GetRouteProfilesForEvent(ctx, args, reply)
 }
 
 // V1GetRoutesList returns the list of valid routes.
-func (rpS *RouteSv1) GetRoutesList(ctx *context.Context, args *utils.CGREvent, reply *[]string) (err error) {
+func (rpS *RouteSv1) GetRoutesList(ctx context.Context, args *utils.CGREvent, reply *[]string) (err error) {
 	return rpS.rpS.V1GetRoutesList(ctx, args, reply)
 }

@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -40,7 +40,7 @@ type AttributeSCfg struct {
 }
 
 // loadAttributeSCfg loads the AttributeS section of the configuration
-func (alS *AttributeSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (alS *AttributeSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnAttributeSCfg := new(AttributeSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, AttributeSJSON, jsnAttributeSCfg); err != nil {
 		return

@@ -4,10 +4,10 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"go.mongodb.org/mongo-driver/bson"

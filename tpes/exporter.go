@@ -4,12 +4,11 @@
 package tpes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -20,7 +19,7 @@ type exporter struct {
 	keyPrefix string
 	dbItemID  string
 	header    []string
-	loadRows  func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error)
+	loadRows  func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error)
 }
 
 var exporters = map[string]exporter{
@@ -29,7 +28,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.AccountPrefix,
 		dbItemID:  utils.MetaAccounts,
 		header:    accountHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			account, err := dm.GetAccount(ctx, tenant, id)
 			if err != nil {
 				return nil, err
@@ -42,7 +41,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.ActionProfilePrefix,
 		dbItemID:  utils.MetaActionProfiles,
 		header:    actionHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetActionProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -55,7 +54,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.AttributeProfilePrefix,
 		dbItemID:  utils.MetaAttributeProfiles,
 		header:    attributeHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetAttributeProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -68,7 +67,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.ChargerProfilePrefix,
 		dbItemID:  utils.MetaChargerProfiles,
 		header:    chargerHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetChargerProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -81,7 +80,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.FilterPrefix,
 		dbItemID:  utils.MetaFilters,
 		header:    filterHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			filter, err := dm.GetFilter(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -94,7 +93,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.RateProfilePrefix,
 		dbItemID:  utils.MetaRateProfiles,
 		header:    rateHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetRateProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -107,7 +106,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.RankingProfilePrefix,
 		dbItemID:  utils.MetaRankingProfiles,
 		header:    rankingHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetRankingProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -120,7 +119,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.ResourceProfilesPrefix,
 		dbItemID:  utils.MetaResourceProfiles,
 		header:    resourceHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetResourceProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -133,7 +132,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.RouteProfilePrefix,
 		dbItemID:  utils.MetaRouteProfiles,
 		header:    routeHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetRouteProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -146,7 +145,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.StatQueueProfilePrefix,
 		dbItemID:  utils.MetaStatQueueProfiles,
 		header:    statHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetStatQueueProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -159,7 +158,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.ThresholdProfilePrefix,
 		dbItemID:  utils.MetaThresholdProfiles,
 		header:    thresholdHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetThresholdProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -172,7 +171,7 @@ var exporters = map[string]exporter{
 		keyPrefix: utils.TrendProfilePrefix,
 		dbItemID:  utils.MetaTrendProfiles,
 		header:    trendHeader,
-		loadRows: func(ctx *context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
+		loadRows: func(ctx context.Context, dm *engine.DataManager, tenant, id string) ([][]string, error) {
 			profile, err := dm.GetTrendProfile(ctx, tenant, id, true, true, utils.NonTransactional)
 			if err != nil {
 				return nil, err
@@ -182,7 +181,7 @@ var exporters = map[string]exporter{
 	},
 }
 
-func (e exporter) exportItems(ctx *context.Context, dm *engine.DataManager, exportType string, w io.Writer, tenant string, itemIDs []string) error {
+func (e exporter) exportItems(ctx context.Context, dm *engine.DataManager, exportType string, w io.Writer, tenant string, itemIDs []string) error {
 	records := make([][]string, 0, len(itemIDs)+1)
 	records = append(records, e.header)
 	for _, id := range itemIDs {

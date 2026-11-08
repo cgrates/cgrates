@@ -7,6 +7,7 @@
 package general_tests
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sort"
@@ -14,7 +15,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/analyzers"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

@@ -4,7 +4,8 @@
 package config
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -15,7 +16,7 @@ type AdminSCfg struct {
 }
 
 // loadApierCfg loads the Apier section of the configuration
-func (aCfg *AdminSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (aCfg *AdminSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnApierCfg := new(AdminSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, AdminSJSON, jsnApierCfg); err != nil {
 		return

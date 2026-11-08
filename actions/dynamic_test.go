@@ -5,6 +5,7 @@ package actions
 
 import (
 	"cmp"
+	"context"
 	"fmt"
 	"reflect"
 	"slices"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -21,10 +21,10 @@ import (
 )
 
 type ccMock struct {
-	calls map[string]func(ctx *context.Context, args any, reply any) error
+	calls map[string]func(ctx context.Context, args any, reply any) error
 }
 
-func (ccM *ccMock) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (ccM *ccMock) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := ccM.calls[serviceMethod]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -214,8 +214,8 @@ func TestActDynamicThresholdExecute(t *testing.T) {
 
 	var tpwo *utils.ThresholdProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetThresholdProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetThresholdProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if tpwo, canCast = args.(*utils.ThresholdProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -603,8 +603,8 @@ func TestActDynamicStatsExecute(t *testing.T) {
 
 	var sqpwo *utils.StatQueueProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetStatQueueProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetStatQueueProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if sqpwo, canCast = args.(*utils.StatQueueProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -1110,8 +1110,8 @@ func TestActDynamicAttributeExecute(t *testing.T) {
 
 	var apwo *utils.APIAttributeProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetAttributeProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetAttributeProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if apwo, canCast = args.(*utils.APIAttributeProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldn't cast")
@@ -1516,8 +1516,8 @@ func TestActDynamicResourceExecute(t *testing.T) {
 
 	var rpwo *utils.ResourceProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetResourceProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetResourceProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if rpwo, canCast = args.(*utils.ResourceProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldn't cast")
@@ -1901,8 +1901,8 @@ func TestActDynamicTrendExecute(t *testing.T) {
 
 	var tpwo *utils.TrendProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetTrendProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetTrendProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if tpwo, canCast = args.(*utils.TrendProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldn't cast")
@@ -2261,8 +2261,8 @@ func TestActDynamicRankingExecute(t *testing.T) {
 
 	var rpwo *utils.RankingProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetRankingProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetRankingProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if rpwo, canCast = args.(*utils.RankingProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -2547,8 +2547,8 @@ func TestActDynamicFilterExecute(t *testing.T) {
 
 	var fwo *engine.FilterWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetFilter: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetFilter: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if fwo, canCast = args.(*engine.FilterWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -2813,8 +2813,8 @@ func TestActDynamicRouteExecute(t *testing.T) {
 
 	var rpo *utils.RouteProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetRouteProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if rpo, canCast = args.(*utils.RouteProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -3112,8 +3112,8 @@ func TestActDynamicIPExecute(t *testing.T) {
 
 	var ipo *utils.IPProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetIPProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetIPProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if ipo, canCast = args.(*utils.IPProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")
@@ -3415,8 +3415,8 @@ func TestActDynamicRateExecute(t *testing.T) {
 
 	var rateProfile *utils.APIRateProfile
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetRateProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetRateProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if rateProfile, canCast = args.(*utils.APIRateProfile); !canCast {
 					return fmt.Errorf("couldn't cast")
@@ -3833,8 +3833,8 @@ func TestActDynamicActionExecute(t *testing.T) {
 
 	var actionProfile *utils.ActionProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetActionProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetActionProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if actionProfile, canCast = args.(*utils.ActionProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldn't cast")
@@ -4329,8 +4329,8 @@ func TestActDynamicActionCfg(t *testing.T) {
 func TestActDynamicRouteExecuteModifyExistingRoute(t *testing.T) {
 	var rpo *utils.RouteProfileWithAPIOpts
 	ccM := &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AdminSv1SetRouteProfile: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AdminSv1SetRouteProfile: func(ctx context.Context, args, reply any) error {
 				var canCast bool
 				if rpo, canCast = args.(*utils.RouteProfileWithAPIOpts); !canCast {
 					return fmt.Errorf("couldnt cast")

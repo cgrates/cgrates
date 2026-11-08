@@ -4,13 +4,13 @@
 package apis
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/actions"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -92,11 +92,11 @@ func TestSetActionProfileReschedule(t *testing.T) {
 	api := NewActionSv1(acts)
 	executed := make(chan struct{}, 1)
 	rpc := make(chan birpc.ClientConnector, 1)
-	rpc <- &mockClientConn{calls: map[string]func(*context.Context, any, any) error{
-		utils.ActionSv1Reschedule: func(ctx *context.Context, args, reply any) error {
+	rpc <- &mockClientConn{calls: map[string]func(context.Context, any, any) error{
+		utils.ActionSv1Reschedule: func(ctx context.Context, args, reply any) error {
 			return api.Reschedule(ctx, args.(*utils.TenantIDWithAPIOpts), reply.(*string))
 		},
-		utils.AccountSv1ActionSetBalance: func(*context.Context, any, any) error {
+		utils.AccountSv1ActionSetBalance: func(context.Context, any, any) error {
 			executed <- struct{}{}
 			return nil
 		},
@@ -159,7 +159,7 @@ func TestSetActionProfileReschedule(t *testing.T) {
 	profile.Overwrite = true
 	profile.Schedule = "@yearly"
 	profile.Targets[utils.MetaAccounts] = utils.StringSet{"account3": {}}
-	if err := dm.Guard(ctx, func(ctx *context.Context) error {
+	if err := dm.Guard(ctx, func(ctx context.Context) error {
 		return admin.SetActionProfile(ctx, profile, &reply)
 	}, utils.ActionProfilePrefix+profile.TenantID()); err != nil {
 		t.Fatal(err)
@@ -421,20 +421,20 @@ func TestActionsSetActionProfileCheckErrors(t *testing.T) {
 	cancel()
 
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
 	}
@@ -530,26 +530,26 @@ func TestActionsRemoveActionProfileCheckErrors(t *testing.T) {
 	}
 
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return nil, nil
 		},
-		SetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
+		SetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx string, indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 			return nil
 		},
-		GetIndexesDrvF: func(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+		GetIndexesDrvF: func(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 			return map[string]utils.StringSet{}, nil
 		},
 	}
@@ -577,17 +577,17 @@ func TestActionsGetActionProfileIDsErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -619,7 +619,7 @@ func TestActionsGetActionProfileIDsErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -649,17 +649,17 @@ func TestActionsGetActionProfilesCountErrMock(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
 	}
@@ -687,7 +687,7 @@ func TestActionsGetActionProfilesCountErrKeys(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{}, nil
 		},
 	}
@@ -904,13 +904,13 @@ func TestActionsGetActionProfilesGetProfileErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acp_cgrates.org:TEST"}, nil
 		},
 	}
@@ -942,20 +942,20 @@ func TestActionsGetActionProfileIDsGetOptsErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actionPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actionPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acp_cgrates.org:key1", "acp_cgrates.org:key2", "acp_cgrates.org:key3"}, nil
 		},
 	}
@@ -990,20 +990,20 @@ func TestActionsGetActionProfileIDsPaginateErr(t *testing.T) {
 	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
 	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
 	dbMock := &engine.DataDBMock{
-		GetActionProfileDrvF: func(*context.Context, string, string) (*utils.ActionProfile, error) {
+		GetActionProfileDrvF: func(context.Context, string, string) (*utils.ActionProfile, error) {
 			actionPrf := &utils.ActionProfile{
 				Tenant: "cgrates.org",
 				ID:     "TEST",
 			}
 			return actionPrf, nil
 		},
-		SetActionProfileDrvF: func(*context.Context, *utils.ActionProfile) error {
+		SetActionProfileDrvF: func(context.Context, *utils.ActionProfile) error {
 			return nil
 		},
-		RemoveActionProfileDrvF: func(*context.Context, string, string) error {
+		RemoveActionProfileDrvF: func(context.Context, string, string) error {
 			return nil
 		},
-		GetKeysForPrefixF: func(c *context.Context, s string, srch string) ([]string, error) {
+		GetKeysForPrefixF: func(c context.Context, s string, srch string) ([]string, error) {
 			return []string{"acp_cgrates.org:key1", "acp_cgrates.org:key2", "acp_cgrates.org:key3"}, nil
 		},
 	}

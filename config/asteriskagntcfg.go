@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -92,7 +92,7 @@ type AsteriskAgentCfg struct {
 }
 
 // loadAsteriskAgentCfg loads the AsteriskAgent section of the configuration
-func (aCfg *AsteriskAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (aCfg *AsteriskAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnSMAstCfg := new(AsteriskAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, AsteriskAgentJSON, jsnSMAstCfg); err != nil {
 		return

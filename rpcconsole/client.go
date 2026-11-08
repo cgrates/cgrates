@@ -4,7 +4,8 @@
 package rpcconsole
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/rpcclient"
 )

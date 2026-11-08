@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -11,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/nats-io/nats.go"
@@ -78,7 +78,7 @@ func (pstr *NatsEE) Connect() error {
 	return err
 }
 
-func (pstr *NatsEE) ExportEvent(ctx *context.Context, content, _ any) error {
+func (pstr *NatsEE) ExportEvent(ctx context.Context, content, _ any) error {
 	pstr.reqs.get()
 	defer pstr.reqs.done()
 	pstr.RLock()

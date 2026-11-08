@@ -4,11 +4,11 @@
 package rates
 
 import (
+	"context"
 	"time"
 
 	"github.com/ericlagergren/decimal"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -31,7 +31,7 @@ type RateS struct {
 }
 
 // matchingRateProfileForEvent returns the matched RateProfile for the given event
-func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, rpIDs []string, args *utils.CGREvent,
+func (rS *RateS) matchingRateProfileForEvent(ctx context.Context, tnt string, rpIDs []string, args *utils.CGREvent,
 	ignoreFilters bool, ignoredRPIDs utils.StringSet) (matchedProfile *utils.RateProfile, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
@@ -96,7 +96,7 @@ func (rS *RateS) matchingRateProfileForEvent(ctx *context.Context, tnt string, r
 }
 
 // rateProfileCostForEvent computes the rateProfileCost for an event based on a preselected rate profile
-func (rS *RateS) rateProfileCostForEvent(ctx *context.Context, rtPfl *utils.RateProfile, args *utils.CGREvent, verbosity int) (rpCost *utils.RateProfileCost, err error) {
+func (rS *RateS) rateProfileCostForEvent(ctx context.Context, rtPfl *utils.RateProfile, args *utils.CGREvent, verbosity int) (rpCost *utils.RateProfileCost, err error) {
 	evNm := utils.MapStorage{
 		utils.MetaReq:  args.Event,
 		utils.MetaOpts: args.APIOpts,

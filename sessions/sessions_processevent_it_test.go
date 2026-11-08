@@ -7,6 +7,7 @@
 package sessions
 
 import (
+	"context"
 	"reflect"
 	"slices"
 	"sort"
@@ -17,8 +18,6 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
-
-	"github.com/cgrates/birpc/context"
 )
 
 func TestSessionSv1ProcessEventRoutes(t *testing.T) {

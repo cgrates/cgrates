@@ -6,13 +6,13 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 	"path"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 
 	"gorm.io/driver/mysql"

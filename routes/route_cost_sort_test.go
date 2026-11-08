@@ -5,13 +5,13 @@ package routes
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -83,8 +83,8 @@ func TestLeastCostSorterSortRoutesOK(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -198,8 +198,8 @@ func TestHightCostSorterSortRoutesOK(t *testing.T) {
 
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				return nil
 			},
 		},
@@ -396,8 +396,8 @@ func TestPopulateCostForRoutesAccountSConnsIgnoreErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -461,8 +461,8 @@ func TestPopulateCostForRoutesAccountSConnsErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -521,8 +521,8 @@ func TestPopulateCostForRoutesAccountCostOverMax(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.EventCharges)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -611,8 +611,8 @@ func TestPopulateCostForRoutesAppendAccounts(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1MaxAbstracts: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1MaxAbstracts: func(ctx context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.EventCharges)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -683,8 +683,8 @@ func TestPopulateCostForRoutesRateSIgnoreErr(t *testing.T) {
 	cc := make(chan birpc.ClientConnector, 1)
 	cc <- &ccMock{
 
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.RateSv1CostForEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.RateSv1CostForEvent: func(ctx context.Context, args, reply any) error {
 				return utils.ErrNotImplemented
 			},
 		},

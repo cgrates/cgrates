@@ -4,6 +4,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -17,7 +18,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"
@@ -268,7 +268,7 @@ func RunCGREngine(fs []string, cfg *config.CGRConfig, extraServices ...servmanag
 	return nil
 }
 
-func loadConfig(ctx *context.Context, cfg *config.CGRConfig, flags *flags) error {
+func loadConfig(ctx context.Context, cfg *config.CGRConfig, flags *flags) error {
 	if err := cfg.LoadFromPath(ctx, flags.config.path); err != nil {
 		return fmt.Errorf("could not parse config: <%s>", err)
 	}

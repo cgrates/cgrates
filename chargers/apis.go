@@ -4,12 +4,13 @@
 package chargers
 
 import (
-	"github.com/cgrates/birpc/context"
+	"context"
+
 	"github.com/cgrates/cgrates/utils"
 )
 
 // V1ProcessEvent will process the event received via API and return list of events forked
-func (cS *ChargerS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
+func (cS *ChargerS) V1ProcessEvent(ctx context.Context, args *utils.CGREvent,
 	reply *[]*ChrgSProcessEventReply) (err error) {
 	if args == nil ||
 		args.Event == nil {
@@ -31,7 +32,7 @@ func (cS *ChargerS) V1ProcessEvent(ctx *context.Context, args *utils.CGREvent,
 }
 
 // V1GetChargersForEvent exposes the list of ordered matching ChargingProfiles for an event
-func (cS *ChargerS) V1GetChargersForEvent(ctx *context.Context, args *utils.CGREvent,
+func (cS *ChargerS) V1GetChargersForEvent(ctx context.Context, args *utils.CGREvent,
 	rply *[]*utils.ChargerProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {

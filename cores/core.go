@@ -4,6 +4,7 @@
 package cores
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -16,7 +17,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -79,7 +79,7 @@ func NewProfiler(shdWg *sync.WaitGroup) *Profiler {
 // It waits for the process WaitGroup until it completes or ctx is done, then
 // flushes and closes the CPU profile. The CPU cleanup is not limited by ctx,
 // and errors from waiting and closing the file are returned together.
-func (p *Profiler) Shutdown(ctx *context.Context) error {
+func (p *Profiler) Shutdown(ctx context.Context) error {
 	p.stateMu.Lock()
 	p.closing.Store(true)
 	if p.memoryStop != nil {
@@ -343,7 +343,7 @@ type V1StatusParams struct {
 }
 
 // V1Status returns metrics related to the engine process.
-func (cS *CoreS) V1Status(_ *context.Context, params *V1StatusParams, reply *map[string]any) error {
+func (cS *CoreS) V1Status(_ context.Context, params *V1StatusParams, reply *map[string]any) error {
 	metrics, err := computeAppMetrics()
 	if err != nil {
 		return err
@@ -373,20 +373,20 @@ func (cS *CoreS) V1Status(_ *context.Context, params *V1StatusParams, reply *map
 }
 
 // Sleep is used to test the concurrent requests mechanism.
-func (cS *CoreS) V1Sleep(_ *context.Context, arg *utils.DurationArgs, reply *string) error {
+func (cS *CoreS) V1Sleep(_ context.Context, arg *utils.DurationArgs, reply *string) error {
 	time.Sleep(arg.Duration)
 	*reply = utils.OK
 	return nil
 }
 
-func (cS *CoreS) V1Shutdown(_ *context.Context, _ *utils.CGREvent, reply *string) error {
+func (cS *CoreS) V1Shutdown(_ context.Context, _ *utils.CGREvent, reply *string) error {
 	cS.ShutdownEngine()
 	*reply = utils.OK
 	return nil
 }
 
 // V1StartCPUProfiling starts CPU profiling in args.DirPath.
-func (cS *CoreS) V1StartCPUProfiling(_ *context.Context, args *utils.DirectoryArgs, reply *string) error {
+func (cS *CoreS) V1StartCPUProfiling(_ context.Context, args *utils.DirectoryArgs, reply *string) error {
 	if err := cS.profiler.StartCPUProfiling(filepath.Join(args.DirPath, utils.CpuPathCgr)); err != nil {
 		return err
 	}
@@ -395,7 +395,7 @@ func (cS *CoreS) V1StartCPUProfiling(_ *context.Context, args *utils.DirectoryAr
 }
 
 // V1StopCPUProfiling stops CPU profiling.
-func (cS *CoreS) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
+func (cS *CoreS) V1StopCPUProfiling(_ context.Context, _ *utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.profiler.StopCPUProfiling(); err != nil {
 		return err
 	}
@@ -404,7 +404,7 @@ func (cS *CoreS) V1StopCPUProfiling(_ *context.Context, _ *utils.TenantWithAPIOp
 }
 
 // V1StartMemoryProfiling starts memory profiling in the specified directory.
-func (cS *CoreS) V1StartMemoryProfiling(_ *context.Context, params MemoryProfilingParams, reply *string) error {
+func (cS *CoreS) V1StartMemoryProfiling(_ context.Context, params MemoryProfilingParams, reply *string) error {
 	if params.DirPath == utils.EmptyString {
 		return utils.NewErrMandatoryIeMissing("DirPath")
 	}
@@ -416,7 +416,7 @@ func (cS *CoreS) V1StartMemoryProfiling(_ *context.Context, params MemoryProfili
 }
 
 // V1StopMemoryProfiling stops memory profiling.
-func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ utils.TenantWithAPIOpts, reply *string) error {
+func (cS *CoreS) V1StopMemoryProfiling(_ context.Context, _ utils.TenantWithAPIOpts, reply *string) error {
 	if err := cS.profiler.StopMemoryProfiling(); err != nil {
 		return err
 	}
@@ -425,14 +425,14 @@ func (cS *CoreS) V1StopMemoryProfiling(_ *context.Context, _ utils.TenantWithAPI
 }
 
 // V1Panic is used print the Message sent as a panic
-func (cS *CoreS) V1Panic(_ *context.Context, args *utils.PanicMessageArgs, _ *string) error {
+func (cS *CoreS) V1Panic(_ context.Context, args *utils.PanicMessageArgs, _ *string) error {
 	panic(args.Message)
 }
 
 // V1DescribeMethods returns every registered method's argument and reply types
 // as field descriptors. Services in args.SkipServices are dropped; empty args
 // returns the full set, _goRPC_ included.
-func (cS *CoreS) V1DescribeMethods(_ *context.Context, args *utils.DescribeMethodsArgs, reply *[]utils.MethodDescriptor) error {
+func (cS *CoreS) V1DescribeMethods(_ context.Context, args *utils.DescribeMethodsArgs, reply *[]utils.MethodDescriptor) error {
 	var skip []string
 	if args != nil {
 		skip = args.SkipServices

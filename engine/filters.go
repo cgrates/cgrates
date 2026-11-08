@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"net"
 	"reflect"
@@ -13,7 +14,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/cron"
@@ -45,7 +45,7 @@ func (fS *FilterS) SetCache(cache *CacheS) {
 // Pass will check all filters wihin filterIDs and require them passing for dataProvider
 // there should be at least one filter passing, ie: if filters are not active event will fail to pass
 // receives the event as DataProvider so we can accept undecoded data (ie: HttpRequest)
-func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
+func (fS *FilterS) Pass(ctx context.Context, tenant string, filterIDs []string,
 	ev utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
@@ -71,7 +71,7 @@ func (fS *FilterS) Pass(ctx *context.Context, tenant string, filterIDs []string,
 }
 
 // PassWithDP evaluates filterIDs against dp directly without wrapping it in DynamicDP.
-func (fS *FilterS) PassWithDP(ctx *context.Context, tenant string, filterIDs []string,
+func (fS *FilterS) PassWithDP(ctx context.Context, tenant string, filterIDs []string,
 	dp utils.DataProvider) (pass bool, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil
@@ -129,7 +129,7 @@ func verifyPrefixes(rule *FilterRule, prefixes []string) (hasPrefix bool) {
 
 // LazyPass is almost the same as Pass except that it verify if the
 // Element of the Values from FilterRules has as prefix one of the pathPrfxs
-func (fS *FilterS) LazyPass(ctx *context.Context, tenant string, filterIDs []string,
+func (fS *FilterS) LazyPass(ctx context.Context, tenant string, filterIDs []string,
 	ev utils.DataProvider, pathPrfxs []string) (pass bool, lazyCheckRules []*FilterRule, err error) {
 	if len(filterIDs) == 0 {
 		return true, nil, nil
@@ -466,7 +466,7 @@ func (fltr *FilterRule) CompileValues() (err error) {
 }
 
 // Pass is the method which should be used from outside.
-func (fltr *FilterRule) Pass(ctx *context.Context, dDP utils.DataProvider) (result bool, err error) {
+func (fltr *FilterRule) Pass(ctx context.Context, dDP utils.DataProvider) (result bool, err error) {
 	switch fltr.Type {
 	case utils.MetaString, utils.MetaNotString:
 		result, err = fltr.passString(dDP)
@@ -639,7 +639,7 @@ func (fltr *FilterRule) passStringSuffix(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passCronExp(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passCronExp(ctx context.Context, dDP utils.DataProvider) (bool, error) {
 	tm, err := fltr.rsrElement.ParseDataProvider(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -765,7 +765,7 @@ func (fltr *FilterRule) passIPNet(dDP utils.DataProvider) (bool, error) {
 	return false, nil
 }
 
-func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passAPIBan(ctx context.Context, dDP utils.DataProvider) (bool, error) {
 	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -784,7 +784,7 @@ func (fltr *FilterRule) passAPIBan(ctx *context.Context, dDP utils.DataProvider)
 	return GetAPIBan(ctx, dynDP.cacheS(), strVal, dynDP.cfg.APIBanCfg().Keys, fltr.Values[0] != utils.MetaAll, true, true)
 }
 
-func (fltr *FilterRule) passSentryPeer(ctx *context.Context, dDP utils.DataProvider) (bool, error) {
+func (fltr *FilterRule) passSentryPeer(ctx context.Context, dDP utils.DataProvider) (bool, error) {
 	strVal, err := fltr.rsrElement.ParseDataProvider(dDP)
 	if err != nil {
 		if err == utils.ErrNotFound {
@@ -1093,7 +1093,7 @@ func (fltr *FilterRule) FieldAsInterface(fldPath []string) (_ any, err error) {
 }
 
 // GetFilters retrieves and compiles the filters identified by filterIDs for the specified tenant.
-func GetFilters(ctx *context.Context, filterIDs []string, tenant string,
+func GetFilters(ctx context.Context, filterIDs []string, tenant string,
 	dm *DataManager) ([]*Filter, error) {
 
 	fltrs := make([]*Filter, 0, len(filterIDs))

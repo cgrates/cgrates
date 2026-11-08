@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/ericlagergren/decimal"
 )
@@ -45,7 +45,7 @@ type GeneralCfg struct {
 	Opts                *GeneralOpts
 }
 
-func (gencfg *GeneralCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (gencfg *GeneralCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnGeneralCfg := new(GeneralJsonCfg)
 	if err = jsnCfg.GetSection(ctx, GeneralJSON, jsnGeneralCfg); err != nil {
 		return

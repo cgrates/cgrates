@@ -4,10 +4,10 @@
 package sessions
 
 import (
+	"context"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/chargers"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
@@ -18,7 +18,7 @@ import (
 // benchMockClient is a minimal mock that returns canned responses for chargers.
 type benchMockClient struct{}
 
-func (benchMockClient) Call(ctx *context.Context, method string, args any, reply any) error {
+func (benchMockClient) Call(ctx context.Context, method string, args any, reply any) error {
 	switch method {
 	case utils.ChargerSv1ProcessEvent:
 		*reply.(*[]*chargers.ChrgSProcessEventReply) = []*chargers.ChrgSProcessEventReply{

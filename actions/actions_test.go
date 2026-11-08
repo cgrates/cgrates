@@ -5,6 +5,7 @@ package actions
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/rpcclient"
 
@@ -292,8 +292,8 @@ func TestScheduleActionsReplacement(t *testing.T) {
 	executed := make(map[string]int)
 	rpcInternal := make(chan birpc.ClientConnector, 1)
 	rpcInternal <- &mockClientConn{
-		calls: map[string]func(*context.Context, any, any) error{
-			utils.AccountSv1ActionSetBalance: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(context.Context, any, any) error{
+			utils.AccountSv1ActionSetBalance: func(_ context.Context, args, reply any) error {
 				balance := args.(*utils.ArgsActSetBalance)
 				if balance.Reset {
 					t.Error("executed the old setBalance action instead of addBalance")
@@ -585,7 +585,7 @@ type dataDBMockError struct {
 	engine.DataDBMock
 }
 
-func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string) (*utils.ActionProfile, error) {
+func (dbM *dataDBMockError) GetActionProfileDrv(context.Context, string, string) (*utils.ActionProfile, error) {
 	return &utils.ActionProfile{
 		Tenant:    "cgrates.org",
 		ID:        "AP6",
@@ -606,11 +606,11 @@ func (dbM *dataDBMockError) GetActionProfileDrv(*context.Context, string, string
 	}, nil
 }
 
-func (dbM *dataDBMockError) SetActionProfileDrv(*context.Context, *utils.ActionProfile) error {
+func (dbM *dataDBMockError) SetActionProfileDrv(context.Context, *utils.ActionProfile) error {
 	return utils.ErrNoDatabaseConn
 }
 
-func (dbM *dataDBMockError) GetIndexesDrv(ctx *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+func (dbM *dataDBMockError) GetIndexesDrv(ctx context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	return nil, nil
 }
 
@@ -641,10 +641,10 @@ func TestLogActionExecute(t *testing.T) {
 }
 
 type testMockEEsConn struct {
-	calls map[string]func(_ *context.Context, _, _ any) error
+	calls map[string]func(_ context.Context, _, _ any) error
 }
 
-func (s *testMockEEsConn) Call(ctx *context.Context, method string, arg, rply any) error {
+func (s *testMockEEsConn) Call(ctx context.Context, method string, arg, rply any) error {
 	call, has := s.calls[method]
 	if !has {
 		return rpcclient.ErrUnsupporteServiceMethod
@@ -654,8 +654,8 @@ func (s *testMockEEsConn) Call(ctx *context.Context, method string, arg, rply an
 
 func TestURLogActionExecute(t *testing.T) {
 	sMock := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -729,8 +729,8 @@ func TestURLogActionExecute(t *testing.T) {
 
 func TestURLogActionWithOpts(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -843,8 +843,8 @@ func TestURLogActionWithOpts(t *testing.T) {
 
 func TestExportAction(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -895,8 +895,8 @@ func TestExportAction(t *testing.T) {
 
 func TestExportActionWithEeIDs(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.EeSv1ProcessEvent: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.EeSv1ProcessEvent: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.CGREventWithEeIDs)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -953,8 +953,8 @@ func TestExportActionWithEeIDs(t *testing.T) {
 
 func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ResetThreshold: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1000,8 +1000,8 @@ func TestExportActionResetThresholdStaticTenantID(t *testing.T) {
 
 func TestExportActionResetThresholdStaticID(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.ThresholdSv1ResetThreshold: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ResetThreshold: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1047,8 +1047,8 @@ func TestExportActionResetThresholdStaticID(t *testing.T) {
 
 func TestExportActionResetStatStaticTenantID(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.StatSv1ResetStatQueue: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1094,8 +1094,8 @@ func TestExportActionResetStatStaticTenantID(t *testing.T) {
 
 func TestExportActionResetStatStaticID(t *testing.T) {
 	sMock2 := &testMockEEsConn{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.StatSv1ResetStatQueue: func(_ *context.Context, arg, rply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.StatSv1ResetStatQueue: func(_ context.Context, arg, rply any) error {
 				argConv, can := arg.(*utils.TenantIDWithAPIOpts)
 				if !can {
 					return fmt.Errorf("Wrong argument type: %T", arg)
@@ -1295,7 +1295,7 @@ type dropCounter struct{}
 
 func (dropCounter) id() string           { return "DROP" }
 func (dropCounter) cfg() *utils.APAction { return &utils.APAction{ID: "DROP"} }
-func (dropCounter) execute(ctx *context.Context, data utils.MapStorage, trgID string) error {
+func (dropCounter) execute(ctx context.Context, data utils.MapStorage, trgID string) error {
 	data[utils.MetaReq].(map[string]any)["Counter"] = 0
 	return nil
 }

@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"maps"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +27,7 @@ type AnalyzerSOpts struct {
 }
 
 // loadAnalyzerCgrCfg loads the Analyzer section of the configuration
-func (alS *AnalyzerSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (alS *AnalyzerSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnAnalyzerCgrCfg := new(AnalyzerSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, AnalyzerSJSON, jsnAnalyzerCgrCfg); err != nil {
 		return

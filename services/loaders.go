@@ -4,10 +4,10 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/loaders"

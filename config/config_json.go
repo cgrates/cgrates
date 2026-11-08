@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"encoding/json"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -103,8 +103,8 @@ var (
 )
 
 type ConfigDB interface {
-	GetSection(ctx *context.Context, section string, val any) error // in this case value must be a not nil pointer
-	SetSection(ctx *context.Context, section string, val any) error
+	GetSection(ctx context.Context, section string, val any) error // in this case value must be a not nil pointer
+	SetSection(ctx context.Context, section string, val any) error
 	DumpConfigDB() error
 	RewriteConfigDB() error
 	BackupConfigDB(string, bool) error
@@ -120,14 +120,14 @@ func NewCgrJsonCfgFromBytes(buf []byte) (cgrJsonCfg *CgrJsonCfg, err error) {
 // Main object holding the loaded config as section raw messages
 type CgrJsonCfg map[string]json.RawMessage
 
-func (jsnCfg CgrJsonCfg) GetSection(ctx *context.Context, section string, val any) (err error) {
+func (jsnCfg CgrJsonCfg) GetSection(ctx context.Context, section string, val any) (err error) {
 	if rawCfg, hasKey := jsnCfg[section]; hasKey {
 		err = json.Unmarshal(rawCfg, val)
 	}
 	return
 }
 
-func (jsnCfg CgrJsonCfg) SetSection(_ *context.Context, section string, jsn any) (_ error) {
+func (jsnCfg CgrJsonCfg) SetSection(_ context.Context, section string, jsn any) (_ error) {
 	data, err := json.Marshal(jsn)
 	if err != nil {
 		return err
@@ -153,10 +153,10 @@ func (jsnCfg CgrJsonCfg) RewriteConfigDB() error {
 
 type Section interface {
 	SName() string
-	Load(*context.Context, ConfigDB, *CGRConfig) error
+	Load(context.Context, ConfigDB, *CGRConfig) error
 	AsMapInterface() any
 	CloneSection() Section
-	// UpdateDB(*context.Context) // not know
+	// UpdateDB(context.Context) // not know
 }
 
 // SanityChecker adds optional checks after all sections have loaded.
@@ -229,7 +229,7 @@ func (r Sections) Get(name string) (sec Section, has bool) {
 	return
 }
 
-func (r Sections) Load(ctx *context.Context, db ConfigDB, cfg *CGRConfig) (err error) {
+func (r Sections) Load(ctx context.Context, db ConfigDB, cfg *CGRConfig) (err error) {
 	for _, f := range r {
 		if err = f.Load(ctx, db, cfg); err != nil {
 			return
@@ -238,7 +238,7 @@ func (r Sections) Load(ctx *context.Context, db ConfigDB, cfg *CGRConfig) (err e
 	return
 }
 
-func (r Sections) LoadWithout(ctx *context.Context, db ConfigDB, cfg *CGRConfig, sections ...string) (err error) {
+func (r Sections) LoadWithout(ctx context.Context, db ConfigDB, cfg *CGRConfig, sections ...string) (err error) {
 	eSec := utils.NewStringSet(sections)
 	for _, sec := range r {
 		if !eSec.Has(sec.SName()) {

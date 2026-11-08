@@ -4,16 +4,16 @@
 package config
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestLoadLoggerCfg(t *testing.T) {
 	loggCfg := &LoggerCfg{}
-	ctx := &context.Context{}
+	ctx := context.Background()
 	jsnCfg := new(mockDb)
 	cgrcfg := &CGRConfig{}
 	if err := loggCfg.Load(ctx, jsnCfg, cgrcfg); err != utils.ErrNotImplemented {

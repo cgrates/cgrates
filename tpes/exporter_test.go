@@ -4,13 +4,12 @@
 package tpes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
 	"strings"
 	"testing"
-
-	"github.com/cgrates/birpc/context"
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"

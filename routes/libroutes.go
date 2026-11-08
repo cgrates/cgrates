@@ -4,9 +4,9 @@
 package routes
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -14,14 +14,14 @@ import (
 
 // RoutesSorter is the interface which needs to be implemented by routes sorters
 type RoutesSorter interface {
-	SortRoutes(*context.Context, string, map[string]*RouteWithWeight, *utils.CGREvent, *optsGetRoutes) (*utils.SortedRoutes, error)
+	SortRoutes(context.Context, string, map[string]*RouteWithWeight, *utils.CGREvent, *optsGetRoutes) (*utils.SortedRoutes, error)
 }
 
 // RouteSortDispatcher will initialize strategies
 // and dispatch requests to them
 type RouteSortDispatcher map[string]RoutesSorter
 
-func (ssd RouteSortDispatcher) SortRoutes(ctx *context.Context, prflID, strategy string,
+func (ssd RouteSortDispatcher) SortRoutes(ctx context.Context, prflID, strategy string,
 	suppls map[string]*RouteWithWeight, suplEv *utils.CGREvent, extraOpts *optsGetRoutes) (_ *utils.SortedRoutes, err error) {
 	sd, has := ssd[strategy]
 	if !has {
@@ -32,7 +32,7 @@ func (ssd RouteSortDispatcher) SortRoutes(ctx *context.Context, prflID, strategy
 }
 
 // routeLazyPass filters the route based on
-func routeLazyPass(ctx *context.Context, filters []*engine.FilterRule, ev *utils.CGREvent, data utils.MapStorage,
+func routeLazyPass(ctx context.Context, filters []*engine.FilterRule, ev *utils.CGREvent, data utils.MapStorage,
 	cfg *config.CGRConfig, fS *engine.FilterS) (pass bool, err error) {
 	if len(filters) == 0 {
 		return true, nil

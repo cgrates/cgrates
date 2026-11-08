@@ -4,6 +4,7 @@
 package sessions
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/rand"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 
@@ -200,7 +200,7 @@ type sTerminator struct {
 
 // setSTerminator installs a new terminator for a session
 // setSTerminator is not thread safe, only the goroutine forked from within
-func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine.MapEvent) {
+func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.MapEvent) {
 	var err error
 
 	// TTL
@@ -301,7 +301,7 @@ func (sS *SessionS) setSTerminator(ctx *context.Context, s *Session, opts engine
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 // not thread safe
-func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
+func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
 	if extraUsage != 0 {
 		// for i := range s.SRuns {
 		// 	if _, err = sS.debitSession(ctx, s, i, extraUsage, lastUsed); err != nil {
@@ -404,7 +404,7 @@ func (sS *SessionS) forceSTerminate(ctx *context.Context, s *Session, extraUsage
 }
 
 // debitSession performs debit for a session run
-func (sS *SessionS) debitSession(ctx *context.Context, s *Session, sRunIdx int, dur time.Duration,
+func (sS *SessionS) debitSession(ctx context.Context, s *Session, sRunIdx int, dur time.Duration,
 	lastUsed *time.Duration) (maxDur time.Duration, err error) {
 
 	return
@@ -539,7 +539,7 @@ func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
 }
 
 // replicateSessions will replicate sessions with or without sID specified
-func (sS *SessionS) replicateSessions(ctx *context.Context, sID string, psv bool) (err error) {
+func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool) (err error) {
 	ss := sS.getSessions(sID, psv)
 	if len(ss) == 0 {
 		// emulate the Session, so it can be also removed from remote
@@ -703,7 +703,7 @@ func (sS *SessionS) unindexSession(originID string, pSessions bool) bool {
 	return true
 }
 
-func (sS *SessionS) getIndexedFilters(ctx *context.Context, tenant string, fltrs []string) (
+func (sS *SessionS) getIndexedFilters(ctx context.Context, tenant string, fltrs []string) (
 	indexedFltr map[string][]string, unindexedFltr []*engine.FilterRule) {
 	indexedFltr = make(map[string][]string)
 	for _, fltrID := range fltrs {
@@ -793,7 +793,7 @@ func (sS *SessionS) getSessionIDsMatchingIndexes(fltrs map[string][]string,
 
 // filterSessions will return a list of sessions in external format based on filters passed
 // is thread safe for the Sessions
-func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter, psv bool) (aSs []*ExternalSession) {
+func (sS *SessionS) filterSessions(ctx context.Context, sf *utils.SessionFilter, psv bool) (aSs []*ExternalSession) {
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
@@ -852,7 +852,7 @@ func (sS *SessionS) filterSessions(ctx *context.Context, sf *utils.SessionFilter
 }
 
 // filterSessionsCount re
-func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionFilter, psv bool) (count int) {
+func (sS *SessionS) filterSessionsCount(ctx context.Context, sf *utils.SessionFilter, psv bool) (count int) {
 	count = 0
 	if len(sf.Filters) == 0 {
 		ss := sS.getSessions(utils.EmptyString, psv)
@@ -904,7 +904,7 @@ func (sS *SessionS) filterSessionsCount(ctx *context.Context, sf *utils.SessionF
 
 // newSessionOutEvent is the new approach to creating session
 // FixMe: rename as soon as we will remove the old newSession
-func (sS *SessionS) newSessionOutEvent(ctx *context.Context, sID string, cgrEv *utils.CGREvent,
+func (sS *SessionS) newSessionOutEvent(ctx context.Context, sID string, cgrEv *utils.CGREvent,
 	clntConnID string) (s *Session, err error) {
 	s = &Session{
 		ID:             sID,
@@ -918,7 +918,7 @@ func (sS *SessionS) newSessionOutEvent(ctx *context.Context, sID string, cgrEv *
 
 // setSession is called on each processEvent with *session flag to either create or update a session
 // cch contain the preprocessed opts
-func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
+func (sS *SessionS) setSession(ctx context.Context, cgrEv *utils.CGREvent,
 	cch map[string]any, clientConnID string) (s *Session, err error) {
 	if cgrIDVal, has := cch[utils.MetaCGRid]; !has ||
 		cgrIDVal.(string) == utils.EmptyString {
@@ -935,7 +935,7 @@ func (sS *SessionS) setSession(ctx *context.Context, cgrEv *utils.CGREvent,
 }
 
 // terminateSessionNew is the new way to terminate a session
-func (sS *SessionS) terminateSessionNew(ctx *context.Context, s *Session) (err error) {
+func (sS *SessionS) terminateSessionNew(ctx context.Context, s *Session) (err error) {
 	s.lk.Lock()
 	defer s.lk.Unlock()
 	s.stopSTerminator()
@@ -1078,7 +1078,7 @@ func (sS *SessionS) DisableAutoChargeSRun(sRun *SRun) {
 }
 
 // ipsAuthorize will authorize the event with the IPs subsystem
-func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
+func (sS *SessionS) ipsAuthorize(ctx context.Context, cgrEv *utils.CGREvent) (rply *utils.AllocatedIP, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
@@ -1103,7 +1103,7 @@ func (sS *SessionS) ipsAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (r
 	return &alcIP, err
 }
 
-func (sS *SessionS) ipsAllocate(ctx *context.Context, cgrEv *utils.CGREvent) (*utils.AllocatedIP, error) {
+func (sS *SessionS) ipsAllocate(ctx context.Context, cgrEv *utils.CGREvent) (*utils.AllocatedIP, error) {
 	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
 	if err != nil {
 		return nil, err
@@ -1126,7 +1126,7 @@ func (sS *SessionS) ipsAllocate(ctx *context.Context, cgrEv *utils.CGREvent) (*u
 	return &allocatedIP, nil
 }
 
-func (sS *SessionS) ipsRelease(ctx *context.Context, cgrEv *utils.CGREvent) error {
+func (sS *SessionS) ipsRelease(ctx context.Context, cgrEv *utils.CGREvent) error {
 	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaIPs, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
 	if err != nil {
 		return err
@@ -1147,7 +1147,7 @@ func (sS *SessionS) ipsRelease(ctx *context.Context, cgrEv *utils.CGREvent) erro
 }
 
 // resourcesAuthorize will authorize the event with the Resources subsystem
-func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREvent) (resID string, err error) {
+func (sS *SessionS) resourcesAuthorize(ctx context.Context, cgrEv *utils.CGREvent) (resID string, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
@@ -1177,7 +1177,7 @@ func (sS *SessionS) resourcesAuthorize(ctx *context.Context, cgrEv *utils.CGREve
 	return resMessage, nil
 }
 
-func (sS *SessionS) resourcesAllocate(ctx *context.Context, cgrEv *utils.CGREvent) (string, error) {
+func (sS *SessionS) resourcesAllocate(ctx context.Context, cgrEv *utils.CGREvent) (string, error) {
 	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
 	if err != nil {
 		return "", err
@@ -1208,7 +1208,7 @@ func (sS *SessionS) resourcesAllocate(ctx *context.Context, cgrEv *utils.CGREven
 	return resMessage, nil
 }
 
-func (sS *SessionS) resourcesRelease(ctx *context.Context, cgrEv *utils.CGREvent) error {
+func (sS *SessionS) resourcesRelease(ctx context.Context, cgrEv *utils.CGREvent) error {
 	conns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaResources, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
 	if err != nil {
 		return err
@@ -1230,7 +1230,7 @@ func (sS *SessionS) resourcesRelease(ctx *context.Context, cgrEv *utils.CGREvent
 }
 
 // accountsMaxAbstracts will query the AccountS cost for Event
-func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
+func (sS *SessionS) accountsMaxAbstracts(ctx context.Context, cgrEv *utils.CGREvent) (rply *utils.EventCharges, err error) {
 	if _, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaUsage)
 	}
@@ -1252,7 +1252,7 @@ func (sS *SessionS) accountsMaxAbstracts(ctx *context.Context, cgrEv *utils.CGRE
 }
 
 // ratesCost will query the RateS cost for Event
-func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (*utils.RateProfileCost, error) {
+func (sS *SessionS) ratesCost(ctx context.Context, cgrEv *utils.CGREvent) (*utils.RateProfileCost, error) {
 	rateConns, err := engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaRates, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS)
 	if err != nil {
 		return nil, err
@@ -1270,7 +1270,7 @@ func (sS *SessionS) ratesCost(ctx *context.Context, cgrEv *utils.CGREvent) (*uti
 
 // accountSDebitEvent will debit the abstracts for the provided event
 // if session is provided, it will try to debit first out of reserved balance
-func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eEc *utils.EventCharges, err error) {
+func (sS *SessionS) accountSDebitEvent(ctx context.Context, cgrEv *utils.CGREvent) (eEc *utils.EventCharges, err error) {
 	if usageIface, hasUsage := cgrEv.APIOpts[utils.MetaUsage]; !hasUsage {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaUsage)
 	} else if usage, _ := utils.IfaceAsDuration(usageIface); usage == time.Duration(0) {
@@ -1297,7 +1297,7 @@ func (sS *SessionS) accountSDebitEvent(ctx *context.Context, cgrEv *utils.CGREve
 
 // accountSRefundCharges will refund the charges specified into rfndEc
 // cgrEv is provided as argument for filtering connections and the needed tenant
-func (sS *SessionS) accountSRefundCharges(ctx *context.Context, rfndEc *utils.EventCharges, cgrEv *utils.CGREvent) (err error) {
+func (sS *SessionS) accountSRefundCharges(ctx context.Context, rfndEc *utils.EventCharges, cgrEv *utils.CGREvent) (err error) {
 	if rfndEc == nil { // no refund to be performed
 		return
 	}
@@ -1389,7 +1389,7 @@ func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
 }
 
 // relocateSession will change the SessionID of an active session
-func (sS *SessionS) relocateSession(ctx *context.Context, oldSID, newSID string) (s *Session) {
+func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) (s *Session) {
 	ss := sS.getSessions(oldSID, false)
 	if len(ss) == 0 {
 		return
@@ -1418,7 +1418,7 @@ func (sS *SessionS) getActivateSession(sID string) (s *Session) {
 }
 
 // getRelocateSession will relocate a session if it cannot find originID and initialOriginID is present
-func (sS *SessionS) getRelocateSession(ctx *context.Context, sID string, oldSID string) (s *Session) {
+func (sS *SessionS) getRelocateSession(ctx context.Context, sID string, oldSID string) (s *Session) {
 	if s = sS.getActivateSession(sID); s != nil ||
 		oldSID == utils.EmptyString {
 		return
@@ -1428,7 +1428,7 @@ func (sS *SessionS) getRelocateSession(ctx *context.Context, sID string, oldSID 
 
 // syncSessions synchronizes the active sessions with the one in the clients
 // it will force-disconnect the one found in SessionS but not in clients
-func (sS *SessionS) syncSessions(ctx *context.Context) {
+func (sS *SessionS) syncSessions(ctx context.Context) {
 	/*
 		sS.aSsMux.RLock()
 		asCount := len(sS.aSessions)
@@ -1480,7 +1480,7 @@ func (sS *SessionS) syncSessions(ctx *context.Context) {
 }
 
 // Extracted from syncSessions in order to test all cases
-func (sS *SessionS) terminateSyncSessions(ctx *context.Context, toBeRemoved []string) {
+func (sS *SessionS) terminateSyncSessions(ctx context.Context, toBeRemoved []string) {
 	/*
 		for _, optOriginID := range toBeRemoved {
 			ss := sS.getSessions(optOriginID, false)
@@ -1500,7 +1500,7 @@ func (sS *SessionS) terminateSyncSessions(ctx *context.Context, toBeRemoved []st
 
 // endSession will end a session from outside
 // this function is not thread safe
-func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsage *time.Duration,
+func (sS *SessionS) endSession(ctx context.Context, s *Session, tUsage, lastUsage *time.Duration,
 	aTime *time.Time, isInstantEvent bool) (err error) {
 	if !isInstantEvent {
 		//check if we have replicate connection and close the session there
@@ -1584,7 +1584,7 @@ func (sS *SessionS) endSession(ctx *context.Context, s *Session, tUsage, lastUsa
 }
 
 // accountSMaxAbstracts computes the maximum abstract units for the events received
-func (sS *SessionS) accountSMaxAbstracts(ctx *context.Context, cgrEvs map[string]*utils.CGREvent) (maxAbstracts map[string]*utils.Decimal, err error) {
+func (sS *SessionS) accountSMaxAbstracts(ctx context.Context, cgrEvs map[string]*utils.CGREvent) (maxAbstracts map[string]*utils.Decimal, err error) {
 	// resolve AccountS connections using the first event for tenant/dP context
 	var acctConns []string
 	for _, cgrEv := range cgrEvs {
@@ -1611,7 +1611,7 @@ func (sS *SessionS) accountSMaxAbstracts(ctx *context.Context, cgrEvs map[string
 // APIs start here
 
 // BiRPCv1GetActiveSessions returns the list of active sessions based on filter
-func (sS *SessionS) BiRPCv1GetActiveSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1GetActiveSessions(ctx context.Context,
 	args *utils.SessionFilter, reply *[]*ExternalSession) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1625,7 +1625,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessions(ctx *context.Context,
 }
 
 // BiRPCv1GetActiveSessionsCount counts the active sessions
-func (sS *SessionS) BiRPCv1GetActiveSessionsCount(ctx *context.Context,
+func (sS *SessionS) BiRPCv1GetActiveSessionsCount(ctx context.Context,
 	args *utils.SessionFilter, reply *int) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1635,7 +1635,7 @@ func (sS *SessionS) BiRPCv1GetActiveSessionsCount(ctx *context.Context,
 }
 
 // BiRPCv1GetPassiveSessions returns the passive sessions handled by SessionS
-func (sS *SessionS) BiRPCv1GetPassiveSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1GetPassiveSessions(ctx context.Context,
 	args *utils.SessionFilter, reply *[]*ExternalSession) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1649,7 +1649,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessions(ctx *context.Context,
 }
 
 // BiRPCv1GetPassiveSessionsCount counts the passive sessions handled by the system
-func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx *context.Context,
+func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx context.Context,
 	args *utils.SessionFilter, reply *int) error {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1659,7 +1659,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx *context.Context,
 }
 
 // BiRPCv1SetPassiveSession used for replicating Sessions
-func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
+func (sS *SessionS) BiRPCv1SetPassiveSession(ctx context.Context,
 	s *Session, reply *string) (err error) {
 	/*
 		if _, has := s.OptsStart[utils.MetaOriginID]; has {
@@ -1687,7 +1687,7 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 
 // BiRPCv1ReplicateSessions will replicate active sessions to either args.Connections or the internal configured ones
 // args.Filter is used to filter the sessions which are replicated, originID is the only one possible for now
-func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1ReplicateSessions(ctx context.Context,
 	args ArgsReplicateSessions, reply *string) (err error) {
 	sS.replicateSessions(ctx, utils.IfaceAsString(args.APIOpts[utils.MetaCGRid]), args.Passive)
 	*reply = utils.OK
@@ -1695,13 +1695,13 @@ func (sS *SessionS) BiRPCv1ReplicateSessions(ctx *context.Context,
 }
 
 // BiRPCv1ProcessMessage processes one event with the right subsystems based on arguments received
-func (sS *SessionS) BiRPCv1ProcessMessage(ctx *context.Context,
+func (sS *SessionS) BiRPCv1ProcessMessage(ctx context.Context,
 	args *utils.CGREvent, rply *V1ProcessMessageReply) (err error) {
 	return
 }
 
 // BiRPCv1SyncSessions will sync sessions on demand
-func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1SyncSessions(ctx context.Context,
 	ignParam *utils.TenantWithAPIOpts, reply *string) error {
 	sS.syncSessions(ctx)
 	*reply = utils.OK
@@ -1709,7 +1709,7 @@ func (sS *SessionS) BiRPCv1SyncSessions(ctx *context.Context,
 }
 
 // BiRPCv1ForceDisconnect will force disconnecting sessions matching sessions
-func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
+func (sS *SessionS) BiRPCv1ForceDisconnect(ctx context.Context,
 	args *utils.SessionFilter, reply *string) (err error) {
 	if args == nil { //protection in case on nil
 		args = &utils.SessionFilter{}
@@ -1745,16 +1745,16 @@ func (sS *SessionS) BiRPCv1ForceDisconnect(ctx *context.Context,
 }
 
 // BiRPCv1RegisterInternalBiJSONConn will register the client for a bidirectional comunication
-func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx *context.Context,
+func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx context.Context,
 	connID string, reply *string) error {
-	sS.RegisterIntBiJConn(ctx.Client, connID)
+	sS.RegisterIntBiJConn(birpc.ClientFromContext(ctx), connID)
 	*reply = utils.OK
 	return nil
 }
 
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.pSsMux.RLock()
@@ -1780,7 +1780,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 
 // BiRPCv1DeactivateSessions is called to deactivate a list/all active sessios
 // returns utils.ErrPartiallyExecuted in case of errors
-func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
+func (sS *SessionS) BiRPCv1DeactivateSessions(ctx context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
 	if len(sIDs.IDs) == 0 {
 		sS.aSsMux.RLock()
@@ -1805,12 +1805,12 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 }
 
 // hasSession will prove if a session with sID exists in either active, passive or closed cached sessions
-func (sS *SessionS) hasSession(ctx *context.Context, sID string) bool {
+func (sS *SessionS) hasSession(ctx context.Context, sID string) bool {
 	return false
 }
 
 // processThreshold will receive the event and send it to ThresholdS to be processed
-func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (tIDs []string, err error) {
+func (sS *SessionS) processThreshold(ctx context.Context, cgrEv *utils.CGREvent, clnb bool) (tIDs []string, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaThresholds, cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
 		return
@@ -1825,7 +1825,7 @@ func (sS *SessionS) processThreshold(ctx *context.Context, cgrEv *utils.CGREvent
 }
 
 // processStats will receive the event and send it to StatS to be processed
-func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
+func (sS *SessionS) processStats(ctx context.Context, cgrEv *utils.CGREvent, clnb bool) (sIDs []string, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaStats,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
@@ -1841,7 +1841,7 @@ func (sS *SessionS) processStats(ctx *context.Context, cgrEv *utils.CGREvent, cl
 }
 
 // getRoutes will receive the event and send it to SupplierS to find the suppliers
-func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (routesReply utils.SortedRoutesList, err error) {
+func (sS *SessionS) getRoutes(ctx context.Context, cgrEv *utils.CGREvent) (routesReply utils.SortedRoutesList, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaRoutes,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
@@ -1861,7 +1861,7 @@ func (sS *SessionS) getRoutes(ctx *context.Context, cgrEv *utils.CGREvent) (rout
 }
 
 // eesProcessEvent will send the CGREvent to EEs
-func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent) (eesIDs []string, err error) {
+func (sS *SessionS) eesProcessEvent(ctx context.Context, cgrEv *utils.CGREvent) (eesIDs []string, err error) {
 	var conns []string
 	if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaEEs,
 		cgrEv.Tenant, cgrEv.AsDataProvider(), nil, sS.fltrS); err != nil {
@@ -1883,7 +1883,7 @@ func (sS *SessionS) eesProcessEvent(ctx *context.Context, cgrEv *utils.CGREvent)
 }
 
 // BiRPCv1AlterSession sends a RAR for the matching sessions
-func (sS *SessionS) BiRPCv1AlterSession(ctx *context.Context,
+func (sS *SessionS) BiRPCv1AlterSession(ctx context.Context,
 	args utils.SessionFilterWithEvent, reply *string) (err error) {
 	if args.SessionFilter == nil { //protection in case on nil
 		args.SessionFilter = &utils.SessionFilter{}
@@ -1918,7 +1918,7 @@ func (sS *SessionS) BiRPCv1AlterSession(ctx *context.Context,
 }
 
 // BiRPCv1DisconnectPeer sends a DPR for the given OriginHost and OriginRealm
-func (sS *SessionS) BiRPCv1DisconnectPeer(ctx *context.Context,
+func (sS *SessionS) BiRPCv1DisconnectPeer(ctx context.Context,
 	args *utils.DPRArgs, reply *string) (err error) {
 	hasErrors := false
 	clients := make(map[string]*biJClient)
@@ -1944,7 +1944,7 @@ func (sS *SessionS) BiRPCv1DisconnectPeer(ctx *context.Context,
 }
 
 // BiRPCv1STIRAuthenticate the API for STIR checking
-func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
+func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx context.Context,
 	args *V1STIRAuthenticateArgs, reply *string) (err error) {
 	attest := sS.cfg.SessionSCfg().STIRCfg.AllowedAttest
 	if len(args.Attest) != 0 {
@@ -1965,7 +1965,7 @@ func (sS *SessionS) BiRPCv1STIRAuthenticate(ctx *context.Context,
 }
 
 // BiRPCv1STIRIdentity the API for STIR header creation
-func (sS *SessionS) BiRPCv1STIRIdentity(ctx *context.Context,
+func (sS *SessionS) BiRPCv1STIRIdentity(ctx context.Context,
 	args *V1STIRIdentityArgs, identity *string) (err error) {
 	if args == nil || args.Payload == nil {
 		return utils.NewErrMandatoryIeMissing("Payload")

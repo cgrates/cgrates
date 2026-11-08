@@ -4,9 +4,9 @@
 package ees
 
 import (
+	"context"
 	"fmt"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -26,7 +26,7 @@ type LogEE struct {
 
 func (vEe *LogEE) Cfg() *config.EventExporterCfg { return vEe.cfg }
 func (vEe *LogEE) Connect() error                { return nil }
-func (vEe *LogEE) ExportEvent(_ *context.Context, mp, _ any) error {
+func (vEe *LogEE) ExportEvent(_ context.Context, mp, _ any) error {
 	utils.Logger.Info(
 		fmt.Sprintf("<%s> <%s> exported: <%s>",
 			utils.EEs, vEe.Cfg().ID, utils.ToJSON(mp)))

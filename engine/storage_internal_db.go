@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/ltcache"
 
@@ -81,7 +81,7 @@ func (iDB *InternalDB) SelectDatabase(string) (err error) {
 }
 
 // GetKeysForPrefix returns the keys from cache that have the given prefix
-func (iDB *InternalDB) GetKeysForPrefix(_ *context.Context, prefix, search string) (ids []string, err error) {
+func (iDB *InternalDB) GetKeysForPrefix(_ context.Context, prefix, search string) (ids []string, err error) {
 	keyLen := len(utils.AccountPrefix)
 	if len(prefix) < keyLen {
 		err = fmt.Errorf("unsupported prefix in GetKeysForPrefix: %s", prefix)
@@ -177,7 +177,7 @@ func (iDB *InternalDB) IsDBEmpty() (isEmpty bool, err error) {
 	return
 }
 
-func (iDB *InternalDB) HasDataDrv(_ *context.Context, category, subject, tenant string) (bool, error) {
+func (iDB *InternalDB) HasDataDrv(_ context.Context, category, subject, tenant string) (bool, error) {
 	switch category {
 	case utils.ResourcesPrefix, utils.ResourceProfilesPrefix, utils.StatQueuePrefix,
 		utils.StatQueueProfilePrefix, utils.ThresholdPrefix, utils.ThresholdProfilePrefix,
@@ -188,83 +188,83 @@ func (iDB *InternalDB) HasDataDrv(_ *context.Context, category, subject, tenant 
 	return false, errors.New("Unsupported HasData category")
 }
 
-func (iDB *InternalDB) GetResourceProfileDrv(_ *context.Context, tenant, id string) (rp *utils.ResourceProfile, err error) {
+func (iDB *InternalDB) GetResourceProfileDrv(_ context.Context, tenant, id string) (rp *utils.ResourceProfile, err error) {
 	if x, ok := iDB.db.Get(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*utils.ResourceProfile), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceProfileDrv(_ *context.Context, rp *utils.ResourceProfile) (err error) {
+func (iDB *InternalDB) SetResourceProfileDrv(_ context.Context, rp *utils.ResourceProfile) (err error) {
 	iDB.db.Set(utils.CacheResourceProfiles, rp.TenantID(), rp, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveResourceProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveResourceProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheResourceProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetResourceDrv(_ *context.Context, tenant, id string) (r *utils.Resource, err error) {
+func (iDB *InternalDB) GetResourceDrv(_ context.Context, tenant, id string) (r *utils.Resource, err error) {
 	if x, ok := iDB.db.Get(utils.CacheResources, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*utils.Resource), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetResourceDrv(_ *context.Context, r *utils.Resource) (err error) {
+func (iDB *InternalDB) SetResourceDrv(_ context.Context, r *utils.Resource) (err error) {
 	iDB.db.Set(utils.CacheResources, r.TenantID(), r, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveResourceDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveResourceDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheResources, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetIPProfileDrv(_ *context.Context, tenant, id string) (*utils.IPProfile, error) {
+func (iDB *InternalDB) GetIPProfileDrv(_ context.Context, tenant, id string) (*utils.IPProfile, error) {
 	if x, ok := iDB.db.Get(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*utils.IPProfile), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetIPProfileDrv(_ *context.Context, ipp *utils.IPProfile) error {
+func (iDB *InternalDB) SetIPProfileDrv(_ context.Context, ipp *utils.IPProfile) error {
 	iDB.db.Set(utils.CacheIPProfiles, ipp.TenantID(), ipp, nil,
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemoveIPProfileDrv(_ *context.Context, tenant, id string) error {
+func (iDB *InternalDB) RemoveIPProfileDrv(_ context.Context, tenant, id string) error {
 	iDB.db.Remove(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetIPAllocationsDrv(_ *context.Context, tenant, id string) (*utils.IPAllocations, error) {
+func (iDB *InternalDB) GetIPAllocationsDrv(_ context.Context, tenant, id string) (*utils.IPAllocations, error) {
 	if x, ok := iDB.db.Get(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*utils.IPAllocations), nil
 	}
 	return nil, utils.ErrNotFound
 }
 
-func (iDB *InternalDB) SetIPAllocationsDrv(_ *context.Context, ip *utils.IPAllocations) error {
+func (iDB *InternalDB) SetIPAllocationsDrv(_ context.Context, ip *utils.IPAllocations) error {
 	iDB.db.Set(utils.CacheIPAllocations, ip.TenantID(), ip, nil,
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemoveIPAllocationsDrv(_ *context.Context, tenant, id string) error {
+func (iDB *InternalDB) RemoveIPAllocationsDrv(_ context.Context, tenant, id string) error {
 	iDB.db.Remove(utils.CacheIPAllocations, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
+func (iDB *InternalDB) GetStatQueueProfileDrv(_ context.Context, tenant string, id string) (sq *utils.StatQueueProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -272,19 +272,19 @@ func (iDB *InternalDB) GetStatQueueProfileDrv(_ *context.Context, tenant string,
 	return x.(*utils.StatQueueProfile), nil
 
 }
-func (iDB *InternalDB) SetStatQueueProfileDrv(_ *context.Context, sq *utils.StatQueueProfile) (err error) {
+func (iDB *InternalDB) SetStatQueueProfileDrv(_ context.Context, sq *utils.StatQueueProfile) (err error) {
 	iDB.db.Set(utils.CacheStatQueueProfiles, sq.TenantID(), sq, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemStatQueueProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemStatQueueProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueueProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetRankingProfileDrv(_ *context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
+func (iDB *InternalDB) GetRankingProfileDrv(_ context.Context, tenant, id string) (sg *utils.RankingProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -292,17 +292,17 @@ func (iDB *InternalDB) GetRankingProfileDrv(_ *context.Context, tenant, id strin
 	return x.(*utils.RankingProfile), nil
 }
 
-func (iDB *InternalDB) SetRankingProfileDrv(_ *context.Context, sgp *utils.RankingProfile) (err error) {
+func (iDB *InternalDB) SetRankingProfileDrv(_ context.Context, sgp *utils.RankingProfile) (err error) {
 	iDB.db.Set(utils.CacheRankingProfiles, sgp.TenantID(), sgp, nil, true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemRankingProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemRankingProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheRankingProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetRankingDrv(_ *context.Context, tenant, id string) (rn *utils.Ranking, err error) {
+func (iDB *InternalDB) GetRankingDrv(_ context.Context, tenant, id string) (rn *utils.Ranking, err error) {
 	x, ok := iDB.db.Get(utils.CacheRankings, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -310,26 +310,26 @@ func (iDB *InternalDB) GetRankingDrv(_ *context.Context, tenant, id string) (rn 
 	return x.(*utils.Ranking), nil
 }
 
-func (iDB *InternalDB) SetRankingDrv(_ *context.Context, rn *utils.Ranking) (err error) {
+func (iDB *InternalDB) SetRankingDrv(_ context.Context, rn *utils.Ranking) (err error) {
 	iDB.db.Set(utils.CacheRankings, rn.TenantID(), rn, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveRankingDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveRankingDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheRankings, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetStatQueueDrv(_ *context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
+func (iDB *InternalDB) GetStatQueueDrv(_ context.Context, tenant, id string) (sq *utils.StatQueue, err error) {
 	x, ok := iDB.db.Get(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
 	}
 	return x.(*utils.StatQueue), nil
 }
-func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, _ *StoredStatQueue, sq *utils.StatQueue) error {
+func (iDB *InternalDB) SetStatQueueDrv(_ context.Context, _ *StoredStatQueue, sq *utils.StatQueue) error {
 	if sq == nil {
 		return utils.ErrMandatoryIeMissing
 	}
@@ -337,13 +337,13 @@ func (iDB *InternalDB) SetStatQueueDrv(_ *context.Context, _ *StoredStatQueue, s
 		true, utils.NonTransactional)
 	return nil
 }
-func (iDB *InternalDB) RemStatQueueDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemStatQueueDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheStatQueues, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
+func (iDB *InternalDB) GetThresholdProfileDrv(_ context.Context, tenant, id string) (tp *utils.ThresholdProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -351,17 +351,17 @@ func (iDB *InternalDB) GetThresholdProfileDrv(_ *context.Context, tenant, id str
 	return x.(*utils.ThresholdProfile), nil
 }
 
-func (iDB *InternalDB) SetTrendProfileDrv(_ *context.Context, srp *utils.TrendProfile) (err error) {
+func (iDB *InternalDB) SetTrendProfileDrv(_ context.Context, srp *utils.TrendProfile) (err error) {
 	iDB.db.Set(utils.CacheTrendProfiles, srp.TenantID(), srp, nil, true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) RemTrendProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemTrendProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id), true, utils.NonTransactional)
 	return nil
 }
 
-func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
+func (iDB *InternalDB) GetTrendProfileDrv(_ context.Context, tenant, id string) (sg *utils.TrendProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheTrendProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -369,7 +369,7 @@ func (iDB *InternalDB) GetTrendProfileDrv(_ *context.Context, tenant, id string)
 	return x.(*utils.TrendProfile), nil
 }
 
-func (iDB *InternalDB) GetTrendDrv(_ *context.Context, tenant, id string) (th *utils.Trend, err error) {
+func (iDB *InternalDB) GetTrendDrv(_ context.Context, tenant, id string) (th *utils.Trend, err error) {
 	x, ok := iDB.db.Get(utils.CacheTrends, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -377,31 +377,31 @@ func (iDB *InternalDB) GetTrendDrv(_ *context.Context, tenant, id string) (th *u
 	return x.(*utils.Trend), nil
 }
 
-func (iDB *InternalDB) SetTrendDrv(_ *context.Context, tr *utils.Trend) (err error) {
+func (iDB *InternalDB) SetTrendDrv(_ context.Context, tr *utils.Trend) (err error) {
 	iDB.db.Set(utils.CacheTrends, tr.TenantID(), tr, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveTrendDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveTrendDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheTrends, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) SetThresholdProfileDrv(_ *context.Context, tp *utils.ThresholdProfile) (err error) {
+func (iDB *InternalDB) SetThresholdProfileDrv(_ context.Context, tp *utils.ThresholdProfile) (err error) {
 	iDB.db.Set(utils.CacheThresholdProfiles, tp.TenantID(), tp, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemThresholdProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemThresholdProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheThresholdProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetThresholdDrv(_ *context.Context, tenant, id string) (th *utils.Threshold, err error) {
+func (iDB *InternalDB) GetThresholdDrv(_ context.Context, tenant, id string) (th *utils.Threshold, err error) {
 	x, ok := iDB.db.Get(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -409,19 +409,19 @@ func (iDB *InternalDB) GetThresholdDrv(_ *context.Context, tenant, id string) (t
 	return x.(*utils.Threshold), nil
 }
 
-func (iDB *InternalDB) SetThresholdDrv(_ *context.Context, th *utils.Threshold) (err error) {
+func (iDB *InternalDB) SetThresholdDrv(_ context.Context, th *utils.Threshold) (err error) {
 	iDB.db.Set(utils.CacheThresholds, th.TenantID(), th, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveThresholdDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveThresholdDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheThresholds, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetFilterDrv(_ *context.Context, tenant, id string) (fltr *Filter, err error) {
+func (iDB *InternalDB) GetFilterDrv(_ context.Context, tenant, id string) (fltr *Filter, err error) {
 	x, ok := iDB.db.Get(utils.CacheFilters, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -430,7 +430,7 @@ func (iDB *InternalDB) GetFilterDrv(_ *context.Context, tenant, id string) (fltr
 
 }
 
-func (iDB *InternalDB) SetFilterDrv(_ *context.Context, fltr *Filter) (err error) {
+func (iDB *InternalDB) SetFilterDrv(_ context.Context, fltr *Filter) (err error) {
 	if err = fltr.Compile(); err != nil {
 		return
 	}
@@ -439,13 +439,13 @@ func (iDB *InternalDB) SetFilterDrv(_ *context.Context, fltr *Filter) (err error
 	return
 }
 
-func (iDB *InternalDB) RemoveFilterDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveFilterDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheFilters, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetRouteProfileDrv(_ *context.Context, tenant, id string) (spp *utils.RouteProfile, err error) {
+func (iDB *InternalDB) GetRouteProfileDrv(_ context.Context, tenant, id string) (spp *utils.RouteProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -453,7 +453,7 @@ func (iDB *InternalDB) GetRouteProfileDrv(_ *context.Context, tenant, id string)
 	return x.(*utils.RouteProfile), nil
 }
 
-func (iDB *InternalDB) SetRouteProfileDrv(_ *context.Context, spp *utils.RouteProfile) (err error) {
+func (iDB *InternalDB) SetRouteProfileDrv(_ context.Context, spp *utils.RouteProfile) (err error) {
 	if err = spp.Compile(); err != nil {
 		return
 	}
@@ -462,13 +462,13 @@ func (iDB *InternalDB) SetRouteProfileDrv(_ *context.Context, spp *utils.RoutePr
 	return
 }
 
-func (iDB *InternalDB) RemoveRouteProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveRouteProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheRouteProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetAttributeProfileDrv(_ *context.Context, tenant, id string) (attr *utils.AttributeProfile, err error) {
+func (iDB *InternalDB) GetAttributeProfileDrv(_ context.Context, tenant, id string) (attr *utils.AttributeProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -476,7 +476,7 @@ func (iDB *InternalDB) GetAttributeProfileDrv(_ *context.Context, tenant, id str
 	return x.(*utils.AttributeProfile), nil
 }
 
-func (iDB *InternalDB) SetAttributeProfileDrv(_ *context.Context, attr *utils.AttributeProfile) (err error) {
+func (iDB *InternalDB) SetAttributeProfileDrv(_ context.Context, attr *utils.AttributeProfile) (err error) {
 	if err = attr.Compile(); err != nil {
 		return
 	}
@@ -485,13 +485,13 @@ func (iDB *InternalDB) SetAttributeProfileDrv(_ *context.Context, attr *utils.At
 	return
 }
 
-func (iDB *InternalDB) RemoveAttributeProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveAttributeProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheAttributeProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetChargerProfileDrv(_ *context.Context, tenant, id string) (ch *utils.ChargerProfile, err error) {
+func (iDB *InternalDB) GetChargerProfileDrv(_ context.Context, tenant, id string) (ch *utils.ChargerProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -499,19 +499,19 @@ func (iDB *InternalDB) GetChargerProfileDrv(_ *context.Context, tenant, id strin
 	return x.(*utils.ChargerProfile), nil
 }
 
-func (iDB *InternalDB) SetChargerProfileDrv(_ *context.Context, chr *utils.ChargerProfile) (err error) {
+func (iDB *InternalDB) SetChargerProfileDrv(_ context.Context, chr *utils.ChargerProfile) (err error) {
 	iDB.db.Set(utils.CacheChargerProfiles, chr.TenantID(), chr, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveChargerProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveChargerProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheChargerProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
+func (iDB *InternalDB) GetItemLoadIDsDrv(_ context.Context, itemIDPrefix string) (loadIDs map[string]int64, err error) {
 	x, ok := iDB.db.Get(utils.CacheLoadIDs, utils.LoadIDs)
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -523,13 +523,13 @@ func (iDB *InternalDB) GetItemLoadIDsDrv(_ *context.Context, itemIDPrefix string
 	return
 }
 
-func (iDB *InternalDB) SetLoadIDsDrv(_ *context.Context, loadIDs map[string]int64) (err error) {
+func (iDB *InternalDB) SetLoadIDsDrv(_ context.Context, loadIDs map[string]int64) (err error) {
 	iDB.db.Set(utils.CacheLoadIDs, utils.LoadIDs, loadIDs, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
+func (iDB *InternalDB) GetRateProfileDrv(_ context.Context, tenant, id string) (rpp *utils.RateProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -538,7 +538,7 @@ func (iDB *InternalDB) GetRateProfileDrv(_ *context.Context, tenant, id string) 
 	return x.(*utils.RateProfile), nil
 }
 
-func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+func (iDB *InternalDB) GetRateProfileRatesDrv(ctx context.Context, tenant, profileID, rtPrfx string, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
 	x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, profileID))
 	if !ok || x == nil {
 		return nil, nil, utils.ErrNotFound
@@ -555,7 +555,7 @@ func (iDB *InternalDB) GetRateProfileRatesDrv(ctx *context.Context, tenant, prof
 	return
 }
 
-func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProfile, optOverwrite bool) error {
+func (iDB *InternalDB) SetRateProfileDrv(_ context.Context, rpp *utils.RateProfile, optOverwrite bool) error {
 	_, err := rpp.CacheCompute()
 	if err != nil {
 		return err
@@ -578,7 +578,7 @@ func (iDB *InternalDB) SetRateProfileDrv(_ *context.Context, rpp *utils.RateProf
 	return nil
 }
 
-func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id string, rateIDs *[]string) (err error) {
+func (iDB *InternalDB) RemoveRateProfileDrv(_ context.Context, tenant, id string, rateIDs *[]string) (err error) {
 	// if we want to remove just some rates from our profile, we will remove by their key Rates:rateID, but firstly we have to get the obejct from cache
 	if rateIDs != nil {
 		x, ok := iDB.db.Get(utils.CacheRateProfiles, utils.ConcatenatedKey(tenant, id))
@@ -598,7 +598,7 @@ func (iDB *InternalDB) RemoveRateProfileDrv(_ *context.Context, tenant, id strin
 	return
 }
 
-func (iDB *InternalDB) GetActionProfileDrv(_ *context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
+func (iDB *InternalDB) GetActionProfileDrv(_ context.Context, tenant, id string) (ap *utils.ActionProfile, err error) {
 	x, ok := iDB.db.Get(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -606,13 +606,13 @@ func (iDB *InternalDB) GetActionProfileDrv(_ *context.Context, tenant, id string
 	return x.(*utils.ActionProfile), nil
 }
 
-func (iDB *InternalDB) SetActionProfileDrv(_ *context.Context, ap *utils.ActionProfile) (err error) {
+func (iDB *InternalDB) SetActionProfileDrv(_ context.Context, ap *utils.ActionProfile) (err error) {
 	iDB.db.Set(utils.CacheActionProfiles, ap.TenantID(), ap, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveActionProfileDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveActionProfileDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheActionProfiles, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
@@ -622,7 +622,7 @@ func (iDB *InternalDB) RemoveLoadIDsDrv() (err error) {
 	return utils.ErrNotImplemented
 }
 
-func (iDB *InternalDB) GetIndexesDrv(_ *context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
+func (iDB *InternalDB) GetIndexesDrv(_ context.Context, idxItmType, tntCtx, transactionID string, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if len(idxKeys) == 0 { // return all
 		indexes = make(map[string]utils.StringSet)
 		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
@@ -653,7 +653,7 @@ func (iDB *InternalDB) GetIndexesDrv(_ *context.Context, idxItmType, tntCtx, tra
 	return
 }
 
-func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx string,
+func (iDB *InternalDB) SetIndexesDrv(_ context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) (err error) {
 	if commit && transactionID != utils.EmptyString {
 		for _, dbKey := range iDB.db.GetGroupItemIDs(idxItmType, tntCtx) {
@@ -694,7 +694,7 @@ func (iDB *InternalDB) SetIndexesDrv(_ *context.Context, idxItmType, tntCtx stri
 	return
 }
 
-func (iDB *InternalDB) RemoveIndexesDrv(_ *context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
+func (iDB *InternalDB) RemoveIndexesDrv(_ context.Context, idxItmType, tntCtx string, idxKeys ...string) (err error) {
 	if len(idxKeys) == 0 {
 		iDB.db.RemoveGroup(idxItmType, tntCtx, true, utils.EmptyString)
 		return
@@ -705,7 +705,7 @@ func (iDB *InternalDB) RemoveIndexesDrv(_ *context.Context, idxItmType, tntCtx s
 	return
 }
 
-func (iDB *InternalDB) GetAccountDrv(_ *context.Context, tenant, id string) (ap *utils.Account, err error) {
+func (iDB *InternalDB) GetAccountDrv(_ context.Context, tenant, id string) (ap *utils.Account, err error) {
 	x, ok := iDB.db.Get(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id))
 	if !ok || x == nil {
 		return nil, utils.ErrNotFound
@@ -713,19 +713,19 @@ func (iDB *InternalDB) GetAccountDrv(_ *context.Context, tenant, id string) (ap 
 	return x.(*utils.Account).Clone(), nil
 }
 
-func (iDB *InternalDB) SetAccountDrv(_ *context.Context, ap *utils.Account) (err error) {
+func (iDB *InternalDB) SetAccountDrv(_ context.Context, ap *utils.Account) (err error) {
 	iDB.db.Set(utils.CacheAccounts, ap.TenantID(), ap, nil,
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) RemoveAccountDrv(_ *context.Context, tenant, id string) (err error) {
+func (iDB *InternalDB) RemoveAccountDrv(_ context.Context, tenant, id string) (err error) {
 	iDB.db.Remove(utils.CacheAccounts, utils.ConcatenatedKey(tenant, id),
 		true, utils.NonTransactional)
 	return
 }
 
-func (iDB *InternalDB) GetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
+func (iDB *InternalDB) GetConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (sectionMap map[string][]byte, err error) {
 	sectionMap = make(map[string][]byte)
 	for _, sectionID := range sectionIDs {
 		x, ok := iDB.db.Get(utils.CacheConfig, utils.ConcatenatedKey(nodeID, sectionID))
@@ -743,7 +743,7 @@ func (iDB *InternalDB) GetConfigSectionsDrv(ctx *context.Context, nodeID string,
 	return
 }
 
-func (iDB *InternalDB) SetConfigSectionsDrv(ctx *context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
+func (iDB *InternalDB) SetConfigSectionsDrv(ctx context.Context, nodeID string, sectionsData map[string][]byte) (err error) {
 	for sectionID, sectionData := range sectionsData {
 		iDB.db.Set(utils.CacheConfig, utils.ConcatenatedKey(nodeID, sectionID),
 			sectionData, nil, true, utils.NonTransactional)
@@ -751,7 +751,7 @@ func (iDB *InternalDB) SetConfigSectionsDrv(ctx *context.Context, nodeID string,
 	return
 }
 
-func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx *context.Context, nodeID string, sectionIDs []string) (err error) {
+func (iDB *InternalDB) RemoveConfigSectionsDrv(ctx context.Context, nodeID string, sectionIDs []string) (err error) {
 	for _, sectionID := range sectionIDs {
 		iDB.db.Remove(utils.CacheConfig, utils.ConcatenatedKey(nodeID, sectionID), true, utils.NonTransactional)
 	}

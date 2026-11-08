@@ -5,23 +5,23 @@ package actions
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 type mockClientConn struct {
-	calls map[string]func(*context.Context, any, any) error
+	calls map[string]func(context.Context, any, any) error
 }
 
-func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args any, reply any) (err error) {
+func (mCC *mockClientConn) Call(ctx context.Context, serviceMethod string, args any, reply any) (err error) {
 	if call, has := mCC.calls[serviceMethod]; has {
 		return call(ctx, args, reply)
 	}
@@ -103,8 +103,8 @@ func TestActionsExecuteActionsResetTH(t *testing.T) {
 	var executed bool
 
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.ThresholdSv1ResetThreshold: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.ThresholdSv1ResetThreshold: func(ctx context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -192,8 +192,8 @@ func TestActionsExecuteActionsResetSQ(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.StatSv1ResetStatQueue: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.StatSv1ResetStatQueue: func(ctx context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -279,8 +279,8 @@ func TestActionsExecuteActionsSetBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1ActionSetBalance: func(ctx context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -366,8 +366,8 @@ func TestActionsExecuteActionsAddBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1ActionSetBalance: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1ActionSetBalance: func(ctx context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -518,8 +518,8 @@ func TestActionsExecuteActionsLogURs(t *testing.T) {
 	// }
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.EeSv1ProcessEvent: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.EeSv1ProcessEvent: func(ctx context.Context, args, reply any) error {
 				// if !reflect.DeepEqual(args, expArgs) {
 				// 	return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 				// 		utils.ToJSON(expArgs), utils.ToJSON(args))
@@ -605,8 +605,8 @@ func TestActionsExecuteActionsRemBalance(t *testing.T) {
 	}
 	var executed bool
 	cc := &mockClientConn{
-		calls: map[string]func(ctx *context.Context, args any, reply any) error{
-			utils.AccountSv1ActionRemoveBalance: func(ctx *context.Context, args, reply any) error {
+		calls: map[string]func(ctx context.Context, args any, reply any) error{
+			utils.AccountSv1ActionRemoveBalance: func(ctx context.Context, args, reply any) error {
 				if !reflect.DeepEqual(args, expArgs) {
 					return fmt.Errorf("expected: <%+v>,\nreceived: <%+v>",
 						utils.ToJSON(expArgs), utils.ToJSON(args))

@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -17,7 +17,7 @@ type RegistrarCCfgs struct {
 }
 
 // loadRegistrarCCfg loads the RegistrarC section of the configuration
-func (dps *RegistrarCCfgs) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (dps *RegistrarCCfgs) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRegistrarCCfg := new(RegistrarCJsonCfgs)
 	if err = jsnCfg.GetSection(ctx, RegistrarCJSON, jsnRegistrarCCfg); err != nil {
 		return

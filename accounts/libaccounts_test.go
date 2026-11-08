@@ -5,6 +5,7 @@ package accounts
 
 import (
 	"bytes"
+	"context"
 	"reflect"
 	"strings"
 	"testing"
@@ -13,7 +14,6 @@ import (
 	"github.com/ericlagergren/decimal"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 
 	"github.com/cgrates/rpcclient"
@@ -77,10 +77,10 @@ func TestNewAccountBalanceOperators(t *testing.T) {
 }
 
 type testMockCall struct {
-	calls map[string]func(_ *context.Context, _, _ any) error
+	calls map[string]func(_ context.Context, _, _ any) error
 }
 
-func (tS *testMockCall) Call(ctx *context.Context, method string, args, rply any) error {
+func (tS *testMockCall) Call(ctx context.Context, method string, args, rply any) error {
 	if call, has := tS.calls[method]; !has {
 		return rpcclient.ErrUnsupporteServiceMethod
 	} else {
@@ -93,8 +93,8 @@ func TestProcessAttributeS(t *testing.T) {
 	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{ // coverage purpose
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.AttributeSv1ProcessEvent: func(_ *context.Context, _, _ any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.AttributeSv1ProcessEvent: func(_ context.Context, _, _ any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -125,8 +125,8 @@ func TestRatesCostForEvent(t *testing.T) { // coverage purpose
 	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, _, _ any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ context.Context, _, _ any) error {
 				return utils.ErrNotImplemented
 			},
 		},
@@ -155,8 +155,8 @@ func TestRatesCostForEvent2(t *testing.T) { // coverage purpose
 	locker := engine.NewLocker(cfg)
 
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -281,8 +281,8 @@ func TestDebitUsageFromConcretesFromRateS(t *testing.T) {
 	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
 	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
 	sTestMock := &testMockCall{
-		calls: map[string]func(_ *context.Context, _, _ any) error{
-			utils.RateSv1CostForEvent: func(_ *context.Context, args, reply any) error {
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.RateSv1CostForEvent: func(_ context.Context, args, reply any) error {
 				rplCast, canCast := reply.(*utils.RateProfileCost)
 				if !canCast {
 					t.Errorf("Wrong argument type : %T", reply)
@@ -885,7 +885,7 @@ func TestUncompressUnits(t *testing.T) {
 }
 
 func TestNewBalanceOperator(t *testing.T) {
-	ctx := new(context.Context)
+	ctx := context.Background()
 	acntID := "1001"
 	filters := new(engine.FilterS)
 	cfg := config.NewDefaultCGRConfig()

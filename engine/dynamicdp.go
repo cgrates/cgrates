@@ -4,16 +4,16 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/nyaruka/phonenumbers"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
 
-func NewDynamicDP(ctx *context.Context, cfg *config.CGRConfig,
+func NewDynamicDP(ctx context.Context, cfg *config.CGRConfig,
 	tenant string, initialDP utils.DataProvider, fs *FilterS) *DynamicDP {
 	return &DynamicDP{
 		cfg:       cfg,
@@ -31,7 +31,7 @@ type DynamicDP struct {
 	initialDP utils.DataProvider
 	fs        *FilterS
 	cache     utils.MapStorage
-	ctx       *context.Context
+	ctx       context.Context
 }
 
 func (dDP *DynamicDP) String() string { return dDP.initialDP.String() }

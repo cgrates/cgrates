@@ -4,12 +4,12 @@
 package apis
 
 import (
+	"context"
 	"path/filepath"
 	"sync"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/cores"
 	"github.com/cgrates/cgrates/engine"

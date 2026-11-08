@@ -4,11 +4,11 @@
 package ees
 
 import (
+	"context"
 	"net/http"
 	"net/url"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -63,7 +63,7 @@ func (httpPost *HTTPPostEE) Cfg() *config.EventExporterCfg { return httpPost.cfg
 
 func (httpPost *HTTPPostEE) Connect() (_ error) { return }
 
-func (httpPost *HTTPPostEE) ExportEvent(ctx *context.Context, content, _ any) (err error) {
+func (httpPost *HTTPPostEE) ExportEvent(ctx context.Context, content, _ any) (err error) {
 	httpPost.reqs.get()
 	defer httpPost.reqs.done()
 	pReq := content.(*HTTPPosterRequest)

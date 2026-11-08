@@ -4,16 +4,16 @@
 package utils
 
 import (
+	"context"
 	"net"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 )
 
 type mockClientConn struct{}
 
-func (mCC *mockClientConn) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
+func (mCC *mockClientConn) Call(ctx context.Context, serviceMethod string, args, reply any) error {
 	return nil
 }
 func TestBiRpcNewBiJSONrpcClient(t *testing.T) {

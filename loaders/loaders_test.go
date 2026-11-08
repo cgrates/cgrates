@@ -6,6 +6,7 @@ package loaders
 import (
 	"archive/zip"
 	"bytes"
+	"context"
 	"os"
 	"path"
 	"reflect"
@@ -14,7 +15,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"

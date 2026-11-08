@@ -4,6 +4,7 @@
 package engine
 
 import (
+	"context"
 	"fmt"
 	"slices"
 	"strings"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	"github.com/cgrates/baningo"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -98,8 +98,8 @@ func (dm *DataManager) Lock(keys ...string) func() {
 }
 
 // Guard runs handler with keys locked until it returns or the context is done.
-func (dm *DataManager) Guard(ctx *context.Context,
-	handler func(*context.Context) error, keys ...string) error {
+func (dm *DataManager) Guard(ctx context.Context,
+	handler func(context.Context) error, keys ...string) error {
 	return dm.locker.Guard(ctx, handler, keys...)
 }
 
@@ -266,7 +266,7 @@ func (dbConns *DBConnManager) getDBForPrefix(prefix string) (dataDB DataDB, err 
 	return
 }
 
-func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []string, mustBeCached bool) (err error) {
+func (dm *DataManager) CacheDataFromDB(ctx context.Context, prfx string, ids []string, mustBeCached bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -479,7 +479,7 @@ func (dm *DataManager) CacheDataFromDB(ctx *context.Context, prfx string, ids []
 }
 
 // GetFilter returns a filter based on the given ID
-func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetFilter(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (fltr *Filter, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -539,7 +539,7 @@ func (dm *DataManager) GetFilter(ctx *context.Context, tenant, id string, cacheR
 	return
 }
 
-func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex bool) (err error) {
+func (dm *DataManager) SetFilter(ctx context.Context, fltr *Filter, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -573,7 +573,7 @@ func (dm *DataManager) SetFilter(ctx *context.Context, fltr *Filter, withIndex b
 	return
 }
 
-func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveFilter(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -620,7 +620,7 @@ func (dm *DataManager) RemoveFilter(ctx *context.Context, tenant, id string, wit
 	return
 }
 
-func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
+func (dm *DataManager) GetThreshold(ctx context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (th *utils.Threshold, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -672,7 +672,7 @@ func (dm *DataManager) GetThreshold(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetThreshold(ctx *context.Context, th *utils.Threshold) (err error) {
+func (dm *DataManager) SetThreshold(ctx context.Context, th *utils.Threshold) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -696,7 +696,7 @@ func (dm *DataManager) SetThreshold(ctx *context.Context, th *utils.Threshold) (
 	return
 }
 
-func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveThreshold(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -720,7 +720,7 @@ func (dm *DataManager) RemoveThreshold(ctx *context.Context, tenant, id string) 
 	return
 }
 
-func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetThresholdProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (th *utils.ThresholdProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -774,7 +774,7 @@ func (dm *DataManager) GetThresholdProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *utils.ThresholdProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetThresholdProfile(ctx context.Context, th *utils.ThresholdProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -837,7 +837,7 @@ func (dm *DataManager) SetThresholdProfile(ctx *context.Context, th *utils.Thres
 	return
 }
 
-func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveThresholdProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -879,7 +879,7 @@ func (dm *DataManager) RemoveThresholdProfile(ctx *context.Context, tenant, id s
 
 // GetStatQueue retrieves a StatQueue from db
 // handles caching and deserialization of metrics
-func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
+func (dm *DataManager) GetStatQueue(ctx context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (sq *utils.StatQueue, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -940,16 +940,16 @@ func (dm *DataManager) GetStatQueue(ctx *context.Context, tenant, id string,
 }
 
 // SetStatQueue converts to StoredStatQueue and stores the result in db
-func (dm *DataManager) SetStatQueue(ctx *context.Context, sq *utils.StatQueue) error {
+func (dm *DataManager) SetStatQueue(ctx context.Context, sq *utils.StatQueue) error {
 	return dm.setStatQueue(ctx, sq, true)
 }
 
 // SetStatQueueWithoutReplicate stores a StatQueue without replication.
-func (dm *DataManager) SetStatQueueWithoutReplicate(ctx *context.Context, sq *utils.StatQueue) error {
+func (dm *DataManager) SetStatQueueWithoutReplicate(ctx context.Context, sq *utils.StatQueue) error {
 	return dm.setStatQueue(ctx, sq, false)
 }
 
-func (dm *DataManager) setStatQueue(ctx *context.Context, sq *utils.StatQueue, replicate bool) error {
+func (dm *DataManager) setStatQueue(ctx context.Context, sq *utils.StatQueue, replicate bool) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -985,7 +985,7 @@ func (dm *DataManager) setStatQueue(ctx *context.Context, sq *utils.StatQueue, r
 }
 
 // RemoveStatQueue removes the StoredStatQueue
-func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveStatQueue(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1009,7 +1009,7 @@ func (dm *DataManager) RemoveStatQueue(ctx *context.Context, tenant, id string) 
 	return
 }
 
-func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetStatQueueProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (sqp *utils.StatQueueProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -1063,7 +1063,7 @@ func (dm *DataManager) GetStatQueueProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.StatQueueProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetStatQueueProfile(ctx context.Context, sqp *utils.StatQueueProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1110,7 +1110,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 		oldSts.TTL != sqp.TTL ||
 		oldSts.MinItems != sqp.MinItems ||
 		oldSts.Stored != sqp.Stored && oldSts.Stored { // reset the stats queue if the profile changed this fields
-		dm.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
+		dm.Guard(ctx, func(ctx context.Context) (_ error) { // we change the queue so lock it
 			var sq *utils.StatQueue
 			if sq, err = utils.NewStatQueue(sqp.Tenant, sqp.ID, sqp.Metrics,
 				uint64(sqp.MinItems)); err != nil {
@@ -1120,7 +1120,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 			return
 		}, utils.StatQueuePrefix+sqp.TenantID())
 	} else {
-		dm.Guard(ctx, func(ctx *context.Context) (_ error) { // we change the queue so lock it
+		dm.Guard(ctx, func(ctx context.Context) (_ error) { // we change the queue so lock it
 			oSq, errRs := dm.GetStatQueue(ctx, sqp.Tenant, sqp.ID, // do not try to get the stats queue if the configuration changed
 				true, false, utils.NonTransactional)
 			if errRs == utils.ErrNotFound { // the stats queue does not exist
@@ -1160,7 +1160,7 @@ func (dm *DataManager) SetStatQueueProfile(ctx *context.Context, sqp *utils.Stat
 	return
 }
 
-func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveStatQueueProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1201,7 +1201,7 @@ func (dm *DataManager) RemoveStatQueueProfile(ctx *context.Context, tenant, id s
 }
 
 // GetTrend retrieves a Trend from db
-func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
+func (dm *DataManager) GetTrend(ctx context.Context, tenant, id string,
 	cacheRead, cacheWrite bool, transactionID string) (tr *utils.Trend, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 
@@ -1267,7 +1267,7 @@ func (dm *DataManager) GetTrend(ctx *context.Context, tenant, id string,
 }
 
 // SetTrend stores Trend in db
-func (dm *DataManager) SetTrend(ctx *context.Context, tr *utils.Trend) (err error) {
+func (dm *DataManager) SetTrend(ctx context.Context, tr *utils.Trend) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1297,7 +1297,7 @@ func (dm *DataManager) SetTrend(ctx *context.Context, tr *utils.Trend) (err erro
 }
 
 // RemoveTrend removes the stored Trend
-func (dm *DataManager) RemoveTrend(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveTrend(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1321,7 +1321,7 @@ func (dm *DataManager) RemoveTrend(ctx *context.Context, tenant, id string) (err
 	return
 }
 
-func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetTrendProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (trp *utils.TrendProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -1374,7 +1374,7 @@ func (dm *DataManager) GetTrendProfile(ctx *context.Context, tenant, id string, 
 	return
 }
 
-func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string) (tps map[string][]string, err error) {
+func (dm *DataManager) GetTrendProfileIDs(ctx context.Context, tenants []string) (tps map[string][]string, err error) {
 	prfx := utils.TrendProfilePrefix
 	var keys []string
 	db, _, err := dm.dbConns.GetConn(utils.MetaTrendProfiles)
@@ -1411,7 +1411,7 @@ func (dm *DataManager) GetTrendProfileIDs(ctx *context.Context, tenants []string
 	return
 }
 
-func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *utils.TrendProfile) (err error) {
+func (dm *DataManager) SetTrendProfile(ctx context.Context, trp *utils.TrendProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1446,7 +1446,7 @@ func (dm *DataManager) SetTrendProfile(ctx *context.Context, trp *utils.TrendPro
 	return
 }
 
-func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveTrendProfile(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1477,7 +1477,7 @@ func (dm *DataManager) RemoveTrendProfile(ctx *context.Context, tenant, id strin
 	return dm.RemoveTrend(ctx, tenant, id)
 }
 
-func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *utils.RankingProfile, err error) {
+func (dm *DataManager) GetRankingProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rgp *utils.RankingProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
 		if x, ok := dm.cache.Get(utils.CacheRankingProfiles, tntID); ok {
@@ -1529,7 +1529,7 @@ func (dm *DataManager) GetRankingProfile(ctx *context.Context, tenant, id string
 	return
 }
 
-func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []string) (rns map[string][]string, err error) {
+func (dm *DataManager) GetRankingProfileIDs(ctx context.Context, tenants []string) (rns map[string][]string, err error) {
 	prfx := utils.RankingProfilePrefix
 	var keys []string
 	db, _, err := dm.dbConns.GetConn(utils.MetaRankingProfiles)
@@ -1565,7 +1565,7 @@ func (dm *DataManager) GetRankingProfileIDs(ctx *context.Context, tenants []stri
 	return
 }
 
-func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *utils.RankingProfile) (err error) {
+func (dm *DataManager) SetRankingProfile(ctx context.Context, rnp *utils.RankingProfile) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1599,7 +1599,7 @@ func (dm *DataManager) SetRankingProfile(ctx *context.Context, rnp *utils.Rankin
 	return
 }
 
-func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveRankingProfile(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1629,7 +1629,7 @@ func (dm *DataManager) RemoveRankingProfile(ctx *context.Context, tenant, id str
 	}
 	return dm.RemoveRanking(ctx, tenant, id)
 }
-func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *utils.Ranking, err error) {
+func (dm *DataManager) GetRanking(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool, transactionID string) (rn *utils.Ranking, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
 		if x, ok := dm.cache.Get(utils.CacheRankings, tntID); ok {
@@ -1682,7 +1682,7 @@ func (dm *DataManager) GetRanking(ctx *context.Context, tenant, id string, cache
 }
 
 // SetRanking stores Ranking in db
-func (dm *DataManager) SetRanking(ctx *context.Context, rn *utils.Ranking) (err error) {
+func (dm *DataManager) SetRanking(ctx context.Context, rn *utils.Ranking) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1707,7 +1707,7 @@ func (dm *DataManager) SetRanking(ctx *context.Context, rn *utils.Ranking) (err 
 }
 
 // RemoveRanking removes the stored Ranking
-func (dm *DataManager) RemoveRanking(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveRanking(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1731,7 +1731,7 @@ func (dm *DataManager) RemoveRanking(ctx *context.Context, tenant, id string) (e
 	return
 }
 
-func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetResource(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rs *utils.Resource, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -1785,7 +1785,7 @@ func (dm *DataManager) GetResource(ctx *context.Context, tenant, id string, cach
 	return
 }
 
-func (dm *DataManager) SetResource(ctx *context.Context, rs *utils.Resource) (err error) {
+func (dm *DataManager) SetResource(ctx context.Context, rs *utils.Resource) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1809,7 +1809,7 @@ func (dm *DataManager) SetResource(ctx *context.Context, rs *utils.Resource) (er
 	return
 }
 
-func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveResource(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1833,7 +1833,7 @@ func (dm *DataManager) RemoveResource(ctx *context.Context, tenant, id string) (
 	return
 }
 
-func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetResourceProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rp *utils.ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -1886,7 +1886,7 @@ func (dm *DataManager) GetResourceProfile(ctx *context.Context, tenant, id strin
 	return
 }
 
-func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.ResourceProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetResourceProfile(ctx context.Context, rp *utils.ResourceProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1949,7 +1949,7 @@ func (dm *DataManager) SetResourceProfile(ctx *context.Context, rp *utils.Resour
 	return
 }
 
-func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveResourceProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -1989,7 +1989,7 @@ func (dm *DataManager) RemoveResourceProfile(ctx *context.Context, tenant, id st
 	return dm.RemoveResource(ctx, tenant, id)
 }
 
-func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetIPAllocations(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ip *utils.IPAllocations, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2044,7 +2044,7 @@ func (dm *DataManager) GetIPAllocations(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetIPAllocations(ctx *context.Context, ip *utils.IPAllocations) (err error) {
+func (dm *DataManager) SetIPAllocations(ctx context.Context, ip *utils.IPAllocations) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2068,7 +2068,7 @@ func (dm *DataManager) SetIPAllocations(ctx *context.Context, ip *utils.IPAlloca
 	return
 }
 
-func (dm *DataManager) RemoveIPAllocations(ctx *context.Context, tenant, id string) (err error) {
+func (dm *DataManager) RemoveIPAllocations(ctx context.Context, tenant, id string) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2092,7 +2092,7 @@ func (dm *DataManager) RemoveIPAllocations(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetIPProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ipp *utils.IPProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2145,7 +2145,7 @@ func (dm *DataManager) GetIPProfile(ctx *context.Context, tenant, id string, cac
 	return
 }
 
-func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetIPProfile(ctx context.Context, ipp *utils.IPProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2208,7 +2208,7 @@ func (dm *DataManager) SetIPProfile(ctx *context.Context, ipp *utils.IPProfile, 
 	return
 }
 
-func (dm *DataManager) RemoveIPProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveIPProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2261,7 +2261,7 @@ func (dm *DataManager) HasData(category, subject, tenant string) (has bool, err 
 	return
 }
 
-func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetRouteProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *utils.RouteProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2318,7 +2318,7 @@ func (dm *DataManager) GetRouteProfile(ctx *context.Context, tenant, id string, 
 	return
 }
 
-func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *utils.RouteProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetRouteProfile(ctx context.Context, rpp *utils.RouteProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2364,7 +2364,7 @@ func (dm *DataManager) SetRouteProfile(ctx *context.Context, rpp *utils.RoutePro
 	return
 }
 
-func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRouteProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2405,7 +2405,7 @@ func (dm *DataManager) RemoveRouteProfile(ctx *context.Context, tenant, id strin
 }
 
 // GetAttributeProfile returns the AttributeProfile with the given id
-func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetAttributeProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (attrPrfl *utils.AttributeProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2465,7 +2465,7 @@ func (dm *DataManager) GetAttributeProfile(ctx *context.Context, tenant, id stri
 	return
 }
 
-func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *utils.AttributeProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetAttributeProfile(ctx context.Context, ap *utils.AttributeProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2522,7 +2522,7 @@ func (dm *DataManager) SetAttributeProfile(ctx *context.Context, ap *utils.Attri
 	return
 }
 
-func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAttributeProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2562,7 +2562,7 @@ func (dm *DataManager) RemoveAttributeProfile(ctx *context.Context, tenant, id s
 	return
 }
 
-func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetChargerProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (cpp *utils.ChargerProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2616,7 +2616,7 @@ func (dm *DataManager) GetChargerProfile(ctx *context.Context, tenant, id string
 	return
 }
 
-func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *utils.ChargerProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetChargerProfile(ctx context.Context, cpp *utils.ChargerProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2661,7 +2661,7 @@ func (dm *DataManager) SetChargerProfile(ctx *context.Context, cpp *utils.Charge
 	return
 }
 
-func (dm *DataManager) RemoveChargerProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveChargerProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2702,7 +2702,7 @@ func (dm *DataManager) RemoveChargerProfile(ctx *context.Context, tenant, id str
 	return
 }
 
-func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
+func (dm *DataManager) GetItemLoadIDs(ctx context.Context, itemIDPrefix string, cacheWrite bool) (loadIDs map[string]int64, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -2752,7 +2752,7 @@ func (dm *DataManager) GetItemLoadIDs(ctx *context.Context, itemIDPrefix string,
 }
 
 // SetLoadIDs sets the loadIDs in the DB
-func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64) error {
+func (dm *DataManager) SetLoadIDs(ctx context.Context, loadIDs map[string]int64) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2784,7 +2784,7 @@ func (dm *DataManager) SetLoadIDs(ctx *context.Context, loadIDs map[string]int64
 	return nil
 }
 
-func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetRateProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rpp *utils.RateProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -2844,7 +2844,7 @@ func (dm *DataManager) GetRateProfile(ctx *context.Context, tenant, id string, c
 	return
 }
 
-func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.ArgsSubItemIDs, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
+func (dm *DataManager) GetRateProfileRates(ctx context.Context, args *utils.ArgsSubItemIDs, needIDs bool) (rateIDs []string, rates []*utils.Rate, err error) {
 	if dm == nil {
 		return nil, nil, utils.ErrNoDatabaseConn
 	}
@@ -2855,7 +2855,7 @@ func (dm *DataManager) GetRateProfileRates(ctx *context.Context, args *utils.Arg
 	return db.GetRateProfileRatesDrv(ctx, args.Tenant, args.ProfileID, args.ItemsPrefix, needIDs)
 }
 
-func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfile, optOverwrite, withIndex bool) (err error) {
+func (dm *DataManager) SetRateProfile(ctx context.Context, rpp *utils.RateProfile, optOverwrite, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2944,7 +2944,7 @@ func (dm *DataManager) SetRateProfile(ctx *context.Context, rpp *utils.RateProfi
 	return
 }
 
-func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRateProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -2995,7 +2995,7 @@ func (dm *DataManager) RemoveRateProfile(ctx *context.Context, tenant, id string
 	return
 }
 
-func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id string, rateIDs *[]string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveRateProfileRates(ctx context.Context, tenant, id string, rateIDs *[]string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3054,7 +3054,7 @@ func (dm *DataManager) RemoveRateProfileRates(ctx *context.Context, tenant, id s
 	return
 }
 
-func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string, cacheRead, cacheWrite bool,
+func (dm *DataManager) GetActionProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (ap *utils.ActionProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)
 	if cacheRead && dm != nil {
@@ -3108,7 +3108,7 @@ func (dm *DataManager) GetActionProfile(ctx *context.Context, tenant, id string,
 	return
 }
 
-func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *utils.ActionProfile, withIndex bool) (err error) {
+func (dm *DataManager) SetActionProfile(ctx context.Context, ap *utils.ActionProfile, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3153,7 +3153,7 @@ func (dm *DataManager) SetActionProfile(ctx *context.Context, ap *utils.ActionPr
 	return
 }
 
-func (dm *DataManager) RemoveActionProfile(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveActionProfile(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3236,7 +3236,7 @@ func (dm *DataManager) ReconnectAll(cfg *config.CGRConfig) (err error) {
 	return
 }
 
-func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, transactionID string,
+func (dm *DataManager) GetIndexes(ctx context.Context, idxItmType, tntCtx, transactionID string,
 	cacheRead, cacheWrite bool, idxKeys ...string) (indexes map[string]utils.StringSet, err error) {
 	if dm == nil {
 		return nil, utils.ErrNoDatabaseConn
@@ -3310,7 +3310,7 @@ func (dm *DataManager) GetIndexes(ctx *context.Context, idxItmType, tntCtx, tran
 	return indexes, err
 }
 
-func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx string,
+func (dm *DataManager) SetIndexes(ctx context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, commit bool, transactionID string) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
@@ -3345,7 +3345,7 @@ func (dm *DataManager) SetIndexes(ctx *context.Context, idxItmType, tntCtx strin
 	return nil
 }
 
-func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
+func (dm *DataManager) RemoveIndexes(ctx context.Context, idxItmType, tntCtx string, idxKeys ...string) error {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3368,7 +3368,7 @@ func (dm *DataManager) RemoveIndexes(ctx *context.Context, idxItmType, tntCtx st
 	return nil
 }
 
-func (dm *DataManager) replicateIndexes(ctx *context.Context, idxItmType, tntCtx string,
+func (dm *DataManager) replicateIndexes(ctx context.Context, idxItmType, tntCtx string,
 	indexes map[string]utils.StringSet, clear bool, itm *config.ItemOpts, dbCfg *config.DBConn) {
 	rpl := dm.dbConns.GetReplicator(itm.DBConn)
 	if err := rpl.replicateIndexes(ctx, utils.CacheInstanceToPrefix[idxItmType], tntCtx,
@@ -3386,7 +3386,7 @@ func (dm *DataManager) replicateIndexes(ctx *context.Context, idxItmType, tntCtx
 	}
 }
 
-func GetAPIBan(ctx *context.Context, cache *CacheS, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
+func GetAPIBan(ctx context.Context, cache *CacheS, ip string, apiKeys []string, single, cacheRead, cacheWrite bool) (banned bool, err error) {
 	if cacheRead {
 		if x, ok := cache.Get(utils.MetaAPIBan, ip); ok && x != nil { // Attempt to find in cache first
 			return x.(bool), nil
@@ -3427,7 +3427,7 @@ func GetAPIBan(ctx *context.Context, cache *CacheS, ip string, apiKeys []string,
 
 // checkFilters returns the id of the first Filter that is not valid
 // it should be called after the dm nil check
-func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []string) (err error) {
+func (dm *DataManager) checkFilters(ctx context.Context, tenant string, ids []string) (err error) {
 	db, dbCfg, err := dm.dbConns.GetConn(utils.MetaFilters)
 	if err != nil {
 		return err
@@ -3467,7 +3467,7 @@ func (dm *DataManager) checkFilters(ctx *context.Context, tenant string, ids []s
 	return
 }
 
-func (dm *DataManager) GetAccount(ctx *context.Context, tenant, id string) (ap *utils.Account, err error) {
+func (dm *DataManager) GetAccount(ctx context.Context, tenant, id string) (ap *utils.Account, err error) {
 	if dm == nil {
 		err = utils.ErrNoDatabaseConn
 		return
@@ -3497,7 +3497,7 @@ func (dm *DataManager) GetAccount(ctx *context.Context, tenant, id string) (ap *
 	return
 }
 
-func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withIndex bool) (err error) {
+func (dm *DataManager) SetAccount(ctx context.Context, ap *utils.Account, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3542,7 +3542,7 @@ func (dm *DataManager) SetAccount(ctx *context.Context, ap *utils.Account, withI
 	return
 }
 
-func (dm *DataManager) RemoveAccount(ctx *context.Context, tenant, id string, withIndex bool) (err error) {
+func (dm *DataManager) RemoveAccount(ctx context.Context, tenant, id string, withIndex bool) (err error) {
 	if dm == nil {
 		return utils.ErrNoDatabaseConn
 	}
@@ -3731,7 +3731,7 @@ func (dm *DataManager) GetItem(args *utils.ArgsGetCacheItemDB) (itm any, err err
 	return
 }
 
-func (dm *DataManager) GetItemWithRemote(ctx *context.Context, args *utils.ArgsGetCacheItemDB) (itm any, err error) {
+func (dm *DataManager) GetItemWithRemote(ctx context.Context, args *utils.ArgsGetCacheItemDB) (itm any, err error) {
 	if args.DBConnID == utils.EmptyString {
 		args.DBConnID = utils.MetaDefault
 	}

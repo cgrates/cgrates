@@ -8,12 +8,12 @@ package general_tests
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"sync/atomic"
 	"testing"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )

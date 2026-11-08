@@ -5,6 +5,7 @@ package loaders
 
 import (
 	"archive/zip"
+	"context"
 	"fmt"
 	"io"
 	"os"
@@ -12,7 +13,6 @@ import (
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -24,7 +24,7 @@ import (
 // 	gprefix = utils.MetaGoogleAPI + utils.ConcatenatedKeySep
 // )
 
-func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, withIndex, ratesPartial bool, obj profile) (_ error) {
+func removeFromDB(ctx context.Context, dm *engine.DataManager, lType string, withIndex, ratesPartial bool, obj profile) (_ error) {
 	tntID := utils.NewTenantID(obj.TenantID())
 	tnt, id := tntID.Tenant, tntID.ID
 	switch lType {
@@ -66,7 +66,7 @@ func removeFromDB(ctx *context.Context, dm *engine.DataManager, lType string, wi
 	return
 }
 
-func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data profile, withIndex, ratesPartial bool) (err error) {
+func setToDB(ctx context.Context, dm *engine.DataManager, lType string, data profile, withIndex, ratesPartial bool) (err error) {
 	switch lType {
 	case utils.MetaAttributes:
 		return dm.SetAttributeProfile(ctx, data.(*utils.AttributeProfile), withIndex)
@@ -111,7 +111,7 @@ func setToDB(ctx *context.Context, dm *engine.DataManager, lType string, data pr
 	return
 }
 
-func dryRun(ctx *context.Context, lType, ldrID string, obj profile) (err error) {
+func dryRun(ctx context.Context, lType, ldrID string, obj profile) (err error) {
 	var msg string
 	switch lType {
 	case utils.MetaAttributes:
@@ -177,7 +177,7 @@ type loader struct {
 	locker    loaderLocker
 }
 
-func (l *loader) process(ctx *context.Context, obj profile, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
+func (l *loader) process(ctx context.Context, obj profile, lType, action string, opts map[string]any, withIndex, partialRates bool) (err error) {
 	switch action {
 	case utils.MetaParse:
 		return
@@ -254,7 +254,7 @@ func (l *loader) process(ctx *context.Context, obj profile, lType, action string
 		cacheArgs, cacheIDs, opts, false, l.ldrCfg.Tenant)
 }
 
-func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]any, withIndex, partialRates bool) (prfCount int, err error) {
+func (l *loader) processData(ctx context.Context, csv *CSVFile, tmpls []*config.FCTemplate, lType, action string, opts map[string]any, withIndex, partialRates bool) (prfCount int, err error) {
 	newPrf := newProfileFunc(lType)
 	obj := newPrf()
 	var prevTntID string
@@ -300,7 +300,7 @@ func (l *loader) processData(ctx *context.Context, csv *CSVFile, tmpls []*config
 	return
 }
 
-func (l *loader) processFile(ctx *context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]any, withIndex bool, prv CSVProvider) (prfCount int, err error) {
+func (l *loader) processFile(ctx context.Context, cfg *config.LoaderDataType, inPath, outPath, action string, opts map[string]any, withIndex bool, prv CSVProvider) (prfCount int, err error) {
 	var csv *CSVFile
 	if csv, err = NewCSVReader(prv, inPath, cfg.Filename, rune(l.ldrCfg.FieldSeparator[0]), 0); err != nil {
 		return
@@ -352,7 +352,7 @@ func (l *loader) processIFile(fileName string) (err error) {
 	return
 }
 
-func (l *loader) processFolder(ctx *context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (stats map[string]int, err error) {
+func (l *loader) processFolder(ctx context.Context, inPath string, opts map[string]any, withIndex, stopOnError bool) (stats map[string]int, err error) {
 	unlock, err := l.locker.lock()
 	if err != nil {
 		return nil, err
@@ -439,7 +439,7 @@ func (l *loader) ListenAndServe(stopChan chan struct{}) (err error) {
 	return
 }
 
-func (l *loader) processZip(ctx *context.Context, opts map[string]any, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
+func (l *loader) processZip(ctx context.Context, opts map[string]any, withIndex, stopOnError bool, zipR *zip.Reader) (err error) {
 	unlock, err := l.locker.lock()
 	if err != nil {
 		return err

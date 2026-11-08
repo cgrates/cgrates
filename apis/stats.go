@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/stats"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetStatQueueProfile returns a StatQueue profile
-func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) (err error) {
+func (adms *AdminSv1) GetStatQueueProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.StatQueueProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -31,7 +31,7 @@ func (adms *AdminSv1) GetStatQueueProfile(ctx *context.Context, arg *utils.Tenan
 }
 
 // GetStatQueueProfileIDs returns list of statQueueProfile IDs registered for a tenant
-func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
+func (adms *AdminSv1) GetStatQueueProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, stsPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = adms.cfg.GeneralCfg().DefaultTenant
@@ -62,7 +62,7 @@ func (adms *AdminSv1) GetStatQueueProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetStatQueueProfiles returns a list of stats profiles registered for a tenant
-func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.StatQueueProfile) (err error) {
+func (admS *AdminSv1) GetStatQueueProfiles(ctx context.Context, args *utils.ArgsItemIDs, sqPrfs *[]*utils.StatQueueProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -85,7 +85,7 @@ func (admS *AdminSv1) GetStatQueueProfiles(ctx *context.Context, args *utils.Arg
 
 // GetStatQueueProfilesCount returns the total number of StatQueueProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 StatQueueProfileIDs
-func (admS *AdminSv1) GetStatQueueProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetStatQueueProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -107,7 +107,7 @@ func (admS *AdminSv1) GetStatQueueProfilesCount(ctx *context.Context, args *util
 }
 
 // SetStatQueueProfile alters/creates a StatQueueProfile
-func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *utils.StatQueueProfileWithAPIOpts, reply *string) (err error) {
+func (adms *AdminSv1) SetStatQueueProfile(ctx context.Context, arg *utils.StatQueueProfileWithAPIOpts, reply *string) (err error) {
 	if missing := utils.MissingStructFields(arg.StatQueueProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -138,7 +138,7 @@ func (adms *AdminSv1) SetStatQueueProfile(ctx *context.Context, arg *utils.StatQ
 }
 
 // RemoveStatQueueProfile remove a specific stat configuration
-func (adms *AdminSv1) RemoveStatQueueProfile(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
+func (adms *AdminSv1) RemoveStatQueueProfile(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(args, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -180,41 +180,41 @@ type StatSv1 struct {
 }
 
 // GetQueueIDs returns list of queueIDs registered for a tenant
-func (s *StatSv1) GetQueueIDs(ctx *context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
+func (s *StatSv1) GetQueueIDs(ctx context.Context, args *utils.TenantWithAPIOpts, qIDs *[]string) error {
 	return s.sS.V1GetQueueIDs(ctx, args, qIDs)
 }
 
 // ProcessEvent returns processes a new Event
-func (s *StatSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (s *StatSv1) ProcessEvent(ctx context.Context, args *utils.CGREvent, reply *[]string) error {
 	return s.sS.V1ProcessEvent(ctx, args, reply)
 }
 
 // GetStatQueuesForEvent returns the list of queues IDs in the system
-func (s *StatSv1) GetStatQueuesForEvent(ctx *context.Context, args *utils.CGREvent, reply *[]string) error {
+func (s *StatSv1) GetStatQueuesForEvent(ctx context.Context, args *utils.CGREvent, reply *[]string) error {
 	return s.sS.V1GetStatQueuesForEvent(ctx, args, reply)
 }
 
 // GetStatQueue returns a StatQueue object
-func (s *StatSv1) GetStatQueue(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
+func (s *StatSv1) GetStatQueue(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *utils.StatQueue) error {
 	return s.sS.V1GetStatQueue(ctx, args, reply)
 }
 
 // GetQueueStringMetrics returns the string metrics for a Queue
-func (s *StatSv1) GetQueueStringMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
+func (s *StatSv1) GetQueueStringMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]string) error {
 	return s.sS.V1GetQueueStringMetrics(ctx, args, reply)
 }
 
 // GetQueueFloatMetrics returns the float metrics for a Queue
-func (s *StatSv1) GetQueueFloatMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
+func (s *StatSv1) GetQueueFloatMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]float64) error {
 	return s.sS.V1GetQueueFloatMetrics(ctx, args, reply)
 }
 
 // GetQueueDecimalMetrics returns the decimal metrics for a Queue
-func (s *StatSv1) GetQueueDecimalMetrics(ctx *context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
+func (s *StatSv1) GetQueueDecimalMetrics(ctx context.Context, args *utils.TenantIDWithAPIOpts, reply *map[string]*utils.Decimal) error {
 	return s.sS.V1GetQueueDecimalMetrics(ctx, args, reply)
 }
 
 // ResetStatQueue resets the stat queue
-func (s *StatSv1) ResetStatQueue(ctx *context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
+func (s *StatSv1) ResetStatQueue(ctx context.Context, tntID *utils.TenantIDWithAPIOpts, reply *string) error {
 	return s.sS.V1ResetStatQueue(ctx, tntID, reply)
 }

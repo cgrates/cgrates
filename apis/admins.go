@@ -4,12 +4,12 @@
 package apis
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io/fs"
 	"path/filepath"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -43,7 +43,7 @@ type ReplayFailedReplicationsArgs struct {
 }
 
 // ReplayFailedReplications will repost failed requests found in the SourcePath.
-func (s *AdminSv1) ReplayFailedReplications(ctx *context.Context, args ReplayFailedReplicationsArgs, reply *string) error {
+func (s *AdminSv1) ReplayFailedReplications(ctx context.Context, args ReplayFailedReplicationsArgs, reply *string) error {
 	if args.DBConnID == "" {
 		args.DBConnID = utils.MetaDefault
 	}

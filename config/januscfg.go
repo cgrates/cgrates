@@ -4,9 +4,9 @@
 package config
 
 import (
+	"context"
 	"maps"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -27,7 +27,7 @@ type JanusAgentCfg struct {
 	RequestProcessors []*RequestProcessor
 }
 
-func (jacfg *JanusAgentCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (jacfg *JanusAgentCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnJACfg := new(JanusAgentJsonCfg)
 	if err = jsnCfg.GetSection(ctx, JanusAgentJSON, jsnJACfg); err != nil {
 		return

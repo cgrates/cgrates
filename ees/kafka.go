@@ -4,13 +4,13 @@
 package ees
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
 	"os"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -79,7 +79,7 @@ func (k *KafkaEE) Cfg() *config.EventExporterCfg { return k.cfg }
 
 func (k *KafkaEE) Connect() error { return nil }
 
-func (k *KafkaEE) ExportEvent(_ *context.Context, content any, key any) error {
+func (k *KafkaEE) ExportEvent(_ context.Context, content any, key any) error {
 	k.reqs.get()
 	defer k.reqs.done()
 	ctx, cancel := context.WithTimeout(context.Background(), k.timeout)

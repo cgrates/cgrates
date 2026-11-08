@@ -4,12 +4,12 @@
 package sessions
 
 import (
+	"context"
 	"errors"
 	"slices"
 	"strings"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 	jwt "github.com/dgrijalva/jwt-go"
@@ -29,11 +29,11 @@ var authReqs = engine.MapEvent{
 // BiRPCClient is the interface implemented by Agents which are able to
 // communicate bidirectionally with SessionS and remote Communication Switch
 type BiRPCClient interface {
-	V1DisconnectSession(*context.Context, utils.CGREvent, *string) error
-	V1GetActiveSessionIDs(*context.Context, string, *[]*SessionID) error
-	V1AlterSession(*context.Context, utils.CGREvent, *string) error
-	V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error
-	V1WarnDisconnect(*context.Context, map[string]any, *string) error
+	V1DisconnectSession(context.Context, utils.CGREvent, *string) error
+	V1GetActiveSessionIDs(context.Context, string, *[]*SessionID) error
+	V1AlterSession(context.Context, utils.CGREvent, *string) error
+	V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error
+	V1WarnDisconnect(context.Context, map[string]any, *string) error
 }
 
 // GetSetOptsOriginID will populate the originID key if not present and return it
@@ -130,7 +130,7 @@ func (pi *ProcessedStirIdentity) VerifyHeader() (isValid bool) {
 }
 
 // VerifySignature returns if the signature is valid
-func (pi *ProcessedStirIdentity) VerifySignature(ctx *context.Context, cache *engine.CacheS, timeoutVal time.Duration) error {
+func (pi *ProcessedStirIdentity) VerifySignature(ctx context.Context, cache *engine.CacheS, timeoutVal time.Duration) error {
 	pubkey, ok := cache.Get(utils.CacheSTIR, pi.Header.X5u)
 	if !ok {
 		var err error
@@ -179,7 +179,7 @@ func (pi *ProcessedStirIdentity) VerifyPayload(originatorTn, originatorURI, dest
 }
 
 // NewSTIRIdentity returns the identiy for stir header
-func NewSTIRIdentity(ctx *context.Context, cache *engine.CacheS, header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (string, error) {
+func NewSTIRIdentity(ctx context.Context, cache *engine.CacheS, header *utils.PASSporTHeader, payload *utils.PASSporTPayload, prvkeyPath string, timeout time.Duration) (string, error) {
 	prvKey, ok := cache.Get(utils.CacheSTIR, prvkeyPath)
 	if !ok {
 		var err error
@@ -216,7 +216,7 @@ func NewSTIRIdentity(ctx *context.Context, cache *engine.CacheS, header *utils.P
 }
 
 // AuthStirShaken autentificates the given identity using STIR/SHAKEN
-func AuthStirShaken(ctx *context.Context, cache *engine.CacheS, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
+func AuthStirShaken(ctx context.Context, cache *engine.CacheS, identity, originatorTn, originatorURI, destinationTn, destinationURI string,
 	attest utils.StringSet, hdrMaxDur, replyTimeout time.Duration) error {
 	pi, err := NewProcessedIdentity(identity)
 	if err != nil {

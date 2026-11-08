@@ -4,15 +4,15 @@
 package apis
 
 import (
+	"context"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // CallCache caching the item based on CacheOpt
-func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cacheID, itemID, groupID string,
+func (admS *AdminSv1) CallCache(ctx context.Context, cacheopt string, tnt, cacheID, itemID, groupID string,
 	filters *[]string, opts map[string]any) (err error) {
 	var reply, method string
 	var args any
@@ -87,7 +87,7 @@ func (admS *AdminSv1) CallCache(ctx *context.Context, cacheopt string, tnt, cach
 
 // composeArgsReload add the ItemID to AttrReloadCache
 // for a specific CacheID
-func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, itemID string, filterIDs *[]string) (argCache map[string][]string, err error) {
+func (admS *AdminSv1) composeArgsReload(ctx context.Context, tnt, cacheID, itemID string, filterIDs *[]string) (argCache map[string][]string, err error) {
 	argCache = map[string][]string{cacheID: {itemID}}
 	switch cacheID { // add the items to the cache reload
 	case utils.CacheThresholdProfiles:
@@ -143,7 +143,7 @@ func (admS *AdminSv1) composeArgsReload(ctx *context.Context, tnt, cacheID, item
 }
 
 // callCacheForIndexes will only call CacheClear because don't have access at ItemID
-func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt string, tnt, cacheID string,
+func (admS *AdminSv1) callCacheForRemoveIndexes(ctx context.Context, cacheopt string, tnt, cacheID string,
 	itemIDs []string, opts map[string]any) (err error) {
 	var reply, method string
 	var args any = utils.NewAttrReloadCacheWithOptsFromMap(map[string][]string{cacheID: itemIDs}, tnt, opts)
@@ -172,7 +172,7 @@ func (admS *AdminSv1) callCacheForRemoveIndexes(ctx *context.Context, cacheopt s
 		method, args, &reply)
 }
 
-func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt, tnt string,
+func (admS *AdminSv1) callCacheForComputeIndexes(ctx context.Context, cacheopt, tnt string,
 	cacheItems map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
 	var args any = utils.NewAttrReloadCacheWithOptsFromMap(cacheItems, tnt, opts)
@@ -206,7 +206,7 @@ func (admS *AdminSv1) callCacheForComputeIndexes(ctx *context.Context, cacheopt,
 }
 
 // callCacheRevDestinations used for reverse destination, loadIDs and indexes replication
-func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]any) (err error) {
+func (admS *AdminSv1) callCacheMultiple(ctx context.Context, cacheopt, tnt, cacheID string, itemIDs []string, opts map[string]any) (err error) {
 	if len(itemIDs) == 0 {
 		return
 	}
@@ -240,7 +240,7 @@ func (admS *AdminSv1) callCacheMultiple(ctx *context.Context, cacheopt, tnt, cac
 		method, args, &reply)
 }
 
-func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, fltr *engine.Filter, tnt, tntID string, args map[string][]string) (_ map[string][]string, err error) {
+func composeCacheArgsForFilter(dm *engine.DataManager, ctx context.Context, fltr *engine.Filter, tnt, tntID string, args map[string][]string) (_ map[string][]string, err error) {
 	indxIDs := make([]string, 0, len(fltr.Rules))
 	for _, flt := range fltr.Rules {
 		if !engine.FilterIndexTypes.Has(flt.Type) ||
@@ -283,7 +283,7 @@ func composeCacheArgsForFilter(dm *engine.DataManager, ctx *context.Context, flt
 }
 
 // callCacheForFilter will call the cache for filter
-func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx *context.Context, cacheopt, dftCache, tnt string,
+func callCacheForFilter(connMgr *engine.ConnManager, cacheConns []string, ctx context.Context, cacheopt, dftCache, tnt string,
 	argC map[string][]string, opts map[string]any) (err error) {
 	var reply, method string
 	var args any = utils.NewAttrReloadCacheWithOptsFromMap(argC, tnt, opts)

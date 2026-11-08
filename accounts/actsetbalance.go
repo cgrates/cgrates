@@ -4,17 +4,17 @@
 package accounts
 
 import (
+	"context"
 	"fmt"
 	"strconv"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // actSetAccount updates the balances base on the diktat
-func actSetAccount(ctx *context.Context, dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (qAcnt *utils.Account, err error) {
+func actSetAccount(ctx context.Context, dm *engine.DataManager, tnt, acntID string, diktats []*utils.BalDiktat, reset bool) (qAcnt *utils.Account, err error) {
 	if qAcnt, err = dm.GetAccount(ctx, tnt, acntID); err != nil {
 		if err != utils.ErrNotFound {
 			return

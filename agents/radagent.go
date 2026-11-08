@@ -4,6 +4,7 @@
 package agents
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -52,7 +52,7 @@ func NewRadiusAgent(cfg *config.CGRConfig, cache *engine.CacheS, fltrS *engine.F
 	if err != nil {
 		return nil, err
 	}
-	ra.ctx = context.WithClient(context.TODO(), srv)
+	ra.ctx = birpc.WithClient(context.TODO(), srv)
 
 	raCfg := cfg.RadiusAgentCfg()
 	dts := make(map[string]*radigo.Dictionary, len(raCfg.ClientDictionaries))
@@ -100,7 +100,7 @@ type RadiusAgent struct {
 	rsAuth map[string]*radigo.Server
 	rsAcct map[string]*radigo.Server
 	dacCfg radiusDAClientCfg
-	ctx    *context.Context
+	ctx    context.Context
 }
 
 // radiusDAClientCfg holds the dictionaries and secrets necessary for initializing Dynamic Authorization Clients in RADIUS (only for
@@ -473,7 +473,7 @@ func (ra *RadiusAgent) ListenAndServe(stopChan <-chan struct{}) (err error) {
 func (ra *RadiusAgent) Wait() { ra.wg.Wait() }
 
 // V1DisconnectSession remotely disconnects a session by making use of the RADIUS Disconnect Message functionality.
-func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (ra *RadiusAgent) V1DisconnectSession(_ context.Context, cgrEv utils.CGREvent, reply *string) error {
 	ifaceOriginID, has := cgrEv.Event[utils.OriginID]
 	if !has {
 		return utils.NewErrMandatoryIeMissing(utils.OriginID)
@@ -505,7 +505,7 @@ func (ra *RadiusAgent) V1DisconnectSession(_ *context.Context, cgrEv utils.CGREv
 }
 
 // V1AlterSession updates session authorization using RADIUS CoA functionality.
-func (ra *RadiusAgent) V1AlterSession(_ *context.Context, cgrEv utils.CGREvent, reply *string) error {
+func (ra *RadiusAgent) V1AlterSession(_ context.Context, cgrEv utils.CGREvent, reply *string) error {
 	originID, err := cgrEv.FieldAsString(utils.OriginID)
 	if err != nil {
 		return fmt.Errorf("could not retrieve OriginID: %w", err)
@@ -607,16 +607,16 @@ func daRequestAddress(remoteAddr string, dynAuthAddresses map[string]config.DACl
 }
 
 // V1WarnDisconnect is needed to satisfy the sessions.BiRPClient interface
-func (*RadiusAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+func (*RadiusAgent) V1WarnDisconnect(context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1DisconnectPeer is needed to satisfy the sessions.BiRPClient interface
-func (*RadiusAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+func (*RadiusAgent) V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
 // V1GetActiveSessionIDs is needed to satisfy the sessions.BiRPClient interface
-func (*RadiusAgent) V1GetActiveSessionIDs(*context.Context, string, *[]*sessions.SessionID) error {
+func (*RadiusAgent) V1GetActiveSessionIDs(context.Context, string, *[]*sessions.SessionID) error {
 	return utils.ErrNotImplemented
 }

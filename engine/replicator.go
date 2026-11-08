@@ -5,6 +5,7 @@ package engine
 
 import (
 	"bytes"
+	"context"
 	"crypto/sha256"
 	"encoding/gob"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/guardian"
@@ -118,7 +118,7 @@ func replicationKey(objType, objID, method string) string {
 // replicate handles the object replication based on configuration.
 // When interval > 0, the replication task is queued for the next batch.
 // Otherwise, it executes immediately.
-func (r *replicator) replicate(ctx *context.Context, objType, objID, method string, args any,
+func (r *replicator) replicate(ctx context.Context, objType, objID, method string, args any,
 	item *config.ItemOpts) {
 	if !item.Replicate {
 		return
@@ -157,7 +157,7 @@ func mergeIndexPatch(patch, newer *utils.SetIndexesArg) {
 	patch.APIOpts = newer.APIOpts
 }
 
-func (r *replicator) replicateIndexes(ctx *context.Context, objType, objID string, args *utils.SetIndexesArg) error {
+func (r *replicator) replicateIndexes(ctx context.Context, objType, objID string, args *utils.SetIndexesArg) error {
 	key := indexPatchKey(replicationKey(objType, objID, utils.ReplicatorSv1SetIndexes))
 	if r.interval <= 0 {
 		return r.replicateIndexPatchAndRestore(ctx, key, objType, objID, args)
@@ -180,7 +180,7 @@ func (r *replicator) replicateIndexes(ctx *context.Context, objType, objID strin
 	return nil
 }
 
-func (r *replicator) replicateIndexPatchAndRestore(ctx *context.Context, key, objType, objID string,
+func (r *replicator) replicateIndexPatchAndRestore(ctx context.Context, key, objType, objID string,
 	args *utils.SetIndexesArg) error {
 	var failedPath string
 	if r.failedDir != "" {
@@ -225,7 +225,7 @@ func (r *replicator) replicateIndexPatchAndRestore(ctx *context.Context, key, ob
 
 // replicateAndRestore is a wrapper over replicate function and checks failedDir
 // to create files for tracking unsuccessful writes
-func (r *replicator) replicateAndRestore(ctx *context.Context, key string, objType, objID, method string, args any) error {
+func (r *replicator) replicateAndRestore(ctx context.Context, key string, objType, objID, method string, args any) error {
 	if key != "" && key[0] == 0 {
 		patch, ok := args.(*utils.SetIndexesArg)
 		if !ok {
@@ -264,7 +264,7 @@ func (r *replicator) replicateAndRestore(ctx *context.Context, key string, objTy
 
 // replicate performs the actual replication by calling Set/Remove APIs on ReplicatorSv1
 // It either replicates to all connections or only to filtered ones based on configuration.
-func replicate(ctx *context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args any) (err error) {
+func replicate(ctx context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType, objID, method string, args any) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
 	var reply string
@@ -340,7 +340,7 @@ func (dm *DataManager) UpdateReplicationFilters(objType, objID, connID string) {
 
 // replicateMultipleIDs will do the same thing as replicate but uses multiple objectIDs
 // used when setting the LoadIDs
-func replicateMultipleIDs(ctx *context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args any) (err error) {
+func replicateMultipleIDs(ctx context.Context, connMgr *ConnManager, connIDs []string, filtered bool, objType string, objIDs []string, method string, args any) (err error) {
 	// the reply is string for Set/Remove APIs
 	// ignored in favor of the error
 	var reply string
@@ -374,7 +374,7 @@ type ReplicationTask struct {
 
 // NewReplicationTaskFromFile loads a replication task from the specified file.
 // The file is removed after successful loading.
-func NewReplicationTaskFromFile(_ *context.Context, path string, locker *guardian.Locker) (*ReplicationTask, error) {
+func NewReplicationTaskFromFile(_ context.Context, path string, locker *guardian.Locker) (*ReplicationTask, error) {
 	unlock := locker.Lock(utils.FileLockPrefix + path)
 	taskBytes, err := os.ReadFile(path)
 	if err == nil {
@@ -394,7 +394,7 @@ func NewReplicationTaskFromFile(_ *context.Context, path string, locker *guardia
 
 // WriteToFile saves the replication task to the specified path.
 // This allows failed tasks to be recovered and retried later.
-func (r *ReplicationTask) WriteToFile(_ *context.Context, path string, locker *guardian.Locker) error {
+func (r *ReplicationTask) WriteToFile(_ context.Context, path string, locker *guardian.Locker) error {
 	unlock := locker.Lock(utils.FileLockPrefix + path)
 	defer unlock()
 	f, err := os.Create(path)
@@ -407,6 +407,6 @@ func (r *ReplicationTask) WriteToFile(_ *context.Context, path string, locker *g
 }
 
 // Execute performs the replication task.
-func (r *ReplicationTask) Execute(ctx *context.Context, cm *ConnManager) error {
+func (r *ReplicationTask) Execute(ctx context.Context, cm *ConnManager) error {
 	return replicate(ctx, cm, r.ConnIDs, r.Filtered, r.ObjType, r.ObjID, r.Method, r.Args)
 }

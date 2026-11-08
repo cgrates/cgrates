@@ -7,6 +7,7 @@
 package ees
 
 // import (
+// 	"context"
 // 	"flag"
 // 	"fmt"
 // 	"net/rpc"
@@ -19,7 +20,6 @@ package ees
 // 	"github.com/aws/aws-sdk-go/aws/session"
 // 	"github.com/aws/aws-sdk-go/service/s3"
 // 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-// 	"github.com/cgrates/birpc/context"
 // 	"github.com/cgrates/cgrates/config"
 // 	"github.com/cgrates/cgrates/engine"
 // 	"github.com/cgrates/cgrates/utils"

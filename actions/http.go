@@ -5,6 +5,7 @@ package actions
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,7 +13,6 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -28,7 +28,7 @@ type reqDetails struct {
 }
 
 // newActHTTPGeneric creates a new action that performs HTTP requests
-func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
+func newActHTTP(ctx context.Context, tnt string, cgrEv *utils.CGREvent,
 	_ *engine.CacheS, fltrS *engine.FilterS, cfg *config.CGRConfig, aCfg *utils.APAction) (aL *actHTTP, err error) {
 	data := cgrEv.AsDataProvider()
 	diktats, err := filterAndSortDiktats(ctx, cfg.GeneralCfg().DefaultTenant, aCfg.Diktats, fltrS, data)
@@ -135,7 +135,7 @@ func newActHTTP(ctx *context.Context, tnt string, cgrEv *utils.CGREvent,
 }
 
 // execute implements actioner interface
-func (aL *actHTTP) execute(ctx *context.Context, data utils.MapStorage, _ string) (err error) {
+func (aL *actHTTP) execute(ctx context.Context, data utils.MapStorage, _ string) (err error) {
 	var partExec bool
 	for _, reqD := range aL.reqDetails {
 		payload := data

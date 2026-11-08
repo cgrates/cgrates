@@ -4,12 +4,12 @@
 package engine
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -478,7 +478,7 @@ type cMock struct {
 	rcvM string
 }
 
-func (*cMock) Call(ctx *context.Context, serviceMethod string, args, reply any) error {
+func (*cMock) Call(ctx context.Context, serviceMethod string, args, reply any) error {
 	return nil
 }
 func TestDispatcherHostGetConnExistingConn(t *testing.T) {

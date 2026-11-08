@@ -4,12 +4,12 @@
 package trends
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 	"sync"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -55,7 +55,7 @@ func NewTrendService(dm *engine.DataManager, cache *engine.CacheS,
 
 // computeTrend queries a stat and builds the Trend for it based on the TrendProfile configuration.
 // Called by Cron service at scheduled intervals.
-func (t *TrendS) computeTrend(ctx *context.Context, tP *utils.TrendProfile) {
+func (t *TrendS) computeTrend(ctx context.Context, tP *utils.TrendProfile) {
 	var floatMetrics map[string]float64
 	statConns, err := engine.GetConnIDs(ctx, t.cfg.TrendSCfg().Conns, utils.MetaStats, tP.Tenant, tP, nil, t.fltrS)
 	if err != nil {
@@ -237,7 +237,7 @@ func (t *TrendS) processEEs(trnd *utils.Trend) (err error) {
 }
 
 // storeTrend stores or schedules the trend for storage based on "storeInterval".
-func (t *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error) {
+func (t *TrendS) storeTrend(ctx context.Context, trnd *utils.Trend) (err error) {
 	if t.cfg.TrendSCfg().StoreInterval == 0 {
 		return
 	}
@@ -255,7 +255,7 @@ func (t *TrendS) storeTrend(ctx *context.Context, trnd *utils.Trend) (err error)
 // storeTrends stores modified trends from cache in DB
 // Reschedules failed trend IDs for next storage cycle.
 // This function is safe for concurrent use.
-func (t *TrendS) storeTrends(ctx *context.Context) {
+func (t *TrendS) storeTrends(ctx context.Context) {
 	var failedTrndIDs []string
 	for {
 		t.sTrndsMux.Lock()
@@ -295,7 +295,7 @@ func (t *TrendS) storeTrends(ctx *context.Context) {
 }
 
 // asyncStoreTrends runs as a background process that periodically calls storeTrends.
-func (t *TrendS) asyncStoreTrends(ctx *context.Context) {
+func (t *TrendS) asyncStoreTrends(ctx context.Context) {
 	storeInterval := t.cfg.TrendSCfg().StoreInterval
 	if storeInterval <= 0 {
 		close(t.storingStopped)
@@ -313,7 +313,7 @@ func (t *TrendS) asyncStoreTrends(ctx *context.Context) {
 }
 
 // StartTrendS activates the Cron service with scheduled trend queries.
-func (t *TrendS) StartTrendS(ctx *context.Context) error {
+func (t *TrendS) StartTrendS(ctx context.Context) error {
 	if err := t.scheduleAutomaticQueries(ctx); err != nil {
 		return err
 	}
@@ -352,7 +352,7 @@ func (t *TrendS) StopTrendS() {
 }
 
 // Reload restarts trend services with updated configuration.
-func (t *TrendS) Reload(ctx *context.Context) {
+func (t *TrendS) Reload(ctx context.Context) {
 	crnctx := t.crn.Stop()
 	close(t.trendStop)
 	<-crnctx.Done()
@@ -364,7 +364,7 @@ func (t *TrendS) Reload(ctx *context.Context) {
 }
 
 // scheduleAutomaticQueries schedules initial trend queries based on configuration.
-func (t *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
+func (t *TrendS) scheduleAutomaticQueries(ctx context.Context) error {
 	schedData := make(map[string][]string)
 	for k, v := range t.cfg.TrendSCfg().ScheduledIDs {
 		schedData[k] = v
@@ -397,7 +397,7 @@ func (t *TrendS) scheduleAutomaticQueries(ctx *context.Context) error {
 
 // scheduleTrendQueries schedules or reschedules specific trend queries
 // Safe for concurrent use.
-func (t *TrendS) scheduleTrendQueries(ctx *context.Context, tnt string, tIDs []string) (scheduled int, err error) {
+func (t *TrendS) scheduleTrendQueries(ctx context.Context, tnt string, tIDs []string) (scheduled int, err error) {
 	var partial bool
 	t.crnTQsMux.Lock()
 	if _, has := t.crnTQs[tnt]; !has {

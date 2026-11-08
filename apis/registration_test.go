@@ -4,12 +4,12 @@
 package apis_test
 
 import (
+	"context"
 	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/apis"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -539,7 +539,7 @@ func newRegisteredAPIService(t *testing.T, rcvr any, name string) *birpc.Service
 	return srv
 }
 
-func testPing(_ any, _ *context.Context, _ *utils.CGREvent, reply *string) error {
+func testPing(_ any, _ context.Context, _ *utils.CGREvent, reply *string) error {
 	*reply = utils.Pong
 	return nil
 }

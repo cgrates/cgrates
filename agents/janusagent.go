@@ -4,6 +4,7 @@
 package agents
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/sessions"
@@ -32,7 +32,7 @@ func NewJanusAgent(cgrCfg *config.CGRConfig,
 		caps:    caps,
 	}
 	srv, _ := birpc.NewService(jsa, "", false)
-	jsa.ctx = context.WithClient(context.TODO(), srv)
+	jsa.ctx = birpc.WithClient(context.TODO(), srv)
 	return jsa, nil
 }
 
@@ -43,7 +43,7 @@ type JanusAgent struct {
 	caps    *engine.Caps
 	jnsConn *janus.Gateway
 	adminWs *websocket.Conn
-	ctx     *context.Context
+	ctx     context.Context
 }
 
 // Connect will create the connection to the Janus Server
@@ -448,7 +448,7 @@ func (ja *JanusAgent) HandlePlugin(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(resp)
 }
 
-func (ja *JanusAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam string,
+func (ja *JanusAgent) V1GetActiveSessionIDs(ctx context.Context, ignParam string,
 	sessionIDs *[]*sessions.SessionID) error {
 	var sIDs []*sessions.SessionID
 	msg := struct {
@@ -497,7 +497,7 @@ func (ja *JanusAgent) V1GetActiveSessionIDs(ctx *context.Context, ignParam strin
 	return nil
 }
 
-func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
+func (ja *JanusAgent) V1DisconnectSession(ctx context.Context, cgrEv utils.CGREvent, reply *string) (err error) {
 	sessionID, err := engine.NewMapEvent(cgrEv.Event).GetTInt64(utils.OriginID)
 	if err != nil {
 		return err
@@ -514,14 +514,14 @@ func (ja *JanusAgent) V1DisconnectSession(ctx *context.Context, cgrEv utils.CGRE
 	return nil
 }
 
-func (ja *JanusAgent) V1AlterSession(*context.Context, utils.CGREvent, *string) error {
+func (ja *JanusAgent) V1AlterSession(context.Context, utils.CGREvent, *string) error {
 	return utils.ErrNotImplemented
 }
 
-func (ja *JanusAgent) V1DisconnectPeer(*context.Context, *utils.DPRArgs, *string) error {
+func (ja *JanusAgent) V1DisconnectPeer(context.Context, *utils.DPRArgs, *string) error {
 	return utils.ErrNotImplemented
 }
 
-func (ja *JanusAgent) V1WarnDisconnect(*context.Context, map[string]any, *string) error {
+func (ja *JanusAgent) V1WarnDisconnect(context.Context, map[string]any, *string) error {
 	return utils.ErrNotImplemented
 }

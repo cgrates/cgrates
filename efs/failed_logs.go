@@ -4,9 +4,9 @@
 package efs
 
 import (
+	"context"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
@@ -34,7 +34,7 @@ func (expEv *FailedExportersLog) AddEvent(ev any) {
 }
 
 // ReplayFailedPosts tries to repost failed cdrs.
-func (expEv *FailedExportersLog) ReplayFailedPosts(ctx *context.Context, attempts int, tnt string) error {
+func (expEv *FailedExportersLog) ReplayFailedPosts(ctx context.Context, attempts int, tnt string) error {
 	expLogger, err := engine.NewExportLogger(ctx, tnt,
 		expEv.connMngr, expEv.cfg)
 	if err != nil {

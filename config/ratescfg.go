@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"slices"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -52,7 +52,7 @@ type RateSCfg struct {
 }
 
 // loadRateSCfg loads the rates section of the configuration
-func (rCfg *RateSCfg) Load(ctx *context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
+func (rCfg *RateSCfg) Load(ctx context.Context, jsnCfg ConfigDB, _ *CGRConfig) (err error) {
 	jsnRateCfg := new(RateSJsonCfg)
 	if err = jsnCfg.GetSection(ctx, RateSJSON, jsnRateCfg); err != nil {
 		return

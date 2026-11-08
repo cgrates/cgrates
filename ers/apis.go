@@ -4,11 +4,11 @@
 package ers
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"slices"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -27,7 +27,7 @@ type V1RunReaderParams struct {
 //
 // Note: This API is not safe to call concurrently for the same reader. Ensure the current input finishes being
 // processed before calling again.
-func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams, reply *string) error {
+func (erS *ERService) V1RunReader(ctx context.Context, params V1RunReaderParams, reply *string) error {
 	rdrCfg := erS.cfg.ERsCfg().ReaderCfg(params.ReaderID)
 	er, has := erS.rdrs[params.ReaderID]
 	if !has || rdrCfg == nil {
@@ -62,7 +62,7 @@ func (erS *ERService) V1RunReader(ctx *context.Context, params V1RunReaderParams
 }
 
 // V1ProcessReaderEvents will find all events on the specified reader, based on filters, and process them while returning any replies it gets back
-func (erS *ERService) V1ProcessReaderEvents(ctx *context.Context, params V1RunReaderParams, reply *[]*sessions.V1ProcessEventReply) (err error) {
+func (erS *ERService) V1ProcessReaderEvents(ctx context.Context, params V1RunReaderParams, reply *[]*sessions.V1ProcessEventReply) (err error) {
 	rdrCfg := erS.cfg.ERsCfg().ReaderCfg(params.ReaderID)
 	er, has := erS.rdrs[params.ReaderID]
 	if !has || rdrCfg == nil {

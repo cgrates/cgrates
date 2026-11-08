@@ -4,16 +4,16 @@
 package apis
 
 import (
+	"context"
 	"fmt"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/utils"
 )
 
 // GetAttributeProfile returns an Attribute Profile based on the tenant and ID received
-func (admS *AdminSv1) GetAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.APIAttributeProfile) (err error) {
+func (admS *AdminSv1) GetAttributeProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *utils.APIAttributeProfile) (err error) {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -31,7 +31,7 @@ func (admS *AdminSv1) GetAttributeProfile(ctx *context.Context, arg *utils.Tenan
 }
 
 // GetAttributeProfileIDs returns list of attributeProfile IDs registered for a tenant
-func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
+func (admS *AdminSv1) GetAttributeProfileIDs(ctx context.Context, args *utils.ArgsItemIDs, attrPrfIDs *[]string) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -62,7 +62,7 @@ func (admS *AdminSv1) GetAttributeProfileIDs(ctx *context.Context, args *utils.A
 }
 
 // GetAttributeProfiles returns a list of attribute profiles registered for a tenant
-func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.ArgsItemIDs, attrPrfs *[]*utils.APIAttributeProfile) (err error) {
+func (admS *AdminSv1) GetAttributeProfiles(ctx context.Context, args *utils.ArgsItemIDs, attrPrfs *[]*utils.APIAttributeProfile) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -86,7 +86,7 @@ func (admS *AdminSv1) GetAttributeProfiles(ctx *context.Context, args *utils.Arg
 
 // GetAttributeProfilesCount returns the total number of AttributeProfileIDs registered for a tenant
 // returns ErrNotFound in case of 0 AttributeProfileIDs
-func (admS *AdminSv1) GetAttributeProfilesCount(ctx *context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
+func (admS *AdminSv1) GetAttributeProfilesCount(ctx context.Context, args *utils.ArgsItemIDs, reply *int) (err error) {
 	tnt := args.Tenant
 	if tnt == utils.EmptyString {
 		tnt = admS.cfg.GeneralCfg().DefaultTenant
@@ -108,7 +108,7 @@ func (admS *AdminSv1) GetAttributeProfilesCount(ctx *context.Context, args *util
 }
 
 // SetAttributeProfile add/update a new Attribute Profile
-func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *utils.APIAttributeProfileWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) SetAttributeProfile(ctx context.Context, arg *utils.APIAttributeProfileWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg.APIAttributeProfile, []string{utils.ID}); len(missing) != 0 {
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -141,7 +141,7 @@ func (admS *AdminSv1) SetAttributeProfile(ctx *context.Context, arg *utils.APIAt
 }
 
 // RemoveAttributeProfile remove a specific Attribute Profile based on tenant an ID
-func (admS *AdminSv1) RemoveAttributeProfile(ctx *context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
+func (admS *AdminSv1) RemoveAttributeProfile(ctx context.Context, arg *utils.TenantIDWithAPIOpts, reply *string) error {
 	if missing := utils.MissingStructFields(arg, []string{utils.ID}); len(missing) != 0 { //Params missing
 		return utils.NewErrMandatoryIeMissing(missing...)
 	}
@@ -181,11 +181,11 @@ type AttributeSv1 struct {
 }
 
 // V1GetAttributeForEvent returns the AttributeProfile that matches the event
-func (atrS *AttributeSv1) GetAttributeForEvent(ctx *context.Context, args *utils.CGREvent, attrPrf *utils.APIAttributeProfile) (err error) {
+func (atrS *AttributeSv1) GetAttributeForEvent(ctx context.Context, args *utils.CGREvent, attrPrf *utils.APIAttributeProfile) (err error) {
 	return atrS.atrs.V1GetAttributeForEvent(ctx, args, attrPrf)
 }
 
 // V1ProcessEvent proccess the event and returns the result
-func (atrS *AttributeSv1) ProcessEvent(ctx *context.Context, args *utils.CGREvent, attrEvntRpl *utils.AttributesProcessEventReply) (err error) {
+func (atrS *AttributeSv1) ProcessEvent(ctx context.Context, args *utils.CGREvent, attrEvntRpl *utils.AttributesProcessEventReply) (err error) {
 	return atrS.atrs.V1ProcessEvent(ctx, args, attrEvntRpl)
 }

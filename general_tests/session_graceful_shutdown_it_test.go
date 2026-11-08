@@ -6,6 +6,7 @@
 package general_tests
 
 import (
+	"context"
 	"os/exec"
 	"path"
 	"reflect"
@@ -13,7 +14,6 @@ import (
 	"testing"
 
 	"github.com/cgrates/birpc"
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/sessions"
 
 	"github.com/cgrates/cgrates/engine"

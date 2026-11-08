@@ -5,6 +5,7 @@ package efs
 
 import (
 	"bytes"
+	"context"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -12,7 +13,6 @@ import (
 	"path"
 	"time"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 )
@@ -45,7 +45,7 @@ func (expEv *FailedExportersLog) FilePath() string {
 }
 
 type FailoverPoster interface {
-	ReplayFailedPosts(*context.Context, int, string) error
+	ReplayFailedPosts(context.Context, int, string) error
 }
 
 // WriteToFile writes the events to file

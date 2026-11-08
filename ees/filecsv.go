@@ -4,6 +4,7 @@
 package ees
 
 import (
+	"context"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -11,7 +12,6 @@ import (
 	"path"
 	"sync"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/config"
@@ -95,7 +95,7 @@ func (fCsv *FileCSVee) Cfg() *config.EventExporterCfg { return fCsv.cfg }
 
 func (fCsv *FileCSVee) Connect() (_ error) { return }
 
-func (fCsv *FileCSVee) ExportEvent(_ *context.Context, ev, _ any) error {
+func (fCsv *FileCSVee) ExportEvent(_ context.Context, ev, _ any) error {
 	fCsv.Lock() // make sure that only one event is writen in file at once
 	defer fCsv.Unlock()
 	return fCsv.csvWriter.Write(ev.([]string))

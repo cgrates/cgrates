@@ -4,10 +4,10 @@
 package config
 
 import (
+	"context"
 	"reflect"
 	"testing"
 
-	"github.com/cgrates/birpc/context"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -531,7 +531,7 @@ func TestAttributeSCloneSection(t *testing.T) {
 
 func TestLoadAttributeSCfg(t *testing.T) {
 	alS := &AttributeSCfg{}
-	ctx := &context.Context{}
+	ctx := context.Background()
 	jsnCfg := new(mockDb)
 	cgrcfg := &CGRConfig{}
 	if err := alS.Load(ctx, jsnCfg, cgrcfg); err == nil || err != utils.ErrNotImplemented {
