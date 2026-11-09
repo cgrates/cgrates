@@ -903,6 +903,7 @@ func TestURRateFromFilesProcessReaderEventsUnusualCases(t *testing.T) {
 		content    string
 		refs       refs
 		expLog     string
+		expErr     string
 	}{
 		{
 			name:       "CSVEmptyFiles",
@@ -925,6 +926,17 @@ func TestURRateFromFilesProcessReaderEventsUnusualCases(t *testing.T) {
 				source: "10", destination: "12", dataIn: "14", dataOut: "15",
 			},
 			expLog: "[WARNING] <ERs> processing file file1.csv, error: Unsupported time format",
+		},
+		{
+			name:       "TypeNotSupported",
+			readerType: utils.MetaKafkajsonMap,
+			suffix:     "",
+			content:    ``,
+			refs: refs{
+				time: "0", tenant: "1", account: "3", originID: "4", originHost: "9",
+				source: "10", destination: "12", dataIn: "14", dataOut: "15",
+			},
+			expErr: "reader type <*kafkaJSONMap> not yet supported",
 		},
 		{
 			name:       "XMLEmptyFiles",
@@ -1223,7 +1235,9 @@ func TestURRateFromFilesProcessReaderEventsUnusualCases(t *testing.T) {
 				&ers.V1RunReaderParams{
 					ReaderID: "ReadURCSVs",
 				}, &ersReplies); err != nil {
-				t.Fatal(err)
+				if err.Error() != tc.expErr {
+					t.Fatalf("expected error <%v>, received <%v>", tc.expErr, err)
+				}
 			}
 			if len(*ersReplies) != 0 {
 				t.Errorf("expected no replies populated, received <%v>", ersReplies)
