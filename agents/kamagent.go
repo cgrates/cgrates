@@ -162,15 +162,6 @@ func (ka *KamailioAgent) onCgrAuth(evData []byte, connIdx int) {
 }
 
 func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
-	if ka.caps.IsLimited() {
-		if err := ka.caps.Allocate(); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> caps limit reached, rejecting call start: %v",
-					utils.KamailioAgent, err))
-			return
-		}
-		defer ka.caps.Deallocate()
-	}
 	if connIdx >= len(ka.conns) { // protection against index out of range panic
 		err := fmt.Errorf("Index out of range[0,%v): %v ", len(ka.conns), connIdx)
 		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.KamailioAgent, err.Error()))
@@ -181,6 +172,20 @@ func (ka *KamailioAgent) onCallStart(evData []byte, connIdx int) {
 		utils.Logger.Err(fmt.Sprintf("<%s> unmarshalling event: %s, error: %s",
 			utils.KamailioAgent, evData, err.Error()))
 		return
+	}
+	if ka.caps.IsLimited() {
+		if err := ka.caps.Allocate(); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> caps limit reached, rejecting call start: %v",
+					utils.KamailioAgent, err))
+			if kev[utils.RequestType] != utils.MetaNone && kev[KamHashEntry] != "" && kev[KamHashID] != "" {
+				_ = ka.disconnectSession(connIdx,
+					NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID],
+						err.Error()))
+			}
+			return
+		}
+		defer ka.caps.Deallocate()
 	}
 	if kev[utils.RequestType] == utils.MetaNone { // Do not process this request
 		return
