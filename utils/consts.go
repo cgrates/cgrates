@@ -312,7 +312,7 @@ const (
 	MetaJSON                 = "*json"
 	MetaDateTime             = "*datetime"
 	MetaUnixTimestamp        = "*unixTimestamp"
-	MetaPostUR               = "*postUR"
+	MetaProcessEvent         = "*processEvent"
 	MetaDumpToFile           = "*dumpToFile"
 	MetaDumpToJSON           = "*dumpToJSON"
 	NonTransactional         = ""

@@ -1544,7 +1544,7 @@ func TestConfigSanityErs(t *testing.T) {
 			Type: utils.MetaNone,
 			ID:   "rdrID",
 			Opts: &EventReaderOpts{
-				PartialCacheAction: utils.StringPointer(utils.MetaPostUR),
+				PartialCacheAction: utils.StringPointer(utils.MetaProcessEvent),
 			},
 		},
 	}
@@ -1560,7 +1560,7 @@ func TestConfigSanityErs(t *testing.T) {
 
 	cfg.ersCfg.Readers[0].Opts = &EventReaderOpts{
 		PartialOrderField:  utils.StringPointer(utils.EmptyString),
-		PartialCacheAction: utils.StringPointer(utils.MetaPostUR),
+		PartialCacheAction: utils.StringPointer(utils.MetaProcessEvent),
 	}
 	expected = "<ERs> empty partialOrderField for reader with ID: rdrID"
 	if err := cfg.checkConfigSanity(); err == nil || err.Error() != expected {

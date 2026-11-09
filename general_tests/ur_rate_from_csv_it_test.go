@@ -342,7 +342,7 @@ func TestURRateFromFilesRunReader(t *testing.T) {
 			],
 			"opts": {
 				"xmlRootPath": "Records.Record",
-				"partialCacheAction": "*postUR",
+				"partialCacheAction": "*processEvent",
 				"partialOrderField": "~*req.CSVArrivalTime",
 				"partialPath": "{{PRT}}",
 			}
@@ -764,7 +764,7 @@ func TestURRateFromFilesProcessReaderEvents(t *testing.T) {
 			],
 			"opts": {
 				"xmlRootPath": "Records.Record",
-				"partialCacheAction": "*postUR",
+				"partialCacheAction": "*processEvent",
 				"partialOrderField": "~*req.CSVArrivalTime",
 				"partialPath": "{{PRT}}",
 			}
@@ -1194,7 +1194,7 @@ func TestURRateFromFilesProcessReaderEventsUnusualCases(t *testing.T) {
 			],
 			"opts": {
 				"xmlRootPath": "Records.Record",
-				"partialCacheAction": "*postUR",
+				"partialCacheAction": "*processEvent",
 				"partialOrderField": "~*req.CSVArrivalTime",
 				"partialPath": "{{PRT}}",
 			}

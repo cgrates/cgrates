@@ -378,7 +378,7 @@
 			"processedPath": "",
 			"flags": ["*sessions"],
 			"opts": {
-				"partialCacheAction": "*postUR",
+				"partialCacheAction": "*processEvent",
 				"partialOrderField": "~*req.AnswerTime",
 				"partialPath": "/tmp/partErs2/out"
 			},
