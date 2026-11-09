@@ -125,6 +125,9 @@ func (ka *KamailioAgent) onKamEvent(evData []byte, connIdx int) {
 				fmt.Sprintf("<%s> caps limit reached, rejecting event: %v", utils.KamailioAgent, kev))
 			if kev[KamTRIndex] != utils.EmptyString {
 				ka.sendReply(kev, connIdx, utils.NewOrderedNavigableMap(), err)
+			} else if kev[EVENT] == "CGR_CALL_START" && kev[KamHashEntry] != "" && kev[KamHashID] != "" {
+				_ = ka.disconnectSession(connIdx,
+					NewKamSessionDisconnect(kev[KamHashEntry], kev[KamHashID], err.Error()))
 			}
 			return
 		}
