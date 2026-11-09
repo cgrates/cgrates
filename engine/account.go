@@ -238,12 +238,9 @@ func (acc *Account) setBalanceAction(a *Action, fltrS *FilterS) error {
 			return err
 		}
 	}
-	inTrgs := acc.executingTriggers
 	acc.InitCounters()
 	acc.ExecuteActionTriggers(nil, fltrS)
-	if !inTrgs {
-		acc.Publish(nil)
-	}
+	acc.Publish(nil)
 	return nil
 }
 
@@ -334,12 +331,9 @@ func (acc *Account) debitBalanceAction(a *Action, reset, resetIfNegative bool, f
 			return err
 		}
 	}
-	inTrgs := acc.executingTriggers
 	acc.InitCounters()
 	acc.ExecuteActionTriggers(nil, fltrS)
-	if !inTrgs {
-		acc.Publish(nil)
-	}
+	acc.Publish(nil)
 	return nil
 }
 

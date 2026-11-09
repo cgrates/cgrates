@@ -931,24 +931,6 @@ func TestActionsPublishAccountBonusTriggerStats(t *testing.T) {
 		}
 	}
 
-	if err := client.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
-		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &engine.StatQueueProfile{
-			Tenant: "cgrates.org",
-			ID:     "STS_ACTION_TRIGGER",
-			FilterIDs: []string{
-				"*string:~*opts.*eventType:AccountUpdate",
-				"*string:~*asm.AccountID:1009",
-			},
-			QueueLength: 100,
-			TTL:         -1,
-			Metrics: []*engine.MetricWithFilters{
-				{MetricID: "*sum#~*asm.BalanceSummaries.BAL_BONUS.Value"},
-				{MetricID: "*sum#~*asm.BalanceSummaries.BAL_MAIN.Value"},
-			},
-		}}, &reply); err != nil {
-		t.Fatal(err)
-	}
-
 	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
 		&utils.AttrSetBalance{
 			Tenant:      "cgrates.org",
@@ -991,10 +973,21 @@ func TestActionsPublishAccountBonusTriggerStats(t *testing.T) {
 		}
 	}
 
-	time.Sleep(500 * time.Millisecond)
-	var statsBefore map[string]float64
-	if err := client.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
-		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "STS_ACTION_TRIGGER"}}, &statsBefore); err != nil {
+	if err := client.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
+		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "STS_ACTION_TRIGGER",
+			FilterIDs: []string{
+				"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.AccountID:1009",
+			},
+			QueueLength: 1,
+			TTL:         -1,
+			Metrics: []*engine.MetricWithFilters{
+				{MetricID: "*sum#~*asm.BalanceSummaries.BAL_BONUS.Value"},
+				{MetricID: "*sum#~*asm.BalanceSummaries.BAL_MAIN.Value"},
+			},
+		}}, &reply); err != nil {
 		t.Fatal(err)
 	}
 
@@ -1030,13 +1023,12 @@ func TestActionsPublishAccountBonusTriggerStats(t *testing.T) {
 
 	const bonusMetric = "*sum#~*asm.BalanceSummaries.BAL_BONUS.Value"
 	if got := metrics[bonusMetric]; got != 10 {
-		t.Errorf("expected one published summary with BAL_BONUS (sum 10; 0 = never published, 20 = published twice), received %v (%v)", got, metrics)
+		t.Errorf("expected the last published summary to have BAL_BONUS 10, received %v (%v)", got, metrics)
 	}
 
 	const mainMetric = "*sum#~*asm.BalanceSummaries.BAL_MAIN.Value"
-	if got := metrics[mainMetric] - statsBefore[mainMetric]; got != 70 {
-		t.Errorf("expected one summary published by the action with BAL_MAIN 70 (140 = published twice), received %v (before %v, after %v)",
-			got, statsBefore[mainMetric], metrics[mainMetric])
+	if got := metrics[mainMetric]; got != 70 {
+		t.Errorf("expected the last published summary to have BAL_MAIN 70, received %v (%v)", got, metrics)
 	}
 }
 
@@ -1222,5 +1214,117 @@ func TestActionsPublishAccountBalanceAutoRecharge(t *testing.T) {
 		t.Fatal(err)
 	} else if th.Hits != 2 {
 		t.Errorf("expected 2 hits in total, received %d", th.Hits)
+	}
+}
+
+func TestActionsPublishAccountTriggerBalanceWithBonus(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaPostgres, utils.MetaMongo, utils.MetaMySQL:
+		t.SkipNow()
+	default:
+		t.Fatal("Unknown Database type")
+	}
+
+	content := `{
+"general": {"log_level": 7},
+"data_db": {"db_type": "*internal"},
+"stor_db": {"db_type": "*internal"},
+"rals": {"enabled": true, "stats_conns": ["*internal"]},
+"schedulers": {"enabled": true},
+"stats": {"enabled": true, "store_interval": "-1"},
+"apiers": {"enabled": true, "scheduler_conns": ["*internal"]}
+}`
+
+	ng := engine.TestEngine{ConfigJSON: content}
+	client, _ := ng.Run(t)
+
+	var reply string
+	for _, attrs := range []*v1.V1AttrSetActions{
+		{
+			ActionsId: "ACT_BONUS_10",
+			Overwrite: true,
+			Actions: []*v1.V1TPAction{
+				{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, BalanceId: "BAL_MAIN", Units: 10, Weight: 10},
+			},
+		},
+		{
+			ActionsId: "ACT_TOPUP_60",
+			Overwrite: true,
+			Actions: []*v1.V1TPAction{
+				{Identifier: utils.MetaTopUp, BalanceType: utils.MetaMonetary, BalanceId: "BAL_MAIN", Units: 60, Weight: 10},
+			},
+		},
+	} {
+		if err := client.Call(context.Background(), utils.APIerSv1SetActions, attrs, &reply); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv2SetBalance,
+		&utils.AttrSetBalance{
+			Tenant: "cgrates.org", Account: "1011",
+			BalanceType: utils.MetaMonetary, Value: 10,
+			Balance: map[string]any{utils.ID: "BAL_MAIN"},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if err := client.Call(context.Background(), utils.APIerSv1SetAccountActionTriggers,
+		&v1.AttrSetAccountActionTriggers{
+			Tenant: "cgrates.org", Account: "1011",
+			AttrSetActionTrigger: engine.AttrSetActionTrigger{
+				GroupID: "TRG_BONUS",
+				ActionTrigger: map[string]any{
+					utils.ThresholdType:  "*max_balance",
+					utils.ThresholdValue: 50,
+					utils.BalanceType:    utils.MetaMonetary,
+					utils.BalanceID:      "BAL_MAIN",
+					utils.ActionsID:      "ACT_BONUS_10",
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1SetStatQueueProfile,
+		&engine.StatQueueProfileWithAPIOpts{StatQueueProfile: &engine.StatQueueProfile{
+			Tenant: "cgrates.org",
+			ID:     "STS_SAME_BAL",
+			FilterIDs: []string{
+				"*string:~*opts.*eventType:AccountUpdate",
+				"*string:~*asm.AccountID:1011",
+			},
+			QueueLength: 1,
+			TTL:         -1,
+			Metrics: []*engine.MetricWithFilters{
+				{MetricID: "*sum#~*asm.BalanceSummaries.BAL_MAIN.Value"},
+			},
+		}}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.APIerSv1ExecuteAction,
+		&utils.AttrExecuteAction{Tenant: "cgrates.org", Account: "1011", ActionsId: "ACT_TOPUP_60"}, &reply); err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(500 * time.Millisecond)
+
+	var acnt *engine.Account
+	if err := client.Call(context.Background(), utils.APIerSv2GetAccount,
+		&utils.AttrGetAccount{Tenant: "cgrates.org", Account: "1011"}, &acnt); err != nil {
+		t.Fatal(err)
+	}
+	if bal := acnt.BalanceMap[utils.MetaMonetary]; len(bal) != 1 || bal[0].Value != 80 {
+		t.Fatalf("expected BAL_MAIN 80 after the trigger, received %v", utils.ToJSON(bal))
+	}
+
+	var metrics map[string]float64
+	if err := client.Call(context.Background(), utils.StatSv1GetQueueFloatMetrics,
+		&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "STS_SAME_BAL"}}, &metrics); err != nil {
+		t.Fatal(err)
+	}
+	const metric = "*sum#~*asm.BalanceSummaries.BAL_MAIN.Value"
+	if got := metrics[metric]; got != 80 {
+		t.Errorf("expected the last published summary to have BAL_MAIN 80, received %v", got)
 	}
 }
