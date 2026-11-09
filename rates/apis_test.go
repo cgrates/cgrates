@@ -1206,3 +1206,320 @@ func TestV1CostForEventErrors(t *testing.T) {
 		})
 	}
 }
+
+func TestRateProfileCostForEventRateFilters(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+	rateS.cfg.RateSCfg().RateIndexedSelects = false
+
+	rPrf := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RATE_1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RT_STANDARD": {
+				ID: "RT_STANDARD",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 0),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"RT_SUFFIX": {
+				ID:        "RT_SUFFIX",
+				FilterIDs: []string{"*suffix:~*req.Destination:00"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{{
+					IntervalStart: utils.NewDecimal(0, 0),
+					RecurrentFee:  utils.NewDecimal(2, 0),
+					Unit:          utils.NewDecimal(1, 0),
+					Increment:     utils.NewDecimal(1, 0),
+				}},
+			},
+			"RT_EXISTS": {
+				ID:        "RT_EXISTS",
+				FilterIDs: []string{"*exists:~*req.Category:"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 30,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(3, 0),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"RT_GT": {
+				ID:        "RT_GT",
+				FilterIDs: []string{"*gt:~*req.Cost:10"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 40,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(4, 0),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name    string
+		event   map[string]any
+		expCost *utils.Decimal
+	}{
+		{
+			name: "standart rate",
+			event: map[string]any{
+				utils.AccountField: "1001",
+			},
+			expCost: utils.NewDecimal(3, 0),
+		},
+		{
+			name: "suffix rate",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "+4930100",
+			},
+			expCost: utils.NewDecimal(6, 0),
+		},
+		{
+			name: "exists rate",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Category:     "sms",
+			},
+			expCost: utils.NewDecimal(9, 0),
+		},
+		{
+			name: "the cost greater than 10",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Cost:         11,
+			},
+			expCost: utils.NewDecimal(12, 0),
+		},
+		{
+			name: "the cost is exactly 10",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Cost:         10,
+			},
+			expCost: utils.NewDecimal(3, 0),
+		},
+		{
+			name: "more than one matching rates",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "+4930100",
+				utils.Category:     "sms",
+				utils.Cost:         11,
+			},
+			expCost: utils.NewDecimal(12, 0),
+		},
+		{
+			name: "no matching destination",
+			event: map[string]any{
+				utils.AccountField: "1001",
+				utils.Destination:  "4930999",
+			},
+			expCost: utils.NewDecimal(3, 0),
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "RATE_FILTERS",
+				Event:  tc.event,
+				APIOpts: map[string]any{
+					utils.OptsRatesProfileIDs: []string{"RATE_1"},
+					utils.OptsRatesStartTime:  time.Date(2026, 10, 21, 10, 0, 0, 0, time.UTC),
+					utils.OptsRatesUsage:      utils.NewDecimal(3, 0),
+				},
+			}
+
+			var rpCost utils.RateProfileCost
+			if err := rateS.V1CostForEvent(context.Background(), ev, &rpCost); err != nil {
+				t.Fatal(err)
+			}
+
+			if rpCost.Cost.Compare(tc.expCost) != 0 {
+				t.Errorf("Expected cost %v, received %v", tc.expCost, rpCost.Cost)
+			}
+		})
+	}
+
+}
+
+func TestRateSUpdateRateProfile(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rp := &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP_VOICE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RT_STANDARD": {
+				ID: "RT_STANDARD",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+			"RT_CHRISTMAS": {
+				ID:        "RT_CHRISTMAS",
+				FilterIDs: []string{"*string:~*req.Destination:+49"},
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ActivationTimes: "* * 24 12 *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(5, 2),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rp, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rp = &utils.RateProfile{
+		Tenant: "cgrates.org",
+		ID:     "RP_VOICE",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RT_STANDARD": {
+				ID: "RT_STANDARD",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rp, true, true); err != nil {
+		t.Fatal(err)
+	}
+
+	updatedProfile, err := dm.GetRateProfile(context.Background(), "cgrates.org", "RP_VOICE", false, false, utils.NonTransactional)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, has := updatedProfile.Rates["RT_CHRISTMAS"]; has {
+		t.Error("RT_CHRISTMAS should have been removed from the profile")
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "PROMO_ENDED",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+			utils.Destination:  "+49",
+		},
+		APIOpts: map[string]any{
+			utils.OptsRatesStartTime: time.Date(2026, 12, 24, 10, 0, 0, 0, time.UTC),
+			utils.OptsRatesUsage:     utils.NewDecimal(3, 0),
+		},
+	}
+
+	var rateIDs []string
+	args := &utils.CGREventWithRateProfile{
+		CGREvent:      ev,
+		RateProfileID: "RP_VOICE",
+	}
+
+	if err := rateS.V1RateProfileRatesForEvent(context.Background(), args, &rateIDs); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(rateIDs, []string{"RT_STANDARD"}) {
+		t.Errorf("Expected only [RT_STANDARD], received %v", rateIDs)
+	}
+}
