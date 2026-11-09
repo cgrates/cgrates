@@ -236,19 +236,20 @@ func (fsa *FSsessions) onChannelAnswer(fsev FSEvent, connIdx int) {
 	if fsev.GetReqType(utils.MetaDefault) == utils.MetaNone { // Do not process this request
 		return
 	}
+	if connIdx >= len(fsa.conns) { // protection against index out of range panic
+		err := fmt.Errorf("Index out of range[0,%v): %v ", len(fsa.conns), connIdx)
+		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
+		return
+	}
 	if fsa.caps.IsLimited() {
 		if err := fsa.caps.Allocate(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> caps limit reached, rejecting answer for channel %s: %v",
 					utils.FreeSWITCHAgent, fsev.GetUUID(), err))
+			_ = fsa.disconnectSession(connIdx, fsev.GetUUID(), "", err.Error())
 			return
 		}
 		defer fsa.caps.Deallocate()
-	}
-	if connIdx >= len(fsa.conns) { // protection against index out of range panic
-		err := fmt.Errorf("Index out of range[0,%v): %v ", len(fsa.conns), connIdx)
-		utils.Logger.Err(fmt.Sprintf("<%s> %s", utils.FreeSWITCHAgent, err.Error()))
-		return
 	}
 	_, err := fsa.conns[connIdx].SendApiCmd(
 		fmt.Sprintf("uuid_setvar %s %s %s\n\n", fsev.GetUUID(),
