@@ -97,22 +97,20 @@ func (fsa *FSsessions) createHandlers() map[string][]func(string, int) {
 func (fsa *FSsessions) handleFSEvent(fsev map[string]string, connIdx int) {
 	eventName := fsev[EventName]
 	uuid := fsev[UUID]
+	if connIdx >= len(fsa.conns) {
+		utils.Logger.Err(fmt.Sprintf("<%s> Index %v out of range",
+			utils.FreeSWITCHAgent, connIdx))
+		return
+	}
 	if fsa.caps.IsLimited() {
 		if err := fsa.caps.Allocate(); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> caps limit reached, rejecting %s for channel %s: %v",
 					utils.FreeSWITCHAgent, fsev[EventName], fsev[UUID], err))
-			if eventName == FsParkEvent {
-				fsa.unparkCall(uuid, connIdx, utils.FirstNonEmpty(fsev[CALL_DEST_NR], fsev[SIP_REQ_USER]), err.Error())
-			}
+			fsa.dispatchErr(uuid, connIdx, eventName, fsev, err)
 			return
 		}
 		defer fsa.caps.Deallocate()
-	}
-	if connIdx >= len(fsa.conns) {
-		utils.Logger.Err(fmt.Sprintf("<%s> Index %v out of range",
-			utils.FreeSWITCHAgent, connIdx))
-		return
 	}
 
 	reqVars := &utils.DataNode{
