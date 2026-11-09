@@ -95,7 +95,7 @@ func (erS *ERService) V1ProcessReaderEvents(ctx *context.Context, params V1RunRe
 			return err
 		}
 	default:
-		return errors.New("reader type not yet supported")
+		return fmt.Errorf("reader type <%v> not yet supported", rdr.Config().Type)
 	}
 
 	sessReplies := make([]*sessions.V1ProcessEventReply, 0) // gather all replies from processEvent (when event is passed through readers)
