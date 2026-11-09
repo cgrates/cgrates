@@ -713,7 +713,7 @@ func (cfg *CGRConfig) checkConfigSanity() error {
 			}
 			if pAct != utils.MetaDumpToFile &&
 				pAct != utils.MetaNone &&
-				pAct != utils.MetaPostUR &&
+				pAct != utils.MetaProcessEvent &&
 				pAct != utils.MetaDumpToJSON {
 				return fmt.Errorf("<%s> wrong partial expiry action for reader with ID: %s", utils.ERs, rdr.ID)
 			}

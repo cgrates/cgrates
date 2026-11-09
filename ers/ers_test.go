@@ -62,7 +62,7 @@ func TestErsOnEvictedNilValue(t *testing.T) {
 	// Verification TBA
 }
 
-func TestErsOnEvictedMetaPostUROK(t *testing.T) {
+func TestErsOnEvictedMetaProcessEventOK(t *testing.T) {
 	value := &erEvents{
 		events: []*utils.CGREvent{
 			{
@@ -78,7 +78,7 @@ func TestErsOnEvictedMetaPostUROK(t *testing.T) {
 			Type:          utils.MetaNone,
 			ProcessedPath: "/tmp",
 			Opts: &config.EventReaderOpts{
-				PartialCacheAction: utils.StringPointer(utils.MetaPostUR),
+				PartialCacheAction: utils.StringPointer(utils.MetaProcessEvent),
 			},
 		},
 	}
@@ -107,7 +107,7 @@ func TestErsOnEvictedMetaPostUROK(t *testing.T) {
 	}
 }
 
-func TestErsOnEvictedMetaPostURMergeErr(t *testing.T) {
+func TestErsOnEvictedMetaProcessEventMergeErr(t *testing.T) {
 	tmpLogger := utils.Logger
 	defer func() {
 		utils.Logger = tmpLogger
@@ -141,7 +141,7 @@ func TestErsOnEvictedMetaPostURMergeErr(t *testing.T) {
 			Type:          utils.MetaNone,
 			ProcessedPath: "/tmp",
 			Opts: &config.EventReaderOpts{
-				PartialCacheAction: utils.StringPointer(utils.MetaPostUR),
+				PartialCacheAction: utils.StringPointer(utils.MetaProcessEvent),
 			},
 		},
 	}

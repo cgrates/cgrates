@@ -306,7 +306,7 @@ opts
 
 		**\*none** - Nothing happens.
 
-		**\*postUR** - Try to merge partial events and post them back to ERs for processing.
+		**\*processEvent** - Try to merge partial events and post them back to ERs for processing.
 
 		**\*dumpToFile** - Apply the `cacheDumpFields` to the partial events and write the record to file in CSV format.
 		
