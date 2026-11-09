@@ -30,7 +30,7 @@ func TestHTTPPostAction(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -40,7 +40,7 @@ func TestHTTPPostAction(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -56,7 +56,7 @@ func TestHTTPPostAction(t *testing.T) {
 		rsSrv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			exp := http.Header{
 				"Accept-Encoding": []string{"gzip"},
-				"Content-Length":  []string{"52482"},
+				"Content-Length":  []string{"52518"},
 				"Content-Type":    []string{"application/json"},
 				"Hdr1":            []string{"val2", "val3"},
 				"Hdr3":            []string{"4"},
@@ -150,7 +150,7 @@ func TestHTTPActionFromConfigsJSON(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -198,7 +198,7 @@ func TestHTTPActionFromConfigsJSON(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -301,7 +301,7 @@ func TestHTTPActionWithOptsFromActionJSON(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -311,7 +311,7 @@ func TestHTTPActionWithOptsFromActionJSON(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -430,7 +430,7 @@ func TestHTTPActionFromConfigsForm(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -485,7 +485,7 @@ func TestHTTPActionFromConfigsForm(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -588,7 +588,7 @@ func TestHTTPActionWithOptsFromActionForm(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -598,7 +598,7 @@ func TestHTTPActionWithOptsFromActionForm(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -719,7 +719,7 @@ func TestHTTPActionWithOptsFromActionPUT(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -729,7 +729,7 @@ func TestHTTPActionWithOptsFromActionPUT(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -852,7 +852,7 @@ func TestHTTPActionWithOptsFromActionPUTDynamicBody(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -862,7 +862,7 @@ func TestHTTPActionWithOptsFromActionPUTDynamicBody(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -979,7 +979,7 @@ func TestHTTPActionWithOptsFromActionPUTDynamicBodyForm(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -989,7 +989,7 @@ func TestHTTPActionWithOptsFromActionPUTDynamicBodyForm(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -1112,7 +1112,7 @@ func TestHTTPActionWithOptsFromConfigsPUTDynamicBodyForm(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -1166,7 +1166,7 @@ func TestHTTPActionWithOptsFromConfigsPUTDynamicBodyForm(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
@@ -1272,7 +1272,7 @@ func TestHTTPActionWithOptsFromConfigsPUTDynamicBody(t *testing.T) {
 
 	var rsSrv *httptest.Server
 
-	cfgJSON := fmt.Sprintf(`{
+	cfgJSON := `{
 	"logger": {
 		"level": 7
 	},
@@ -1318,7 +1318,7 @@ func TestHTTPActionWithOptsFromConfigsPUTDynamicBody(t *testing.T) {
 	"admins": {
 		"enabled": true
 	}
-}`)
+}`
 
 	ng := engine.TestEngine{
 		ConfigJSON: cfgJSON,
