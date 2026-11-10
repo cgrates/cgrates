@@ -7,7 +7,7 @@
 					"*string:~*vars.QueryName{*e164}:4986517174965"],
 				"flags": ["*sessions", "*continue"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
 					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1001"}, // so we can match the supplier profile
@@ -21,8 +21,8 @@
 				"id": "NAPTRSuppliersOneSupplier",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.QueryName{*e164}:4986517174965",
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:1"],
 				"flags": ["*none","*continue"], // do not send request to CGRateS
 				"replyFields":[
 					{"tag": "NAPTROrder", "path": "*rep.Answer.Order",
@@ -34,7 +34,7 @@
 					{"tag": "NAPTRService", "path": "*rep.Answer.Service",
 						"type": "*group", "value": "E2U+SIP"},
 					{"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*group",
-						"value": "~*cgrep.RouteProfiles[0].Routes[0].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles.*primary[0].Routes[0].RouteParameters"},
 					{"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement",
 						"type": "*group", "value": "."},
 				],
@@ -43,8 +43,8 @@
 				"id": "NAPTRSuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.QueryType:NAPTR",
 					"*string:~*vars.QueryName{*e164}:4986517174965",
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
 				"replyFields":[
 					{"tag": "NAPTROrder", "type": "*group", "newBranch": true,
@@ -56,7 +56,7 @@
 					{"tag": "NAPTRService", "path": "*rep.Answer.Service",
 						"type": "*group", "value": "E2U+SIP"},
 					{"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*group",
-						"value": "~*cgrep.RouteProfiles[0].Routes[1].RouteParameters"},
+						"value": "~*cgrep.RouteProfiles.*primary[0].Routes[1].RouteParameters"},
 					{"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement",
 						"type": "*group", "value": "."},
 				],
@@ -67,7 +67,7 @@
 					"*string:~*vars.QueryName:go.dev."],
 				"flags": ["*sessions", "*continue"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
 					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1002"}
@@ -81,30 +81,30 @@
 				"id": "ASuppliersOneSupplier",
 				"filters": ["*string:~*vars.QueryType:A", 
 					"*string:~*vars.QueryName:go.dev.", 
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:2"],
 				"flags": ["*none","*continue"], 
 				"replyFields":[
 					{"tag": "Aname", "path": "*rep.Answer.Hdr.Name", "type": "*group", "value": "go.dev."},
 					{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*group", "value": "300"},
 					{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*group", "value": "1"},
 					{"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*group", "value": "1"},
-					{"tag": "Aip", "path": "*rep.Answer.A", "type": "*group", "value": "~*cgrep.RouteProfiles[0].Routes[0].RouteParameters"}
+					{"tag": "Aip", "path": "*rep.Answer.A", "type": "*group", "value": "~*cgrep.RouteProfiles.*primary[0].Routes[0].RouteParameters"}
 				]
 			},
 			{
 				"id": "ASuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.QueryType:A", 
 					"*string:~*vars.QueryName:go.dev.", 
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
 				"replyFields":[
 					{"tag": "Aname", "path": "*rep.Answer[1].Hdr.Name", "type": "*group", "value": "go.dev."},
 					{"tag": "Attl", "path": "*rep.Answer[1].Hdr.Ttl", "type": "*group", "value": "300"},
 					{"tag": "Aclass", "path": "*rep.Answer[1].Hdr.Class", "type": "*group", "value": "1"},
 					{"tag": "Arrtype", "path": "*rep.Answer[1].Hdr.Rrtype", "type": "*group", "value": "1"},
-					{"tag": "Aip", "path": "*rep.Answer[1].A", "type": "*group", "value": "~*cgrep.RouteProfiles[0].Routes[1].RouteParameters"}
+					{"tag": "Aip", "path": "*rep.Answer[1].A", "type": "*group", "value": "~*cgrep.RouteProfiles.*primary[0].Routes[1].RouteParameters"}
 				]
 			},
 			{
@@ -113,7 +113,7 @@
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org."],
 				"flags": ["*sessions", "*continue"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptDebit", "path": "*opts.*debit", "type": "*constant", "value": "true"},
 					{"tag": "OptRoutes", "path": "*opts.*routes", "type": "*constant", "value": "true"},
 					{"tag": "ToR", "path": "*cgreq.Account", "type": "*constant", "value": "1003"}
@@ -127,30 +127,30 @@
 				"id": "SRVSuppliersOneSupplier",
 				"filters": ["*string:~*vars.QueryType:SRV", 
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org.", 
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:1"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:1"],
 				"flags": ["*none","*continue"],
 				"replyFields":[
 					{"tag": "SRVHdr", "path": "*rep.Answer.Hdr.Name", "type": "*group", "value": "_xmpp-client._tcp.xmpp.org."},
 					{"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*group", "value": "1"},
 					{"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*group", "value": "1"},
 					{"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*group", "value": "9222"},
-					{"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*group", "value": "~*cgrep.RouteProfiles[0].Routes[0].RouteParameters"}
+					{"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*group", "value": "~*cgrep.RouteProfiles.*primary[0].Routes[0].RouteParameters"}
 				]
 			},
 			{
 				"id": "SRVSuppliersTwoSuppliers",
 				"filters": ["*string:~*vars.QueryType:SRV", 
 					"*string:~*vars.QueryName:_xmpp-client._tcp.xmpp.org.", 
-					"*gte:~*cgrep.RouteProfiles.Length:1",
-					"*gte:~*cgrep.RouteProfiles[0].Routes.Length:2"],
+					"*gte:~*cgrep.RouteProfiles.*primary.Length:1",
+					"*gte:~*cgrep.RouteProfiles.*primary[0].Routes.Length:2"],
 				"flags": ["*none","*continue"],
 				"replyFields":[
 					{"tag": "SRVHdr", "path": "*rep.Answer[1].Hdr.Name", "type": "*group", "value": "_xmpp-client._tcp.xmpp.org."},
 					{"tag": "SRVPriority", "path": "*rep.Answer[1].Priority", "type": "*group", "value": "1"},
 					{"tag": "SRVWeight", "path": "*rep.Answer[1].Weight", "type": "*group", "value": "1"},
 					{"tag": "SRVPort", "path": "*rep.Answer[1].Port", "type": "*group", "value": "9222"},
-					{"tag": "SRVTarget", "path": "*rep.Answer[1].Target", "type": "*group", "value": "~*cgrep.RouteProfiles[0].Routes[1].RouteParameters"}
+					{"tag": "SRVTarget", "path": "*rep.Answer[1].Target", "type": "*group", "value": "~*cgrep.RouteProfiles.*primary[0].Routes[1].RouteParameters"}
 				]
 			}
 		],

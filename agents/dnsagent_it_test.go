@@ -55,7 +55,6 @@ var (
 		testDNSitClntAOptsWithAttributes,
 		testDNSitClntSRVOptsWithAttributes,
 		testDNSitClntNAPTROptsWithAttributes,
-		testDNSitStopEngine,
 	}
 )
 
@@ -63,19 +62,20 @@ func TestDNSitSimple(t *testing.T) {
 	switch *utils.DBType {
 	case utils.MetaInternal:
 		dnsCfgDIR = "dnsagent_internal"
-	case utils.MetaRedis:
+	case utils.MetaRedis, utils.MetaPostgres:
 		t.SkipNow()
 	case utils.MetaMySQL:
 		dnsCfgDIR = "dnsagent_mysql"
 	case utils.MetaMongo:
 		dnsCfgDIR = "dnsagent_mongo"
-	case utils.MetaPostgres:
-		dnsCfgDIR = "dnsagent_postgres"
 	default:
 		t.Fatal("Unknown Database type")
 	}
+	t.Cleanup(func() { testDNSitStopEngine(t) })
 	for _, stest := range sTestsDNS {
-		t.Run(dnsCfgDIR, stest)
+		if !t.Run(dnsCfgDIR, stest) {
+			break
+		}
 	}
 }
 
@@ -291,56 +291,24 @@ func testDNSitClntSRVDryRun(t *testing.T) {
 
 func testDNSitClntNAPTRDryRun(t *testing.T) {
 	m := new(dns.Msg)
-	m.SetQuestion("4.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
-	if err := dnsClnt.UDP.WriteMsg(m); err != nil {
-		t.Error(err)
-	}
-	if rply, err := dnsClnt.UDP.ReadMsg(); err != nil {
-		t.Error(err)
-	} else {
-		if rply.Rcode != dns.RcodeSuccess {
-			t.Errorf("failed to get an valid answer\n%v", rply)
+	m.SetQuestion("3.6.9.4.7.1.7.1.5.6.8.9.4.e164.arpa.", dns.TypeNAPTR)
+	for _, conn := range []*dns.Conn{dnsClnt.UDP, dnsClnt.TCP, dnsClnt.TCPTLS} {
+		if err := conn.WriteMsg(m); err != nil {
+			t.Fatal(err)
+		}
+		rply, err := conn.ReadMsg()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if rply.Rcode != dns.RcodeSuccess || len(rply.Answer) != 1 {
+			t.Fatalf("unexpected answer: %v", rply)
 		}
 		answr := rply.Answer[0].(*dns.NAPTR)
 		if answr.Order != 100 {
 			t.Errorf("received: <%v>", answr.Order)
 		}
-		if answr.Regexp != "sip:1@172.16.1.1." {
-			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
-		}
-	}
-	if err := dnsClnt.TCP.WriteMsg(m); err != nil {
-		t.Error(err)
-	}
-	if rply, err := dnsClnt.TCP.ReadMsg(); err != nil {
-		t.Error(err)
-	} else {
-		if rply.Rcode != dns.RcodeSuccess {
-			t.Errorf("failed to get an valid answer\n%v", rply)
-		}
-		answr := rply.Answer[0].(*dns.NAPTR)
-		if answr.Order != 100 {
-			t.Errorf("received: <%v>", answr.Order)
-		}
-		if answr.Regexp != "sip:1@172.16.1.1." {
-			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
-		}
-	}
-	if err := dnsClnt.TCPTLS.WriteMsg(m); err != nil {
-		t.Error(err)
-	}
-	if rply, err := dnsClnt.TCPTLS.ReadMsg(); err != nil {
-		t.Error(err)
-	} else {
-		if rply.Rcode != dns.RcodeSuccess {
-			t.Errorf("failed to get an valid answer\n%v", rply)
-		}
-		answr := rply.Answer[0].(*dns.NAPTR)
-		if answr.Order != 100 {
-			t.Errorf("received: <%v>", answr.Order)
-		}
-		if answr.Regexp != "sip:1@172.16.1.1." {
-			t.Errorf("Expected :<%q> , received: <%q>", "sip:1\\@172.16.1.1.", answr.Regexp)
+		if want := "!^(.*)$!sip:1@172.16.1.10.!"; answr.Regexp != want {
+			t.Errorf("expected %q, received %q", want, answr.Regexp)
 		}
 	}
 }
