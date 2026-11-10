@@ -1867,3 +1867,90 @@ func TestMatchingRateProfileForEventNilEvent(t *testing.T) {
 		t.Errorf("Expected %v, received %v", utils.ErrNotFound, err)
 	}
 }
+
+func TestRateProfileCostForEventPartialIncrementAtRateChange(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	minDecimal, err := utils.NewDecimalFromUsage("1m")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	rPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rpID",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RT_STANDARD": {
+				ID: "RT_STANDARD",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(3, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
+					},
+				},
+			},
+			"RT_WEEKEND": {
+				ID: "RT_WEEKEND",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 20,
+					},
+				},
+				ActivationTimes: "* * * * 0,6",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 1),
+						Unit:          minDecimal,
+						Increment:     minDecimal,
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.OptsRatesStartTime: time.Date(2026, 11, 13, 23, 59, 30, 0, time.UTC),
+			utils.OptsRatesUsage:     utils.NewDecimal(int64(2*time.Minute), 0),
+		},
+	}
+
+	rpCost, err := rateS.rateProfileCostForEvent(context.Background(), rPrf, ev, rateS.cfg.RateSCfg().Verbosity)
+	if err != nil {
+		t.Error(err)
+	}
+	if rpCost.Cost.Compare(utils.NewDecimal(5, 1)) != 0 {
+		t.Errorf("Expected %v, received %v", utils.NewDecimal(5, 1), rpCost.Cost)
+	}
+}
