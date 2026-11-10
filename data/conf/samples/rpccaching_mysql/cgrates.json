@@ -43,6 +43,10 @@
 	}
 },
 
+"accounts": {
+	"enabled": true
+},
+
 "rates": {
 	"enabled": true
 },

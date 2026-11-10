@@ -38,6 +38,7 @@ func expectedUREvent() map[string]any {
 
 }
 func TestERSCgrURFilters(t *testing.T) {
+	dbCfg := getDBCfg(t)
 	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 	buf := &bytes.Buffer{}
 	ng := engine.TestEngine{
@@ -65,7 +66,7 @@ func TestERSCgrURFilters(t *testing.T) {
   ]
 }
 }`,
-		DBCfg:            getDBCfg(t),
+		DBCfg:            dbCfg,
 		Encoding:         *utils.Encoding,
 		LogBuffer:        buf,
 		GracefulShutdown: true,
@@ -87,6 +88,7 @@ func TestERSCgrURFilters(t *testing.T) {
 }
 
 func TestERSCgrURFiltersDelete(t *testing.T) {
+	dbCfg := getDBCfg(t)
 	db := openTestDB(t, "cgrates2", utils.URsTBL, ur1, ur2, ur3)
 
 	buf := &bytes.Buffer{}
@@ -117,7 +119,7 @@ func TestERSCgrURFiltersDelete(t *testing.T) {
   ]
 }
 }`,
-		DBCfg:            getDBCfg(t),
+		DBCfg:            dbCfg,
 		Encoding:         *utils.Encoding,
 		LogBuffer:        buf,
 		GracefulShutdown: true,
@@ -129,6 +131,7 @@ func TestERSCgrURFiltersDelete(t *testing.T) {
 		"expected 2 rows in urs after delete",
 		2*time.Second,
 	)
+	waitForLog(t, buf, ersDryRunCgrUR, 2*time.Second)
 	if got := strings.Count(buf.String(), ersDryRunCgrUR); got != 1 {
 		t.Fatalf("expected 1 DRY_RUN record, got %d", got)
 	}

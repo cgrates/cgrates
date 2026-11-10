@@ -1,4 +1,4 @@
-//go:build flaky
+//go:build integration
 
 // Copyright ITsysCOM GmbH
 // SPDX-License-Identifier: AGPL-3.0-or-later
@@ -49,7 +49,6 @@ var (
 		// testRPCMethodsLoadData,
 		// testRPCMethodsResponderDebit,
 		// testRPCMethodsResponderMaxDebit,
-		testRPCMethodsStopEngine,
 	}
 )
 
@@ -70,8 +69,11 @@ func TestRPCMethods(t *testing.T) {
 		t.Fatal("Unknown Database type")
 	}
 
+	t.Cleanup(func() { testRPCMethodsStopEngine(t) })
 	for _, stest := range sTestsRPCMethods {
-		t.Run(rpcConfDIR, stest)
+		if !t.Run(rpcConfDIR, stest) {
+			break
+		}
 	}
 }
 
