@@ -499,7 +499,8 @@ ActionType
 
 	**\*publish_account**
 		Publish the :ref:`Account` and each individual :ref:`Balance` to the :ref:`ThresholdS`.
-
+		Not needed after *\*topup*, *\*topup_reset*, *\*debit*, *\*debit_reset* or *\*set_balance*, which publish the :ref:`Account` on their own.
+		
 	**\*publish_balance**
 		Publish the matching :ref:`Balances <Balance>` to the :ref:`ThresholdS`.
 
@@ -797,7 +798,16 @@ ActionType
 		.. code-block:: text
 			
 			<Tag[0];UniqueId[1];ThresholdType[2];ThresholdValue[3];Recurrent[4];MinSleep[5];ExpiryTime[6];ActivationTime[7];BalanceTag[8];BalanceType[9];BalanceCategories[10];BalanceDestinationIds[11];BalanceRatingSubject[12];BalanceSharedGroup[13];BalanceExpiryTime[14];BalanceTimingIds[15];BalanceWeight[16];BalanceBlocker[17];BalanceDisabled[18];ActionsId[19];Weight[20]>
-		
+
+Account publishing
+^^^^^^^^^^^^^^^^^^
+
+Balance changes of an :ref:`Account`, such as those performed by the Actions *\*topup*, *\*topup_reset*, *\*debit*, *\*debit_reset* and *\*set_balance*, are automatically published as an *AccountUpdate* event. The event is sent to the connections configured via **thresholds_conns** and **stats_conns** in the **rals** section, so that :ref:`ThresholdS` and :ref:`StatS` can react to them. It carries the Account summary (available in filters via *\*asm*) and *\*eventType* set to *AccountUpdate* within APIOpts.
+
+.. note::
+
+   A Threshold whose Actions modify the same Account (ie: *\*topup*) has to be configured with **Async** set to *true*, otherwise it will block on the Account lock held while the event is published.	
+
 
 Configuration
 -------------
