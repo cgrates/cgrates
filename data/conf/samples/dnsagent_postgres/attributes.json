@@ -6,7 +6,7 @@
 				"filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:4986517174964"],
 				"flags": ["*sessions", "*log"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
 					{"tag": "E164Address", "path": "*cgreq.E164Address", 
 						"type": "*constant", "value": "4986517174964"},
@@ -23,7 +23,7 @@
 					{"tag": "NAPTRService", "path": "*rep.Answer.Service", 
 						"type": "*constant", "value": "E2U+SIP"},
 					{"tag": "NAPTRRegex", "path": "*rep.Answer.Regexp", 
-						"type": "*variable", "value": "~*cgrep.Attributes.NAPTRAddress"}
+						"type": "*variable", "value": "~*cgrep.Attributes.*primary.NAPTRAddress"}
 				]
 			},
 			{
@@ -31,7 +31,7 @@
 				"filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:dns.google."],
 				"flags": ["*sessions", "*log"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
 					{"tag": "Domain", "path": "*cgreq.Domain", 
 						"type": "*constant", "value": "dns.google."},
@@ -45,12 +45,12 @@
 					{"tag": "Attl", "path": "*rep.Answer.Hdr.Ttl", "type": "*constant", "value": "300"},
 					{"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
 					{"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
-					{"tag": "Aip0", "path": "*rep.Answer.A", "type": "*variable", "value": "~*cgrep.Attributes.Aip0"},
+					{"tag": "Aip0", "path": "*rep.Answer.A", "type": "*variable", "value": "~*cgrep.Attributes.*primary.Aip0"},
 					{"tag": "Aname1", "path": "*rep.Answer[1].Hdr.Name", "type": "*constant", "value": "dns.google."},
 					{"tag": "Attl1", "path": "*rep.Answer[1].Hdr.Ttl", "type": "*constant", "value": "300"},
 					{"tag": "Aclass1", "path": "*rep.Answer[1].Hdr.Class", "type": "*constant", "value": "1"},
 					{"tag": "Arrtype1", "path": "*rep.Answer[1].Hdr.Rrtype", "type": "*constant", "value": "1"},
-					{"tag": "Aip1", "path": "*rep.Answer[1].A", "type": "*variable", "value": "~*cgrep.Attributes.Aip1"}
+					{"tag": "Aip1", "path": "*rep.Answer[1].A", "type": "*variable", "value": "~*cgrep.Attributes.*primary.Aip1"}
 				]
 			},
 			{
@@ -58,7 +58,7 @@
 				"filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_ldap._tcp.google.com."],
 				"flags": ["*sessions", "*log"],
 				"requestFields":[
-					{"tag": "OptAuth", "path": "*opts.*authorize", "type": "*constant", "value": "true"},
+					{"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
 					{"tag": "OptAttributes", "path": "*opts.*attributes", "type": "*constant", "value": "true"},
 					{"tag": "SRVAddress", "path": "*cgreq.SRVAddress", 
 						"type": "*constant", "value": "_ldap._tcp.google.com."},
@@ -70,7 +70,7 @@
 					{"tag": "SRVPriority", "path": "*rep.Answer.Priority", "type": "*constant", "value": "5"},
 					{"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*constant", "value": "0"},
 					{"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "389"},
-					{"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*variable", "value": "~*cgrep.Attributes.SRVName"}
+					{"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*variable", "value": "~*cgrep.Attributes.*primary.SRVName"}
 				]
 			}
 		]

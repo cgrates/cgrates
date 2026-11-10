@@ -25,6 +25,7 @@
                 "filters": ["*string:~*vars.QueryType:NAPTR", "*string:~*vars.QueryName{*e164}:5986517174967"],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
+                    {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
                     {"tag": "Origin", "path": "*cgreq.Origin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domanin", "path": "*cgreq.Domanin", "type": "*variable", "value": "~*vars.QueryName{*e164Domain}"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
@@ -36,7 +37,7 @@
                     {"tag": "NAPTRService", "path": "*rep.Answer.Service", "type": "*constant", "value": "E2U+SIP"},
                     {"tag": "NAPTRRegexp", "path": "*rep.Answer.Regexp", "type": "*constant", "value": "!^(.*)$!sip:\\1@172.16.1.10.!"},
                     {"tag": "NAPTRReplacement", "path": "*rep.Answer.Replacement", "type": "*constant", "value": "."},
-                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes.*primary.SipURI", "mandatory": true}
                 ]
             },
             {
@@ -62,6 +63,7 @@
                 "filters": ["*string:~*vars.QueryType:A", "*string:~*vars.QueryName:opendns.com."],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
+                    {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
                     {"tag": "Origin", "path": "*cgreq.AOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domain", "path": "*cgreq.ASIPDomain", "type": "*variable", "value": "~*vars.QueryName"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
@@ -72,7 +74,7 @@
                     {"tag": "Aclass", "path": "*rep.Answer.Hdr.Class", "type": "*constant", "value": "1"},
                     {"tag": "Arrtype", "path": "*rep.Answer.Hdr.Rrtype", "type": "*constant", "value": "1"},
                     {"tag": "Aip", "path": "*rep.Answer.A", "type": "*constant", "value": "146.112.62.105"},
-                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes.*primary.SipURI", "mandatory": true}
                 ]
             },
             {
@@ -98,6 +100,7 @@
                 "filters": ["*string:~*vars.QueryType:SRV", "*string:~*vars.QueryName:_sip._udp.opensips.org."],
                 "flags": ["*sessions","*attributes"],
                 "requestFields":[
+                    {"tag": "OriginID", "path": "*opts.*originID", "type": "*variable", "value": "~*req.Id"},
                     {"tag": "Origin", "path": "*cgreq.SRVOrigin", "type": "*variable", "value": "~*req.Option[0].Uri{*sipuriUser}"},
                     {"tag": "Domain", "path": "*cgreq.SRVDomain", "type": "*variable", "value": "~*vars.QueryName"},
                     {"tag": "NewSipURI", "path": "*cgreq.SipURI", "type": "*constant", "value": "*attributes"}
@@ -108,7 +111,7 @@
                     {"tag": "SRVWeight", "path": "*rep.Answer.Weight", "type": "*constant", "value": "50"},
                     {"tag": "SRVPort", "path": "*rep.Answer.Port", "type": "*constant", "value": "5060"},
                     {"tag": "SRVTarget", "path": "*rep.Answer.Target", "type": "*constant", "value": "opensips.org."},
-                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes[*raw].SipURI", "mandatory": true}
+                    {"tag": "Opts", "path": "*rep.Option.Uri", "type": "*variable", "value": "~*cgrep.Attributes.*primary.SipURI", "mandatory": true}
                 ]
             }
         ]
