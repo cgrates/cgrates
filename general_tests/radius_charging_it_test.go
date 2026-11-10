@@ -48,7 +48,10 @@ func TestRadiusChargingProvisioning(t *testing.T) {
 	ng := engine.TestEngine{
 		ConfigPath: filepath.Join(*utils.DataDir, "conf", "samples", "radius_charging"),
 		ConfigJSON: fmt.Sprintf(`{
-"ees": {"exporters": [{"id": "radius_usage", "exportPath": %q}]},
+"ees": {"exporters": [
+	{"id": "radius_usage", "exportPath": %q},
+	{"id": "plan_log", "type": "*log", "filters": ["*string:~*req.Source:*urLog"]}
+]},
 "radiusAgent": {"clientDictionaries": {"*default": [%q]}}
 }`, exportDir, dictDir+"/"),
 		DBCfg:            engine.InternalDBCfg,
