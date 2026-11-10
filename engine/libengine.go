@@ -136,6 +136,7 @@ func (s *RPCClientSet) Call(ctx context.Context, method string, args any, reply 
 			return rpcclient.ErrDisconnected
 		}
 	case <-ctx2.Done():
+		cancel()
 		return ctx2.Err()
 	}
 	return conn.Call(ctx, method, args, reply)

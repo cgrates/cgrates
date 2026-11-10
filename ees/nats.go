@@ -90,7 +90,9 @@ func (pstr *NatsEE) ExportEvent(ctx context.Context, content, _ any) error {
 	if pstr.jetStream {
 		ctx := context.TODO()
 		if pstr.cfg.Opts.NATSJetStreamMaxWait != nil {
-			ctx, _ = context.WithTimeout(ctx, *pstr.cfg.Opts.NATSJetStreamMaxWait)
+			var cancel context.CancelFunc
+			ctx, cancel = context.WithTimeout(ctx, *pstr.cfg.Opts.NATSJetStreamMaxWait)
+			defer cancel()
 		}
 		_, err = pstr.posterJS.Publish(ctx, pstr.subject, content.([]byte))
 	} else {
