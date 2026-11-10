@@ -128,7 +128,9 @@ func (rdr *NatsER) Serve() error {
 			}
 			ctx := context.TODO()
 			if jsMaxWait := rdr.Config().Opts.NATSJetStreamMaxWait; jsMaxWait != nil {
-				ctx, _ = context.WithTimeout(ctx, *jsMaxWait)
+				var cancel context.CancelFunc
+				ctx, cancel = context.WithTimeout(ctx, *jsMaxWait)
+				defer cancel()
 			}
 
 			var cons jetstream.Consumer
