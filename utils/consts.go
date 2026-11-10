@@ -312,6 +312,7 @@ const (
 	MetaJSON                 = "*json"
 	MetaDateTime             = "*datetime"
 	MetaUnixTimestamp        = "*unixTimestamp"
+	MetaTimezone             = "*timezone"
 	MetaProcessEvent         = "*processEvent"
 	MetaDumpToFile           = "*dumpToFile"
 	MetaDumpToJSON           = "*dumpToJSON"

@@ -557,6 +557,12 @@ func TestUsageRecordsRerating(t *testing.T) {
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"processedPath": "",
 			"flags": ["*sessions"],
+			"fields": [
+				{"tag": "NoRate", "path": "*opts.*rates", "type": "*constant", "value": "false"}, // make sure we dont rate what we get
+				{"tag": "NoRefund", "path": "*opts.*refund", "type": "*constant", "value": "false"},
+				{"tag": "NoDebit", "path": "*opts.*debit", "type": "*constant", "value": "false"},
+				{"tag": "NoEEs", "path": "*opts.*ees", "type": "*constant", "value": "false"},
+			],
 			"opts": {
 				"sqlDBName": "cgrates",
 				"sqlTableName": "urs"
@@ -891,6 +897,12 @@ func TestUsageRecordsGetURsRerating(t *testing.T) {
 			"sourcePath": "*mysql://cgrates:CGRateS.org@127.0.0.1:3306",
 			"processedPath": "",
 			"flags": ["*sessions"],
+			"fields": [
+				{"tag": "NoRate", "path": "*opts.*rates", "type": "*constant", "value": "false"}, // make sure we dont rate what we get
+				{"tag": "NoRefund", "path": "*opts.*refund", "type": "*constant", "value": "false"},
+				{"tag": "NoDebit", "path": "*opts.*debit", "type": "*constant", "value": "false"},
+				{"tag": "NoEEs", "path": "*opts.*ees", "type": "*constant", "value": "false"},
+			],
 			"opts": {
 				"sqlDBName": "cgrates",
 				"sqlTableName": "urs"
@@ -1032,7 +1044,7 @@ func TestUsageRecordsGetURsRerating(t *testing.T) {
 		var rows []map[string]*utils.CGREvent
 		if err := client.Call(context.Background(), utils.AdminSv1GetURs,
 			&apis.URFiltersFromReader{
-				ReaderID: "GetURs", // call reader that  only gets urs without refunding/rerating
+				ReaderID: "GetURs", // call reader that only gets urs without refunding/rerating
 			}, &rows); err != nil {
 			t.Fatal(err)
 		}

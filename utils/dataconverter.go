@@ -87,8 +87,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(SIPURIUserConverter), nil
 	case params == MetaSIPURIMethod:
 		return new(SIPURIMethodConverter), nil
-	case params == MetaUnixTime:
-		return new(UnixTimeConverter), nil
+	case strings.HasPrefix(params, MetaUnixTime):
+		if len(params) == len(MetaUnixTime) { // no extra params, defaults implied
+			return NewUnixTimeConverter(EmptyString)
+		}
+		return NewUnixTimeConverter(params[len(MetaUnixTime)+1:])
 	case params == MetaLen:
 		return new(LengthConverter), nil
 	case params == MetaSlice:
@@ -105,13 +108,11 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
 	case strings.HasPrefix(params, MetaTimeString):
-		layout := time.RFC3339
-		if len(params) > len(MetaTimeString) { // no extra params, defaults implied
-			layout = params[len(MetaTimeString)+1:]
-		}
-		return NewTimeStringConverter(layout), nil
+		return NewTimeStringConverter(params)
 	case strings.HasPrefix(params, MetaDateTime):
 		return NewDateTimeConverter(params)
+	case strings.HasPrefix(params, MetaTimezone):
+		return NewTimezoneConverter(params)
 	case strings.HasPrefix(params, MetaRandom):
 		if len(params) == len(MetaRandom) { // no extra params, defaults implied
 			return NewRandomConverter(EmptyString)
@@ -388,18 +389,48 @@ func (*SIPURIMethodConverter) Convert(in any) (out any, err error) {
 	return sipingo.MethodFrom(IfaceAsString(in)), nil
 }
 
-func NewTimeStringConverter(params string) (hdlr DataConverter) {
-	return &TimeStringConverter{Layout: params}
+// splitLayoutTimezone splits "layout:timezone". Since layouts can contain
+// ':' themselves, the last ':'-separated segment is treated as the timezone
+// only if it is a valid IANA location name.
+func splitLayoutTimezone(rest string) (layout, timezone string) {
+	// find the last ":" character in the params
+	if i := strings.LastIndexByte(rest, ':'); i > 0 && i < len(rest)-1 {
+		// try to convert to location the string after the last ":" character
+		if _, err := time.LoadLocation(rest[i+1:]); err == nil {
+			// if succesfuly converted, plot the layout and timezone, if not, assume only layout was present in the params and timezone was not included, and apply default UTC timezone
+			return rest[:i], rest[i+1:]
+		}
+	}
+	return rest, EmptyString
+}
+
+// NewTimeStringConverter parses params in the form:
+//
+//	*timestring:layout:timezone
+//
+// Layout defaults to time.RFC3339 and timezone to UTC.
+func NewTimeStringConverter(params string) (DataConverter, error) {
+	layout, timezone := time.RFC3339, EmptyString
+	if _, rest, ok := strings.Cut(params, ":"); ok && rest != EmptyString {
+		layout, timezone = splitLayoutTimezone(rest)
+	}
+	if timezone != EmptyString {
+		if _, err := time.LoadLocation(timezone); err != nil {
+			return nil, fmt.Errorf("*timestring converter: invalid timezone %q: %w", timezone, err)
+		}
+	}
+	return &TimeStringConverter{Layout: layout, Timezone: timezone}, nil
 }
 
 type TimeStringConverter struct {
-	Layout string
+	Layout   string // the layout the time will be transformed into
+	Timezone string // the timezone that the time will be converted to
 }
 
 // Convert implements DataConverter interface
 func (tS *TimeStringConverter) Convert(in any) (
 	out any, err error) {
-	tm, err := ParseTimeDetectLayout(in.(string), EmptyString)
+	tm, err := ParseTimeDetectLayout(IfaceAsString(in), tS.Timezone)
 	if err != nil {
 		return nil, err
 	}
@@ -421,13 +452,25 @@ func (*String2HexConverter) Convert(in any) (o any, err error) {
 }
 
 // UnixTimeConverter converts the interface in the unix time
-type UnixTimeConverter struct{}
+type UnixTimeConverter struct {
+	Timezone string
+}
+
+// NewUnixTimeConverter creates a converter which parses the input as a time
+// in the given timezone (UTC if empty) and returns it as unix time.
+func NewUnixTimeConverter(timezone string) (DataConverter, error) {
+	if timezone != EmptyString {
+		if _, err := time.LoadLocation(timezone); err != nil {
+			return nil, fmt.Errorf("*unixtime converter: invalid timezone %q: %w", timezone, err)
+		}
+	}
+	return &UnixTimeConverter{Timezone: timezone}, nil
+}
 
 // Convert implements DataConverter interface
-func (tS *UnixTimeConverter) Convert(in any) (
-	out any, err error) {
+func (tS *UnixTimeConverter) Convert(in any) (out any, err error) {
 	var tm time.Time
-	if tm, err = ParseTimeDetectLayout(in.(string), EmptyString); err != nil {
+	if tm, err = ParseTimeDetectLayout(IfaceAsString(in), tS.Timezone); err != nil {
 		return
 	}
 	out = tm.Unix()
@@ -889,24 +932,66 @@ func (c *ULIConverter) Convert(in any) (any, error) {
 
 type DateTimeConverter struct {
 	inlayout string
+	location *time.Location
 }
 
+// NewDateTimeConverter parses params in the form:
+//
+//	*datetime:layout:timezone
+//
+// Since layouts can contain ':' themselves (e.g. "15:04:05"), the last
+// ':'-separated segment is treated as the timezone only if it is a valid
+// IANA location name. Otherwise the whole remainder is the layout and
+// the timezone defaults to UTC.
 func NewDateTimeConverter(params string) (DataConverter, error) {
-	_, layout, ok := strings.Cut(params, ":")
-	if !ok || layout == "" {
+	_, rest, ok := strings.Cut(params, ":")
+	if !ok || rest == "" {
 		return nil, fmt.Errorf("*datetime converter: requires at least one parameter")
 	}
-	return &DateTimeConverter{inlayout: layout}, nil
+	layout, timezone := splitLayoutTimezone(rest)
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return nil, fmt.Errorf("*datetime converter: invalid timezone %q: %w", timezone, err)
+	}
+	return &DateTimeConverter{inlayout: layout, location: loc}, nil
 }
 
 func (dt *DateTimeConverter) Convert(in any) (any, error) {
 	inStr := IfaceAsString(in)
-	tm, err := time.Parse(dt.inlayout, inStr)
+	tm, err := time.ParseInLocation(dt.inlayout, inStr, dt.location)
 	if err != nil {
 		return nil, fmt.Errorf("*datetime converter: parsing failed for value %q with layout %q: %w",
 			inStr, dt.inlayout, err)
 	}
 	return tm, nil
+}
+
+// TimezoneConverter converts any time-like input (time.Time, unix timestamp)
+// into the target timezone.
+type TimezoneConverter struct {
+	timezone string
+}
+
+// NewTimezoneConverter parses params in the form:
+//
+//	*timezone:America/New_York
+//
+// The timezone is an IANA name (e.g. America/New_York) and the output is a time.Time.
+func NewTimezoneConverter(params string) (DataConverter, error) {
+	_, tz, ok := strings.Cut(params, ":")
+	if !ok || tz == EmptyString {
+		return nil, errors.New("*timezone converter: requires a timezone parameter")
+	}
+	return &TimezoneConverter{timezone: tz}, nil
+}
+
+// Convert implements DataConverter interface
+func (c *TimezoneConverter) Convert(in any) (any, error) {
+	t, err := ParseTimeDetectLayout(IfaceAsString(in), c.timezone)
+	if err != nil {
+		return nil, fmt.Errorf("*timezone converter: %w", err)
+	}
+	return t, nil
 }
 
 // UnitsConverter converts duration into integer

@@ -343,14 +343,17 @@ func ParseDurationWithNanosecs(durStr string) (d time.Duration, err error) {
 	return time.ParseDuration(durStr)
 }
 
+// ConcatenatedKey will join strings with ":" separator
 func ConcatenatedKey(keyVals ...string) string {
 	return strings.Join(keyVals, ConcatenatedKeySep)
 }
 
+// SplitConcatenatedKey will split string to strings based on ":" separator
 func SplitConcatenatedKey(key string) []string {
 	return strings.Split(key, ConcatenatedKeySep)
 }
 
+// InfieldSplit will split string to strings based on ";" separator
 func InfieldSplit(val string) []string {
 	return strings.Split(val, InfieldSep)
 }
