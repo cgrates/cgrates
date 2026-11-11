@@ -6670,3 +6670,196 @@ func TestAccountsDebitBalanceLimitWithFixedFee(t *testing.T) {
 		t.Errorf("Expected %v, \n received %v", utils.ToJSON(evChExp), utils.ToJSON(charges))
 	}
 }
+
+func TestAccountSMatchingAccountForEvent(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	fltr := engine.NewFilterS(cfg, nil, dm)
+	accnts := NewAccountS(cfg, fltr, nil, dm)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(2, 0),
+		},
+	}
+
+	evNm := utils.MapStorage{
+		utils.MetaReq:  cgrEv.Event,
+		utils.MetaOpts: cgrEv.APIOpts,
+	}
+
+	acc, weight, err := accnts.matchingAccountForEvent(context.Background(), "cgrates.org", cgrEv, evNm, "acc1", false)
+	if err != nil {
+		t.Error(err)
+	}
+	if acc != nil {
+		t.Errorf("Expected nil, received %v", acc)
+	}
+	if weight != 0 {
+		t.Errorf("Expected 0, received %v", weight)
+	}
+}
+
+func TestMatchingAccountForEventDBError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	cm := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &dataDBMockError{}}, cfg.DbCfg())
+	dm := engine.NewDataManager(cm, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	acnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, dm)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+	}
+
+	evNm := utils.MapStorage{
+		utils.MetaReq:  ev.Event,
+		utils.MetaOpts: ev.APIOpts,
+	}
+	acc, weight, err := acnts.matchingAccountForEvent(context.Background(), "cgrates.org", ev, evNm, "accID", false)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+	if acc != nil {
+		t.Errorf("Expected nil, received %v", acc)
+	}
+	if weight != 0 {
+		t.Errorf("Expected 0, received %v", weight)
+	}
+}
+
+func TestMatchingAccountsForEventAccountSelection(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+
+	acc1 := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACC_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+	}
+
+	acc2 := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACC_2",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+	}
+
+	acc3 := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACC_3",
+		FilterIDs: []string{"*string:~*req.Account:1002"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 15,
+			},
+		},
+	}
+
+	if err := dm.SetAccount(context.Background(), acc1, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetAccount(context.Background(), acc2, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetAccount(context.Background(), acc3, true); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name          string
+		account       string
+		accIDs        []string
+		ignoreFilters bool
+		expIDs        []string
+		expErr        error
+	}{
+		{
+			name:    "missing account is skipped",
+			account: "1001",
+			accIDs:  []string{"ACC_1", "MISSING", "ACC_2"},
+			expIDs:  []string{"ACC_2", "ACC_1"},
+		},
+		{
+			name:    "filter not passing",
+			account: "1001",
+			accIDs:  []string{"ACC_3"},
+			expErr:  utils.ErrNotFound,
+		},
+		{
+			name:    "indexed match sorted by weight",
+			account: "1001",
+			expIDs:  []string{"ACC_2", "ACC_1"},
+		},
+		{
+			name:    "indexed no match",
+			account: "1003",
+			expErr:  utils.ErrNotFound,
+		},
+		{
+			name:    "only missing account",
+			account: "1001",
+			accIDs:  []string{"MISSING"},
+			expErr:  utils.ErrNotFound,
+		},
+		{
+			name:          "ignore filters true",
+			account:       "1001",
+			accIDs:        []string{"ACC_3"},
+			ignoreFilters: true,
+			expIDs:        []string{"ACC_3"},
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event: map[string]any{
+					utils.AccountField: tc.account,
+				},
+				APIOpts: map[string]any{},
+			}
+
+			accs, err := accnts.matchingAccountsForEvent(context.Background(), "cgrates.org", ev, tc.accIDs, tc.ignoreFilters)
+			if err != tc.expErr {
+				t.Errorf("Expected %v, received %v", tc.expErr, err)
+			}
+
+			var ids []string
+			for _, acc := range accs {
+				ids = append(ids, acc.ID)
+			}
+			if !reflect.DeepEqual(ids, tc.expIDs) {
+				t.Errorf("Expected %v, received %v", tc.expIDs, ids)
+			}
+		})
+	}
+}
