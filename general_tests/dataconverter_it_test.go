@@ -146,7 +146,7 @@ cgrates.org,ATTR_DC,,,,,,*req.Float64Variable,*variable,~*opts.variable15{*float
 // cgrates.org,ATTR_DC,,,,,,*req.E164DomainVariable,*variable,~*opts.variable16{*e164Domain}
 // cgrates.org,ATTR_DC,,,,,,*req.E164Variable,*variable,~*opts.variable17{*e164}
 // cgrates.org,ATTR_DC,,,,,,*req.LibphonenumberVariable,*variable,~*opts.variable18{*libphonenumber}
-// cgrates.org,ATTR_DC,,,,,,*req.TimeStringVariable,*variable,~*opts.variable19{*timeString}
+// cgrates.org,ATTR_DC,,,,,,*req.TimeVariable,*variable,~*opts.variable19{*time}
 // cgrates.org,ATTR_DC,,,,,,*req.RandomVariable,*variable,~*opts.variable20{*random}
 // cgrates.org,ATTR_DC,,,,,,*req.JoinVariable,*variable,~*opts.variable21{*join}
 // cgrates.org,ATTR_DC,,,,,,*req.SplitVariable,*variable,~*opts.variable22{*split}

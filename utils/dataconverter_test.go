@@ -139,11 +139,11 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", exp, hex)
 	}
 
-	tm, err := NewDataConverter(MetaTimeString)
+	tm, err := NewDataConverter(MetaTime)
 	if err != nil {
 		t.Error(err)
 	}
-	expTime, err := NewTimeStringConverter(ConcatenatedKey(MetaTimeString, time.RFC3339))
+	expTime, err := NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339))
 	if err != nil {
 		t.Error(err)
 	}
@@ -151,11 +151,11 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
 
-	tm, err = NewDataConverter("*timeString:020106150400")
+	tm, err = NewDataConverter("*time:020106150400")
 	if err != nil {
 		t.Error(err)
 	}
-	expTime, err = NewTimeStringConverter("*timeString:020106150400")
+	expTime, err = NewTimeConverter("*time:020106150400")
 	if err != nil {
 		t.Error(err)
 	}
@@ -805,20 +805,20 @@ func TestNewDataConverterMustCompile2(t *testing.T) {
 	NewDataConverterMustCompile(MetaMultiply)
 }
 
-func TestNewTimeStringConverter(t *testing.T) {
+func TestNewTimeConverter(t *testing.T) {
 	//empty
-	eOut := &TimeStringConverter{Layout: time.RFC3339}
-	if rcv, err := NewTimeStringConverter(""); err != nil {
+	eOut := &TimeConverter{Layout: time.RFC3339}
+	if rcv, err := NewTimeConverter(""); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
 
 	//default
-	eOut = &TimeStringConverter{Layout: time.RFC3339}
+	eOut = &TimeConverter{Layout: time.RFC3339}
 	var rcv DataConverter
 	var err error
-	if rcv, err = NewTimeStringConverter(ConcatenatedKey(MetaTimeString, time.RFC3339)); err != nil {
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339)); err != nil {
 		t.Fatal(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
@@ -837,8 +837,8 @@ func TestNewTimeStringConverter(t *testing.T) {
 	}
 
 	//other
-	eOut = &TimeStringConverter{"020106150400", EmptyString}
-	if rcv, err = NewTimeStringConverter(ConcatenatedKey(MetaTimeString, "020106150400")); err != nil {
+	eOut = &TimeConverter{"020106150400", EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "020106150400")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
@@ -856,8 +856,8 @@ func TestNewTimeStringConverter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
 	}
 
-	eOut = &TimeStringConverter{"20060102", EmptyString}
-	if rcv, err = NewTimeStringConverter(ConcatenatedKey(MetaTimeString, "20060102")); err != nil {
+	eOut = &TimeConverter{"20060102", EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "20060102")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
@@ -870,8 +870,8 @@ func TestNewTimeStringConverter(t *testing.T) {
 	}
 
 	//wrong cases
-	eOut = &TimeStringConverter{"not really a good time", EmptyString}
-	if rcv, err = NewTimeStringConverter(ConcatenatedKey(MetaTimeString, "not really a good time")); err != nil {
+	eOut = &TimeConverter{"not really a good time", EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "not really a good time")); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)

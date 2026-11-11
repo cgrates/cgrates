@@ -107,8 +107,8 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return NewPhoneNumberConverter(EmptyString)
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
-	case strings.HasPrefix(params, MetaTimeString):
-		return NewTimeStringConverter(params)
+	case strings.HasPrefix(params, MetaTime):
+		return NewTimeConverter(params)
 	case strings.HasPrefix(params, MetaDateTime):
 		return NewDateTimeConverter(params)
 	case strings.HasPrefix(params, MetaTimezone):
@@ -404,31 +404,31 @@ func splitLayoutTimezone(rest string) (layout, timezone string) {
 	return rest, EmptyString
 }
 
-// NewTimeStringConverter parses params in the form:
+// NewTimeConverter parses params in the form:
 //
-//	*timestring:layout:timezone
+//	*time:layout:timezone
 //
 // Layout defaults to time.RFC3339 and timezone to UTC.
-func NewTimeStringConverter(params string) (DataConverter, error) {
+func NewTimeConverter(params string) (DataConverter, error) {
 	layout, timezone := time.RFC3339, EmptyString
 	if _, rest, ok := strings.Cut(params, ":"); ok && rest != EmptyString {
 		layout, timezone = splitLayoutTimezone(rest)
 	}
 	if timezone != EmptyString {
 		if _, err := time.LoadLocation(timezone); err != nil {
-			return nil, fmt.Errorf("*timestring converter: invalid timezone %q: %w", timezone, err)
+			return nil, fmt.Errorf("*time converter: invalid timezone %q: %w", timezone, err)
 		}
 	}
-	return &TimeStringConverter{Layout: layout, Timezone: timezone}, nil
+	return &TimeConverter{Layout: layout, Timezone: timezone}, nil
 }
 
-type TimeStringConverter struct {
+type TimeConverter struct {
 	Layout   string // the layout the time will be transformed into
 	Timezone string // the timezone that the time will be converted to
 }
 
 // Convert implements DataConverter interface
-func (tS *TimeStringConverter) Convert(in any) (
+func (tS *TimeConverter) Convert(in any) (
 	out any, err error) {
 	tm, err := ParseTimeDetectLayout(IfaceAsString(in), tS.Timezone)
 	if err != nil {

@@ -13,5 +13,5 @@ CREATE TABLE urs (
  `deleted_at` TIMESTAMP NULL,
   PRIMARY KEY (`id`)
 );
-ALTER TABLE urs ADD COLUMN urid VARCHAR(40) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$."*urID"') );
+ALTER TABLE urs ADD COLUMN urid VARCHAR(128) GENERATED ALWAYS AS ( JSON_VALUE(opts, '$."*urID"') );
 CREATE UNIQUE INDEX opts_urid_idx ON urs (urid);
