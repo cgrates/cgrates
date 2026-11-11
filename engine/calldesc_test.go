@@ -2858,3 +2858,92 @@ func TestAddRatingInfos(t *testing.T) {
 		})
 	}
 }
+
+func TestCDRefundIncrementsGenericBalance(t *testing.T) {
+	t.Skip("fails until the refund fix for #5481 is solved")
+	tests := []struct {
+		name      string
+		tor       string
+		accID     string
+		increment *Increment
+		wantVoice float64
+		wantGen   float64
+	}{
+		{
+			name:  "voice event used from generic",
+			tor:   utils.MetaVoice,
+			accID: "genericwithvoice",
+			increment: &Increment{
+				Duration: 19 * time.Second,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "testUUID", Factor: 1, ToR: utils.MetaVoice},
+					AccountID: "genericwithvoice",
+				},
+			},
+			wantVoice: 10 * float64(time.Second),
+			wantGen:   29 * float64(time.Second),
+		},
+		{
+			name:  "sms event used from generic with factor",
+			tor:   utils.MetaSMS,
+			accID: "gneericwithsms",
+			increment: &Increment{
+				Duration: 1,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "testUUID", Factor: 60 * float64(time.Second), ToR: utils.MetaSMS},
+					AccountID: "gneericwithsms",
+				},
+			},
+			wantVoice: 10 * float64(time.Second),
+			wantGen:   70 * float64(time.Second),
+		},
+		{
+			name:  "voice event used from voice ",
+			tor:   utils.MetaVoice,
+			accID: "voiceonly",
+			increment: &Increment{
+				Duration: 3 * time.Second,
+				BalanceInfo: &DebitInfo{
+					Unit:      &UnitInfo{UUID: "minutea", Factor: 1, ToR: utils.MetaVoice},
+					AccountID: "voiceonly",
+				},
+			},
+			wantVoice: 13 * float64(time.Second),
+			wantGen:   10 * float64(time.Second),
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ub := &Account{
+				ID: tc.accID,
+				BalanceMap: map[string]Balances{
+					utils.MetaVoice: {
+						&Balance{Uuid: "minutea", Value: 10 * float64(time.Second), Weight: 10,
+							DestinationIDs: utils.StringMap{"NAT": true}},
+					},
+					utils.MetaGeneric: {
+						&Balance{Uuid: "testUUID", Value: 10 * float64(time.Second), Weight: 20,
+							DestinationIDs: utils.StringMap{"NAT": true}},
+					},
+				},
+			}
+			if err := dm.SetAccount(ub); err != nil {
+				t.Fatal(err)
+			}
+			cd := &CallDescriptor{ToR: tc.tor, Increments: Increments{tc.increment}}
+			if _, err := cd.RefundIncrements(nil); err != nil {
+				t.Fatal(err)
+			}
+			ub, err := dm.GetAccount(tc.accID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := ub.BalanceMap[utils.MetaVoice][0].GetValue(); got != tc.wantVoice {
+				t.Errorf("voice balance: expected %v, received %v", tc.wantVoice, got)
+			}
+			if got := ub.BalanceMap[utils.MetaGeneric][0].GetValue(); got != tc.wantGen {
+				t.Errorf("generic balance: expected %v, received %v", tc.wantGen, got)
+			}
+		})
+	}
+}
