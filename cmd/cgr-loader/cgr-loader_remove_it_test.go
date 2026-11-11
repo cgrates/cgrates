@@ -48,6 +48,7 @@ func TestCGRLoaderStoreRemove(t *testing.T) {
 	_ = client.Close()
 	testEngine.Stop(t)
 	client = testEngine.Start(t)
+	engine.WaitForServiceStart(t, client, utils.AdminS, time.Second)
 
 	args := func(id string) *utils.TenantIDWithAPIOpts {
 		return &utils.TenantIDWithAPIOpts{

@@ -1130,6 +1130,7 @@ func TestSessionSv1ProcessEventRatesFlag(t *testing.T) {
 	}
 
 	client, _ := ng.Run(t)
+	engine.WaitForServiceStart(t, client, utils.AdminS, time.Second)
 
 	var reply string
 
