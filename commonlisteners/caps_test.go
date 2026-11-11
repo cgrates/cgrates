@@ -4,8 +4,14 @@
 package commonlisteners
 
 import (
+	"context"
+	"encoding/json"
+	"io"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"reflect"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -83,6 +89,93 @@ func TestNewCapsServerCodec(t *testing.T) {
 	}
 	if err = codec.Close(); err != nil {
 		t.Fatal(err)
+	}
+}
+
+type capsCompletionService struct{}
+
+func (*capsCompletionService) CapsError(_ context.Context, _ string, _ *string) error {
+	return utils.ErrMaxConcurentRPCExceededNoCaps
+}
+
+func TestCapsHTTPRequestCompletion(t *testing.T) {
+	for _, tc := range []struct {
+		name      string
+		request   string
+		full      bool
+		wantError string
+	}{
+		{
+			name:      "unknown method while full",
+			request:   `{"method":"Missing.Call","params":["x"],"id":1}`,
+			full:      true,
+			wantError: "can't find service",
+		},
+		{
+			name:      "handler caps error",
+			request:   `{"method":"Test.CapsError","params":["x"],"id":1}`,
+			wantError: utils.ErrMaxConcurentRPCExceeded.Error(),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			caps := engine.NewCaps(1, utils.MetaBusy)
+			server := NewCommonListenerS(caps)
+			server.RpcRegisterName("Test", new(capsCompletionService))
+			wantAllocated := 0
+			if tc.full {
+				if err := caps.Allocate(); err != nil {
+					t.Fatal(err)
+				}
+				wantAllocated = 1
+			}
+
+			request := httptest.NewRequest(http.MethodPost, "/jsonrpc", strings.NewReader(tc.request))
+			response := httptest.NewRecorder()
+			server.handleRequest(response, request)
+			var reply struct{ Error string }
+			if err := json.Unmarshal(response.Body.Bytes(), &reply); err != nil {
+				t.Fatal(err)
+			}
+			if !strings.Contains(reply.Error, tc.wantError) {
+				t.Errorf("expected error containing %q, got %q", tc.wantError, reply.Error)
+			}
+			if allocated := caps.Allocated(); allocated != wantAllocated {
+				t.Errorf("expected %d allocated caps, got %d", wantAllocated, allocated)
+			}
+		})
+	}
+}
+
+func TestCapsBiRPCRequestCompletion(t *testing.T) {
+	caps := engine.NewCaps(1, utils.MetaBusy)
+	server := birpc.NewBirpcServer()
+	if err := server.RegisterName("Test", new(capsCompletionService)); err != nil {
+		t.Fatal(err)
+	}
+	serverConn, clientConn := net.Pipe()
+	done := make(chan struct{})
+	go func() {
+		server.ServeCodec(newCapsBiRPCJSONCodec(serverConn, caps, nil))
+		close(done)
+	}()
+	t.Cleanup(func() {
+		_ = clientConn.Close()
+		<-done
+	})
+	if _, err := io.WriteString(clientConn, `{"method":"Test.CapsError","params":["x"],"id":1}`); err != nil {
+		t.Fatal(err)
+	}
+	var reply struct{ Error string }
+	if err := json.NewDecoder(clientConn).Decode(&reply); err != nil {
+		t.Fatal(err)
+	}
+	_ = clientConn.Close()
+	<-done
+	if reply.Error != utils.ErrMaxConcurentRPCExceeded.Error() {
+		t.Errorf("unexpected error: %q", reply.Error)
+	}
+	if allocated := caps.Allocated(); allocated != 0 {
+		t.Errorf("expected no allocated caps, got %d", allocated)
 	}
 }
 

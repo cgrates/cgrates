@@ -71,9 +71,11 @@ func newCapsServerCodec(sc birpc.ServerCodec, caps *engine.Caps) birpc.ServerCod
 type capsServerCodec struct {
 	sc   birpc.ServerCodec
 	caps *engine.Caps
+	req  *birpc.Request
 }
 
 func (c *capsServerCodec) ReadRequestHeader(r *birpc.Request) error {
+	c.req = r
 	return c.sc.ReadRequestHeader(r)
 }
 
@@ -81,13 +83,12 @@ func (c *capsServerCodec) ReadRequestBody(x any) error {
 	if err := c.caps.Allocate(); err != nil {
 		return err
 	}
+	c.req.SetDoneFunc(c.caps.Deallocate)
 	return c.sc.ReadRequestBody(x)
 }
 func (c *capsServerCodec) WriteResponse(r *birpc.Response, x any) error {
 	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
-	} else {
-		defer c.caps.Deallocate()
 	}
 	return c.sc.WriteResponse(r, x)
 }
@@ -142,11 +143,13 @@ func newCapsBiRPCCodec(sc birpc.BirpcCodec, caps *engine.Caps) birpc.BirpcCodec 
 type capsBiRPCCodec struct {
 	sc   birpc.BirpcCodec
 	caps *engine.Caps
+	req  *birpc.Request
 }
 
 // ReadHeader must read a message and populate either the request
 // or the response by inspecting the incoming message.
 func (c *capsBiRPCCodec) ReadHeader(req *birpc.Request, resp *birpc.Response) (err error) {
+	c.req = req
 	return c.sc.ReadHeader(req, resp)
 }
 
@@ -155,6 +158,7 @@ func (c *capsBiRPCCodec) ReadRequestBody(x any) (err error) {
 	if err = c.caps.Allocate(); err != nil {
 		return
 	}
+	c.req.SetDoneFunc(c.caps.Deallocate)
 	return c.sc.ReadRequestBody(x)
 }
 
@@ -172,8 +176,6 @@ func (c *capsBiRPCCodec) WriteRequest(req *birpc.Request, x any) error {
 func (c *capsBiRPCCodec) WriteResponse(r *birpc.Response, x any) error {
 	if r.Error == utils.ErrMaxConcurentRPCExceededNoCaps.Error() {
 		r.Error = utils.ErrMaxConcurentRPCExceeded.Error()
-	} else {
-		defer c.caps.Deallocate()
 	}
 	return c.sc.WriteResponse(r, x)
 }
