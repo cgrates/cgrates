@@ -651,7 +651,7 @@ const (
 	ResourceUsageStr     = "ResourceUsage"
 	MetaDuration         = "*duration"
 	MetaLibPhoneNumber   = "*libphonenumber"
-	MetaTimeString       = "*timeString"
+	MetaTime             = "*time"
 	MetaIP2Hex           = "*ip2hex"
 	MetaString2Hex       = "*string2hex"
 	MetaUnixTime         = "*unixtime"
