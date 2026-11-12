@@ -272,6 +272,11 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string, thresholdS
 						*act.Balance.ExpirationDate = expDate
 					}
 				}
+				if act.Balance.WeightRule != "" {
+					if dynWeight, errWg := utils.BalanceWeightAsFloat64(act.Balance.WeightRule); errWg == nil {
+						act.Balance.Weight = &dynWeight
+					}
+				}
 
 				actionFunction, exists := getActionFunc(act.ActionType)
 				if !exists {

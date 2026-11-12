@@ -292,12 +292,17 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 		}
 
 		var weight *float64
+		var weightRule string
 		if apiAct.BalanceWeight != "" {
-			x, err := utils.BalanceWeightAsFloat64(apiAct.BalanceWeight)
-			if err != nil {
-				return err
+			if strings.HasPrefix(apiAct.BalanceWeight, utils.Meta) {
+				weightRule = apiAct.BalanceWeight
+			} else {
+				x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64)
+				if err != nil {
+					return err
+				}
+				weight = &x
 			}
-			weight = &x
 		}
 
 		var blocker *bool
@@ -335,6 +340,7 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 				Type:           utils.StringPointer(apiAct.BalanceType),
 				Value:          vf,
 				Weight:         weight,
+				WeightRule:     weightRule,
 				DestinationIDs: utils.StringMapPointer(utils.ParseStringMap(apiAct.DestinationIds)),
 				RatingSubject:  utils.StringPointer(apiAct.RatingSubject),
 				SharedGroups:   utils.StringMapPointer(utils.ParseStringMap(apiAct.SharedGroups)),
