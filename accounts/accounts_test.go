@@ -6863,3 +6863,441 @@ func TestMatchingAccountsForEventAccountSelection(t *testing.T) {
 		})
 	}
 }
+
+func TestProcessThresholds(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+
+	var cgrEv *utils.CGREvent
+	cc := &testMockCall{
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ProcessEvent: func(_ context.Context, args, _ any) error {
+				cgrEv = args.(*utils.CGREvent)
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- cc
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+	cfg.AccountSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	connMgr.AddInternalConn(connID, utils.ThresholdSv1, chanInternal)
+
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), connMgr, nil)
+
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACCOUNT1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+
+	tests := []struct {
+		name   string
+		opts   map[string]any
+		expIDs any
+	}{
+		{
+			name: "ThresholdIDs from opts",
+			opts: map[string]any{
+				utils.MetaThresholds:          true,
+				utils.OptsThresholdProfileIDs: []string{"THR1", "THR2"},
+			},
+			expIDs: []string{"THR1", "THR2"},
+		},
+		{
+			name: "no ThresholdIDs while thresholds is true",
+			opts: map[string]any{
+				utils.MetaThresholds: true,
+			},
+			expIDs: nil,
+		},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				ID:      "evID",
+				Event:   map[string]any{},
+				APIOpts: tc.opts,
+			}
+			_, err := accnts.processThresholds(context.Background(), ev, acnt)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if cgrEv == nil {
+				t.Fatal("ThresholdS was not called")
+			}
+			rcv := cgrEv.APIOpts[utils.OptsThresholdProfileIDs]
+			if !reflect.DeepEqual(rcv, tc.expIDs) {
+				t.Errorf("Expected %v \n received %v", tc.expIDs, rcv)
+			}
+		})
+	}
+}
+
+func TestProcessThresholdsAccountIDsPriority(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+
+	var cgrEv *utils.CGREvent
+	cc := &testMockCall{
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ProcessEvent: func(_ context.Context, args, reply any) error {
+				cgrEv = args.(*utils.CGREvent)
+				*reply.(*[]string) = []string{"TH_CALL"}
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- cc
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+	cfg.AccountSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	connMgr.AddInternalConn(connID, utils.ThresholdSv1, chanInternal)
+
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), connMgr, nil)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		APIOpts: map[string]any{
+			utils.MetaThresholds:          true,
+			utils.OptsThresholdProfileIDs: []string{"TH_EVENT"},
+		},
+	}
+
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACC1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH_ACC1"},
+	}
+
+	tIDs, err := accnts.processThresholds(context.Background(), ev, acnt)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !reflect.DeepEqual(tIDs, []string{"TH_CALL"}) {
+		t.Errorf("Expected %v \n received %v", []string{"TH_CALL"}, tIDs)
+	}
+	if cgrEv == nil {
+		t.Fatal("ThresholdS was not called")
+	}
+	rcv := cgrEv.APIOpts[utils.OptsThresholdProfileIDs]
+	if !reflect.DeepEqual(rcv, []string{"TH_ACC1"}) {
+		t.Errorf("Expected %v, received %v", []string{"TH_ACC1"}, rcv)
+	}
+}
+
+func TestProcessThresholdsNotConnected(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+	}
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACC1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH1"},
+	}
+
+	expected := "NOT_CONNECTED: ThresholdS"
+	tIDs, err := accnts.processThresholds(context.Background(), ev, acnt)
+	if err == nil || err.Error() != expected {
+		t.Errorf("Expected %v, received %v", expected, err)
+	}
+	if tIDs != nil {
+		t.Errorf("Expected %v \n received %v", nil, tIDs)
+	}
+}
+
+func TestProcessThresholdsCallError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+
+	cc := &testMockCall{
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ProcessEvent: func(_ context.Context, _, _ any) error {
+				return utils.ErrNotImplemented
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- cc
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+	cfg.AccountSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	connMgr.AddInternalConn(connID, utils.ThresholdSv1, chanInternal)
+
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), connMgr, nil)
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "evID",
+		APIOpts: map[string]any{
+			utils.MetaThresholds: true,
+		},
+	}
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACC1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH1"},
+	}
+
+	tIDs, err := accnts.processThresholds(context.Background(), ev, acnt)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+	if tIDs != nil {
+		t.Errorf("Expected %v \n received %v", nil, tIDs)
+	}
+}
+
+func TestProcessThresholdsInvalidOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	connMgr := engine.NewConnManager(cfg)
+	dataDB, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: dataDB}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+
+	var called int
+	cc := &testMockCall{
+		calls: map[string]func(_ context.Context, _, _ any) error{
+			utils.ThresholdSv1ProcessEvent: func(_ context.Context, _, reply any) error {
+				called++
+				return nil
+			},
+		},
+	}
+	chanInternal := make(chan birpc.ClientConnector, 1)
+	chanInternal <- cc
+	connID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaThresholds)
+	cfg.AccountSCfg().Conns[utils.MetaThresholds] = []*config.DynamicConns{{ConnIDs: []string{connID}}}
+	connMgr.AddInternalConn(connID, utils.ThresholdSv1, chanInternal)
+
+	acnt := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACC1",
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Blockers: utils.DynamicBlockers{
+			{
+				Blocker: true,
+			},
+		},
+		Balances: map[string]*utils.Balance{
+			"AbstractBalance1": {
+				ID: "AbstractBalance1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Type:  utils.MetaAbstract,
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+		ThresholdIDs: []string{"TH1"},
+	}
+
+	for _, tc := range []struct {
+		name   string
+		opts   map[string]any
+		expErr string
+	}{
+		{
+			name: "empty APIOpts",
+			opts: map[string]any{},
+		},
+		{
+			name: "thresholds false",
+			opts: map[string]any{
+				utils.MetaThresholds: false,
+			},
+		},
+		{
+			name: "invalid format",
+			opts: map[string]any{
+				utils.MetaThresholds: "trueee",
+			},
+			expErr: `strconv.ParseBool: parsing "trueee": invalid syntax`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), connMgr, nil)
+
+			ev := &utils.CGREvent{
+				Tenant:  "cgrates.org",
+				ID:      "evID",
+				APIOpts: tc.opts,
+			}
+
+			tIDs, err := accnts.processThresholds(context.Background(), ev, acnt)
+			if err != nil && err.Error() != tc.expErr {
+				t.Errorf("Expected %v \n received %v", tc.expErr, err)
+			}
+			if called != 0 {
+				t.Errorf("Expected %v calls \n received %v calls", 0, called)
+			}
+			if tIDs != nil {
+				t.Errorf("Expected %v \n received %v", nil, tIDs)
+			}
+		})
+	}
+}
