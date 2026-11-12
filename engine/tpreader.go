@@ -459,11 +459,15 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-				u, err := utils.BalanceWeightAsFloat64(tpact.BalanceWeight)
-				if err != nil {
-					return err
+				if strings.HasPrefix(tpact.BalanceWeight, utils.Meta) {
+					acts[idx].Balance.WeightRule = tpact.BalanceWeight
+				} else {
+					u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+					if err != nil {
+						return err
+					}
+					acts[idx].Balance.Weight = utils.Float64Pointer(u)
 				}
-				acts[idx].Balance.Weight = utils.Float64Pointer(u)
 			}
 
 			if tpact.RatingSubject != "" && tpact.RatingSubject != utils.MetaAny {
@@ -934,11 +938,15 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-						u, err := utils.BalanceWeightAsFloat64(tpact.BalanceWeight)
-						if err != nil {
-							return err
+						if strings.HasPrefix(tpact.BalanceWeight, utils.Meta) {
+							acts[idx].Balance.WeightRule = tpact.BalanceWeight
+						} else {
+							u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+							if err != nil {
+								return err
+							}
+							acts[idx].Balance.Weight = utils.Float64Pointer(u)
 						}
-						acts[idx].Balance.Weight = utils.Float64Pointer(u)
 					}
 					if tpact.RatingSubject != "" && tpact.RatingSubject != utils.MetaAny {
 						acts[idx].Balance.RatingSubject = utils.StringPointer(tpact.RatingSubject)

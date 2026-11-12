@@ -785,7 +785,7 @@ func TestBalanceFilterString(t *testing.T) {
 		Blocker:  &blocker,
 		Factors:  &factors,
 	}
-	expectedJSON := `{"Uuid":"1234-uuid","ID":"5678-id","Type":"type","Value":null,"ExpirationDate":null,"Weight":10.5,"DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":true,"Factors":{"factor1":1.5,"factor2":2.5},"Blocker":false}`
+	expectedJSON := `{"Uuid":"1234-uuid","ID":"5678-id","Type":"type","Value":null,"ExpirationDate":null,"Weight":10.5,"WeightRule":"","DestinationIDs":null,"RatingSubject":null,"Categories":null,"SharedGroups":null,"TimingIDs":null,"Timings":null,"Disabled":true,"Factors":{"factor1":1.5,"factor2":2.5},"Blocker":false}`
 
 	result := balanceFilter.String()
 

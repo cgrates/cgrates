@@ -78,6 +78,11 @@ func (at *ActionTrigger) Execute(acc *Account, fltrS *FilterS) (err error) {
 				*act.Balance.ExpirationDate = expDate
 			}
 		}
+		if act.Balance.WeightRule != "" {
+			if dynWeight, errWg := utils.BalanceWeightAsFloat64(act.Balance.WeightRule); errWg == nil {
+				act.Balance.Weight = &dynWeight
+			}
+		}
 
 		actionFunction, exists := getActionFunc(act.ActionType)
 		if !exists {
