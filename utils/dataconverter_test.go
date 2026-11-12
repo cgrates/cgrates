@@ -163,6 +163,54 @@ func TestNewDataConverter(t *testing.T) {
 		t.Errorf("Expected %+v received: %+v", expTime, tm)
 	}
 
+	tm, err = NewDataConverter("*time:020106150400:")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err = NewTimeConverter("*time:020106150400:")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %#v received: %#v", expTime, tm)
+	}
+
+	tm, err = NewDataConverter("*time:020106150400:UTC")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err = NewTimeConverter("*time:020106150400:UTC")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %#v received: %#v", expTime, tm)
+	}
+
+	tm, err = NewDataConverter("*time:020106150400:America/New_York")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err = NewTimeConverter("*time:020106150400:America/New_York")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %#v received: %#v", expTime, tm)
+	}
+
+	tm, err = NewDataConverter("*time:020106150400:badTimeZone")
+	if err != nil {
+		t.Error(err)
+	}
+	expTime, err = NewTimeConverter("*time:020106150400:badTimeZone")
+	if err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(tm, expTime) {
+		t.Errorf("Expected %#v received: %#v", expTime, tm)
+	}
+
 	received, err := NewDataConverter(MetaConnStatus)
 	if err != nil {
 		t.Error(err)
@@ -856,13 +904,103 @@ func TestNewTimeConverter(t *testing.T) {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
 	}
 
-	eOut = &TimeConverter{"20060102", EmptyString}
-	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "20060102")); err != nil {
+	eOut = &TimeConverter{time.RFC3339, EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339)); err != nil {
 		t.Error(err)
 	} else if !reflect.DeepEqual(eOut, rcv) {
 		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
 	}
-	exp = "20261019"
+	exp = "2026-10-19T13:00:00Z"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{Layout: time.RFC3339, Timezone: "UTC"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, "UTC")); err != nil {
+		t.Fatal(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2015-07-07T14:52:08Z"
+	if rcv, err := rcv.Convert("1436280728"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "2013-07-30T19:33:10Z"
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{"020106150400", "UTC"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "020106150400", "UTC")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "070715145200"
+	if rcv, err := rcv.Convert("1436280728"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "290720175900"
+	if rcv, err := rcv.Convert("2020-07-29T17:59:59Z"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{time.RFC3339, "UTC"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, "UTC")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2026-10-19T13:00:00Z"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{time.RFC3339, "America/New_York"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, "America/New_York")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2026-10-19T09:00:00-04:00"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{time.RFC3339, "Japan"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, "Japan")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2026-10-19T22:00:00+09:00"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimeConverter{"2006-01-02T15:04:05Z07:00:", EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, EmptyString)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2026-10-19T13:00:00Z:"
 	if rcv, err := rcv.Convert("1792414800"); err != nil {
 		t.Error(err)
 	} else if rcv.(string) != exp {
@@ -886,6 +1024,111 @@ func TestNewTimeConverter(t *testing.T) {
 		t.Error(err)
 	} else if rcv.(string) != exp {
 		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+	eOut = &TimeConverter{"not really a good time", "UTC"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "not really a good time", "UTC")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "not really a good time"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+	eOut = &TimeConverter{"not really a good time:", EmptyString}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "not really a good time", EmptyString)); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "not really a good time:"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+	eOut = &TimeConverter{"not really a good time", "America/New_York"}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "not really a good time", "America/New_York")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "not really a good time"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+	eOut = &TimeConverter{"not really a good time:bad timezone", ""}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, "not really a good time", "bad timezone")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "not really a good time:bad timezone"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+	eOut = &TimeConverter{"2006-01-02T15:04:05Z07:00:bad timezone", ""}
+	if rcv, err = NewTimeConverter(ConcatenatedKey(MetaTime, time.RFC3339, "bad timezone")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "0001-01-01T00:00:00Z:bad timezone"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	if rcv, err := rcv.Convert("1375212790"); err != nil {
+		t.Error(err)
+	} else if rcv.(string) != "2013-07-30T19:33:10Z:bad timezone" {
+		t.Errorf("Expecting: %+v, received: %+v", "2013-07-30T19:33:10Z:bad timezone", rcv)
 	}
 	if _, err := rcv.Convert("137521s2790"); err == nil {
 		t.Errorf("Expected error received: %v:", err)

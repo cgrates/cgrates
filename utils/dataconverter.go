@@ -107,12 +107,12 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 			return NewPhoneNumberConverter(EmptyString)
 		}
 		return NewPhoneNumberConverter(params[len(MetaLibPhoneNumber)+1:])
-	case strings.HasPrefix(params, MetaTime):
+	case strings.HasPrefix(params, MetaTimezone):
+		return NewTimezoneConverter(params)
+	case strings.HasPrefix(params, MetaTime): // make sure we check for prefix *time last to not include dataconverters starting with the same prefix
 		return NewTimeConverter(params)
 	case strings.HasPrefix(params, MetaDateTime):
 		return NewDateTimeConverter(params)
-	case strings.HasPrefix(params, MetaTimezone):
-		return NewTimezoneConverter(params)
 	case strings.HasPrefix(params, MetaRandom):
 		if len(params) == len(MetaRandom) { // no extra params, defaults implied
 			return NewRandomConverter(EmptyString)
@@ -428,13 +428,13 @@ type TimeConverter struct {
 }
 
 // Convert implements DataConverter interface
-func (tS *TimeConverter) Convert(in any) (
+func (t *TimeConverter) Convert(in any) (
 	out any, err error) {
-	tm, err := ParseTimeDetectLayout(IfaceAsString(in), tS.Timezone)
+	tm, err := ParseTimeDetectLayout(IfaceAsString(in), t.Timezone)
 	if err != nil {
 		return nil, err
 	}
-	return tm.Format(tS.Layout), nil
+	return tm.Format(t.Layout), nil
 }
 
 // String2HexConverter will transform the string to hex
