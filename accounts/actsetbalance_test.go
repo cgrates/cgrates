@@ -473,3 +473,167 @@ func TestActSetCostIncrementErrors(t *testing.T) {
 		t.Errorf("Expected %+v, received %+v", expected, err)
 	}
 }
+
+func TestActSetBalanceUnits(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		units    *utils.Decimal
+		value    string
+		reset    bool
+		expected *utils.Decimal
+	}{
+		{
+			name:     "add to existing units",
+			units:    utils.NewDecimal(10, 0),
+			value:    "5",
+			reset:    false,
+			expected: utils.NewDecimal(15, 0),
+		},
+		{
+			name:     "decimal value",
+			units:    utils.NewDecimal(10, 0),
+			value:    "0.5",
+			reset:    false,
+			expected: utils.NewDecimal(105, 1),
+		},
+		{
+			name:     "negative value",
+			units:    utils.NewDecimal(10, 0),
+			value:    "-3",
+			reset:    false,
+			expected: utils.NewDecimal(7, 0),
+		},
+		{
+			name:     "add without existing units",
+			units:    nil,
+			value:    "7",
+			reset:    false,
+			expected: utils.NewDecimal(7, 0),
+		},
+		{
+			name:     "set overwrites existing units",
+			units:    utils.NewDecimal(10, 0),
+			value:    "5",
+			reset:    true,
+			expected: utils.NewDecimal(5, 0),
+		},
+		{
+			name:     "set without existing units",
+			units:    nil,
+			value:    "7",
+			reset:    true,
+			expected: utils.NewDecimal(7, 0),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			bal := &utils.Balance{
+				Units: tc.units,
+			}
+
+			if err := actSetBalance(bal, []string{utils.Units}, tc.value, tc.reset); err != nil {
+				t.Error(err)
+			}
+			if bal.Units.Compare(tc.expected) != 0 {
+				t.Errorf("Expected %v \n received %v", tc.expected, bal.Units)
+			}
+		})
+	}
+}
+
+func TestActSetBalanceEmptyValues(t *testing.T) {
+	bal := &utils.Balance{
+		ID:        "blID",
+		FilterIDs: []string{"*string:~*req.ToR:*sms"},
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 10,
+			},
+		},
+		Type:  utils.MetaAbstract,
+		Units: utils.NewDecimal(0, 0),
+		UnitFactors: []*utils.UnitFactor{
+			{
+				FilterIDs: []string{"fltr1"},
+				Factor:    utils.NewDecimal(100, 0),
+			},
+		},
+		Opts: map[string]any{
+			utils.AccountField: "1004",
+		},
+		CostIncrements: []*utils.CostIncrement{
+			{
+				FilterIDs:    []string{"fltr1"},
+				Increment:    utils.NewDecimal(1, 0),
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
+		AttributeIDs:   []string{"ATTR_ID"},
+		RateProfileIDs: []string{"RATE_ID"},
+	}
+
+	expBal := &utils.Balance{
+		ID:        "",
+		FilterIDs: []string{"*string:~*req.ToR:*sms"},
+		Weights: []*utils.DynamicWeight{
+			{
+				Weight: 10,
+			},
+		},
+		Type:  "",
+		Units: utils.NewDecimal(0, 0),
+		UnitFactors: []*utils.UnitFactor{
+			{
+				FilterIDs: []string{"fltr1"},
+				Factor:    utils.NewDecimal(100, 0),
+			},
+		},
+		Opts: map[string]any{
+			utils.AccountField: "",
+		},
+		CostIncrements: []*utils.CostIncrement{
+			{
+				FilterIDs:    []string{"fltr1"},
+				Increment:    utils.NewDecimal(1, 0),
+				FixedFee:     utils.NewDecimal(0, 0),
+				RecurrentFee: utils.NewDecimal(1, 0),
+			},
+		},
+		AttributeIDs:   []string{"ATTR_ID"},
+		RateProfileIDs: []string{"RATE_ID"},
+	}
+
+	if err := actSetBalance(bal, []string{utils.ID}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.FilterIDs}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.Weights}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.Type}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.Units}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.UnitFactors}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.Opts, utils.AccountField}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.CostIncrements}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.AttributeIDs}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if err := actSetBalance(bal, []string{utils.RateProfileIDs}, utils.EmptyString, false); err != nil {
+		t.Error(err)
+	}
+	if !reflect.DeepEqual(bal, expBal) {
+		t.Errorf("Expected %v \n received %v", expBal, bal)
+	}
+}

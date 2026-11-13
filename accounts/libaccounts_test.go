@@ -1200,3 +1200,148 @@ func TestMaxDebitAbstractsFromConcretesIncrements(t *testing.T) {
 		})
 	}
 }
+
+func TestCostIncrementInvalidFilterIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	ctx := context.Background()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+	costIncrements := []*utils.CostIncrement{
+		{
+			FilterIDs: []string{"*string"},
+			Increment: utils.NewDecimal(1, 0),
+		},
+	}
+	evNm := utils.MapStorage{
+		utils.MetaReq: map[string]any{utils.Category: "sms"},
+	}
+	expectedErr := "inline parse error for string: <*string>"
+	_, err := costIncrement(ctx, costIncrements, fltrS, "cgrates.org", evNm)
+	if err == nil || err.Error() != expectedErr {
+		t.Errorf("Expected %v \n received %v", expectedErr, err)
+	}
+}
+
+func TestUnitFactorSelection(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	ctx := context.Background()
+	fltrS := engine.NewFilterS(cfg, nil, dm)
+
+	for _, tc := range []struct {
+		name        string
+		category    string
+		unitFactors []*utils.UnitFactor
+		expected    *utils.UnitFactor
+	}{
+		{
+			name:     "second unitFactor matches",
+			category: "sms",
+			unitFactors: []*utils.UnitFactor{
+				{
+					FilterIDs: []string{"*string:~*req.Category:data"},
+					Factor:    utils.NewDecimal(10, 0),
+				},
+				{
+					FilterIDs: []string{"*string:~*req.Category:sms"},
+					Factor:    utils.NewDecimal(3, 0),
+				},
+			},
+			expected: &utils.UnitFactor{
+				FilterIDs: []string{"*string:~*req.Category:sms"},
+				Factor:    utils.NewDecimal(3, 0),
+			},
+		},
+		{
+			name:     "first unitFactor matches",
+			category: "data",
+			unitFactors: []*utils.UnitFactor{
+				{
+					FilterIDs: []string{"*string:~*req.Category:data"},
+					Factor:    utils.NewDecimal(10, 0),
+				},
+				{
+					FilterIDs: []string{"*string:~*req.Category:sms"},
+					Factor:    utils.NewDecimal(3, 0),
+				},
+			},
+			expected: &utils.UnitFactor{
+				FilterIDs: []string{"*string:~*req.Category:data"},
+				Factor:    utils.NewDecimal(10, 0),
+			},
+		},
+		{
+			name:     "first matching unitFactor is selected",
+			category: "sms",
+			unitFactors: []*utils.UnitFactor{
+				{
+					FilterIDs: []string{"*string:~*req.Category:sms"},
+					Factor:    utils.NewDecimal(3, 0),
+				},
+				{
+					FilterIDs: []string{"*string:~*req.Category:sms"},
+					Factor:    utils.NewDecimal(5, 0),
+				},
+			},
+			expected: &utils.UnitFactor{
+				FilterIDs: []string{"*string:~*req.Category:sms"},
+				Factor:    utils.NewDecimal(3, 0),
+			},
+		},
+		{
+			name:     "unitFactor without filters matches everything",
+			category: "voice",
+			unitFactors: []*utils.UnitFactor{
+				{
+					Factor: utils.NewDecimal(2, 0),
+				},
+			},
+			expected: &utils.UnitFactor{
+				Factor: utils.NewDecimal(2, 0),
+			},
+		},
+		{
+			name:     "nothing matches",
+			category: "voice",
+			unitFactors: []*utils.UnitFactor{
+				{
+					FilterIDs: []string{"*string:~*req.Category:data"},
+					Factor:    utils.NewDecimal(10, 0),
+				},
+				{
+					FilterIDs: []string{"*string:~*req.Category:sms"},
+					Factor:    utils.NewDecimal(3, 0),
+				},
+			},
+			expected: nil,
+		},
+		{
+			name:        "no unit factors",
+			category:    "sms",
+			unitFactors: nil,
+			expected:    nil,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			evNm := utils.MapStorage{
+				utils.MetaReq: map[string]any{utils.Category: tc.category},
+			}
+
+			rcv, err := unitFactor(ctx, tc.unitFactors, fltrS, "cgrates.org", evNm)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if !reflect.DeepEqual(rcv, tc.expected) {
+				t.Errorf("Expected %v \n received %v", utils.ToJSON(tc.expected), utils.ToJSON(rcv))
+			}
+		})
+	}
+}
