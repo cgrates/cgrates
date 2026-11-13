@@ -1135,6 +1135,77 @@ func TestNewTimeConverter(t *testing.T) {
 	}
 }
 
+func TestNewTimezoneConverter(t *testing.T) {
+	//empty
+	expErr := "*timezone converter: requires a timezone parameter"
+	if _, err := NewTimezoneConverter(""); err == nil || err.Error() != expErr {
+		t.Errorf("expected error <%v>, received <%v>", expErr, err)
+	}
+
+	//default
+	eOut := &TimezoneConverter{}
+	var rcv DataConverter
+	var err error
+	if rcv, err = NewTimezoneConverter(MetaTimezone); err == nil || err.Error() != expErr {
+		t.Errorf("expected error <%v>, received <%v>", expErr, err)
+	}
+
+	//other
+	eOut = &TimezoneConverter{"America/New_York"}
+	if rcv, err = NewTimezoneConverter(ConcatenatedKey(MetaTimezone, "America/New_York")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp := "2015-07-07 10:52:08 -0400 EDT"
+	if rcv, err := rcv.Convert("1436280728"); err != nil {
+		t.Error(err)
+	} else if rcv.(time.Time).String() != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "2020-07-29 17:59:59 +0000 UTC"
+	if rcv, err := rcv.Convert("2020-07-29T17:59:59Z"); err != nil {
+		t.Error(err)
+	} else if rcv.(time.Time).String() != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	eOut = &TimezoneConverter{"America/Chicago"}
+	if rcv, err = NewTimezoneConverter(ConcatenatedKey(MetaTimezone, "America/Chicago")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "2026-10-19 08:00:00 -0500 CDT"
+	if rcv, err := rcv.Convert("1792414800"); err != nil {
+		t.Error(err)
+	} else if rcv.(time.Time).String() != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+
+	//wrong cases
+	eOut = &TimezoneConverter{"not really a good timezone"}
+	if rcv, err = NewTimezoneConverter(ConcatenatedKey(MetaTimezone, "not really a good timezone")); err != nil {
+		t.Error(err)
+	} else if !reflect.DeepEqual(eOut, rcv) {
+		t.Errorf("Expecting: %+v, received: %+v", eOut, rcv)
+	}
+	exp = "0001-01-01 00:00:00 +0000 UTC"
+	if rcv, err := rcv.Convert(EmptyString); err != nil {
+		t.Error(err)
+	} else if rcv.(time.Time).String() != exp {
+		t.Errorf("Expecting: %+v, received: %+v", exp, rcv)
+	}
+	exp = "*timezone converter: unknown time zone not really a good timezone"
+	if _, err := rcv.Convert("1375212790"); err == nil || err.Error() != exp {
+		t.Errorf("Expected error <%v>, received <%v>", exp, err)
+	}
+	if _, err := rcv.Convert("137521s2790"); err == nil {
+		t.Errorf("Expected error received: %v:", err)
+	}
+
+}
+
 func TestStringHexConvertor(t *testing.T) {
 	hx := new(String2HexConverter)
 	val := "127.0.0.1"
@@ -1195,6 +1266,47 @@ func TestUnixTimeConverter(t *testing.T) {
 	}
 	if _, err := cnv.Convert("NotAValidTime"); err == nil {
 		t.Errorf("Expected error received %v", err)
+	}
+}
+
+func TestNewUnixTimeConverterValid(t *testing.T) {
+	for _, tz := range []string{"", "UTC", "Europe/Berlin"} {
+		cnv, err := NewUnixTimeConverter(tz)
+		if err != nil {
+			t.Errorf("timezone %q: unexpected error: %v", tz, err)
+			continue
+		}
+		utc, ok := cnv.(*UnixTimeConverter)
+		if !ok {
+			t.Errorf("timezone %q: expected *UnixTimeConverter, received %T", tz, cnv)
+			continue
+		}
+		if utc.Timezone != tz {
+			t.Errorf("Timezone = %q, want %q", utc.Timezone, tz)
+		}
+	}
+}
+
+func TestNewUnixTimeConverterInvalidTimezone(t *testing.T) {
+	cnv, err := NewUnixTimeConverter("Not/AZone")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if cnv != nil {
+		t.Errorf("expected nil converter, got %v", cnv)
+	}
+	if !strings.Contains(err.Error(), `*unixtime converter: invalid timezone "Not/AZone"`) {
+		t.Errorf("unexpected error message: %v", err)
+	}
+	cnv, err = NewUnixTimeConverter(":")
+	if err == nil {
+		t.Fatal("expected error, got nil")
+	}
+	if cnv != nil {
+		t.Errorf("expected nil converter, got %v", cnv)
+	}
+	if !strings.Contains(err.Error(), `*unixtime converter: invalid timezone ":"`) {
+		t.Errorf("unexpected error message: %v", err)
 	}
 }
 
@@ -2297,6 +2409,114 @@ func TestDateTimeConverterConvert(t *testing.T) {
 			}
 			if out != tc.want {
 				t.Errorf("expected %q, got %q", tc.want, out)
+			}
+		})
+	}
+}
+
+func TestNewDateTimeConverterWithTimezone(t *testing.T) {
+	if _, err := time.LoadLocation("Europe/Berlin"); err != nil {
+		t.Error(err)
+	}
+	cnv, err := NewDateTimeConverter("*datetime:2006-01-02T15:04:05:Europe/Berlin")
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	dtc := cnv.(*DateTimeConverter)
+	if dtc.inlayout != "2006-01-02T15:04:05" {
+		t.Errorf("inlayout = %q, want %q", dtc.inlayout, "2006-01-02T15:04:05")
+	}
+	if dtc.location.String() != "Europe/Berlin" {
+		t.Errorf("location = %q, want %q", dtc.location.String(), "Europe/Berlin")
+	}
+}
+
+func TestDateTimeConverterConvertTimezone(t *testing.T) {
+	berlin, err := time.LoadLocation("Europe/Berlin")
+	if err != nil {
+		t.Error(err)
+	}
+
+	tests := []struct {
+		name   string
+		params string
+		in     any
+		exp    time.Time
+		expErr string
+	}{
+		{
+			name:   "explicit timezone",
+			params: "*datetime:2006-01-02 15:04:05:Europe/Berlin",
+			in:     "2023-06-15 10:30:00",
+			exp:    time.Date(2023, 6, 15, 10, 30, 0, 0, berlin),
+		},
+		{
+			name:   "value does not match layout",
+			params: "*datetime:2006-01-02 15:04:05:not a timezone",
+			in:     "2023-06-15 10:30:00",
+			expErr: `*datetime converter: parsing failed for value "2023-06-15 10:30:00" with layout "2006-01-02 15:04:05:not a timezone": parsing time "2023-06-15 10:30:00" as "2006-01-02 15:04:05:not a timezone": cannot parse "" as ":not a timezone"`,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cnv, err := NewDateTimeConverter(tc.params)
+			if err != nil {
+				t.Fatal(err)
+			}
+			rcv, err := cnv.Convert(tc.in)
+			if tc.expErr != "" {
+				if err == nil {
+					t.Fatalf("expected error <%v>, received nil", tc.expErr)
+				}
+				if !strings.Contains(err.Error(), tc.expErr) {
+					t.Errorf("expected error <%v>, received <%v>", tc.expErr, err)
+				}
+				if rcv != nil {
+					t.Errorf("expected nil result on error, received %v", rcv)
+				}
+				return
+			}
+			if err != nil {
+				t.Fatal(err)
+			}
+			rcvTime, ok := rcv.(time.Time)
+			if !ok {
+				t.Fatalf("expected time.Time, got %T", rcv)
+			}
+			if !rcvTime.Equal(tc.exp) {
+				t.Errorf("expected <%v>, received <%v>", tc.exp, rcvTime)
+			}
+			if rcvTime.Location().String() != tc.exp.Location().String() {
+				t.Errorf("expected <%v>, received <%v>", tc.exp.Location(), rcvTime.Location())
+			}
+		})
+	}
+}
+
+func TestDateTimeConverterDST(t *testing.T) {
+	cnv, err := NewDateTimeConverter("*datetime:2006-01-02 15:04:05:America/New_York")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name      string
+		in        string
+		expOffset int // seconds east of UTC
+	}{
+		{"summer (EDT)", "2023-06-15 12:00:00", -4 * 3600},
+		{"winter (EST)", "2023-01-15 12:00:00", -5 * 3600},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rcv, err := cnv.Convert(tc.in)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			_, offset := rcv.(time.Time).Zone()
+			if offset != tc.expOffset {
+				t.Errorf("offset = %d, want %d", offset, tc.expOffset)
 			}
 		})
 	}
