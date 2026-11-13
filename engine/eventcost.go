@@ -483,7 +483,7 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 			}
 		}
 	}
-	if slices.Contains([]string{utils.MetaData, utils.MetaVoice}, balanceType) && cBC.ExtraChargeID == "" {
+	if slices.Contains([]string{utils.MetaData, utils.MetaVoice, utils.MetaGeneric}, balanceType) && cBC.ExtraChargeID == "" {
 		cBC.ExtraChargeID = utils.MetaNone // mark the balance to be exported as Unit type
 	}
 	if cBC.ExtraChargeID != "" { // have both monetary and data

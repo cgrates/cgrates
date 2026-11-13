@@ -2860,7 +2860,6 @@ func TestAddRatingInfos(t *testing.T) {
 }
 
 func TestCDRefundIncrementsGenericBalance(t *testing.T) {
-	t.Skip("fails until the refund fix for #5481 is solved")
 	tests := []struct {
 		name      string
 		tor       string
