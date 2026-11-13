@@ -35,7 +35,6 @@ var (
 		testSessRefGenItVoiceUnusedReservationRefunded,
 		testSessRefGenItSMSWithFactorUnusedReservationRefunded,
 		testSessRefGenItVoiceWithPairedMonetaryUnusedReservationRefunded,
-		testSessRefGenItStopCgrEngine,
 	}
 )
 
@@ -52,8 +51,11 @@ func TestSessionsRefundGenericIt(t *testing.T) {
 	default:
 		t.Fatal("Unknown Database type")
 	}
+	t.Cleanup(func() { testSessRefGenItStopCgrEngine(t) })
 	for _, stest := range sTestSessRefGenIt {
-		t.Run(sessRefGenCfgDIR, stest)
+		if !t.Run(sessRefGenCfgDIR, stest) {
+			break
+		}
 	}
 }
 

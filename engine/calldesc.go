@@ -919,6 +919,9 @@ func (cd *CallDescriptor) refundIncrements(fltrS *FilterS) (acnt *Account, err e
 		cc := cd.CreateCallCost()
 		if increment.BalanceInfo.Unit != nil && increment.BalanceInfo.Unit.UUID != "" {
 			if balance = account.BalanceMap[unitType].GetBalance(increment.BalanceInfo.Unit.UUID); balance == nil {
+				balance = account.BalanceMap[utils.MetaGeneric].GetBalance(increment.BalanceInfo.Unit.UUID)
+			}
+			if balance == nil {
 				utils.Logger.Warning(fmt.Sprintf("Could not get the balnce: <%s> to be refunded for account: <%s>", increment.BalanceInfo.Unit.UUID, increment.BalanceInfo.AccountID))
 				continue
 			}
