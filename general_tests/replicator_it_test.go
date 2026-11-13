@@ -6,9 +6,11 @@
 package general_tests
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -370,4 +372,168 @@ func TestReplicatorFailedPostsNoInterval(t *testing.T) {
 	if len(entries) != 0 {
 		t.Errorf("expected failed dir to be empty, found %d entries", len(entries))
 	}
+}
+
+func TestReplicatorFailedReplicationFiles(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	failedDir := t.TempDir()
+	node1NG := engine.TestEngine{
+		ConfigJSON: fmt.Sprintf(`{
+"general": {
+	"nodeID": "primary",
+	"reconnects": 1
+},
+"listen": {
+	"rpcJSON": ":4212",
+	"rpcGOB": ":4213",
+	"http": ":4280"
+},
+"db": {
+	"dbConns": {
+		"*default": {
+			"replicationConns": ["node2Conn"],
+			"replicationFailedDir": %q
+		}
+	},
+	"items": {
+		"*attributeProfiles": {"replicate": true}
+	}
+},
+"rpcConns": {
+	"node2Conn": {
+		"conns": [
+			{
+				"address": "127.0.0.1:4223",
+				"transport": "*gob"
+			}
+		]
+	}
+},
+"admins": {
+	"enabled": true
+}
+}`, failedDir),
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client1, _ := node1NG.Run(t)
+
+	node2NG := engine.TestEngine{
+		ConfigJSON: `{
+"general": {
+	"nodeID": "node2",
+	"reconnects": 1
+},
+"listen": {
+	"rpcJSON": ":4222",
+	"rpcGOB": ":4223",
+	"http": ":4290"
+},
+"db": {
+	"dbConns": {
+		"*default": {
+			"dbType": "*internal",
+			"opts": {
+				"internalDBDumpInterval": "0s",
+				"internalDBRewriteInterval": "0s"
+			}
+		}
+	}
+},
+"admins": {
+	"enabled": true
+}
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client2, cfg2 := node2NG.Run(t)
+
+	cleanFailedDir := func(t *testing.T) {
+		t.Helper()
+		entries, err := os.ReadDir(failedDir)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, entry := range entries {
+			if err := os.RemoveAll(filepath.Join(failedDir, entry.Name())); err != nil {
+				t.Fatal(err)
+			}
+		}
+	}
+
+	t.Run("ReplayRemoveUndecodable", func(t *testing.T) {
+		cleanFailedDir(t)
+		unDecFile := filepath.Join(failedDir, "file1"+utils.GOBSuffix)
+		if err := os.WriteFile(unDecFile, []byte("gob file"), 0644); err != nil {
+			t.Fatal(err)
+		}
+		var reply string
+		if err := client1.Call(context.Background(), utils.AdminSv1ReplayFailedReplications,
+			apis.ReplayFailedReplicationsArgs{}, &reply); err == nil {
+			t.Fatal("expected replay to fail undecodable file")
+		}
+		if _, err := os.Stat(unDecFile); err != nil {
+			t.Error("undecodable file was removed")
+		}
+	})
+
+	t.Run("ReplaySaveFailedPathError", func(t *testing.T) {
+		cleanFailedDir(t)
+		node2NG.Stop(t)
+		var reply string
+		if err := client1.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+			&utils.APIAttributeProfileWithAPIOpts{
+				APIAttributeProfile: &utils.APIAttributeProfile{
+					Tenant: "cgrates.org",
+					ID:     "ATTR_1",
+					Attributes: []*utils.ExternalAttribute{
+						{Path: "*req.Destination", Type: utils.MetaConstant, Value: "1001"},
+					},
+				},
+			}, &reply); err != nil {
+			t.Fatal(err)
+		}
+		failedFile := filepath.Join(failedDir, utils.AttributeProfilePrefix+"cgrates.org:"+"ATTR_1"+utils.GOBSuffix)
+		before, err := os.ReadFile(failedFile)
+		if err != nil {
+			t.Fatal("saved failed files doesn't exist")
+		}
+		if err := client1.Call(context.Background(), utils.AdminSv1ReplayFailedReplications,
+			apis.ReplayFailedReplicationsArgs{
+				FailedPath: filepath.Join(t.TempDir(), "missing"),
+			}, &reply); err == nil {
+			t.Fatal("expected replay to fail when FailedPath cannot be written")
+		}
+		after, err := os.ReadFile(failedFile)
+		if err != nil {
+			t.Fatal("saved failed files removed when FailedPath cannot be written")
+		}
+		if !bytes.Equal(before, after) {
+			t.Error("saved failed files changed when FailedPath cannot be written")
+		}
+		node2NG.Start(t)
+		client2 = engine.NewRPCClient(t, cfg2.ListenCfg(), *utils.Encoding)
+		if err := client1.Call(context.Background(), utils.AdminSv1ReplayFailedReplications,
+			apis.ReplayFailedReplicationsArgs{}, &reply); err != nil {
+			t.Fatal(err)
+		}
+		var attr utils.APIAttributeProfile
+		if err := client2.Call(context.Background(), utils.AdminSv1GetAttributeProfile,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "ATTR_1"}},
+			&attr); err != nil {
+			t.Fatal(err)
+		}
+		if len(attr.Attributes) != 1 || attr.Attributes[0].Value != "1001" {
+			t.Errorf("got wrong attributes %+v", attr.Attributes)
+		}
+	})
+
 }
