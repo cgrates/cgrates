@@ -21,6 +21,7 @@ type BalanceFilter struct {
 	Value          *utils.ValueFormula
 	ExpirationDate *time.Time
 	Weight         *float64
+	WeightRule     string
 	DestinationIDs *utils.StringMap
 	RatingSubject  *string
 	Categories     *utils.StringMap
@@ -165,6 +166,7 @@ func (bf *BalanceFilter) Clone() *BalanceFilter {
 		result.Weight = new(float64)
 		*result.Weight = *bf.Weight
 	}
+	result.WeightRule = bf.WeightRule
 	if bf.DestinationIDs != nil {
 		result.DestinationIDs = utils.StringMapPointer(bf.DestinationIDs.Clone())
 	}

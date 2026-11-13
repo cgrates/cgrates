@@ -2580,8 +2580,12 @@ func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
 				t.Fatalf("expected 1 action, got %d", len(acts))
 			}
 			a := acts[0]
-			if a.Balance.Weight == nil || *a.Balance.Weight == 0 {
-				t.Errorf("expected a weight for %q, got %v", tt.balWeight, *a.Balance.Weight)
+			if strings.HasPrefix(tt.balWeight, utils.Meta) {
+				if a.Balance.WeightRule != tt.balWeight {
+					t.Errorf("expected WeightRule %q, got %q", tt.balWeight, a.Balance.WeightRule)
+				}
+			} else if a.Balance.Weight == nil || *a.Balance.Weight == 0 {
+				t.Errorf("expected a weight for %q, got %v", tt.balWeight, a.Balance.Weight)
 			}
 		})
 	}

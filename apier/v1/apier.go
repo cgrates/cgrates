@@ -702,7 +702,11 @@ func (apierSv1 *APIerSv1) GetActions(ctx *context.Context, actsId *string, reply
 			act.DestinationIds = bf.GetDestinationIDs().AsPrefixedString()
 			act.RatingSubject = bf.GetRatingSubject()
 			act.SharedGroups = bf.GetSharedGroups().String()
-			act.BalanceWeight = strconv.FormatFloat(bf.GetWeight(), 'f', -1, 64)
+			if bf.WeightRule != "" {
+				act.BalanceWeight = bf.WeightRule
+			} else {
+				act.BalanceWeight = strconv.FormatFloat(bf.GetWeight(), 'f', -1, 64)
+			}
 			act.TimingTags = bf.GetTimingIDs().String()
 			act.BalanceId = bf.GetID()
 			act.Categories = bf.GetCategories().String()
