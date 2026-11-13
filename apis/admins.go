@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 
 	"github.com/cgrates/cgrates/config"
@@ -84,10 +85,19 @@ func (s *AdminSv1) ReplayFailedReplications(ctx context.Context, args ReplayFail
 		}
 
 		if err := task.Execute(ctx, s.connMgr); err != nil && failoverPath != utils.MetaNone {
+			if failoverPath == path {
+				return nil
+			}
 			// Write the events that failed to be replayed to the failover directory
 			if err = task.WriteToFile(ctx, failoverPath, s.locker); err != nil {
 				return fmt.Errorf("failed to write the events that failed to be replayed to %s: %v", path, err)
 			}
+		}
+		unlock := s.locker.Lock(utils.FileLockPrefix + path)
+		err = os.Remove(path)
+		unlock()
+		if err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("failed to remove replayed file %s: %v", path, err)
 		}
 		return nil
 	}); err != nil {

@@ -183,6 +183,7 @@ func (r *replicator) replicateIndexes(ctx context.Context, objType, objID string
 func (r *replicator) replicateIndexPatchAndRestore(ctx context.Context, key, objType, objID string,
 	args *utils.SetIndexesArg) error {
 	var failedPath string
+	var merged bool
 	if r.failedDir != "" {
 		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
 		task, err := NewReplicationTaskFromFile(ctx, failedPath, r.locker)
@@ -198,6 +199,7 @@ func (r *replicator) replicateIndexPatchAndRestore(ctx context.Context, key, obj
 			} else {
 				mergeIndexPatch(failed, args)
 				args = failed
+				merged = true
 			}
 		} else if !os.IsNotExist(err) {
 			utils.Logger.Err(fmt.Sprintf(
@@ -206,6 +208,14 @@ func (r *replicator) replicateIndexPatchAndRestore(ctx context.Context, key, obj
 	}
 	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID,
 		utils.ReplicatorSv1SetIndexes, args)
+	if err == nil && merged {
+		unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
+		if rmErr := os.Remove(failedPath); rmErr != nil && !os.IsNotExist(rmErr) {
+			utils.Logger.Warning(fmt.Sprintf(
+				"<DataManager> failed to remove file %q: %v", failedPath, rmErr))
+		}
+		unlock()
+	}
 	if err != nil && failedPath != "" {
 		task := &ReplicationTask{
 			ConnIDs:  r.conns,
@@ -236,6 +246,9 @@ func (r *replicator) replicateAndRestore(ctx context.Context, key string, objTyp
 	var failedPath string
 	if r.failedDir != "" {
 		failedPath = filepath.Join(r.failedDir, failedReplicationFileName(key)+utils.GOBSuffix)
+	}
+	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
+	if err == nil && failedPath != "" {
 		// Clean up any existing file containing failed replications.
 		unlock := r.locker.Lock(utils.FileLockPrefix + failedPath)
 		if err := os.Remove(failedPath); err != nil && !os.IsNotExist(err) {
@@ -244,7 +257,6 @@ func (r *replicator) replicateAndRestore(ctx context.Context, key string, objTyp
 		}
 		unlock()
 	}
-	err := replicate(ctx, r.cm, r.conns, r.filtered, objType, objID, method, args)
 	if err != nil && failedPath != "" {
 		task := &ReplicationTask{
 			ConnIDs:  r.conns,
@@ -373,13 +385,9 @@ type ReplicationTask struct {
 }
 
 // NewReplicationTaskFromFile loads a replication task from the specified file.
-// The file is removed after successful loading.
 func NewReplicationTaskFromFile(_ context.Context, path string, locker *guardian.Locker) (*ReplicationTask, error) {
 	unlock := locker.Lock(utils.FileLockPrefix + path)
 	taskBytes, err := os.ReadFile(path)
-	if err == nil {
-		err = os.Remove(path) // file is not needed anymore
-	}
 	unlock()
 	if err != nil {
 		return nil, err
@@ -397,13 +405,22 @@ func NewReplicationTaskFromFile(_ context.Context, path string, locker *guardian
 func (r *ReplicationTask) WriteToFile(_ context.Context, path string, locker *guardian.Locker) error {
 	unlock := locker.Lock(utils.FileLockPrefix + path)
 	defer unlock()
-	f, err := os.Create(path)
+	tmpPath := path + utils.TmpSuffix
+	f, err := os.Create(tmpPath)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
-	enc := gob.NewEncoder(f)
-	return enc.Encode(r)
+	err = gob.NewEncoder(f).Encode(r)
+	if cErr := f.Close(); err == nil {
+		err = cErr
+	}
+	if err == nil {
+		err = os.Rename(tmpPath, path)
+	}
+	if err != nil {
+		os.Remove(tmpPath)
+	}
+	return err
 }
 
 // Execute performs the replication task.
