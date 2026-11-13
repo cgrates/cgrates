@@ -4,7 +4,6 @@
 package analyzers
 
 import (
-	"os"
 	"reflect"
 	"runtime"
 	"testing"
@@ -34,18 +33,17 @@ func (c *mockServerCodec) Close() error { return nil }
 
 func TestNewServerCodec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().DBPath = t.TempDir()
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
-		t.Fatal(err)
-	}
 	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if err := anz.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	})
 
 	codec := NewAnalyzerServerCodec(new(mockServerCodec), anz, utils.MetaJSON, "127.0.0.1:5565", "127.0.0.1:2012")
 	r := new(birpc.Request)
@@ -78,9 +76,6 @@ func TestNewServerCodec(t *testing.T) {
 	} else if cnt != 1 {
 		t.Errorf("Expected only one document received:%v", cnt)
 	}
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
 }
 
 type mockBiRPCCodec struct{}
@@ -98,18 +93,17 @@ func (mockBiRPCCodec) Close() error                             { return nil }
 
 func TestNewBiRPCCodec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().DBPath = t.TempDir()
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
-		t.Fatal(err)
-	}
 	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if err := anz.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	})
 
 	codec := NewAnalyzerBiRPCCodec(new(mockBiRPCCodec), anz, rpcclient.BiRPCJSON, "127.0.0.1:5565", "127.0.0.1:2012")
 	r := new(birpc.Request)
@@ -142,9 +136,6 @@ func TestNewBiRPCCodec(t *testing.T) {
 	} else if cnt != 1 {
 		t.Errorf("Expected only one document received:%v", cnt)
 	}
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
 }
 
 type mockBiRPCCodec2 struct{}
@@ -162,18 +153,17 @@ func (mockBiRPCCodec2) Close() error                             { return nil }
 
 func TestNewBiRPCCodec2(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
-	cfg.AnalyzerSCfg().DBPath = "/tmp/analyzers"
+	cfg.AnalyzerSCfg().DBPath = t.TempDir()
 	cfg.AnalyzerSCfg().TTL = 30 * time.Minute
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
-	}
-	if err := os.MkdirAll(cfg.AnalyzerSCfg().DBPath, 0700); err != nil {
-		t.Fatal(err)
-	}
 	anz, err := NewAnalyzerS(cfg)
 	if err != nil {
 		t.Fatal(err)
 	}
+	t.Cleanup(func() {
+		if err := anz.Shutdown(); err != nil {
+			t.Error(err)
+		}
+	})
 
 	codec := NewAnalyzerBiRPCCodec(new(mockBiRPCCodec2), anz, rpcclient.BiRPCJSON, "127.0.0.1:5565", "127.0.0.1:2012")
 	if err = codec.WriteRequest(&birpc.Request{Seq: 0, ServiceMethod: utils.CoreSv1Ping}, "args"); err != nil {
@@ -203,8 +193,5 @@ func TestNewBiRPCCodec2(t *testing.T) {
 		t.Fatal(err)
 	} else if cnt != 1 {
 		t.Errorf("Expected only one document received:%v", cnt)
-	}
-	if err := os.RemoveAll(cfg.AnalyzerSCfg().DBPath); err != nil {
-		t.Fatal(err)
 	}
 }
