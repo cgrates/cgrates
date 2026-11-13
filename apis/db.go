@@ -21,7 +21,7 @@ func (adms *AdminSv1) DumpDB(ctx context.Context, ignr *string, reply *string) (
 }
 
 // RewriteDB will rewrite every dump file of offline internal DB
-func (adms *AdminSv1) RewriteDB(ctx context.Context, ignr *string, reply *string) (err error) {
+func (adms *AdminSv1) RewriteDB(ctx context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = adms.dm.RewriteDB(); err != nil {
 		return
 	}

@@ -255,3 +255,56 @@ func TestCallCacheMultiple(t *testing.T) {
 		t.Errorf("Expected %v\n but received %v", errExp, err)
 	}
 }
+
+func TestAdminSv1RewriteDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cfg.GeneralCfg().DefaultCaching = utils.MetaNone
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	cacheS.Clear(nil)
+	connMgr := engine.NewConnManager(cfg)
+	connMgr.SetCache(cacheS)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &engine.DataDBMock{}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	dm.SetCache(cacheS)
+	admS := NewAdminSv1(cfg, dm, connMgr, nil, locker)
+
+	subtests := []struct {
+		name string
+		args *utils.TenantWithAPIOpts
+	}{
+		{
+			name: "with tenant and apiopts",
+			args: &utils.TenantWithAPIOpts{
+				Tenant:  "cgrates.org",
+				APIOpts: map[string]any{},
+			},
+		},
+		{
+			name: "without tenant",
+			args: &utils.TenantWithAPIOpts{
+				APIOpts: map[string]any{},
+			},
+		},
+		{
+			name: "without apiopts",
+			args: &utils.TenantWithAPIOpts{
+				Tenant: "cgrates.org",
+			},
+		},
+		{
+			name: "empty args",
+			args: &utils.TenantWithAPIOpts{},
+		},
+	}
+	for _, st := range subtests {
+		t.Run(st.name, func(t *testing.T) {
+			var reply string
+			if err := admS.RewriteDB(context.Background(), st.args, &reply); err != nil {
+				t.Error(err)
+			} else if reply != utils.OK {
+				t.Errorf("Expected %v\n but received %v", utils.OK, reply)
+			}
+		})
+	}
+}
