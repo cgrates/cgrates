@@ -257,7 +257,7 @@ func (da *DiameterAgent) handleMessage(c diam.Conn, m *diam.Message) {
 	// cache message for ASR
 	if da.cgrCfg.DiameterAgentCfg().ASRTemplate != "" ||
 		da.cgrCfg.DiameterAgentCfg().RARTemplate != "" {
-		sessID, err := diamDP.FieldAsString([]string{"Session-Id"})
+		sessID, err := diamDP.FieldAsString([]string{utils.DiamSessionID})
 		if err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> failed retrieving Session-Id err: %s, message: %s",

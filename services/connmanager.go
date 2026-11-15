@@ -83,8 +83,8 @@ func (s *ConnManagerService) AddInternalConn(svcName string, receiver birpc.Clie
 // internalRoute defines how a service's methods can be accessed internally within the system.
 type internalRoute struct {
 	receiver     string // method receiver name (e.g. "ChargerSv1")
-	internalPath string // internal API path
-	biRPCPath    string // bidirectional API path, if supported
+	internalPath string // internal API path (e.g. *internal:*admins)
+	biRPCPath    string // bidirectional API path, if supported (e.g. "*birpc_internal:sessions")
 }
 
 var serviceMethods = map[string]internalRoute{

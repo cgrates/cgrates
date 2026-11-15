@@ -1818,6 +1818,7 @@ const (
 	SIPAgent        = "SIPAgent"
 	JanusAgent      = "JanusAgent"
 	PrometheusAgent = "PrometheusAgent"
+	DiamSessionID   = "Session-Id"
 )
 
 // Google_API
