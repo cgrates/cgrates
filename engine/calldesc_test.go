@@ -1657,8 +1657,9 @@ func TestCDRefundIncrements(t *testing.T) {
 			Duration: 3 * time.Second,
 			BalanceInfo: &DebitInfo{
 				Unit: &UnitInfo{
-					UUID:   "minutea",
-					Factor: 1,
+					UUID:        "minutea",
+					BalanceType: utils.MetaVoice,
+					Factor:      1,
 				},
 				Monetary: &MonetaryInfo{
 					UUID: "moneya",
@@ -1670,8 +1671,9 @@ func TestCDRefundIncrements(t *testing.T) {
 			Duration: 4 * time.Second,
 			BalanceInfo: &DebitInfo{
 				Unit: &UnitInfo{
-					UUID:   "minuteb",
-					Factor: 1,
+					UUID:        "minuteb",
+					BalanceType: utils.MetaVoice,
+					Factor:      1,
 				},
 				AccountID: ub.ID,
 			},
@@ -2875,7 +2877,7 @@ func TestCDRefundIncrementsGenericBalance(t *testing.T) {
 			increment: &Increment{
 				Duration: 19 * time.Second,
 				BalanceInfo: &DebitInfo{
-					Unit:      &UnitInfo{UUID: "testUUID", Factor: 1, ToR: utils.MetaVoice},
+					Unit:      &UnitInfo{UUID: "testUUID", Factor: 1, ToR: utils.MetaVoice, BalanceType: utils.MetaGeneric},
 					AccountID: "genericwithvoice",
 				},
 			},
@@ -2889,7 +2891,7 @@ func TestCDRefundIncrementsGenericBalance(t *testing.T) {
 			increment: &Increment{
 				Duration: 1,
 				BalanceInfo: &DebitInfo{
-					Unit:      &UnitInfo{UUID: "testUUID", Factor: 60 * float64(time.Second), ToR: utils.MetaSMS},
+					Unit:      &UnitInfo{UUID: "testUUID", Factor: 60 * float64(time.Second), ToR: utils.MetaSMS, BalanceType: utils.MetaGeneric},
 					AccountID: "gneericwithsms",
 				},
 			},
@@ -2903,7 +2905,7 @@ func TestCDRefundIncrementsGenericBalance(t *testing.T) {
 			increment: &Increment{
 				Duration: 3 * time.Second,
 				BalanceInfo: &DebitInfo{
-					Unit:      &UnitInfo{UUID: "minutea", Factor: 1, ToR: utils.MetaVoice},
+					Unit:      &UnitInfo{UUID: "minutea", Factor: 1, ToR: utils.MetaVoice, BalanceType: utils.MetaVoice},
 					AccountID: "voiceonly",
 				},
 			},

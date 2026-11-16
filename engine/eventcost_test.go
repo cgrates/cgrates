@@ -713,6 +713,11 @@ func TestNewEventCostFromCallCost(t *testing.T) {
 			utils.ToJSON(ec.Rates[ec.Rating[ec.Accounting[ec.Charges[0].Increments[2].AccountingID].RatingID].RatesID]))
 	}
 
+	for _, charge := range eEC.Accounting {
+		if charge.BalanceUUID == "8c54a9e9-d610-4c82-bcb5-a315b9a65010" {
+			charge.BalanceType = utils.MetaMonetary
+		}
+	}
 	// Compare to expected EC
 	if !reflect.DeepEqual(eEC.Accounting[eEC.Charges[0].Increments[3].AccountingID],
 		ec.Accounting[ec.Charges[0].Increments[3].AccountingID]) {
@@ -1014,7 +1019,16 @@ func TestECAsRefundIncrements(t *testing.T) {
 		},
 	}
 
-	if cd := testEC.Clone().AsRefundIncrements(utils.MetaVoice); !reflect.DeepEqual(eCD, cd) {
+	for _, increment := range eCD.Increments {
+		if increment.BalanceInfo.Unit != nil {
+			increment.BalanceInfo.Unit.BalanceType = utils.MetaVoice
+		}
+	}
+	ec := testEC.Clone()
+	for _, charge := range ec.Accounting {
+		charge.BalanceType = ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(charge.BalanceUUID).Type
+	}
+	if cd := ec.AsRefundIncrements(utils.MetaVoice); !reflect.DeepEqual(eCD, cd) {
 		t.Errorf("expecting: %s\n\n, received: %s", utils.ToIJSON(eCD), utils.ToIJSON(cd))
 	}
 }
@@ -1219,9 +1233,10 @@ func TestECAsCallCost(t *testing.T) {
 						Cost:     0,
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{
-								UUID:     "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
-								Consumed: 1,
-								Factor:   1,
+								UUID:        "9d54a9e9-d610-4c82-bcb5-a315b9a65089",
+								BalanceType: utils.MetaVoice,
+								Consumed:    1,
+								Factor:      1,
 							},
 							AccountID: "cgrates.org:dan",
 						},
@@ -1232,9 +1247,10 @@ func TestECAsCallCost(t *testing.T) {
 						Cost:     0.005,
 						BalanceInfo: &DebitInfo{
 							Unit: &UnitInfo{ // Minutes with special price
-								UUID:     "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
-								Consumed: 1,
-								Factor:   1,
+								UUID:        "7a54a9e9-d610-4c82-bcb5-a315b9a65010",
+								BalanceType: utils.MetaVoice,
+								Consumed:    1,
+								Factor:      1,
 								RateInterval: &RateInterval{
 									Timing: &RITiming{
 										ID:        "27f1e5f8-05bb-4f1c-a596-bf1010ad296c",
@@ -1313,6 +1329,12 @@ func TestECAsCallCost(t *testing.T) {
 				},
 			},
 		},
+	}
+	for _, charge := range ec.Accounting {
+		charge.BalanceType = utils.MetaMonetary
+		if charge.ExtraChargeID != "" {
+			charge.BalanceType = utils.MetaVoice
+		}
 	}
 	cc := ec.AsCallCost(utils.EmptyString)
 	if !reflect.DeepEqual(eCC, cc) {
@@ -4236,7 +4258,7 @@ func TestECnewChargingIncrementNoUnitInfo(t *testing.T) {
 	}
 	expEC := &EventCost{
 		Accounting: Accounting{
-			utils.MetaPause: &BalanceCharge{},
+			utils.MetaPause: &BalanceCharge{BalanceType: utils.MetaMonetary},
 		},
 	}
 	rcv := ec.newChargingIncrement(incr, rf, false, true)
@@ -4302,11 +4324,13 @@ func TestECAsRefundIncrements2(t *testing.T) {
 			"accID": &BalanceCharge{
 				AccountID:     "bcAccID",
 				BalanceUUID:   "bcUUID",
+				BalanceType:   utils.MetaSMS,
 				ExtraChargeID: "extrachargeID",
 			},
 			"extrachargeID": &BalanceCharge{
 				AccountID:   "extraAccID",
 				BalanceUUID: "extraBcUUID",
+				BalanceType: utils.MetaSMS,
 			},
 		},
 		AccountSummary: &AccountSummary{
@@ -4336,8 +4360,9 @@ func TestECAsRefundIncrements2(t *testing.T) {
 				Cost:     5,
 				BalanceInfo: &DebitInfo{
 					Unit: &UnitInfo{
-						UUID:   "extraBcUUID",
-						Factor: 1,
+						UUID:        "extraBcUUID",
+						BalanceType: utils.MetaSMS,
+						Factor:      1,
 					},
 					AccountID: "bcAccID",
 				},
@@ -4574,6 +4599,7 @@ func TestECnewIntervalFromCharge(t *testing.T) {
 			"accID1": &BalanceCharge{
 				RatingID:    utils.MetaRounding,
 				BalanceUUID: "asdfgh1",
+				BalanceType: utils.MetaData,
 				AccountID:   "1001",
 			},
 			"accID2": &BalanceCharge{
@@ -4622,8 +4648,9 @@ func TestECnewIntervalFromCharge(t *testing.T) {
 		BalanceInfo: &DebitInfo{
 			AccountID: "1001",
 			Unit: &UnitInfo{
-				UUID:   "asdfgh1",
-				Factor: 1,
+				UUID:        "asdfgh1",
+				BalanceType: utils.MetaData,
+				Factor:      1,
 				RateInterval: &RateInterval{
 					Rating: &RIRate{
 						RoundingDecimals: 4,

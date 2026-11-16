@@ -482,6 +482,10 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 	if !isUnitBal {
 		tor = utils.MetaMonetary
 	}
+	balanceType := tor
+	if isUnitBal && ub.BalanceMap[utils.MetaGeneric].GetBalance(b.Uuid) != nil {
+		balanceType = utils.MetaGeneric
+	}
 
 	// Compute the balance factor ahead of time. If the map is nil, or
 	// the factor is not found, it will default to 1.
@@ -541,6 +545,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					Factor:        bFactor,
 					Category:      cd.Category,
 					ToR:           tor,
+					BalanceType:   balanceType,
 					RateInterval:  nil,
 				}
 				inc.BalanceInfo.AccountID = ub.ID
@@ -714,6 +719,7 @@ func (b *Balance) debit(cd *CallDescriptor, ub *Account, moneyBalances Balances,
 					Factor:        bFactor,
 					Category:      cc.Category,
 					ToR:           cc.ToR,
+					BalanceType:   balanceType,
 					RateInterval:  ts.RateInterval,
 				}
 				inc.BalanceInfo.AccountID = ub.ID

@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"slices"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -86,6 +85,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 			bc := &BalanceCharge{
 				AccountID:   incr.BalanceInfo.AccountID,
 				BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+				BalanceType: utils.MetaMonetary,
 				Units:       incr.Cost,
 				RatingID:    rateID,
 			}
@@ -102,6 +102,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 		bc := &BalanceCharge{
 			AccountID:     incr.BalanceInfo.AccountID,
 			BalanceUUID:   incr.BalanceInfo.Unit.UUID,
+			BalanceType:   incr.BalanceInfo.Unit.BalanceType,
 			Units:         incr.BalanceInfo.Unit.Consumed,
 			RatingID:      rateID,
 			ExtraChargeID: ecUUID,
@@ -125,6 +126,7 @@ func (ec *EventCost) newChargingIncrement(incr *Increment, rf RatingMatchedFilte
 		bc := &BalanceCharge{
 			AccountID:   incr.BalanceInfo.AccountID,
 			BalanceUUID: incr.BalanceInfo.Monetary.UUID,
+			BalanceType: utils.MetaMonetary,
 			Units:       incr.Cost,
 			RatingID:    rateID,
 		}
@@ -369,13 +371,14 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 						AccountID: blncCharge.AccountID,
 					}
 					cd.Increments[iIdx].BalanceInfo = blncInfo
-					blncSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(blncCharge.BalanceUUID)
-					if blncSmry.Type == utils.MetaMonetary {
-						blncInfo.Monetary = &MonetaryInfo{UUID: blncSmry.UUID}
-					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
+					balanceType := blncCharge.BalanceType
+					if balanceType == utils.MetaMonetary {
+						blncInfo.Monetary = &MonetaryInfo{UUID: blncCharge.BalanceUUID}
+					} else if utils.NonMonetaryBalances.Has(balanceType) {
 						blncInfo.Unit = &UnitInfo{
-							UUID:   blncSmry.UUID,
-							Factor: blncCharge.BalanceFactor,
+							UUID:        blncCharge.BalanceUUID,
+							BalanceType: balanceType,
+							Factor:      blncCharge.BalanceFactor,
 						}
 						if blncCharge.BalanceFactor == 0 {
 							blncInfo.Unit.Factor = 1
@@ -387,14 +390,15 @@ func (ec *EventCost) AsRefundIncrements(tor string) (cd *CallDescriptor) {
 						continue
 					}
 					// extra charges, ie: non-free *voice
-					extraSmry := ec.AccountSummary.BalanceSummaries.BalanceSummaryWithUUD(
-						ec.Accounting[blncCharge.ExtraChargeID].BalanceUUID)
-					if extraSmry.Type == utils.MetaMonetary {
-						blncInfo.Monetary = &MonetaryInfo{UUID: extraSmry.UUID}
-					} else if utils.NonMonetaryBalances.Has(blncSmry.Type) {
+					extraCharge := ec.Accounting[blncCharge.ExtraChargeID]
+					extraType := extraCharge.BalanceType
+					if extraType == utils.MetaMonetary {
+						blncInfo.Monetary = &MonetaryInfo{UUID: extraCharge.BalanceUUID}
+					} else if utils.NonMonetaryBalances.Has(extraType) {
 						blncInfo.Unit = &UnitInfo{
-							UUID:   extraSmry.UUID,
-							Factor: blncCharge.BalanceFactor,
+							UUID:        extraCharge.BalanceUUID,
+							BalanceType: extraType,
+							Factor:      blncCharge.BalanceFactor,
 						}
 						if blncCharge.BalanceFactor == 0 {
 							blncInfo.Unit.Factor = 1
@@ -472,27 +476,13 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 	}
 	cBC := ec.Accounting[cInc.AccountingID]
 	incr.BalanceInfo.AccountID = cBC.AccountID
-	var balanceType string
-	if cBC.BalanceUUID != "" {
-		if ec.AccountSummary != nil {
-			for _, b := range ec.AccountSummary.BalanceSummaries {
-				if b.UUID == cBC.BalanceUUID {
-					balanceType = b.Type
-					break
-				}
-			}
-		}
-	}
-	if slices.Contains([]string{utils.MetaData, utils.MetaVoice, utils.MetaGeneric}, balanceType) && cBC.ExtraChargeID == "" {
-		cBC.ExtraChargeID = utils.MetaNone // mark the balance to be exported as Unit type
-	}
-	if cBC.ExtraChargeID != "" { // have both monetary and data
-		// Work around, enforce logic with 2 balances for *voice/*monetary combination
-		// so we can stay compatible with CallCost
+	balanceType := cBC.BalanceType
+	if balanceType != "" && balanceType != utils.MetaMonetary {
 		incr.BalanceInfo.Unit = &UnitInfo{
-			UUID:     cBC.BalanceUUID,
-			Consumed: cBC.Units,
-			Factor:   cBC.BalanceFactor,
+			UUID:        cBC.BalanceUUID,
+			BalanceType: balanceType,
+			Consumed:    cBC.Units,
+			Factor:      cBC.BalanceFactor,
 		}
 
 		// EventCost's BalanceFactor is changed to 0 when it's 1
@@ -503,14 +493,13 @@ func (ec *EventCost) newIntervalFromCharge(cInc *ChargingIncrement) (incr *Incre
 		}
 
 		incr.BalanceInfo.Unit.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
-		if cBC.ExtraChargeID != utils.MetaNone {
-			cBC = ec.Accounting[cBC.ExtraChargeID] // overwrite original balance so we can process it in one place
+		if cBC.ExtraChargeID == "" || cBC.ExtraChargeID == utils.MetaNone {
+			return incr
 		}
+		cBC = ec.Accounting[cBC.ExtraChargeID]
 	}
-	if cBC.ExtraChargeID != utils.MetaNone {
-		incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
-		incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
-	}
+	incr.BalanceInfo.Monetary = &MonetaryInfo{UUID: cBC.BalanceUUID}
+	incr.BalanceInfo.Monetary.RateInterval = ec.rateIntervalForRatingID(cBC.RatingID)
 	return
 }
 
