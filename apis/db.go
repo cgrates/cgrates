@@ -12,7 +12,7 @@ import (
 )
 
 // DumpDB will dump all of offline internal DB from memory to a file
-func (adms *AdminSv1) DumpDB(ctx context.Context, ignr *string, reply *string) (err error) {
+func (adms *AdminSv1) DumpDB(ctx context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = adms.dm.DumpDB(); err != nil {
 		return
 	}
