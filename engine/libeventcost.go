@@ -174,6 +174,7 @@ func (cIt *ChargingIncrement) FieldAsInterface(fldPath []string) (val any, err e
 type BalanceCharge struct {
 	AccountID     string  // reference for shared balances
 	BalanceUUID   string  // balance charged
+	BalanceType   string  // balance type recorded in the increment
 	RatingID      string  // special price applied on this balance
 	Units         float64 // number of units charged
 	BalanceFactor float64 `json:",omitempty"` // calculation multiplier for units
@@ -221,6 +222,7 @@ func (bc *BalanceCharge) Equals(oBC *BalanceCharge) bool {
 	}
 	return bc.AccountID == oBC.AccountID &&
 		bc.BalanceUUID == oBC.BalanceUUID &&
+		bc.BalanceType == oBC.BalanceType &&
 		bc.RatingID == oBC.RatingID &&
 		bc.Units == oBC.Units &&
 		bc.BalanceFactor == oBC.BalanceFactor &&

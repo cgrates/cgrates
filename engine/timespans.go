@@ -96,6 +96,7 @@ type UnitInfo struct {
 	Factor        float64
 	Category      string
 	ToR           string
+	BalanceType   string
 	RateInterval  *RateInterval
 }
 
@@ -116,6 +117,7 @@ func (ui *UnitInfo) Equal(other *UnitInfo) bool {
 		ui.Consumed == other.Consumed &&
 		ui.Factor == other.Factor &&
 		ui.ToR == other.ToR &&
+		ui.BalanceType == other.BalanceType &&
 		ui.Category == other.Category &&
 		reflect.DeepEqual(ui.RateInterval, other.RateInterval)
 }
