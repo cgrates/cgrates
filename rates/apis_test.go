@@ -1769,3 +1769,338 @@ func TestV1RateProfileRatesForEventRateProfileNotFound(t *testing.T) {
 		t.Errorf("Expected error %v, received %v", expErr, err)
 	}
 }
+
+func TestV1CostForEventProfileIDs(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rPrfID",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(5, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rPrf2 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rPrf2ID",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf2, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	rPrf3 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "rPrf3ID",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 15,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(3, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf3, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name    string
+		account string
+		rpIDs   []string
+		expID   string
+		expCost *utils.Decimal
+		expErr  error
+	}{
+		{
+			name:    "no profile IDs",
+			account: "1001",
+			expID:   "rPrfID",
+			expCost: utils.NewDecimal(15, 1),
+		},
+		{
+			name:    "1 profile",
+			account: "1001",
+			rpIDs:   []string{"rPrf2ID"},
+			expID:   "rPrf2ID",
+			expCost: utils.NewDecimal(6, 1),
+		},
+		{
+			name:    "highest weight among the profiles",
+			account: "1001",
+			rpIDs:   []string{"rPrf2ID", "rPrf3ID"},
+			expID:   "rPrf3ID",
+			expCost: utils.NewDecimal(9, 1),
+		},
+		{
+			name:    "unknown profile id is skipped",
+			account: "1001",
+			rpIDs:   []string{"rPrfOtherID", "rPrf2ID"},
+			expID:   "rPrf2ID",
+			expCost: utils.NewDecimal(6, 1),
+		},
+		{
+			name:    "profile with failing filters",
+			account: "1002",
+			rpIDs:   []string{"rPrf2ID"},
+			expErr:  utils.ErrNotFound,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event: map[string]any{
+					utils.AccountField: tc.account,
+				},
+				APIOpts: map[string]any{
+					utils.OptsRatesStartTime:  time.Date(2026, 11, 10, 10, 0, 0, 0, time.UTC),
+					utils.OptsRatesUsage:      utils.NewDecimal(3, 0),
+					utils.OptsRatesProfileIDs: tc.rpIDs,
+				},
+			}
+			var rpCost utils.RateProfileCost
+			err := rateS.V1CostForEvent(context.Background(), ev, &rpCost)
+			if err != tc.expErr {
+				t.Fatalf("Expected %v, received %v", tc.expErr, err)
+			}
+			if rpCost.ID != tc.expID {
+				t.Errorf("Expected profile %v, received %v", tc.expID, rpCost.ID)
+			}
+			if rpCost.Cost.Compare(tc.expCost) != 0 {
+				t.Errorf("Expected cost %v, received %v", tc.expCost, rpCost.Cost)
+			}
+		})
+	}
+}
+
+func TestV1CostForEventFallback(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(engine.NewCacheS(cfg, nil, nil, nil, locker))
+	filters := engine.NewFilterS(cfg, nil, dm)
+	rateS := NewRateS(cfg, filters, dm)
+
+	rPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_1",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 30,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+
+	rPrf2 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_2",
+		FilterIDs: []string{"*string:~*req.Account:1001|1002"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 20,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+
+	rPrf3 := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RP_3",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Weights: utils.DynamicWeights{
+			{
+				Weight: 10,
+			},
+		},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 0,
+					},
+				},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(2, 1),
+						Unit:          utils.NewDecimal(1, 0),
+						Increment:     utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+
+	if err := dm.SetRateProfile(context.Background(), rPrf, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf2, false, true); err != nil {
+		t.Fatal(err)
+	}
+	if err := dm.SetRateProfile(context.Background(), rPrf3, false, true); err != nil {
+		t.Fatal(err)
+	}
+
+	for _, tc := range []struct {
+		name    string
+		account string
+		expID   string
+		expCost *utils.Decimal
+		expErr  string
+	}{
+		{
+			name:    "3rd profile succeeds",
+			account: "1001",
+			expID:   "RP_3",
+			expCost: utils.NewDecimal(6, 1),
+		},
+		{
+			name:    "all fail, error from the highest weight profile",
+			account: "1002",
+			expErr:  "SERVER_ERROR: zero increment to be charged within rate: <cgrates.org:RP_1:RATE1>",
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "evID",
+				Event: map[string]any{
+					utils.AccountField: tc.account,
+				},
+				APIOpts: map[string]any{
+					utils.OptsRatesStartTime: time.Date(2026, 11, 10, 10, 0, 0, 0, time.UTC),
+					utils.OptsRatesUsage:     utils.NewDecimal(3, 0),
+				},
+			}
+			var rpCost utils.RateProfileCost
+			err := rateS.V1CostForEvent(context.Background(), ev, &rpCost)
+			if err != nil && err.Error() != tc.expErr {
+				t.Errorf("Expected error %v, received %v", tc.expErr, err)
+			}
+			if rpCost.ID != tc.expID {
+				t.Errorf("Expected profile %v, received %v", tc.expID, rpCost.ID)
+			}
+			if rpCost.Cost.Compare(tc.expCost) != 0 {
+				t.Errorf("Expected cost %v, received %v", tc.expCost, rpCost.Cost)
+			}
+		})
+	}
+}
