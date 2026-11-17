@@ -1576,3 +1576,62 @@ func TestV1GetAccountThresholdError(t *testing.T) {
 		t.Errorf("expected %v, recieved %v", utils.ErrPartiallyExecuted, err)
 	}
 }
+
+func TestV1GetAccountDefaultTenant(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "acc1",
+		Balances: map[string]*utils.Balance{
+			"concreteBalance": {
+				ID:   "concreteBalance",
+				Type: utils.MetaConcrete,
+				Weights: utils.DynamicWeights{
+					{
+						Weight: 10,
+					},
+				},
+				Units: utils.NewDecimal(10, 0),
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetAccount(context.Background(), acc, false); err != nil {
+		t.Fatal(err)
+	}
+
+	arg := &utils.TenantIDWithAPIOpts{
+		TenantID: &utils.TenantID{
+			ID: "acc1",
+		},
+		APIOpts: map[string]any{},
+	}
+	var reply utils.Account
+	if err := accnts.V1GetAccount(context.Background(), arg, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if reply.Tenant != "cgrates.org" {
+		t.Errorf("Expected %v \nreceived %v", "cgrates.org", reply.Tenant)
+	}
+	if reply.ID != "acc1" {
+		t.Errorf("Expected %v \nreceived %v", "acc1", reply.ID)
+	}
+	if reply.Balances["concreteBalance"].Units.Compare(utils.NewDecimal(10, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(10, 0), reply.Balances["concreteBalance"].Units)
+	}
+}
