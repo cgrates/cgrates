@@ -7301,3 +7301,154 @@ func TestProcessThresholdsInvalidOpts(t *testing.T) {
 		})
 	}
 }
+
+func TestAccountsDebitRatesNotConnected(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	connMngr := engine.NewConnManager(cfg)
+	idb, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Error(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: idb}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMngr, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMngr, nil, locker)
+	connMngr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+	fltrs := engine.NewFilterS(cfg, connMngr, dm)
+
+	rtPrf := &utils.RateProfile{
+		ID:        "RP1",
+		Tenant:    "cgrates.org",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RATE1": {
+				ID: "RATE1",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						FixedFee:     utils.NewDecimal(2, 1),
+						RecurrentFee: utils.NewDecimal(1, 0),
+					},
+				},
+			},
+		},
+	}
+	if err := dm.SetRateProfile(context.Background(), rtPrf, false, true); err != nil {
+		t.Error(err)
+	}
+	accnts := NewAccountS(cfg, fltrs, connMngr, dm)
+
+	accntsPrf := []*utils.Account{
+		{
+			Tenant:    "cgrates.org",
+			ID:        "acc1",
+			FilterIDs: []string{"*string:~*req.Account:1001"},
+			Balances: map[string]*utils.Balance{
+				"ConcreteBal1": {
+					ID: "ConcreteBal1",
+					Weights: utils.DynamicWeights{
+						{
+							Weight: 10,
+						},
+					},
+					Type:  utils.MetaConcrete,
+					Units: &utils.Decimal{Big: decimal.New(90, 0)},
+				},
+			},
+		},
+	}
+
+	cgrEvent := &utils.CGREvent{
+		ID:     "evID",
+		Tenant: "cgrates.org",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.OptsAccountsUsage: "2s",
+		},
+	}
+	expErr := "RATES_ERROR:NOT_CONNECTED: RateS"
+	if _, err := accnts.accountsDebit(context.Background(), accntsPrf, cgrEvent, false, false); err == nil || err.Error() != expErr {
+		t.Errorf("Expected %v, recieved %v", expErr, err)
+	}
+}
+
+func TestAccountDebitBalanceTypes(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, nil)
+	account := &utils.Account{
+		Tenant:    "cgrates.org",
+		ID:        "ACC1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Balances: map[string]*utils.Balance{
+			"abstractBalance1": {
+				ID:      "abstractBalance1",
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(5, 0),
+				Weights: utils.DynamicWeights{{Weight: 20}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			"abstractBalance2": {
+				ID:      "abstractBalance2",
+				Type:    utils.MetaAbstract,
+				Units:   utils.NewDecimal(100, 0),
+				Weights: utils.DynamicWeights{{Weight: 10}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+			"balance": {
+				ID:      "balance",
+				Type:    "unknown",
+				Units:   utils.NewDecimal(50, 0),
+				Weights: utils.DynamicWeights{{Weight: 30}},
+				CostIncrements: []*utils.CostIncrement{
+					{
+						Increment:    utils.NewDecimal(1, 0),
+						FixedFee:     utils.NewDecimal(0, 0),
+						RecurrentFee: utils.NewDecimal(0, 0),
+					},
+				},
+			},
+		},
+	}
+	ev := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{
+			utils.MetaUsage: utils.NewDecimal(8, 0),
+		},
+	}
+
+	ec, err := accnts.accountsDebit(context.Background(), []*utils.Account{account}, ev, false, false)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if ec.Abstracts.Compare(utils.NewDecimal(8, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(8, 0), ec.Abstracts)
+	}
+	if account.Balances["abstractBalance1"].Units.Compare(utils.NewDecimal(0, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(0, 0), account.Balances["abstractBalance1"].Units)
+	}
+	if account.Balances["abstractBalance2"].Units.Compare(utils.NewDecimal(97, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(97, 0), account.Balances["abstractBalance2"].Units)
+	}
+	if account.Balances["balance"].Units.Compare(utils.NewDecimal(50, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(50, 0), account.Balances["balance"].Units)
+	}
+}
