@@ -10,6 +10,7 @@ import (
 	"os"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 	"testing"
 	"time"
@@ -2527,10 +2528,11 @@ func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
 		balWeight string
 		err       string
 	}{
-		{name: "*time_asc", balWeight: utils.MetaTimeAsc},
-		{name: "*time_desc", balWeight: utils.MetaTimeDesc},
+		{name: "*time_asc", balWeight: "*constant:*req.BalanceWeight:*none{*time_asc}"},
+		{name: "*time_desc", balWeight: "*constant:*req.BalanceWeight:*none{*time_desc}"},
 		{name: "number", balWeight: "15.5"},
-		{name: "invalid value", balWeight: "randomstr", err: "invalid syntax"},
+		{name: "inline attribute", balWeight: "*sum:*req.BalanceWeight:*none{*time_desc}&1000"},
+		{name: "attribute profile ID", balWeight: "ATTR_BALANCE_WEIGHT"},
 	}
 
 	for _, tt := range tests {
@@ -2580,7 +2582,7 @@ func TestTprLoadActionsBalanceWeightTime(t *testing.T) {
 				t.Fatalf("expected 1 action, got %d", len(acts))
 			}
 			a := acts[0]
-			if strings.HasPrefix(tt.balWeight, utils.Meta) {
+			if _, errFlt := strconv.ParseFloat(tt.balWeight, 64); errFlt != nil {
 				if a.Balance.WeightRule != tt.balWeight {
 					t.Errorf("expected WeightRule %q, got %q", tt.balWeight, a.Balance.WeightRule)
 				}
