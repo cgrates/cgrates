@@ -60,11 +60,13 @@ func NewBalanceFilter(filter map[string]any, defaultTimezone string) (*BalanceFi
 		bf.ExpirationDate = utils.TimePointer(expTime)
 	}
 	if weight, has := filter[utils.Weight]; has {
-		value, err := utils.BalanceWeightAsFloat64(utils.IfaceAsString(weight))
+		weightStr := utils.IfaceAsString(weight)
+		value, err := strconv.ParseFloat(weightStr, 64)
 		if err != nil {
-			return nil, err
+			bf.WeightRule = weightStr
+		} else {
+			bf.Weight = utils.Float64Pointer(value)
 		}
-		bf.Weight = utils.Float64Pointer(value)
 	}
 	if dst, has := filter[utils.DestinationIDs]; has {
 		bf.DestinationIDs = utils.StringMapPointer(utils.ParseStringMap(utils.IfaceAsString(dst)))
