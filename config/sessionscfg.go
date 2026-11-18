@@ -113,7 +113,6 @@ type SessionSCfg struct {
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
-	MinDurLowBalance    time.Duration
 	Conns               map[string][]*DynamicConns
 	STIRCfg             *STIRcfg
 	Opts                *SessionsOpts
@@ -557,11 +556,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.AlterableFields != nil {
 		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.AlterableFields)
 	}
-	if jsnCfg.MinDurLowBalance != nil {
-		if scfg.MinDurLowBalance, err = utils.ParseDurationWithNanosecs(*jsnCfg.MinDurLowBalance); err != nil {
-			return err
-		}
-	}
 	if jsnCfg.Stir != nil {
 		if err = scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir); err != nil {
 			return
@@ -650,16 +644,12 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
 		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
-		utils.MinDurLowBalanceCfg:    "0",
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.OptsCfg:                opts,
 		utils.ConnsCfg:               stripConns(scfg.Conns),
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		mp[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
-	}
-	if scfg.MinDurLowBalance != 0 {
-		mp[utils.MinDurLowBalanceCfg] = scfg.MinDurLowBalance.String()
 	}
 	return mp
 }
@@ -736,7 +726,6 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		ClientProtocol:      scfg.ClientProtocol,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
-		MinDurLowBalance:    scfg.MinDurLowBalance,
 		Conns:               CloneConnsMap(scfg.Conns),
 		SessionIndexes:      scfg.SessionIndexes.Clone(),
 		AlterableFields:     scfg.AlterableFields.Clone(),
@@ -909,7 +898,6 @@ type SessionSJsonCfg struct {
 	ChannelSyncInterval *string                    `json:"channelSyncInterval"`
 	TerminateAttempts   *int                       `json:"terminateAttempts"`
 	AlterableFields     *[]string                  `json:"alterableFields"`
-	MinDurLowBalance    *string                    `json:"minDurLowBalance"`
 	Stir                *STIRJsonCfg               `json:"stir"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Opts                *SessionsOptsJson          `json:"opts"`
@@ -1120,9 +1108,6 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if !v1.AlterableFields.Equals(v2.AlterableFields) {
 		d.AlterableFields = utils.SliceStringPointer(v2.AlterableFields.AsSlice())
-	}
-	if v1.MinDurLowBalance != v2.MinDurLowBalance {
-		d.MinDurLowBalance = utils.StringPointer(v2.MinDurLowBalance.String())
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {

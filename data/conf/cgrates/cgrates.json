@@ -614,7 +614,6 @@
 // 	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
 // 	"terminateAttempts": 5,		// attempts to get the session before terminating it
 // 	"alterableFields": [],			// the session fields that can be updated
-// 	//"minDurLowBalance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debitInterval)
 // 	"stir": {
 // 		"allowedAttest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
 // 		"payloadMaxduration": "-1", 	// the duration that stir header is valid after it was created
