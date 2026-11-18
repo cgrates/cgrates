@@ -57,8 +57,12 @@
 
 "diameter_agent": {
 	"enabled": true,										
-	"listen": "192.168.122.42:3868",								
-	"listen_net": "tcp",									
+	"listeners": [
+    	{
+        	"address": "192.168.122.42:3868",
+			"network": "tcp"
+    	}
+    ],
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
 	"sessions_conns": ["*bijson_localhost"],
 	"origin_host": "server.diameter.test",

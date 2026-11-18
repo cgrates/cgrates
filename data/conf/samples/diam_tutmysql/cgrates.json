@@ -65,7 +65,11 @@
 
   "diameter_agent": {
     "enabled": true,
-    "listen": ":3868",
+    "listeners": [
+	    {
+	    "address": ":3868"
+	    }
+	  ],
     "sessions_conns": ["*birpc_internal"]
   }
 }

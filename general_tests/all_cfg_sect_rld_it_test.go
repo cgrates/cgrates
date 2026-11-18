@@ -694,8 +694,12 @@ func testSectConfigSReloadDiameterAgent(t *testing.T) {
 		Tenant: "cgrates.org",
 		Config: `{"diameter_agent": {
 			"enabled": false,
-			"listen": "127.0.0.1:3868",
-			"listen_net": "tcp",
+			"listeners": [
+	   			{
+	   				"address": "127.0.0.1:3868",
+	   				"network": "tcp",
+	   			}
+			],
 			"dictionaries_path": "/usr/share/cgrates/diameter/dict/",
 			"sessions_conns": ["*birpc_internal"],
 			"origin_host": "CGR-DA",

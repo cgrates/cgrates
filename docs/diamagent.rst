@@ -27,8 +27,12 @@ With explanations in the comments:
 
  "diameter_agent": {
 	"enabled": false,					// enables the diameter agent: <true|false>
-	"listen": "127.0.0.1:3868",			// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
-	"listen_net": "tcp",				// transport type for diameter <tcp|sctp>
+  "listeners": [
+	   {
+	   "address": "127.0.0.1:3868",					// address where to listen for diameter requests <x.y.z.y/x1.y1.z1.y1:1234>
+	   "network": "tcp",						// transport type for diameter <tcp|sctp>
+	   }
+	],
 	"dictionaries_path": "/usr/share/cgrates/diameter/dict/",	// path towards directory
 										//   holding additional dictionaries to load
 	"dictionaries_append_defaults": true,         // if true, dictionaries from the provided path will be appended to the default dictionaries from the go-diameter library
@@ -172,7 +176,7 @@ Config params
 Most of the parameters are explained in :ref:`JSON configuration <configuration>`, hence we mention here only the ones where additional info is necessary or there will be particular implementation for *DiameterAgent*.
 
 
-listen_net
+network
 	The network the *DiameterAgent* will bind to. CGRateS supports both **tcp** and **sctp** specified in Diameter_ standard.
 
 asr_template
