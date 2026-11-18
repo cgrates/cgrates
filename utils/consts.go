@@ -174,7 +174,6 @@ const (
 	SetupTime                = "SetupTime"
 	AnswerTime               = "AnswerTime"
 	Usage                    = "Usage"
-	DebitInterval            = "DebitInterval"
 	TimeStart                = "TimeStart"
 	TimeEnd                  = "TimeEnd"
 	DryRun                   = "DryRun"
