@@ -92,7 +92,7 @@ func TestOnBiJSONConnectDisconnect(t *testing.T) {
 	sClinents := NewServiceBiRPCClients()
 	//connect BiJSON
 	client := &birpc.Service{}
-	sClinents.OnBiJSONConnect(client, 0)
+	sClinents.OnBiJSONConnect(client, 0, "nodeID")
 
 	//we'll change the connection identifier just for testing
 	sClinents.biJClnts[client] = "test_conn"

@@ -5,6 +5,7 @@
   },
   "schedulers": {
     "enabled": true,
+    "thresholds_conns": ["*localhost"],
   },
   "data_db": {
     "db_type": "mongo",
@@ -19,20 +20,21 @@
   },
   "apiers": {
     "enabled": true,
-    "scheduler_conns": ["*internal"]
+    "scheduler_conns": ["*localhost"]
   },
   "filters": {
-    "apiers_conns": ["*internal"]
+    "apiers_conns": ["*localhost"]
   },
   "thresholds": {
-    "enabled": true
+    "enabled": true,
+    "apiers_conns": ["*localhost"]
   },
   "sessions": {
     "enabled": true,
-    "apiers_conns": ["*internal"],
+    "apiers_conns": ["*localhost"],
     "thresholds_conns": ["*birpc_internal"],
-    "chargers_conns": ["*internal"],
-    "rals_conns": ["*internal"],
+    "chargers_conns": ["*localhost"],
+    "rals_conns": ["*localhost"],
     "backup_interval": "-1"
   },
   "chargers": {
@@ -41,7 +43,7 @@
   },
   "rals": {
     "enabled": true,
-    "thresholds_conns": ["*internal"],
+    "thresholds_conns": ["*localhost"],
     "max_computed_usage": {
       "*data": "10737418"
     }
@@ -390,6 +392,27 @@
             "mandatory": true
           },
           {
+            "tag": "DestinationRealm",
+            "path": "*cgreq.DestinationRealm",
+            "type": "*variable",
+            "value": "~*req.Destination-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "DestinationHost",
+            "path": "*cgreq.DestinationHost",
+            "type": "*variable",
+            "value": "~*req.Destination-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "AuthApplicationId",
+            "path": "*cgreq.AuthApplicationId",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -403,10 +426,18 @@
             "value": "*sy"
           },
           {
-            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters",
+            "tag": "BalanceValuePolicyFilterNORMAL", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters.THD_NORMAL",
             "type": "*group",
-            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
+            "value": "*gte:~*asm.BalanceSummaries.balance_data.Value:1024",
+            "new_branch": true
+          },
+          {
+            "tag": "BalanceValuePolicyFilterTHROTTLE", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
+            "type": "*group",
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023",
+            "new_branch": true
           }
         ],
         "reply_fields": [
@@ -516,6 +547,27 @@
             "mandatory": true
           },
           {
+            "tag": "DestinationRealm",
+            "path": "*cgreq.DestinationRealm",
+            "type": "*variable",
+            "value": "~*req.Destination-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "DestinationHost",
+            "path": "*cgreq.DestinationHost",
+            "type": "*variable",
+            "value": "~*req.Destination-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "AuthApplicationId",
+            "path": "*cgreq.AuthApplicationId",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -529,8 +581,8 @@
             "value": "*sy"
           },
           {
-            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters",
+            "tag": "BalanceValuePolicyFilterNEVER_THROTTLE", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters.NEVER_THROTTLE",
             "type": "*group",
             "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"
           }
@@ -593,6 +645,30 @@
           }
         ]
       },
+      // {
+      //   "id": "Sy_SNR",
+      //   "filters": [
+      //     "*string:~*vars.*cmd:SNR"
+      //   ],
+      //   "request_fields": [ // build the SN request. ~*req and ~*opts fields are defined from the SLR request and ~*opts.*syPolicyStatus is the current policy status, picked dynamically from the SLR *syPolicyFilters path
+      //     {"tag": "SessionId", "path": "*diamreq.Session-Id", "type": "*variable",
+      //       "value": "~*req.OriginID", "mandatory": true},
+      //     {"tag": "OriginHost", "path": "*diamreq.Origin-Host", "type": "*variable",
+      //       "value": "~*req.OriginHost", "mandatory": true},
+      //     {"tag": "OriginRealm", "path": "*diamreq.Origin-Realm", "type": "*variable",
+      //       "value": "~*req.OriginRealm", "mandatory": true},
+      //     {"tag": "DestinationRealm", "path": "*diamreq.Destination-Realm", "type": "*variable",
+      //       "value": "~*req.DestinationRealm", "mandatory": true},
+      //     {"tag": "DestinationHost", "path": "*diamreq.Destination-Host", "type": "*variable",
+      //       "value": "~*req.DestinationHost", "mandatory": true},
+      //     {"tag": "AuthApplicationId", "path": "*diamreq.Auth-Application-Id", "type": "*variable",
+      //       "value": "~*vars.*appid", "mandatory": true},
+      //     {"tag": "Policy-Counter-Identifier", "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Identifier", "type": "*group", 
+      //       "value": "Monthly", "new_branch": true},
+      //     {"tag": "Policy-Counter-Status", "path": "*diamreq.Policy-Counter-Status-Report.Policy-Counter-Status", "type": "*group", 
+      //       "value": "~*opts.*syPolicyStatus"}
+      //   ]
+      // },
       {
         "id": "Sy_Terminate_STR",
         "filters": ["*string:~*vars.*cmd:STR"],

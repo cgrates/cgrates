@@ -93,6 +93,27 @@
             "mandatory": true
           },
           {
+            "tag": "DestinationRealm",
+            "path": "*cgreq.DestinationRealm",
+            "type": "*variable",
+            "value": "~*req.Destination-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "DestinationHost",
+            "path": "*cgreq.DestinationHost",
+            "type": "*variable",
+            "value": "~*req.Destination-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "AuthApplicationId",
+            "path": "*cgreq.AuthApplicationId",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -107,7 +128,7 @@
           },
           {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters",
+            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
             "type": "*group",
             "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
           }
@@ -228,6 +249,27 @@
             "mandatory": true
           },
           {
+            "tag": "DestinationRealm",
+            "path": "*cgreq.DestinationRealm",
+            "type": "*variable",
+            "value": "~*req.Destination-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "DestinationHost",
+            "path": "*cgreq.DestinationHost",
+            "type": "*variable",
+            "value": "~*req.Destination-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "AuthApplicationId",
+            "path": "*cgreq.AuthApplicationId",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -242,7 +284,7 @@
           },
           {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters",
+            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
             "type": "*group",
             "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"
           }
@@ -412,6 +454,27 @@
             "mandatory": true
           },
           {
+            "tag": "DestinationRealm",
+            "path": "*cgreq.DestinationRealm",
+            "type": "*variable",
+            "value": "~*req.Destination-Realm",
+            "mandatory": true
+          },
+          {
+            "tag": "DestinationHost",
+            "path": "*cgreq.DestinationHost",
+            "type": "*variable",
+            "value": "~*req.Destination-Host",
+            "mandatory": true
+          },
+          {
+            "tag": "AuthApplicationId",
+            "path": "*cgreq.AuthApplicationId",
+            "type": "*variable",
+            "value": "~*req.Auth-Application-Id",
+            "mandatory": true
+          },
+          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -426,13 +489,13 @@
           },
           {
             "tag": "BalanceIDPolicyFilter",
-            "path": "*opts.*syPolicyFilters",
+            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
             "type": "*group",
             "value": "BadFilter"
           },
           {
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters",
+            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
             "type": "*group",
             "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:1023"
           }
