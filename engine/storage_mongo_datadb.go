@@ -2226,11 +2226,11 @@ type mongoStoredSession struct {
 	IPAllocID     string
 	ResourceID    string
 	ClientConnID  string
-	EventStart    MapEvent
+	EventStart    string
 	DebitInterval time.Duration
 	Chargeable    bool
 	SRuns         []*StoredSRun
-	OptsStart     MapEvent
+	OptsStart     string
 	UpdatedAt     time.Time
 }
 
@@ -2238,14 +2238,20 @@ type mongoStoredSession struct {
 func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions []*StoredSession) error {
 	return ms.query(func(sctx mongo.SessionContext) error {
 		for i := 0; i < len(storedSessions); i += 1000 {
-			end := i + 1000
-			if end > len(storedSessions) {
-				end = len(storedSessions)
-			}
+			end := min(i+1000, len(storedSessions))
 			// split sessions into batches of 1001 sessons
 			batch := storedSessions[i:end] //  if sessions < 1001, puts all sessions in 1 batch
 			var models []mongo.WriteModel
 			for _, sess := range batch {
+				// save eventStart and optsStart as json string to avoid issues with bson marshalling of nested structs
+				eventStart, err := ms.ms.Marshal(sess.EventStart)
+				if err != nil {
+					return err
+				}
+				optsStart, err := ms.ms.Marshal(sess.OptsStart)
+				if err != nil {
+					return err
+				}
 				doc := bson.M{"$set": mongoStoredSession{
 					NodeID:        nodeID,
 					CGRID:         sess.CGRID,
@@ -2253,11 +2259,11 @@ func (ms *MongoStorage) SetBackupSessionsDrv(nodeID, tnt string, storedSessions 
 					IPAllocID:     sess.IPAllocID,
 					ResourceID:    sess.ResourceID,
 					ClientConnID:  sess.ClientConnID,
-					EventStart:    sess.EventStart,
+					EventStart:    string(eventStart),
 					DebitInterval: sess.DebitInterval,
 					Chargeable:    sess.Chargeable,
 					SRuns:         sess.SRuns,
-					OptsStart:     sess.OptsStart,
+					OptsStart:     string(optsStart),
 					UpdatedAt:     sess.UpdatedAt,
 				}}
 				model := mongo.NewUpdateOneModel().SetUpdate(doc).SetUpsert(true).SetFilter(bson.M{"nodeid": nodeID, "cgrid": sess.CGRID})
@@ -2296,17 +2302,26 @@ func (ms *MongoStorage) GetSessionsBackupDrv(nodeID, tnt string) ([]*StoredSessi
 			} else if qryErr != nil {
 				return qryErr
 			}
+			// unmarshal eventStart and optsStart from json string to their respective structs
+			var eventStart MapEvent
+			if err := ms.ms.Unmarshal([]byte(result.EventStart), &eventStart); err != nil {
+				return err
+			}
+			var optsStart MapEvent
+			if err := ms.ms.Unmarshal([]byte(result.OptsStart), &optsStart); err != nil {
+				return err
+			}
 			oneStSession := &StoredSession{
 				CGRID:         result.CGRID,
 				Tenant:        result.Tenant,
 				IPAllocID:     result.IPAllocID,
 				ResourceID:    result.ResourceID,
 				ClientConnID:  result.ClientConnID,
-				EventStart:    result.EventStart,
+				EventStart:    eventStart,
 				DebitInterval: result.DebitInterval,
 				Chargeable:    result.Chargeable,
 				SRuns:         result.SRuns,
-				OptsStart:     result.OptsStart,
+				OptsStart:     optsStart,
 				UpdatedAt:     result.UpdatedAt,
 			}
 			storeSessions = append(storeSessions, oneStSession)

@@ -487,7 +487,7 @@ func (apierSv1 *APIerSv1) modifyBalance(aType string, attr *AttrAddBalance, repl
 		}}
 	}
 	at.SetActions(acts)
-	if err := at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
+	if err := at.Execute(apierSv1.FilterS, utils.ApierS); err != nil {
 		return err
 	}
 	*reply = utils.OK
@@ -562,7 +562,7 @@ func (apierSv1 *APIerSv1) SetBalance(ctx *context.Context, attr *utils.AttrSetBa
 		}}
 	}
 	at.SetActions(acts)
-	if err = at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
+	if err = at.Execute(apierSv1.FilterS, utils.ApierS); err != nil {
 		return
 	}
 	*reply = utils.OK
@@ -641,7 +641,7 @@ func (apierSv1 *APIerSv1) SetBalances(ctx *context.Context, attr *utils.AttrSetB
 			}}
 		}
 		at.SetActions(acts)
-		if err = at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
+		if err = at.Execute(apierSv1.FilterS, utils.ApierS); err != nil {
 			return
 		}
 	}
@@ -685,7 +685,7 @@ func (apierSv1 *APIerSv1) RemoveBalances(ctx *context.Context, attr *utils.AttrS
 		acts = append(acts, &engine.Action{ActionType: utils.CDRLog})
 	}
 	at.SetActions(acts)
-	if err := at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
+	if err := at.Execute(apierSv1.FilterS, utils.ApierS); err != nil {
 		*reply = err.Error()
 		return err
 	}
@@ -745,7 +745,7 @@ func (apierSv1 *APIerSv1) TransferBalance(ctx *context.Context, attr utils.AttrT
 	at := &engine.ActionTiming{}
 	at.SetActions(actions)
 	at.SetAccountIDs(utils.StringMap{utils.ConcatenatedKey(attr.Tenant, attr.SourceAccountID): true})
-	if err = at.Execute(apierSv1.FilterS, utils.ApierS, nil); err != nil {
+	if err = at.Execute(apierSv1.FilterS, utils.ApierS); err != nil {
 		return utils.NewErrServerError(err)
 	}
 	return nil

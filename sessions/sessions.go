@@ -52,7 +52,7 @@ func (sS *SessionS) PopulateCtx(ctx *context.Context) {
 
 // OnBiJSONConnect handles new client connections.
 func (sS *SessionS) OnBiJSONConnect(c birpc.ClientConnector) {
-	sS.sBiRPCClients.OnBiJSONConnect(c, sS.cgrCfg.SessionSCfg().ClientProtocol)
+	sS.sBiRPCClients.OnBiJSONConnect(c, sS.cgrCfg.SessionSCfg().ClientProtocol, sS.cgrCfg.GeneralCfg().NodeID)
 }
 
 // OnBiJSONDisconnect handles client disconnects.
@@ -283,16 +283,32 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
 				utils.SessionS, s.cgrID(), err.Error()))
 	}
-	if s.EventStart != nil {
-		if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
-			var rply string // will always reply with OK
-			if err = sS.connMgr.Call(context.TODO(),
-				sS.cgrCfg.SessionSCfg().ThresholdSConns,
-				utils.ThresholdSv1RemoveClientConnID,
-				utils.MetaSy+utils.Underline+s.EventStart[utils.OriginID].(string),
-				&rply); err != nil {
-				return utils.NewErrThresholdS(err)
+	if s.EventStart != nil { // remove ClientConnIDs from thresholdS afte the Sy session is terminated
+		if reqType, has := s.EventStart[utils.RequestType]; has && reqType.(string) == utils.MetaSy {
+			// get statuses to find the thresholds profile ids for this Sy session
+			if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
+				statuses, err := syPolicyStatuses(allPS)
+				if err != nil {
+					return utils.ErrCastFailed
+				}
+				for _, status := range statuses {
+					var rply string // will always reply with OK
+					if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+						utils.ThresholdSv1RemoveClientConnID,
+						&utils.SyConnIDs{
+							CGRID: s.CGRID,
+							ThresholdProfileID: utils.MetaSy + utils.Underline +
+								s.EventStart[utils.OriginID].(string) +
+								utils.InInFieldSep + status,
+							PolicyStatus: status,
+						},
+						&rply); err != nil {
+						utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to remove ClientConnID from ThresholdS for session with CGRID <%s>, OriginID <%v>, policy status <%v> error <%v>", s.CGRID, s.EventStart[utils.OriginID], status, err))
+						return utils.NewErrThresholdS(err)
+					}
+				}
 			}
+
 		}
 	}
 	// post the CDRs
@@ -1609,10 +1625,41 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 	return
 }
 
+// restoreSySession will restore the Sy session and rebuild ClientConnIDs for it in ThresholdS
+func (sS *SessionS) restoreSySession(s *Session) error {
+	if reqType, has := s.EventStart[utils.RequestType]; !has || reqType.(string) != utils.MetaSy {
+		return nil
+	}
+	// get statuses to find the thresholds profile ids for this Sy session
+	if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
+		statuses, err := syPolicyStatuses(allPS)
+		if err != nil {
+			return err
+		}
+		for _, status := range statuses {
+			var rply string // will always reply with OK
+			if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+				utils.ThresholdSv1StoreClientConnID,
+				&utils.SyConnIDs{
+					CGRID: s.CGRID,
+					ThresholdProfileID: utils.MetaSy + utils.Underline +
+						s.EventStart[utils.OriginID].(string) +
+						utils.InInFieldSep + status,
+					PolicyStatus: status,
+				},
+				&rply); err != nil {
+				utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to store ClientConnID to ThresholdS for session with CGRID <%s>, OriginID <%v>, policy status <%v> error <%v>", s.CGRID, s.EventStart[utils.OriginID], status, err))
+				return utils.NewErrThresholdS(err)
+			}
+		}
+	}
+	return nil
+}
+
 // restoreSessions reinitiates sessions stored on dataDB backup
 // no session protection needed since it runs only once at start of service,
 // before the start modifying/creating sessions
-func (sS *SessionS) restoreSessions(sessions []*Session) {
+func (sS *SessionS) restoreSessions(sessions []*Session) error {
 	for _, s := range sessions {
 		tor, _ := s.EventStart[utils.ToR].(string)
 		if tor == utils.EmptyString {
@@ -1621,17 +1668,8 @@ func (sS *SessionS) restoreSessions(sessions []*Session) {
 		if time.Since(s.UpdatedAt) <= sS.cgrCfg.SessionSCfg().DefaultUsage[tor] {
 			sS.initSessionDebitLoops(s)
 			sS.registerSession(s, false)
-			if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
-				var rply string // will always reply with OK
-				if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-					utils.ThresholdSv1StoreClientConnID,
-					&utils.SyConnIDs{
-						CGRID:              s.CGRID,
-						ThresholdProfileID: utils.MetaSy + utils.Underline + s.EventStart[utils.OriginID].(string),
-					},
-					&rply); err != nil {
-					utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to store ClientConnID to ThresholdS for session with CGRID <%s>, OriginID <%v>, error <%v>", s.CGRID, s.EventStart[utils.OriginID], err))
-				}
+			if err := sS.restoreSySession(s); err != nil {
+				return err
 			}
 		} else { // remove expired sessions from dataDB
 			sS.removeSsCGRIDsMux.Lock()
@@ -1639,6 +1677,7 @@ func (sS *SessionS) restoreSessions(sessions []*Session) {
 			sS.removeSsCGRIDsMux.Unlock()
 		}
 	}
+	return nil
 }
 
 // initSession handles a new session
@@ -2466,6 +2505,242 @@ func (r *V1InitSessionReply) AsNavigableMap() map[string]*utils.DataNode {
 	return cgrReply
 }
 
+type syPolicy struct {
+	status  string   // the status defined for the policy
+	filters []string // the filters for the threshold for the policy
+}
+
+// syPolicyStatuses normalizes policy statuses returned as []string or []any.
+func syPolicyStatuses(value any) ([]string, error) {
+	switch statuses := value.(type) {
+	case []string:
+		return statuses, nil
+	case []any:
+		converted := make([]string, len(statuses))
+		for i, status := range statuses {
+			convertedStatus, ok := status.(string)
+			if !ok {
+				return nil, utils.ErrCastFailed
+			}
+			converted[i] = convertedStatus
+		}
+		return converted, nil
+	default:
+		return nil, utils.ErrCastFailed
+	}
+}
+
+// getSyPolicies will return the list of policies and all possible statuses for the account
+func getSyPolicies(cgrEv *utils.CGREvent) (syPolicies []syPolicy,
+	syAllPolicyStatuses []string, err error) {
+	accField, err := cgrEv.FieldAsString(utils.AccountField)
+	if err != nil {
+		return nil, nil, utils.NewErrMandatoryIeMissing(utils.AccountField)
+	}
+	filters := []string{
+		utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, accField),
+	}
+	// event will always have *syPolicyFilters by default
+	syOpts := cgrEv.APIOpts[utils.OptsSyPolicyFilters]
+	var syOptsMap map[string]any
+	switch typedSyOpts := syOpts.(type) {
+	case utils.MapStorage:
+		// Normalize MapStorage to a plain map for policy processing.
+		syOptsMap = typedSyOpts
+	case map[string]any:
+		syOptsMap = typedSyOpts
+	default:
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to cast <%s> as MapStorage or map[string]any. Type <%T>", utils.OptsSyPolicyFilters, syOpts))
+		return nil, nil, utils.ErrCastFailed
+	}
+
+	syPolicies = []syPolicy{}        // the policies hold the statuses of an account, while creating thresholds for each of them to trigger SNR actions
+	syAllPolicyStatuses = []string{} // list of all possible statuses for this session the account can have
+	for status, syFiltersAny := range syOptsMap {
+		// populate filters of the threshold with *syPolicyFilters
+		fltrCpy := filters
+		if syFilters, canCast := syFiltersAny.([]any); !canCast {
+			utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to cast <%s>. Only *group type as a list format is supported", utils.OptsSyPolicyFilters))
+			return nil, nil, utils.ErrCastFailed
+		} else {
+			for _, syFilter := range syFilters {
+				fltrCpy = append(fltrCpy, syFilter.(string))
+			}
+			syAllPolicyStatuses = append(syAllPolicyStatuses, status) // collect all policy statuses
+			syPolicies = append(syPolicies, syPolicy{
+				status:  status,
+				filters: fltrCpy,
+			})
+		}
+	}
+	return syPolicies, syAllPolicyStatuses, nil
+}
+
+// initSySession will initialize an Sy session, and set up thresholds for each policy status
+func (sS *SessionS) initSySession(ctx *context.Context, args *V1InitSessionArgs,
+	originID string) error {
+	if len(sS.cgrCfg.SessionSCfg().ApierSConns) == 0 {
+		return errors.New("ApierS is disabled")
+	}
+	// make sure OriginID is populated
+	if originID == "" {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	syPolicies, syAllPolicyStatuses, err := getSyPolicies(args.CGREvent)
+	if err != nil {
+		return err
+	}
+	time.Sleep(50 * time.Millisecond) // unfinished , OnBijson finishes putting the clientID in the map after this function is ran
+
+	s, err := sS.initSession(args.CGREvent, sS.sBiRPCClients.BiJClntID(ctx.Client), originID, 0,
+		false, args.ForceDuration)
+	if err != nil {
+		return err
+	}
+	if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
+		sS.bkpSessionIDsMux.Lock()
+		sS.bkpSessionIDs.Add(s.CGRID)
+		sS.bkpSessionIDsMux.Unlock()
+	}
+	thID := utils.MetaSy + utils.Underline + originID // thresholds id prefix
+	for _, syPolicy := range syPolicies {
+		timeNow := time.Now()
+		var result string
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &engine.ThresholdProfile{
+					Tenant: args.Tenant,
+					ID:     utils.ConcatenatedKey(thID, syPolicy.status),
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: timeNow,
+						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
+					},
+					FilterIDs: syPolicy.filters, // taken from templates
+					MaxHits:   1,
+					Async:     true,
+					// actions will send SNR and reset every thresholds for this session except the one that triggered this action
+					ActionIDs: []string{utils.MetaSyPublish},
+				},
+			}, &result); err != nil {
+			sS.terminateSession(s, nil, nil, nil, false)
+			return err
+		}
+
+		var rply string // will always reply with OK
+		if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+			utils.ThresholdSv1StoreClientConnID,
+			&utils.SyConnIDs{
+				CGRID:              s.CGRID,
+				ThresholdProfileID: utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+				PolicyStatus:       syPolicy.status,
+			},
+			&rply); err != nil {
+			return utils.NewErrThresholdS(err)
+		}
+	}
+	s.Lock()
+	// used when activating or restoring sessions to restore also the thresholdS ClientConnIDs
+	s.OptsStart[utils.OptsSyAllPolicyStatuses] = syAllPolicyStatuses
+	s.Unlock()
+	return nil
+}
+
+// updateSySession will update an existing Sy session, and set up thresholds for each policy status
+func (sS *SessionS) updateSySession(args *V1UpdateSessionArgs) error {
+	if len(sS.cgrCfg.SessionSCfg().ApierSConns) == 0 {
+		return errors.New("ApierS is disabled")
+	}
+	originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
+	if originID == utils.EmptyString {
+		return utils.NewErrMandatoryIeMissing(utils.OriginID)
+	}
+	syPolicies, syAllPolicyStatuses, err := getSyPolicies(args.CGREvent)
+	if err != nil {
+		return err
+	}
+
+	ev := engine.MapEvent(args.CGREvent.Event)
+	cgrID := GetSetCGRID(ev)
+	s := sS.getRelocateSession(cgrID,
+		ev.GetStringIgnoreErrors(utils.InitialOriginID),
+		ev.GetStringIgnoreErrors(utils.OriginID),
+		ev.GetStringIgnoreErrors(utils.OriginHost))
+	if s == nil {
+		// dont create session but reply with SESSION_NOT_FOUND to comply with diameter Sy standarts
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> could not find session with CGRID <%s>", cgrID))
+		return utils.ErrSessionNotFound
+	}
+	if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
+		sS.bkpSessionIDsMux.Lock()
+		sS.bkpSessionIDs.Add(s.CGRID)
+		sS.bkpSessionIDsMux.Unlock()
+	}
+	thID := utils.MetaSy + utils.Underline + originID // thresholds id prefix
+	// remove all thresholds for this session
+	var currentThresholds []string // current threshold profiles for this session
+	if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+		utils.APIerSv1GetThresholdProfileIDs,
+		&utils.PaginatorWithTenant{Tenant: args.Tenant, Search: thID}, &currentThresholds); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return err
+	}
+	for _, thProfID := range currentThresholds {
+		var result string
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+			utils.APIerSv1RemoveThresholdProfile, &utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: args.Tenant, ID: thProfID},
+			}, &result); err != nil {
+			return err
+		}
+		var rply string // will always reply with OK
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThresholdSConns,
+			utils.ThresholdSv1RemoveClientConnID, thProfID,
+			&rply); err != nil {
+			return utils.NewErrThresholdS(err)
+		}
+	}
+	// create the new thresholds
+	for _, syPolicy := range syPolicies {
+		var result string
+		timeNow := time.Now()
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
+				ThresholdProfile: &engine.ThresholdProfile{
+					Tenant: args.Tenant,
+					ID:     utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+					ActivationInterval: &utils.ActivationInterval{
+						ActivationTime: timeNow,
+						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
+					},
+					FilterIDs: syPolicy.filters, // taken from templates
+					MaxHits:   1,
+					Async:     true,
+					// actions will send SNR and reset every thresholds for this session except the one that triggered this action
+					ActionIDs: []string{utils.MetaSyPublish},
+				},
+			}, &result); err != nil {
+			return err // dont terminate the session
+		}
+		var rply string // will always reply with OK
+		// set on update again in case of status modification
+		if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+			utils.ThresholdSv1StoreClientConnID,
+			&utils.SyConnIDs{
+				CGRID:              s.CGRID,
+				ThresholdProfileID: utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+				PolicyStatus:       syPolicy.status,
+			},
+			&rply); err != nil {
+			return utils.NewErrThresholdS(err)
+		}
+	}
+	s.Lock()
+	// used when activating or restoring sessions to restore also the thresholdS ClientConnIDs
+	s.OptsStart[utils.OptsSyAllPolicyStatuses] = syAllPolicyStatuses
+	s.Unlock()
+	return nil
+}
+
 // BiRPCv1InitiateSession initiates a new session
 func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 	args *V1InitSessionArgs, rply *V1InitSessionReply) (err error) {
@@ -2554,73 +2829,8 @@ func (sS *SessionS) BiRPCv1InitiateSession(ctx *context.Context,
 		rply.AllocatedIP = &allocIP
 	}
 	if syRequest {
-		if len(sS.cgrCfg.SessionSCfg().ApierSConns) == 0 {
-			return errors.New("ApierS is disabled")
-		}
-		// make sure OriginID is populated
-		if originID == "" {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
-		}
-		accField, err := args.CGREvent.FieldAsString(utils.AccountField)
-		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.AccountField) // account is mandatory
-		}
-		var filters []string
-		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, accField))
-		// event will always have *syPolicyFilters by default
-		syOpts := args.APIOpts[utils.OptsSyPolicyFilters]
-		// populate filters of the threshold with *syPolicyFilters
-		if syFilters, canCast := syOpts.([]any); !canCast {
-			utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to cast <%s>. Only *group type as a list format is supported", utils.OptsSyPolicyFilters))
-			return utils.ErrCastFailed
-		} else {
-			for _, syFilter := range syFilters {
-				filters = append(filters, syFilter.(string))
-			}
-		}
-		time.Sleep(50 * time.Millisecond) // unfinished , OnBijson finishes putting the clientID in the map after this function is ran
-
-		s, err := sS.initSession(args.CGREvent, sS.sBiRPCClients.BiJClntID(ctx.Client), originID, 0,
-			false, args.ForceDuration)
-		if err != nil {
+		if err = sS.initSySession(ctx, args, originID); err != nil {
 			return err
-		}
-		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-			sS.bkpSessionIDsMux.Lock()
-			sS.bkpSessionIDs.Add(s.CGRID)
-			sS.bkpSessionIDsMux.Unlock()
-		}
-
-		timeNow := time.Now()
-		var result string
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
-			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
-					Tenant: args.Tenant,
-					ID:     utils.MetaSy + utils.Underline + originID,
-					ActivationInterval: &utils.ActivationInterval{
-						ActivationTime: timeNow,
-						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
-					},
-					FilterIDs: filters, // taken from templates
-					MaxHits:   1,
-					MinHits:   1,
-					Async:     true,
-					ActionIDs: []string{utils.MetaSyPublish},
-				},
-			}, &result); err != nil {
-			sS.terminateSession(s, nil, nil, nil, false)
-			return err
-		}
-		var rply string // will always reply with OK
-		if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-			utils.ThresholdSv1StoreClientConnID,
-			&utils.SyConnIDs{
-				CGRID:              s.CGRID,
-				ThresholdProfileID: utils.MetaSy + utils.Underline + originID,
-			},
-			&rply); err != nil {
-			return utils.NewErrThresholdS(err)
 		}
 	} else if args.InitSession {
 		var err error
@@ -2864,67 +3074,8 @@ func (sS *SessionS) BiRPCv1UpdateSession(ctx *context.Context,
 		}
 	}
 	if syRequest {
-		if len(sS.cgrCfg.SessionSCfg().ApierSConns) == 0 {
-			return errors.New("ApierS is disabled")
-		}
-		originID, _ := args.CGREvent.FieldAsString(utils.OriginID)
-		if originID == utils.EmptyString {
-			return utils.NewErrMandatoryIeMissing(utils.OriginID)
-		}
-
-		accField, err := args.CGREvent.FieldAsString(utils.AccountField)
-		if err != nil {
-			return utils.NewErrMandatoryIeMissing(utils.AccountField) // account is mandatory
-		}
-		var filters []string
-		filters = append(filters, utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, accField))
-		// event will always have *syPolicyFilters by default
-		syOpts := args.APIOpts[utils.OptsSyPolicyFilters]
-		// populate filters of the threshold with *syPolicyFilters
-		if syFilters, canCast := syOpts.([]any); !canCast {
-			utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to cast <%s>. Only *group type as a list format is supported", utils.OptsSyPolicyFilters))
-			return utils.ErrCastFailed
-		} else {
-			for _, syFilter := range syFilters {
-				filters = append(filters, syFilter.(string))
-			}
-		}
-
-		ev := engine.MapEvent(args.CGREvent.Event)
-		cgrID := GetSetCGRID(ev)
-		s := sS.getRelocateSession(cgrID,
-			ev.GetStringIgnoreErrors(utils.InitialOriginID),
-			ev.GetStringIgnoreErrors(utils.OriginID),
-			ev.GetStringIgnoreErrors(utils.OriginHost))
-		if s == nil {
-			// dont create session but reply with SESSION_NOT_FOUND to comply with diameter Sy standarts
-			utils.Logger.Warning(fmt.Sprintf("<SessionS> could not find session with CGRID <%s>", cgrID))
-			return utils.ErrSessionNotFound
-		}
-		if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
-			sS.bkpSessionIDsMux.Lock()
-			sS.bkpSessionIDs.Add(s.CGRID)
-			sS.bkpSessionIDsMux.Unlock()
-		}
-		timeNow := time.Now()
-		var result string
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
-			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
-				ThresholdProfile: &engine.ThresholdProfile{
-					Tenant: args.Tenant,
-					ID:     utils.MetaSy + utils.Underline + originID,
-					ActivationInterval: &utils.ActivationInterval{
-						ActivationTime: timeNow,
-						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
-					},
-					FilterIDs: filters, // taken from templates
-					MaxHits:   1,
-					MinHits:   1,
-					Async:     true,
-					ActionIDs: []string{utils.MetaSyPublish},
-				},
-			}, &result); err != nil {
-			return err // dont terminate the session
+		if err = sS.updateSySession(args); err != nil {
+			return err
 		}
 	} else if args.UpdateSession {
 		ev := engine.MapEvent(args.CGREvent.Event)
@@ -3123,20 +3274,28 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 			false); err != nil {
 			return utils.NewErrRALs(err)
 		}
-
-		// remove the Threshold created on init
-		var result string
-		if err := sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns, utils.APIerSv1RemoveThresholdProfile, &utils.TenantIDWithAPIOpts{
-			TenantID: &utils.TenantID{
-				Tenant: args.Tenant, ID: utils.MetaSy + utils.Underline + originID},
-		}, &result); err != nil {
-			return utils.APIErrorHandler(err)
+		// remove all thresholds for this session
+		var currentThresholds []string // current threshold profiles for this session
+		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+			utils.APIerSv1GetThresholdProfileIDs,
+			&utils.PaginatorWithTenant{Tenant: args.Tenant, Search: utils.MetaSy + utils.Underline + originID}, &currentThresholds); err != nil &&
+			err.Error() != utils.ErrNotFound.Error() {
+			return err
 		}
-		var rply string // will always reply with OK
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThresholdSConns,
-			utils.ThresholdSv1RemoveClientConnID, utils.MetaSy+utils.Underline+originID,
-			&rply); err != nil {
-			return utils.NewErrThresholdS(err)
+		for _, thProfID := range currentThresholds {
+			var result string
+			if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
+				utils.APIerSv1RemoveThresholdProfile, &utils.TenantIDWithAPIOpts{
+					TenantID: &utils.TenantID{Tenant: args.Tenant, ID: thProfID},
+				}, &result); err != nil {
+				return utils.APIErrorHandler(err)
+			}
+			var rply string // will always reply with OK
+			if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThresholdSConns,
+				utils.ThresholdSv1RemoveClientConnID, thProfID,
+				&rply); err != nil {
+				return utils.NewErrThresholdS(err)
+			}
 		}
 	} else if args.TerminateSession {
 		if originID == "" {
@@ -4356,16 +4515,27 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 			err = utils.ErrPartiallyExecuted
 		} else {
 			if s.EventStart != nil {
-				if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
-					var rply string // will always reply with OK
-					if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-						utils.ThresholdSv1StoreClientConnID,
-						&utils.SyConnIDs{
-							CGRID:              s.CGRID,
-							ThresholdProfileID: utils.MetaSy + utils.Underline + s.EventStart[utils.OriginID].(string),
-						},
-						&rply); err != nil {
-						return utils.NewErrThresholdS(err)
+				if reqType, has := s.EventStart[utils.RequestType]; has && reqType.(string) == utils.MetaSy {
+					// get statuses to find the thresholds profile ids for this Sy session
+					if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
+						statuses, err := syPolicyStatuses(allPS)
+						if err != nil {
+							return utils.ErrCastFailed
+						}
+						for _, status := range statuses {
+							var rply string // will always reply with OK
+							if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+								utils.ThresholdSv1StoreClientConnID,
+								&utils.SyConnIDs{
+									CGRID: s.CGRID,
+									ThresholdProfileID: utils.MetaSy +
+										utils.Underline + s.EventStart[utils.OriginID].(string) + utils.InInFieldSep + status,
+									PolicyStatus: status,
+								},
+								&rply); err != nil {
+								return utils.NewErrThresholdS(err)
+							}
+						}
 					}
 				}
 			}
@@ -4831,7 +5001,9 @@ func (sS *SessionS) RestoreAndBackupSessions(stopChan chan struct{}) error {
 			storSess := newSessionFromStoredSession(storSess)
 			restoredSess = append(restoredSess, storSess)
 		}
-		sS.restoreSessions(restoredSess)
+		if err := sS.restoreSessions(restoredSess); err != nil {
+			return err
+		}
 	}
 
 	go sS.runBackup(stopChan)
@@ -4921,7 +5093,7 @@ func (sS *SessionS) storeSessions() (sessStored int, err error) {
 
 // BiRPCv1BackupActiveSessions will store all active sessions in dataDB and reply with the amount of sessions it stored
 func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
-	args string, reply *int) error {
+	_ string, reply *int) error {
 	if sessCount, err := sS.storeSessions(); err != nil {
 		return err
 	} else {
@@ -4932,25 +5104,54 @@ func (sS *SessionS) BiRPCv1BackupActiveSessions(ctx *context.Context,
 
 // ThresholdNotify creates and sends SNR to diameter agent
 func (sS *SessionS) BiRPCv1ThresholdNotify(ctx *context.Context,
-	cgrID string, rply *string) (err error) {
+	cgrEv *utils.CGREvent, rply *string) (err error) {
+	thSyConnsAny, err := engine.MapEvent(cgrEv.APIOpts).FieldAsInterface([]string{utils.OptsSyConns})
+	if err != nil {
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find APIOpts <*syConns> within event <%v>", cgrEv))
+		return err
+	}
+	var thSyConns *engine.ThresholdSyConn
+	switch thSyConnsTyped := thSyConnsAny.(type) { // type changes depending on biRPC type
+	case *engine.ThresholdSyConn:
+		thSyConns = thSyConnsTyped
+	case map[string]any:
+		thSyConns = &engine.ThresholdSyConn{
+			SyConnIDs: &utils.SyConnIDs{
+				CGRID:              thSyConnsTyped[utils.SyConnIDsFld].(map[string]any)[utils.CGRID].(string),
+				ClientConnID:       thSyConnsTyped[utils.SyConnIDsFld].(map[string]any)[utils.ClientConnID].(string),
+				ThresholdProfileID: thSyConnsTyped[utils.SyConnIDsFld].(map[string]any)[utils.ThresholdProfileID].(string),
+				PolicyStatus:       thSyConnsTyped[utils.SyConnIDsFld].(map[string]any)[utils.PolicyStatus].(string),
+			},
+		}
+	default:
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify failed to cast *syConns of type <%T> for event <%v>", thSyConnsAny, cgrEv))
+		return utils.ErrCastFailed
+	}
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	ssMux.RLock()
 	defer ssMux.RUnlock()
-	if s, hasCGRID := ssMp[cgrID]; hasCGRID {
-		clnt := sS.sBiRPCClients.BiJClnt(s.ClientConnID) // get client from Session ClientConnID
-		if clnt == nil {
-			return fmt.Errorf("calling %s requires bidirectional JSON connection, connID: <%s>",
-				utils.AgentV1SpendingStatusNotification, s.ClientConnID)
-		}
-		var rply string
-		if err = clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, s.asCGREvents()[0], &rply); err != nil {
-			return
-		}
-	} else {
-		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find session with CGRID <%s>", cgrID))
+	sySess, hasCGRID := ssMp[thSyConns.SyConnIDs.CGRID]
+	if !hasCGRID {
+		utils.Logger.Warning(fmt.Sprintf("<SessionS> ThresholdNotify could not find session with CGRID <%s>", thSyConns.SyConnIDs.CGRID))
 		return utils.ErrNotFound
 	}
-	*rply = utils.OK
-	return
+	//  original session used to get fields asked by SNR templates(fields which were set on SLR, session initiation)
+	sessEventWithStatus := sySess.asCGREvents()[0]
+	// attach the current status policy to the event
+	sessEventWithStatus.APIOpts[utils.OptsSyPolicyStatus] = thSyConns.SyConnIDs.
+		PolicyStatus
+	// append account summary fields to the session CGREvent to make it able to query account related info from templates later on if needed(on SNR)
+	maps.Copy(sessEventWithStatus.Event, cgrEv.Event)
+	maps.Copy(sessEventWithStatus.APIOpts, cgrEv.APIOpts)
+	// get client from Session ClientConnID
+	if clnt := sS.sBiRPCClients.BiJClnt(sySess.ClientConnID); clnt != nil {
+		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, sessEventWithStatus, rply)
+	}
+	// try to get client from engine NodeID if failed from ClientConnID (happens when restoring sessions)
+	if clnt := sS.sBiRPCClients.BiJClnt(sS.cgrCfg.GeneralCfg().NodeID); clnt != nil {
+		return clnt.Conn().Call(ctx, utils.AgentV1SpendingStatusNotification, sessEventWithStatus, rply)
+	}
+	return fmt.Errorf("couldn't find BiRPC client with connID %s to call <%s>",
+		sySess.ClientConnID, utils.AgentV1SpendingStatusNotification)
 }

@@ -158,6 +158,6 @@ func (ssv1 *SessionSv1) BackupActiveSessions(ctx *context.Context, args string, 
 }
 
 // ThresholdNotify creates and sends SNR to diameter agent
-func (ssv1 *SessionSv1) ThresholdNotify(ctx *context.Context, args string, rply *string) (err error) {
+func (ssv1 *SessionSv1) ThresholdNotify(ctx *context.Context, args *utils.CGREvent, rply *string) (err error) {
 	return ssv1.sS.BiRPCv1ThresholdNotify(ctx, args, rply)
 }
