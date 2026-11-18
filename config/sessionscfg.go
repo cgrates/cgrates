@@ -723,6 +723,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 	cln = &SessionSCfg{
 		Enabled:             scfg.Enabled,
 		ListenBiJSON:        scfg.ListenBiJSON,
+		ListenBiGob:         scfg.ListenBiGob,
 		ClientProtocol:      scfg.ClientProtocol,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
@@ -839,7 +840,7 @@ type SessionsOptsJson struct {
 	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
 	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
 	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
-	Authorize              []*DynamicInterfaceOpt `json:"authorize"`
+	Authorize              []*DynamicInterfaceOpt `json:"*authorize"`
 	Debit                  []*DynamicInterfaceOpt `json:"*debit"`
 	Refund                 []*DynamicInterfaceOpt `json:"*refund"`
 	Initiate               []*DynamicInterfaceOpt `json:"*initiate"`
@@ -1059,9 +1060,6 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	}
 	if !DynamicBoolOptEqual(v1.Session, v2.Session) {
 		d.Session = BoolToIfaceDynamicOpts(v2.Session)
-	}
-	if !DynamicDurationOptEqual(v1.AutoChargeInterval, v2.AutoChargeInterval) {
-		d.AutoChargeInterval = DurationToIfaceDynamicOpts(v2.AutoChargeInterval)
 	}
 	if !DynamicDecimalOptEqual(v1.AutoChargeUsage, v2.AutoChargeUsage) {
 		d.AutoChargeUsage = DecimalToIfaceDynamicOpts(v2.AutoChargeUsage)
