@@ -14,7 +14,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/cgrates/cgrates/utils"
 )
@@ -108,9 +107,8 @@ func newCGRConfig(config []byte) (cfg *CGRConfig, err error) {
 			},
 		},
 		sessionSCfg: &SessionSCfg{
-			STIRCfg:      new(STIRcfg),
-			DefaultUsage: make(map[string]time.Duration),
-			Conns:        make(map[string][]*DynamicConns),
+			STIRCfg: new(STIRcfg),
+			Conns:   make(map[string][]*DynamicConns),
 			Opts: &SessionsOpts{
 				Accounts:               []*DynamicBoolOpt{{value: SessionsAccountsDftOpt}},
 				Rates:                  []*DynamicBoolOpt{{value: SessionsRatesDftOpt}},

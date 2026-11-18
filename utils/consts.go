@@ -2032,7 +2032,6 @@ const (
 	TerminateAttemptsCfg   = "terminateAttempts"
 	AlterableFieldsCfg     = "alterableFields"
 	MinDurLowBalanceCfg    = "minDurLowBalance"
-	DefaultUsageCfg        = "defaultUsage"
 	STIRCfg                = "stir"
 
 	AllowedAtestCfg       = "allowedAttest"
