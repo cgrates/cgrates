@@ -72,12 +72,22 @@ func (s *ConnManagerService) AddInternalConn(svcName string, receiver birpc.Clie
 	if !exists {
 		return
 	}
-	rpcIntChan := make(chan birpc.ClientConnector, 1)
-	s.connMgr.AddInternalConn(route.internalPath, route.receiver, rpcIntChan)
+	s.addInternalRoute(svcName, route, receiver)
+}
+
+// AddInternalRoute registers srv under connID for internal RPC calls.
+// AnalyzerS uses svcName as the destination name.
+func (s *ConnManagerService) AddInternalRoute(svcName, connID string, srv *birpc.Service) {
+	s.addInternalRoute(svcName, internalRoute{receiver: srv.Name, internalPath: connID}, srv)
+}
+
+func (s *ConnManagerService) addInternalRoute(svcName string, route internalRoute, conn birpc.ClientConnector) {
+	ch := make(chan birpc.ClientConnector, 1)
+	ch <- s.anz.GetInternalCodec(conn, svcName)
+	s.connMgr.AddInternalConn(route.internalPath, route.receiver, ch)
 	if route.biRPCPath != "" {
-		s.connMgr.AddInternalConn(route.biRPCPath, route.receiver, rpcIntChan)
+		s.connMgr.AddInternalConn(route.biRPCPath, route.receiver, ch)
 	}
-	rpcIntChan <- s.anz.GetInternalCodec(receiver, svcName)
 }
 
 // internalRoute defines how a service's methods can be accessed internally within the system.

@@ -55,6 +55,24 @@ func TestConfigServiceDuplicateRegistration(t *testing.T) {
 	}
 }
 
+func TestAddInternalRoute(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cms := NewConnManagerService(cfg)
+	cms.connMgr = engine.NewConnManager(cfg)
+	cms.connMgr.SetCache(engine.NewCacheS(cfg, nil, nil, nil, engine.NewLocker(cfg)))
+	cms.anz = NewAnalyzerService(cfg)
+	srv, err := NewRPCService(new(rpcTestReceiver), "TestSv1")
+	if err != nil {
+		t.Fatal(err)
+	}
+	connID := "*internal:*tests"
+	cms.AddInternalRoute("TestS", connID, srv)
+	var reply string
+	if err := cms.ConnManager().Call(t.Context(), []string{connID}, "TestSv1.Status", &utils.CGREvent{}, &reply); err != nil || reply != utils.OK {
+		t.Fatalf("Status = %q, %v", reply, err)
+	}
+}
+
 type rpcTestReceiver struct{}
 
 func (*rpcTestReceiver) Status(_ context.Context, _ *utils.CGREvent, reply *string) error {
