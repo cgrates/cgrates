@@ -247,6 +247,9 @@ func (tS *ThresholdService) matchingThresholdsForEvent(args *ArgsProcessEvent) (
 		}
 		t, err := tS.dm.GetThreshold(tPrfl.Tenant, tPrfl.ID, true, true, "")
 		if err != nil {
+			if err == utils.ErrNotFound { // corner case where the threshold was removed due to MaxHits
+				continue
+			}
 			return nil, err
 		}
 		if t.dirty == nil || tPrfl.MaxHits == -1 || t.Hits < tPrfl.MaxHits {

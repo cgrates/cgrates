@@ -971,3 +971,80 @@ func TestThresholdSnoozeSleep(t *testing.T) {
 	}
 
 }
+
+func TestThSProcessEventSkipsThresholdRemovedByMaxHits(t *testing.T) {
+	cfg, _ := config.NewDefaultCGRConfig()
+	tmpDm := dm
+	defer func() {
+		dm = tmpDm
+	}()
+	db := NewInternalDB(nil, nil, true, cfg.DataDbCfg().Items)
+	dm := NewDataManager(db, cfg.CacheCfg(), nil)
+	thS, err := NewThresholdService(dm, cfg, NewFilterS(cfg, nil, dm))
+	if err != nil {
+		t.Fatal(err)
+	}
+	dm.SetFilter(&Filter{
+		Tenant: "cgrates.org",
+		ID:     "FLTR_CALL",
+		Rules: []*FilterRule{
+			{
+				Type:    "*string",
+				Element: "~*req.Category",
+				Values:  []string{"call"},
+			},
+		},
+	})
+
+	dm.SetThresholdProfile(&ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_ONCE",
+		FilterIDs: []string{"FLTR_CALL"},
+		MaxHits:   1,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    90.0,
+	}, true)
+	dm.SetThreshold(&Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_ONCE",
+	})
+	dm.SetThresholdProfile(&ThresholdProfile{
+		Tenant:    "cgrates.org",
+		ID:        "TH_SECOND",
+		FilterIDs: []string{"FLTR_CALL"},
+		MaxHits:   -1,
+		MinSleep:  time.Duration(1 * time.Millisecond),
+		Weight:    80.0,
+	}, true)
+	dm.SetThreshold(&Threshold{
+		Tenant: "cgrates.org",
+		ID:     "TH_SECOND",
+	})
+	args := &ArgsProcessEvent{
+		CGREvent: &utils.CGREvent{
+			Tenant: "cgrates.org",
+			ID:     "ProcessEvent",
+			Event: map[string]any{
+				utils.Category: "call",
+				utils.Account:  "1001",
+			},
+		},
+	}
+	SetDataStorage(dm)
+
+	var reply []string
+	if err := thS.V1ProcessEvent(args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if exp := []string{"TH_ONCE", "TH_SECOND"}; !reflect.DeepEqual(reply, exp) {
+		t.Errorf("first event: expecting %v, received %v", exp, reply)
+	}
+
+	reply = nil
+	if err := thS.V1ProcessEvent(args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if exp := []string{"TH_SECOND"}; !reflect.DeepEqual(reply, exp) {
+		t.Errorf("second event: expecting %v, received %v", exp, reply)
+	}
+}
