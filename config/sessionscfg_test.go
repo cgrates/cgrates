@@ -1404,9 +1404,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
           "channelSyncInterval": "1s",
-          "sessionTTLMaxDelay": "3h0m0s",
-          "sessionTTLLastUsed": "0s",
-          "sessionTTLUsage": "1s",
            "sessions": {
 			"stir": {
 				"payloadMaxduration": "-1",

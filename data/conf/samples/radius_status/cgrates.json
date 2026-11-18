@@ -56,7 +56,6 @@
     
     "sessions": {
         "enabled": true,
-        "debitInterval": "10s",
         "conns":{
         "*attributes": [
                  {
