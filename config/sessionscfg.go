@@ -5,7 +5,6 @@ package config
 
 import (
 	"context"
-	"strconv"
 	"time"
 
 	"github.com/cgrates/cgrates/utils"
@@ -117,7 +116,6 @@ type SessionSCfg struct {
 	MinDurLowBalance    time.Duration
 	Conns               map[string][]*DynamicConns
 	STIRCfg             *STIRcfg
-	DefaultUsage        map[string]time.Duration
 	Opts                *SessionsOpts
 }
 
@@ -564,13 +562,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 			return err
 		}
 	}
-	if jsnCfg.DefaultUsage != nil {
-		for k, v := range jsnCfg.DefaultUsage {
-			if scfg.DefaultUsage[k], err = utils.ParseDurationWithNanosecs(v); err != nil {
-				return
-			}
-		}
-	}
 	if jsnCfg.Stir != nil {
 		if err = scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir); err != nil {
 			return
@@ -590,23 +581,8 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	return
 }
 
-func (scfg SessionSCfg) GetDefaultUsage(tor string) time.Duration {
-	if tor == utils.EmptyString {
-		tor = utils.MetaAny
-	}
-	return scfg.DefaultUsage[tor]
-}
-
 // AsMapInterface returns the config as a map[string]any
 func (scfg SessionSCfg) AsMapInterface() any {
-	maxComputed := make(map[string]string)
-	for key, item := range scfg.DefaultUsage {
-		if key == utils.MetaAny || key == utils.MetaVoice {
-			maxComputed[key] = item.String()
-		} else {
-			maxComputed[key] = strconv.Itoa(int(item))
-		}
-	}
 	opts := map[string]any{
 		utils.MetaAccounts:                  scfg.Opts.Accounts,
 		utils.MetaRates:                     scfg.Opts.Rates,
@@ -676,7 +652,6 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 		utils.MinDurLowBalanceCfg:    "0",
 		utils.ChannelSyncIntervalCfg: "0",
-		utils.DefaultUsageCfg:        maxComputed,
 		utils.OptsCfg:                opts,
 		utils.ConnsCfg:               stripConns(scfg.Conns),
 	}
@@ -766,11 +741,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		SessionIndexes:      scfg.SessionIndexes.Clone(),
 		AlterableFields:     scfg.AlterableFields.Clone(),
 		STIRCfg:             scfg.STIRCfg.Clone(),
-		DefaultUsage:        make(map[string]time.Duration),
 		Opts:                scfg.Opts.Clone(),
-	}
-	for k, v := range scfg.DefaultUsage {
-		cln.DefaultUsage[k] = v
 	}
 	return
 }
@@ -940,7 +911,6 @@ type SessionSJsonCfg struct {
 	AlterableFields     *[]string                  `json:"alterableFields"`
 	MinDurLowBalance    *string                    `json:"minDurLowBalance"`
 	Stir                *STIRJsonCfg               `json:"stir"`
-	DefaultUsage        map[string]string          `json:"defaultUsage"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Opts                *SessionsOptsJson          `json:"opts"`
 }
@@ -1155,14 +1125,6 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 		d.MinDurLowBalance = utils.StringPointer(v2.MinDurLowBalance.String())
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
-	if d.DefaultUsage == nil {
-		d.DefaultUsage = make(map[string]string)
-	}
-	for tor, usage2 := range v2.DefaultUsage {
-		if usage1, has := v1.DefaultUsage[tor]; !has || usage1 != usage2 {
-			d.DefaultUsage[tor] = usage2.String()
-		}
-	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
 		d.Conns = stripConns(v2.Conns)
 	}

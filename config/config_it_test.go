@@ -833,12 +833,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
-		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
@@ -945,12 +939,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
-		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
 			utils.MetaIPs:        {{ConnIDs: []string{utils.MetaLocalHost}}},
@@ -1055,12 +1043,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
