@@ -223,6 +223,21 @@ func IfaceAsTInt(itm any) (i int, err error) {
 	return
 }
 
+func IfaceAsInt32(itm any) (i int32, err error) {
+	switch it := itm.(type) {
+	case int:
+		return int32(it), nil
+	case int32:
+		return int32(it), nil
+	case string:
+		v, err := strconv.ParseInt(it, 10, 32)
+		return int32(v), err
+	default:
+		err = fmt.Errorf("cannot convert field: %+v to int", it)
+	}
+	return
+}
+
 func IfaceAsInt64(itm any) (i int64, err error) {
 	switch it := itm.(type) {
 	case int:

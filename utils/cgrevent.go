@@ -97,6 +97,15 @@ func (ev *CGREvent) FieldAsFloat64(fldName string) (f float64, err error) {
 	return IfaceAsFloat64(iface)
 }
 
+// FieldAsInt32 returns a field as int32 instance
+func (ev *CGREvent) FieldAsInt32(fldName string) (f int32, err error) {
+	iface, has := ev.Event[fldName]
+	if !has {
+		return f, ErrNotFound
+	}
+	return IfaceAsInt32(iface)
+}
+
 // FieldAsInt64 returns a field as int64 instance
 func (ev *CGREvent) FieldAsInt64(fldName string) (f int64, err error) {
 	iface, has := ev.Event[fldName]

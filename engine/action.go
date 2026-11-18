@@ -110,8 +110,8 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		utils.MetaAlterSessions,
 		utils.MetaForceDisconnectSessions,
 	}
-	dynamicActions := []string{
-		utils.MetaDynamicThreshold, utils.MetaDynamicStats,
+	thresholdActions := []string{
+		utils.MetaSyPublish, utils.MetaDynamicThreshold, utils.MetaDynamicStats,
 		utils.MetaDynamicAttribute, utils.MetaDynamicActionPlan,
 		utils.MetaDynamicActionPlanAccounts, utils.MetaDynamicAction,
 		utils.MetaDynamicDestination, utils.MetaDynamicFilter,
@@ -129,7 +129,7 @@ func newActionConnCfg(source, action string, cfg *config.CGRConfig) ActionConnCf
 		switch {
 		case slices.Contains(sessionActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().SessionSConns
-		case slices.Contains(dynamicActions, action):
+		case slices.Contains(thresholdActions, action):
 			act.ConnIDs = cfg.ThresholdSCfg().ApierSConns
 		}
 	case utils.RALs:
@@ -3059,23 +3059,45 @@ func dynamicActionTrigger(_ *Account, act *Action, _ Actions, _ *FilterS, ev any
 }
 
 // holds the threshold client and syConnIDs
-type thresholdSyConn struct {
-	syConnIDs       *utils.SyConnIDs
+type ThresholdSyConn struct {
+	SyConnIDs       *utils.SyConnIDs
 	thresholdClient *utils.BiJClient
 }
 
 // syPublish is used for diameter Sy sessions, to send SNR from thresholds to sessions to diameter agent
-func syPublish(ub *Account, _ *Action, _ Actions, _ *FilterS, extraData any, _ SharedActionsData, _ ActionConnCfg) (err error) {
-	thresholdSyConn, canCast := extraData.(*thresholdSyConn)
+func syPublish(_ *Account, _ *Action, _ Actions, _ *FilterS, extraData any, _ SharedActionsData, connCfg ActionConnCfg) (err error) {
+	cgrEv, canCast := extraData.(*utils.CGREvent)
 	if !canCast {
 		return fmt.Errorf("Couldn't cast <extraData> of type <%T> to <thresholdSyConn>", extraData)
 	}
+	thClientConn := cgrEv.APIOpts[utils.OptsSyConns].(*ThresholdSyConn)
 	var rply string
-	if err = thresholdSyConn.thresholdClient.Conn().Call(context.TODO(), utils.SessionSv1ThresholdNotify,
-		thresholdSyConn.syConnIDs.CGRID, &rply); err != nil {
+	if err = thClientConn.thresholdClient.Conn().Call(context.TODO(), utils.SessionSv1ThresholdNotify, cgrEv, &rply); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<ThresholdS> Call to SessionSv1.ThresholdNotify failed with error <%s>", err))
+		// dont return err here, because we want to reset the rest of the thresholds for this session, even if the notify failed
 	}
-	return
+	thresholdPrefix := strings.TrimSuffix(thClientConn.SyConnIDs.ThresholdProfileID, utils.InInFieldSep+thClientConn.SyConnIDs.PolicyStatus)
+	var currentThresholds []string // current threshold profiles for this session
+	if err = connMgr.Call(context.TODO(), connCfg.ConnIDs,
+		utils.APIerSv1GetThresholdProfileIDs,
+		&utils.PaginatorWithTenant{Tenant: cgrEv.Tenant, Search: thresholdPrefix}, &currentThresholds); err != nil &&
+		err.Error() != utils.ErrNotFound.Error() {
+		return err
+	}
+	// reset the rest of the thresholds for this session, except the current status threshold, so that they can be re-triggered if needed
+	for _, thresholdID := range currentThresholds {
+		if thresholdID == thClientConn.SyConnIDs.ThresholdProfileID {
+			continue // skip the current status threshold
+		}
+		if err = resetThreshold(nil, &Action{ExtraParameters: utils.ConcatenatedKey(cgrEv.Tenant, thresholdID)}, nil, nil, nil, SharedActionsData{}, ActionConnCfg{}); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf(
+					"<ThresholdS> resetting threshold <%s> on <*sy_publish> action failed with error <%s>", utils.ConcatenatedKey(cgrEv.Tenant, thresholdID), err))
+			// dont return err here, because we want to reset the rest of the thresholds for this session, even if one of them failed
+		}
+	}
+
+	return err
 }

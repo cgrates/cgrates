@@ -230,6 +230,9 @@ const (
 	OriginIDPrefix           = "OriginIDPrefix"
 	Source                   = "Source"
 	OriginHost               = "OriginHost"
+	AuthApplicationId        = "AuthApplicationId"
+	DestinationRealm         = "DestinationRealm"
+	DestinationHost          = "DestinationHost"
 	RequestType              = "RequestType"
 	Direction                = "Direction"
 	Tenant                   = "Tenant"
@@ -796,6 +799,7 @@ const (
 	JanusAdminSubProto = "janus-admin-protocol"
 
 	SLR                     = "SLR"
+	SNR                     = "SNR"
 	RemoteHost              = "RemoteHost"
 	Local                   = "local"
 	TCP                     = "tcp"
@@ -2994,11 +2998,23 @@ const (
 	OptsAttributesProfileIgnoreFilters = "*attrProfileIgnoreFilters"
 	// Used to populate filters of Sy threshold profiles
 	OptsSyPolicyFilters = "*syPolicyFilters"
-	MetaEventTime       = "*eventTime"
-	SchedulerInit       = "SchedulerInit"
+	// Used to define the current status policy of an account
+	OptsSyPolicyStatus      = "*syPolicyStatus"
+	OptsSyAllPolicyStatuses = "*syAllPolicyStatuses"
+	OptsSyConns             = "*syConns" // For holding the thresholdClient and IDs related to an Sy session
+	MetaEventTime           = "*eventTime"
+	SchedulerInit           = "SchedulerInit"
 
 	RemoteHostOpt = "*rmtHost"
 	CacheOpt      = "*cache"
+)
+
+// SyConnIDs
+const (
+	SyConnIDsFld       = "SyConnIDs"
+	ClientConnID       = "ClientConnID"
+	ThresholdProfileID = "ThresholdProfileID"
+	PolicyStatus       = "PolicyStatus"
 )
 
 // Event Flags

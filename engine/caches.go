@@ -172,6 +172,7 @@ func init() {
 	gob.Register(new(utils.ArgCacheReplicateRemove))
 
 	gob.Register(utils.StringSet{})
+	gob.Register(utils.MapStorage{})
 }
 
 // NewCacheS initializes the Cache service and executes the precaching

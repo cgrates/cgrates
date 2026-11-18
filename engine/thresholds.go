@@ -373,7 +373,8 @@ func (tS *ThresholdService) Shutdown() {
 
 // OnBiJSONConnect handles new client connections.
 func (tS *ThresholdService) OnBiJSONConnect(c birpc.ClientConnector) {
-	tS.sBiRPCClients.OnBiJSONConnect(c, 0) // clientProtocol is not used for thresholds cases
+	// thresholds will always have a random id for ClientConnID since we generate new client for it when we restoreSessions
+	tS.sBiRPCClients.OnBiJSONConnect(c, 0, utils.EmptyString) // clientProtocol is not used for thresholds cases
 }
 
 // OnBiJSONDisconnect handles client disconnects
@@ -563,7 +564,7 @@ func (tS *ThresholdService) matchingThresholdsForEvent(tnt string, args *utils.C
 }
 
 // getThresholdSyConn returns the syConnIDs and client corresponding to the thresholdProfileID, or returns nil if not found
-func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thresholdSyConn, error) {
+func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*ThresholdSyConn, error) {
 	tS.ccidMux.RLock()
 	defer tS.ccidMux.RUnlock()
 	if syIds, has := tS.clientConnID[thresholdProfileID]; has {
@@ -575,8 +576,8 @@ func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*thre
 					utils.SessionSv1ThresholdNotify, syIds))
 			return nil, utils.ErrPartiallyExecuted
 		}
-		return &thresholdSyConn{
-			syConnIDs:       syIds,
+		return &ThresholdSyConn{
+			SyConnIDs:       syIds,
 			thresholdClient: clnt,
 		}, nil
 	}
@@ -624,9 +625,9 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 				if tntAcnt != utils.EmptyString {
 					at.accountIDs = utils.NewStringMap(tntAcnt)
 				}
-				var thSC *thresholdSyConn
 				if strings.HasPrefix(t.tPrfl.ID, utils.MetaSy) {
-					thSC, err = tS.getThresholdSyConn(t.tPrfl.ID)
+					// if Sy threshold, set its connIDs and birpc Client in ExtraData to later be used on *sy_publish
+					at.ExtraData.(*utils.CGREvent).APIOpts[utils.OptsSyConns], err = tS.getThresholdSyConn(t.tPrfl.ID)
 					if err != nil {
 						withErrors = true
 						continue
@@ -634,11 +635,11 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 				}
 				if t.tPrfl.Async {
 					go func(setID string) {
-						if errExec := at.Execute(tS.filterS, utils.ThresholdS, thSC); errExec != nil {
+						if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
 							utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", setID, errExec.Error()))
 						}
 					}(actionSetID)
-				} else if errExec := at.Execute(tS.filterS, utils.ThresholdS, thSC); errExec != nil {
+				} else if errExec := at.Execute(tS.filterS, utils.ThresholdS); errExec != nil {
 					utils.Logger.Warning(fmt.Sprintf("<ThresholdS> failed executing actions: %s, error: %s", actionSetID, errExec.Error()))
 					withErrors = true
 				}
@@ -798,9 +799,12 @@ func (tS *ThresholdService) BiRPCv1StoreClientConnID(ctx *context.Context,
 	args *utils.SyConnIDs, reply *string) error {
 	time.Sleep(100 * time.Millisecond) // unfinished , OnBijsonConnect finishes putting the clientID in the map after this function is ran
 	tS.ccidMux.Lock()
+	ccID := tS.sBiRPCClients.BiJClntID(ctx.Client)
 	tS.clientConnID[args.ThresholdProfileID] = &utils.SyConnIDs{
-		CGRID:        args.CGRID,
-		ClientConnID: tS.sBiRPCClients.BiJClntID(ctx.Client),
+		CGRID:              args.CGRID,
+		ClientConnID:       ccID,
+		ThresholdProfileID: args.ThresholdProfileID,
+		PolicyStatus:       args.PolicyStatus,
 	}
 	tS.ccidMux.Unlock()
 	*reply = utils.OK

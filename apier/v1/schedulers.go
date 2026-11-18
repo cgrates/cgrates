@@ -51,7 +51,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActions(ctx *context.Context, attr *utils.At
 
 				at.SetAccountIDs(apl.AccountIDs) // copy the accounts
 				at.SetActionPlanID(apl.Id)
-				err := at.Execute(schdSv1.fltrS, utils.SchedulerS, nil)
+				err := at.Execute(schdSv1.fltrS, utils.SchedulerS)
 				if err != nil {
 					*reply = err.Error()
 					return err
@@ -96,7 +96,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActions(ctx *context.Context, attr *utils.At
 			current = a0.GetNextStartTime(current)
 			if current.Before(attr.TimeEnd) || current.Equal(attr.TimeEnd) {
 				utils.Logger.Info(fmt.Sprintf("<Replay Scheduler> Executing action %s for time %v", a0.ActionsID, current))
-				err := a0.Execute(schdSv1.fltrS, utils.SchedulerS, nil)
+				err := a0.Execute(schdSv1.fltrS, utils.SchedulerS)
 				if err != nil {
 					*reply = err.Error()
 					return err
@@ -145,7 +145,7 @@ func (schdSv1 *SchedulerSv1) ExecuteActionPlans(ctx *context.Context, attr *util
 			engine.ActionTimingWeightOnlyPriorityList(apl.ActionTimings).Sort()
 			for _, at := range apl.ActionTimings {
 				at.SetAccountIDs(utils.NewStringMap(accID))
-				err := at.Execute(schdSv1.fltrS, utils.SchedulerS, nil)
+				err := at.Execute(schdSv1.fltrS, utils.SchedulerS)
 				if err != nil {
 					*reply = err.Error()
 					return err

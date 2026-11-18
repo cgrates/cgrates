@@ -24,7 +24,7 @@ func (t *Task) Execute(fltrS *FilterS) error {
 	if len(t.AccountID) != 0 {
 		at.accountIDs = utils.StringMap{t.AccountID: true}
 	}
-	return at.Execute(fltrS, utils.SchedulerS, nil)
+	return at.Execute(fltrS, utils.SchedulerS)
 }
 
 // String implements utils.DataProvider

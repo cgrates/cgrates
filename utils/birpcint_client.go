@@ -55,11 +55,14 @@ func (b *BiJClient) Conn() birpc.ClientConnector {
 }
 
 // OnBiJSONConnect handles new client connections.
-func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64) {
-	nodeID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
+func (s *ServiceBiRPCClients) OnBiJSONConnect(c birpc.ClientConnector, clientProtocol float64, nodeID string) {
+	hashID := UUIDSha1Prefix() // connection identifier, should be later updated as login procedure
 	s.biJMux.Lock()
-	s.biJClnts[c] = nodeID
-	s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
+	s.biJClnts[c] = hashID
+	s.biJIDs[hashID] = &BiJClient{conn: c, proto: clientProtocol}
+	if nodeID != EmptyString {
+		s.biJIDs[nodeID] = &BiJClient{conn: c, proto: clientProtocol}
+	}
 	s.biJMux.Unlock()
 }
 
@@ -128,6 +131,7 @@ func (s *ServiceBiRPCClients) BiJClientsMap() map[string]*BiJClient {
 // SyConnIDs contains needed IDs to build and run a Diameter Sy session
 type SyConnIDs struct {
 	CGRID              string // CGRID of the session
-	ClientConnID       string // ID of the Client Connection
-	ThresholdProfileID string // ID of the Threshold Profile
+	ClientConnID       string // ID of the Client Connection createdOnConnect
+	ThresholdProfileID string // ID of the Threshold Profile, used to relate to a thresholdS ClientConnID
+	PolicyStatus       string // the Sy policy status defining this threshold
 }
