@@ -2031,7 +2031,6 @@ const (
 	ChannelSyncIntervalCfg = "channelSyncInterval"
 	TerminateAttemptsCfg   = "terminateAttempts"
 	AlterableFieldsCfg     = "alterableFields"
-	MinDurLowBalanceCfg    = "minDurLowBalance"
 	STIRCfg                = "stir"
 
 	AllowedAtestCfg       = "allowedAttest"
