@@ -1136,6 +1136,13 @@ const CGRATES_CFG_JSON = `
 		// 		"connIDs": []
 		// 	}
 		// ],
+		// "*resources": [     // connections to ResourceS
+		// 	{
+		// 		"tenant": "",
+		// 		"filterIDs": [],
+		// 		"connIDs": []
+		// 	}
+		// ],
 		// "*routes": [		// connections to RouteS for querying routes for event <""|*internal|$rpc_conns_id>
 		// 	{
 		// 		"tenant": "",
