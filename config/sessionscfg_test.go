@@ -54,7 +54,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientProtocol:      utils.Float64Pointer(2.5),
 		ChannelSyncInterval: utils.StringPointer("10"),
 		TerminateAttempts:   utils.IntPointer(6),
-		AlterableFields:     &[]string{},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaChargers:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaResources:   {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
@@ -331,7 +330,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
-		AlterableFields:     utils.StringSet{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -643,6 +641,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				{},
 			},
+			AlterableFields: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -1233,7 +1232,6 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
-		AlterableFields:     utils.StringSet{},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -1318,6 +1316,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 					value: utils.DurationPointer(1),
 				},
 			},
+			AlterableFields: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -1361,7 +1360,6 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ClientProtocolCfg:      1.0,
 		utils.ChannelSyncIntervalCfg: "1s",
 		utils.TerminateAttemptsCfg:   5,
-		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
@@ -1426,6 +1424,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaAutoChargeMinGranted:      []*DynamicDecimalOpt{},
 			utils.MetaCGRid:                     []*DynamicStringOpt{},
 			utils.MetaHostID:                    []*DynamicStringOpt{},
+			utils.MetaAlterableFields:           []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -1497,7 +1496,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		utils.ClientProtocolCfg:      2.0,
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.TerminateAttemptsCfg:   10,
-		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
@@ -1576,6 +1574,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaAutoChargeMinGranted: []*DynamicDecimalOpt{},
 			utils.MetaCGRid:                []*DynamicStringOpt{},
 			utils.MetaHostID:               []*DynamicStringOpt{},
+			utils.MetaAlterableFields:      []*DynamicStringSliceOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -2373,8 +2372,6 @@ func TestSessionSCfgClone(t *testing.T) {
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
-		AlterableFields:     utils.StringSet{},
-
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
@@ -2516,7 +2513,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},
@@ -2577,9 +2573,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      13.2,
 		ChannelSyncInterval: 2 * time.Second,
 		TerminateAttempts:   5,
-		AlterableFields: utils.StringSet{
-			"index1": struct{}{},
-		},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      nil,
 			PayloadMaxduration: 4 * time.Second,
@@ -2642,7 +2635,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      utils.Float64Pointer(13.2),
 		ChannelSyncInterval: utils.StringPointer("2s"),
 		TerminateAttempts:   utils.IntPointer(5),
-		AlterableFields:     &[]string{"index1"},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      nil,
 			Payload_maxduration: utils.StringPointer("4s"),
@@ -2727,7 +2719,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},
@@ -2769,12 +2760,11 @@ func TestSessionSCloneSection(t *testing.T) {
 	exp := &SessionSCfg{
 		Enabled:             false,
 		ListenBiJSON:        "*bijson_rpc",
-		ListenBiGob:         "",
+		ListenBiGob:         "*bigob_rpc",
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},

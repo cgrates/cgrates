@@ -3762,7 +3762,15 @@ func TestSessionSv1ProcessEventAlterIndexedField(t *testing.T) {
 "sessions": {
 	"enabled": true,
 	"sessionIndexes": ["Account"],
-	"alterableFields": ["Account"],
+	 "opts": {
+		"*alterableFields": [
+			{
+				"tenant": "cgrates.org",
+				"filterIDs": [],
+				"values": ["Account"]
+			},
+		]
+	},
 	"conns": {
 		"*chargers": [{"connIDs": ["*internal"]}]
 	}

@@ -44,6 +44,8 @@ const (
 	SessionsAutoChargeIntervalDftOpt     = 0
 )
 
+var SessionsAlterableFieldsDftOpt = []string{}
+
 type SessionsOpts struct {
 	Accounts               []*DynamicBoolOpt
 	Rates                  []*DynamicBoolOpt
@@ -101,6 +103,7 @@ type SessionsOpts struct {
 	EEs                    []*DynamicBoolOpt
 	EEsIDs                 []*DynamicStringOpt
 	UR                     []*DynamicBoolOpt // UsageRecord generation
+	AlterableFields        []*DynamicStringSliceOpt
 }
 
 // SessionSCfg is the config section for SessionS
@@ -112,7 +115,6 @@ type SessionSCfg struct {
 	ClientProtocol      float64
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
-	AlterableFields     utils.StringSet
 	Conns               map[string][]*DynamicConns
 	STIRCfg             *STIRcfg
 	Opts                *SessionsOpts
@@ -523,6 +525,9 @@ func (sesOpts *SessionsOpts) loadFromJSONCfg(jsnCfg *SessionsOptsJson) error {
 		}
 		sesOpts.UR = append(opts, sesOpts.UR...)
 	}
+	if jsnCfg.AlterableFields != nil {
+		sesOpts.AlterableFields = append(sesOpts.AlterableFields, jsnCfg.AlterableFields...)
+	}
 	return nil
 }
 
@@ -552,9 +557,6 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	}
 	if jsnCfg.TerminateAttempts != nil {
 		scfg.TerminateAttempts = *jsnCfg.TerminateAttempts
-	}
-	if jsnCfg.AlterableFields != nil {
-		scfg.AlterableFields = utils.NewStringSet(*jsnCfg.AlterableFields)
 	}
 	if jsnCfg.Stir != nil {
 		if err = scfg.STIRCfg.loadFromJSONCfg(jsnCfg.Stir); err != nil {
@@ -634,6 +636,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.MetaEEs:                       scfg.Opts.EEs,
 		utils.MetaEEsIDs:                    scfg.Opts.EEsIDs,
 		utils.MetaUR:                        scfg.Opts.UR,
+		utils.MetaAlterableFields:           scfg.Opts.AlterableFields,
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:             scfg.Enabled,
@@ -642,7 +645,6 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.SessionIndexesCfg:      scfg.SessionIndexes.AsSlice(),
 		utils.ClientProtocolCfg:      scfg.ClientProtocol,
 		utils.TerminateAttemptsCfg:   scfg.TerminateAttempts,
-		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.OptsCfg:                opts,
@@ -715,6 +717,7 @@ func (o *SessionsOpts) Clone() *SessionsOpts {
 		EEs:                    CloneDynamicBoolOpt(o.EEs),
 		EEsIDs:                 CloneDynamicStringOpt(o.EEsIDs),
 		UR:                     CloneDynamicBoolOpt(o.UR),
+		AlterableFields:        CloneDynamicStringSliceOpt(o.AlterableFields),
 	}
 }
 
@@ -729,7 +732,6 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		TerminateAttempts:   scfg.TerminateAttempts,
 		Conns:               CloneConnsMap(scfg.Conns),
 		SessionIndexes:      scfg.SessionIndexes.Clone(),
-		AlterableFields:     scfg.AlterableFields.Clone(),
 		STIRCfg:             scfg.STIRCfg.Clone(),
 		Opts:                scfg.Opts.Clone(),
 	}
@@ -831,62 +833,63 @@ func diffSTIRJsonCfg(d *STIRJsonCfg, v1, v2 *STIRcfg) *STIRJsonCfg {
 }
 
 type SessionsOptsJson struct {
-	Accounts               []*DynamicInterfaceOpt `json:"*accounts"`
-	Rates                  []*DynamicInterfaceOpt `json:"*rates"`
-	Attributes             []*DynamicInterfaceOpt `json:"*attributes"`
-	Chargers               []*DynamicInterfaceOpt `json:"*chargers"`
-	Resources              []*DynamicInterfaceOpt `json:"*resources"`
-	IPs                    []*DynamicInterfaceOpt `json:"*ips"`
-	Routes                 []*DynamicInterfaceOpt `json:"*routes"`
-	Stats                  []*DynamicInterfaceOpt `json:"*stats"`
-	Thresholds             []*DynamicInterfaceOpt `json:"*thresholds"`
-	Authorize              []*DynamicInterfaceOpt `json:"*authorize"`
-	Debit                  []*DynamicInterfaceOpt `json:"*debit"`
-	Refund                 []*DynamicInterfaceOpt `json:"*refund"`
-	Initiate               []*DynamicInterfaceOpt `json:"*initiate"`
-	Update                 []*DynamicInterfaceOpt `json:"*update"`
-	Terminate              []*DynamicInterfaceOpt `json:"*terminate"`
-	Message                []*DynamicInterfaceOpt `json:"*message"`
-	AttributesDerivedReply []*DynamicInterfaceOpt `json:"*attributesDerivedReply"`
-	BlockerError           []*DynamicInterfaceOpt `json:"*blockerError"`
-	ResourcesAuthorize     []*DynamicInterfaceOpt `json:"*resourcesAuthorize"`
-	ResourcesAllocate      []*DynamicInterfaceOpt `json:"*resourcesAllocate"`
-	ResourcesRelease       []*DynamicInterfaceOpt `json:"*resourcesRelease"`
-	ResourcesDerivedReply  []*DynamicInterfaceOpt `json:"*resourcesDerivedReply"`
-	ResourcesUsageID       []*DynamicInterfaceOpt `json:"*resourcesUsageID"`
-	ResourcesUnits         []*DynamicInterfaceOpt `json:"*resourcesUnits"`
-	IPsAuthorize           []*DynamicInterfaceOpt `json:"*ipsAuthorize"`
-	IPsAllocate            []*DynamicInterfaceOpt `json:"*ipsAllocate"`
-	IPsRelease             []*DynamicInterfaceOpt `json:"*ipsRelease"`
-	RoutesDerivedReply     []*DynamicInterfaceOpt `json:"*routesDerivedReply"`
-	StatsDerivedReply      []*DynamicInterfaceOpt `json:"*statsDerivedReply"`
-	ThresholdsDerivedReply []*DynamicInterfaceOpt `json:"*thresholdsDerivedReply"`
-	MaxUsage               []*DynamicInterfaceOpt `json:"*maxUsage"`
-	InterimConsumed        []*DynamicInterfaceOpt `json:"*interimConsumed"`
-	InterimUsage           []*DynamicInterfaceOpt `json:"*interimUsage"`
-	TotalUsage             []*DynamicInterfaceOpt `json:"*totalUsage"`
-	Usage                  []*DynamicInterfaceOpt `json:"*usage"`
-	ForceUsage             []*DynamicInterfaceOpt `json:"*forceUsage"`
-	TTL                    []*DynamicInterfaceOpt `json:"*ttl"`
-	Chargeable             []*DynamicInterfaceOpt `json:"*chargeable"`
-	TTLLastUsage           []*DynamicInterfaceOpt `json:"*ttlLastUsage"`
-	TTLLastUsed            []*DynamicInterfaceOpt `json:"*ttlLastUsed"`
-	TTLMaxDelay            []*DynamicInterfaceOpt `json:"*ttlMaxDelay"`
-	TTLUsage               []*DynamicInterfaceOpt `json:"*ttlUsage"`
-	CGRid                  []*DynamicInterfaceOpt `json:"*cgrID"`
-	OriginID               []*DynamicInterfaceOpt `json:"*originID"`
-	HostID                 []*DynamicInterfaceOpt `json:"*hostID"`
-	AccountsForceUsage     []*DynamicInterfaceOpt `json:"*accountsForceUsage"`
-	AccountsAuthorize      []*DynamicInterfaceOpt `json:"*accountsAuthorize"`
-	AccountsDebit          []*DynamicInterfaceOpt `json:"*accountsDebit"`
-	AccountsRefund         []*DynamicInterfaceOpt `json:"*accountsRefund"`
-	Session                []*DynamicInterfaceOpt `json:"*session"`
-	AutoChargeInterval     []*DynamicInterfaceOpt `json:"*autoChargeInterval"`
-	AutoChargeUsage        []*DynamicInterfaceOpt `json:"*autoChargeUsage"`
-	AutoChargeMinGranted   []*DynamicInterfaceOpt `json:"*autoChargeMinGranted"`
-	EEs                    []*DynamicInterfaceOpt `json:"*ees"`
-	EEsIDs                 []*DynamicInterfaceOpt `json:"*eesIDs"`
-	UR                     []*DynamicInterfaceOpt `json:"*ur"`
+	Accounts               []*DynamicInterfaceOpt   `json:"*accounts"`
+	Rates                  []*DynamicInterfaceOpt   `json:"*rates"`
+	Attributes             []*DynamicInterfaceOpt   `json:"*attributes"`
+	Chargers               []*DynamicInterfaceOpt   `json:"*chargers"`
+	Resources              []*DynamicInterfaceOpt   `json:"*resources"`
+	IPs                    []*DynamicInterfaceOpt   `json:"*ips"`
+	Routes                 []*DynamicInterfaceOpt   `json:"*routes"`
+	Stats                  []*DynamicInterfaceOpt   `json:"*stats"`
+	Thresholds             []*DynamicInterfaceOpt   `json:"*thresholds"`
+	Authorize              []*DynamicInterfaceOpt   `json:"*authorize"`
+	Debit                  []*DynamicInterfaceOpt   `json:"*debit"`
+	Refund                 []*DynamicInterfaceOpt   `json:"*refund"`
+	Initiate               []*DynamicInterfaceOpt   `json:"*initiate"`
+	Update                 []*DynamicInterfaceOpt   `json:"*update"`
+	Terminate              []*DynamicInterfaceOpt   `json:"*terminate"`
+	Message                []*DynamicInterfaceOpt   `json:"*message"`
+	AttributesDerivedReply []*DynamicInterfaceOpt   `json:"*attributesDerivedReply"`
+	BlockerError           []*DynamicInterfaceOpt   `json:"*blockerError"`
+	ResourcesAuthorize     []*DynamicInterfaceOpt   `json:"*resourcesAuthorize"`
+	ResourcesAllocate      []*DynamicInterfaceOpt   `json:"*resourcesAllocate"`
+	ResourcesRelease       []*DynamicInterfaceOpt   `json:"*resourcesRelease"`
+	ResourcesDerivedReply  []*DynamicInterfaceOpt   `json:"*resourcesDerivedReply"`
+	ResourcesUsageID       []*DynamicInterfaceOpt   `json:"*resourcesUsageID"`
+	ResourcesUnits         []*DynamicInterfaceOpt   `json:"*resourcesUnits"`
+	IPsAuthorize           []*DynamicInterfaceOpt   `json:"*ipsAuthorize"`
+	IPsAllocate            []*DynamicInterfaceOpt   `json:"*ipsAllocate"`
+	IPsRelease             []*DynamicInterfaceOpt   `json:"*ipsRelease"`
+	RoutesDerivedReply     []*DynamicInterfaceOpt   `json:"*routesDerivedReply"`
+	StatsDerivedReply      []*DynamicInterfaceOpt   `json:"*statsDerivedReply"`
+	ThresholdsDerivedReply []*DynamicInterfaceOpt   `json:"*thresholdsDerivedReply"`
+	MaxUsage               []*DynamicInterfaceOpt   `json:"*maxUsage"`
+	InterimConsumed        []*DynamicInterfaceOpt   `json:"*interimConsumed"`
+	InterimUsage           []*DynamicInterfaceOpt   `json:"*interimUsage"`
+	TotalUsage             []*DynamicInterfaceOpt   `json:"*totalUsage"`
+	Usage                  []*DynamicInterfaceOpt   `json:"*usage"`
+	ForceUsage             []*DynamicInterfaceOpt   `json:"*forceUsage"`
+	TTL                    []*DynamicInterfaceOpt   `json:"*ttl"`
+	Chargeable             []*DynamicInterfaceOpt   `json:"*chargeable"`
+	TTLLastUsage           []*DynamicInterfaceOpt   `json:"*ttlLastUsage"`
+	TTLLastUsed            []*DynamicInterfaceOpt   `json:"*ttlLastUsed"`
+	TTLMaxDelay            []*DynamicInterfaceOpt   `json:"*ttlMaxDelay"`
+	TTLUsage               []*DynamicInterfaceOpt   `json:"*ttlUsage"`
+	CGRid                  []*DynamicInterfaceOpt   `json:"*cgrID"`
+	OriginID               []*DynamicInterfaceOpt   `json:"*originID"`
+	HostID                 []*DynamicInterfaceOpt   `json:"*hostID"`
+	AccountsForceUsage     []*DynamicInterfaceOpt   `json:"*accountsForceUsage"`
+	AccountsAuthorize      []*DynamicInterfaceOpt   `json:"*accountsAuthorize"`
+	AccountsDebit          []*DynamicInterfaceOpt   `json:"*accountsDebit"`
+	AccountsRefund         []*DynamicInterfaceOpt   `json:"*accountsRefund"`
+	Session                []*DynamicInterfaceOpt   `json:"*session"`
+	AutoChargeInterval     []*DynamicInterfaceOpt   `json:"*autoChargeInterval"`
+	AutoChargeUsage        []*DynamicInterfaceOpt   `json:"*autoChargeUsage"`
+	AutoChargeMinGranted   []*DynamicInterfaceOpt   `json:"*autoChargeMinGranted"`
+	EEs                    []*DynamicInterfaceOpt   `json:"*ees"`
+	EEsIDs                 []*DynamicInterfaceOpt   `json:"*eesIDs"`
+	UR                     []*DynamicInterfaceOpt   `json:"*ur"`
+	AlterableFields        []*DynamicStringSliceOpt `json:"*alterableFields"`
 }
 
 // SessionSJsonCfg config section
@@ -898,7 +901,6 @@ type SessionSJsonCfg struct {
 	ClientProtocol      *float64                   `json:"clientProtocol"`
 	ChannelSyncInterval *string                    `json:"channelSyncInterval"`
 	TerminateAttempts   *int                       `json:"terminateAttempts"`
-	AlterableFields     *[]string                  `json:"alterableFields"`
 	Stir                *STIRJsonCfg               `json:"stir"`
 	Conns               map[string][]*DynamicConns `json:"conns,omitempty"`
 	Opts                *SessionsOptsJson          `json:"opts"`
@@ -1076,6 +1078,9 @@ func diffSessionsOptsJsonCfg(d *SessionsOptsJson, v1, v2 *SessionsOpts) *Session
 	if !DynamicBoolOptEqual(v1.UR, v2.UR) {
 		d.UR = BoolToIfaceDynamicOpts(v2.UR)
 	}
+	if !DynamicStringSliceOptEqual(v1.AlterableFields, v2.AlterableFields) {
+		d.AlterableFields = v2.AlterableFields
+	}
 	return d
 }
 
@@ -1103,9 +1108,6 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if v1.TerminateAttempts != v2.TerminateAttempts {
 		d.TerminateAttempts = utils.IntPointer(v2.TerminateAttempts)
-	}
-	if !v1.AlterableFields.Equals(v2.AlterableFields) {
-		d.AlterableFields = utils.SliceStringPointer(v2.AlterableFields.AsSlice())
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
