@@ -621,7 +621,6 @@ const CGRATES_CFG_JSON = `
 	"clientProtocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
 	"terminateAttempts": 5,		// attempts to get the session before terminating it
-	"alterableFields": [],			// the session fields that can be updated
 	"stir": {
 		"allowedAttest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
 		"payloadMaxduration": "-1", 	// the duration that stir header is valid after it was created
@@ -670,6 +669,14 @@ const CGRATES_CFG_JSON = `
         //      "value": false
         //  }
         // ],
+
+		// "*alterableFields": [
+		//  {
+		//      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "values": []
+		//  }
+		// ],
 
         // "*attributes": [
         //  {

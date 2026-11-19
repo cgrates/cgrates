@@ -827,7 +827,6 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
@@ -897,6 +896,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -933,7 +933,6 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
@@ -1003,6 +1002,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -1038,7 +1038,6 @@ func testCGRConfigReloadAll(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
@@ -1109,6 +1108,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {

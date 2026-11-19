@@ -1627,9 +1627,14 @@ func TestCGRConfigcheckConfigSanitySessionSErr(t *testing.T) {
 		sessionSCfg: &SessionSCfg{
 			Enabled:           true,
 			TerminateAttempts: 1,
-			AlterableFields:   utils.NewStringSet([]string{"OriginHost"}),
 			Conns:             make(map[string][]*DynamicConns),
-			Opts:              &SessionsOpts{},
+			Opts: &SessionsOpts{
+				AlterableFields: []*DynamicStringSliceOpt{
+					{
+						Values: []string{"OriginHost"},
+					},
+				},
+			},
 		},
 		cacheCfg: &CacheCfg{
 
