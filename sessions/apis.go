@@ -11,6 +11,7 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/attributes"
 	"github.com/cgrates/cgrates/chargers"
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -219,11 +220,20 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 			cchEv[utils.MetaTotalUsage] = totalUsage
 		}
 
+		// Set *alterableFields
+		var alterableFields []string
+		if alterableFields, err = engine.GetStringSliceOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AlterableFields, config.SessionsAlterableFieldsDftOpt, utils.OptsSesAlterableFields); err != nil {
+			return
+		} else if alterableFields != nil {
+			cchEv[utils.MetaAlterableFields] = alterableFields
+		}
+
 		// setSRun
 		if s != nil {
 			s.lk.Lock()
 			if has, reIdx, errSet := s.setSRun(runID, cgrEv,
-				sS.cfg.SessionSCfg().AlterableFields, sS.cfg.SessionSCfg().SessionIndexes, cchEv,
+				utils.NewStringSet(alterableFields), sS.cfg.SessionSCfg().SessionIndexes, cchEv,
 				interimConsumed, interimUsage, totalUsage); errSet != nil {
 				if utils.OptAsBool(cch, utils.OptsSesBlockerError) {
 					s.lk.Unlock()

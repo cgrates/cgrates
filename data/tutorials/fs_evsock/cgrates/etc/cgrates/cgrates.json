@@ -51,7 +51,6 @@
 
 "sessions": {
 	"enabled": true,
-	"debitInterval": "5s",
 	"channelSyncInterval":"7s",
 	"conns":{
 	"*rals": [

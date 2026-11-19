@@ -600,14 +600,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		ClientProtocol:      utils.Float64Pointer(1.0),
 		ChannelSyncInterval: utils.StringPointer("0"),
 		TerminateAttempts:   utils.IntPointer(5),
-		AlterableFields:     &[]string{},
-		DefaultUsage: map[string]string{
-			utils.MetaAny:   "3h",
-			utils.MetaVoice: "3h",
-			utils.MetaData:  "1048576",
-			utils.MetaSMS:   "1",
-		},
-		Conns: map[string][]*DynamicConns{},
+		Conns:               map[string][]*DynamicConns{},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      &[]string{utils.MetaAny},
 			Payload_maxduration: utils.StringPointer("-1"),

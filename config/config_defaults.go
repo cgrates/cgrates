@@ -617,24 +617,10 @@ const CGRATES_CFG_JSON = `
 	"enabled": false,			// starts the session service: <true|false>
 	"listenBiJSON": "127.0.0.1:2014",	// address where to listen for bidirectional JSON-RPC requests
 	"listenBiGob": "",			// address where to listen for bidirectional GOB-RPC requests
-	"debitInterval": "0s",			// interval to perform debits on.
-	"defaultUsage":{			// the usage if the event is missing the usage field
-			"*any": "3h",
-			"*voice": "3h",
-			"*data": "1048576",
-			"*sms": "1"
-	},
-	"sessionTTL": "0s",			// time after a session with no updates is terminated, not defined by default
-	//"sessionTTLMaxDelay": "",		// activates sessionTTL randomization and limits the maximum possible delay
-	//"sessionTTLLastUsed": "",		// tweak LastUsed for sessions timing-out, not defined by default
-	//"sessionTTLUsage": "",		// tweak Usage for sessions timing-out, not defined by default
-	//"sessionLastUsage": "",		// tweak LastUsage for session timing-out, not defined by default
 	"sessionIndexes": [],			// index sessions based on these fields for GetActiveSessions API
 	"clientProtocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
 	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
 	"terminateAttempts": 5,		// attempts to get the session before terminating it
-	"alterableFields": [],			// the session fields that can be updated
-	//"minDurLowBalance": "5s",		// threshold which will trigger low balance warnings for prepaid calls (needs to be lower than debitInterval)
 	"stir": {
 		"allowedAttest": ["*any"],	// the default attest for stir/shaken authentication <*any|A|B|C>
 		"payloadMaxduration": "-1", 	// the duration that stir header is valid after it was created
@@ -683,6 +669,14 @@ const CGRATES_CFG_JSON = `
         //      "value": false
         //  }
         // ],
+
+		// "*alterableFields": [
+		//  {
+		//      "tenant": "*any",
+        //      "filterIDs": [],
+        //      "values": []
+		//  }
+		// ],
 
         // "*attributes": [
         //  {
@@ -1143,6 +1137,13 @@ const CGRATES_CFG_JSON = `
 		// 	}
 		// ],
 		// "*replication": [	// replicate sessions towards these session services
+		// 	{
+		// 		"tenant": "",
+		// 		"filterIDs": [],
+		// 		"connIDs": []
+		// 	}
+		// ],
+		// "*resources": [     // connections to ResourceS
 		// 	{
 		// 		"tenant": "",
 		// 		"filterIDs": [],

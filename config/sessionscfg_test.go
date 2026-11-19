@@ -54,8 +54,6 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientProtocol:      utils.Float64Pointer(2.5),
 		ChannelSyncInterval: utils.StringPointer("10"),
 		TerminateAttempts:   utils.IntPointer(6),
-		AlterableFields:     &[]string{},
-		MinDurLowBalance:    utils.StringPointer("1"),
 		Conns: map[string][]*DynamicConns{
 			utils.MetaChargers:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaResources:   {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
@@ -332,20 +330,12 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
-		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    1,
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaChargers:    {{ConnIDs: []string{utils.ConcatenatedKey(utils.MetaInternal, utils.MetaChargers), "*conn1"}}},
@@ -651,6 +641,7 @@ func TestSessionSCfgloadFromJsonCfgCase1(t *testing.T) {
 				},
 				{},
 			},
+			AlterableFields: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -1209,17 +1200,6 @@ func TestSessionSCfgloadFromJsonCfgCase7(t *testing.T) {
 	}
 }
 
-func TestSessionSCfgloadFromJsonCfgCase8(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		MinDurLowBalance: utils.StringPointer("1ss"),
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
 func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 	cfgJSON := &SessionSJsonCfg{
 		Opts: &SessionsOptsJson{
@@ -1252,20 +1232,12 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 		ClientProtocol:      1.0,
 		ChannelSyncInterval: 0,
 		TerminateAttempts:   5,
-		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    0,
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "",
 			PublicKeyPath:      "",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{},
 		Opts: &SessionsOpts{
@@ -1344,6 +1316,7 @@ func TestSessionSCfgloadFromJsonCfgCase10(t *testing.T) {
 					value: utils.DurationPointer(1),
 				},
 			},
+			AlterableFields: []*DynamicStringSliceOpt{},
 		},
 	}
 	jsonCfg := NewDefaultCGRConfig()
@@ -1367,46 +1340,10 @@ func TestSessionSCfgloadFromJsonCfgCase11(t *testing.T) {
 	}
 }
 
-func TestSessionSCfgloadFromJsonCfgCase12(t *testing.T) {
-	cfgJSON := &SessionSJsonCfg{
-		DefaultUsage: map[string]string{
-			utils.MetaAny:   "1ss",
-			utils.MetaVoice: "1ss",
-			utils.MetaData:  "1ss",
-			utils.MetaSMS:   "1ss",
-		},
-	}
-	expected := "time: unknown unit \"ss\" in duration \"1ss\""
-	jsonCfg := NewDefaultCGRConfig()
-	if err := jsonCfg.sessionSCfg.loadFromJSONCfg(cfgJSON); err == nil || err.Error() != expected {
-		t.Errorf("Expected %+v, received %+v", expected, err)
-	}
-}
-
-func TestGetDefaultUsage(t *testing.T) {
-	session := &SessionSCfg{
-		DefaultUsage: map[string]time.Duration{
-			"test":        time.Hour,
-			utils.MetaAny: time.Second,
-		},
-	}
-	expected := time.Hour
-	if rcv := session.GetDefaultUsage("test"); !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
-	}
-	expected = time.Second
-	if rcv := session.GetDefaultUsage(utils.EmptyString); !reflect.DeepEqual(rcv, expected) {
-		t.Errorf("Expected %+v, received %+v", expected, rcv)
-	}
-}
-
 func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 	cfgJSONStr := `{
 	"sessions": {
           "channelSyncInterval": "1s",
-          "sessionTTLMaxDelay": "3h0m0s",
-          "sessionTTLLastUsed": "0s",
-          "sessionTTLUsage": "1s",
            "sessions": {
 			"stir": {
 				"payloadMaxduration": "-1",
@@ -1423,20 +1360,12 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ClientProtocolCfg:      1.0,
 		utils.ChannelSyncIntervalCfg: "1s",
 		utils.TerminateAttemptsCfg:   5,
-		utils.MinDurLowBalanceCfg:    "0",
-		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"*any"},
 			utils.PayloadMaxdurationCfg: "-1",
 			utils.DefaultAttestCfg:      "A",
 			utils.PublicKeyPathCfg:      "",
 			utils.PrivateKeyPathCfg:     "",
-		},
-		utils.DefaultUsageCfg: map[string]string{
-			utils.MetaAny:   "3h0m0s",
-			utils.MetaVoice: "3h0m0s",
-			utils.MetaData:  "1048576",
-			utils.MetaSMS:   "1",
 		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
@@ -1495,6 +1424,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 			utils.MetaAutoChargeMinGranted:      []*DynamicDecimalOpt{},
 			utils.MetaCGRid:                     []*DynamicStringOpt{},
 			utils.MetaHostID:                    []*DynamicStringOpt{},
+			utils.MetaAlterableFields:           []*DynamicStringSliceOpt{},
 		},
 	}
 	if cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr); err != nil {
@@ -1522,7 +1452,6 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 				"*accounts": [{"connIDs": ["*internal", "*conn1"]}],
 				"*replication": [{"connIDs": ["*localhost"]}]
 			},
-            "minDurLowBalance": "1s",
 			"clientProtocol": 2.0,
 			"terminateAttempts": 10,
 			"stir": {
@@ -1563,24 +1492,16 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaAccounts:    {{ConnIDs: []string{utils.MetaInternal, "*conn1"}}},
 			utils.MetaReplication: {{ConnIDs: []string{utils.MetaLocalHost}}},
 		},
-		utils.MinDurLowBalanceCfg:    "1s",
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      2.0,
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.TerminateAttemptsCfg:   10,
-		utils.AlterableFieldsCfg:     []string{},
 		utils.STIRCfg: map[string]any{
 			utils.AllowedAtestCfg:       []string{"any1", "any2"},
 			utils.PayloadMaxdurationCfg: "1s",
 			utils.DefaultAttestCfg:      "B",
 			utils.PublicKeyPathCfg:      "",
 			utils.PrivateKeyPathCfg:     "",
-		},
-		utils.DefaultUsageCfg: map[string]string{
-			utils.MetaAny:   "3h0m0s",
-			utils.MetaVoice: "3h0m0s",
-			utils.MetaData:  "1048576",
-			utils.MetaSMS:   "1",
 		},
 		utils.OptsCfg: map[string]any{
 			utils.MetaAccounts:                  []*DynamicBoolOpt{{}},
@@ -1653,6 +1574,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 			utils.MetaAutoChargeMinGranted: []*DynamicDecimalOpt{},
 			utils.MetaCGRid:                []*DynamicStringOpt{},
 			utils.MetaHostID:               []*DynamicStringOpt{},
+			utils.MetaAlterableFields:      []*DynamicStringSliceOpt{},
 		},
 	}
 	cgrCfg, err := NewCGRConfigFromJSONStringWithDefaults(cfgJSONStr)
@@ -2450,21 +2372,12 @@ func TestSessionSCfgClone(t *testing.T) {
 		ClientProtocol:      2.5,
 		ChannelSyncInterval: 10,
 		TerminateAttempts:   6,
-		AlterableFields:     utils.StringSet{},
-		MinDurLowBalance:    1,
-
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.StringSet{utils.MetaAny: {}},
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
 			PrivateKeyPath:     "randomPath",
 			PublicKeyPath:      "randomPath",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaActions: {
@@ -2600,11 +2513,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
-		MinDurLowBalance:    1 * time.Second,
-		DefaultUsage: map[string]time.Duration{
-			"DFLT_1": 1 * time.Second,
-		},
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},
@@ -2665,13 +2573,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      13.2,
 		ChannelSyncInterval: 2 * time.Second,
 		TerminateAttempts:   5,
-		AlterableFields: utils.StringSet{
-			"index1": struct{}{},
-		},
-		MinDurLowBalance: 2 * time.Second,
-		DefaultUsage: map[string]time.Duration{
-			"DFLT_1": 2 * time.Second,
-		},
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      nil,
 			PayloadMaxduration: 4 * time.Second,
@@ -2734,11 +2635,6 @@ func TestDiffSessionSJsonCfg(t *testing.T) {
 		ClientProtocol:      utils.Float64Pointer(13.2),
 		ChannelSyncInterval: utils.StringPointer("2s"),
 		TerminateAttempts:   utils.IntPointer(5),
-		AlterableFields:     &[]string{"index1"},
-		MinDurLowBalance:    utils.StringPointer("2s"),
-		DefaultUsage: map[string]string{
-			"DFLT_1": "2s",
-		},
 		Stir: &STIRJsonCfg{
 			Allowed_attest:      nil,
 			Payload_maxduration: utils.StringPointer("4s"),
@@ -2823,11 +2719,6 @@ func TestSessionSCloneSection(t *testing.T) {
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
-		MinDurLowBalance:    1 * time.Second,
-		DefaultUsage: map[string]time.Duration{
-			"DFLT_1": 1 * time.Second,
-		},
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},
@@ -2869,16 +2760,11 @@ func TestSessionSCloneSection(t *testing.T) {
 	exp := &SessionSCfg{
 		Enabled:             false,
 		ListenBiJSON:        "*bijson_rpc",
-		ListenBiGob:         "",
+		ListenBiGob:         "*bigob_rpc",
 		SessionIndexes:      nil,
 		ClientProtocol:      12.2,
 		ChannelSyncInterval: 1 * time.Second,
 		TerminateAttempts:   3,
-		AlterableFields:     nil,
-		MinDurLowBalance:    1 * time.Second,
-		DefaultUsage: map[string]time.Duration{
-			"DFLT_1": 1 * time.Second,
-		},
 		STIRCfg: &STIRcfg{
 			AllowedAttest: utils.StringSet{
 				"A_TEST1": {},

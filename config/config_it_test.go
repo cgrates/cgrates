@@ -827,17 +827,10 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
@@ -903,6 +896,7 @@ func testCGRConfigReloadConfigFromJSONSessionS(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -939,17 +933,10 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
@@ -1015,6 +1002,7 @@ func testCGRConfigReloadConfigFromStringSessionS(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
@@ -1050,17 +1038,10 @@ func testCGRConfigReloadAll(t *testing.T) {
 		SessionIndexes:    utils.StringSet{},
 		ClientProtocol:    1,
 		TerminateAttempts: 5,
-		AlterableFields:   utils.NewStringSet([]string{}),
 		STIRCfg: &STIRcfg{
 			AllowedAttest:      utils.NewStringSet([]string{utils.MetaAny}),
 			PayloadMaxduration: -1,
 			DefaultAttest:      "A",
-		},
-		DefaultUsage: map[string]time.Duration{
-			utils.MetaAny:   3 * time.Hour,
-			utils.MetaVoice: 3 * time.Hour,
-			utils.MetaData:  1048576,
-			utils.MetaSMS:   1,
 		},
 		Conns: map[string][]*DynamicConns{
 			utils.MetaResources:  {{ConnIDs: []string{utils.MetaLocalHost}}},
@@ -1127,6 +1108,7 @@ func testCGRConfigReloadAll(t *testing.T) {
 			HostID:                 []*DynamicStringOpt{},
 			ResourcesUsageID:       []*DynamicStringOpt{},
 			ResourcesUnits:         []*DynamicIntOpt{},
+			AlterableFields:        []*DynamicStringSliceOpt{},
 		},
 	}
 	if !reflect.DeepEqual(expAttr, cfg.SessionSCfg()) {
