@@ -86,7 +86,6 @@
 
 "sessions": {
 	"enabled": true,
-	"alterableFields": ["Extra1"],
 	"conns":{
 	"*chargers": [
 		 {

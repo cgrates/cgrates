@@ -2029,7 +2029,6 @@ const (
 	ClientProtocolCfg      = "clientProtocol"
 	ChannelSyncIntervalCfg = "channelSyncInterval"
 	TerminateAttemptsCfg   = "terminateAttempts"
-	AlterableFieldsCfg     = "alterableFields"
 	STIRCfg                = "stir"
 
 	AllowedAtestCfg       = "allowedAttest"
@@ -2212,6 +2211,7 @@ const (
 	MetaTTLMaxDelayCfg            = "*ttlMaxDelay"
 	MetaTTLUsageCfg               = "*ttlUsage"
 	MetaAccountsForceUsage        = "*accountsForceUsage"
+	MetaAlterableFields           = "*alterableFields"
 	AutoCharge                    = "AutoCharge"
 
 	// AnalyzerSCfg
@@ -2362,7 +2362,7 @@ var CGROptionsSet = NewStringSet([]string{OptsRatesProfileIDs, OptsRatesStartTim
 	OptsSesRouteSDerivedReply, OptsSesStatSDerivedReply, OptsSesSTIRAuthenticate, OptsSesSTIRDerivedReply,
 	OptsSesSTIRInitiate, OptsSesThresholdSDerivedReply,
 	OptsSesMaxUsage, OptsSesForceUsage, MetaInitiate, MetaUpdate, MetaTerminate,
-	OptsSesMessage, MetaAttributes, MetaChargers, MetaStats, MetaThresholds, MetaRates, MetaAccounts,
+	OptsSesMessage, OptsSesAlterableFields, MetaAttributes, MetaChargers, MetaStats, MetaThresholds, MetaRates, MetaAccounts,
 	OptsAccountsUsage, OptsStatsProfileIDs, OptsActionsProfileIDs, MetaProfileIgnoreFilters,
 	OptsRoundingDecimals, MetaOriginID, MetaAuthorize, MetaSession, MetaUsage, MetaDebit, MetaEEs, MetaUR})
 
@@ -2395,6 +2395,7 @@ const (
 	OptsSesThresholdSDerivedReply = "*sesThresholdSDerivedReply"
 	OptsSesMaxUsage               = "*sesMaxUsage"
 	OptsSesMessage                = "*sesMessage"
+	OptsSesAlterableFields        = "*sesAlterableFields"
 
 	// Accounts
 	OptsAccountsUsage      = "*accountsUsage"
