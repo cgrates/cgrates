@@ -38,10 +38,10 @@ func NewSessionS(cgrCfg *config.CGRConfig, dm *engine.DataManager, cache *engine
 		connMgr:       connMgr,
 		biJClnts:      make(map[birpc.ClientConnector]string),
 		biJIDs:        make(map[string]*biJClient),
-		aSessions:     make(map[string]*Session),
+		aSessions:     make(map[string]*session),
 		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		aSessionsRIdx: make(map[string][]*riFieldNameVal),
-		pSessions:     make(map[string]*Session),
+		pSessions:     make(map[string]*session),
 		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
 		pSessionsRIdx: make(map[string][]*riFieldNameVal),
 	}
@@ -66,14 +66,14 @@ type SessionS struct {
 	biJIDs   map[string]*biJClient            // identifiers of bidirectional JSON conns, used to call RPC based on connIDs
 
 	aSsMux    sync.RWMutex        // protects aSessions
-	aSessions map[string]*Session // group sessions per sessionId
+	aSessions map[string]*session // group sessions per sessionId
 
 	aSIMux        sync.RWMutex                                     // protects aSessionsIdx
 	aSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][originID]utils.StringSet[runID]sID
 	aSessionsRIdx map[string][]*riFieldNameVal                     // reverse indexes for active sessions, used on remove
 
 	pSsMux    sync.RWMutex        // protects pSessions
-	pSessions map[string]*Session // group passive sessions based on originID
+	pSessions map[string]*session // group passive sessions based on originID
 
 	pSIMux        sync.RWMutex                                     // protects pSessionsIdx
 	pSessionsIdx  map[string]map[string]map[string]utils.StringSet // map[fieldName]map[fieldValue][originID]utils.StringSet[runID]sID
@@ -200,16 +200,17 @@ type sTerminator struct {
 
 // setSTerminator installs a new terminator for a session
 // setSTerminator is not thread safe, only the goroutine forked from within
-func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.MapEvent) {
+func (sS *SessionS) setSTerminator(ctx context.Context, s *session, opts engine.MapEvent) {
 	var err error
+	origin := s.session.OriginCGREvent
 
 	// TTL
 	var ttl time.Duration
-	if ttl, err = engine.GetDurationOptsFromMultipleMaps(ctx, s.OriginCGREvent.Tenant, s.OriginCGREvent.Event, opts, s.OriginCGREvent.APIOpts, sS.fltrS,
+	if ttl, err = engine.GetDurationOptsFromMultipleMaps(ctx, origin.Tenant, origin.Event, opts, origin.APIOpts, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTL, config.SessionsTTLDftOpt, utils.OptsSesTTL); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTL, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts, err))
+				utils.SessionS, utils.OptsSesTTL, origin.APIOpts[utils.MetaOriginID], opts, err))
 		return
 	}
 	if ttl == 0 {
@@ -217,11 +218,11 @@ func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.
 	}
 	// random delay computation
 	var maxDelay time.Duration
-	if maxDelay, err = engine.GetDurationOptsFromMultipleMaps(ctx, s.OriginCGREvent.Tenant, s.OriginCGREvent.Event, opts, s.OriginCGREvent.APIOpts, sS.fltrS,
+	if maxDelay, err = engine.GetDurationOptsFromMultipleMaps(ctx, origin.Tenant, origin.Event, opts, origin.APIOpts, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLMaxDelay, config.SessionsTTLMaxDelayDftOpt, utils.OptsSesTTLMaxDelay); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLMaxDelay, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSesTTLMaxDelay, origin.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
 	if maxDelay != 0 {
@@ -230,29 +231,29 @@ func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.
 	}
 	// LastUsed
 	var ttlLastUsed *time.Duration
-	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.OriginCGREvent.Tenant, s.OriginCGREvent.Event, opts, s.OriginCGREvent.APIOpts, sS.fltrS,
+	if ttlLastUsed, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, origin.Tenant, origin.Event, opts, origin.APIOpts, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLLastUsed, utils.OptsSesTTLLastUsed); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLLastUsed, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSesTTLLastUsed, origin.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
 	// LastUsage
 	var ttlLastUsage *time.Duration
-	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.OriginCGREvent.Tenant, s.OriginCGREvent.Event, opts, s.OriginCGREvent.APIOpts, sS.fltrS,
+	if ttlLastUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, origin.Tenant, origin.Event, opts, origin.APIOpts, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLLastUsage, utils.OptsSesTTLLastUsage); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLLastUsage, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSesTTLLastUsage, origin.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
 	// TTLUsage
 	var ttlUsage *time.Duration
-	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, s.OriginCGREvent.Tenant, s.OriginCGREvent.Event, opts, s.OriginCGREvent.APIOpts, sS.fltrS,
+	if ttlUsage, err = engine.GetDurationPointerOptsFromMultipleMaps(ctx, origin.Tenant, origin.Event, opts, origin.APIOpts, sS.fltrS,
 		sS.cfg.SessionSCfg().Opts.TTLUsage, utils.OptsSesTTLUsage); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s>, cannot extract <%s> for session:<%s>, from its options: <%s>, err: <%s>",
-				utils.SessionS, utils.OptsSesTTLUsage, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
+				utils.SessionS, utils.OptsSesTTLUsage, origin.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
 	// previously defined, reset
@@ -301,7 +302,7 @@ func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 // not thread safe
-func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
+func (sS *SessionS) forceSTerminate(ctx context.Context, s *session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
 	if extraUsage != 0 {
 		// for i := range s.SRuns {
 		// 	if _, err = sS.debitSession(ctx, s, i, extraUsage, lastUsed); err != nil {
@@ -317,10 +318,10 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage 
 		utils.Logger.Warning(
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
-				utils.SessionS, s.ID, err.Error()))
+				utils.SessionS, s.session.ID, err.Error()))
 	}
-	tenant := s.OriginCGREvent.Tenant
-	dP := s.OriginCGREvent.AsDataProvider()
+	tenant := s.session.OriginCGREvent.Tenant
+	dP := s.session.OriginCGREvent.AsDataProvider()
 	// post the URs using ees
 	if ees, errEEs := engine.GetBoolOpts(ctx, tenant, dP, nil,
 		sS.fltrS, sS.cfg.SessionSCfg().Opts.EEs,
@@ -349,16 +350,16 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage 
 			fmt.Sprintf("<%s> error resolving ResourceS connections: %s", utils.SessionS, errR.Error()))
 	} else if len(resSConns) != 0 {
 		var reply string
-		args := s.OriginCGREvent.Clone()
+		args := s.session.OriginCGREvent.Clone()
 		args.ID = utils.UUIDSha1Prefix()
-		args.APIOpts[utils.OptsResourcesUsageID] = s.ID
+		args.APIOpts[utils.OptsResourcesUsageID] = s.session.ID
 		args.APIOpts[utils.OptsResourcesUnits] = 1
 		if err := sS.connMgr.Call(ctx, resSConns,
 			utils.ResourceSv1ReleaseResources,
 			args, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s could not release resource with resourceID: %s",
-					utils.SessionS, err.Error(), s.ID))
+					utils.SessionS, err.Error(), s.session.ID))
 		}
 	}
 	// release the ips for the session
@@ -367,23 +368,23 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage 
 			fmt.Sprintf("<%s> error resolving IPs connections: %s", utils.SessionS, errI.Error()))
 	} else if len(ipsConns) != 0 {
 		var reply string
-		args := s.OriginCGREvent.Clone()
+		args := s.session.OriginCGREvent.Clone()
 		args.ID = utils.UUIDSha1Prefix()
-		args.APIOpts[utils.OptsIPsAllocationID] = s.ID
+		args.APIOpts[utils.OptsIPsAllocationID] = s.session.ID
 		if err := sS.connMgr.Call(ctx, ipsConns,
 			utils.IPsV1ReleaseIP,
 			args, &reply); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s could not release IP %q",
-					utils.SessionS, err.Error(), s.ID))
+					utils.SessionS, err.Error(), s.session.ID))
 		}
 	}
-	if errRpl := sS.replicateSessions(ctx, s.ID, false); errRpl != nil {
+	if errRpl := sS.replicateSessions(ctx, s.session.ID, false); errRpl != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: <%s> replicating session: <%s>",
-				utils.SessionS, errRpl.Error(), s.ID))
+				utils.SessionS, errRpl.Error(), s.session.ID))
 	}
-	if clnt := sS.biJClnt(s.ClientConnID); clnt != nil {
+	if clnt := sS.biJClnt(s.session.ClientConnID); clnt != nil {
 		go func() {
 			var rply string
 			if err := clnt.conn.Call(ctx,
@@ -396,7 +397,7 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage 
 				&rply); err != nil && err != utils.ErrNotImplemented {
 				utils.Logger.Warning(
 					fmt.Sprintf("<%s> err: %s remotely disconnect session with id: %s",
-						utils.SessionS, err.Error(), s.ID))
+						utils.SessionS, err.Error(), s.session.ID))
 			}
 		}()
 	}
@@ -404,7 +405,7 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *Session, extraUsage 
 }
 
 // debitSession performs debit for a session run
-func (sS *SessionS) debitSession(ctx context.Context, s *Session, sRunIdx int, dur time.Duration,
+func (sS *SessionS) debitSession(ctx context.Context, s *session, sRunIdx int, dur time.Duration,
 	lastUsed *time.Duration) (maxDur time.Duration, err error) {
 
 	return
@@ -412,7 +413,7 @@ func (sS *SessionS) debitSession(ctx context.Context, s *Session, sRunIdx int, d
 
 // debitLoopSession will periodically debit sessions, ie: automatic prepaid
 // threadSafe since it will run into it's own goroutine
-func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
+func (sS *SessionS) debitLoopSession(s *session, sRunIdx int,
 	dbtIvl time.Duration) (maxDur time.Duration, err error) {
 	/*
 		// NextAutoDebit works in tandem with session replication
@@ -512,7 +513,7 @@ func (sS *SessionS) debitLoopSession(s *Session, sRunIdx int,
 
 // disconnectSession will send disconnect from SessionS to clients
 // not thread safe, it considers that the session is already stopped by this time
-func (sS *SessionS) disconnectSession(s *Session, rsn string) (err error) {
+func (sS *SessionS) disconnectSession(s *session, rsn string) (err error) {
 	/*
 		clnt := sS.biJClnt(s.ClientConnID)
 		if clnt == nil {
@@ -543,16 +544,16 @@ func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool)
 	ss := sS.getSessions(sID, psv)
 	if len(ss) == 0 {
 		// emulate the Session, so it can be also removed from remote
-		ss = []*Session{{ID: sID}}
+		ss = []*session{{session: &utils.Session{ID: sID}}}
 	}
 	for _, s := range ss {
 		sCln := s.Clone()
 		var conns []string // ToDo: cache per session
 		tnt := utils.MetaAny
 		dP := utils.MapStorage{}
-		if s.OriginCGREvent != nil {
-			tnt = s.OriginCGREvent.Tenant
-			dP = s.OriginCGREvent.AsDataProvider()
+		if s.session.OriginCGREvent != nil {
+			tnt = s.session.OriginCGREvent.Tenant
+			dP = s.session.OriginCGREvent.AsDataProvider()
 		}
 		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaReplication,
 			tnt, dP, nil, sS.fltrS); err != nil {
@@ -577,7 +578,7 @@ func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool)
 // registerSession will register an active or passive Session
 // called on init or relocate
 // not thread safe for the Session
-func (sS *SessionS) registerSession(s *Session, passive bool) {
+func (sS *SessionS) registerSession(s *session, passive bool) {
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -585,7 +586,7 @@ func (sS *SessionS) registerSession(s *Session, passive bool) {
 		sMp = sS.pSessions
 	}
 	sMux.Lock()
-	sMp[s.ID] = s
+	sMp[s.session.ID] = s
 	sMux.Unlock()
 	sS.indexSession(s, passive)
 }
@@ -625,16 +626,16 @@ func (sS *SessionS) unregisterSession(sID string, passive bool) bool {
 }
 
 // indexSession will index an active or passive Session based on configuration
-func (sS *SessionS) indexSession(s *Session, pSessions bool) {
-	srs := make([]*SRun, 0, len(s.sRuns))
-	for _, sr := range s.sRuns {
+func (sS *SessionS) indexSession(s *session, pSessions bool) {
+	srs := make([]*utils.SRun, 0, len(s.session.SRuns))
+	for _, sr := range s.session.SRuns {
 		srs = append(srs, sr)
 	}
-	sS.indexSRuns(s.ID, pSessions, srs...)
+	sS.indexSRuns(s.session.ID, pSessions, srs...)
 }
 
 // indexSRuns will index the SRuns
-func (sS *SessionS) indexSRuns(sID string, pSessions bool, srs ...*SRun) {
+func (sS *SessionS) indexSRuns(sID string, pSessions bool, srs ...*utils.SRun) {
 	idxMux := &sS.aSIMux // pointer to original mux since will have no effect if we copy it
 	ssIndx := sS.aSessionsIdx
 	ssRIdx := sS.aSessionsRIdx
@@ -832,8 +833,8 @@ func (sS *SessionS) filterSessions(ctx context.Context, sf *utils.SessionFilter,
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		runIDs := matchingSRuns[s.ID]
-		for runID, sr := range s.sRuns {
+		runIDs := matchingSRuns[s.session.ID]
+		for runID, sr := range s.session.SRuns {
 			if len(originIDs) != 0 && !runIDs.Has(runID) {
 				continue
 			}
@@ -858,7 +859,7 @@ func (sS *SessionS) filterSessionsCount(ctx context.Context, sf *utils.SessionFi
 		ss := sS.getSessions(utils.EmptyString, psv)
 		for _, s := range ss {
 			s.lk.RLock()
-			count += len(s.sRuns)
+			count += len(s.session.SRuns)
 			s.lk.RUnlock()
 		}
 		return
@@ -888,8 +889,8 @@ func (sS *SessionS) filterSessionsCount(ctx context.Context, sf *utils.SessionFi
 	}
 	for _, s := range ss {
 		s.lk.RLock()
-		runIDs := matchingSRuns[s.ID]
-		for runID, sr := range s.sRuns {
+		runIDs := matchingSRuns[s.session.ID]
+		for runID, sr := range s.session.SRuns {
 			if len(originIDs) != 0 && !runIDs.Has(runID) {
 				continue
 			}
@@ -905,21 +906,20 @@ func (sS *SessionS) filterSessionsCount(ctx context.Context, sf *utils.SessionFi
 // newSessionOutEvent is the new approach to creating session
 // FixMe: rename as soon as we will remove the old newSession
 func (sS *SessionS) newSessionOutEvent(ctx context.Context, sID string, cgrEv *utils.CGREvent,
-	clntConnID string) (s *Session, err error) {
-	s = &Session{
+	clntConnID string) (s *session, err error) {
+	s = &session{session: &utils.Session{
 		ID:             sID,
 		OriginCGREvent: cgrEv,
 		ClientConnID:   clntConnID,
-
-		sRuns: make(map[string]*SRun),
-	}
+		SRuns:          make(map[string]*utils.SRun),
+	}}
 	return
 }
 
 // setSession is called on each processEvent with *session flag to either create or update a session
 // cch contain the preprocessed opts
 func (sS *SessionS) setSession(ctx context.Context, cgrEv *utils.CGREvent,
-	cch map[string]any, clientConnID string) (s *Session, err error) {
+	cch map[string]any, clientConnID string) (s *session, err error) {
 	if cgrIDVal, has := cch[utils.MetaCGRid]; !has ||
 		cgrIDVal.(string) == utils.EmptyString {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaCGRid)
@@ -935,14 +935,14 @@ func (sS *SessionS) setSession(ctx context.Context, cgrEv *utils.CGREvent,
 }
 
 // terminateSessionNew is the new way to terminate a session
-func (sS *SessionS) terminateSessionNew(ctx context.Context, s *Session) (err error) {
+func (sS *SessionS) terminateSessionNew(ctx context.Context, s *session) (err error) {
 	s.lk.Lock()
 	defer s.lk.Unlock()
 	s.stopSTerminator()
-	for _, sRun := range s.sRuns {
-		sS.DisableAutoChargeSRun(sRun)
+	for _, run := range s.runStates {
+		sS.DisableAutoChargeSRun(run)
 	}
-	for _, sRun := range s.sRuns {
+	for _, sRun := range s.session.SRuns {
 		if sRun.Charges == nil {
 			continue
 		}
@@ -961,7 +961,7 @@ func (sS *SessionS) terminateSessionNew(ctx context.Context, s *Session) (err er
 				if rfndEC, err = sRun.Charges.Truncate(utils.SubstractDecimal(sRun.Charges.Abstracts, sRun.UsageAdjustment)); err != nil {
 					return
 				}
-				if err = sS.accountSRefundCharges(ctx, rfndEC, s.OriginCGREvent); err != nil {
+				if err = sS.accountSRefundCharges(ctx, rfndEC, s.session.OriginCGREvent); err != nil {
 					return
 				}
 			case -1: // debit more
@@ -974,39 +974,41 @@ func (sS *SessionS) terminateSessionNew(ctx context.Context, s *Session) (err er
 			}
 		}
 	}
-	sS.unregisterSession(s.ID, false)
+	sS.unregisterSession(s.session.ID, false)
 	return
 }
 
 // ensureDisconnect makes sure the session will be disconnected, attempting normal than forceDisconnect
-func (sS *SessionS) ensureDisconnect(s *Session, funcTag string, errIn error) (err error) {
+func (sS *SessionS) ensureDisconnect(s *session, funcTag string, errIn error) (err error) {
 	utils.Logger.Warning(
 		fmt.Sprintf("<%s> funcTag: <%s> error: %s, session: %s, disconnecting session ...",
-			utils.SessionS, funcTag, errIn.Error(), utils.ToJSON(s)))
+			utils.SessionS, funcTag, errIn.Error(), utils.ToJSON(s.session)))
 	if err = sS.disconnectSession(s, utils.ErrServerError.Error()); err != nil {
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s attempted to disconnect session: %s, will forceDisconnect ...",
-				utils.SessionS, err.Error(), utils.ToJSON(s)))
+				utils.SessionS, err.Error(), utils.ToJSON(s.session)))
 		if err = sS.forceSTerminate(context.TODO(), s, time.Duration(0), nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s attempted to forceDisconnect session: %s",
-					utils.SessionS, err.Error(), utils.ToJSON(s)))
+					utils.SessionS, err.Error(), utils.ToJSON(s.session)))
 		}
 	}
 	return
 }
 
 // EnableAutoChargeSRun will enable autocharging loop on a SRun
-func (sS *SessionS) EnableAutoChargeSRun(s *Session, sRunID string, autoChargeInterval time.Duration) {
+func (sS *SessionS) EnableAutoChargeSRun(s *session, sRunID string, autoChargeInterval time.Duration) {
 	var autoChargeUsage, aCMinGranted *utils.Decimal
 	var eEc *utils.EventCharges
 	var err error
-	var origAChrIval *time.Duration                          // populated if the original changes
-	s.sRuns[sRunID].AutoChargeInterval = &autoChargeInterval // small chance of concurrency, maybe add lock
+	var origAChrIval *time.Duration // populated if the original changes
+	sr := s.session.SRuns[sRunID]
+	state := s.runStates[sRunID]
+	sr.AutoChargeInterval = &autoChargeInterval // small chance of concurrency, maybe add lock
 	for {
-		s.sRuns[sRunID].lk.RLock()
-		cgrEv := s.sRuns[sRunID].CGREvent.Clone()
-		s.sRuns[sRunID].lk.RUnlock()
+		state.lk.RLock()
+		cgrEv := sr.CGREvent.Clone()
+		state.lk.RUnlock()
 
 		if aCMinGranted, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeMinGranted,
@@ -1026,9 +1028,9 @@ func (sS *SessionS) EnableAutoChargeSRun(s *Session, sRunID string, autoChargeIn
 			sS.ensureDisconnect(s, utils.AutoCharge, err)
 			return
 		}
-		s.sRuns[sRunID].lk.Lock()
-		s.sRuns[sRunID].Charges.Merge(eEc)
-		s.sRuns[sRunID].lk.Unlock()
+		state.lk.Lock()
+		sr.Charges.Merge(eEc)
+		state.lk.Unlock()
 
 		if eEc.Abstracts.Compare(aCMinGranted) == -1 { // allowed Abstracts are smaller than MinGranted setting
 			sS.ensureDisconnect(s, utils.AutoCharge, utils.ErrInsufficientCredit)
@@ -1050,12 +1052,12 @@ func (sS *SessionS) EnableAutoChargeSRun(s *Session, sRunID string, autoChargeIn
 			}
 		}
 
-		s.sRuns[sRunID].lk.Lock()
-		s.sRuns[sRunID].NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
-		s.sRuns[sRunID].lk.Unlock()
+		state.lk.Lock()
+		sr.NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
+		state.lk.Unlock()
 
 		select {
-		case <-s.sRuns[sRunID].autoChargeStop:
+		case <-state.autoChargeStop:
 			return
 		case <-time.After(autoChargeInterval):
 			continue
@@ -1064,12 +1066,12 @@ func (sS *SessionS) EnableAutoChargeSRun(s *Session, sRunID string, autoChargeIn
 }
 
 // DisableAutoChargeSRun will disable autocharging loop on a SRun
-func (sS *SessionS) DisableAutoChargeSRun(sRun *SRun) {
+func (sS *SessionS) DisableAutoChargeSRun(sRun *sRun) {
 	sRun.lk.Lock()
 	if sRun.autoChargeStop != nil {
 		close(sRun.autoChargeStop)
 		sRun.autoChargeStop = nil
-		sRun.AutoChargeInterval = nil
+		sRun.run.AutoChargeInterval = nil
 	}
 	sRun.lk.Unlock()
 }
@@ -1313,7 +1315,7 @@ func (sS *SessionS) accountSRefundCharges(ctx context.Context, rfndEc *utils.Eve
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
-func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session) {
+func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	if pSessions {
@@ -1323,7 +1325,7 @@ func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session)
 	ssMux.RLock()
 	defer ssMux.RUnlock()
 	if len(originID) == 0 {
-		ss = make([]*Session, len(ssMp))
+		ss = make([]*session, len(ssMp))
 		var i int
 		for _, s := range ssMp {
 			ss[i] = s
@@ -1332,13 +1334,13 @@ func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session)
 		return
 	}
 	if s, hasOptOriginID := ssMp[originID]; hasOptOriginID {
-		ss = []*Session{s}
+		ss = []*session{s}
 	}
 	return
 }
 
 // getSessions is used to return in a thread-safe manner active or passive sessions
-func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string) (ss []*Session) {
+func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string) (ss []*session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
 	ssMp := sS.aSessions // reference it so we don't overwrite the new map without protection
 	if pSessions {
@@ -1348,7 +1350,7 @@ func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string
 	ssMux.RLock()
 	defer ssMux.RUnlock()
 	if len(originIDs) == 0 {
-		ss = make([]*Session, len(ssMp))
+		ss = make([]*session, len(ssMp))
 		var i int
 		for _, s := range ssMp {
 			ss[i] = s
@@ -1356,7 +1358,7 @@ func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string
 		}
 		return
 	}
-	ss = make([]*Session, len(originIDs))
+	ss = make([]*session, len(originIDs))
 	for i, originID := range originIDs {
 		if s, hasoriginID := ssMp[originID]; hasoriginID {
 			ss[i] = s
@@ -1366,7 +1368,7 @@ func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string
 }
 
 // transitSState will transit the sessions from one state (active/passive) to another (passive/active)
-func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
+func (sS *SessionS) transitSState(sID string, psv bool) (s *session) {
 	ss := sS.getSessions(sID, !psv)
 	if len(ss) == 0 {
 		return
@@ -1386,7 +1388,7 @@ func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
 }
 
 // relocateSession will change the SessionID of an active session
-func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) (s *Session) {
+func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) (s *session) {
 	ss := sS.getSessions(oldSID, false)
 	if len(ss) == 0 {
 		return
@@ -1394,8 +1396,8 @@ func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) 
 	s = ss[0]
 	s.lk.Lock()
 	sS.unregisterSession(oldSID, false)
-	s.ID = newSID
-	for _, sRun := range s.sRuns {
+	s.session.ID = newSID
+	for _, sRun := range s.session.SRuns {
 		sRun.CGREvent.APIOpts[utils.MetaCGRid] = newSID
 	}
 	sS.registerSession(s, false)
@@ -1406,7 +1408,7 @@ func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) 
 }
 
 // getActivateSession returns the session from active list or moves from passive
-func (sS *SessionS) getActivateSession(sID string) (s *Session) {
+func (sS *SessionS) getActivateSession(sID string) (s *session) {
 	ss := sS.getSessions(sID, false)
 	if len(ss) != 0 {
 		return ss[0]
@@ -1415,7 +1417,7 @@ func (sS *SessionS) getActivateSession(sID string) (s *Session) {
 }
 
 // getRelocateSession will relocate a session if it cannot find originID and initialOriginID is present
-func (sS *SessionS) getRelocateSession(ctx context.Context, sID string, oldSID string) (s *Session) {
+func (sS *SessionS) getRelocateSession(ctx context.Context, sID string, oldSID string) (s *session) {
 	if s = sS.getActivateSession(sID); s != nil ||
 		oldSID == utils.EmptyString {
 		return
@@ -1497,14 +1499,14 @@ func (sS *SessionS) terminateSyncSessions(ctx context.Context, toBeRemoved []str
 
 // endSession will end a session from outside
 // this function is not thread safe
-func (sS *SessionS) endSession(ctx context.Context, s *Session, tUsage, lastUsage *time.Duration,
+func (sS *SessionS) endSession(ctx context.Context, s *session, tUsage, lastUsage *time.Duration,
 	aTime *time.Time, isInstantEvent bool) (err error) {
 	if !isInstantEvent {
 		//check if we have replicate connection and close the session there
 		defer func() {
-			_ = sS.replicateSessions(ctx, s.ID, false)
+			_ = sS.replicateSessions(ctx, s.session.ID, false)
 		}()
-		sS.unregisterSession(s.ID, false)
+		sS.unregisterSession(s.session.ID, false)
 		s.stopSTerminator()
 		//s.stopDebitLoops()  // TODO: debit loops functionality will be implemented in future versions
 	}
@@ -1573,7 +1575,7 @@ func (sS *SessionS) endSession(ctx context.Context, s *Session, tUsage, lastUsag
 	// 		sr.CGREvent.Event[utils.AnswerTime] = *aTime
 	// 	}
 	// }
-	if errCh := sS.cache.Set(ctx, utils.CacheClosedSessions, utils.IfaceAsString(s.OriginCGREvent.APIOpts[utils.MetaOriginID]), s,
+	if errCh := sS.cache.Set(ctx, utils.CacheClosedSessions, utils.IfaceAsString(s.session.OriginCGREvent.APIOpts[utils.MetaOriginID]), s.session,
 		nil, true, utils.NonTransactional); errCh != nil {
 		return errCh
 	}
@@ -1657,7 +1659,7 @@ func (sS *SessionS) BiRPCv1GetPassiveSessionsCount(ctx context.Context,
 
 // BiRPCv1SetPassiveSession used for replicating Sessions
 func (sS *SessionS) BiRPCv1SetPassiveSession(ctx context.Context,
-	s *Session, reply *string) (err error) {
+	s *utils.Session, reply *string) (err error) {
 	/*
 		if _, has := s.OptsStart[utils.MetaOriginID]; has {
 			return utils.NewErrMandatoryIeMissing(utils.MetaOriginID)

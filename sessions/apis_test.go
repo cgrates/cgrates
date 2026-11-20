@@ -1438,49 +1438,48 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 		},
 	}
 
-	expS := &Session{
-		ID:           "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
-		ClientConnID: "agent",
-		OriginCGREvent: &utils.CGREvent{
-			Tenant: "cgrates.org",
-			ID:     "sessInit",
-			Event: map[string]any{
-				"Account": "1001",
+	expS := &session{
+		session: &utils.Session{ID: "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+			ClientConnID: "agent",
+			OriginCGREvent: &utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "sessInit",
+				Event: map[string]any{
+					"Account": "1001",
+				},
+				APIOpts: map[string]any{
+					utils.MetaCGRid:    "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
+					utils.MetaChargers: true,
+					utils.MetaOriginID: "originID",
+					utils.MetaRunID:    "*primary",
+					utils.MetaSession:  true,
+				},
 			},
-			APIOpts: map[string]any{
-				utils.MetaCGRid:    "63d6015b6fe2ea85029d91e6944f3f2223f7eedb",
-				utils.MetaChargers: true,
-				utils.MetaOriginID: "originID",
-				utils.MetaRunID:    "*primary",
-				utils.MetaSession:  true,
-			},
-		},
-		sRuns: map[string]*SRun{
-			"CHRG1": {
-				ID: "CHRG1",
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "run1Ev",
-					Event:  map[string]any{utils.AccountField: "1001"},
-					APIOpts: map[string]any{
-						utils.MetaOriginID: "originID",
-						utils.MetaRunID:    "CHRG1",
+			SRuns: map[string]*utils.SRun{
+				"CHRG1": {
+					ID: "CHRG1",
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "run1Ev",
+						Event:  map[string]any{utils.AccountField: "1001"},
+						APIOpts: map[string]any{
+							utils.MetaOriginID: "originID",
+							utils.MetaRunID:    "CHRG1",
+						},
 					},
 				},
-				nextDebit: utils.NewDecimal(0, 0),
-			},
-			"CHRG2": {
-				ID: "CHRG2",
-				CGREvent: &utils.CGREvent{
-					Tenant: "cgrates.org",
-					ID:     "run1Ev",
-					Event:  map[string]any{utils.AccountField: "1001"},
-					APIOpts: map[string]any{
-						utils.MetaOriginID: "originID",
-						utils.MetaRunID:    "CHRG2",
+				"CHRG2": {
+					ID: "CHRG2",
+					CGREvent: &utils.CGREvent{
+						Tenant: "cgrates.org",
+						ID:     "run1Ev",
+						Event:  map[string]any{utils.AccountField: "1001"},
+						APIOpts: map[string]any{
+							utils.MetaOriginID: "originID",
+							utils.MetaRunID:    "CHRG2",
+						},
 					},
 				},
-				nextDebit: utils.NewDecimal(0, 0),
 			},
 		},
 	}
@@ -1490,11 +1489,16 @@ func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {
 	}
 	cgrId := args.APIOpts[utils.MetaCGRid].(string)
 	sS := sessions.getActivateSession(cgrId)
-	if !reflect.DeepEqual(sS, expS) {
-		t.Errorf("Expected %#v, \nrecieved %#v", expS, sS)
+	if !reflect.DeepEqual(sS.session, expS.session) {
+		t.Errorf("Expected %#v, \nrecieved %#v", expS.session, sS.session)
 	}
-	if got := len(sS.sRuns); got != 2 {
-		t.Errorf("Expected 2 sRuns, got %d", got)
+	if got := len(sS.session.SRuns); got != 2 {
+		t.Errorf("Expected 2 SRuns, got %d", got)
+	}
+	for _, runID := range []string{"CHRG1", "CHRG2"} {
+		if run := sS.runStates[runID]; run == nil || !reflect.DeepEqual(run.nextDebit, utils.NewDecimal(0, 0)) {
+			t.Errorf("want zero nextDebit for %s, got %+v", runID, run)
+		}
 	}
 	args.APIOpts[utils.MetaTerminate] = true
 	if err := sessions.BiRPCv1ProcessEvent(ctx, args, &reply); err != nil {

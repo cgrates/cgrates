@@ -113,7 +113,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 	} else {
 		cch[utils.MetaSession] = sesBool
 	}
-	var s *Session
+	var s *session
 	if utils.OptAsBool(cch, utils.MetaSession) {
 		if s, err = sS.setSession(ctx, apiArgs, cch,
 			sS.biJClntID(birpc.ClientFromContext(ctx))); err != nil {
@@ -140,7 +140,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 	// Apply ChargerS, but only if *primary *runID
 	if utils.OptAsBool(cch, utils.MetaChargers) &&
 		utils.IfaceAsString(cch[utils.MetaRunID]) == utils.MetaPrimary &&
-		(s == nil || len(s.sRuns) == 0) { // initial event, sRuns not yet initialized
+		(s == nil || len(s.session.SRuns) == 0) { // initial event, SRuns not yet initialized
 		var chrgrs []*chargers.ChrgSProcessEventReply
 		if chrgrs, err = chargers.ChargerScProcessEvent(ctx, sS.fltrS,
 			sS.cfg.SessionSCfg().Conns, sS.connMgr, sS.cache,
@@ -150,7 +150,8 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		delete(cgrEvs, utils.MetaPrimary) // it becomes entirely ChargerS responsibility to provide events
 		if s != nil {
 			s.lk.Lock()
-			delete(s.sRuns, utils.MetaPrimary) // overwrite the primary event, empty chargers will mean no further charging applied
+			delete(s.session.SRuns, utils.MetaPrimary) // overwrite the primary event, empty chargers will mean no further charging applied
+			delete(s.runStates, utils.MetaPrimary)
 			s.lk.Unlock()
 		}
 		for _, chrgr := range chrgrs {
@@ -251,19 +252,19 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 					fmt.Sprintf("<%s> error: %s processing event: %+v for SRun set",
 						utils.SessionS, errSet.Error(), cgrEv))
 			} else if !has { // index new SRun
-				sS.indexSRuns(s.ID, false, s.sRuns[runID])
+				sS.indexSRuns(s.session.ID, false, s.session.SRuns[runID])
 			} else if reIdx { // indexed field altered
-				sS.unindexSession(s.ID, false)
+				sS.unindexSession(s.session.ID, false)
 				sS.indexSession(s, false)
 			}
 
 			if autoChargeInterval == time.Duration(0) { // Should have no AutoCharging
-				if s.sRuns[runID].autoChargeStop != nil { // disable autoCharging which was previously enabled
-					sS.DisableAutoChargeSRun(s.sRuns[runID])
+				if s.runStates[runID].autoChargeStop != nil { // disable autoCharging which was previously enabled
+					sS.DisableAutoChargeSRun(s.runStates[runID])
 				}
 			} else { // Should have AutoCharging
-				if s.sRuns[runID].AutoChargeInterval != nil && *s.sRuns[runID].AutoChargeInterval != autoChargeInterval { // Difference in autoChargeInterval, stop first previous one
-					sS.DisableAutoChargeSRun(s.sRuns[runID])
+				if interval := s.session.SRuns[runID].AutoChargeInterval; interval != nil && *interval != autoChargeInterval { // Difference in autoChargeInterval, stop first previous one
+					sS.DisableAutoChargeSRun(s.runStates[runID])
 				}
 				sS.EnableAutoChargeSRun(s, runID, autoChargeInterval) // Enable AutoCharging
 			}
@@ -749,7 +750,7 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		if utils.OptAsBool(cchEv, utils.MetaAccountsDebitCfg) ||
 			(utils.OptAsBool(cchEv, utils.MetaAccounts) && utils.OptAsBool(cchEv, utils.MetaDebit)) {
 			if s != nil {
-				cgrEv.APIOpts[utils.MetaUsage] = s.sRuns[runID].nextDebit
+				cgrEv.APIOpts[utils.MetaUsage] = s.runStates[runID].nextDebit
 			}
 			var acntCost *utils.EventCharges
 			if acntCost, err = sS.accountSDebitEvent(ctx, cgrEv); err != nil {
@@ -764,12 +765,12 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 				acntDbt := acntCost.Abstracts
 				if s != nil {
 					s.lk.Lock()
-					if s.sRuns[runID].Charges == nil {
-						s.sRuns[runID].Charges = utils.NewEventCharges()
+					if s.session.SRuns[runID].Charges == nil {
+						s.session.SRuns[runID].Charges = utils.NewEventCharges()
 					}
-					s.sRuns[runID].Charges.Merge(acntCost)
-					if s.sRuns[runID].lclDebit != nil {
-						acntDbt = utils.SumDecimal(acntDbt, s.sRuns[runID].lclDebit)
+					s.session.SRuns[runID].Charges.Merge(acntCost)
+					if s.runStates[runID].lclDebit != nil {
+						acntDbt = utils.SumDecimal(acntDbt, s.runStates[runID].lclDebit)
 					}
 					s.lk.Unlock()
 				} else { // add it for export or ur, only for non session since sessions are written in terminate method
@@ -796,11 +797,11 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		// terminate corrections
 		if utils.OptAsBool(cch, utils.MetaTerminate) && s != nil {
 			if _, has := apiRply.AccountsUsage[runID]; has { // correct usage to reflect total usage instead of interm one
-				totalUsage, _ := s.sRuns[runID].TotalUsage.Duration()
+				totalUsage, _ := s.session.SRuns[runID].TotalUsage.Duration()
 				apiRply.AccountsUsage[runID] = totalUsage
 			}
-			if s.sRuns[runID].Charges != nil {
-				cgrEv.APIOpts[utils.MetaAccountsCost] = s.sRuns[runID].Charges
+			if s.session.SRuns[runID].Charges != nil {
+				cgrEv.APIOpts[utils.MetaAccountsCost] = s.session.SRuns[runID].Charges
 			}
 		}
 		// UsageRecords generation
