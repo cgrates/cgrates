@@ -6,6 +6,300 @@
 
 package agents
 
+import (
+	"fmt"
+	"testing"
+	"time"
+
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/sessions"
+	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/radigo"
+)
+
+func TestRadiusAccountingRestart(t *testing.T) {
+	switch *utils.DBType {
+	case utils.MetaInternal:
+	case utils.MetaMySQL, utils.MetaRedis, utils.MetaMongo, utils.MetaPostgres:
+		t.SkipNow()
+	default:
+		t.Fatal("unsupported dbtype value")
+	}
+
+	tenant := "cgrates.org"
+	ng := engine.TestEngine{
+		ConfigJSON: fmt.Sprintf(`{
+  "general": {
+    "nodeID": "radius-restart"
+  },
+  "db": {
+    "dbConns": {
+      "*default": {
+        "dbType": "*internal",
+        "opts": {
+          "internalDBDumpPath": %q,
+          "internalDBDumpInterval": "1h"
+        }
+      }
+    }
+  },
+  "sessions": {
+    "enabled": true,
+    "storeInterval": "-1",
+    "conns": {
+      "*accounts": [{"connIDs": ["*internal"]}]
+    }
+  },
+  "accounts": {
+    "enabled": true
+  },
+  "admins": {
+    "enabled": true
+  },
+  "radiusAgent": {
+    "enabled": true,
+    "clientDictionaries": {
+      "*default": []
+    },
+    "requestProcessors": [
+      {
+        "id": "AccountingOn",
+        "filters": ["*string:~*req.Acct-Status-Type:7"],
+        "flags": ["*none"]
+      },
+      {
+        "id": "SessionAccounting",
+        "tenant": %q,
+        "flags": ["*sessions"],
+        "requestFields": [
+          {
+            "path": "*opts.*session",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "path": "*opts.*accountsDebit",
+            "type": "*constant",
+            "value": "true"
+          },
+          {
+            "path": "*opts.*originID",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Id",
+            "mandatory": true
+          },
+          {
+            "path": "*cgreq.Account",
+            "type": "*variable",
+            "value": "~*req.User-Name",
+            "mandatory": true
+          },
+          {
+            "path": "*opts.*interimUsage",
+            "type": "*constant",
+            "value": "10s",
+            "filters": ["*string:~*req.Acct-Status-Type:1"]
+          },
+          {
+            "path": "*opts.*interimUsage",
+            "type": "*constant",
+            "value": "6s",
+            "filters": ["*string:~*req.Acct-Status-Type:3"]
+          },
+          {
+            "path": "*opts.*totalUsage",
+            "type": "*variable",
+            "value": "~*req.Acct-Session-Time:s/(.*)/${1}s/"
+          },
+          {
+            "path": "*opts.*terminate",
+            "type": "*constant",
+            "value": "true",
+            "filters": ["*string:~*req.Acct-Status-Type:2"]
+          }
+        ]
+      }
+    ]
+  }
+}`, t.TempDir(), tenant),
+		GracefulShutdown: true,
+		Encoding:         utils.MetaJSON,
+	}
+	client, cfg := ng.Run(t)
+	ctx := t.Context()
+
+	listener := cfg.RadiusAgentCfg().Listeners[0]
+	secret := cfg.RadiusAgentCfg().ClientSecrets[utils.MetaDefault]
+
+	const (
+		start        = "1"
+		stop         = "2"
+		interim      = "3"
+		accountingOn = "7"
+	)
+	dict := radigo.RFC2865Dictionary()
+	var radClient *radigo.Client
+	packetID := uint8(0)
+	sendAccounting := func(status, id, sessionTime string) error {
+		t.Helper()
+		packetID++
+		req := radClient.NewRequest(radigo.AccountingRequest, packetID)
+		avps := map[string]string{"Acct-Status-Type": status, "NAS-Identifier": "restart-test-nas"}
+		if id != "" {
+			avps["Acct-Session-Id"] = "acct-" + id
+			avps["User-Name"] = id
+		}
+		if sessionTime != "" {
+			avps["Acct-Session-Time"] = sessionTime
+		}
+		for name, value := range avps {
+			if err := req.AddAVPWithName(name, value, ""); err != nil {
+				t.Fatalf("add %s: %v", name, err)
+			}
+		}
+		reply, err := radClient.SendRequest(req)
+		if err != nil {
+			return err
+		}
+		if reply == nil || reply.Code != radigo.AccountingResponse || len(reply.AVPs) != 0 {
+			return fmt.Errorf("want empty Accounting-Response, got %s", utils.ToJSON(reply))
+		}
+		return nil
+	}
+	waitForServices := func() {
+		t.Helper()
+		for _, service := range []string{utils.AdminS, utils.AccountS, utils.SessionS} {
+			engine.WaitForServiceStart(t, client, service, time.Second)
+		}
+		engine.WaitFor(t, func() bool {
+			if radClient == nil {
+				acctClient, err := radigo.NewClient(listener.Network, listener.AcctAddr, secret, dict, 1, nil, utils.Logger)
+				if err != nil {
+					t.Logf("connect RADIUS: %v", err)
+					return false
+				}
+				radClient = acctClient
+			}
+			if err := sendAccounting(accountingOn, "", ""); err != nil {
+				t.Logf("Accounting-On: %v", err)
+				// radigo does not reconnect after a read error.
+				radClient = nil
+				return false
+			}
+			return true
+		}, "RADIUS accounting listener not ready", 3*time.Second)
+	}
+	waitForServices()
+
+	checkBalance := func(id, balance string) {
+		t.Helper()
+		account := new(utils.Account)
+		if err := client.Call(ctx, utils.AdminSv1GetAccount,
+			&utils.TenantIDWithAPIOpts{TenantID: &utils.TenantID{Tenant: tenant, ID: id}}, account); err != nil {
+			t.Fatalf("get account %s: %v", id, err)
+		}
+		money := account.Balances["money"]
+		want, err := utils.NewDecimalFromString(balance)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if money == nil || money.Units == nil || money.Units.Compare(want) != 0 {
+			t.Fatalf("%s money balance = %s, want %s units", id, utils.ToJSON(money), balance)
+		}
+	}
+	checkSession := func(id string, wantUsage time.Duration, wantCGRID string) string {
+		t.Helper()
+		active := []*sessions.ExternalSession{}
+		if err := client.Call(ctx, utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &active); err != nil {
+			t.Fatalf("get %s active session: %v", id, err)
+		}
+		if len(active) != 1 {
+			t.Fatalf("%s: active sessions = %s, want one", id, utils.ToJSON(active))
+		}
+		s := active[0]
+		if s == nil || s.ID == "" || s.CGREvent == nil || s.CGREvent.APIOpts[utils.MetaOriginID] != "acct-"+id {
+			t.Fatalf("%s: unexpected active session: %s", id, utils.ToJSON(s))
+		}
+		if wantCGRID != "" && s.ID != wantCGRID {
+			t.Fatalf("%s: CGRID = %q, want %q", id, s.ID, wantCGRID)
+		}
+		if s.TotalUsage == nil || time.Duration(*s.TotalUsage) != wantUsage {
+			t.Fatalf("%s: usage = %s, want %v", id, utils.ToJSON(s.TotalUsage), wantUsage)
+		}
+		wantCharges := utils.NewDecimal(int64(wantUsage), 0)
+		if s.Charges == nil || s.Charges.Abstracts == nil || s.Charges.Abstracts.Compare(wantCharges) != 0 {
+			t.Fatalf("%s: charges = %s, want %v", id, utils.ToJSON(s.Charges), wantCharges)
+		}
+		return s.ID
+	}
+
+	for _, tc := range []struct {
+		account string
+		restart bool
+	}{
+		{account: "1001"},
+		{account: "1002", restart: true},
+	} {
+		id := tc.account
+		reply := ""
+		if err := client.Call(ctx, utils.AdminSv1SetAccount, &utils.AccountWithAPIOpts{
+			Account: &utils.Account{
+				Tenant:    tenant,
+				ID:        id,
+				FilterIDs: []string{"*string:~*req.Account:" + id},
+				Balances: map[string]*utils.Balance{
+					"money": {
+						ID:    "money",
+						Type:  utils.MetaConcrete,
+						Units: utils.NewDecimal(10, 0),
+						CostIncrements: []*utils.CostIncrement{
+							{
+								Increment:    utils.NewDecimal(int64(time.Second), 0),
+								RecurrentFee: utils.NewDecimal(1, 1),
+							},
+						},
+					},
+				},
+			},
+		}, &reply); err != nil {
+			t.Fatalf("set account %s: %v", id, err)
+		}
+
+		sendEvent := func(status, sessionTime string) {
+			t.Helper()
+			if err := sendAccounting(status, id, sessionTime); err != nil {
+				t.Fatalf("%s Acct-Status-Type %s, Acct-Session-Time %q: %v", id, status, sessionTime, err)
+			}
+		}
+		sendEvent(start, "")
+		cgrid := checkSession(id, 10*time.Second, "")
+		checkBalance(id, "9.0")
+
+		sendEvent(interim, "7")
+		checkSession(id, 13*time.Second, cgrid)
+		checkBalance(id, "8.7")
+
+		if tc.restart {
+			ng.Stop(t)
+			client = ng.Start(t)
+			waitForServices()
+			checkSession(id, 13*time.Second, cgrid)
+			checkBalance(id, "8.7")
+		}
+
+		sendEvent(interim, "12")
+		checkSession(id, 18*time.Second, cgrid)
+		checkBalance(id, "8.2")
+
+		sendEvent(stop, "20")
+		checkBalance(id, "8.0")
+		active := []*sessions.ExternalSession{}
+		if err := client.Call(ctx, utils.SessionSv1GetActiveSessions, new(utils.SessionFilter), &active); err == nil || err.Error() != utils.ErrNotFound.Error() {
+			t.Fatalf("after %s Stop: active sessions = %s, err = %v; want NOT_FOUND", id, utils.ToJSON(active), err)
+		}
+	}
+}
+
 // import (
 // 	"context"
 // 	"bytes"
