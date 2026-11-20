@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net"
 	"net/url"
 	"time"
 
@@ -113,10 +114,12 @@ func init() {
 	gob.Register(map[string]int64{})
 	gob.Register(Versions{})
 	gob.Register(map[string]any{})
+	gob.Register(utils.MapStorage{})
 	gob.Register(map[string][]map[string]any{})
 	gob.Register(map[string]string{})
 	gob.Register(time.Duration(0))
 	gob.Register(time.Time{})
+	gob.Register(net.IP{})
 	gob.Register(url.Values{})
 	gob.Register(json.RawMessage{})
 

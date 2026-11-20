@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/cgrates/birpc"
@@ -20,6 +21,64 @@ import (
 	"github.com/cgrates/rpcclient"
 	jwt "github.com/dgrijalva/jwt-go"
 )
+
+func TestSessionBackupInterval(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().StoreInterval = time.Second
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(db.Close)
+	locker := engine.NewLocker(cfg)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cache := engine.NewCacheS(cfg, dm, nil, nil, locker)
+	dm.SetCache(cache)
+	sS := NewSessionS(cfg, dm, cache, nil, nil)
+
+	synctest.Test(t, func(t *testing.T) {
+		ctx := t.Context()
+		sS.StartBackups()
+		defer func() {
+			if err := sS.Shutdown(); err != nil {
+				t.Error(err)
+			}
+		}()
+		process := func(terminate bool) {
+			t.Helper()
+			ev := &utils.CGREvent{
+				Tenant: "cgrates.org",
+				Event:  map[string]any{utils.OriginID: "call1"},
+				APIOpts: map[string]any{
+					utils.MetaOriginID:  "call1",
+					utils.MetaSession:   true,
+					utils.MetaTerminate: terminate,
+				},
+			}
+			if err := sS.BiRPCv1ProcessEvent(ctx, ev, new(V1ProcessEventReply)); err != nil {
+				t.Fatal(err)
+			}
+		}
+		checkBackups := func(want int) {
+			t.Helper()
+			synctest.Sleep(time.Second)
+			synctest.Wait()
+			backups, err := db.GetSessionBackupsDrv(ctx, cfg.GeneralCfg().NodeID)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(backups) != want {
+				t.Fatalf("got %d session backups, want %d", len(backups), want)
+			}
+		}
+		synctest.Wait()
+		process(false)
+		checkBackups(1)
+		process(true)
+		checkBackups(0)
+	})
+}
 
 var attrs = &utils.AttributesProcessEventReply{
 	AlteredFields: []*utils.FieldsAltered{
@@ -2541,9 +2600,7 @@ func TestSetSTerminator(t *testing.T) {
 		if ss.sTerminator.timer == nil {
 			t.Error("Expected timer to be set")
 		}
-		if ss.sTerminator.endChan == nil {
-			t.Error("Expected endChan to be set")
-		}
+		defer ss.stopSTerminator()
 		if ss.sTerminator.ttl < 1*time.Second || ss.sTerminator.ttl >= 2*time.Second {
 			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.sTerminator.ttl)
 		}
@@ -2581,19 +2638,26 @@ func TestSetSTerminator(t *testing.T) {
 		}
 		ss.sTerminator = &sTerminator{
 			timer:        time.NewTimer(time.Hour),
-			endChan:      make(chan struct{}),
 			ttl:          time.Hour,
 			ttlLastUsed:  utils.DurationPointer(time.Second),
 			ttlUsage:     utils.DurationPointer(time.Second),
 			ttlLastUsage: utils.DurationPointer(time.Second),
 		}
 
+		sessions.registerSession(ss, false)
+		oldTimerID := ss.sTerminator.timerID
 		sessions.setSTerminator(ctx, ss, engine.MapEvent{
 			utils.OptsSesTTL:          "5s",
 			utils.OptsSesTTLLastUsed:  "6s",
 			utils.OptsSesTTLLastUsage: "7s",
 			utils.OptsSesTTLUsage:     "8s",
 		})
+		defer ss.stopSTerminator()
+		newTimerID := ss.sTerminator.timerID
+		sessions.expireSession(ctx, ss, ss.ID, oldTimerID)
+		if ss.sTerminator.timerID != newTimerID || !sessions.isSessionRegistered(ss.ID, false) {
+			t.Fatal("the old timeout stopped the new timer or ended the session")
+		}
 
 		if ss.sTerminator.ttl != 5*time.Second {
 			t.Errorf("Expected ttl 5s, received %s", ss.sTerminator.ttl)
@@ -2635,12 +2699,15 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTL: "1s",
 		}
 		sessions.registerSession(ss, false)
-		sessions.setSTerminator(ctx, ss, opts)
-		ss.sTerminator.endChan <- struct{}{}
-
-		if !sessions.isSessionRegistered(ss.ID, false) {
-			t.Error("Expected session to remain registered since termination was manual")
-		}
+		synctest.Test(t, func(t *testing.T) {
+			sessions.setSTerminator(ctx, ss, opts)
+			ss.stopSTerminator()
+			synctest.Sleep(time.Second)
+			synctest.Wait()
+			if !sessions.isSessionRegistered(ss.ID, false) {
+				t.Fatal("session ended after its timer was stopped")
+			}
+		})
 	})
 
 	t.Run("Automatic termination", func(t *testing.T) {
@@ -2670,17 +2737,16 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTLLastUsage: "0s",
 		}
 		sessions.registerSession(ss, false)
-		sessions.setSTerminator(ctx, ss, opts)
-
-		select {
-		case <-time.After(3 * time.Second):
-			t.Fatal("timeout")
-		case <-ss.sTerminator.endChan:
-		}
-
-		if sessions.isSessionRegistered(ss.ID, false) {
-			t.Error("Expected session to be unregistered after automatic termination")
-		}
+		synctest.Test(t, func(t *testing.T) {
+			ss.lk.Lock()
+			sessions.setSTerminator(ctx, ss, opts)
+			ss.lk.Unlock()
+			synctest.Sleep(time.Second)
+			synctest.Wait()
+			if sessions.isSessionRegistered(ss.ID, false) {
+				t.Fatal("session remained registered after its deadline")
+			}
+		})
 	})
 }
 

@@ -104,11 +104,11 @@ func TestSessionstopSTerminator(t *testing.T) {
 	}
 	//normal check
 	session = &Session{
-		sTerminator: &sTerminator{endChan: make(chan struct{})},
+		sTerminator: &sTerminator{timer: time.AfterFunc(time.Hour, func() {})},
 	}
 	session.stopSTerminator()
-	if session.sTerminator.endChan != nil {
-		t.Errorf("Expecting: nil, received: %s", utils.ToJSON(session.sTerminator.endChan))
+	if session.sTerminator.timer != nil {
+		t.Fatal("stopSTerminator did not clear the timer")
 	}
 }
 

@@ -68,6 +68,49 @@ func (s *Session) Clone() (cln *Session) {
 	return
 }
 
+func (s *Session) backup(passive bool) ([]byte, error) {
+	s.lk.RLock()
+	defer s.lk.RUnlock()
+	backup := &sessionBackup{
+		OriginCGREvent: s.OriginCGREvent,
+		ClientConnID:   s.ClientConnID,
+		Passive:        passive,
+		Runs:           make(map[string]*sessionBackupRun, len(s.sRuns)),
+	}
+	for runID, run := range s.sRuns {
+		run.lk.RLock()
+		defer run.lk.RUnlock()
+		backup.Runs[runID] = &sessionBackupRun{
+			CGREvent:        run.CGREvent,
+			InterimUsage:    run.InterimUsage,
+			UsageAdjustment: run.UsageAdjustment,
+			TotalUsage:      run.TotalUsage,
+			Charges:         run.Charges,
+		}
+	}
+	return (utils.GOBMarshaler{}).Marshal(backup)
+}
+
+func sessionFromBackup(id string, backup *sessionBackup) *Session {
+	s := &Session{
+		ID:             id,
+		OriginCGREvent: backup.OriginCGREvent,
+		ClientConnID:   backup.ClientConnID,
+		sRuns:          make(map[string]*SRun, len(backup.Runs)),
+	}
+	for runID, run := range backup.Runs {
+		s.sRuns[runID] = &SRun{
+			ID:              runID,
+			CGREvent:        run.CGREvent,
+			InterimUsage:    run.InterimUsage,
+			UsageAdjustment: run.UsageAdjustment,
+			TotalUsage:      run.TotalUsage,
+			Charges:         run.Charges,
+		}
+	}
+	return s
+}
+
 // AsExternalSessions returns the session as a list of ExternalSession using all sRuns (thread safe)
 func (s *Session) AsExternalSessions(tmz, nodeID string) (aSs []*ExternalSession) {
 	s.lk.RLock()
@@ -118,12 +161,10 @@ func (s *Session) asCGREventsMap() (cgrEvs map[string]*utils.CGREvent) {
 
 // stopSTerminator clears the session terminator
 func (s *Session) stopSTerminator() {
-	if s.sTerminator == nil ||
-		s.sTerminator.endChan == nil {
-		return
+	if st := s.sTerminator; st != nil && st.timer != nil {
+		st.timer.Stop()
+		st.timer = nil
 	}
-	close(s.sTerminator.endChan)
-	s.sTerminator.endChan = nil
 }
 
 // setSRun will create/update a single run with the data received within CGREvent

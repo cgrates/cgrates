@@ -4,6 +4,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -27,7 +28,7 @@ func NewSessionService(cfg *config.CGRConfig) *SessionService {
 type SessionService struct {
 	mu           sync.RWMutex
 	sm           *sessions.SessionS
-	bircpEnabled bool // to stop birpc server if needed
+	birpcEnabled bool
 	stopChan     chan struct{}
 	cfg          *config.CGRConfig
 }
@@ -55,21 +56,22 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
-	//start sync session in a separate goroutine
-	smg.stopChan = make(chan struct{})
-	go smg.sm.ListenAndServe(smg.stopChan)
-	// Pass internal connection via BiRPCClient
-
-	// Register RPC handler
-	srv, err := newRPCService(apis.NewSessionSv1(smg.sm), utils.SessionSv1)
+	sm := sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
+	if err := sm.RestoreBackups(context.TODO()); err != nil {
+		return err
+	}
+	srv, err := newRPCService(apis.NewSessionSv1(sm), utils.SessionSv1)
 	if err != nil {
 		return err
 	}
+	smg.sm = sm
+	sm.StartBackups()
+	smg.stopChan = make(chan struct{})
+	go sm.ListenAndServe(smg.stopChan)
 	cl.RpcRegister(srv)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBiJSON != utils.EmptyString {
-		smg.bircpEnabled = true
+		smg.birpcEnabled = true
 		cl.BiRPCRegisterName(srv.Name, srv)
 		// run this in it's own goroutine
 		go smg.start(shutdown, cl)
@@ -83,7 +85,7 @@ func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners
 		smg.cfg.SessionSCfg().ListenBiGob, smg.sm.OnBiJSONConnect, smg.sm.OnBiJSONDisconnect); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> serve BiRPC error: %s!", utils.SessionS, err))
 		smg.mu.Lock()
-		smg.bircpEnabled = false
+		smg.birpcEnabled = false
 		smg.mu.Unlock()
 		shutdown.CloseOnce()
 	}
@@ -96,22 +98,19 @@ func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) 
 }
 
 // Shutdown stops the service
-func (smg *SessionService) Shutdown(registry *servmanager.Registry) (err error) {
+func (smg *SessionService) Shutdown(registry *servmanager.Registry) error {
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 	close(smg.stopChan)
-	if err = smg.sm.Shutdown(); err != nil {
-		return
-	}
+	err := smg.sm.Shutdown()
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
-	if smg.bircpEnabled {
+	if smg.birpcEnabled {
 		cl.StopBiRPC()
-		smg.bircpEnabled = false
+		smg.birpcEnabled = false
 	}
 	smg.sm = nil
 	cl.RpcUnregisterName(utils.SessionSv1)
-	// smg.server.BiRPCUnregisterName(utils.SessionSv1)
-	return
+	return err
 }
 
 // ServiceName returns the service name

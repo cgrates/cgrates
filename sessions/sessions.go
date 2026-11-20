@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
-	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -18,6 +17,7 @@ import (
 	"github.com/cgrates/cgrates/engine"
 
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 var (
@@ -30,7 +30,17 @@ func NewSessionS(cgrCfg *config.CGRConfig, dm *engine.DataManager, cache *engine
 	connMgr *engine.ConnManager) *SessionS {
 	cgrCfg.SessionSCfg().SessionIndexes.Add(utils.OriginID) // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 
+	var backups *sessionBackups
+	if interval := cgrCfg.SessionSCfg().StoreInterval; interval > 0 || interval == -1 {
+		backups = &sessionBackups{
+			nodeID:   cgrCfg.GeneralCfg().NodeID,
+			interval: interval,
+			locker:   guardian.New(),
+			pending:  make(map[string]uint64),
+		}
+	}
 	return &SessionS{
+		backups:       backups,
 		cfg:           cgrCfg,
 		dm:            dm,
 		cache:         cache,
@@ -60,6 +70,7 @@ type SessionS struct {
 	cache   *engine.CacheS
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
+	backups *sessionBackups
 
 	biJMux   sync.RWMutex                     // mux protecting BI-JSON connections
 	biJClnts map[birpc.ClientConnector]string // index BiJSONConnection so we can sync them later
@@ -96,6 +107,9 @@ func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
+	if sS.backups != nil {
+		return sS.stopBackups()
+	}
 	replConns, err := engine.GetConnIDs(context.TODO(), sS.cfg.SessionSCfg().Conns, utils.MetaReplication, utils.MetaAny, utils.MapStorage{}, nil, sS.fltrS)
 	if len(replConns) == 0 {
 		var hasErr bool
@@ -191,15 +205,14 @@ type riFieldNameVal struct {
 // sTerminator holds the info needed to force-terminate sessions based on timer
 type sTerminator struct {
 	timer        *time.Timer
-	endChan      chan struct{}
+	timerID      uint64
 	ttl          time.Duration
 	ttlLastUsed  *time.Duration
 	ttlUsage     *time.Duration
 	ttlLastUsage *time.Duration
 }
 
-// setSTerminator installs a new terminator for a session
-// setSTerminator is not thread safe, only the goroutine forked from within
+// setSTerminator sets the session timer. The caller must lock the session first.
 func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.MapEvent) {
 	var err error
 
@@ -255,48 +268,51 @@ func (sS *SessionS) setSTerminator(ctx context.Context, s *Session, opts engine.
 				utils.SessionS, utils.OptsSesTTLUsage, s.OriginCGREvent.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
-	// previously defined, reset
-	if s.sTerminator != nil {
-		s.sTerminator.ttl = ttl
-		if ttlLastUsed != nil {
-			s.sTerminator.ttlLastUsed = ttlLastUsed
-		}
-		if ttlUsage != nil {
-			s.sTerminator.ttlUsage = ttlUsage
-		}
-		if ttlLastUsage != nil {
-			s.sTerminator.ttlLastUsage = ttlLastUsage
-		}
-		s.sTerminator.timer.Reset(s.sTerminator.ttl)
+	if s.sTerminator == nil {
+		s.sTerminator = &sTerminator{}
+	}
+	st := s.sTerminator
+	st.ttl = ttl
+	if ttlLastUsed != nil {
+		st.ttlLastUsed = ttlLastUsed
+	}
+	if ttlUsage != nil {
+		st.ttlUsage = ttlUsage
+	}
+	if ttlLastUsage != nil {
+		st.ttlLastUsage = ttlLastUsage
+	}
+	s.stopSTerminator()
+	st.timerID++
+	// The timer ID can change on reset and the session ID on relocation.
+	id, timerID := s.ID, st.timerID
+	st.timer = time.AfterFunc(ttl, func() {
+		sS.expireSession(ctx, s, id, timerID)
+	})
+}
+
+func (sS *SessionS) expireSession(ctx context.Context, s *Session, id string, timerID uint64) {
+	unlockUpdates, err := sS.beginSessionUpdate()
+	if err != nil {
 		return
 	}
-	// new set
-	s.sTerminator = &sTerminator{
-		timer:        time.NewTimer(ttl),
-		endChan:      make(chan struct{}),
-		ttl:          ttl,
-		ttlLastUsed:  ttlLastUsed,
-		ttlUsage:     ttlUsage,
-		ttlLastUsage: ttlLastUsage,
-	}
+	defer unlockUpdates()
+	unlock := sS.lockSessionID(id)
+	defer unlock()
 
-	// schedule automatic termination
-	go func(endChan chan struct{}, timer *time.Timer) {
-		select {
-		case <-timer.C:
-			s.lk.Lock()
-			lastUsage := s.sTerminator.ttl
-			if s.sTerminator.ttlLastUsage != nil {
-				lastUsage = *s.sTerminator.ttlLastUsage
-			}
-			sS.forceSTerminate(ctx, s, lastUsage, s.sTerminator.ttlUsage,
-				s.sTerminator.ttlLastUsed)
-			s.lk.Unlock()
-		case <-endChan:
-			timer.Stop()
-		}
-	}(s.sTerminator.endChan, s.sTerminator.timer)
-	runtime.Gosched() // force context switching
+	s.lk.Lock()
+	st := s.sTerminator
+	if st == nil || st.timer == nil || st.timerID != timerID || sS.sessionByID(id, false) != s {
+		s.lk.Unlock()
+		return
+	}
+	lastUsage := st.ttl
+	if st.ttlLastUsage != nil {
+		lastUsage = *st.ttlLastUsage
+	}
+	_ = sS.forceSTerminate(ctx, s, lastUsage, st.ttlUsage, st.ttlLastUsed)
+	s.lk.Unlock()
+	sS.backupSession(ctx, id)
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
@@ -550,9 +566,9 @@ func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool)
 		var conns []string // ToDo: cache per session
 		tnt := utils.MetaAny
 		dP := utils.MapStorage{}
-		if s.OriginCGREvent != nil {
-			tnt = s.OriginCGREvent.Tenant
-			dP = s.OriginCGREvent.AsDataProvider()
+		if sCln.OriginCGREvent != nil {
+			tnt = sCln.OriginCGREvent.Tenant
+			dP = sCln.OriginCGREvent.AsDataProvider()
 		}
 		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaReplication,
 			tnt, dP, nil, sS.fltrS); err != nil {
@@ -930,7 +946,9 @@ func (sS *SessionS) setSession(ctx context.Context, cgrEv *utils.CGREvent,
 		}
 		sS.registerSession(s, false)
 	}
-	sS.setSTerminator(ctx, s, cgrEv.APIOpts) // start termination timer
+	s.lk.Lock()
+	sS.setSTerminator(ctx, s, cgrEv.APIOpts)
+	s.lk.Unlock()
 	return
 }
 
@@ -1315,6 +1333,17 @@ func (sS *SessionS) accountSRefundCharges(ctx context.Context, rfndEc *utils.Eve
 		&utils.APIEventCharges{Tenant: cgrEv.Tenant, EventCharges: rfndEc}, &ign)
 }
 
+func (sS *SessionS) sessionByID(id string, passive bool) *Session {
+	if passive {
+		sS.pSsMux.RLock()
+		defer sS.pSsMux.RUnlock()
+		return sS.pSessions[id]
+	}
+	sS.aSsMux.RLock()
+	defer sS.aSsMux.RUnlock()
+	return sS.aSessions[id]
+}
+
 // getSessions is used to return in a thread-safe manner active or passive sessions
 func (sS *SessionS) getSessions(originID string, pSessions bool) (ss []*Session) {
 	ssMux := &sS.aSsMux  // get the pointer so we don't copy, otherwise locks will not work
@@ -1370,11 +1399,10 @@ func (sS *SessionS) getSessionsFromOriginIDs(pSessions bool, originIDs ...string
 
 // transitSState will transit the sessions from one state (active/passive) to another (passive/active)
 func (sS *SessionS) transitSState(sID string, psv bool) (s *Session) {
-	ss := sS.getSessions(sID, !psv)
-	if len(ss) == 0 {
+	s = sS.sessionByID(sID, !psv)
+	if s == nil {
 		return
 	}
-	s = ss[0]
 	s.lk.Lock()
 	sS.unregisterSession(sID, !psv)
 	sS.registerSession(s, psv)
@@ -1409,10 +1437,9 @@ func (sS *SessionS) relocateSession(ctx context.Context, oldSID, newSID string) 
 }
 
 // getActivateSession returns the session from active list or moves from passive
-func (sS *SessionS) getActivateSession(sID string) (s *Session) {
-	ss := sS.getSessions(sID, false)
-	if len(ss) != 0 {
-		return ss[0]
+func (sS *SessionS) getActivateSession(sID string) *Session {
+	if s := sS.sessionByID(sID, false); s != nil {
+		return s
 	}
 	return sS.transitSState(sID, false)
 }
@@ -1756,6 +1783,11 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx context.Context,
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
+	unlockUpdates, err := sS.beginSessionUpdate()
+	if err != nil {
+		return err
+	}
+	defer unlockUpdates()
 	if len(sIDs.IDs) == 0 {
 		sS.pSsMux.RLock()
 		i := 0
@@ -1767,7 +1799,13 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
 		sS.pSsMux.RUnlock()
 	}
 	for _, sID := range sIDs.IDs {
-		if s := sS.transitSState(sID, false); s == nil {
+		unlock := sS.lockSessionID(sID)
+		s := sS.transitSState(sID, false)
+		if s != nil {
+			sS.backupSession(ctx, sID)
+		}
+		unlock()
+		if s == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> no passive session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted
 		}
@@ -1782,6 +1820,11 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1DeactivateSessions(ctx context.Context,
 	sIDs *utils.SessionIDsWithAPIOpts, reply *string) (err error) {
+	unlockUpdates, err := sS.beginSessionUpdate()
+	if err != nil {
+		return err
+	}
+	defer unlockUpdates()
 	if len(sIDs.IDs) == 0 {
 		sS.aSsMux.RLock()
 		i := 0
@@ -1793,7 +1836,13 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx context.Context,
 		sS.aSsMux.RUnlock()
 	}
 	for _, sID := range sIDs.IDs {
-		if s := sS.transitSState(sID, true); s == nil {
+		unlock := sS.lockSessionID(sID)
+		s := sS.transitSState(sID, true)
+		if s != nil {
+			sS.backupSession(ctx, sID)
+		}
+		unlock()
+		if s == nil {
 			utils.Logger.Warning(fmt.Sprintf("<%s> no active session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted
 		}

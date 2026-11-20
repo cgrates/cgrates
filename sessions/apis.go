@@ -113,7 +113,38 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		cch[utils.MetaSession] = sesBool
 	}
 	var s *Session
+	var endSessionUpdate func(bool)
 	if utils.OptAsBool(cch, utils.MetaSession) {
+		if sS.backups != nil {
+			id := cch[utils.MetaCGRid].(string)
+			unlockUpdates, err := sS.beginSessionUpdate()
+			if err != nil {
+				return err
+			}
+			unlockID := sS.lockSessionID(id)
+			endSessionUpdate = func(save bool) {
+				if s != nil {
+					s.lk.Lock()
+					// Keep the original event before setting options for export.
+					if s.OriginCGREvent == apiArgs {
+						s.OriginCGREvent = apiArgs.Clone()
+					}
+					s.lk.Unlock()
+				}
+				if save {
+					sS.backupSession(ctx, id)
+				} else {
+					sS.dropPendingBackup(id)
+				}
+				unlockID()
+				unlockUpdates()
+			}
+			defer func() {
+				if endSessionUpdate != nil {
+					endSessionUpdate(false)
+				}
+			}()
+		}
 		if s, err = sS.setSession(ctx, apiArgs, cch,
 			sS.biJClntID(birpc.ClientFromContext(ctx))); err != nil {
 			return
@@ -762,6 +793,10 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		if errTerminate := sS.terminateSessionNew(ctx, s); errTerminate != nil {
 			return errTerminate
 		}
+	}
+	if endSessionUpdate != nil {
+		endSessionUpdate(!withErrors || utils.OptAsBool(cch, utils.MetaTerminate))
+		endSessionUpdate = nil
 	}
 	for runID, cgrEv := range cgrEvs { // need to run here in the eventuality of terminate being called
 		cchEv := make(map[string]any)
