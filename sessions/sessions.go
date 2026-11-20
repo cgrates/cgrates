@@ -283,33 +283,8 @@ func (sS *SessionS) forceSTerminate(s *Session, extraUsage time.Duration, tUsage
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
 				utils.SessionS, s.cgrID(), err.Error()))
 	}
-	if s.EventStart != nil { // remove ClientConnIDs from thresholdS afte the Sy session is terminated
-		if reqType, has := s.EventStart[utils.RequestType]; has && reqType.(string) == utils.MetaSy {
-			// get statuses to find the thresholds profile ids for this Sy session
-			if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
-				statuses, err := syPolicyStatuses(allPS)
-				if err != nil {
-					return utils.ErrCastFailed
-				}
-				for _, status := range statuses {
-					var rply string // will always reply with OK
-					if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-						utils.ThresholdSv1RemoveClientConnID,
-						&utils.SyConnIDs{
-							CGRID: s.CGRID,
-							ThresholdProfileID: utils.MetaSy + utils.Underline +
-								s.EventStart[utils.OriginID].(string) +
-								utils.InInFieldSep + status,
-							PolicyStatus: status,
-						},
-						&rply); err != nil {
-						utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to remove ClientConnID from ThresholdS for session with CGRID <%s>, OriginID <%v>, policy status <%v> error <%v>", s.CGRID, s.EventStart[utils.OriginID], status, err))
-						return utils.NewErrThresholdS(err)
-					}
-				}
-			}
-
-		}
+	if syErr := sS.updateSySessionClientConnIDs(s, utils.ThresholdSv1RemoveClientConnID); syErr != nil {
+		return syErr
 	}
 	// post the CDRs
 	if len(sS.cgrCfg.SessionSCfg().CDRsConns) != 0 {
@@ -1625,35 +1600,76 @@ func (sS *SessionS) authEvent(cgrEv *utils.CGREvent, forceDuration bool) (usage 
 	return
 }
 
-// restoreSySession will restore the Sy session and rebuild ClientConnIDs for it in ThresholdS
-func (sS *SessionS) restoreSySession(s *Session) error {
+// updateSySessionClientConnIDs applies the given ThresholdS method (e.g. storing or
+// removing a ClientConnID) to every policy status of a Sy session. The threshold profile
+// ID for each status is built from the same prefix used when the session was initialized.
+func (sS *SessionS) updateSySessionClientConnIDs(s *Session, method string) error {
+	if s.EventStart == nil {
+		return nil
+	}
+	// only Sy sessions have ClientConnIDs registered in ThresholdS
 	if reqType, has := s.EventStart[utils.RequestType]; !has || reqType.(string) != utils.MetaSy {
 		return nil
 	}
-	// get statuses to find the thresholds profile ids for this Sy session
-	if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
-		statuses, err := syPolicyStatuses(allPS)
-		if err != nil {
-			return err
-		}
-		for _, status := range statuses {
-			var rply string // will always reply with OK
-			if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-				utils.ThresholdSv1StoreClientConnID,
-				&utils.SyConnIDs{
-					CGRID: s.CGRID,
-					ThresholdProfileID: utils.MetaSy + utils.Underline +
-						s.EventStart[utils.OriginID].(string) +
-						utils.InInFieldSep + status,
-					PolicyStatus: status,
-				},
-				&rply); err != nil {
-				utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to store ClientConnID to ThresholdS for session with CGRID <%s>, OriginID <%v>, policy status <%v> error <%v>", s.CGRID, s.EventStart[utils.OriginID], status, err))
+	thresholdPrefix := syThresholdProfilePrefix(
+		s.EventStart.GetStringIgnoreErrors(utils.OriginID),
+		s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+	)
+	allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]
+	if !has {
+		return nil
+	}
+	statuses, err := syPolicyStatuses(allPS)
+	if err != nil {
+		return utils.ErrCastFailed
+	}
+	var firstErr error
+	for _, status := range statuses {
+		var rply string // always replies with OK
+		if err := sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
+			method,
+			&utils.SyConnIDs{
+				CGRID:              s.CGRID,
+				ThresholdProfileID: utils.ConcatenatedKey(thresholdPrefix, status),
+				PolicyStatus:       status,
+			},
+			&rply); err != nil {
+			utils.Logger.Warning(fmt.Sprintf("<SessionS> Failed to call <%s> on ThresholdS for session with CGRID <%s>, OriginID <%v>, policy status <%v> error <%v>", method, s.CGRID, s.EventStart[utils.OriginID], status, err))
+			if method != utils.ThresholdSv1RemoveClientConnID {
 				return utils.NewErrThresholdS(err)
+			}
+			// keep removing the remaining statuses, return the first error the end
+			if firstErr == nil {
+				firstErr = utils.NewErrThresholdS(err)
 			}
 		}
 	}
-	return nil
+	return firstErr
+}
+
+// syThresholdProfilePrefix builds the prefix shared by all threshold profile IDs of a
+// Sy session, in the form "*sy_<originID>_<originHost>". The full profile ID is this
+// prefix concatenated with a policy status.
+func syThresholdProfilePrefix(originID, originHost string) string {
+	return utils.MetaSy + utils.Underline + originID + utils.Underline + originHost
+}
+
+// restoreSySession restores a Sy session by re-registering its ClientConnIDs in
+// ThresholdS, one per policy status. ThresholdS may still be starting up when sessions
+// are restored, so the whole store is retried a few times with a short pause between
+// attempts.
+func (sS *SessionS) restoreSySession(s *Session) (err error) {
+	const attempts = 5
+	for i := range attempts {
+		// pause before every retry, but not before the first attempt
+		if i > 0 {
+			time.Sleep(10 * time.Millisecond)
+		}
+		if err = sS.updateSySessionClientConnIDs(s, utils.ThresholdSv1StoreClientConnID); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("%s service did not become available, error <%v>", utils.ThresholdS, err)
 }
 
 // restoreSessions reinitiates sessions stored on dataDB backup
@@ -1991,14 +2007,8 @@ func (sS *SessionS) BiRPCv1SetPassiveSession(ctx *context.Context,
 		aSs[0].Unlock()
 	}
 	sS.registerSession(s, true)
-	if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
-		var rply string // will always reply with OK
-		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ThresholdSConns,
-			utils.ThresholdSv1RemoveClientConnID,
-			utils.MetaSy+utils.Underline+s.EventStart[utils.OriginID].(string),
-			&rply); err != nil {
-			return utils.NewErrThresholdS(err)
-		}
+	if err := sS.updateSySessionClientConnIDs(s, utils.ThresholdSv1RemoveClientConnID); err != nil {
+		return err
 	}
 
 	*reply = utils.OK
@@ -2602,7 +2612,8 @@ func (sS *SessionS) initSySession(ctx *context.Context, args *V1InitSessionArgs,
 		sS.bkpSessionIDs.Add(s.CGRID)
 		sS.bkpSessionIDsMux.Unlock()
 	}
-	thID := utils.MetaSy + utils.Underline + originID // thresholds id prefix
+	thID := syThresholdProfilePrefix(originID,
+		engine.MapEvent(args.CGREvent.Event).GetStringIgnoreErrors(utils.OriginHost))
 	for _, syPolicy := range syPolicies {
 		timeNow := time.Now()
 		var result string
@@ -2631,7 +2642,7 @@ func (sS *SessionS) initSySession(ctx *context.Context, args *V1InitSessionArgs,
 			utils.ThresholdSv1StoreClientConnID,
 			&utils.SyConnIDs{
 				CGRID:              s.CGRID,
-				ThresholdProfileID: utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+				ThresholdProfileID: utils.ConcatenatedKey(thID, syPolicy.status),
 				PolicyStatus:       syPolicy.status,
 			},
 			&rply); err != nil {
@@ -2675,7 +2686,10 @@ func (sS *SessionS) updateSySession(args *V1UpdateSessionArgs) error {
 		sS.bkpSessionIDs.Add(s.CGRID)
 		sS.bkpSessionIDsMux.Unlock()
 	}
-	thID := utils.MetaSy + utils.Underline + originID // thresholds id prefix
+	thID := syThresholdProfilePrefix(
+		s.EventStart.GetStringIgnoreErrors(utils.OriginID),
+		s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+	)
 	// remove all thresholds for this session
 	var currentThresholds []string // current threshold profiles for this session
 	if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
@@ -2703,11 +2717,12 @@ func (sS *SessionS) updateSySession(args *V1UpdateSessionArgs) error {
 	for _, syPolicy := range syPolicies {
 		var result string
 		timeNow := time.Now()
+		thresholdID := utils.ConcatenatedKey(thID, syPolicy.status)
 		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
 			utils.APIerSv1SetThresholdProfile, &engine.ThresholdProfileWithAPIOpts{
 				ThresholdProfile: &engine.ThresholdProfile{
 					Tenant: args.Tenant,
-					ID:     utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+					ID:     thresholdID,
 					ActivationInterval: &utils.ActivationInterval{
 						ActivationTime: timeNow,
 						ExpiryTime:     timeNow.Add(30 * 24 * time.Hour), // 30 days from now
@@ -2727,7 +2742,7 @@ func (sS *SessionS) updateSySession(args *V1UpdateSessionArgs) error {
 			utils.ThresholdSv1StoreClientConnID,
 			&utils.SyConnIDs{
 				CGRID:              s.CGRID,
-				ThresholdProfileID: utils.MetaSy + utils.Underline + originID + utils.InInFieldSep + syPolicy.status,
+				ThresholdProfileID: thresholdID,
 				PolicyStatus:       syPolicy.status,
 			},
 			&rply); err != nil {
@@ -3278,7 +3293,13 @@ func (sS *SessionS) BiRPCv1TerminateSession(ctx *context.Context,
 		var currentThresholds []string // current threshold profiles for this session
 		if err = sS.connMgr.Call(context.TODO(), sS.cgrCfg.SessionSCfg().ApierSConns,
 			utils.APIerSv1GetThresholdProfileIDs,
-			&utils.PaginatorWithTenant{Tenant: args.Tenant, Search: utils.MetaSy + utils.Underline + originID}, &currentThresholds); err != nil &&
+			&utils.PaginatorWithTenant{
+				Tenant: args.Tenant,
+				Search: syThresholdProfilePrefix(
+					s.EventStart.GetStringIgnoreErrors(utils.OriginID),
+					s.EventStart.GetStringIgnoreErrors(utils.OriginHost),
+				),
+			}, &currentThresholds); err != nil &&
 			err.Error() != utils.ErrNotFound.Error() {
 			return err
 		}
@@ -4514,30 +4535,8 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx *context.Context,
 			utils.Logger.Warning(fmt.Sprintf("<%s> no passive session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted
 		} else {
-			if s.EventStart != nil {
-				if reqType, has := s.EventStart[utils.RequestType]; has && reqType.(string) == utils.MetaSy {
-					// get statuses to find the thresholds profile ids for this Sy session
-					if allPS, has := s.OptsStart[utils.OptsSyAllPolicyStatuses]; has {
-						statuses, err := syPolicyStatuses(allPS)
-						if err != nil {
-							return utils.ErrCastFailed
-						}
-						for _, status := range statuses {
-							var rply string // will always reply with OK
-							if err = sS.connMgr.Call(sS.ctx, sS.cgrCfg.SessionSCfg().ThresholdSConns,
-								utils.ThresholdSv1StoreClientConnID,
-								&utils.SyConnIDs{
-									CGRID: s.CGRID,
-									ThresholdProfileID: utils.MetaSy +
-										utils.Underline + s.EventStart[utils.OriginID].(string) + utils.InInFieldSep + status,
-									PolicyStatus: status,
-								},
-								&rply); err != nil {
-								return utils.NewErrThresholdS(err)
-							}
-						}
-					}
-				}
+			if err = sS.updateSySessionClientConnIDs(s, utils.ThresholdSv1StoreClientConnID); err != nil {
+				return err
 			}
 			if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
 				sS.bkpSessionIDsMux.Lock()
@@ -4571,17 +4570,8 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx *context.Context,
 			utils.Logger.Warning(fmt.Sprintf("<%s> no active session with id: <%s>", utils.SessionS, sID))
 			err = utils.ErrPartiallyExecuted
 		} else {
-			if s.EventStart != nil {
-				if ev, has := s.EventStart[utils.RequestType]; has && ev.(string) == utils.MetaSy {
-					var rply string // will always reply with OK
-					if err = sS.connMgr.Call(context.TODO(),
-						sS.cgrCfg.SessionSCfg().ThresholdSConns,
-						utils.ThresholdSv1RemoveClientConnID,
-						utils.MetaSy+utils.Underline+s.EventStart[utils.OriginID].(string),
-						&rply); err != nil {
-						return utils.NewErrThresholdS(err)
-					}
-				}
+			if err := sS.updateSySessionClientConnIDs(s, utils.ThresholdSv1RemoveClientConnID); err != nil {
+				return err
 			}
 			if sS.cgrCfg.SessionSCfg().BackupInterval > 0 {
 				sS.removeSsCGRIDsMux.Lock()

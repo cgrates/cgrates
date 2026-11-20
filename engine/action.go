@@ -3082,7 +3082,10 @@ func syPublish(_ *Account, _ *Action, _ Actions, _ *FilterS, extraData any, _ Sh
 	var currentThresholds []string // current threshold profiles for this session
 	if err = connMgr.Call(context.TODO(), connCfg.ConnIDs,
 		utils.APIerSv1GetThresholdProfileIDs,
-		&utils.PaginatorWithTenant{Tenant: cgrEv.Tenant, Search: thresholdPrefix}, &currentThresholds); err != nil &&
+		&utils.PaginatorWithTenant{
+			Tenant: cgrEv.Tenant,
+			Search: thresholdPrefix + utils.ConcatenatedKeySep,
+		}, &currentThresholds); err != nil &&
 		err.Error() != utils.ErrNotFound.Error() {
 		return err
 	}

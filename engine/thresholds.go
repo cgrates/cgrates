@@ -572,7 +572,7 @@ func (tS *ThresholdService) getThresholdSyConn(thresholdProfileID string) (*Thre
 		if clnt == nil {
 			utils.Logger.Warning(
 				fmt.Sprintf(
-					"<ThresholdS> processEvent failed calling <%s>. Requires bidirectional JSON connection, connID: <%s>",
+					"<ThresholdS> processEvent failed calling <%s>. Requires bidirectional connection, connID: <%s>",
 					utils.SessionSv1ThresholdNotify, syIds))
 			return nil, utils.ErrPartiallyExecuted
 		}
@@ -627,11 +627,14 @@ func (tS *ThresholdService) processEvent(tnt string, args *utils.CGREvent) (thre
 				}
 				if strings.HasPrefix(t.tPrfl.ID, utils.MetaSy) {
 					// if Sy threshold, set its connIDs and birpc Client in ExtraData to later be used on *sy_publish
-					at.ExtraData.(*utils.CGREvent).APIOpts[utils.OptsSyConns], err = tS.getThresholdSyConn(t.tPrfl.ID)
+					// use a clone to not modify the args pointer and modify any other executing thresholds running async
+					argsCln := args.Clone()
+					argsCln.APIOpts[utils.OptsSyConns], err = tS.getThresholdSyConn(t.tPrfl.ID)
 					if err != nil {
 						withErrors = true
 						continue
 					}
+					at.ExtraData = argsCln
 				}
 				if t.tPrfl.Async {
 					go func(setID string) {
