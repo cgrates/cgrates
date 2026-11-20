@@ -9,8 +9,10 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"testing/synctest"
 	"time"
 
+	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
 	"github.com/cgrates/cgrates/utils"
 )
@@ -108,6 +110,115 @@ func TestSessionClone(t *testing.T) {
 	if (*sess.SRuns["run1"].NextAutoCharge).Equal(tTimeNow) {
 		t.Errorf("Expecting: %s, received: %s", time.Date(2020, time.April, 18, 23, 0, 0, 0, time.UTC), tTimeNow)
 	}
+}
+
+func TestSessionStoreInterval(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().StoreInterval = 10 * time.Millisecond
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(db.Close)
+	conns := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	dm := engine.NewDataManager(conns, cfg, nil, engine.NewLocker(cfg))
+	sS := NewSessionS(cfg, dm, nil, nil, nil)
+	var pendingID string
+	synctest.Test(t, func(t *testing.T) {
+		process := func(originID string, terminate bool) string {
+			t.Helper()
+			ev := &utils.CGREvent{Event: map[string]any{}, APIOpts: map[string]any{
+				utils.MetaSession: true, utils.MetaOriginID: originID, utils.MetaTerminate: terminate,
+			}}
+			if err := sS.BiRPCv1ProcessEvent(t.Context(), ev, new(V1ProcessEventReply)); err != nil {
+				t.Fatal(err)
+			}
+			return ev.APIOpts[utils.MetaCGRid].(string)
+		}
+		checkStored := func(want int) {
+			t.Helper()
+			saved, err := db.GetSessionsDrv(t.Context())
+			if err != nil || len(saved) != want {
+				t.Fatalf("stored %d sessions, want %d: %v", len(saved), want, err)
+			}
+		}
+		stop := make(chan struct{})
+		defer close(stop)
+		go sS.ListenAndServe(stop)
+		synctest.Wait()
+		process("ended", false)
+		checkStored(0)
+		time.Sleep(cfg.SessionSCfg().StoreInterval)
+		synctest.Wait()
+		checkStored(1)
+		process("ended", true)
+		checkStored(1)
+		pendingID = process("pending", false)
+	})
+	if err := sS.Shutdown(); err != nil {
+		t.Fatal(err)
+	}
+	saved, err := db.GetSessionsDrv(t.Context())
+	if err != nil || len(saved) != 1 || saved[0].ID != pendingID || !sS.isSessionRegistered(pendingID, false) {
+		t.Fatalf("shutdown should save the open session and remove the stopped one: %s, %v", utils.ToJSON(saved), err)
+	}
+}
+
+func TestRestoreSessionTTL(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cfg.SessionSCfg().StoreInterval = -1
+	db, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(db.Close)
+	conns := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: db}, cfg.DbCfg())
+	locker := engine.NewLocker(cfg)
+	dm := engine.NewDataManager(conns, cfg, nil, locker)
+	cache := engine.NewCacheS(cfg, dm, nil, nil, locker)
+	sS := NewSessionS(cfg, dm, cache, nil, nil)
+	synctest.Test(t, func(t *testing.T) {
+		defer func() { _ = sS.Shutdown() }()
+		deadline := time.Now().Add(time.Second)
+		for id, expires := range map[string]time.Time{"expired": deadline.Add(-2 * time.Second), "active": deadline, "passive": deadline} {
+			if err := db.SetSessionDrv(t.Context(), &utils.Session{
+				ID:      id,
+				Passive: id == "passive",
+				OriginCGREvent: &utils.CGREvent{
+					APIOpts: map[string]any{utils.MetaOriginID: id},
+				},
+				TTL: &utils.SessionTTL{Deadline: expires, Duration: time.Hour},
+			}); err != nil {
+				t.Fatal(err)
+			}
+		}
+		if err := sS.RestoreSessions(t.Context()); err != nil {
+			t.Fatal(err)
+		}
+		checkClosed := func(id string) {
+			t.Helper()
+			// Advance fake time so a timer due now can fire.
+			time.Sleep(time.Nanosecond)
+			synctest.Wait()
+			if _, closed := cache.Get(utils.CacheClosedSessions, id); !closed || sS.isSessionRegistered(id, false) {
+				t.Fatalf("session %q was not closed at TTL expiry", id)
+			}
+		}
+		checkClosed("expired")
+		time.Sleep(time.Until(deadline) - time.Nanosecond)
+		if !sS.isSessionRegistered("active", false) {
+			t.Fatal("active session expired before the saved deadline")
+		}
+		checkClosed("active")
+		saved, err := db.GetSessionsDrv(t.Context())
+		if err != nil || len(saved) != 1 || saved[0].ID != "passive" || !sS.isSessionRegistered("passive", true) {
+			t.Fatalf("only the passive session should remain: %s, %v", utils.ToJSON(saved), err)
+		}
+		if err := sS.BiRPCv1ActivateSessions(t.Context(), &utils.SessionIDsWithAPIOpts{IDs: []string{"passive"}}, new(string)); err != nil {
+			t.Fatal(err)
+		}
+		checkClosed("passive")
+	})
 }
 
 func TestSessionstopSTerminator(t *testing.T) {
