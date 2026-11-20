@@ -287,6 +287,14 @@ func (sqls *SQLStorage) RemoveAccountDrv(ctx context.Context, tenant, id string)
 	return
 }
 
+func (sqls *SQLStorage) GetSessionBackupsDrv(context.Context, string) (map[string][]byte, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) SetSessionBackupsDrv(context.Context, string, map[string][]byte) error {
+	return utils.ErrNotImplemented
+}
+
 func (sqls *SQLStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
 	var result []*IPProfileMdl
 	if err := sqls.db.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant,

@@ -34,6 +34,8 @@ type DataDB interface {
 	GetResourceDrv(context.Context, string, string) (*utils.Resource, error)
 	SetResourceDrv(context.Context, *utils.Resource) error
 	RemoveResourceDrv(context.Context, string, string) error
+	GetSessionBackupsDrv(ctx context.Context, nodeID string) (map[string][]byte, error)
+	SetSessionBackupsDrv(ctx context.Context, nodeID string, backups map[string][]byte) error
 	GetIPProfileDrv(context.Context, string, string) (*utils.IPProfile, error)
 	SetIPProfileDrv(context.Context, *utils.IPProfile) error
 	RemoveIPProfileDrv(context.Context, string, string) error

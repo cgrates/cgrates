@@ -12,6 +12,7 @@ import (
 
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/ltcache"
 	"github.com/google/go-cmp/cmp"
 )
 
@@ -67,6 +68,36 @@ func TestMsgpackTime(t *testing.T) {
 func TestStoreInterfaces(t *testing.T) {
 	rds := new(RedisStorage)
 	var _ DataDB = rds
+}
+
+func TestInternalDBSessionBackupRestore(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	items := map[string]*config.ItemOpts{utils.MetaSessionBackups: cfg.DbCfg().Items[utils.MetaSessionBackups]}
+	opts := &ltcache.TransCacheOpts{
+		DumpPath:      t.TempDir(),
+		StartTimeout:  time.Second,
+		DumpInterval:  -1,
+		FileSizeLimit: 1024 * 1024,
+	}
+	ctx := context.Background()
+	want := map[string][]byte{"call1": []byte("backup")}
+	db, err := NewInternalDB(opts, items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = db.SetSessionBackupsDrv(ctx, "node1", want)
+	db.Close()
+	if err != nil {
+		t.Fatal(err)
+	}
+	db, err = NewInternalDB(opts, items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(db.Close)
+	if got, err := db.GetSessionBackupsDrv(ctx, "node1"); err != nil || !reflect.DeepEqual(want, got) {
+		t.Fatalf("expected restored backups %s, got %s, %v", utils.ToJSON(want), utils.ToJSON(got), err)
+	}
 }
 
 func TestStorageDecodeCodecMsgpackMarshaler(t *testing.T) {

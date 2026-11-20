@@ -111,6 +111,7 @@ type SessionSCfg struct {
 	ListenBiGob         string
 	SessionIndexes      utils.StringSet
 	ClientProtocol      float64
+	StoreInterval       time.Duration
 	ChannelSyncInterval time.Duration
 	TerminateAttempts   int
 	AlterableFields     utils.StringSet
@@ -548,6 +549,11 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 	if jsnCfg.ClientProtocol != nil {
 		scfg.ClientProtocol = *jsnCfg.ClientProtocol
 	}
+	if jsnCfg.StoreInterval != nil {
+		if scfg.StoreInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.StoreInterval); err != nil {
+			return err
+		}
+	}
 	if jsnCfg.ChannelSyncInterval != nil {
 		if scfg.ChannelSyncInterval, err = utils.ParseDurationWithNanosecs(*jsnCfg.ChannelSyncInterval); err != nil {
 			return err
@@ -675,10 +681,14 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.AlterableFieldsCfg:     scfg.AlterableFields.AsSlice(),
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 		utils.MinDurLowBalanceCfg:    "0",
+		utils.StoreIntervalCfg:       "",
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.DefaultUsageCfg:        maxComputed,
 		utils.OptsCfg:                opts,
 		utils.ConnsCfg:               stripConns(scfg.Conns),
+	}
+	if scfg.StoreInterval != 0 {
+		mp[utils.StoreIntervalCfg] = scfg.StoreInterval.String()
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		mp[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
@@ -759,6 +769,7 @@ func (scfg SessionSCfg) Clone() (cln *SessionSCfg) {
 		Enabled:             scfg.Enabled,
 		ListenBiJSON:        scfg.ListenBiJSON,
 		ClientProtocol:      scfg.ClientProtocol,
+		StoreInterval:       scfg.StoreInterval,
 		ChannelSyncInterval: scfg.ChannelSyncInterval,
 		TerminateAttempts:   scfg.TerminateAttempts,
 		MinDurLowBalance:    scfg.MinDurLowBalance,
@@ -935,6 +946,7 @@ type SessionSJsonCfg struct {
 	ListenBiGob         *string                    `json:"listenBiGob"`
 	SessionIndexes      *[]string                  `json:"sessionIndexes"`
 	ClientProtocol      *float64                   `json:"clientProtocol"`
+	StoreInterval       *string                    `json:"storeInterval"`
 	ChannelSyncInterval *string                    `json:"channelSyncInterval"`
 	TerminateAttempts   *int                       `json:"terminateAttempts"`
 	AlterableFields     *[]string                  `json:"alterableFields"`
@@ -1141,6 +1153,9 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	if v1.ClientProtocol != v2.ClientProtocol {
 		d.ClientProtocol = utils.Float64Pointer(v2.ClientProtocol)
+	}
+	if v1.StoreInterval != v2.StoreInterval {
+		d.StoreInterval = utils.StringPointer(v2.StoreInterval.String())
 	}
 	if v1.ChannelSyncInterval != v2.ChannelSyncInterval {
 		d.ChannelSyncInterval = utils.StringPointer(v2.ChannelSyncInterval.String())

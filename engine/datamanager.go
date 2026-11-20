@@ -1833,6 +1833,31 @@ func (dm *DataManager) RemoveResource(ctx context.Context, tenant, id string) (e
 	return
 }
 
+// GetSessionBackups returns the node's backups, one per CGRID.
+func (dm *DataManager) GetSessionBackups(ctx context.Context, nodeID string) (map[string][]byte, error) {
+	db, _, err := dm.dbConns.GetConn(utils.MetaSessionBackups)
+	if err != nil {
+		return nil, err
+	}
+	if db == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	return db.GetSessionBackupsDrv(ctx, nodeID)
+}
+
+// SetSessionBackups saves backups for nodeID. A nil value deletes that CGRID's backup.
+// Some changes may be saved even if it returns an error.
+func (dm *DataManager) SetSessionBackups(ctx context.Context, nodeID string, backups map[string][]byte) error {
+	db, _, err := dm.dbConns.GetConn(utils.MetaSessionBackups)
+	if err != nil {
+		return err
+	}
+	if db == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return db.SetSessionBackupsDrv(ctx, nodeID, backups)
+}
+
 func (dm *DataManager) GetResourceProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rp *utils.ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)

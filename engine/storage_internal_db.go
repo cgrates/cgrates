@@ -226,6 +226,30 @@ func (iDB *InternalDB) RemoveResourceDrv(_ context.Context, tenant, id string) (
 	return
 }
 
+func (iDB *InternalDB) GetSessionBackupsDrv(_ context.Context, nodeID string) (map[string][]byte, error) {
+	prefix := nodeID + utils.ConcatenatedKeySep
+	keys := iDB.db.GetItemIDs(utils.MetaSessionBackups, prefix)
+	backups := make(map[string][]byte, len(keys))
+	for _, key := range keys {
+		if v, ok := iDB.db.Get(utils.MetaSessionBackups, key); ok {
+			backups[key[len(prefix):]] = v.([]byte)
+		}
+	}
+	return backups, nil
+}
+
+func (iDB *InternalDB) SetSessionBackupsDrv(_ context.Context, nodeID string, backups map[string][]byte) error {
+	prefix := nodeID + utils.ConcatenatedKeySep
+	for id, backup := range backups {
+		if backup == nil {
+			iDB.db.Remove(utils.MetaSessionBackups, prefix+id, true, utils.NonTransactional)
+			continue
+		}
+		iDB.db.Set(utils.MetaSessionBackups, prefix+id, backup, nil, true, utils.NonTransactional)
+	}
+	return nil
+}
+
 func (iDB *InternalDB) GetIPProfileDrv(_ context.Context, tenant, id string) (*utils.IPProfile, error) {
 	if x, ok := iDB.db.Get(utils.CacheIPProfiles, utils.ConcatenatedKey(tenant, id)); ok && x != nil {
 		return x.(*utils.IPProfile), nil

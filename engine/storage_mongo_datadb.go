@@ -64,6 +64,8 @@ const (
 	ColApp  = "actionProfiles"
 	ColLID  = "loadIDs"
 	ColAnp  = "accountProfiles"
+
+	ColSessionBackups = "sessionBackups"
 )
 
 var (
@@ -665,6 +667,61 @@ func (ms *MongoStorage) RemoveResourceDrv(ctx context.Context, tenant, id string
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
+		return err
+	})
+}
+
+type mongoSessionBackupID struct {
+	NodeID string `bson:"nodeid"`
+	CGRID  string `bson:"cgrid"`
+}
+
+func (ms *MongoStorage) GetSessionBackupsDrv(ctx context.Context, nodeID string) (map[string][]byte, error) {
+	backups := make(map[string][]byte)
+	if err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		cursor, err := ms.getCol(ColSessionBackups).Find(sctx, bson.M{"_id.nodeid": nodeID})
+		if err != nil {
+			return err
+		}
+		defer func() { _ = cursor.Close(sctx) }()
+		for cursor.Next(sctx) {
+			var doc struct {
+				ID   mongoSessionBackupID `bson:"_id"`
+				Data []byte               `bson:"data"`
+			}
+			if err := cursor.Decode(&doc); err != nil {
+				return err
+			}
+			backups[doc.ID.CGRID] = doc.Data
+		}
+		return cursor.Err()
+	}); err != nil {
+		return nil, err
+	}
+	return backups, nil
+}
+
+func (ms *MongoStorage) SetSessionBackupsDrv(ctx context.Context, nodeID string, backups map[string][]byte) error {
+	if len(backups) == 0 {
+		return nil
+	}
+	writes := make([]mongo.WriteModel, 0, len(backups))
+	for id, backup := range backups {
+		filter := bson.M{"_id": mongoSessionBackupID{
+			NodeID: nodeID,
+			CGRID:  id,
+		}}
+		if backup == nil {
+			writes = append(writes, mongo.NewDeleteOneModel().SetFilter(filter))
+			continue
+		}
+		writes = append(writes, mongo.NewUpdateOneModel().
+			SetFilter(filter).
+			SetUpdate(bson.M{"$set": bson.M{"data": backup}}).
+			SetUpsert(true))
+	}
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColSessionBackups).BulkWrite(sctx, writes, options.BulkWrite().SetOrdered(false))
 		return err
 	})
 }

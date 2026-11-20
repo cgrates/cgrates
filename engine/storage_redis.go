@@ -337,6 +337,42 @@ func (rs *RedisStorage) RemoveResourceDrv(ctx context.Context, tenant, id string
 	return rs.Cmd(nil, redisDEL, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
 }
 
+func (rs *RedisStorage) GetSessionBackupsDrv(_ context.Context, nodeID string) (map[string][]byte, error) {
+	var fields map[string]string
+	if err := rs.Cmd(&fields, redisHGETALL, utils.SessionBackupPrefix+nodeID); err != nil {
+		return nil, err
+	}
+	backups := make(map[string][]byte, len(fields))
+	for id, data := range fields {
+		backups[id] = []byte(data)
+	}
+	return backups, nil
+}
+
+func (rs *RedisStorage) SetSessionBackupsDrv(_ context.Context, nodeID string, backups map[string][]byte) error {
+	if len(backups) == 0 {
+		return nil
+	}
+	var setArgs, delArgs []any
+	for id, backup := range backups {
+		if backup == nil {
+			delArgs = append(delArgs, id)
+			continue
+		}
+		setArgs = append(setArgs, id, backup)
+	}
+	key := utils.SessionBackupPrefix + nodeID
+	if len(setArgs) != 0 {
+		if err := rs.FlatCmd(nil, redisHSET, key, setArgs...); err != nil {
+			return err
+		}
+	}
+	if len(delArgs) != 0 {
+		return rs.FlatCmd(nil, redisHDEL, key, delArgs...)
+	}
+	return nil
+}
+
 func (rs *RedisStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
 	var values []byte
 	if err := rs.Cmd(&values, redisGET, utils.IPProfilesPrefix+utils.ConcatenatedKey(tenant, id)); err != nil {
