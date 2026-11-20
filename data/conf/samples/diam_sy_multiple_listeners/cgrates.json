@@ -163,7 +163,7 @@
             "tag": "Usage",
             "path": "*cgreq.Usage",
             "type": "*constant",
-            "value": "2048"
+            "value": "2000"
           }
         ],
         "reply_fields": [
@@ -404,6 +404,13 @@
             "mandatory": true
           },
           {
+            "tag": "OriginRealm",
+            "path": "*cgreq.OriginRealm",
+            "type": "*variable",
+            "value": "~*req.Origin-Realm",
+            "mandatory": true
+          },
+          {
             "tag": "DestinationRealm",
             "path": "*cgreq.DestinationRealm",
             "type": "*variable",
@@ -425,13 +432,6 @@
             "mandatory": true
           },
           {
-            "tag": "OriginRealm",
-            "path": "*cgreq.OriginRealm",
-            "type": "*variable",
-            "value": "~*req.Origin-Realm",
-            "mandatory": true
-          },
-          {
             "tag": "Account",
             "path": "*cgreq.Account",
             "type": "*variable",
@@ -448,7 +448,7 @@
             "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
             "path": "*opts.*syPolicyFilters.THD_THROTTLE",
             "type": "*group",
-            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:86216"
+            "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:85000"
           }
         ],
         "reply_fields": [
@@ -592,8 +592,8 @@
             "value": "*sy"
           },
           {
-            "tag": "BalanceValuePolicyFilter", // The balance Value which when under it, it will trigger the SNR
-            "path": "*opts.*syPolicyFilters.THD_THROTTLE",
+            "tag": "BalanceValuePolicyFilterNEVER_THROTTLE", // The balance Value which when under it, it will trigger the SNR
+            "path": "*opts.*syPolicyFilters.NEVER_THROTTLE",
             "type": "*group",
             "value": "*lte:~*asm.BalanceSummaries.balance_data.Value:-1"
           }

@@ -28,6 +28,13 @@ import (
 	"github.com/cgrates/go-diameter/diam/dict"
 )
 
+func syThresholdID(originID, originHost, status string) string {
+	return utils.ConcatenatedKey(
+		utils.MetaSy+utils.Underline+originID+utils.Underline+originHost,
+		status,
+	)
+}
+
 func TestDiamSyGeneral(t *testing.T) {
 	ng := engine.TestEngine{
 		TpFiles: map[string]string{
@@ -161,14 +168,14 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected 2 threshold profile to be created, received <%v>", tIDs)
 	}
 	slices.Sort(tIDs)
-	if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL", tIDs[0])
-	} else if tIDs[1] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[1])
+	if tIDs[0] != syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL"), tIDs[0])
+	} else if tIDs[1] != syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE"), tIDs[1])
 	}
 	expTp := &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_NORMAL",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL"),
 		FilterIDs: []string{
 			"*gte:~*asm.BalanceSummaries.balance_data.Value:1024",
 			"*string:~*req.AccountID:1001",
@@ -189,7 +196,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	expTp = &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE"),
 		FilterIDs: []string{
 			"*lte:~*asm.BalanceSummaries.balance_data.Value:1023",
 			"*string:~*req.AccountID:1001",
@@ -680,12 +687,12 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	if len(tIDs) != 1 {
 		t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
-	} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":NEVER_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":NEVER_THROTTLE", tIDs[0])
+	} else if tIDs[0] != syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE"), tIDs[0])
 	}
 	expTp = &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":NEVER_THROTTLE",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE"),
 		FilterIDs: []string{
 			"*lte:~*asm.BalanceSummaries.balance_data.Value:-1",
 			"*string:~*req.AccountID:1001",
@@ -735,9 +742,9 @@ RP_1001,DR_DATA,*any,10`,
 			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
 			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
-					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
-					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(5000)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)), // CC-Output-Octets
 				},
 			}),
 		},
@@ -1017,14 +1024,14 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected 2 threshold profile to be created, received <%v>", tIDs)
 	}
 	slices.Sort(tIDs)
-	if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL", tIDs[0])
-	} else if tIDs[1] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[1])
+	if tIDs[0] != syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL"), tIDs[0])
+	} else if tIDs[1] != syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE"), tIDs[1])
 	}
 	expTp := &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_NORMAL",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "THD_NORMAL"),
 		FilterIDs: []string{
 			"*gte:~*asm.BalanceSummaries.balance_data.Value:1024",
 			"*string:~*req.AccountID:1001",
@@ -1045,7 +1052,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	expTp = &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "THD_THROTTLE"),
 		FilterIDs: []string{
 			"*lte:~*asm.BalanceSummaries.balance_data.Value:1023",
 			"*string:~*req.AccountID:1001",
@@ -1068,9 +1075,9 @@ RP_1001,DR_DATA,*any,10`,
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(ng.LogBuffer)
-	ng.LogBuffer = &bytes.Buffer{}
-	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	// fmt.Println(ng.LogBuffer)
+	// ng.LogBuffer = &bytes.Buffer{}
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	ng.PreserveDataDB = true
 	ng.TpFiles = nil // dont re-load tariffplans (if we were to re-load them, it would trigger the thresholds for THD_NORMAL before the ClientConnIDs wouldve been reestablished for it from restoreSessions)
 	client, cfg = ng.Run(t)
@@ -1535,22 +1542,6 @@ RP_1001,DR_DATA,*any,10`,
 	if resultCode != "2001" {
 		t.Errorf("Result-Code=%s, want 2001", resultCode)
 	}
-
-	expBalance = float64(1022) // balance shouldnt be changed from SLR update
-	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
-		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
-	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
-		t.Errorf("APIerSv1.GetAccount: data_balance: %f, want: %f", rply, expBalance)
-	}
-
-	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions, utils.SessionFilter{Filters: []string{"*string:~*req.RequestType:*sy"}}, &replyActSess); err != nil {
-		t.Error(err)
-	}
-	if len(replyActSess) != 1 {
-		t.Errorf("expected 1 active sessions, received <%v>", replyActSess)
-	}
-	// t.Log(utils.ToIJSON(replyActSess))
-
 	// get thresholds
 	if err := client.Call(context.Background(), utils.ThresholdSv1GetThresholdIDs,
 		&utils.TenantWithAPIOpts{}, &tIDs); err != nil {
@@ -1558,12 +1549,12 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	if len(tIDs) != 1 {
 		t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
-	} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":NEVER_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":NEVER_THROTTLE", tIDs[0])
+	} else if tIDs[0] != syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE"), tIDs[0])
 	}
 	expTp = &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":NEVER_THROTTLE",
+		ID:     syThresholdID(syOriginID, "Sy-CGR-DA", "NEVER_THROTTLE"),
 		FilterIDs: []string{
 			"*lte:~*asm.BalanceSummaries.balance_data.Value:-1",
 			"*string:~*req.AccountID:1001",
@@ -1582,6 +1573,21 @@ RP_1001,DR_DATA,*any,10`,
 	if !reflect.DeepEqual(tp, expTp) {
 		t.Errorf("expected <%v>\nreceived\n<%v>", utils.ToJSON(expTp), utils.ToJSON(tp))
 	}
+
+	expBalance = float64(1022) // balance shouldnt be changed from SLR update
+	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
+		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
+	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
+		t.Errorf("APIerSv1.GetAccount: data_balance: %f, want: %f", rply, expBalance)
+	}
+
+	if err := client.Call(context.Background(), utils.SessionSv1GetActiveSessions, utils.SessionFilter{Filters: []string{"*string:~*req.RequestType:*sy"}}, &replyActSess); err != nil {
+		t.Error(err)
+	}
+	if len(replyActSess) != 1 {
+		t.Errorf("expected 1 active sessions, received <%v>", replyActSess)
+	}
+	// t.Log(utils.ToIJSON(replyActSess))
 
 	// CCR-T
 	ccrT := diam.NewRequest(diam.CreditControl, 4, nil)
@@ -1613,9 +1619,9 @@ RP_1001,DR_DATA,*any,10`,
 			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
 			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
-					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
-					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(5000)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)), // CC-Output-Octets
 				},
 			}),
 		},
@@ -1853,14 +1859,14 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected 2 threshold profiles to be created, received <%v>", tIDs)
 	}
 	slices.Sort(tIDs)
-	if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_NORMAL", tIDs[0])
-	} else if tIDs[1] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[1])
+	if tIDs[0] != syThresholdID(syOriginID, "CGR-DA", "THD_NORMAL") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "CGR-DA", "THD_NORMAL"), tIDs[0])
+	} else if tIDs[1] != syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"), tIDs[1])
 	}
 	expTp := &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_NORMAL",
+		ID:     syThresholdID(syOriginID, "CGR-DA", "THD_NORMAL"),
 		FilterIDs: []string{
 			"*gt:~*asm.BalanceSummaries.balance_data.Value:0",
 			"*string:~*req.AccountID:1001",
@@ -1881,7 +1887,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	expTp = &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
-		ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE",
+		ID:     syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"),
 		FilterIDs: []string{
 			"*lte:~*asm.BalanceSummaries.balance_data.Value:0",
 			"*string:~*req.AccountID:1001",
@@ -1987,7 +1993,9 @@ RP_1001,DR_DATA,*any,10`,
 	t.Run("Test DIAMETER_INVALID_AVP_VALUE", func(t *testing.T) {
 		// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 		client, cfg := ng.Run(t)
-
+		ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+		defer cancel()
+		engine.WaitForService(t, ctx, client, utils.SchedulerSv1)
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start start proper SL session
 		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
@@ -2070,12 +2078,12 @@ RP_1001,DR_DATA,*any,10`,
 		}
 		if len(tIDs) != 1 {
 			t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
-		} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-			t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[0])
+		} else if tIDs[0] != syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE") {
+			t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"), tIDs[0])
 		}
 		expTp := &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
-			ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE",
+			ID:     syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"),
 			FilterIDs: []string{
 				"*lte:~*asm.BalanceSummaries.balance_data.Value:1023",
 				"*string:~*req.AccountID:1001",
@@ -2159,8 +2167,8 @@ RP_1001,DR_DATA,*any,10`,
 		}
 		if len(tIDs) != 1 {
 			t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
-		} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-			t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[0])
+		} else if tIDs[0] != syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE") {
+			t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"), tIDs[0])
 		}
 		if err := client.Call(context.Background(), utils.APIerSv1GetThresholdProfile,
 			&utils.TenantID{ID: tIDs[0]}, &tp); err != nil {
@@ -2179,7 +2187,9 @@ RP_1001,DR_DATA,*any,10`,
 	t.Run("Test DIAMETER_UNKNOWN_SESSION_ID SLR", func(t *testing.T) {
 		// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 		client, cfg := ng.Run(t)
-
+		ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+		defer cancel()
+		engine.WaitForService(t, ctx, client, utils.SchedulerSv1)
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start SL intermediate session that will error with DIAMETER_UNKNOWN_SESSION_ID
 		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
@@ -2272,7 +2282,9 @@ RP_1001,DR_DATA,*any,10`,
 	t.Run("Test DIAMETER_UNKNOWN_SESSION_ID STR", func(t *testing.T) {
 		// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 		client, cfg := ng.Run(t)
-
+		ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+		defer cancel()
+		engine.WaitForService(t, ctx, client, utils.SchedulerSv1)
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start SL intermediate session that will error with DIAMETER_UNKNOWN_SESSION_ID
 		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
@@ -2424,7 +2436,9 @@ RP_1001,DR_DATA,*any,10`,
 	t.Run("Test DIAMETER_ERROR_UNKNOWN_POLICY_COUNTERS SLR", func(t *testing.T) {
 		// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 		client, cfg := ng.Run(t)
-
+		ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
+		defer cancel()
+		engine.WaitForService(t, ctx, client, utils.SchedulerSv1)
 		time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service to start
 		// Start start proper SL session
 		diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[0].Address, cfg.DiameterAgentCfg().OriginHost,
@@ -2850,10 +2864,10 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	if len(tIDs) != 1 {
 		t.Errorf("expected 1 threshold profile to be created, received <%v>", tIDs)
-	} else if tIDs[0] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-		t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[0])
+	} else if tIDs[0] != syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE") {
+		t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE"), tIDs[0])
 	}
-	thresholdID := utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE"
+	thresholdID := syThresholdID(syOriginID, "CGR-DA", "THD_THROTTLE")
 	expTp := &engine.ThresholdProfile{
 		Tenant: "cgrates.org",
 		ID:     thresholdID,
@@ -2999,9 +3013,9 @@ RP_1001,DR_DATA,*any,10`,
 			diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
 			diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 				AVP: []*diam.AVP{
-					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
-					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
-					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+					diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(5000)),  // CC-Total-Octets
+					diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)),  // CC-Input-Octets
+					diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)), // CC-Output-Octets
 				},
 			}),
 		},
@@ -3101,6 +3115,7 @@ RP_1001,DR_DATA,*any,10`,
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
+
 	client, cfg := ng.Run(t)
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
@@ -3110,11 +3125,20 @@ RP_1001,DR_DATA,*any,10`,
 	// Start monitoring SL
 	syOriginIDs := []string{utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix()}
 	slices.Sort(syOriginIDs)
+	diamClientSyList := make([]*DiameterClient, len(cfg.DiameterAgentCfg().Listeners))
+	diamClientRoList := make([]*DiameterClient, len(cfg.DiameterAgentCfg().Listeners))
 	wg := sync.WaitGroup{} // wait for responses before starting to debit from CCR
 	for i := range cfg.DiameterAgentCfg().Listeners {
 		// start monitoring SL concurrently
 		wg.Go(func() {
-			diamClientSy, err := NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, "Sy-CGR-DA"+strconv.Itoa(i),
+			diamClientRoList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, cfg.DiameterAgentCfg().OriginHost,
+				cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+				cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+				cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
+			if err != nil {
+				t.Fatal(err)
+			}
+			diamClientSyList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, "Sy-CGR-DA"+strconv.Itoa(i),
 				cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
 				cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
 				cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
@@ -3140,11 +3164,11 @@ RP_1001,DR_DATA,*any,10`,
 					diam.NewAVP(avp.SubscriptionIDData, avp.Mbit, 0, datatype.UTF8String("104502200011")), // Subscription-Id-Data (IMSI)
 				}})
 			// t.Log("sendingg msg: ", slr.PrettyDump())
-			if err := diamClientSy.SendMessage(slr); err != nil {
+			if err := diamClientSyList[i].SendMessage(slr); err != nil {
 				t.Errorf("failed to send diameter message: %v", err)
 			}
 
-			reply := diamClientSy.ReceivedMessage(2 * time.Second)
+			reply := diamClientSyList[i].ReceivedMessage(2 * time.Second)
 			if reply == nil {
 				t.Fatal("received empty reply")
 			}
@@ -3200,14 +3224,14 @@ RP_1001,DR_DATA,*any,10`,
 			t.Errorf("expected 3 threshold profiles to be created, received <%v>", tIDs)
 		}
 		slices.Sort(tIDs)
-		if tIDs[i] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-			t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[i])
+		if tIDs[i] != syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "THD_THROTTLE") {
+			t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "THD_THROTTLE"), tIDs[i])
 		}
 		expTp := &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
-			ID:     utils.MetaSy + utils.Underline + syOriginID + ":THD_THROTTLE",
+			ID:     syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "THD_THROTTLE"),
 			FilterIDs: []string{
-				utils.ConcatenatedKey(utils.MetaLessOrEqual, utils.DynamicDataPrefix+utils.MetaAsm+utils.NestingSep+utils.BalanceSummaries+utils.NestingSep+"balance_data"+utils.NestingSep+utils.Value, "86216"),
+				utils.ConcatenatedKey(utils.MetaLessOrEqual, utils.DynamicDataPrefix+utils.MetaAsm+utils.NestingSep+utils.BalanceSummaries+utils.NestingSep+"balance_data"+utils.NestingSep+utils.Value, "85000"),
 				utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, "1001"),
 			},
 			MaxHits:   1,
@@ -3230,41 +3254,35 @@ RP_1001,DR_DATA,*any,10`,
 	if err := engine.KillEngine(100); err != nil {
 		t.Error(err)
 	}
-	fmt.Println(ng.LogBuffer)
-	ng.LogBuffer = &bytes.Buffer{}
-	t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
+	// fmt.Println(ng.LogBuffer)
+	// ng.LogBuffer = &bytes.Buffer{}
+	// t.Cleanup(func() { fmt.Println(ng.LogBuffer) })
 	ng.PreserveDataDB = true
 	client, cfg = ng.Run(t)
 	ctx, cancel = context.WithTimeout(context.Background(), 500*time.Millisecond)
 	defer cancel()
 	engine.WaitForService(t, ctx, client, utils.SessionSv1)
 	time.Sleep(100 * time.Millisecond) // wait for DiameterAgent service since its waiting on sessions
-	// reopen connection with client after we shutdown engine
-
-	diamClientRoList := make([]*DiameterClient, len(cfg.DiameterAgentCfg().Listeners))
-	diamClientSyList := make([]*DiameterClient, len(cfg.DiameterAgentCfg().Listeners))
-	ccrOriginIDs := []string{utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix()}
-	for i := range cfg.DiameterAgentCfg().Listeners {
-		wg.Go(func() {
-			diamClientSyList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, "Sy-CGR-DA"+strconv.Itoa(i),
-				cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
-				cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-				cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
-			if err != nil {
-				t.Fatal(err)
-			}
-		})
+	for i := range diamClientRoList {
+		diamClientRoList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, cfg.DiameterAgentCfg().OriginHost,
+			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
+		if err != nil {
+			t.Fatal(err)
+		}
+		diamClientSyList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, "Sy-CGR-DA"+strconv.Itoa(i),
+			cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
+			cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
+			cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
+		if err != nil {
+			t.Fatal(err)
+		}
 	}
-	wg.Wait()
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	ccrOriginIDs := []string{utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix(), utils.UUIDSha1Prefix()}
+	for i := range diamClientSyList {
 		wg.Go(func() {
-			diamClientRoList[i], err = NewDiameterClient(cfg.DiameterAgentCfg().Listeners[i].Address, cfg.DiameterAgentCfg().OriginHost,
-				cfg.DiameterAgentCfg().OriginRealm, cfg.DiameterAgentCfg().VendorID,
-				cfg.DiameterAgentCfg().ProductName, utils.DiameterFirmwareRevision,
-				cfg.DiameterAgentCfg().DictionariesPath, cfg.DiameterAgentCfg().Listeners[i].Network)
-			if err != nil {
-				t.Fatal(err)
-			}
+
 			ccr := diam.NewRequest(diam.CreditControl, 4, nil)
 			ccr.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginIDs[i]))
 			ccr.NewAVP(avp.AuthApplicationID, avp.Mbit, 0, datatype.Unsigned32(4))
@@ -3337,7 +3355,7 @@ RP_1001,DR_DATA,*any,10`,
 		})
 	}
 	wg.Wait()
-	expBalance = float64(93856) // CCR init should take 2048 units constant from templates, 3 times since we have 3 clients. initial balance is 100000, 100000 - 6144 = 93856
+	expBalance = float64(94000) // CCR init should take 2000 units constant from templates, 3 times since we have 3 clients. initial balance is 100000, 100000 - 6000 = 94000
 	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
 		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
 	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
@@ -3360,7 +3378,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	// t.Log(utils.ToIJSON(replyActSess))
 
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	for i := range diamClientSyList {
 		wg.Go(func() {
 			ccrU := diam.NewRequest(diam.CreditControl, 4, nil)
 			ccrU.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginIDs[i]))
@@ -3390,9 +3408,9 @@ RP_1001,DR_DATA,*any,10`,
 					diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
 					diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 						AVP: []*diam.AVP{
-							diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
-							diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
-							diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+							diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(5000)),  // CC-Total-Octets
+							diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)),  // CC-Input-Octets
+							diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)), // CC-Output-Octets
 						},
 					}),
 				},
@@ -3441,7 +3459,7 @@ RP_1001,DR_DATA,*any,10`,
 		})
 	}
 	wg.Wait()
-	expBalance = float64(93856 - 7640 - 7640 - 7640) // CCR update should take 7640 units from CCTotalOctets, 3 times since we have 3 clients. leftover balance is 93856, after debits 70936 is left
+	expBalance = float64(94000 - 5000 - 5000 - 5000) // CCR update should take 5000 units from CCTotalOctets, 3 times since we have 3 clients. leftover balance is 94000, after debits 79000 is left
 	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
 		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
 	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
@@ -3464,14 +3482,15 @@ RP_1001,DR_DATA,*any,10`,
 	// t.Log(utils.ToIJSON(replyActSess))
 
 	// receive SNR
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	for i := range diamClientSyList {
 		wg.Go(func() {
-			t.Log("waiting for SNR msg from listener ", cfg.DiameterAgentCfg().Listeners[i].Address)
+			// fmt.Println("waiting for SNR msg from listener ", cfg.DiameterAgentCfg().Listeners[i].Address)
 			reply := diamClientSyList[i].ReceivedMessage(2 * time.Second)
 			if reply == nil {
 				t.Fatal("Received empty reply")
+				return
 			}
-			t.Log("got SNR msg from listener ", cfg.DiameterAgentCfg().Listeners[i].Address)
+			// fmt.Println("got SNR msg from listener ", cfg.DiameterAgentCfg().Listeners[i].Address)
 			rplSID, err := reply.FindAVP(avp.SessionID, 0)
 			if err != nil {
 				t.Error(err)
@@ -3506,7 +3525,7 @@ RP_1001,DR_DATA,*any,10`,
 			sna.NewAVP(avp.ResultCode, avp.Mbit, 0, datatype.Unsigned32(2001))
 			sna.NewAVP(avp.OriginHost, avp.Mbit, 0, datatype.DiameterIdentity("Sy-CGR-DA"+strconv.Itoa(i)))
 			sna.NewAVP(avp.OriginRealm, avp.Mbit, 0, datatype.DiameterIdentity("cgrates.org"))
-			t.Log("sendingg msg: ", sna.PrettyDump())
+			// fmt.Println("sendingg msg: ", sna.PrettyDump())
 			if err := diamClientSyList[i].SendMessage(sna); err != nil {
 				t.Errorf("failed to send diameter message: %v", err)
 			}
@@ -3515,7 +3534,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 	wg.Wait()
 	// Change session policy subscription
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	for i := range diamClientSyList {
 		wg.Go(func() {
 			slri := diam.NewRequest(diam.SpendingLimit, 16777302, nil)
 			slri.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(syOriginIDs[i]))
@@ -3564,7 +3583,7 @@ RP_1001,DR_DATA,*any,10`,
 		})
 	}
 	wg.Wait()
-	expBalance = float64(70936) // no debits shouldve been done
+	expBalance = float64(79000) // no debits shouldve been done
 	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
 		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
 	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
@@ -3590,12 +3609,12 @@ RP_1001,DR_DATA,*any,10`,
 			t.Errorf("expected 3 threshold profiles to be created, received <%v>", tIDs)
 		}
 		slices.Sort(tIDs)
-		if tIDs[i] != utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE" {
-			t.Errorf("expected <%v>, received <%v>", utils.MetaSy+utils.Underline+syOriginID+":THD_THROTTLE", tIDs[i])
+		if tIDs[i] != syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "NEVER_THROTTLE") {
+			t.Errorf("expected <%v>, received <%v>", syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "NEVER_THROTTLE"), tIDs[i])
 		}
 		expTp := &engine.ThresholdProfile{
 			Tenant: "cgrates.org",
-			ID:     utils.MetaSy + utils.Underline + syOriginID,
+			ID:     syThresholdID(syOriginID, "Sy-CGR-DA"+strconv.Itoa(i), "NEVER_THROTTLE"),
 			FilterIDs: []string{
 				utils.ConcatenatedKey(utils.MetaLessOrEqual, utils.DynamicDataPrefix+utils.MetaAsm+utils.NestingSep+utils.BalanceSummaries+utils.NestingSep+"balance_data"+utils.NestingSep+utils.Value, "-1"),
 				utils.ConcatenatedKey(utils.MetaString, utils.MetaDynReq+utils.NestingSep+utils.AccountID, "1001"),
@@ -3617,7 +3636,7 @@ RP_1001,DR_DATA,*any,10`,
 	}
 
 	// Send CCT
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	for i := range diamClientSyList {
 		wg.Go(func() {
 			ccrT := diam.NewRequest(diam.CreditControl, 4, nil)
 			ccrT.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(ccrOriginIDs[i]))
@@ -3648,9 +3667,9 @@ RP_1001,DR_DATA,*any,10`,
 					diam.NewAVP(avp.RatingGroup, avp.Mbit, 0, datatype.Unsigned32(20000)), // Rating-Group
 					diam.NewAVP(avp.UsedServiceUnit, avp.Mbit, 0, &diam.GroupedAVP{ // Used-Service-Unit
 						AVP: []*diam.AVP{
-							diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(7640)),  // CC-Total-Octets
-							diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(5337)),  // CC-Input-Octets
-							diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2303)), // CC-Output-Octets
+							diam.NewAVP(avp.CCTotalOctets, avp.Mbit, 0, datatype.Unsigned64(5000)),  // CC-Total-Octets
+							diam.NewAVP(avp.CCInputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)),  // CC-Input-Octets
+							diam.NewAVP(avp.CCOutputOctets, avp.Mbit, 0, datatype.Unsigned64(2500)), // CC-Output-Octets
 						},
 					}),
 				},
@@ -3699,7 +3718,7 @@ RP_1001,DR_DATA,*any,10`,
 		})
 	}
 	wg.Wait()
-	expBalance = float64(70936)
+	expBalance = float64(79000)
 	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
 		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
 	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {
@@ -3720,7 +3739,7 @@ RP_1001,DR_DATA,*any,10`,
 		t.Errorf("expected 3 active sessions, received <%v>", utils.ToJSON(replyActSess))
 	}
 	// t.Log(utils.ToIJSON(replyActSess))
-	for i := range cfg.DiameterAgentCfg().Listeners {
+	for i := range diamClientSyList {
 		wg.Go(func() {
 			str := diam.NewRequest(diam.SessionTermination, 16777302, nil)
 			str.NewAVP(avp.SessionID, avp.Mbit, 0, datatype.UTF8String(syOriginIDs[i]))
@@ -3758,7 +3777,7 @@ RP_1001,DR_DATA,*any,10`,
 		})
 	}
 	wg.Wait()
-	expBalance = float64(70936)
+	expBalance = float64(79000)
 	if err = client.Call(context.Background(), utils.APIerSv2GetAccount, attrsAcnt, &acnt); err != nil {
 		t.Errorf("APIerSv1.GetAccount unexpected err: %v", err)
 	} else if rply := acnt.BalanceMap[utils.MetaData].GetTotalValue(); rply != expBalance {

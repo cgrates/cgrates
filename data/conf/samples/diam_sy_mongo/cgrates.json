@@ -29,10 +29,20 @@
     "enabled": true,
     "apiers_conns": ["*localhost"]
   },
+  "rpc_conns": {
+    "*bijson_localhost_thresholds": {
+      "conns": [
+        {
+          "address": "127.0.0.1:2014",
+          "transport": "*birpc_json"
+        }
+      ]
+    }
+  },
   "sessions": {
     "enabled": true,
     "apiers_conns": ["*localhost"],
-    "thresholds_conns": ["*birpc_internal"],
+    "thresholds_conns": ["*bijson_localhost_thresholds"],
     "chargers_conns": ["*localhost"],
     "rals_conns": ["*localhost"],
     "backup_interval": "-1"
@@ -55,7 +65,7 @@
         "address": "0.0.0.0:3868"
       }
     ],
-    "sessions_conns": ["*birpc_internal"],
+    "sessions_conns": ["*bijson_localhost"],
     "snr_template": "*snr",
     "request_processors": [
       {
