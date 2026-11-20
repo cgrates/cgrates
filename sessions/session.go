@@ -99,7 +99,7 @@ func (s *session) asCGREventsMap() (cgrEvs map[string]*utils.CGREvent) {
 	return
 }
 
-// stopSTerminator clears the session terminator
+// stopSTerminator keeps the deadline so expiry can resume if the session becomes active again.
 func (s *session) stopSTerminator() {
 	if s.sTerminator == nil ||
 		s.sTerminator.endChan == nil {
@@ -117,6 +117,7 @@ func (s *session) setSRun(runID string, cgrEv *utils.CGREvent, alterableFields, 
 		sr = &utils.SRun{ID: runID, CGREvent: cgrEv.Clone()}
 		s.session.SRuns[runID] = sr
 	}
+	// A restored run needs debit state only when it receives an update.
 	run := s.runStates[runID]
 	if run == nil {
 		if s.runStates == nil {

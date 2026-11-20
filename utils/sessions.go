@@ -11,12 +11,42 @@ type Session struct {
 	OriginCGREvent *CGREvent // initial event for the session
 	ClientConnID   string    // connection towards the client for passive sessions
 	SRuns          map[string]*SRun
+	Passive        bool
+	TTL            *SessionTTL
+}
+
+type SessionTTL struct {
+	Deadline  time.Time
+	Duration  time.Duration
+	LastUsed  *time.Duration
+	Usage     *time.Duration
+	LastUsage *time.Duration
+}
+
+func (t *SessionTTL) Clone() *SessionTTL {
+	if t == nil {
+		return nil
+	}
+	cln := *t
+	if t.LastUsed != nil {
+		cln.LastUsed = new(*t.LastUsed)
+	}
+	if t.Usage != nil {
+		cln.Usage = new(*t.Usage)
+	}
+	if t.LastUsage != nil {
+		cln.LastUsage = new(*t.LastUsage)
+	}
+	return &cln
 }
 
 // Clone copies the session and its runs. Nested event values are not copied.
 func (s *Session) Clone() *Session {
 	cln := &Session{
+		ID:           s.ID,
 		ClientConnID: s.ClientConnID,
+		Passive:      s.Passive,
+		TTL:          s.TTL.Clone(),
 	}
 	if s.OriginCGREvent != nil {
 		cln.OriginCGREvent = s.OriginCGREvent.Clone()

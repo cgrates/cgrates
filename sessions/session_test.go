@@ -47,6 +47,13 @@ func TestSessionClone(t *testing.T) {
 		ID:             "session1",
 		ClientConnID:   "ClientConnID",
 		OriginCGREvent: &utils.CGREvent{Event: map[string]any{"origin": "event"}},
+		TTL: &utils.SessionTTL{
+			Deadline:  tTime.Add(time.Minute),
+			Duration:  time.Minute,
+			LastUsed:  new(time.Second),
+			Usage:     new(time.Minute),
+			LastUsage: new(2 * time.Second),
+		},
 		SRuns: map[string]*utils.SRun{
 			"run1": {
 				ID: "1001",
@@ -62,7 +69,9 @@ func TestSessionClone(t *testing.T) {
 	}
 
 	eOut = &utils.Session{
+		ID:           "session1",
 		ClientConnID: "ClientConnID",
+		TTL:          sess.TTL,
 		OriginCGREvent: &utils.CGREvent{
 			Event:   map[string]any{"origin": "event"},
 			APIOpts: map[string]any{},
@@ -86,6 +95,10 @@ func TestSessionClone(t *testing.T) {
 		t.Errorf("Expected: %+v, received: %+v", eOut, rcv)
 	}
 	//check clone
+	if rcv.TTL == nil || rcv.TTL == sess.TTL || rcv.TTL.LastUsed == sess.TTL.LastUsed ||
+		rcv.TTL.Usage == sess.TTL.Usage || rcv.TTL.LastUsage == sess.TTL.LastUsage {
+		t.Error("session copy has missing or shared TTL data")
+	}
 	rcv.SRuns["run1"].TotalUsage = utils.NewDecimal(10, 0)
 	if sess.SRuns["run1"].TotalUsage == utils.NewDecimal(10, 0) {
 		t.Errorf("Expecting: %s, received: %s", 3*time.Nanosecond, sess.SRuns["run1"].TotalUsage)

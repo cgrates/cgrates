@@ -2553,17 +2553,17 @@ func TestSetSTerminator(t *testing.T) {
 		if ss.sTerminator.endChan == nil {
 			t.Error("Expected endChan to be set")
 		}
-		if ss.sTerminator.ttl < 1*time.Second || ss.sTerminator.ttl >= 2*time.Second {
-			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.sTerminator.ttl)
+		if ss.session.TTL.Duration < time.Second || ss.session.TTL.Duration >= 2*time.Second {
+			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.session.TTL.Duration)
 		}
-		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 2*time.Second {
-			t.Errorf("Expected ttlLastUsed 2s, received %+v", ss.sTerminator.ttlLastUsed)
+		if ss.session.TTL.LastUsed == nil || *ss.session.TTL.LastUsed != 2*time.Second {
+			t.Errorf("Expected ttlLastUsed 2s, received %+v", ss.session.TTL.LastUsed)
 		}
-		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 3*time.Second {
-			t.Errorf("Expected ttlLastUsage 3s, received %+v", ss.sTerminator.ttlLastUsage)
+		if ss.session.TTL.LastUsage == nil || *ss.session.TTL.LastUsage != 3*time.Second {
+			t.Errorf("Expected ttlLastUsage 3s, received %+v", ss.session.TTL.LastUsage)
 		}
-		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 4*time.Second {
-			t.Errorf("Expected ttlUsage 4s, received %+v", ss.sTerminator.ttlUsage)
+		if ss.session.TTL.Usage == nil || *ss.session.TTL.Usage != 4*time.Second {
+			t.Errorf("Expected ttlUsage 4s, received %+v", ss.session.TTL.Usage)
 		}
 	})
 
@@ -2590,12 +2590,12 @@ func TestSetSTerminator(t *testing.T) {
 			},
 		}
 		ss.sTerminator = &sTerminator{
-			timer:        time.NewTimer(time.Hour),
-			endChan:      make(chan struct{}),
-			ttl:          time.Hour,
-			ttlLastUsed:  utils.DurationPointer(time.Second),
-			ttlUsage:     utils.DurationPointer(time.Second),
-			ttlLastUsage: utils.DurationPointer(time.Second),
+			timer:   time.NewTimer(time.Hour),
+			endChan: make(chan struct{}),
+		}
+		ss.session.TTL = &utils.SessionTTL{
+			Duration: time.Hour, LastUsed: utils.DurationPointer(time.Second),
+			Usage: utils.DurationPointer(time.Second), LastUsage: utils.DurationPointer(time.Second),
 		}
 
 		sessions.setSTerminator(ctx, ss, engine.MapEvent{
@@ -2605,17 +2605,17 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTLUsage:     "8s",
 		})
 
-		if ss.sTerminator.ttl != 5*time.Second {
-			t.Errorf("Expected ttl 5s, received %s", ss.sTerminator.ttl)
+		if ss.session.TTL.Duration != 5*time.Second {
+			t.Errorf("Expected ttl 5s, received %s", ss.session.TTL.Duration)
 		}
-		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 6*time.Second {
-			t.Errorf("Expected ttlLastUsed 6s, received %+v", ss.sTerminator.ttlLastUsed)
+		if ss.session.TTL.LastUsed == nil || *ss.session.TTL.LastUsed != 6*time.Second {
+			t.Errorf("Expected ttlLastUsed 6s, received %+v", ss.session.TTL.LastUsed)
 		}
-		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 7*time.Second {
-			t.Errorf("Expected ttlLastUsage 7s, received %+v", ss.sTerminator.ttlLastUsage)
+		if ss.session.TTL.LastUsage == nil || *ss.session.TTL.LastUsage != 7*time.Second {
+			t.Errorf("Expected ttlLastUsage 7s, received %+v", ss.session.TTL.LastUsage)
 		}
-		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 8*time.Second {
-			t.Errorf("Expected ttlUsage 8s, received %+v", ss.sTerminator.ttlUsage)
+		if ss.session.TTL.Usage == nil || *ss.session.TTL.Usage != 8*time.Second {
+			t.Errorf("Expected ttlUsage 8s, received %+v", ss.session.TTL.Usage)
 		}
 	})
 
@@ -2682,12 +2682,15 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTLLastUsage: "0s",
 		}
 		sessions.registerSession(ss, false)
+		ss.lk.Lock()
 		sessions.setSTerminator(ctx, ss, opts)
+		done := ss.sTerminator.endChan
+		ss.lk.Unlock()
 
 		select {
 		case <-time.After(3 * time.Second):
 			t.Fatal("timeout")
-		case <-ss.sTerminator.endChan:
+		case <-done:
 		}
 
 		if sessions.isSessionRegistered(ss.session.ID, false) {
@@ -2756,7 +2759,7 @@ func TestSessionSForceSTerminate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+	if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 		t.Error(err)
 	}
 	if activeS := sessions.getSessions(s.session.ID, false); len(activeS) != 0 {
@@ -2804,7 +2807,7 @@ func TestSessionSForceSTerminate2(t *testing.T) {
 	}
 
 	sessions.registerSession(s, false)
-	if err := sessions.forceSTerminate(ctx, s, 5*time.Second, nil, nil); err != nil {
+	if err := sessions.forceSTerminate(ctx, s, 5*time.Second, nil, nil, nil); err != nil {
 		t.Error(err)
 	}
 
@@ -2865,7 +2868,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		sessions.registerSession(s, false)
 		expErr := "NOT_CONNECTED: EEs"
 		s.session.SRuns["run1"].CGREvent.APIOpts = nil
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err == nil || err.Error() != expErr {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err == nil || err.Error() != expErr {
 			t.Errorf("Expected error %v, \nrecieved %v", expErr, err)
 		}
 	})
@@ -2881,7 +2884,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2901,7 +2904,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2932,7 +2935,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2946,7 +2949,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2973,7 +2976,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := `CGRateS <> [WARNING] <SessionS> error: strconv.ParseBool: parsing "trueee": `

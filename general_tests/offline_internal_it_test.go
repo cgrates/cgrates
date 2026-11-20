@@ -337,8 +337,8 @@ func TestOfflineInternal(t *testing.T) {
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 35 {
-					t.Errorf("expected <%d> directories, received <%d>", 35, dirs)
+				} else if dirs != 36 {
+					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
 				} else if files != 32 {
 					t.Errorf("expected <%d> files, received <%d>", 32, files)
 				}

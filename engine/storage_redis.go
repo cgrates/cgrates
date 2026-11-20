@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"errors"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -335,6 +336,37 @@ func (rs *RedisStorage) SetResourceDrv(ctx context.Context, r *utils.Resource) (
 
 func (rs *RedisStorage) RemoveResourceDrv(ctx context.Context, tenant, id string) (err error) {
 	return rs.Cmd(nil, redisDEL, utils.ResourcesPrefix+utils.ConcatenatedKey(tenant, id))
+}
+
+func (rs *RedisStorage) GetSessionsDrv(_ context.Context) ([]*utils.Session, error) {
+	var fields map[string]string
+	if err := rs.Cmd(&fields, redisHGETALL, "sessions"); err != nil {
+		return nil, err
+	}
+	sessions := make([]*utils.Session, 0, len(fields))
+	for id, value := range fields {
+		session := new(utils.Session)
+		if err := rs.ms.Unmarshal([]byte(value), session); err != nil {
+			return nil, fmt.Errorf("decode session %q: %w", id, err)
+		}
+		if session.ID == "" || session.ID != id {
+			return nil, fmt.Errorf("session %q has CGRID %q", id, session.ID)
+		}
+		sessions = append(sessions, session)
+	}
+	return sessions, nil
+}
+
+func (rs *RedisStorage) SetSessionDrv(_ context.Context, session *utils.Session) error {
+	data, err := rs.ms.Marshal(session)
+	if err != nil {
+		return err
+	}
+	return rs.Cmd(nil, redisHSET, "sessions", session.ID, string(data))
+}
+
+func (rs *RedisStorage) RemoveSessionDrv(_ context.Context, cgrID string) error {
+	return rs.Cmd(nil, redisHDEL, "sessions", cgrID)
 }
 
 func (rs *RedisStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {

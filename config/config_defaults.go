@@ -188,6 +188,7 @@ const CGRATES_CFG_JSON = `
 		"*thresholds": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*trendProfiles": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*trends": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
+		"*sessions": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"},
 		"*versions": {"limit": -1, "ttl": "", "staticTTL": false, "remote":false, "replicate":false, "dbConn": "*default"}
 	},
 },
@@ -619,6 +620,7 @@ const CGRATES_CFG_JSON = `
 	"listenBiGob": "",			// address where to listen for bidirectional GOB-RPC requests
 	"sessionIndexes": [],			// index sessions based on these fields for GetActiveSessions API
 	"clientProtocol": 1.0,			// version of protocol to use when acting as JSON-PRC client <"0","1.0">
+	"storeInterval": "",			// session backup interval, 0 disables backups, -1 saves on each update
 	"channelSyncInterval": "0",		// sync channels to detect stale sessions (0 to disable)
 	"terminateAttempts": 5,		// attempts to get the session before terminating it
 	"stir": {

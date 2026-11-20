@@ -86,6 +86,7 @@ func init() {
 	// CDR
 	gob.Register(new(utils.CGREvent))
 	gob.Register(new(utils.EventCharges))
+	gob.Register(new(utils.Session))
 	// ChargerS
 	gob.Register(new(utils.ChargerProfile))
 	gob.Register(new(utils.ChargerProfileWithAPIOpts))
@@ -113,6 +114,7 @@ func init() {
 	gob.Register(map[string]int64{})
 	gob.Register(Versions{})
 	gob.Register(map[string]any{})
+	gob.Register(utils.MapStorage{})
 	gob.Register(map[string][]map[string]any{})
 	gob.Register(map[string]string{})
 	gob.Register(time.Duration(0))

@@ -124,6 +124,7 @@ func (db *DBService) Shutdown(registry *servmanager.Registry) error {
 		utils.RankingS,
 		utils.StatS,
 		utils.ThresholdS,
+		utils.SessionS,
 	}
 	for _, svcID := range deps {
 		if registry.State(svcID) != utils.StateServiceUP {

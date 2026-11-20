@@ -49,7 +49,7 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) {
 			"*routeFilterIndexes", "*attributeFilterIndexes",
 			"*chargerFilterIndexes", "*rateProfileFilterIndexes",
 			"*rateFilterIndexes", "*actionProfileFilterIndexes",
-			"*accountFilterIndexes", "*reverseFilterIndexes",
+			"*accountFilterIndexes", "*reverseFilterIndexes", "*sessions",
 		}
 		slices.Sort(dirNames)
 		dumpBase := t.TempDir()
@@ -351,8 +351,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) {
 				slices.Sort(dumpDirs1)
 				if !reflect.DeepEqual(dirNames, dumpDirs1) {
 					t.Errorf("expected <%v>, received <%v>", dirNames, dumpDirs1)
-				} else if files != 35 {
-					t.Errorf("expected <%d> files, received <%d>", 35, files)
+				} else if files != 36 {
+					t.Errorf("expected <%d> files, received <%d>", 36, files)
 				}
 			})
 
@@ -442,8 +442,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) {
 				slices.Sort(snapshotDirs)
 				if !reflect.DeepEqual(dirNames, snapshotDirs) {
 					t.Errorf("expected <%v>, received <%v>", dirNames, snapshotDirs)
-				} else if files != 34 { // expected 1 less file then dump since rewriting happens on dumps *versions
-					t.Errorf("expected <%d> files, received <%d>", 34, files)
+				} else if files != 35 { // expected 1 less file then dump since rewriting happens on dumps *versions
+					t.Errorf("expected <%d> files, received <%d>", 35, files)
 				}
 				for _, sfn := range snapshotFileNames {
 					// make sure file names are not the same as discarded(backed up) dump files
@@ -713,8 +713,8 @@ func TestOfflineInternalSnapshotAndRestore(t *testing.T) {
 					return nil
 				}); err != nil {
 					t.Error(err)
-				} else if dirs != 35 {
-					t.Errorf("expected <%d> directories, received <%d>", 35, dirs)
+				} else if dirs != 36 {
+					t.Errorf("expected <%d> directories, received <%d>", 36, dirs)
 				} else if files != 32 {
 					t.Errorf("expected <%d> files, received <%d>", 32, files)
 				}

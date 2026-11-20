@@ -16,8 +16,8 @@ import (
 	"github.com/cgrates/birpc"
 	"github.com/cgrates/cgrates/config"
 	"github.com/cgrates/cgrates/engine"
-
 	"github.com/cgrates/cgrates/utils"
+	"github.com/cgrates/guardian"
 )
 
 var (
@@ -31,19 +31,21 @@ func NewSessionS(cgrCfg *config.CGRConfig, dm *engine.DataManager, cache *engine
 	cgrCfg.SessionSCfg().SessionIndexes.Add(utils.OriginID) // Make sure we have indexing for OriginID since it is a requirement on prefix searching
 
 	return &SessionS{
-		cfg:           cgrCfg,
-		dm:            dm,
-		cache:         cache,
-		fltrS:         fltrS,
-		connMgr:       connMgr,
-		biJClnts:      make(map[birpc.ClientConnector]string),
-		biJIDs:        make(map[string]*biJClient),
-		aSessions:     make(map[string]*session),
-		aSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
-		aSessionsRIdx: make(map[string][]*riFieldNameVal),
-		pSessions:     make(map[string]*session),
-		pSessionsIdx:  make(map[string]map[string]map[string]utils.StringSet),
-		pSessionsRIdx: make(map[string][]*riFieldNameVal),
+		cfg:            cgrCfg,
+		dm:             dm,
+		cache:          cache,
+		locker:         guardian.New(),
+		storedSessions: make(utils.StringSet),
+		fltrS:          fltrS,
+		connMgr:        connMgr,
+		biJClnts:       make(map[birpc.ClientConnector]string),
+		biJIDs:         make(map[string]*biJClient),
+		aSessions:      make(map[string]*session),
+		aSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
+		aSessionsRIdx:  make(map[string][]*riFieldNameVal),
+		pSessions:      make(map[string]*session),
+		pSessionsIdx:   make(map[string]map[string]map[string]utils.StringSet),
+		pSessionsRIdx:  make(map[string][]*riFieldNameVal),
 	}
 }
 
@@ -58,8 +60,12 @@ type SessionS struct {
 	cfg     *config.CGRConfig // Separate from smCfg since there can be multiple
 	dm      *engine.DataManager
 	cache   *engine.CacheS
+	locker  *guardian.Locker
 	fltrS   *engine.FilterS
 	connMgr *engine.ConnManager
+
+	storedMu       sync.Mutex
+	storedSessions utils.StringSet
 
 	biJMux   sync.RWMutex                     // mux protecting BI-JSON connections
 	biJClnts map[birpc.ClientConnector]string // index BiJSONConnection so we can sync them later
@@ -82,20 +88,123 @@ type SessionS struct {
 
 // ListenAndServe starts the service and binds it to the listen loop
 func (sS *SessionS) ListenAndServe(stopChan chan struct{}) {
-	if sS.cfg.SessionSCfg().ChannelSyncInterval != 0 {
-		for { // Schedule sync channels to run repeately
-			select {
-			case <-stopChan:
-				return
-			case <-time.After(sS.cfg.SessionSCfg().ChannelSyncInterval):
-				sS.syncSessions(context.TODO())
-			}
+	var syncC, storeC <-chan time.Time
+	if interval := sS.cfg.SessionSCfg().ChannelSyncInterval; interval > 0 {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		syncC = ticker.C
+	}
+	if interval := sS.cfg.SessionSCfg().StoreInterval; interval > 0 {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+		storeC = ticker.C
+	}
+	for {
+		select {
+		case <-stopChan:
+			return
+		case <-syncC:
+			sS.syncSessions(context.TODO())
+		case <-storeC:
+			sS.storeSessions()
+		}
+	}
+}
+
+func (sS *SessionS) RestoreSessions(ctx context.Context) error {
+	if sS.cfg.SessionSCfg().StoreInterval == 0 {
+		return nil
+	}
+	sessions, err := sS.dm.GetSessions(ctx)
+	if err != nil {
+		return fmt.Errorf("restore sessions: %w", err)
+	}
+	for _, saved := range sessions {
+		s := &session{session: saved}
+		s.lk.Lock()
+		sS.registerSession(s, saved.Passive)
+		if !saved.Passive {
+			sS.activateSession(s)
+		}
+		s.lk.Unlock()
+	}
+	return nil
+}
+
+func (sS *SessionS) removeStoredSession(ctx context.Context, id string) error {
+	interval := sS.cfg.SessionSCfg().StoreInterval
+	if interval == 0 {
+		return nil
+	}
+	if interval > 0 {
+		sS.scheduleSession(id)
+		return nil
+	}
+	err := sS.dm.RemoveSession(ctx, id)
+	if err != nil {
+		logSessionStoreError(id, err)
+	}
+	return err
+}
+
+func logSessionStoreError(id string, err error) {
+	utils.Logger.Warning(fmt.Sprintf("<%s> session storage error for CGRID %q: %v", utils.SessionS, id, err))
+}
+
+func (sS *SessionS) scheduleSession(id string) {
+	sS.storedMu.Lock()
+	sS.storedSessions.Add(id)
+	sS.storedMu.Unlock()
+}
+
+func (sS *SessionS) storeSession(ctx context.Context, s *session) error {
+	s.lk.RLock()
+	defer s.lk.RUnlock()
+	return sS.dm.SetSession(ctx, s.session)
+}
+
+func (sS *SessionS) storeSessions() {
+	if sS.cfg.SessionSCfg().StoreInterval == 0 {
+		return
+	}
+	// Leave IDs queued during this pass for the next save.
+	sS.storedMu.Lock()
+	ids := sS.storedSessions
+	sS.storedSessions = make(utils.StringSet)
+	sS.storedMu.Unlock()
+	ctx := context.Background()
+	for id := range ids {
+		unlock := sS.locker.Lock(id)
+		// A stopped session may already have been replaced under this CGRID.
+		ss := sS.getSessions(id, false)
+		if len(ss) == 0 {
+			ss = sS.getSessions(id, true)
+		}
+		var err error
+		if len(ss) != 0 {
+			err = sS.storeSession(ctx, ss[0])
+		} else {
+			err = sS.dm.RemoveSession(ctx, id)
+		}
+		unlock()
+		if err != nil {
+			logSessionStoreError(id, err)
+			sS.scheduleSession(id)
 		}
 	}
 }
 
 // Shutdown is called by engine to clear states
 func (sS *SessionS) Shutdown() (err error) {
+	if sS.cfg.SessionSCfg().StoreInterval != 0 {
+		for _, s := range sS.getSessions("", false) {
+			s.lk.Lock()
+			s.stopSTerminator()
+			s.lk.Unlock()
+		}
+		sS.storeSessions()
+		return nil
+	}
 	replConns, err := engine.GetConnIDs(context.TODO(), sS.cfg.SessionSCfg().Conns, utils.MetaReplication, utils.MetaAny, utils.MapStorage{}, nil, sS.fltrS)
 	if len(replConns) == 0 {
 		var hasErr bool
@@ -190,16 +299,11 @@ type riFieldNameVal struct {
 
 // sTerminator holds the info needed to force-terminate sessions based on timer
 type sTerminator struct {
-	timer        *time.Timer
-	endChan      chan struct{}
-	ttl          time.Duration
-	ttlLastUsed  *time.Duration
-	ttlUsage     *time.Duration
-	ttlLastUsage *time.Duration
+	timer   *time.Timer
+	endChan chan struct{}
 }
 
-// setSTerminator installs a new terminator for a session
-// setSTerminator is not thread safe, only the goroutine forked from within
+// setSTerminator must run with s.lk held so a save cannot copy the TTL while it is being updated.
 func (sS *SessionS) setSTerminator(ctx context.Context, s *session, opts engine.MapEvent) {
 	var err error
 	origin := s.session.OriginCGREvent
@@ -256,53 +360,72 @@ func (sS *SessionS) setSTerminator(ctx context.Context, s *session, opts engine.
 				utils.SessionS, utils.OptsSesTTLUsage, origin.APIOpts[utils.MetaOriginID], opts.String(), err.Error()))
 		return
 	}
-	// previously defined, reset
-	if s.sTerminator != nil {
-		s.sTerminator.ttl = ttl
-		if ttlLastUsed != nil {
-			s.sTerminator.ttlLastUsed = ttlLastUsed
-		}
-		if ttlUsage != nil {
-			s.sTerminator.ttlUsage = ttlUsage
-		}
-		if ttlLastUsage != nil {
-			s.sTerminator.ttlLastUsage = ttlLastUsage
-		}
-		s.sTerminator.timer.Reset(s.sTerminator.ttl)
+	if s.session.TTL == nil {
+		s.session.TTL = new(utils.SessionTTL)
+	}
+	t := s.session.TTL
+	t.Deadline = time.Now().Add(ttl)
+	t.Duration = ttl
+	if ttlLastUsed != nil {
+		t.LastUsed = ttlLastUsed
+	}
+	if ttlUsage != nil {
+		t.Usage = ttlUsage
+	}
+	if ttlLastUsage != nil {
+		t.LastUsage = ttlLastUsage
+	}
+	sS.scheduleTTLExpiry(ctx, s)
+}
+
+func (sS *SessionS) activateSession(s *session) {
+	// Call after registration so immediate expiry can remove the session.
+	if s.session.TTL != nil {
+		sS.scheduleTTLExpiry(context.Background(), s)
+	}
+}
+
+func (sS *SessionS) scheduleTTLExpiry(ctx context.Context, s *session) {
+	delay := time.Until(s.session.TTL.Deadline)
+	if s.sTerminator != nil && s.sTerminator.endChan != nil {
+		s.sTerminator.timer.Reset(delay)
 		return
 	}
-	// new set
-	s.sTerminator = &sTerminator{
-		timer:        time.NewTimer(ttl),
-		endChan:      make(chan struct{}),
-		ttl:          ttl,
-		ttlLastUsed:  ttlLastUsed,
-		ttlUsage:     ttlUsage,
-		ttlLastUsage: ttlLastUsage,
-	}
+	s.sTerminator = &sTerminator{timer: time.NewTimer(delay), endChan: make(chan struct{})}
 
-	// schedule automatic termination
-	go func(endChan chan struct{}, timer *time.Timer) {
+	go func(id string, endChan chan struct{}, timer *time.Timer) {
 		select {
 		case <-timer.C:
-			s.lk.Lock()
-			lastUsage := s.sTerminator.ttl
-			if s.sTerminator.ttlLastUsage != nil {
-				lastUsage = *s.sTerminator.ttlLastUsage
+			var unlock func()
+			if sS.cfg.SessionSCfg().StoreInterval != 0 {
+				unlock = sS.locker.Lock(id)
 			}
-			sS.forceSTerminate(ctx, s, lastUsage, s.sTerminator.ttlUsage,
-				s.sTerminator.ttlLastUsed)
+			s.lk.Lock()
+			// The timer may have been cancelled or replaced while acquiring the locks.
+			if s.sTerminator.endChan != endChan {
+				s.lk.Unlock()
+				if unlock != nil {
+					unlock()
+				}
+				return
+			}
+			ttl := s.session.TTL
+			lastUsage := ttl.Duration
+			if ttl.LastUsage != nil {
+				lastUsage = *ttl.LastUsage
+			}
+			_ = sS.forceSTerminate(ctx, s, lastUsage, ttl.Usage, ttl.LastUsed, unlock)
 			s.lk.Unlock()
 		case <-endChan:
 			timer.Stop()
 		}
-	}(s.sTerminator.endChan, s.sTerminator.timer)
+	}(s.session.ID, s.sTerminator.endChan, s.sTerminator.timer)
 	runtime.Gosched() // force context switching
 }
 
 // forceSTerminate is called when a session times-out or it is forced from CGRateS side
 // not thread safe
-func (sS *SessionS) forceSTerminate(ctx context.Context, s *session, extraUsage time.Duration, tUsage, lastUsed *time.Duration) (err error) {
+func (sS *SessionS) forceSTerminate(ctx context.Context, s *session, extraUsage time.Duration, tUsage, lastUsed *time.Duration, unlock func()) (err error) {
 	if extraUsage != 0 {
 		// for i := range s.SRuns {
 		// 	if _, err = sS.debitSession(ctx, s, i, extraUsage, lastUsed); err != nil {
@@ -319,6 +442,9 @@ func (sS *SessionS) forceSTerminate(ctx context.Context, s *session, extraUsage 
 			fmt.Sprintf(
 				"<%s> failed force terminating session with ID <%s>, err: <%s>",
 				utils.SessionS, s.session.ID, err.Error()))
+	}
+	if unlock != nil {
+		unlock()
 	}
 	tenant := s.session.OriginCGREvent.Tenant
 	dP := s.session.OriginCGREvent.AsDataProvider()
@@ -551,9 +677,9 @@ func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool)
 		var conns []string // ToDo: cache per session
 		tnt := utils.MetaAny
 		dP := utils.MapStorage{}
-		if s.session.OriginCGREvent != nil {
-			tnt = s.session.OriginCGREvent.Tenant
-			dP = s.session.OriginCGREvent.AsDataProvider()
+		if sCln.OriginCGREvent != nil {
+			tnt = sCln.OriginCGREvent.Tenant
+			dP = sCln.OriginCGREvent.AsDataProvider()
 		}
 		if conns, err = engine.GetConnIDs(ctx, sS.cfg.SessionSCfg().Conns, utils.MetaReplication,
 			tnt, dP, nil, sS.fltrS); err != nil {
@@ -579,6 +705,7 @@ func (sS *SessionS) replicateSessions(ctx context.Context, sID string, psv bool)
 // called on init or relocate
 // not thread safe for the Session
 func (sS *SessionS) registerSession(s *session, passive bool) {
+	s.session.Passive = passive
 	sMux := &sS.aSsMux
 	sMp := sS.aSessions
 	if passive {
@@ -924,13 +1051,16 @@ func (sS *SessionS) setSession(ctx context.Context, cgrEv *utils.CGREvent,
 		cgrIDVal.(string) == utils.EmptyString {
 		return nil, utils.NewErrMandatoryIeMissing(utils.MetaCGRid)
 	}
-	if s = sS.getActivateSession(cch[utils.MetaCGRid].(string)); s == nil {
-		if s, err = sS.newSessionOutEvent(ctx, cch[utils.MetaCGRid].(string), cgrEv, clientConnID); err != nil {
-			return
+	id := cch[utils.MetaCGRid].(string)
+	if s = sS.getActivateSession(id); s == nil {
+		if s, err = sS.newSessionOutEvent(ctx, id, cgrEv, clientConnID); err != nil {
+			return nil, err
 		}
 		sS.registerSession(s, false)
 	}
+	s.lk.Lock()
 	sS.setSTerminator(ctx, s, cgrEv.APIOpts) // start termination timer
+	s.lk.Unlock()
 	return
 }
 
@@ -987,7 +1117,7 @@ func (sS *SessionS) ensureDisconnect(s *session, funcTag string, errIn error) (e
 		utils.Logger.Warning(
 			fmt.Sprintf("<%s> error: %s attempted to disconnect session: %s, will forceDisconnect ...",
 				utils.SessionS, err.Error(), utils.ToJSON(s.session)))
-		if err = sS.forceSTerminate(context.TODO(), s, time.Duration(0), nil, nil); err != nil {
+		if err = sS.forceSTerminate(context.TODO(), s, time.Duration(0), nil, nil, nil); err != nil {
 			utils.Logger.Warning(
 				fmt.Sprintf("<%s> error: %s attempted to forceDisconnect session: %s",
 					utils.SessionS, err.Error(), utils.ToJSON(s.session)))
@@ -1378,7 +1508,7 @@ func (sS *SessionS) transitSState(sID string, psv bool) (s *session) {
 	sS.unregisterSession(sID, !psv)
 	sS.registerSession(s, psv)
 	if !psv {
-		//sS.initSessionDebitLoops(s)
+		sS.activateSession(s)
 	} else { // transit from active with possible STerminator and DebitLoops
 		s.stopSTerminator()
 		//s.stopDebitLoops()
@@ -1508,6 +1638,7 @@ func (sS *SessionS) endSession(ctx context.Context, s *session, tUsage, lastUsag
 		}()
 		sS.unregisterSession(s.session.ID, false)
 		s.stopSTerminator()
+		_ = sS.removeStoredSession(context.Background(), s.session.ID)
 		//s.stopDebitLoops()  // TODO: debit loops functionality will be implemented in future versions
 	}
 	//for _, sr := range s.SRuns {
@@ -1751,6 +1882,34 @@ func (sS *SessionS) BiRPCv1RegisterInternalBiJSONConn(ctx context.Context,
 	return nil
 }
 
+func (sS *SessionS) setSessionState(ctx context.Context, id string, passive bool) error {
+	interval := sS.cfg.SessionSCfg().StoreInterval
+	if interval != 0 {
+		defer sS.locker.Lock(id)()
+	}
+	s := sS.transitSState(id, passive)
+	if s == nil {
+		state := "passive"
+		if passive {
+			state = "active"
+		}
+		utils.Logger.Warning(fmt.Sprintf("<%s> no %s session with id: <%s>", utils.SessionS, state, id))
+		return utils.ErrNotFound
+	}
+	if interval == 0 {
+		return nil
+	}
+	if interval > 0 {
+		sS.scheduleSession(id)
+		return nil
+	}
+	err := sS.storeSession(ctx, s)
+	if err != nil {
+		logSessionStoreError(id, err)
+	}
+	return err
+}
+
 // BiRPCv1ActivateSessions is called to activate a list/all sessions
 // returns utils.ErrPartiallyExecuted in case of errors
 func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
@@ -1766,8 +1925,7 @@ func (sS *SessionS) BiRPCv1ActivateSessions(ctx context.Context,
 		sS.pSsMux.RUnlock()
 	}
 	for _, sID := range sIDs.IDs {
-		if s := sS.transitSState(sID, false); s == nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> no passive session with id: <%s>", utils.SessionS, sID))
+		if sS.setSessionState(ctx, sID, false) != nil {
 			err = utils.ErrPartiallyExecuted
 		}
 	}
@@ -1792,8 +1950,7 @@ func (sS *SessionS) BiRPCv1DeactivateSessions(ctx context.Context,
 		sS.aSsMux.RUnlock()
 	}
 	for _, sID := range sIDs.IDs {
-		if s := sS.transitSState(sID, true); s == nil {
-			utils.Logger.Warning(fmt.Sprintf("<%s> no active session with id: <%s>", utils.SessionS, sID))
+		if sS.setSessionState(ctx, sID, true) != nil {
 			err = utils.ErrPartiallyExecuted
 		}
 	}

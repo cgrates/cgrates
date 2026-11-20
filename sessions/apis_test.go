@@ -1362,6 +1362,42 @@ func TestSessionSBiRPCv1ProcessEventAccounting(t *testing.T) {
 			t.Error(err)
 		}
 	})
+
+	t.Run("Save after route error", func(t *testing.T) {
+		cfg.SessionSCfg().StoreInterval = -1
+		addInternalConn(sessions, cfg, utils.MetaRoutes, utils.RouteSv1, &testMockClients{
+			calls: map[string]func(context.Context, string, any, any) error{
+				utils.RouteSv1GetRoutes: func(context.Context, string, any, any) error { return utils.ErrNotFound },
+			},
+		})
+		args := &utils.CGREvent{
+			Tenant: "cgrates.org",
+			Event:  map[string]any{utils.AccountField: "1001"},
+			APIOpts: map[string]any{
+				utils.MetaOriginID:         "savedSession",
+				utils.MetaSession:          true,
+				utils.MetaAccountsDebitCfg: true,
+				utils.MetaTotalUsage:       90 * time.Second,
+			},
+		}
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args.Clone(), new(V1ProcessEventReply)); err != nil {
+			t.Fatal(err)
+		}
+		args.APIOpts[utils.MetaRoutes] = true
+		args.APIOpts[utils.MetaTotalUsage] = 180 * time.Second
+		if err := sessions.BiRPCv1ProcessEvent(ctx, args, new(V1ProcessEventReply)); err != utils.ErrPartiallyExecuted {
+			t.Fatalf("want %v, got %v", utils.ErrPartiallyExecuted, err)
+		}
+		saved, err := data.GetSessionsDrv(ctx)
+		if err != nil || len(saved) != 1 {
+			t.Fatalf("want one saved session, got %d: %v", len(saved), err)
+		}
+		run := saved[0].SRuns[utils.MetaPrimary]
+		want := utils.NewDecimal(int64(180*time.Second), 0)
+		if run == nil || run.TotalUsage.Compare(want) != 0 || run.Charges == nil || run.Charges.Abstracts.Compare(want) != 0 {
+			t.Fatalf("want 180s of saved usage and charges, got %s", utils.ToJSON(run))
+		}
+	})
 }
 
 func TestSessionSBiRPCv1ProcessEventSession(t *testing.T) {

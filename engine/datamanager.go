@@ -1833,6 +1833,48 @@ func (dm *DataManager) RemoveResource(ctx context.Context, tenant, id string) (e
 	return
 }
 
+func (dm *DataManager) GetSessions(ctx context.Context) ([]*utils.Session, error) {
+	if dm == nil || dm.dbConns == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	db, _, err := dm.dbConns.GetConn(utils.MetaSessionS)
+	if err != nil {
+		return nil, err
+	}
+	if db == nil {
+		return nil, utils.ErrNoDatabaseConn
+	}
+	return db.GetSessionsDrv(ctx)
+}
+
+func (dm *DataManager) SetSession(ctx context.Context, session *utils.Session) error {
+	if dm == nil || dm.dbConns == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	db, _, err := dm.dbConns.GetConn(utils.MetaSessionS)
+	if err != nil {
+		return err
+	}
+	if db == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return db.SetSessionDrv(ctx, session)
+}
+
+func (dm *DataManager) RemoveSession(ctx context.Context, cgrID string) error {
+	if dm == nil || dm.dbConns == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	db, _, err := dm.dbConns.GetConn(utils.MetaSessionS)
+	if err != nil {
+		return err
+	}
+	if db == nil {
+		return utils.ErrNoDatabaseConn
+	}
+	return db.RemoveSessionDrv(ctx, cgrID)
+}
+
 func (dm *DataManager) GetResourceProfile(ctx context.Context, tenant, id string, cacheRead, cacheWrite bool,
 	transactionID string) (rp *utils.ResourceProfile, err error) {
 	tntID := utils.ConcatenatedKey(tenant, id)

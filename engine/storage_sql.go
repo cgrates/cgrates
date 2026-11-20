@@ -287,6 +287,18 @@ func (sqls *SQLStorage) RemoveAccountDrv(ctx context.Context, tenant, id string)
 	return
 }
 
+func (sqls *SQLStorage) GetSessionsDrv(context.Context) ([]*utils.Session, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) SetSessionDrv(context.Context, *utils.Session) error {
+	return utils.ErrNotImplemented
+}
+
+func (sqls *SQLStorage) RemoveSessionDrv(context.Context, string) error {
+	return utils.ErrNotImplemented
+}
+
 func (sqls *SQLStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
 	var result []*IPProfileMdl
 	if err := sqls.db.Model(&IPProfileMdl{}).Where(&IPProfileMdl{Tenant: tenant,

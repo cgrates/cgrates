@@ -1358,6 +1358,7 @@ func TestSessionSCfgAsMapInterfaceCase1(t *testing.T) {
 		utils.ConnsCfg:               map[string][]*DynamicConns{},
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      1.0,
+		utils.StoreIntervalCfg:       "",
 		utils.ChannelSyncIntervalCfg: "1s",
 		utils.TerminateAttemptsCfg:   5,
 		utils.STIRCfg: map[string]any{
@@ -1494,6 +1495,7 @@ func TestSessionSCfgAsMapInterfaceCase2(t *testing.T) {
 		},
 		utils.SessionIndexesCfg:      []string{},
 		utils.ClientProtocolCfg:      2.0,
+		utils.StoreIntervalCfg:       "",
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.TerminateAttemptsCfg:   10,
 		utils.STIRCfg: map[string]any{

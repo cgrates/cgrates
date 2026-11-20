@@ -4,6 +4,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -29,6 +30,7 @@ type SessionService struct {
 	sm           *sessions.SessionS
 	bircpEnabled bool // to stop birpc server if needed
 	stopChan     chan struct{}
+	loop         sync.WaitGroup
 	cfg          *config.CGRConfig
 }
 
@@ -55,10 +57,14 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 
-	smg.sm = sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
+	sm := sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
+	if err := sm.RestoreSessions(context.Background()); err != nil {
+		return err
+	}
+	smg.sm = sm
 	//start sync session in a separate goroutine
 	smg.stopChan = make(chan struct{})
-	go smg.sm.ListenAndServe(smg.stopChan)
+	smg.loop.Go(func() { smg.sm.ListenAndServe(smg.stopChan) })
 	// Pass internal connection via BiRPCClient
 
 	// Register RPC handler
@@ -92,6 +98,12 @@ func (smg *SessionService) start(shutdown *utils.SyncedChan, cl *commonlisteners
 
 // Reload handles the change of config
 func (smg *SessionService) Reload(_ *utils.SyncedChan, _ *servmanager.Registry) (err error) {
+	smg.mu.Lock()
+	defer smg.mu.Unlock()
+	close(smg.stopChan)
+	smg.loop.Wait()
+	smg.stopChan = make(chan struct{})
+	smg.loop.Go(func() { smg.sm.ListenAndServe(smg.stopChan) })
 	return
 }
 
@@ -100,6 +112,7 @@ func (smg *SessionService) Shutdown(registry *servmanager.Registry) (err error) 
 	smg.mu.Lock()
 	defer smg.mu.Unlock()
 	close(smg.stopChan)
+	smg.loop.Wait()
 	if err = smg.sm.Shutdown(); err != nil {
 		return
 	}

@@ -114,10 +114,35 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		cch[utils.MetaSession] = sesBool
 	}
 	var s *session
+	var storeInterval time.Duration
+	var unlock func()
 	if utils.OptAsBool(cch, utils.MetaSession) {
+		storeInterval = sS.cfg.SessionSCfg().StoreInterval
+		if storeInterval != 0 {
+			releaseCGRID := sS.locker.Lock(cch[utils.MetaCGRid].(string))
+			unlock = func() {
+				if s != nil {
+					s.lk.Lock()
+					if s.session.OriginCGREvent == apiArgs {
+						// The caller can still change the event or its opts after the RPC returns.
+						s.session.OriginCGREvent = apiArgs.Clone()
+					}
+					s.lk.Unlock()
+				}
+				releaseCGRID()
+			}
+			defer func() {
+				if unlock != nil {
+					unlock()
+				}
+			}()
+		}
 		if s, err = sS.setSession(ctx, apiArgs, cch,
 			sS.biJClntID(birpc.ClientFromContext(ctx))); err != nil {
 			return
+		}
+		if storeInterval > 0 {
+			sS.scheduleSession(s.session.ID)
 		}
 	}
 	// extracting *terminate
@@ -791,6 +816,18 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 		if errTerminate := sS.terminateSessionNew(ctx, s); errTerminate != nil {
 			return errTerminate
 		}
+		if err := sS.removeStoredSession(ctx, s.session.ID); err != nil {
+			withErrors = true
+		}
+	} else if storeInterval == -1 {
+		if err := sS.storeSession(ctx, s); err != nil {
+			logSessionStoreError(s.session.ID, err)
+			withErrors = true
+		}
+	}
+	if unlock != nil {
+		unlock()
+		unlock = nil
 	}
 	for runID, cgrEv := range cgrEvs { // need to run here in the eventuality of terminate being called
 		cchEv := make(map[string]any)

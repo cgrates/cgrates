@@ -385,6 +385,14 @@ func TestDfDataDbJsonCfg(t *testing.T) {
 				Remote:     utils.BoolPointer(false),
 				DbConn:     utils.StringPointer(utils.MetaDefault),
 			},
+			utils.MetaSessionS: {
+				Ttl:        utils.StringPointer(""),
+				Static_ttl: utils.BoolPointer(false),
+				Limit:      utils.IntPointer(-1),
+				Replicate:  utils.BoolPointer(false),
+				Remote:     utils.BoolPointer(false),
+				DbConn:     utils.StringPointer(utils.MetaDefault),
+			},
 			utils.CacheThresholdProfiles: {
 				Ttl:        utils.StringPointer(utils.EmptyString),
 				Static_ttl: utils.BoolPointer(false),
@@ -598,6 +606,7 @@ func TestSmgJsonCfg(t *testing.T) {
 		ListenBiGob:         utils.StringPointer(""),
 		SessionIndexes:      &[]string{},
 		ClientProtocol:      utils.Float64Pointer(1.0),
+		StoreInterval:       utils.StringPointer(""),
 		ChannelSyncInterval: utils.StringPointer("0"),
 		TerminateAttempts:   utils.IntPointer(5),
 		Conns:               map[string][]*DynamicConns{},
