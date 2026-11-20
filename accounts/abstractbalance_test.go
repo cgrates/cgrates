@@ -6,9 +6,14 @@ package accounts
 import (
 	"context"
 	"reflect"
+	"strings"
 	"testing"
 	"time"
 
+	"github.com/cgrates/birpc"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/rates"
 	"github.com/cgrates/cgrates/utils"
 )
 
@@ -1279,5 +1284,236 @@ func TestAbstractBalanceId(t *testing.T) {
 
 	if result != "1001" {
 		t.Errorf("Expected id to be '1001', but got '%s'", result)
+	}
+}
+
+func TestAbstractBalanceCostNoMatchingRates(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	connMgr := engine.NewConnManager(cfg)
+	data, errdb := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if errdb != nil {
+		t.Fatal(errdb)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+	filterS := engine.NewFilterS(cfg, connMgr, dm)
+
+	rateSConn := make(chan birpc.ClientConnector, 1)
+	rateSrv, cErr := birpc.NewServiceWithMethodsRename(rates.NewRateS(cfg, filterS, dm), utils.RateSv1, true, func(key string) (newKey string) {
+		return strings.TrimPrefix(key, utils.V1Prfx)
+	})
+	if cErr != nil {
+		t.Fatal(cErr)
+	}
+	rateSConn <- rateSrv
+	rateConnID := utils.ConcatenatedKey(utils.MetaInternal, utils.MetaRates)
+	connMgr.AddInternalConn(rateConnID, utils.RateSv1, rateSConn)
+
+	rtPrf := &utils.RateProfile{
+		Tenant:    "cgrates.org",
+		ID:        "RATE_1",
+		FilterIDs: []string{"*string:~*req.Account:1001"},
+		Rates: map[string]*utils.Rate{
+			"RT_ALWAYS": {
+				ID:              "RT_ALWAYS",
+				FilterIDs:       []string{"*string:~*req.ToR:*voice"},
+				ActivationTimes: "* * * * *",
+				IntervalRates: []*utils.IntervalRate{
+					{
+						IntervalStart: utils.NewDecimal(0, 0),
+						RecurrentFee:  utils.NewDecimal(1, 2),
+						Increment:     utils.NewDecimal(int64(time.Second), 1),
+						Unit:          utils.NewDecimal(int64(time.Second), 0),
+					},
+				},
+			},
+		},
+	}
+	if errSet := dm.SetRateProfile(context.Background(), rtPrf, false, true); errSet != nil {
+		t.Fatal(errSet)
+	}
+
+	concrete := &concreteBalance{
+		cfg:     cfg,
+		acntID:  "1001",
+		fltrS:   filterS,
+		connMgr: connMgr,
+		blnCfg: &utils.Balance{
+			ID:    "ConcreteBalance1",
+			Type:  utils.MetaConcrete,
+			Units: utils.NewDecimal(100, 0),
+		},
+	}
+
+	abstractBalance := &abstractBalance{
+		cfg:    cfg,
+		acntID: "1001",
+		blnCfg: &utils.Balance{
+			ID:    "AbstractBalance1",
+			Type:  utils.MetaAbstract,
+			Units: utils.NewDecimal(int64(60*time.Second), 0),
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment: utils.NewDecimal(int64(time.Second), 0),
+				},
+			},
+			RateProfileIDs: []string{"RATE_1"},
+		},
+		cncrtBlncs: []*concreteBalance{concrete},
+		fltrS:      filterS,
+		connMgr:    connMgr,
+		rateSConns: []string{rateConnID},
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant: "cgrates.org",
+		ID:     "EV1",
+		Event: map[string]any{
+			utils.AccountField: "1001",
+		},
+		APIOpts: map[string]any{},
+	}
+
+	expErr := "RATES_ERROR:NOT_FOUND"
+	_, err := abstractBalance.debitAbstracts(context.Background(), utils.NewDecimal(int64(10*time.Second), 0), cgrEv, utils.NewDecimal(0, 0))
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected %v \n received %v", expErr, err)
+	}
+}
+
+func TestAbstractBalanceCostLimitExceed(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	connMgr := engine.NewConnManager(cfg)
+	data, err := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+	filterS := engine.NewFilterS(cfg, connMgr, dm)
+
+	abstractBalance := &abstractBalance{
+		cfg:     cfg,
+		connMgr: connMgr,
+		blnCfg: &utils.Balance{
+			ID:    "AbstractBalance",
+			Type:  utils.MetaAbstract,
+			Units: utils.NewDecimal(60, 0),
+			Opts: map[string]any{
+				utils.MetaBalanceLimit: 30.0,
+			},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(1, 0),
+					RecurrentFee: utils.NewDecimal(1, 1),
+				},
+			},
+		},
+		cncrtBlncs: []*concreteBalance{
+			{
+				cfg:     cfg,
+				connMgr: connMgr,
+				blnCfg: &utils.Balance{
+					ID:    "ConcreteBalance",
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(10, 0),
+				},
+				fltrS: filterS,
+			},
+		},
+		fltrS: filterS,
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "EV1",
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
+	}
+
+	ec, err := abstractBalance.debitAbstracts(context.Background(), utils.NewDecimal(40, 0), cgrEv, utils.NewDecimal(0, 0))
+	if err != nil {
+		t.Error(err)
+	}
+	if ec.Abstracts.Compare(utils.NewDecimal(30, 0)) != 0 {
+		t.Errorf("Expected 30, recieved %v", ec.Abstracts)
+	}
+	if ec.Concretes.Compare(utils.NewDecimal(3, 0)) != 0 {
+		t.Errorf("Expected 3, recieved %v", ec.Concretes)
+	}
+	if abstractBalance.blnCfg.Units.Compare(utils.NewDecimal(30, 0)) != 0 {
+		t.Errorf("Expected 30, recieved %v", abstractBalance.blnCfg.Units)
+	}
+	if abstractBalance.cncrtBlncs[0].blnCfg.Units.Compare(utils.NewDecimal(7, 0)) != 0 {
+		t.Errorf("Expected 7, recieved %v", abstractBalance.cncrtBlncs[0].blnCfg.Units)
+	}
+}
+
+func TestAbstractBalanceCostLimitError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	connMgr := engine.NewConnManager(cfg)
+	data, errDB := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if errDB != nil {
+		t.Fatal(errDB)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
+	cacheS := engine.NewCacheS(cfg, dm, connMgr, nil, locker)
+	connMgr.SetCache(cacheS)
+	dm.SetCache(cacheS)
+	filterS := engine.NewFilterS(cfg, connMgr, dm)
+
+	abstractBalance := &abstractBalance{
+		cfg:     cfg,
+		connMgr: connMgr,
+		blnCfg: &utils.Balance{
+			ID:    "AbstractBalance",
+			Type:  utils.MetaAbstract,
+			Units: utils.NewDecimal(60, 0),
+			Opts: map[string]any{
+				utils.MetaBalanceLimit: 30,
+			},
+			CostIncrements: []*utils.CostIncrement{
+				{
+					Increment:    utils.NewDecimal(1, 0),
+					RecurrentFee: utils.NewDecimal(1, 1),
+				},
+			},
+		},
+		cncrtBlncs: []*concreteBalance{
+			{
+				cfg:     cfg,
+				connMgr: connMgr,
+				blnCfg: &utils.Balance{
+					ID:    "ConcreteBalance",
+					Type:  utils.MetaConcrete,
+					Units: utils.NewDecimal(10, 0),
+				},
+				fltrS: filterS,
+			},
+		},
+		fltrS: filterS,
+	}
+
+	cgrEv := &utils.CGREvent{
+		Tenant:  "cgrates.org",
+		ID:      "EV1",
+		Event:   map[string]any{},
+		APIOpts: map[string]any{},
+	}
+
+	expErr := "unsupported *balanceLimit format"
+	_, err := abstractBalance.debitAbstracts(context.Background(), utils.NewDecimal(40, 0), cgrEv, utils.NewDecimal(0, 0))
+	if err == nil || err.Error() != expErr {
+		t.Errorf("Expected %v \n received %v", expErr, err)
 	}
 }
