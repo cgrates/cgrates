@@ -273,8 +273,12 @@ func (at *ActionTiming) Execute(fltrS *FilterS, originService string) (err error
 					}
 				}
 				if act.Balance.WeightRule != "" {
-					if dynWeight, errWg := utils.BalanceWeightAsFloat64(act.Balance.WeightRule); errWg == nil {
-						act.Balance.Weight = &dynWeight
+					// if weightrule is populated we generate balance weight dynamically on every execute
+					if wgh, errWg := act.calculateWeightRule(); errWg != nil {
+						utils.Logger.Warning(fmt.Sprintf("could not calculate weightrule %s, action %s: %v",
+							act.Balance.WeightRule, act.Id, errWg))
+					} else {
+						act.Balance.Weight = &wgh
 					}
 				}
 

@@ -59,6 +59,100 @@ func (a *Action) Clone() (cln *Action) {
 	}
 }
 
+func (a *Action) AsMapInterface() map[string]any {
+	ev := map[string]any{
+		utils.ActionID:   a.Id,
+		utils.ActionType: a.ActionType,
+		utils.Weight:     a.Weight,
+	}
+	if a.ExtraParameters != "" {
+		ev[utils.ExtraParameters] = a.ExtraParameters
+	}
+	if len(a.Filters) != 0 {
+		ev[utils.Filters] = a.Filters
+	}
+	bf := a.Balance
+	if bf == nil {
+		return ev
+	}
+	if bf.ID != nil {
+		ev[utils.BalanceID] = *bf.ID
+	}
+	if bf.Type != nil {
+		ev[utils.BalanceType] = *bf.Type
+	}
+	if bf.Value != nil {
+		ev[utils.BalanceValue] = bf.GetValue()
+	}
+	if bf.ExpirationDate != nil {
+		ev[utils.BalanceExpirationDate] = *bf.ExpirationDate
+	}
+	if bf.Weight != nil {
+		ev[utils.BalanceWeight] = *bf.Weight
+	}
+	if bf.DestinationIDs != nil {
+		ev[utils.BalanceDestinationIds] = bf.DestinationIDs.String()
+	}
+	if bf.RatingSubject != nil {
+		ev[utils.BalanceRatingSubject] = *bf.RatingSubject
+	}
+	if bf.Categories != nil {
+		ev[utils.BalanceCategories] = bf.Categories.String()
+	}
+	if bf.SharedGroups != nil {
+		ev[utils.BalanceSharedGroups] = bf.SharedGroups.String()
+	}
+	if bf.TimingIDs != nil {
+		ev[utils.BalanceTimingTags] = bf.TimingIDs.String()
+	}
+	if bf.Blocker != nil {
+		ev[utils.BalanceBlocker] = *bf.Blocker
+	}
+	if bf.Disabled != nil {
+		ev[utils.BalanceDisabled] = *bf.Disabled
+	}
+	return ev
+}
+
+// calculateWeightRule checks first to return a value from time constants (*time_desc/*time_asc).
+// otherwise it processes the weightrule to attributeS as attribute ID.
+// returns populated value from *req.BalanceWeight as a float.
+func (act *Action) calculateWeightRule() (float64, error) {
+	switch act.Balance.WeightRule {
+	case utils.MetaTimeDesc, utils.MetaTimeAsc:
+		// convert weight value directly using time constants
+		return utils.BalanceWeightAsFloat64(act.Balance.WeightRule)
+	}
+	// weightrule defined as an attribute profile
+	timeDesc, _ := utils.BalanceWeightAsFloat64(utils.MetaTimeDesc)
+	timeAsc, _ := utils.BalanceWeightAsFloat64(utils.MetaTimeAsc)
+
+	cgrEv := &utils.CGREvent{
+		Tenant: config.CgrConfig().GeneralCfg().DefaultTenant,
+		ID:     utils.GenUUID(),
+		Event:  act.AsMapInterface(),
+		APIOpts: map[string]any{
+			utils.OptsAttributesProfileIDs: []string{act.Balance.WeightRule},
+			utils.OptsContext:              utils.MetaActions,
+			utils.MetaTimeDesc:             timeDesc,
+			utils.MetaTimeAsc:              timeAsc,
+		},
+	}
+	var evRep AttrSProcessEventReply
+	if err := connMgr.Call(context.TODO(), config.CgrConfig().ApierCfg().AttributeSConns,
+		utils.AttributeSv1ProcessEvent, cgrEv, &evRep); err != nil {
+		return 0, err
+	}
+	if !slices.Contains(evRep.AlteredFields, utils.MetaReq+utils.NestingSep+utils.BalanceWeight) {
+		return 0, fmt.Errorf("balance weight was not populated by attributes")
+	}
+	weight, has := evRep.CGREvent.Event[utils.BalanceWeight]
+	if !has {
+		return 0, utils.ErrNotFound
+	}
+	return utils.IfaceAsFloat64(weight)
+}
+
 // SharedActionsData holds shared data for processing actions within a group.
 type SharedActionsData struct {
 
