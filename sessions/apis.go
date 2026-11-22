@@ -219,6 +219,13 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 			cchEv[utils.MetaTotalUsage] = totalUsage
 		}
 
+		// AutoCharging
+		var autoChargeInterval time.Duration
+		if autoChargeInterval, err = engine.GetDurationOpts(ctx, apiArgs.Tenant, apiArgs.AsDataProvider(), cch,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeInterval, utils.MetaAutoChargeIntervalCfg); err != nil {
+			return
+		}
+
 		// setSRun
 		if s != nil {
 			s.lk.Lock()
@@ -238,6 +245,17 @@ func (sS *SessionS) BiRPCv1ProcessEvent(ctx context.Context,
 			} else if reIdx { // indexed field altered
 				sS.unindexSession(s.ID, false)
 				sS.indexSession(s, false)
+			}
+
+			if autoChargeInterval == time.Duration(0) { // Should have no AutoCharging
+				if s.sRuns[runID].autoChargeStop != nil { // disable autoCharging which was previously enabled
+					sS.DisableAutoChargeSRun(s.sRuns[runID])
+				}
+			} else { // Should have AutoCharging
+				if s.sRuns[runID].AutoChargeInterval != nil && *s.sRuns[runID].AutoChargeInterval != autoChargeInterval { // Difference in autoChargeInterval, stop first previous one
+					sS.DisableAutoChargeSRun(s.sRuns[runID])
+				}
+				sS.EnableAutoChargeSRun(s, runID, autoChargeInterval) // Enable AutoCharging
 			}
 			s.lk.Unlock()
 		}

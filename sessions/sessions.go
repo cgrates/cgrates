@@ -978,59 +978,60 @@ func (sS *SessionS) terminateSessionNew(ctx context.Context, s *Session) (err er
 	return
 }
 
+// ensureDisconnect makes sure the session will be disconnected, attempting normal than forceDisconnect
+func (sS *SessionS) ensureDisconnect(s *Session, funcTag string, errIn error) (err error) {
+	utils.Logger.Warning(
+		fmt.Sprintf("<%s> funcTag: <%s> error: %s, session: %s, disconnecting session ...",
+			utils.SessionS, funcTag, errIn.Error(), utils.ToJSON(s)))
+	if err = sS.disconnectSession(s, utils.ErrServerError.Error()); err != nil {
+		utils.Logger.Warning(
+			fmt.Sprintf("<%s> error: %s attempted to disconnect session: %s, will forceDisconnect ...",
+				utils.SessionS, err.Error(), utils.ToJSON(s)))
+		if err = sS.forceSTerminate(context.TODO(), s, time.Duration(0), nil, nil); err != nil {
+			utils.Logger.Warning(
+				fmt.Sprintf("<%s> error: %s attempted to forceDisconnect session: %s",
+					utils.SessionS, err.Error(), utils.ToJSON(s)))
+		}
+	}
+	return
+}
+
 // EnableAutoChargeSRun will enable autocharging loop on a SRun
-func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Duration, s *Session) {
+func (sS *SessionS) EnableAutoChargeSRun(s *Session, sRunID string, autoChargeInterval time.Duration) {
 	var autoChargeUsage, aCMinGranted *utils.Decimal
 	var eEc *utils.EventCharges
 	var err error
-	var origAChrIval *time.Duration // populated if the original changes
-	sRun.lk.RLock()
-	cgrEv := sRun.CGREvent.Clone()
-	sRun.lk.RUnlock()
-	if aCMinGranted, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
-		sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeMinGranted,
-		utils.MetaAutoChargeMinGranted); err != nil {
-		utils.Logger.Warning(
-			fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-				utils.SessionS, err.Error(), cgrEv, utils.MetaAutoChargeMinGranted))
-		if err = sS.disconnectSession(s, utils.ErrServerError.Error()); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, err.Error(), cgrEv, utils.AgentV1DisconnectSession))
-		}
-		return
-	}
-
+	var origAChrIval *time.Duration                          // populated if the original changes
+	s.sRuns[sRunID].AutoChargeInterval = &autoChargeInterval // small chance of concurrency, maybe add lock
 	for {
-		sRun.lk.RLock()
-		cgrEv := sRun.CGREvent.Clone()
-		sRun.lk.RUnlock()
+		s.sRuns[sRunID].lk.RLock()
+		cgrEv := s.sRuns[sRunID].CGREvent.Clone()
+		s.sRuns[sRunID].lk.RUnlock()
+
+		if aCMinGranted, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
+			sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeMinGranted,
+			utils.MetaAutoChargeMinGranted); err != nil {
+			sS.ensureDisconnect(s, utils.MetaAutoChargeMinGranted, err)
+			return
+		}
 		if autoChargeUsage, err = engine.GetDecimalOpts(context.TODO(), cgrEv.Tenant, cgrEv.AsDataProvider(), nil,
 			sS.fltrS, sS.cfg.SessionSCfg().Opts.AutoChargeUsage,
 			utils.MetaAutoChargeUsageCfg); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
-			continue
+			sS.ensureDisconnect(s, utils.MetaAutoChargeUsageCfg, err)
+			return
 		}
 		isACLoopUsage := utils.NewDecimal(int64(autoChargeInterval), 0).Compare(autoChargeUsage) == 0 // special case when we are looping for the same usage, ie: voice debit
 		cgrEv.APIOpts[utils.MetaUsage] = autoChargeUsage                                              // dynamically change the next usage
 		if eEc, err = sS.accountSDebitEvent(context.TODO(), cgrEv); err != nil {
-			utils.Logger.Warning(
-				fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s",
-					utils.SessionS, err.Error(), cgrEv, utils.AutoCharge))
+			sS.ensureDisconnect(s, utils.AutoCharge, err)
+			return
 		}
-		sRun.lk.Lock()
-		sRun.Charges.Merge(eEc)
-		sRun.lk.Unlock()
+		s.sRuns[sRunID].lk.Lock()
+		s.sRuns[sRunID].Charges.Merge(eEc)
+		s.sRuns[sRunID].lk.Unlock()
 
 		if eEc.Abstracts.Compare(aCMinGranted) == -1 { // allowed Abstracts are smaller than MinGranted setting
-			if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err != nil {
-				utils.Logger.Warning(
-					fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s, reason: %s",
-						utils.SessionS, err.Error(), cgrEv,
-						utils.AgentV1DisconnectSession, utils.ErrInsufficientCredit.Error()))
-			}
+			sS.ensureDisconnect(s, utils.AutoCharge, utils.ErrInsufficientCredit)
 			return
 		}
 
@@ -1042,24 +1043,19 @@ func (sS *SessionS) EnableAutoChargeSRun(sRun *SRun, autoChargeInterval time.Dur
 		if eEc.Abstracts.Compare(autoChargeUsage) == -1 && isACLoopUsage { // granted smaller than requested, for loopUsage we try again when that empties
 			origAChrIval = &autoChargeInterval
 			if eAbs, isDur := eEc.Abstracts.Duration(); !isDur {
-				if err = sS.disconnectSession(s, utils.ErrInsufficientCredit.Error()); err != nil {
-					utils.Logger.Warning(
-						fmt.Sprintf("<%s> error: %s processing event: %+v flag for %s, reason: %s",
-							utils.SessionS, err.Error(), cgrEv,
-							utils.AgentV1DisconnectSession, utils.ErrServerError.Error()))
-				}
+				sS.ensureDisconnect(s, utils.AutoCharge, utils.ErrServerError)
 				return
 			} else {
 				autoChargeInterval = eAbs
 			}
 		}
 
-		sRun.lk.Lock()
-		sRun.NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
-		sRun.lk.Unlock()
+		s.sRuns[sRunID].lk.Lock()
+		s.sRuns[sRunID].NextAutoCharge = utils.TimePointer(time.Now().Add(autoChargeInterval))
+		s.sRuns[sRunID].lk.Unlock()
 
 		select {
-		case <-sRun.autoChargeStop:
+		case <-s.sRuns[sRunID].autoChargeStop:
 			return
 		case <-time.After(autoChargeInterval):
 			continue
@@ -1073,6 +1069,7 @@ func (sS *SessionS) DisableAutoChargeSRun(sRun *SRun) {
 	if sRun.autoChargeStop != nil {
 		close(sRun.autoChargeStop)
 		sRun.autoChargeStop = nil
+		sRun.AutoChargeInterval = nil
 	}
 	sRun.lk.Unlock()
 }
