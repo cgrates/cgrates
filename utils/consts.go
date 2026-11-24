@@ -460,6 +460,7 @@ const (
 	Categories         = "Categories"
 	Blocker            = "Blocker"
 	Blockers           = "Blockers"
+	ReleaseMode        = "ReleaseMode"
 	Params             = "Params"
 	StartTime          = "StartTime"
 	EndTime            = "EndTime"

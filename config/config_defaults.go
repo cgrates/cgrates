@@ -1919,8 +1919,9 @@ const CGRATES_CFG_JSON = `
 					{"tag": "Limit", "path": "Limit", "type": "*variable", "value": "~*req.5"},
 					{"tag": "AllocationMessage", "path": "AllocationMessage", "type": "*variable", "value": "~*req.6"},
 					{"tag": "Blocker", "path": "Blocker", "type": "*variable", "value": "~*req.7"},
-					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.8"},
-					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.9"}
+					{"tag": "ReleaseMode", "path": "ReleaseMode", "type": "*variable", "value": "~*req.8"},
+					{"tag": "Stored", "path": "Stored", "type": "*variable", "value": "~*req.9"},
+					{"tag": "ThresholdIDs", "path": "ThresholdIDs", "type": "*variable", "value": "~*req.10"}
 				]
 			},
 			{

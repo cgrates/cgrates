@@ -66,8 +66,8 @@ cgrates.org,FLTR_CLI_BL,*string,~*req.CLI,1001;1002;1003;1004;1005`,
 			utils.AttributesCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,AttributeFilterIDs,AttributeBlockers,Path,Type,Value
 cgrates.org,ATTR_1001,*string:~*req.CLI:1001,;10,,,,*req.Category,*constant,Customer
 cgrates.org,ATTR_Blacklist,FLTR_CLI_BL;*string:~*req.Destination:111,;20,,,,*req.Destination,*constant,Blacklisted`,
-			utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],Stored[8],ThresholdIDs[9]
-cgrates.org,RES_1001,*string:~*req.CLI:1001,;10,-1,2,,false,true,*none`,
+			utils.ResourcesCsv: `#Tenant[0],Id[1],FilterIDs[2],Weights[3],TTL[4],Limit[5],AllocationMessage[6],Blocker[7],ReleaseMode[8],Stored[9],ThresholdIDs[10]
+cgrates.org,RES_1001,*string:~*req.CLI:1001,;10,-1,2,,false,,true,*none`,
 			utils.AccountsCsv: `#Tenant,ID,FilterIDs,Weights,Blockers,Opts,BalanceID,BalanceFilterIDs,BalanceWeights,BalanceBlockers,BalanceType,BalanceUnits,BalanceUnitFactors,BalanceOpts,BalanceCostIncrements,BalanceAttributeIDs,BalanceRateProfileIDs,ThresholdIDs
 cgrates.org,1001,*string:~*req.CLI:1001,;10,,,MONETARY,,;10,,*concrete,10,,,;;;;1s,,RP_CUSTOMER,`,
 			utils.RatesCsv: `#Tenant,ID,FilterIDs,Weights,MinCost,MaxCost,MaxCostStrategy,RateID,RateFilterIDs,RateActivationStart,RateWeights,RateBlocker,RateIntervalStart,RateFixedFee,RateRecurrentFee,RateUnit,RateIncrement
