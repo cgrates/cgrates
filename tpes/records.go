@@ -128,6 +128,7 @@ func resourceProfileRecords(profile *utils.ResourceProfile) [][]string {
 	fields[utils.Limit] = utils.IfaceAsString(profile.Limit)
 	fields[utils.AllocationMessage] = profile.AllocationMessage
 	fields[utils.Blocker] = utils.IfaceAsString(profile.Blocker)
+	fields[utils.ReleaseMode] = profile.ReleaseMode
 	fields[utils.Stored] = utils.IfaceAsString(profile.Stored)
 	fields[utils.ThresholdIDs] = joinValues(profile.ThresholdIDs)
 	return [][]string{row(resourceHeader, fields)}

@@ -16,6 +16,7 @@ type ResourceProfile struct {
 	Limit             float64       // -1 for unlimited
 	AllocationMessage string        // message returned by the winning resource on allocation
 	Blocker           bool          // blocker flag to stop processing on filters matched
+	ReleaseMode       string        // *any, *ttl or *api
 	Stored            bool
 	Weights           DynamicWeights // Weight to sort the resources
 	ThresholdIDs      []string       // Thresholds to check after changing Limit
@@ -34,6 +35,7 @@ func (rp *ResourceProfile) Clone() *ResourceProfile {
 		Limit:             rp.Limit,
 		AllocationMessage: rp.AllocationMessage,
 		Blocker:           rp.Blocker,
+		ReleaseMode:       rp.ReleaseMode,
 		Stored:            rp.Stored,
 	}
 	if rp.FilterIDs != nil {
@@ -81,6 +83,8 @@ func (rp *ResourceProfile) Set(path []string, val any, _ bool) error {
 		rp.AllocationMessage = IfaceAsString(val)
 	case Blocker:
 		rp.Blocker, err = IfaceAsBool(val)
+	case ReleaseMode:
+		rp.ReleaseMode = IfaceAsString(val)
 	case Stored:
 		rp.Stored, err = IfaceAsBool(val)
 	case Weights:
@@ -116,6 +120,9 @@ func (rp *ResourceProfile) Merge(v2 any) {
 	}
 	if vi.Blocker {
 		rp.Blocker = vi.Blocker
+	}
+	if vi.ReleaseMode != EmptyString {
+		rp.ReleaseMode = vi.ReleaseMode
 	}
 	if vi.Stored {
 		rp.Stored = vi.Stored
@@ -165,6 +172,8 @@ func (rp *ResourceProfile) FieldAsInterface(fldPath []string) (any, error) {
 		return rp.AllocationMessage, nil
 	case Blocker:
 		return rp.Blocker, nil
+	case ReleaseMode:
+		return rp.ReleaseMode, nil
 	case Stored:
 		return rp.Stored, nil
 	case Weights:
@@ -187,6 +196,7 @@ func (rp *ResourceProfile) AsMapStringInterface() map[string]any {
 		Limit:             rp.Limit,
 		AllocationMessage: rp.AllocationMessage,
 		Blocker:           rp.Blocker,
+		ReleaseMode:       rp.ReleaseMode,
 		Stored:            rp.Stored,
 		Weights:           rp.Weights,
 		ThresholdIDs:      rp.ThresholdIDs,
@@ -226,6 +236,9 @@ func MapStringInterfaceToResourceProfile(m map[string]any) (*ResourceProfile, er
 	}
 	if v, ok := m[Blocker].(bool); ok {
 		rp.Blocker = v
+	}
+	if v, ok := m[ReleaseMode].(string); ok {
+		rp.ReleaseMode = v
 	}
 	if v, ok := m[Stored].(bool); ok {
 		rp.Stored = v

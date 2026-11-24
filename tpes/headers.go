@@ -121,6 +121,7 @@ var resourceHeader = []string{
 	utils.Limit,
 	utils.AllocationMessage,
 	utils.Blocker,
+	utils.ReleaseMode,
 	utils.Stored,
 	utils.ThresholdIDs,
 }
