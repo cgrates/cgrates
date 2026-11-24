@@ -7452,3 +7452,50 @@ func TestAccountDebitBalanceTypes(t *testing.T) {
 		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(50, 0), account.Balances["balance"].Units)
 	}
 }
+
+func TestRefundChargesDBError(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: &dataDBMockError{}}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, nil), nil, dm)
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "ACC1",
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance": {
+				ID:    "ConcreteBalance",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(5, 0),
+			},
+		},
+	}
+
+	ec := &utils.EventCharges{
+		Charges: []*utils.ChargeEntry{
+			{
+				ChargingID:     "chrg1",
+				CompressFactor: 1,
+			},
+		},
+		Accounting: map[string]*utils.AccountCharge{
+			"chrg1": {
+				AccountID: "ACC1",
+				BalanceID: "ConcreteBalance",
+				Units:     utils.NewDecimal(10, 0),
+			},
+		},
+		Accounts: map[string]*utils.Account{
+			"ACC1": acc,
+		},
+	}
+	accounts, err := accnts.refundCharges(context.Background(), "cgrates.org", ec)
+	if err != utils.ErrNotImplemented {
+		t.Errorf("Expected %v \nreceived %v", utils.ErrNotImplemented, err)
+	}
+	if accounts != nil {
+		t.Errorf("Expected %v \nreceived %v", nil, accounts)
+	}
+}

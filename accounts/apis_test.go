@@ -1635,3 +1635,149 @@ func TestV1GetAccountDefaultTenant(t *testing.T) {
 		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(10, 0), reply.Balances["concreteBalance"].Units)
 	}
 }
+
+func TestV1ActionSetBalanceAddAndReset(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+	var reply string
+
+	args := &utils.ArgsActSetBalance{
+		Tenant:    "cgrates.org",
+		AccountID: "acc1",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*balance.ConcreteBalance.Units",
+				Value: "10",
+			},
+		},
+	}
+
+	for _, tc := range []struct {
+		name     string
+		value    string
+		reset    bool
+		expected *utils.Decimal
+	}{
+		{
+			name:     "first add creates the balance",
+			value:    "10",
+			reset:    false,
+			expected: utils.NewDecimal(10, 0),
+		},
+		{
+			name:     "second add sums the units",
+			value:    "5",
+			reset:    false,
+			expected: utils.NewDecimal(15, 0),
+		},
+		{
+			name:     "reset true",
+			value:    "3",
+			reset:    true,
+			expected: utils.NewDecimal(3, 0),
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			args.Diktats[0].Value = tc.value
+			args.Reset = tc.reset
+
+			if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err != nil {
+				t.Fatal(err)
+			}
+			if reply != utils.OK {
+				t.Errorf("Expected %v \nreceived %v", utils.OK, reply)
+			}
+
+			rcv, err := dm.GetAccount(context.Background(), "cgrates.org", "acc1")
+			if err != nil {
+				t.Fatal(err)
+			}
+			if rcv.Balances["ConcreteBalance"].Units.Compare(tc.expected) != 0 {
+				t.Errorf("Expected %v \nreceived %v", tc.expected, rcv.Balances["ConcreteBalance"].Units)
+			}
+		})
+	}
+}
+
+func TestV1ActionRemoveBalanceNotFoundAccount(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, dbErr := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if dbErr != nil {
+		t.Fatal(dbErr)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+
+	args := &utils.ArgsActRemoveBalances{
+		Tenant:     "cgrates.org",
+		AccountID:  "rmvAccID",
+		BalanceIDs: []string{"ConcreteBalance"},
+	}
+	var reply string
+	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err == nil || err != utils.ErrNotFound {
+		t.Errorf("Expected %v \nreceived %v", utils.ErrNotFound, err)
+	}
+}
+
+func TestV1ActionRemoveBalanceNonExistingBalance(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, dbErr := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	if dbErr != nil {
+		t.Fatal(dbErr)
+	}
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+
+	acc := &utils.Account{
+		Tenant: "cgrates.org",
+		ID:     "accID",
+		Balances: map[string]*utils.Balance{
+			"ConcreteBalance": {
+				ID:    "ConcreteBalance",
+				Type:  utils.MetaConcrete,
+				Units: utils.NewDecimal(10, 0),
+			},
+		},
+	}
+	if err := dm.SetAccount(context.Background(), acc, false); err != nil {
+		t.Fatal(err)
+	}
+
+	args := &utils.ArgsActRemoveBalances{
+		Tenant:     "cgrates.org",
+		AccountID:  "accID",
+		BalanceIDs: []string{"AbstractBalance"},
+	}
+	var reply string
+	if err := accnts.V1ActionRemoveBalance(context.Background(), args, &reply); err != nil {
+		t.Fatal(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected %v \nreceived %v", utils.OK, reply)
+	}
+
+	rcv, err := dm.GetAccount(context.Background(), "cgrates.org", "accID")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(rcv.Balances) != 1 {
+		t.Errorf("Expected %v \nreceived %v", 1, len(rcv.Balances))
+	}
+	if _, has := rcv.Balances["ConcreteBalance"]; !has {
+		t.Errorf("Expected ConcreteBalance, \nreceived %v", utils.ToJSON(rcv.Balances))
+	}
+}
