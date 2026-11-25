@@ -1781,3 +1781,84 @@ func TestV1ActionRemoveBalanceNonExistingBalance(t *testing.T) {
 		t.Errorf("Expected ConcreteBalance, \nreceived %v", utils.ToJSON(rcv.Balances))
 	}
 }
+
+func TestV1ActionSetBalanceMultipleDiktats(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	locker := engine.NewLocker(cfg)
+	data, _ := engine.NewInternalDB(nil, cfg.DbCfg().Items)
+	dbCM := engine.NewDBConnManager(map[string]engine.DataDB{utils.MetaDefault: data}, cfg.DbCfg())
+	dm := engine.NewDataManager(dbCM, cfg, nil, locker)
+	cacheS := engine.NewCacheS(cfg, nil, nil, nil, locker)
+	dm.SetCache(cacheS)
+	accnts := NewAccountS(cfg, engine.NewFilterS(cfg, nil, dm), nil, dm)
+
+	args := &utils.ArgsActSetBalance{
+		Tenant:    "cgrates.org",
+		AccountID: "ACC1",
+		Diktats: []*utils.BalDiktat{
+			{
+				Path:  "*account.Weights",
+				Value: ";10",
+			},
+			{
+				Path:  "*account.ThresholdIDs",
+				Value: "TH1",
+			},
+			{
+				Path:  "*balance.ConcreteBalance.Type",
+				Value: utils.MetaConcrete,
+			},
+			{
+				Path:  "*balance.ConcreteBalance.Units",
+				Value: "25",
+			},
+			{
+				Path:  "*balance.ConcreteBalance.Weights",
+				Value: ";20",
+			},
+		},
+	}
+
+	var reply string
+	if err := accnts.V1ActionSetBalance(context.Background(), args, &reply); err != nil {
+		t.Error(err)
+	}
+	if reply != utils.OK {
+		t.Errorf("Expected %v \nreceived %v", utils.OK, reply)
+	}
+
+	rcv, err := dm.GetAccount(context.Background(), "cgrates.org", "ACC1")
+	if err != nil {
+		t.Error(err)
+	}
+	expWeights := utils.DynamicWeights{
+		{
+			Weight: 10,
+		},
+	}
+	if !reflect.DeepEqual(rcv.Weights, expWeights) {
+		t.Errorf("Expected %v \nreceived %v", utils.ToJSON(expWeights), utils.ToJSON(rcv.Weights))
+	}
+	if !reflect.DeepEqual(rcv.ThresholdIDs, []string{"TH1"}) {
+		t.Errorf("Expected %v \nreceived %v", []string{"TH1"}, rcv.ThresholdIDs)
+	}
+
+	bal, has := rcv.Balances["ConcreteBalance"]
+	if !has {
+		t.Errorf("Expected ConcreteBalance, \nreceived %v", utils.ToJSON(rcv.Balances))
+	}
+	if bal.Type != utils.MetaConcrete {
+		t.Errorf("Expected %v \nreceived %v", utils.MetaConcrete, bal.Type)
+	}
+	if bal.Units.Compare(utils.NewDecimal(25, 0)) != 0 {
+		t.Errorf("Expected %v \nreceived %v", utils.NewDecimal(25, 0), bal.Units)
+	}
+	expBalWeights := utils.DynamicWeights{
+		{
+			Weight: 20,
+		},
+	}
+	if !reflect.DeepEqual(bal.Weights, expBalWeights) {
+		t.Errorf("Expected %v \nreceived %v", utils.ToJSON(expBalWeights), utils.ToJSON(bal.Weights))
+	}
+}
