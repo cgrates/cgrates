@@ -294,13 +294,11 @@ func (apiv2 *APIerSv2) SetActions(ctx *context.Context, attrs *utils.AttrSetActi
 		var weight *float64
 		var weightRule string
 		if apiAct.BalanceWeight != "" {
-			if strings.HasPrefix(apiAct.BalanceWeight, utils.Meta) {
+			x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64)
+			if err != nil {
+				// weight rule (inline attribute or attribute profile ID)
 				weightRule = apiAct.BalanceWeight
 			} else {
-				x, err := strconv.ParseFloat(apiAct.BalanceWeight, 64)
-				if err != nil {
-					return err
-				}
 				weight = &x
 			}
 		}

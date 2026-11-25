@@ -85,6 +85,10 @@ func NewDataConverter(params string) (conv DataConverter, err error) {
 		return new(SIPURIMethodConverter), nil
 	case params == MetaUnixTime:
 		return new(UnixTimeConverter), nil
+	case params == MetaTimeDesc:
+		return new(TimeDescConverter), nil
+	case params == MetaTimeAsc:
+		return new(TimeAscConverter), nil
 	case params == MetaLen:
 		return new(LengthConverter), nil
 	case params == MetaSlice:
@@ -420,6 +424,26 @@ func (tS *UnixTimeConverter) Convert(in any) (
 	}
 	out = tm.Unix()
 	return
+}
+
+// TimeDescConverter returns seconds left until 2050 which decreases over time
+type TimeDescConverter struct{}
+
+func (td *TimeDescConverter) Convert(in any) (any, error) {
+	if inStr := IfaceAsString(in); inStr != MetaNone {
+		return nil, fmt.Errorf("%s converter expects %s as input, received: <%s>", MetaTimeDesc, MetaNone, inStr)
+	}
+	return time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC).Unix() - time.Now().Unix(), nil
+}
+
+// TimeAscConverter returns seconds of current unix time which increases over time
+type TimeAscConverter struct{}
+
+func (ta *TimeAscConverter) Convert(in any) (any, error) {
+	if inStr := IfaceAsString(in); inStr != MetaNone {
+		return nil, fmt.Errorf("%s converter expects %s as input, received: <%s>", MetaTimeAsc, MetaNone, inStr)
+	}
+	return time.Now().Unix(), nil
 }
 
 func NewRandomConverter(params string) (dflr DataConverter, err error) {

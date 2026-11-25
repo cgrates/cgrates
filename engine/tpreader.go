@@ -459,13 +459,11 @@ func (tpr *TpReader) LoadActions() (err error) {
 			}
 
 			if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-				if strings.HasPrefix(tpact.BalanceWeight, utils.Meta) {
+				u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+				if err != nil {
+					// weight rule (inline attribute or attribute profile ID)
 					acts[idx].Balance.WeightRule = tpact.BalanceWeight
 				} else {
-					u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
-					if err != nil {
-						return err
-					}
 					acts[idx].Balance.Weight = utils.Float64Pointer(u)
 				}
 			}
@@ -938,13 +936,11 @@ func (tpr *TpReader) LoadAccountActionsFiltered(qriedAA *utils.TPAccountActions)
 					}
 
 					if tpact.BalanceWeight != "" && tpact.BalanceWeight != utils.MetaAny {
-						if strings.HasPrefix(tpact.BalanceWeight, utils.Meta) {
+						u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
+						if err != nil {
+							// weight rule (inline attribute or attribute profile ID)
 							acts[idx].Balance.WeightRule = tpact.BalanceWeight
 						} else {
-							u, err := strconv.ParseFloat(tpact.BalanceWeight, 64)
-							if err != nil {
-								return err
-							}
 							acts[idx].Balance.Weight = utils.Float64Pointer(u)
 						}
 					}
