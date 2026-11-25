@@ -28,6 +28,9 @@ type Storage interface {
 type DataDB interface {
 	Storage
 	HasDataDrv(context.Context, string, string, string) (bool, error)
+	GetSessionsDrv(context.Context) ([]*utils.Session, error)
+	SetSessionDrv(context.Context, *utils.Session) error
+	RemoveSessionDrv(context.Context, string) error
 	GetResourceProfileDrv(context.Context, string, string) (*utils.ResourceProfile, error)
 	SetResourceProfileDrv(context.Context, *utils.ResourceProfile) error
 	RemoveResourceProfileDrv(context.Context, string, string) error

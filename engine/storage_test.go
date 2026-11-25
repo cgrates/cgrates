@@ -278,6 +278,31 @@ func TestComposeURI(t *testing.T) {
 	}
 }
 
+func TestInternalDBSetSessionCopiesOpts(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	db, err := NewInternalDB(nil, cfg.DbCfg().Items)
+	if err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(db.Close)
+	ctx := t.Context()
+	opts := map[string]any{utils.MetaOriginID: "call"}
+	if err := db.SetSessionDrv(ctx, &utils.Session{
+		ID:             "cgrid",
+		OriginCGREvent: &utils.CGREvent{APIOpts: opts},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	opts[utils.MetaOriginID] = "changed"
+	saved, err := db.GetSessionsDrv(ctx)
+	if err != nil || len(saved) != 1 {
+		t.Fatalf("want one saved session, got %d: %v", len(saved), err)
+	}
+	if got := saved[0].OriginCGREvent.APIOpts[utils.MetaOriginID]; got != "call" {
+		t.Fatalf("saved *originID = %q, want call", got)
+	}
+}
+
 func TestInternalDBGetSetSection(t *testing.T) {
 	db, _ := NewInternalDB(nil, nil)
 	defer db.Close()

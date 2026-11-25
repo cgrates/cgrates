@@ -65,7 +65,7 @@ func (ssv1 *SessionSv1) GetPassiveSessionsCount(ctx context.Context, args *utils
 // 	return ssv1.sS.BiRPCv1ReplicateSessions(ctx, args.ArgsReplicateSessions, rply)
 // }
 
-func (ssv1 *SessionSv1) SetPassiveSession(ctx context.Context, args *sessions.Session,
+func (ssv1 *SessionSv1) SetPassiveSession(ctx context.Context, args *utils.Session,
 	reply *string) error {
 	return ssv1.sS.BiRPCv1SetPassiveSession(ctx, args, reply)
 }

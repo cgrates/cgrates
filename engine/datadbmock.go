@@ -157,6 +157,18 @@ func (dbM *DataDBMock) RemoveResourceDrv(ctx context.Context, tnt, id string) er
 	return utils.ErrNotImplemented
 }
 
+func (dbM *DataDBMock) GetSessionsDrv(context.Context) ([]*utils.Session, error) {
+	return nil, utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) SetSessionDrv(context.Context, *utils.Session) error {
+	return utils.ErrNotImplemented
+}
+
+func (dbM *DataDBMock) RemoveSessionDrv(context.Context, string) error {
+	return utils.ErrNotImplemented
+}
+
 func (dbM *DataDBMock) GetIPProfileDrv(ctx context.Context, tnt, id string) (*utils.IPProfile, error) {
 	if dbM.GetIPProfileDrvF != nil {
 		return dbM.GetIPProfileDrvF(ctx, tnt, id)

@@ -219,6 +219,12 @@ CREATE TABLE trends (
 CREATE UNIQUE INDEX trends_idx ON trends ("id");
 
 
+DROP TABLE IF EXISTS sessions;
+CREATE TABLE sessions (
+  cgrid VARCHAR(40) PRIMARY KEY,
+  session JSONB NOT NULL
+);
+
 DROP TABLE IF EXISTS load_history;
 CREATE TABLE load_history (
   key SERIAL PRIMARY KEY,

@@ -791,6 +791,27 @@ func (iDB *InternalDB) HasItem(args utils.ArgsGetCacheItemWithAPIOpts) (bool, er
 	return iDB.db.HasItem(args.CacheID, args.ItemID), nil
 }
 
+func (iDB *InternalDB) GetSessionsDrv(_ context.Context) ([]*utils.Session, error) {
+	ids := iDB.db.GetItemIDs(utils.MetaSessionS, "")
+	sessions := make([]*utils.Session, 0, len(ids))
+	for _, id := range ids {
+		if item, ok := iDB.db.Get(utils.MetaSessionS, id); ok {
+			sessions = append(sessions, item.(*utils.Session).Clone())
+		}
+	}
+	return sessions, nil
+}
+
+func (iDB *InternalDB) SetSessionDrv(_ context.Context, session *utils.Session) error {
+	iDB.db.Set(utils.MetaSessionS, session.ID, session.Clone(), nil, true, utils.NonTransactional)
+	return nil
+}
+
+func (iDB *InternalDB) RemoveSessionDrv(_ context.Context, cgrID string) error {
+	iDB.db.Remove(utils.MetaSessionS, cgrID, true, utils.NonTransactional)
+	return nil
+}
+
 func (iDB *InternalDB) GetItem(args utils.ArgsGetCacheItemWithAPIOpts) (any, bool) {
 	return iDB.db.Get(args.CacheID, args.ItemID)
 }

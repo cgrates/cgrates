@@ -103,19 +103,20 @@ func TestBiRPCv1ForceDisconnect(t *testing.T) {
 	}
 	sessions.dm = dm
 	args.Filters = nil
-	sessions.aSessions = map[string]*Session{
+	sessions.aSessions = map[string]*session{
 		"sess1": {
 
-			ID: "1001",
-			sRuns: map[string]*SRun{
-				"Id": {
-					ID: "Id",
+			session: &utils.Session{ID: "1001",
+				SRuns: map[string]*utils.SRun{
+					"Id": {
+						ID: "Id",
+					},
 				},
 			},
 		},
 		"CGRATES_ID": {
 
-			ClientConnID: "client1",
+			session: &utils.Session{ClientConnID: "client1"},
 		},
 	}
 	time.Sleep(50 * time.Millisecond)
@@ -164,7 +165,7 @@ func TestSyncSessionsSync(t *testing.T) {
 	dm := engine.NewDataManager(dbCM, cfg, connMgr, locker)
 	dm.SetCache(cacheS)
 	sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
-	sessions.aSessions = map[string]*Session{}
+	sessions.aSessions = map[string]*session{}
 	sessions.cfg.GeneralCfg().ReplyTimeout = 1
 	var reply string
 	if err := sessions.BiRPCv1SyncSessions(nil, nil, &reply); err != nil {

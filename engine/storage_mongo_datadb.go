@@ -39,6 +39,7 @@ const (
 	ColRpl  = "ratingPlans"
 	ColRpf  = "ratingProfiles"
 	ColAcc  = "accounts"
+	ColSes  = "sessions"
 	ColShg  = "sharedGroups"
 	ColLht  = "load_history"
 	ColVer  = "versions"
@@ -665,6 +666,48 @@ func (ms *MongoStorage) RemoveResourceDrv(ctx context.Context, tenant, id string
 		if dr.DeletedCount == 0 {
 			return utils.ErrNotFound
 		}
+		return err
+	})
+}
+
+func (ms *MongoStorage) GetSessionsDrv(ctx context.Context) ([]*utils.Session, error) {
+	var sessions []*utils.Session
+	err := ms.query(ctx, func(sctx mongo.SessionContext) error {
+		cursor, err := ms.getCol(ColSes).Find(sctx, bson.D{})
+		if err != nil {
+			return err
+		}
+		defer func() { _ = cursor.Close(sctx) }()
+		for cursor.Next(sctx) {
+			session := new(utils.Session)
+			if err := cursor.Decode(session); err != nil {
+				return fmt.Errorf("decode session %v: %w", cursor.Current.Lookup("_id"), err)
+			}
+			// Later writes and deletes use the CGRID, so it must match the row key.
+			if id, _ := cursor.Current.Lookup("_id").StringValueOK(); id == "" || id != session.ID {
+				return fmt.Errorf("session %q has CGRID %q", id, session.ID)
+			}
+			sessions = append(sessions, session)
+		}
+		return cursor.Err()
+	})
+	if err != nil {
+		return nil, err
+	}
+	return sessions, nil
+}
+
+func (ms *MongoStorage) SetSessionDrv(ctx context.Context, session *utils.Session) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColSes).UpdateOne(sctx, bson.M{"_id": session.ID},
+			bson.M{"$set": session}, options.Update().SetUpsert(true))
+		return err
+	})
+}
+
+func (ms *MongoStorage) RemoveSessionDrv(ctx context.Context, cgrID string) error {
+	return ms.query(ctx, func(sctx mongo.SessionContext) error {
+		_, err := ms.getCol(ColSes).DeleteOne(sctx, bson.M{"_id": cgrID})
 		return err
 	})
 }

@@ -1891,14 +1891,14 @@ func TestGetRelocateSession(t *testing.T) {
 		t.Errorf("Expected to be nil, recieved %v", rcv)
 	}
 
-	sessions.pSessions = map[string]*Session{
+	sessions.pSessions = map[string]*session{
 		"s1": {
-			ID: "testID",
+			session: &utils.Session{ID: "testID"},
 		},
 	}
 
-	expected := &Session{
-		ID: "testID",
+	expected := &session{
+		session: &utils.Session{ID: "testID"},
 	}
 	rcv = sessions.getRelocateSession(ctx, "s1", "")
 	if !reflect.DeepEqual(rcv, expected) {
@@ -1940,11 +1940,11 @@ func TestSessionSSetSession(t *testing.T) {
 		if s == nil {
 			t.Error("Expected the session to be set")
 		}
-		if s.ID != cgrID {
-			t.Errorf("Expected %v, got %v", cgrID, s.ID)
+		if s.session.ID != cgrID {
+			t.Errorf("Expected %v, got %v", cgrID, s.session.ID)
 		}
-		if s.ClientConnID != clientConnID {
-			t.Errorf("Expected %v, recieved %v", clientConnID, s.ClientConnID)
+		if s.session.ClientConnID != clientConnID {
+			t.Errorf("Expected %v, recieved %v", clientConnID, s.session.ClientConnID)
 		}
 		if !sS.isSessionRegistered(cgrID, false) {
 			t.Error("Expected session to be registered as active")
@@ -1971,7 +1971,7 @@ func TestSessionSSetSession(t *testing.T) {
 		if err == nil || err.Error() != expErr {
 			t.Errorf("Expected error %v, got %v", expErr, err.Error())
 		}
-		exp := &Session{}
+		exp := &session{}
 		exp = nil
 		if !reflect.DeepEqual(s, exp) {
 			t.Errorf("Expected Session to be nil, got %v", s)
@@ -1985,7 +1985,7 @@ func TestSessionSSetSession(t *testing.T) {
 			t.Errorf("Expected error %v, got %v", expErr, err.Error())
 		}
 
-		exp := &Session{}
+		exp := &session{}
 		exp = nil
 		if !reflect.DeepEqual(s, exp) {
 			t.Errorf("Expected Session to be nil, got %v", s)
@@ -2017,17 +2017,18 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 		Event:   map[string]any{utils.OriginID: cgrID},
 		APIOpts: map[string]any{},
 	}
-	sr := &SRun{
+	sr := &utils.SRun{
 		CGREvent: cgrEv,
 	}
 	t.Run("Charges set with nil UsageAdjustment", func(t *testing.T) {
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(500, 0)
 		sr.UsageAdjustment = nil
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns:          map[string]*utils.SRun{utils.MetaPrimary: sr},
+			},
 		}
 		sS.registerSession(s, false)
 		if err := sS.terminateSessionNew(ctx, s); err != nil {
@@ -2042,10 +2043,11 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
 		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns:          map[string]*utils.SRun{utils.MetaPrimary: sr},
+			},
 		}
 		sS.registerSession(s, false)
 		err := sS.terminateSessionNew(ctx, s)
@@ -2141,10 +2143,11 @@ func TestSessionSTerminateSessionNew(t *testing.T) {
 			},
 		}
 		sr.UsageAdjustment = utils.NewDecimal(30, 0)
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns:          map[string]*utils.SRun{utils.MetaPrimary: sr},
+			},
 		}
 		sS.registerSession(s, false)
 		err = sS.terminateSessionNew(ctx, s)
@@ -2210,7 +2213,7 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 			utils.MetaBlockerErrorCfg: true,
 		},
 	}
-	sr := &SRun{
+	sr := &utils.SRun{
 		CGREvent: cgrEv,
 	}
 	t.Run("Refund", func(t *testing.T) {
@@ -2293,10 +2296,11 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 			},
 		}
 		sr.UsageAdjustment = utils.NewDecimal(30, 0)
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns:          map[string]*utils.SRun{utils.MetaPrimary: sr},
+			},
 		}
 		sS.registerSession(s, false)
 		err = sS.terminateSessionNew(ctx, s)
@@ -2316,10 +2320,11 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 		sr.Charges = utils.NewEventCharges()
 		sr.Charges.Abstracts = utils.NewDecimal(100, 0)
 		sr.UsageAdjustment = utils.NewDecimal(-40, 0)
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns:          map[string]*SRun{utils.MetaPrimary: sr},
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns:          map[string]*utils.SRun{utils.MetaPrimary: sr},
+			},
 		}
 		sS.registerSession(s, false)
 		err := sS.terminateSessionNew(ctx, s)
@@ -2336,22 +2341,23 @@ func TestSessionSTerminateSessionNew2(t *testing.T) {
 	})
 
 	t.Run("Multiple SRun all processed", func(t *testing.T) {
-		sr1 := &SRun{
+		sr1 := &utils.SRun{
 			CGREvent: cgrEv,
 		}
 		sr1.Charges = utils.NewEventCharges()
 		sr1.Charges.Abstracts = utils.NewDecimal(200, 0)
-		sr2 := &SRun{
+		sr2 := &utils.SRun{
 			CGREvent: cgrEv,
 		}
 		sr2.Charges = utils.NewEventCharges()
 		sr2.Charges.Abstracts = utils.NewDecimal(300, 0)
-		s := &Session{
-			ID:             cgrID,
-			OriginCGREvent: cgrEv,
-			sRuns: map[string]*SRun{
-				utils.MetaPrimary: sr1,
-				utils.MetaDefault: sr2,
+		s := &session{
+			session: &utils.Session{ID: cgrID,
+				OriginCGREvent: cgrEv,
+				SRuns: map[string]*utils.SRun{
+					utils.MetaPrimary: sr1,
+					utils.MetaDefault: sr2,
+				},
 			},
 		}
 		sS.registerSession(s, false)
@@ -2442,23 +2448,24 @@ func TestSetSTerminator(t *testing.T) {
 				var buf bytes.Buffer
 				utils.Logger = utils.NewStdLoggerWithWriter(&buf, "", 7)
 
-				ss := &Session{
-					ID: "id",
-					OriginCGREvent: &utils.CGREvent{
-						Tenant: "cgrates.org",
-						ID:     "id1",
-						Event:  map[string]any{},
-						APIOpts: map[string]any{
-							utils.MetaOriginID: "id2",
-						},
-					},
-					sRuns: map[string]*SRun{
-						"run1": {
-							CGREvent: &utils.CGREvent{
-								Event:   map[string]any{},
-								APIOpts: map[string]any{},
+				ss := &session{
+					session: &utils.Session{ID: "id",
+						OriginCGREvent: &utils.CGREvent{
+							Tenant: "cgrates.org",
+							ID:     "id1",
+							Event:  map[string]any{},
+							APIOpts: map[string]any{
+								utils.MetaOriginID: "id2",
 							},
-							TotalUsage: utils.NewDecimal(90, 0),
+						},
+						SRuns: map[string]*utils.SRun{
+							"run1": {
+								CGREvent: &utils.CGREvent{
+									Event:   map[string]any{},
+									APIOpts: map[string]any{},
+								},
+								TotalUsage: utils.NewDecimal(90, 0),
+							},
 						},
 					},
 				}
@@ -2477,23 +2484,24 @@ func TestSetSTerminator(t *testing.T) {
 	})
 
 	t.Run("Empty engine.MapEvent", func(t *testing.T) {
-		ss := &Session{
-			ID: "ssID",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ssID",
-				Event:  map[string]any{},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "ssID",
-				},
-			},
-			sRuns: map[string]*SRun{
-				"run1": {
-					CGREvent: &utils.CGREvent{
-						Event:   map[string]any{},
-						APIOpts: map[string]any{},
+		ss := &session{
+			session: &utils.Session{ID: "ssID",
+				OriginCGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ssID",
+					Event:  map[string]any{},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "ssID",
 					},
-					TotalUsage: utils.NewDecimal(90, 0),
+				},
+				SRuns: map[string]*utils.SRun{
+					"run1": {
+						CGREvent: &utils.CGREvent{
+							Event:   map[string]any{},
+							APIOpts: map[string]any{},
+						},
+						TotalUsage: utils.NewDecimal(90, 0),
+					},
 				},
 			},
 		}
@@ -2505,23 +2513,24 @@ func TestSetSTerminator(t *testing.T) {
 	})
 
 	t.Run("OptsSesTTLMaxDelay not nil", func(t *testing.T) {
-		ss := &Session{
-			ID: "ssID",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ssID1",
-				Event:  map[string]any{},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "ssID2",
-				},
-			},
-			sRuns: map[string]*SRun{
-				"run2": {
-					CGREvent: &utils.CGREvent{
-						Event:   map[string]any{},
-						APIOpts: map[string]any{},
+		ss := &session{
+			session: &utils.Session{ID: "ssID",
+				OriginCGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ssID1",
+					Event:  map[string]any{},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "ssID2",
 					},
-					TotalUsage: utils.NewDecimal(80, 0),
+				},
+				SRuns: map[string]*utils.SRun{
+					"run2": {
+						CGREvent: &utils.CGREvent{
+							Event:   map[string]any{},
+							APIOpts: map[string]any{},
+						},
+						TotalUsage: utils.NewDecimal(80, 0),
+					},
 				},
 			},
 		}
@@ -2544,48 +2553,49 @@ func TestSetSTerminator(t *testing.T) {
 		if ss.sTerminator.endChan == nil {
 			t.Error("Expected endChan to be set")
 		}
-		if ss.sTerminator.ttl < 1*time.Second || ss.sTerminator.ttl >= 2*time.Second {
-			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.sTerminator.ttl)
+		if ss.session.TTL.Duration < time.Second || ss.session.TTL.Duration >= 2*time.Second {
+			t.Errorf("Expected ttl within 1s and 2s, received %s", ss.session.TTL.Duration)
 		}
-		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 2*time.Second {
-			t.Errorf("Expected ttlLastUsed 2s, received %+v", ss.sTerminator.ttlLastUsed)
+		if ss.session.TTL.LastUsed == nil || *ss.session.TTL.LastUsed != 2*time.Second {
+			t.Errorf("Expected ttlLastUsed 2s, received %+v", ss.session.TTL.LastUsed)
 		}
-		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 3*time.Second {
-			t.Errorf("Expected ttlLastUsage 3s, received %+v", ss.sTerminator.ttlLastUsage)
+		if ss.session.TTL.LastUsage == nil || *ss.session.TTL.LastUsage != 3*time.Second {
+			t.Errorf("Expected ttlLastUsage 3s, received %+v", ss.session.TTL.LastUsage)
 		}
-		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 4*time.Second {
-			t.Errorf("Expected ttlUsage 4s, received %+v", ss.sTerminator.ttlUsage)
+		if ss.session.TTL.Usage == nil || *ss.session.TTL.Usage != 4*time.Second {
+			t.Errorf("Expected ttlUsage 4s, received %+v", ss.session.TTL.Usage)
 		}
 	})
 
 	t.Run("reset an existing terminator", func(t *testing.T) {
-		ss := &Session{
-			ID: "idS1",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "idS2",
-				Event:  map[string]any{},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "idS3",
-				},
-			},
-			sRuns: map[string]*SRun{
-				"run3": {
-					CGREvent: &utils.CGREvent{
-						Event:   map[string]any{},
-						APIOpts: map[string]any{},
+		ss := &session{
+			session: &utils.Session{ID: "idS1",
+				OriginCGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "idS2",
+					Event:  map[string]any{},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "idS3",
 					},
-					TotalUsage: utils.NewDecimal(70, 0),
+				},
+				SRuns: map[string]*utils.SRun{
+					"run3": {
+						CGREvent: &utils.CGREvent{
+							Event:   map[string]any{},
+							APIOpts: map[string]any{},
+						},
+						TotalUsage: utils.NewDecimal(70, 0),
+					},
 				},
 			},
 		}
 		ss.sTerminator = &sTerminator{
-			timer:        time.NewTimer(time.Hour),
-			endChan:      make(chan struct{}),
-			ttl:          time.Hour,
-			ttlLastUsed:  utils.DurationPointer(time.Second),
-			ttlUsage:     utils.DurationPointer(time.Second),
-			ttlLastUsage: utils.DurationPointer(time.Second),
+			timer:   time.NewTimer(time.Hour),
+			endChan: make(chan struct{}),
+		}
+		ss.session.TTL = &utils.SessionTTL{
+			Duration: time.Hour, LastUsed: utils.DurationPointer(time.Second),
+			Usage: utils.DurationPointer(time.Second), LastUsage: utils.DurationPointer(time.Second),
 		}
 
 		sessions.setSTerminator(ctx, ss, engine.MapEvent{
@@ -2595,39 +2605,40 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTLUsage:     "8s",
 		})
 
-		if ss.sTerminator.ttl != 5*time.Second {
-			t.Errorf("Expected ttl 5s, received %s", ss.sTerminator.ttl)
+		if ss.session.TTL.Duration != 5*time.Second {
+			t.Errorf("Expected ttl 5s, received %s", ss.session.TTL.Duration)
 		}
-		if ss.sTerminator.ttlLastUsed == nil || *ss.sTerminator.ttlLastUsed != 6*time.Second {
-			t.Errorf("Expected ttlLastUsed 6s, received %+v", ss.sTerminator.ttlLastUsed)
+		if ss.session.TTL.LastUsed == nil || *ss.session.TTL.LastUsed != 6*time.Second {
+			t.Errorf("Expected ttlLastUsed 6s, received %+v", ss.session.TTL.LastUsed)
 		}
-		if ss.sTerminator.ttlLastUsage == nil || *ss.sTerminator.ttlLastUsage != 7*time.Second {
-			t.Errorf("Expected ttlLastUsage 7s, received %+v", ss.sTerminator.ttlLastUsage)
+		if ss.session.TTL.LastUsage == nil || *ss.session.TTL.LastUsage != 7*time.Second {
+			t.Errorf("Expected ttlLastUsage 7s, received %+v", ss.session.TTL.LastUsage)
 		}
-		if ss.sTerminator.ttlUsage == nil || *ss.sTerminator.ttlUsage != 8*time.Second {
-			t.Errorf("Expected ttlUsage 8s, received %+v", ss.sTerminator.ttlUsage)
+		if ss.session.TTL.Usage == nil || *ss.session.TTL.Usage != 8*time.Second {
+			t.Errorf("Expected ttlUsage 8s, received %+v", ss.session.TTL.Usage)
 		}
 	})
 
 	t.Run("Manual termination", func(t *testing.T) {
 		sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
-		ss := &Session{
-			ID: "sessionID",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "sessionID",
-				Event:  map[string]any{},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "sessionID",
-				},
-			},
-			sRuns: map[string]*SRun{
-				"run4": {
-					CGREvent: &utils.CGREvent{
-						Event:   map[string]any{},
-						APIOpts: map[string]any{},
+		ss := &session{
+			session: &utils.Session{ID: "sessionID",
+				OriginCGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "sessionID",
+					Event:  map[string]any{},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "sessionID",
 					},
-					TotalUsage: utils.NewDecimal(60, 0),
+				},
+				SRuns: map[string]*utils.SRun{
+					"run4": {
+						CGREvent: &utils.CGREvent{
+							Event:   map[string]any{},
+							APIOpts: map[string]any{},
+						},
+						TotalUsage: utils.NewDecimal(60, 0),
+					},
 				},
 			},
 		}
@@ -2638,30 +2649,31 @@ func TestSetSTerminator(t *testing.T) {
 		sessions.setSTerminator(ctx, ss, opts)
 		ss.sTerminator.endChan <- struct{}{}
 
-		if !sessions.isSessionRegistered(ss.ID, false) {
+		if !sessions.isSessionRegistered(ss.session.ID, false) {
 			t.Error("Expected session to remain registered since termination was manual")
 		}
 	})
 
 	t.Run("Automatic termination", func(t *testing.T) {
 		sessions := NewSessionS(cfg, dm, cacheS, nil, connMgr)
-		ss := &Session{
-			ID: "ssID",
-			OriginCGREvent: &utils.CGREvent{
-				Tenant: "cgrates.org",
-				ID:     "ssID",
-				Event:  map[string]any{},
-				APIOpts: map[string]any{
-					utils.MetaOriginID: "ssID",
-				},
-			},
-			sRuns: map[string]*SRun{
-				"run5": {
-					CGREvent: &utils.CGREvent{
-						Event:   map[string]any{},
-						APIOpts: map[string]any{},
+		ss := &session{
+			session: &utils.Session{ID: "ssID",
+				OriginCGREvent: &utils.CGREvent{
+					Tenant: "cgrates.org",
+					ID:     "ssID",
+					Event:  map[string]any{},
+					APIOpts: map[string]any{
+						utils.MetaOriginID: "ssID",
 					},
-					TotalUsage: utils.NewDecimal(50, 0),
+				},
+				SRuns: map[string]*utils.SRun{
+					"run5": {
+						CGREvent: &utils.CGREvent{
+							Event:   map[string]any{},
+							APIOpts: map[string]any{},
+						},
+						TotalUsage: utils.NewDecimal(50, 0),
+					},
 				},
 			},
 		}
@@ -2670,15 +2682,18 @@ func TestSetSTerminator(t *testing.T) {
 			utils.OptsSesTTLLastUsage: "0s",
 		}
 		sessions.registerSession(ss, false)
+		ss.lk.Lock()
 		sessions.setSTerminator(ctx, ss, opts)
+		done := ss.sTerminator.endChan
+		ss.lk.Unlock()
 
 		select {
 		case <-time.After(3 * time.Second):
 			t.Fatal("timeout")
-		case <-ss.sTerminator.endChan:
+		case <-done:
 		}
 
-		if sessions.isSessionRegistered(ss.ID, false) {
+		if sessions.isSessionRegistered(ss.session.ID, false) {
 			t.Error("Expected session to be unregistered after automatic termination")
 		}
 	})
@@ -2744,10 +2759,10 @@ func TestSessionSForceSTerminate(t *testing.T) {
 		t.Error(err)
 	}
 
-	if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+	if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 		t.Error(err)
 	}
-	if activeS := sessions.getSessions(s.ID, false); len(activeS) != 0 {
+	if activeS := sessions.getSessions(s.session.ID, false); len(activeS) != 0 {
 		t.Errorf("Expected session to be unregistered, recieved %v", activeS)
 	}
 }
@@ -2780,22 +2795,23 @@ func TestSessionSForceSTerminate2(t *testing.T) {
 		},
 	}
 
-	s := &Session{
-		ID:             "originExtraUsage",
-		OriginCGREvent: origEv,
-		sRuns: map[string]*SRun{
-			"run1": {
-				CGREvent: origEv,
+	s := &session{
+		session: &utils.Session{ID: "originExtraUsage",
+			OriginCGREvent: origEv,
+			SRuns: map[string]*utils.SRun{
+				"run1": {
+					CGREvent: origEv,
+				},
 			},
 		},
 	}
 
 	sessions.registerSession(s, false)
-	if err := sessions.forceSTerminate(ctx, s, 5*time.Second, nil, nil); err != nil {
+	if err := sessions.forceSTerminate(ctx, s, 5*time.Second, nil, nil, nil); err != nil {
 		t.Error(err)
 	}
 
-	if activeS := sessions.getSessions(s.ID, false); len(activeS) != 0 {
+	if activeS := sessions.getSessions(s.session.ID, false); len(activeS) != 0 {
 		t.Errorf("Expected session to be unregistered, recieved %v", activeS)
 	}
 }
@@ -2838,20 +2854,21 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 	cch := map[string]any{utils.MetaCGRid: origEv.ID}
 
 	t.Run("EEs: nil APIOpts", func(t *testing.T) {
-		s := &Session{
-			ID:             "originID",
-			OriginCGREvent: origEv,
-			sRuns: map[string]*SRun{
-				"run1": {
-					ID:       "runID1",
-					CGREvent: origEv.Clone(),
+		s := &session{
+			session: &utils.Session{ID: "originID",
+				OriginCGREvent: origEv,
+				SRuns: map[string]*utils.SRun{
+					"run1": {
+						ID:       "runID1",
+						CGREvent: origEv.Clone(),
+					},
 				},
 			},
 		}
 		sessions.registerSession(s, false)
 		expErr := "NOT_CONNECTED: EEs"
-		s.sRuns["run1"].CGREvent.APIOpts = nil
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err == nil || err.Error() != expErr {
+		s.session.SRuns["run1"].CGREvent.APIOpts = nil
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err == nil || err.Error() != expErr {
 			t.Errorf("Expected error %v, \nrecieved %v", expErr, err)
 		}
 	})
@@ -2867,7 +2884,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2887,7 +2904,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2918,7 +2935,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2932,7 +2949,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := "CGRateS <> [WARNING] <SessionS> error: NOT_CONNECTED: EEs"
@@ -2959,7 +2976,7 @@ func TestSessionSForceSTerminateErrors(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil); err != nil {
+		if err := sessions.forceSTerminate(ctx, s, 0, nil, nil, nil); err != nil {
 			t.Error(err)
 		}
 		contain := `CGRateS <> [WARNING] <SessionS> error: strconv.ParseBool: parsing "trueee": `
