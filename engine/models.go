@@ -320,6 +320,15 @@ func (TrendJSONMdl) TableName() string {
 	return utils.TBLTrends
 }
 
+type SessionJSONMdl struct {
+	CGRID   string         `gorm:"column:cgrid;primary_key"`
+	Session *utils.Session `gorm:"serializer:json"`
+}
+
+func (SessionJSONMdl) TableName() string {
+	return utils.TBLSessions
+}
+
 type LoadIDMdl struct {
 	PK      uint        `gorm:"primary_key"`
 	LoadIDs utils.JSONB `gorm:"type:jsonb" index:"0" re:".*"`

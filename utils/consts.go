@@ -1731,6 +1731,7 @@ const (
 	TBLRankings          = "rankings"
 	TBLTrendProfiles     = "trend_profiles"
 	TBLTrends            = "trends"
+	TBLSessions          = "sessions"
 	TBLLoadIDs           = "load_ids"
 	TBLIndexes           = "indexes"
 )

@@ -26,8 +26,10 @@ func TestRadiusAccountingRestart(t *testing.T) {
 		remote = engine.RedisDBCfg.DB.DBConns[utils.MetaDefault]
 	case utils.MetaMongo:
 		remote = engine.MongoDBCfg.DB.DBConns[utils.MetaDefault]
-	case utils.MetaMySQL, utils.MetaPostgres:
-		t.SkipNow()
+	case utils.MetaMySQL:
+		remote = engine.MySQLDBCfg.DB.DBConns[utils.MetaDefault]
+	case utils.MetaPostgres:
+		remote = engine.PostgresDBCfg.DB.DBConns[utils.MetaDefault]
 	default:
 		t.Fatal("unsupported dbtype value")
 	}
@@ -41,6 +43,10 @@ func TestRadiusAccountingRestart(t *testing.T) {
 			map[string]*config.ItemOpts{utils.MetaSessionS: item})
 		if err != nil {
 			t.Fatal(err)
+		}
+		t.Cleanup(db.Close)
+		if got := db.GetStorageType(); got != *utils.DBType {
+			t.Fatalf("session storage type = %s, want %s", got, *utils.DBType)
 		}
 		return db
 	}
@@ -153,6 +159,7 @@ func TestRadiusAccountingRestart(t *testing.T) {
 		GracefulShutdown: true,
 		Encoding:         utils.MetaJSON,
 	}
+	var sessionDB engine.DataDB
 	if remote.Type != nil {
 		ng.DBCfg.DB = &engine.DBParams{
 			DBConns: map[string]engine.DBConn{"sessions": remote},
@@ -160,9 +167,8 @@ func TestRadiusAccountingRestart(t *testing.T) {
 		}
 		ng.PreserveDB = true
 		ng.PreStartHook = func(_ testing.TB, cfg *config.CGRConfig) {
-			db := openSessionDB(cfg)
-			defer db.Close()
-			checkEmpty(db)
+			sessionDB = openSessionDB(cfg)
+			checkEmpty(sessionDB)
 		}
 	}
 	client, cfg := ng.Run(t)
@@ -325,6 +331,15 @@ func TestRadiusAccountingRestart(t *testing.T) {
 
 		if tc.restart {
 			ng.Stop(t)
+			if sessionDB != nil {
+				saved, err := sessionDB.GetSessionsDrv(ctx)
+				if err != nil || len(saved) != 1 {
+					t.Fatalf("%s: got %d saved sessions, want one: %v", *utils.DBType, len(saved), err)
+				}
+				if saved[0].ID != cgrid {
+					t.Fatalf("%s: saved CGRID = %q, want %q", *utils.DBType, saved[0].ID, cgrid)
+				}
+			}
 			client = ng.Start(t)
 			waitForServices()
 			checkSession(id, 13*time.Second, cgrid)
@@ -344,9 +359,10 @@ func TestRadiusAccountingRestart(t *testing.T) {
 	}
 
 	ng.Stop(t)
-	db := openSessionDB(cfg)
-	defer db.Close()
-	checkEmpty(db)
+	if sessionDB == nil {
+		sessionDB = openSessionDB(cfg)
+	}
+	checkEmpty(sessionDB)
 }
 
 // import (

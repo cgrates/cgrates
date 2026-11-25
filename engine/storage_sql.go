@@ -15,6 +15,7 @@ import (
 	"github.com/cgrates/cgrates/utils"
 	"github.com/cgrates/ltcache"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type SQLImpl interface {
@@ -184,7 +185,7 @@ func (sqls *SQLStorage) IsDBEmpty() (bool, error) {
 		utils.TBLThresholdProfiles, utils.TBLThresholds, utils.TBLFilters,
 		utils.TBLRouteProfiles, utils.TBLRateProfiles, utils.TBLRates,
 		utils.TBLRankingProfiles, utils.TBLRankings, utils.TBLTrendProfiles,
-		utils.TBLTrends, utils.TBLLoadIDs, utils.TBLIndexes,
+		utils.TBLTrends, utils.TBLSessions, utils.TBLLoadIDs, utils.TBLIndexes,
 	}
 	for _, tbl := range sqlTables {
 		if !sqls.db.Migrator().HasTable(tbl) {
@@ -287,16 +288,33 @@ func (sqls *SQLStorage) RemoveAccountDrv(ctx context.Context, tenant, id string)
 	return
 }
 
-func (sqls *SQLStorage) GetSessionsDrv(context.Context) ([]*utils.Session, error) {
-	return nil, utils.ErrNotImplemented
+func (sqls *SQLStorage) GetSessionsDrv(ctx context.Context) ([]*utils.Session, error) {
+	var rows []SessionJSONMdl
+	if err := sqls.db.WithContext(ctx).Find(&rows).Error; err != nil {
+		return nil, err
+	}
+	sessions := make([]*utils.Session, 0, len(rows))
+	for _, row := range rows {
+		if row.Session == nil {
+			return nil, fmt.Errorf("saved session %q is null", row.CGRID)
+		}
+		if row.Session.ID == "" || row.Session.ID != row.CGRID {
+			return nil, fmt.Errorf("saved session %q has CGRID %q", row.CGRID, row.Session.ID)
+		}
+		sessions = append(sessions, row.Session)
+	}
+	return sessions, nil
 }
 
-func (sqls *SQLStorage) SetSessionDrv(context.Context, *utils.Session) error {
-	return utils.ErrNotImplemented
+func (sqls *SQLStorage) SetSessionDrv(ctx context.Context, session *utils.Session) error {
+	return sqls.db.WithContext(ctx).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "cgrid"}},
+		DoUpdates: clause.AssignmentColumns([]string{"session"}),
+	}).Create(&SessionJSONMdl{CGRID: session.ID, Session: session}).Error
 }
 
-func (sqls *SQLStorage) RemoveSessionDrv(context.Context, string) error {
-	return utils.ErrNotImplemented
+func (sqls *SQLStorage) RemoveSessionDrv(ctx context.Context, cgrID string) error {
+	return sqls.db.WithContext(ctx).Where("cgrid = ?", cgrID).Delete(&SessionJSONMdl{}).Error
 }
 
 func (sqls *SQLStorage) GetIPProfileDrv(ctx context.Context, tenant, id string) (*utils.IPProfile, error) {
