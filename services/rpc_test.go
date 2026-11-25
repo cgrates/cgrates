@@ -7,11 +7,15 @@ import (
 	"context"
 	"testing"
 
+	"github.com/cgrates/cgrates/commonlisteners"
+	"github.com/cgrates/cgrates/config"
+	"github.com/cgrates/cgrates/engine"
+	"github.com/cgrates/cgrates/servmanager"
 	"github.com/cgrates/cgrates/utils"
 )
 
 func TestNewRPCServiceAddsPing(t *testing.T) {
-	srv, err := newRPCService(new(rpcTestReceiver), "TestSv1")
+	srv, err := NewRPCService(new(rpcTestReceiver), "TestSv1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -24,6 +28,30 @@ func TestNewRPCServiceAddsPing(t *testing.T) {
 	}
 	if reply != utils.Pong {
 		t.Errorf("Ping reply = %q, want %q", reply, utils.Pong)
+	}
+}
+
+func TestConfigServiceDuplicateRegistration(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	cl := NewCommonListenerService(cfg)
+	cl.cls = commonlisteners.NewCommonListenerS(nil)
+	cm := NewConnManagerService(cfg)
+	cm.connMgr = engine.NewConnManager(cfg)
+	cm.anz = NewAnalyzerService(cfg)
+	registry := servmanager.NewRegistry()
+	registry.Register(cl, cm)
+	for _, name := range []string{utils.CommonListenerS, utils.ConnManager} {
+		if err := registry.SetState(name, utils.StateServiceUP); err != nil {
+			t.Fatal(err)
+		}
+	}
+	svc := NewConfigService(cfg)
+	shutdown := utils.NewSyncedChan()
+	if err := svc.Start(shutdown, registry); err != nil {
+		t.Fatal(err)
+	}
+	if err := svc.Start(shutdown, registry); err == nil {
+		t.Fatal("duplicate ConfigSv1 registration succeeded")
 	}
 }
 

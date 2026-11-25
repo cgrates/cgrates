@@ -27,10 +27,11 @@ func NewAnalyzerService(cfg *config.CGRConfig) *AnalyzerService {
 
 // AnalyzerService implements Service interface
 type AnalyzerService struct {
-	mu         sync.RWMutex
-	cfg        *config.CGRConfig
-	anz        *analyzers.AnalyzerS
-	cancelFunc context.CancelFunc
+	mu            sync.RWMutex
+	cfg           *config.CGRConfig
+	anz           *analyzers.AnalyzerS
+	cancelFunc    context.CancelFunc
+	rpcRegistered bool
 }
 
 // Start should handle the sercive start
@@ -76,13 +77,12 @@ func (anz *AnalyzerService) registerRPC(shutdown *utils.SyncedChan, registry *se
 	}
 	a.SetFilterS(fs.(*FilterService).FilterS())
 
-	srv, err := newRPCService(apis.NewAnalyzerSv1(a), utils.AnalyzerSv1)
-	if err != nil {
+	if _, err := RegisterRPCService(cl, apis.NewAnalyzerSv1(a), utils.AnalyzerSv1); err != nil {
 		utils.Logger.Err(fmt.Sprintf("<%s> error registering RPC service: %s", utils.AnalyzerS, err))
 		shutdown.CloseOnce()
 		return
 	}
-	_ = cl.RpcRegister(srv)
+	anz.rpcRegistered = true
 }
 
 // Reload handles the change of config
@@ -98,8 +98,11 @@ func (anz *AnalyzerService) Shutdown(registry *servmanager.Registry) (err error)
 	cl.SetAnalyzer(nil)
 	anz.anz.Shutdown()
 	anz.anz = nil
+	if anz.rpcRegistered {
+		cl.RpcUnregisterName(utils.AnalyzerSv1)
+		anz.rpcRegistered = false
+	}
 	anz.mu.Unlock()
-	cl.RpcUnregisterName(utils.AnalyzerSv1)
 	return
 }
 

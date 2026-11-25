@@ -58,11 +58,11 @@ func (ran *RankingService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	if err := ran.ran.StartRankingS(context.TODO()); err != nil {
 		return err
 	}
-	srv, err := newRPCService(apis.NewRankingSv1(ran.ran), utils.RankingSv1)
+	srv, err := RegisterRPCService(cl, apis.NewRankingSv1(ran.ran), utils.RankingSv1)
 	if err != nil {
+		ran.ran.StopRankingS()
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RankingS, srv)
 	return nil
 }

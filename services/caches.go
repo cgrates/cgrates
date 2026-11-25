@@ -59,15 +59,12 @@ func (cS *CacheService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if capsStats := cs.CoreS().CapsStats; capsStats != nil {
 		capsStats.SetCache(cache)
 	}
-	cache.Precache(shutdown)
-
-	cS.cacheCh <- cache
-
-	srv, err := newRPCService(apis.NewCacheSv1(cache), utils.CacheSv1)
+	srv, err := RegisterRPCService(cl, apis.NewCacheSv1(cache), utils.CacheSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
+	cache.Precache(shutdown)
+	cS.cacheCh <- cache
 	cms.AddInternalConn(utils.CacheS, srv)
 	if len(cS.cfg.HTTPCfg().RegistrarSURL) != 0 {
 		cl.RegisterHTTPFunc(cS.cfg.HTTPCfg().RegistrarSURL, registrarc.Registrar(cS.cfg, cache))

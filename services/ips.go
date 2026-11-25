@@ -57,12 +57,11 @@ func (s *IPService) Start(shutdown *utils.SyncedChan, registry *servmanager.Regi
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.ips = ips.NewIPService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	s.ips.StartLoop(context.TODO())
-	srv, err := newRPCService(apis.NewIPSv1(s.ips), utils.IPsV1)
+	srv, err := RegisterRPCService(cl, apis.NewIPSv1(s.ips), utils.IPsV1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
+	s.ips.StartLoop(context.TODO())
 	cms.AddInternalConn(utils.IPs, srv)
 	return nil
 }

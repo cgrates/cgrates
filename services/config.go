@@ -36,11 +36,10 @@ func (s *ConfigService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
 
-	svc, err := newRPCService(apis.NewConfigSv1(s.cfg), utils.ConfigSv1)
+	svc, err := RegisterRPCService(cl, apis.NewConfigSv1(s.cfg), utils.ConfigSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(svc)
 	cms.AddInternalConn(utils.ConfigS, svc)
 	return nil
 }

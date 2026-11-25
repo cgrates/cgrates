@@ -49,11 +49,10 @@ func (ts *TPeService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	defer ts.mu.Unlock()
 
 	ts.tpes = tpes.NewTPeS(ts.cfg, dbs, cm)
-	ts.srv, err = newRPCService(apis.NewTPeSv1(ts.tpes), utils.TPeSv1)
+	ts.srv, err = RegisterRPCService(cl, apis.NewTPeSv1(ts.tpes), utils.TPeSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(ts.srv)
 	return nil
 }
 

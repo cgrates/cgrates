@@ -54,11 +54,11 @@ func (acts *ActionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = actions.NewActionS(acts.cfg, cacheS.CacheS(), fs, dbs, cms.ConnManager())
-	srv, err := newRPCService(apis.NewActionSv1(acts.acts), utils.ActionSv1)
+	srv, err := RegisterRPCService(cl, apis.NewActionSv1(acts.acts), utils.ActionSv1)
 	if err != nil {
-		return
+		acts.acts.Shutdown()
+		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ActionS, srv)
 	return
 }

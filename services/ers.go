@@ -61,11 +61,11 @@ func (erS *EventReaderService) Start(shutdown *utils.SyncedChan, registry *servm
 	erS.ers = ers.NewERService(dbs.DataManager(), erS.cfg, cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
 	go erS.listenAndServe(erS.ers, erS.stopChan, erS.rldChan, shutdown)
 
-	srv, err := newRPCService(apis.NewErSv1(erS.ers), utils.ErSv1)
+	srv, err := RegisterRPCService(cl, apis.NewErSv1(erS.ers), utils.ErSv1)
 	if err != nil {
+		close(erS.stopChan)
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ERs, srv)
 	return
 }

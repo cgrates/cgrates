@@ -19,7 +19,6 @@ import (
 func NewLoaderService(cfg *config.CGRConfig, preloadIDs []string) *LoaderService {
 	return &LoaderService{
 		cfg:        cfg,
-		stopChan:   make(chan struct{}),
 		preloadIDs: preloadIDs,
 	}
 }
@@ -56,6 +55,7 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	s.stopChan = make(chan struct{})
 	s.ldrs = loaders.NewLoaderS(s.cfg, dbs, fs, cms.ConnManager(), gs.Locker())
 	if !s.ldrs.Enabled() {
 		return nil
@@ -77,11 +77,11 @@ func (s *LoaderService) Start(shutdown *utils.SyncedChan, registry *servmanager.
 	if err := s.ldrs.ListenAndServe(s.stopChan); err != nil {
 		return err
 	}
-	srv, err := newRPCService(apis.NewLoaderSv1(s.ldrs), utils.LoaderSv1)
+	srv, err := RegisterRPCService(cl, apis.NewLoaderSv1(s.ldrs), utils.LoaderSv1)
 	if err != nil {
+		close(s.stopChan)
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.LoaderS, srv)
 	return nil
 }

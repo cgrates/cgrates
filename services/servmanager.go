@@ -20,16 +20,13 @@ func RegisterServiceManagerV1(cfg *config.CGRConfig, srvMngr *servmanager.Servic
 	if err != nil {
 		return err
 	}
-	srv, err := newRPCService(apis.NewServiceManagerV1(srvMngr), utils.ServiceManagerV1)
+	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
+	srv, err := RegisterRPCService(cl, apis.NewServiceManagerV1(srvMngr), utils.ServiceManagerV1)
 	if err != nil {
 		return err
 	}
 
 	cms := srvDeps[utils.ConnManager].(*ConnManagerService)
-	cl := srvDeps[utils.CommonListenerS].(*CommonListenerService).CLS()
-	if err := cl.RpcRegister(srv); err != nil {
-		return err
-	}
 	cms.AddInternalConn(utils.ServiceManager, srv)
 	return nil
 }

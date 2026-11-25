@@ -58,11 +58,11 @@ func (trs *TrendService) Start(shutdown *utils.SyncedChan, registry *servmanager
 	if err := trs.trs.StartTrendS(context.TODO()); err != nil {
 		return err
 	}
-	srv, err := newRPCService(apis.NewTrendSv1(trs.trs), utils.TrendSv1)
+	srv, err := RegisterRPCService(cl, apis.NewTrendSv1(trs.trs), utils.TrendSv1)
 	if err != nil {
+		trs.trs.StopTrendS()
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.TrendS, srv)
 	return nil
 }
