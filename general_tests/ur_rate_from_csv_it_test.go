@@ -1501,7 +1501,7 @@ func Test13CasesURRateFromCSV(t *testing.T) {
 				"*notempty:~*req.14:", "*lt:~*req.14:53687091200",
 				"*notempty:~*req.15:", "*lt:~*req.15:53687091200",
 				// Drops rows older than 30 days
-				"*gte:~*req.0:-720h{*unixtime}",
+				"*gte:~*req.0:1789995600",
 			],
 		
 			"fields":[

@@ -1516,9 +1516,12 @@ func TestERsLineNr(t *testing.T) {
 	fileIdx := 0
 	createFile := func(t *testing.T, dir, ext, content string) {
 		fileIdx++
-		filePath := filepath.Join(dir, fmt.Sprintf("file%d%s", fileIdx, ext))
+		filePath := filepath.Join(t.TempDir(), fmt.Sprintf("file%d%s", fileIdx, ext))
 		if err := os.WriteFile(filePath, []byte(content), 0644); err != nil {
 			t.Fatalf("could not write to file %s: %v", filePath, err)
+		}
+		if err := os.Rename(filePath, filepath.Join(dir, filepath.Base(filePath))); err != nil {
+			t.Fatalf("error moving file to processing directory: %v", err)
 		}
 	}
 	verifyLogLines := func(t *testing.T, reader io.Reader) {
