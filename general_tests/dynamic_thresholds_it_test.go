@@ -435,7 +435,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicResource1002",
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -447,7 +447,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicResource1002NotFoundFilter",
 								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_RES_2_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_RES_2_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -458,7 +458,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicResource1002Blocker",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_RES_3_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_RES_3_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -474,7 +474,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicResource1002Blocked",
 								Opts: map[string]any{
-									"*template": "*tenant;DYNAMICLY_RES_4_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;true;THID1&THID2;~*opts",
+									"*template": "*tenant;DYNAMICLY_RES_4_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&30;5s;5;alloc_msg;true;;true;THID1&THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -2047,7 +2047,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicResource1002",
 								FilterIDs: []string{"*string:~*req.Account:1002"},
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;;true;THID1\u0026THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -2059,7 +2059,7 @@ func TestDynThdIT(t *testing.T) {
 								ID:        "CreateDynamicResource1002NotFoundFilter",
 								FilterIDs: []string{"*string:~*req.Account:1003"},
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_2_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_2_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;;true;THID1\u0026THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -2070,7 +2070,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicResource1002Blocker",
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_3_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_3_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;;true;THID1\u0026THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{
@@ -2086,7 +2086,7 @@ func TestDynThdIT(t *testing.T) {
 							{
 								ID: "CreateDynamicResource1002Blocked",
 								Opts: map[string]any{
-									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_4_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;true;THID1\u0026THID2;~*opts",
+									utils.MetaTemplate: "*tenant;DYNAMICLY_RES_4_\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e;*string:~*req.Account:\u003c~*req.Account\u003e\u002630;5s;5;alloc_msg;true;;true;THID1\u0026THID2;~*opts",
 								},
 								Weights: utils.DynamicWeights{
 									{

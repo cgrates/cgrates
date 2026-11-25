@@ -1006,8 +1006,8 @@ func testTPeSExportTariffPlanHalfTariffPlan(t *testing.T) {
 			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST", "", "", "", "", "", "*tenant", "*constant", "cgrates.itsyscom"},
 		},
 		utils.ResourcesCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "TTL", "Limit", "AllocationMessage", "Blocker", "Stored", "ThresholdIDs"},
-			{"cgrates.org", "ResGroup1", "*string:~*req.Account:1001", ";20", "", "10", "Approved", "false", "false", "*none"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "TTL", "Limit", "AllocationMessage", "Blocker", "ReleaseMode", "Stored", "ThresholdIDs"},
+			{"cgrates.org", "ResGroup1", "*string:~*req.Account:1001", ";20", "", "10", "Approved", "false", "", "false", "*none"},
 		},
 		utils.FiltersCsv: {
 			{"#Tenant", "ID", "Type", "Path", "Values"},
@@ -1122,9 +1122,9 @@ func testTPeSExportTariffPlanAllTariffPlan(t *testing.T) {
 			{"cgrates.org", "TEST_ATTRIBUTES_IT_TEST_SECOND", "*string:~*opts.*context:*sessions;*exists:~*opts.*usage:", "", "", "", "", "*tenant", "*constant", "cgrates.itsyscom"},
 		},
 		utils.ResourcesCsv: {
-			{"#Tenant", "ID", "FilterIDs", "Weights", "TTL", "Limit", "AllocationMessage", "Blocker", "Stored", "ThresholdIDs"},
-			{"cgrates.org", "ResGroup1", "*string:~*req.Account:1001", ";20", "", "10", "Approved", "false", "false", "*none"},
-			{"cgrates.org", "ResGroup2", "*string:~*req.Account:1002", ";10", "", "5", "Declined", "false", "false", "*none"},
+			{"#Tenant", "ID", "FilterIDs", "Weights", "TTL", "Limit", "AllocationMessage", "Blocker", "ReleaseMode", "Stored", "ThresholdIDs"},
+			{"cgrates.org", "ResGroup1", "*string:~*req.Account:1001", ";20", "", "10", "Approved", "false", "", "false", "*none"},
+			{"cgrates.org", "ResGroup2", "*string:~*req.Account:1002", ";10", "", "5", "Declined", "false", "", "false", "*none"},
 		},
 		utils.FiltersCsv: {
 			{"#Tenant", "ID", "Type", "Path", "Values"},
