@@ -88,7 +88,7 @@ func (jaCfg *JanusAgentCfg) loadFromJSONCfg(jsnCfg *JanusAgentJsonCfg) (err erro
 		jaCfg.URL = *jsnCfg.Url
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		maps.Copy(jaCfg.Conns, tagged)
 	}
 	if jsnCfg.Janus_conns != nil {
@@ -116,7 +116,7 @@ func (jaCfg JanusAgentCfg) AsMapInterface() any {
 		requestProcessors[i] = item.AsMapInterface()
 	}
 	mp[utils.RequestProcessorsCfg] = requestProcessors
-	mp[utils.ConnsCfg] = stripConns(jaCfg.Conns)
+	mp[utils.ConnsCfg] = StripConns(jaCfg.Conns)
 	janConns := make([]map[string]any, len(jaCfg.JanusConns))
 	for i, jc := range jaCfg.JanusConns {
 		janConns[i] = jc.AsMapInterface()
@@ -228,7 +228,7 @@ func diffJanusAgentSJsonCfg(d *JanusAgentJsonCfg, v1, v2 *JanusAgentCfg) *JanusA
 		d.Url = utils.StringPointer(v2.URL)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.Request_processors = diffReqProcessorsJsnCfg(d.Request_processors, v1.RequestProcessors, v2.RequestProcessors)
 	d.Janus_conns = diffJanusConnsJsonCfg(d.Janus_conns, v1.JanusConns, v2.JanusConns)

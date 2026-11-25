@@ -102,7 +102,7 @@ func (t *ThresholdSCfg) loadFromJSONCfg(jsnCfg *ThresholdSJsonCfg) error {
 		if t.Conns == nil {
 			t.Conns = make(map[string][]*DynamicConns)
 		}
-		maps.Copy(t.Conns, tagConns(jsnCfg.Conns))
+		maps.Copy(t.Conns, TagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		t.EEsExporterIDs = slices.Clone(*jsnCfg.Ees_exporter_ids)
@@ -124,7 +124,7 @@ func (t ThresholdSCfg) AsMapInterface() any {
 		utils.IndexedSelectsCfg: t.IndexedSelects,
 		utils.NestedFieldsCfg:   t.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
-		utils.ConnsCfg:          stripConns(t.Conns),
+		utils.ConnsCfg:          StripConns(t.Conns),
 		utils.OptsCfg:           opts,
 	}
 	if t.StoreInterval != 0 {
@@ -258,7 +258,7 @@ func diffThresholdSJsonCfg(d *ThresholdSJsonCfg, v1, v2 *ThresholdSCfg) *Thresho
 		d.Nested_fields = utils.BoolPointer(v2.NestedFields)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = utils.SliceStringPointer(slices.Clone(v2.EEsExporterIDs))

@@ -47,7 +47,7 @@ func (sa *SIPAgentCfg) loadFromJSONCfg(jsnCfg *SIPAgentJsonCfg) (err error) {
 		sa.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			sa.Conns[connType] = opts
 		}
@@ -71,7 +71,7 @@ func (sa SIPAgentCfg) AsMapInterface() any {
 		utils.EnabledCfg:             sa.Enabled,
 		utils.ListenCfg:              sa.Listen,
 		utils.ListenNetCfg:           sa.ListenNet,
-		utils.ConnsCfg:               stripConns(sa.Conns),
+		utils.ConnsCfg:               StripConns(sa.Conns),
 		utils.TimezoneCfg:            sa.Timezone,
 		utils.RetransmissionTimerCfg: sa.RetransmissionTimer.String(),
 		utils.RequestProcessorsCfg:   requestProcessors,
@@ -126,7 +126,7 @@ func diffSIPAgentJsonCfg(d *SIPAgentJsonCfg, v1, v2 *SIPAgentCfg) *SIPAgentJsonC
 		d.ListenNet = utils.StringPointer(v2.ListenNet)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

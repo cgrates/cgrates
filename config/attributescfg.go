@@ -88,7 +88,7 @@ func (alS *AttributeSCfg) loadFromJSONCfg(jsnCfg *AttributeSJsonCfg) (err error)
 		alS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			alS.Conns[connType] = opts
 		}
@@ -130,7 +130,7 @@ func (alS AttributeSCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:        alS.Enabled,
-		utils.ConnsCfg:          stripConns(alS.Conns),
+		utils.ConnsCfg:          StripConns(alS.Conns),
 		utils.IndexedSelectsCfg: alS.IndexedSelects,
 		utils.NestedFieldsCfg:   alS.NestedFields,
 		utils.OptsCfg:           opts,
@@ -256,7 +256,7 @@ func diffAttributeSJsonCfg(d *AttributeSJsonCfg, v1, v2 *AttributeSCfg) *Attribu
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

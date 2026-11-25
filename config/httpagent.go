@@ -90,7 +90,7 @@ func (ha *HTTPAgentCfg) loadFromJSONCfg(jsnCfg *HttpAgentJsonCfg) (err error) {
 		ha.URL = *jsnCfg.URL
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		if ha.Conns == nil {
 			ha.Conns = make(map[string][]*DynamicConns)
 		}
@@ -115,7 +115,7 @@ func (ha *HTTPAgentCfg) AsMapInterface() map[string]any {
 	m := map[string]any{
 		utils.IDCfg:                ha.ID,
 		utils.URLCfg:               ha.URL,
-		utils.ConnsCfg:             stripConns(ha.Conns),
+		utils.ConnsCfg:             StripConns(ha.Conns),
 		utils.RequestPayloadCfg:    ha.RequestPayload,
 		utils.ReplyPayloadCfg:      ha.ReplyPayload,
 		utils.RequestProcessorsCfg: requestProcessors,
@@ -166,7 +166,7 @@ func diffHttpAgentJsonCfg(d *HttpAgentJsonCfg, v1, v2 *HTTPAgentCfg) *HttpAgentJ
 		d.ReplyPayload = utils.StringPointer(v2.ReplyPayload)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.RequestProcessors = diffReqProcessorsJsnCfg(d.RequestProcessors, v1.RequestProcessors, v2.RequestProcessors)
 	return d

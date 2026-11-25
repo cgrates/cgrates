@@ -108,7 +108,7 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			aCfg.Conns[connType] = opts
 		}
@@ -129,7 +129,7 @@ func (aCfg *AsteriskAgentCfg) loadFromJSONCfg(jsnCfg *AsteriskAgentJsonCfg) (err
 func (aCfg AsteriskAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: aCfg.Enabled,
-		utils.ConnsCfg:   stripConns(aCfg.Conns),
+		utils.ConnsCfg:   StripConns(aCfg.Conns),
 	}
 	if aCfg.AsteriskConns != nil {
 		conns := make([]map[string]any, len(aCfg.AsteriskConns))
@@ -244,7 +244,7 @@ func diffAsteriskAgentJsonCfg(d *AsteriskAgentJsonCfg, v1, v2 *AsteriskAgentCfg)
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 
 	if !equalsAstConnJsonCfg(v1.AsteriskConns, v2.AsteriskConns) {

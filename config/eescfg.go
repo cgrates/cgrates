@@ -56,7 +56,7 @@ func (eeS *EEsCfg) loadFromJSONCfg(jsnCfg *EEsJsonCfg, msgTemplates map[string][
 		eeS.Cache[kJsn] = val
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			eeS.Conns[connType] = opts
 		}
@@ -113,7 +113,7 @@ func (eeS EEsCfg) Clone() (cln *EEsCfg) {
 func (eeS EEsCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: eeS.Enabled,
-		utils.ConnsCfg:   stripConns(eeS.Conns),
+		utils.ConnsCfg:   StripConns(eeS.Conns),
 	}
 	if eeS.Cache != nil {
 		cache := make(map[string]any, len(eeS.Cache))
@@ -578,7 +578,7 @@ func (eeC *EventExporterCfg) loadFromJSONCfg(jsnEec *EventExporterJsonCfg, msgTe
 		eeC.FailedPostsDir = *jsnEec.FailedPostsDir
 	}
 	if jsnEec.Conns != nil {
-		eeC.Conns = tagConns(jsnEec.Conns)
+		eeC.Conns = TagConns(jsnEec.Conns)
 	}
 	if jsnEec.Opts != nil {
 		err = eeC.Opts.loadFromJSONCfg(jsnEec.Opts)
@@ -979,7 +979,7 @@ func (eeC *EventExporterCfg) AsMapInterface() (initialMP map[string]any) {
 		utils.FailedPostsDirCfg:       eeC.FailedPostsDir,
 		utils.OptsCfg:                 eeC.Opts.AsMapInterface(),
 	}
-	initialMP[utils.ConnsCfg] = stripConns(eeC.Conns)
+	initialMP[utils.ConnsCfg] = StripConns(eeC.Conns)
 	if eeC.Fields != nil {
 		fields := make([]map[string]any, 0, len(eeC.Fields))
 		for _, fld := range eeC.Fields {
@@ -1834,7 +1834,7 @@ func diffEventExporterJsonCfg(d *EventExporterJsonCfg, v1, v2 *EventExporterCfg)
 		d.FailedPostsDir = utils.StringPointer(v2.FailedPostsDir)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	return d
 }
@@ -1892,7 +1892,7 @@ func diffEEsJsonCfg(d *EEsJsonCfg, v1, v2 *EEsCfg) *EEsJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.Cache = diffCacheParamsJsonCfg(d.Cache, v2.Cache)
 	d.Exporters = diffEventExportersJsonCfg(d.Exporters, v1.Exporters, v2.Exporters)

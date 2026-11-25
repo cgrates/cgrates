@@ -569,7 +569,7 @@ func (scfg *SessionSCfg) loadFromJSONCfg(jsnCfg *SessionSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			scfg.Conns[connType] = opts
 		}
@@ -648,7 +648,7 @@ func (scfg SessionSCfg) AsMapInterface() any {
 		utils.STIRCfg:                scfg.STIRCfg.AsMapInterface(),
 		utils.ChannelSyncIntervalCfg: "0",
 		utils.OptsCfg:                opts,
-		utils.ConnsCfg:               stripConns(scfg.Conns),
+		utils.ConnsCfg:               StripConns(scfg.Conns),
 	}
 	if scfg.ChannelSyncInterval != 0 {
 		mp[utils.ChannelSyncIntervalCfg] = scfg.ChannelSyncInterval.String()
@@ -1111,7 +1111,7 @@ func diffSessionSJsonCfg(d *SessionSJsonCfg, v1, v2 *SessionSCfg) *SessionSJsonC
 	}
 	d.Stir = diffSTIRJsonCfg(d.Stir, v1.STIRCfg, v2.STIRCfg)
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.Opts = diffSessionsOptsJsonCfg(d.Opts, v1.Opts, v2.Opts)
 	return d

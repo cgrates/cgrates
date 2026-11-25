@@ -48,7 +48,7 @@ func (c *ERsCfg) loadFromJSONCfg(jc *ERsJsonCfg, msgTemplates map[string][]*FCTe
 		c.Enabled = *jc.Enabled
 	}
 	if jc.Conns != nil {
-		tagged := tagConns(jc.Conns)
+		tagged := TagConns(jc.Conns)
 		for connType, opts := range tagged {
 			c.Conns[connType] = opts
 		}
@@ -112,7 +112,7 @@ func (c ERsCfg) Clone() *ERsCfg {
 func (c ERsCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:         c.Enabled,
-		utils.ConnsCfg:           stripConns(c.Conns),
+		utils.ConnsCfg:           StripConns(c.Conns),
 		utils.PartialCacheTTLCfg: "0",
 	}
 	if c.PartialCacheTTL != 0 {
@@ -1465,7 +1465,7 @@ func diffERsJsonCfg(d *ERsJsonCfg, v1, v2 *ERsCfg) *ERsJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.PartialCacheTTL != v2.PartialCacheTTL {
 		d.PartialCacheTTL = utils.StringPointer(v2.PartialCacheTTL.String())

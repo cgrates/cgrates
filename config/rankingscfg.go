@@ -36,7 +36,7 @@ func (rnk *RankingSCfg) loadFromJSONCfg(jsnCfg *RankingSJsonCfg) (err error) {
 		rnk.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		if rnk.Conns == nil {
 			rnk.Conns = make(map[string][]*DynamicConns)
 		}
@@ -62,7 +62,7 @@ func (rnk *RankingSCfg) AsMapInterface() any {
 		utils.StoreIntervalCfg:  utils.EmptyString,
 		utils.EEsExporterIDsCfg: slices.Clone(rnk.EEsExporterIDs),
 	}
-	mp[utils.ConnsCfg] = stripConns(rnk.Conns)
+	mp[utils.ConnsCfg] = StripConns(rnk.Conns)
 	if rnk.ScheduledIDs != nil {
 		mp[utils.ScheduledIDsCfg] = rnk.ScheduledIDs
 	}
@@ -109,7 +109,7 @@ func diffRankingsJsonCfg(d *RankingSJsonCfg, v1, v2 *RankingSCfg) *RankingSJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {
 		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())

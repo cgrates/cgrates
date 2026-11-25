@@ -43,7 +43,7 @@ func (cS *ChargerSCfg) loadFromJSONCfg(jsnCfg *ChargerSJsonCfg) (err error) {
 		cS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			cS.Conns[connType] = opts
 		}
@@ -75,7 +75,7 @@ func (cS ChargerSCfg) AsMapInterface() any {
 		utils.EnabledCfg:        cS.Enabled,
 		utils.IndexedSelectsCfg: cS.IndexedSelects,
 		utils.NestedFieldsCfg:   cS.NestedFields,
-		utils.ConnsCfg:          stripConns(cS.Conns),
+		utils.ConnsCfg:          StripConns(cS.Conns),
 	}
 	if cS.StringIndexedFields != nil {
 		mp[utils.StringIndexedFieldsCfg] = slices.Clone(*cS.StringIndexedFields)
@@ -149,7 +149,7 @@ func diffChargerSJsonCfg(d *ChargerSJsonCfg, v1, v2 *ChargerSCfg) *ChargerSJsonC
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.String_indexed_fields = diffIndexSlice(d.String_indexed_fields, v1.StringIndexedFields, v2.StringIndexedFields)
 	d.Prefix_indexed_fields = diffIndexSlice(d.Prefix_indexed_fields, v1.PrefixIndexedFields, v2.PrefixIndexedFields)

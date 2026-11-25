@@ -32,7 +32,7 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 		aCfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			aCfg.Conns[connType] = opts
 		}
@@ -44,7 +44,7 @@ func (aCfg *AdminSCfg) loadFromJSONCfg(jsnCfg *AdminSJsonCfg) (err error) {
 func (aCfg AdminSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg: aCfg.Enabled,
-		utils.ConnsCfg:   stripConns(aCfg.Conns),
+		utils.ConnsCfg:   StripConns(aCfg.Conns),
 	}
 	return mp
 }
@@ -74,7 +74,7 @@ func diffAdminSJsonCfg(d *AdminSJsonCfg, v1, v2 *AdminSCfg) *AdminSJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	return d
 }

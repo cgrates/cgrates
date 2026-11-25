@@ -37,9 +37,9 @@ func stripInternalConns(conns []string) []string {
 	result := make([]string, len(conns))
 	for i, conn := range conns {
 		switch {
-		case strings.HasPrefix(conn, utils.MetaInternal):
+		case strings.HasPrefix(conn, utils.MetaInternal+utils.ConcatenatedKeySep):
 			result[i] = utils.MetaInternal
-		case strings.HasPrefix(conn, rpcclient.BiRPCInternal):
+		case strings.HasPrefix(conn, rpcclient.BiRPCInternal+utils.ConcatenatedKeySep):
 			result[i] = rpcclient.BiRPCInternal
 		default:
 			result[i] = conn
@@ -78,7 +78,8 @@ func stripInternalConnsOpt(opts []*DynamicConns) []*DynamicConns {
 	return result
 }
 
-func tagConns(conns map[string][]*DynamicConns) map[string][]*DynamicConns {
+// TagConns adds the subsystem to internal connections, e.g. *internal becomes *internal:*stats.
+func TagConns(conns map[string][]*DynamicConns) map[string][]*DynamicConns {
 	if conns == nil {
 		return nil
 	}
@@ -89,7 +90,8 @@ func tagConns(conns map[string][]*DynamicConns) map[string][]*DynamicConns {
 	return result
 }
 
-func stripConns(conns map[string][]*DynamicConns) map[string][]*DynamicConns {
+// StripConns removes the subsystem suffix from internal connection IDs.
+func StripConns(conns map[string][]*DynamicConns) map[string][]*DynamicConns {
 	if conns == nil {
 		return nil
 	}
