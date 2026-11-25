@@ -1545,6 +1545,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 					Limit:             100.0,
 					AllocationMessage: "Resource allocated",
 					Blocker:           true,
+					ReleaseMode:       "*ttl",
 					Stored:            true,
 					Weights: utils.DynamicWeights{
 						&utils.DynamicWeight{
@@ -1566,7 +1567,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;*string:~*req.Account:1001;*string:~*req.Account:1001&20;60s;100;Resource allocated;true;true;THD_1001;key:value",
+						utils.MetaTemplate: "cgrates.org;RES_1001;*string:~*req.Account:1001;*string:~*req.Account:1001&20;60s;100;Resource allocated;true;*ttl;true;THD_1001;key:value",
 					},
 				},
 			},
@@ -1583,6 +1584,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 					Limit:             100.0,
 					AllocationMessage: "Resource allocated",
 					Blocker:           true,
+					ReleaseMode:       "*ttl",
 					Stored:            true,
 					Weights: utils.DynamicWeights{
 						&utils.DynamicWeight{
@@ -1604,7 +1606,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&20;60s;100;Resource allocated;true;true;THD_<~*req.Account>;key:value",
+						utils.MetaTemplate: "cgrates.org;RES_<~*req.Account>;*string:~*req.Account:<~*req.Account>;*string:~*req.Account:<~*req.Account>&20;60s;100;Resource allocated;true;*ttl;true;THD_<~*req.Account>;key:value",
 					},
 				},
 			},
@@ -1621,6 +1623,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 					Limit:             0.0,
 					AllocationMessage: "",
 					Blocker:           false,
+					ReleaseMode:       "",
 					Stored:            false,
 					Weights:           nil,
 					ThresholdIDs:      nil,
@@ -1635,7 +1638,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;;",
 					},
 				},
 			},
@@ -1650,7 +1653,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&w2&w3;;;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&w2&w3;;;;;;;;",
 					},
 				},
 			},
@@ -1665,7 +1668,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&invalid;;;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;w1&invalid;;;;;;;;",
 					},
 				},
 			},
@@ -1680,7 +1683,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;invalid;;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;invalid;;;;;;;",
 					},
 				},
 			},
@@ -1695,7 +1698,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;invalid;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;invalid;;;;;;",
 					},
 				},
 			},
@@ -1710,7 +1713,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;invalid;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;invalid;;;;",
 					},
 				},
 			},
@@ -1725,7 +1728,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;invalid;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;invalid;;",
 					},
 				},
 			},
@@ -1740,7 +1743,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;keyvalue",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;;keyvalue",
 					},
 				},
 			},
@@ -1775,7 +1778,7 @@ func TestActDynamicResourceExecute(t *testing.T) {
 						&utils.DynamicWeight{Weight: 20.0},
 					},
 					Opts: map[string]any{
-						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;",
+						utils.MetaTemplate: "cgrates.org;RES_1001;;;;;;;;;;",
 					},
 				},
 			},

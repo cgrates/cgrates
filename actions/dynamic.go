@@ -528,8 +528,9 @@ func (aL *actDynamicAttribute) execute(ctx context.Context, data utils.MapStorag
 //	 	 5 Limit: float
 //	 	 6 AllocationMessage: string
 //	 	 7 Blocker: bool
-//	 	 8 Stored: bool
-//	 	 9 ThresholdIDs: strings separated by "&".
+//		 8 ReleaseMode: string
+//	 	 9 Stored: bool
+//	 	10 ThresholdIDs: strings separated by "&".
 //		10 APIOpts: set of key-value pairs (separated by "&").
 //
 // Parameters are separated by ";" and must be provided in the specified order.
@@ -573,8 +574,8 @@ func (aL *actDynamicResource) execute(ctx context.Context, data utils.MapStorage
 	for _, diktat := range diktats {
 		params := strings.Split(utils.IfaceAsString(diktat.Opts[utils.MetaTemplate]),
 			utils.InfieldSep)
-		if len(params) != 11 {
-			return fmt.Errorf("invalid number of parameters <%d> expected 11", len(params))
+		if len(params) != 12 {
+			return fmt.Errorf("invalid number of parameters <%d> expected 12", len(params))
 		}
 		// parse dynamic parameters
 		for i := range params {
@@ -588,6 +589,7 @@ func (aL *actDynamicResource) execute(ctx context.Context, data utils.MapStorage
 				Tenant:            params[0],
 				ID:                params[1],
 				AllocationMessage: params[6],
+				ReleaseMode:       params[8],
 			},
 			APIOpts: make(map[string]any),
 		}
@@ -627,19 +629,19 @@ func (aL *actDynamicResource) execute(ctx context.Context, data utils.MapStorage
 			}
 		}
 		// populate Resource's Stored
-		if params[8] != utils.EmptyString {
-			args.Stored, err = strconv.ParseBool(params[8])
+		if params[9] != utils.EmptyString {
+			args.Stored, err = strconv.ParseBool(params[9])
 			if err != nil {
 				return err
 			}
 		}
 		// populate Resource's ThresholdIDs
-		if params[9] != utils.EmptyString {
-			args.ThresholdIDs = strings.Split(params[9], utils.ANDSep)
+		if params[10] != utils.EmptyString {
+			args.ThresholdIDs = strings.Split(params[10], utils.ANDSep)
 		}
 		// populate Resource's APIOpts
-		if params[10] != utils.EmptyString {
-			if err := parseParamStringToMap(params[10], args.APIOpts); err != nil {
+		if params[11] != utils.EmptyString {
+			if err := parseParamStringToMap(params[11], args.APIOpts); err != nil {
 				return err
 			}
 		}
