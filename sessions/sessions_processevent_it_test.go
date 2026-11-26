@@ -3881,3 +3881,370 @@ cgrates.org,ATTR_ACNT_1002,,;10,;false,,,*req.Account,*constant,1002`,
 		})
 	}
 }
+
+func TestSessionSv1ProcessEventResources(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": { "level": 7 },
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*resources": [{"connIDs": ["*localhost"]}]
+	}
+},
+"resources": {
+	"enabled": true,
+	"storeInterval": "-1"
+},
+"admins": { "enabled": true }
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	for _, rp := range []*utils.ResourceProfile{
+		{
+			Tenant:            "cgrates.org",
+			ID:                "RES_1001",
+			FilterIDs:         []string{"*string:~*req.Account:1001"},
+			Weights:           utils.DynamicWeights{{Weight: 10}},
+			UsageTTL:          time.Hour,
+			Limit:             2,
+			AllocationMessage: "Allocated1001",
+			Stored:            true,
+		},
+		{
+			Tenant:            "cgrates.org",
+			ID:                "RES_1002",
+			FilterIDs:         []string{"*string:~*req.Account:1002"},
+			Weights:           utils.DynamicWeights{{Weight: 10}},
+			UsageTTL:          time.Hour,
+			Limit:             1,
+			AllocationMessage: "Allocated1002",
+			Stored:            true,
+		},
+	} {
+		var reply string
+		if err := client.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+			&utils.ResourceProfileWithAPIOpts{ResourceProfile: rp}, &reply); err != nil {
+			t.Fatalf("AdminSv1SetResourceProfile %s failed: %v", rp.ID, err)
+		}
+	}
+
+	t.Run("allocateIncreasesUsage", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "allocateIncreasesUsage",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc1",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "Allocated1001" {
+			t.Errorf("unexpected allocation message: %q", msg)
+		}
+
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 1 {
+			t.Errorf("RES_1001 usage = %v, want 1", usage)
+		}
+
+		rs = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1002"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 0 {
+			t.Errorf("RES_1002 usage = %v, want 0", usage)
+		}
+	})
+
+	t.Run("allocateOverLimitFails", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "allocateOverLimitFails-alloc2",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc2",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 2 {
+			t.Fatalf("RES_1001 usage = %v, want 2", usage)
+		}
+
+		rply = V1ProcessEventReply{}
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "allocateOverLimitFails-alloc3",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc3",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err == nil {
+			t.Fatal("expected an error when allocating over the limit")
+		}
+
+		rs = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 2 {
+			t.Errorf("RES_1001 usage after rejected allocation = %v, want 2", usage)
+		}
+	})
+
+	t.Run("releaseFreesUnits", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "releaseFreesUnits-release",
+				APIOpts: map[string]any{
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    "alloc1",
+					utils.OptsResourcesUnits:      1,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 1 {
+			t.Fatalf("RES_1001 usage after release = %v, want 1", usage)
+		}
+
+		rply = V1ProcessEventReply{}
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "releaseFreesUnits-alloc3",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc3",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Errorf("allocation after release failed: %v", err)
+		}
+	})
+
+	t.Run("profilesAreIndependent", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "profilesAreIndependent-other1",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "other1",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1002",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "Allocated1002" {
+			t.Errorf("unexpected allocation message: %q", msg)
+		}
+
+		rply = V1ProcessEventReply{}
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "profilesAreIndependent-other2",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "other2",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1002",
+				},
+			}, &rply); err == nil {
+			t.Error("expected an error when allocating over the limit of RES_1002")
+		}
+	})
+
+	t.Run("noMatchingProfile", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "noMatchingProfile",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "nomatch",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "9999",
+				},
+			}, &rply); err == nil {
+			t.Fatal("expected an error when no resource profile matches")
+		}
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "" {
+			t.Errorf("expected empty allocation message, got %q", msg)
+		}
+
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 2 {
+			t.Errorf("RES_1001 usage = %v, want 2", usage)
+		}
+		rs = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1002"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 1 {
+			t.Errorf("RES_1002 usage = %v, want 1", usage)
+		}
+	})
+
+	t.Run("cleanup", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cleanupReleaseAlloc2",
+				APIOpts: map[string]any{
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    "alloc2",
+					utils.OptsResourcesUnits:      1,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+
+		rply = V1ProcessEventReply{}
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cleanupReleaseAlloc3",
+				APIOpts: map[string]any{
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    "alloc3",
+					utils.OptsResourcesUnits:      1,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+
+		rply = V1ProcessEventReply{}
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "cleanupReleaseOther1",
+				APIOpts: map[string]any{
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    "other1",
+					utils.OptsResourcesUnits:      1,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "1002",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1001"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 0 {
+			t.Errorf("RES_1001 usage after cleanup = %v, want 0", usage)
+		}
+		rs = utils.Resource{}
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_1002"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		if usage := rs.TotalUsage(); usage != 0 {
+			t.Errorf("RES_1002 usage after cleanup = %v, want 0", usage)
+		}
+	})
+}
