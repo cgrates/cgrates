@@ -360,3 +360,32 @@ func TestAdminSv1DumpDB(t *testing.T) {
 		})
 	}
 }
+func TestConfigSv1DumpConfigDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	_ = cfg.LoadFromDB(context.Background(), make(config.CgrJsonCfg))
+	cSv1 := NewConfigSv1(cfg)
+	args := &utils.TenantWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]any{},
+	}
+	var reply string
+
+	if err := cSv1.DumpConfigDB(context.Background(), args, &reply); err != utils.ErrNotImplemented {
+		t.Errorf("expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+}
+
+func TestConfigSv1RewriteConfigDB(t *testing.T) {
+	cfg := config.NewDefaultCGRConfig()
+	_ = cfg.LoadFromDB(context.Background(), make(config.CgrJsonCfg))
+	cSv1 := NewConfigSv1(cfg)
+	args := &utils.TenantWithAPIOpts{
+		Tenant:  "cgrates.org",
+		APIOpts: map[string]any{},
+	}
+	var reply string
+
+	if err := cSv1.RewriteConfigDB(context.Background(), args, &reply); err != utils.ErrNotImplemented {
+		t.Errorf("expected %v, received %v", utils.ErrNotImplemented, err)
+	}
+}

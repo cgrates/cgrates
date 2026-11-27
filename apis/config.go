@@ -57,7 +57,7 @@ func (cSv1 *ConfigSv1) StoreCfgInDB(ctx context.Context, args *config.SectionWit
 }
 
 // DumpConfigDB will dump all of configdb from memory to a file
-func (cSv1 *ConfigSv1) DumpConfigDB(ctx context.Context, ignr *string, reply *string) (err error) {
+func (cSv1 *ConfigSv1) DumpConfigDB(ctx context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = cSv1.cfg.ConfigDB().DumpConfigDB(); err != nil {
 		return
 	}
@@ -66,7 +66,7 @@ func (cSv1 *ConfigSv1) DumpConfigDB(ctx context.Context, ignr *string, reply *st
 }
 
 // Will rewrite every dump file of ConfigDB
-func (cSv1 *ConfigSv1) RewriteConfigDB(ctx context.Context, ignr *string, reply *string) (err error) {
+func (cSv1 *ConfigSv1) RewriteConfigDB(ctx context.Context, args *utils.TenantWithAPIOpts, reply *string) (err error) {
 	if err = cSv1.cfg.ConfigDB().RewriteConfigDB(); err != nil {
 		return
 	}
