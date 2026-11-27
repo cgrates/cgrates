@@ -357,3 +357,197 @@ func TestSessionSv1ProcessEventResourcesAuthorize(t *testing.T) {
 		}
 	})
 }
+
+func TestSessionSv1ProcessEventAttributesResources(t *testing.T) {
+	ng := engine.TestEngine{
+		ConfigJSON: `{
+"logger": { "level": 7 },
+"sessions": {
+	"enabled": true,
+	"conns": {
+		"*attributes": [{"connIDs": ["*localhost"]}],
+		"*resources": [{"connIDs": ["*localhost"]}]
+	}
+},
+"attributes": { "enabled": true },
+"resources": {
+	"enabled": true,
+	"storeInterval": "-1"
+},
+"admins": { "enabled": true }
+}`,
+		DBCfg:    engine.InternalDBCfg,
+		Encoding: *utils.Encoding,
+	}
+	client, _ := ng.Run(t)
+
+	var reply string
+	if err := client.Call(context.Background(), utils.AdminSv1SetAttributeProfile,
+		&utils.APIAttributeProfileWithAPIOpts{
+			APIAttributeProfile: &utils.APIAttributeProfile{
+				Tenant:    "cgrates.org",
+				ID:        "ATTR_PREMIUM",
+				FilterIDs: []string{"*string:~*req.Account:2001"},
+				Weights:   utils.DynamicWeights{{Weight: 10}},
+				Attributes: []*utils.ExternalAttribute{
+					{
+						Path:  "*req.Category",
+						Type:  utils.MetaConstant,
+						Value: "premium",
+					},
+				},
+			},
+		}, &reply); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := client.Call(context.Background(), utils.AdminSv1SetResourceProfile,
+		&utils.ResourceProfileWithAPIOpts{
+			ResourceProfile: &utils.ResourceProfile{
+				Tenant:            "cgrates.org",
+				ID:                "RES_PREMIUM",
+				FilterIDs:         []string{"*string:~*req.Category:premium"},
+				Weights:           utils.DynamicWeights{{Weight: 10}},
+				UsageTTL:          time.Hour,
+				Limit:             1,
+				AllocationMessage: "AllocatedPremium",
+				Stored:            true,
+			},
+		}, &reply); err != nil {
+		t.Fatalf("AdminSv1SetResourceProfile failed: %v", err)
+	}
+
+	getUsage := func(t *testing.T) float64 {
+		t.Helper()
+		var rs utils.Resource
+		if err := client.Call(context.Background(), utils.ResourceSv1GetResource,
+			&utils.TenantIDWithAPIOpts{
+				TenantID: &utils.TenantID{Tenant: "cgrates.org", ID: "RES_PREMIUM"},
+			}, &rs); err != nil {
+			t.Fatal(err)
+		}
+		return rs.TotalUsage()
+	}
+
+	t.Run("resourceMatchesAttributeModifiedEvent", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "attrRes-alloc1",
+				APIOpts: map[string]any{
+					utils.MetaAttributes:           true,
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc1",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "2001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		if msg := rply.ResourceAllocation[utils.MetaPrimary]; msg != "AllocatedPremium" {
+			t.Errorf("unexpected allocation message: %q", msg)
+		}
+		if usage := getUsage(t); usage != 1 {
+			t.Errorf("RES_PREMIUM usage = %v, want 1", usage)
+		}
+	})
+
+	t.Run("attributesDisabledNoResourceMatch", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "attrRes-noAttrs",
+				APIOpts: map[string]any{
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc2",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "2001",
+				},
+			}, &rply); err == nil {
+			t.Fatal("expected an error when no resource profile matches")
+		}
+		if usage := getUsage(t); usage != 1 {
+			t.Errorf("RES_PREMIUM usage = %v, want 1", usage)
+		}
+	})
+
+	t.Run("attributeNotMatchedNoResourceMatch", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "attrRes-noAccMatch",
+				APIOpts: map[string]any{
+					utils.MetaAttributes:           true,
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc3",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "2002",
+				},
+			}, &rply); err == nil {
+			t.Fatal("expected an error when attributes do not match and no resource matches")
+		}
+		if usage := getUsage(t); usage != 1 {
+			t.Errorf("RES_PREMIUM usage = %v, want 1", usage)
+		}
+	})
+
+	t.Run("allocateOverLimitFails", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "attrRes-overLimit",
+				APIOpts: map[string]any{
+					utils.MetaAttributes:           true,
+					utils.MetaResourcesAllocateCfg: true,
+					utils.OptsResourcesUsageID:     "alloc4",
+					utils.OptsResourcesUnits:       1,
+					utils.MetaOriginID:             "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "2001",
+				},
+			}, &rply); err == nil {
+			t.Fatal("expected an error when allocating over the limit")
+		}
+		if usage := getUsage(t); usage != 1 {
+			t.Errorf("RES_PREMIUM usage = %v, want 1", usage)
+		}
+	})
+
+	t.Run("cleanup", func(t *testing.T) {
+		var rply V1ProcessEventReply
+		if err := client.Call(context.Background(), utils.SessionSv1ProcessEvent,
+			&utils.CGREvent{
+				Tenant: "cgrates.org",
+				ID:     "attrRes-release",
+				APIOpts: map[string]any{
+					utils.MetaAttributes:          true,
+					utils.MetaResourcesReleaseCfg: true,
+					utils.OptsResourcesUsageID:    "alloc1",
+					utils.OptsResourcesUnits:      1,
+					utils.MetaOriginID:            "OriginID",
+				},
+				Event: map[string]any{
+					utils.AccountField: "2001",
+				},
+			}, &rply); err != nil {
+			t.Fatal(err)
+		}
+		if usage := getUsage(t); usage != 0 {
+			t.Errorf("RES_PREMIUM usage after release = %v, want 0", usage)
+		}
+	})
+}
