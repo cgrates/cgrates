@@ -56,17 +56,13 @@ func (smg *SessionService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	defer smg.mu.Unlock()
 
 	smg.sm = sessions.NewSessionS(smg.cfg, dbs, cacheS.CacheS(), fs, cms.ConnManager())
-	//start sync session in a separate goroutine
-	smg.stopChan = make(chan struct{})
-	go smg.sm.ListenAndServe(smg.stopChan)
-	// Pass internal connection via BiRPCClient
-
 	// Register RPC handler
-	srv, err := newRPCService(apis.NewSessionSv1(smg.sm), utils.SessionSv1)
+	srv, err := RegisterRPCService(cl, apis.NewSessionSv1(smg.sm), utils.SessionSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
+	smg.stopChan = make(chan struct{})
+	go smg.sm.ListenAndServe(smg.stopChan)
 	// Register BiRpc handlers
 	if smg.cfg.SessionSCfg().ListenBiJSON != utils.EmptyString {
 		smg.bircpEnabled = true

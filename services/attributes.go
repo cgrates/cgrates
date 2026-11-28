@@ -54,11 +54,10 @@ func (attrS *AttributeService) Start(shutdown *utils.SyncedChan, registry *servm
 	attrS.mu.Lock()
 	defer attrS.mu.Unlock()
 	attrService := attributes.NewAttributeService(dm, fs, cms.ConnManager(), attrS.cfg)
-	srv, err := newRPCService(apis.NewAttributeSv1(attrService), utils.AttributeSv1)
+	srv, err := RegisterRPCService(cl, apis.NewAttributeSv1(attrService), utils.AttributeSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.AttributeS, srv)
 	return
 }

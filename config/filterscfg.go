@@ -28,7 +28,7 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 		return
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			fSCfg.Conns[connType] = opts
 		}
@@ -39,7 +39,7 @@ func (fSCfg *FilterSCfg) loadFromJSONCfg(jsnCfg *FilterSJsonCfg) (err error) {
 // AsMapInterface returns the config as a map[string]any
 func (fSCfg FilterSCfg) AsMapInterface() any {
 	mp := map[string]any{
-		utils.ConnsCfg: stripConns(fSCfg.Conns),
+		utils.ConnsCfg: StripConns(fSCfg.Conns),
 	}
 	return mp
 }
@@ -65,7 +65,7 @@ func diffFilterSJsonCfg(d *FilterSJsonCfg, v1, v2 *FilterSCfg) *FilterSJsonCfg {
 		d = new(FilterSJsonCfg)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	return d
 }

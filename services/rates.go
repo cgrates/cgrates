@@ -57,11 +57,10 @@ func (rs *RateService) Start(shutdown *utils.SyncedChan, registry *servmanager.R
 	rs.rateS = rates.NewRateS(rs.cfg, fs, dbs)
 	rs.mu.Unlock()
 
-	srv, err := newRPCService(apis.NewRateSv1(rs.rateS), utils.RateSv1)
+	srv, err := RegisterRPCService(cl, apis.NewRateSv1(rs.rateS), utils.RateSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RateS, srv)
 	return
 }

@@ -96,7 +96,7 @@ func (st *StatSCfg) loadFromJSONCfg(jsnCfg *StatServJsonCfg) error {
 		if st.Conns == nil {
 			st.Conns = make(map[string][]*DynamicConns)
 		}
-		maps.Copy(st.Conns, tagConns(jsnCfg.Conns))
+		maps.Copy(st.Conns, TagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Ees_exporter_ids != nil {
 		st.EEsExporterIDs = append(st.EEsExporterIDs, *jsnCfg.Ees_exporter_ids...)
@@ -138,7 +138,7 @@ func (st StatSCfg) AsMapInterface() any {
 		utils.StoreUncompressedLimitCfg: st.StoreUncompressedLimit,
 		utils.NestedFieldsCfg:           st.NestedFields,
 		utils.StoreIntervalCfg:          utils.EmptyString,
-		utils.ConnsCfg:                  stripConns(st.Conns),
+		utils.ConnsCfg:                  StripConns(st.Conns),
 		utils.EEsExporterIDsCfg:         slices.Clone(st.EEsExporterIDs),
 		utils.OptsCfg:                   opts,
 	}
@@ -274,7 +274,7 @@ func diffStatServJsonCfg(d *StatServJsonCfg, v1, v2 *StatSCfg) *StatServJsonCfg 
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {
 		d.Ees_exporter_ids = utils.SliceStringPointer(slices.Clone(v2.EEsExporterIDs))

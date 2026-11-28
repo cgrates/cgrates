@@ -82,7 +82,7 @@ func (da *DiameterAgentCfg) loadFromJSONCfg(jc *DiameterAgentJsonCfg) (err error
 		copy(da.CEApplications, *jc.CEApplications)
 	}
 	if jc.Conns != nil {
-		tagged := tagConns(jc.Conns)
+		tagged := TagConns(jc.Conns)
 		maps.Copy(da.Conns, tagged)
 	}
 	if jc.OriginHost != nil {
@@ -149,7 +149,7 @@ func (da DiameterAgentCfg) AsMapInterface() any {
 		utils.ListenersCfg:                  listeners,
 		utils.DictionariesPathCfg:           da.DictionariesPath,
 		utils.DictionariesAppendDefaultsCfg: da.DictionariesAppendDefaults,
-		utils.ConnsCfg:                      stripConns(da.Conns),
+		utils.ConnsCfg:                      StripConns(da.Conns),
 		utils.ConnStatusStatQueueIDsCfg:     da.ConnStatusStatQueueIDs,
 		utils.ConnStatusThresholdIDsCfg:     da.ConnStatusThresholdIDs,
 		utils.OriginHostCfg:                 da.OriginHost,
@@ -262,7 +262,7 @@ func diffDiameterAgentJsonCfg(d *DiameterAgentJsonCfg, v1, v2 *DiameterAgentCfg)
 		d.CEApplications = utils.SliceStringPointer(v2.CEApplications)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.OriginHost != v2.OriginHost {
 		d.OriginHost = utils.StringPointer(v2.OriginHost)

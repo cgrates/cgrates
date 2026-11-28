@@ -93,7 +93,7 @@ func (acS *AccountSCfg) loadFromJSONCfg(jsnCfg *AccountSJsonCfg) (err error) {
 		acS.IndexedSelects = *jsnCfg.Indexed_selects
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			acS.Conns[connType] = opts
 		}
@@ -144,7 +144,7 @@ func (acS AccountSCfg) AsMapInterface() any {
 		utils.IndexedSelectsCfg: acS.IndexedSelects,
 		utils.NestedFieldsCfg:   acS.NestedFields,
 		utils.MaxIterations:     acS.MaxIterations,
-		utils.ConnsCfg:          stripConns(acS.Conns),
+		utils.ConnsCfg:          StripConns(acS.Conns),
 		utils.OptsCfg:           opts,
 	}
 	if acS.StringIndexedFields != nil {
@@ -284,7 +284,7 @@ func diffAccountSJsonCfg(d *AccountSJsonCfg, v1, v2 *AccountSCfg) *AccountSJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.IndexedSelects != v2.IndexedSelects {
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)

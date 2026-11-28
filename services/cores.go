@@ -50,11 +50,11 @@ func (s *CoreService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	defer s.mu.Unlock()
 	s.stopChan = make(chan struct{})
 	s.cS = cores.NewCoreService(s.cfg, caps, s.profiler, s.stopChan, shutdown, cl)
-	srv, err := newRPCService(apis.NewCoreSv1(s.cS), utils.CoreSv1)
+	srv, err := RegisterRPCService(cl, apis.NewCoreSv1(s.cS), utils.CoreSv1)
 	if err != nil {
+		close(s.stopChan)
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.CoreS, srv)
 	return nil
 }

@@ -108,7 +108,7 @@ func (acS *ActionSCfg) loadFromJSONCfg(jsnCfg *ActionSJsonCfg) (err error) {
 		acS.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			acS.Conns[connType] = opts
 		}
@@ -161,7 +161,7 @@ func (acS ActionSCfg) AsMapInterface() any {
 	}
 	mp := map[string]any{
 		utils.EnabledCfg:                acS.Enabled,
-		utils.ConnsCfg:                  stripConns(acS.Conns),
+		utils.ConnsCfg:                  StripConns(acS.Conns),
 		utils.IndexedSelectsCfg:         acS.IndexedSelects,
 		utils.NestedFieldsCfg:           acS.NestedFields,
 		utils.DynaprepaidActionplansCfg: acS.DynaprepaidActionProfile,
@@ -324,7 +324,7 @@ func diffActionSJsonCfg(d *ActionSJsonCfg, v1, v2 *ActionSCfg) *ActionSJsonCfg {
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.Tenants != v2.Tenants {
 		d.Tenants = utils.SliceStringPointer(slices.Clone(*v2.Tenants))

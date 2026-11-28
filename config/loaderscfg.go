@@ -178,7 +178,7 @@ func (l *LoaderSCfg) loadFromJSONCfg(jsnCfg *LoaderJsonCfg, msgTemplates map[str
 		}
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		if l.Conns == nil {
 			l.Conns = make(map[string][]*DynamicConns)
 		}
@@ -340,7 +340,7 @@ func (l LoaderSCfg) AsMapInterface() (mp map[string]any) {
 	if l.RunDelay != 0 {
 		mp[utils.RunDelayCfg] = l.RunDelay.String()
 	}
-	mp[utils.ConnsCfg] = stripConns(l.Conns)
+	mp[utils.ConnsCfg] = StripConns(l.Conns)
 	if l.Cache != nil {
 		cache := make(map[string]any, len(l.Cache))
 		for key, value := range l.Cache {
@@ -433,7 +433,7 @@ func diffLoaderJsonCfg(v1, v2 *LoaderSCfg) (d *LoaderJsonCfg) {
 		d.Lockfile_path = utils.StringPointer(v2.LockFilePath)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.FieldSeparator != v2.FieldSeparator {
 		d.Field_separator = utils.StringPointer(v2.FieldSeparator)

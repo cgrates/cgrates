@@ -139,7 +139,7 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 	scheduledIDs := map[string][]string{"tenant1": {"id1"}}
 
 	conns := map[string][]*DynamicConns{
-		utils.MetaStats:      {{ConnIDs: []string{"statConn1"}}},
+		utils.MetaStats:      {{ConnIDs: []string{"statConn1", "*internal1", "*birpc_internal1"}}},
 		utils.MetaThresholds: {{ConnIDs: []string{"thresholdConn1"}}},
 		utils.MetaEEs:        {{ConnIDs: []string{"eesConn1"}}},
 	}
@@ -155,7 +155,7 @@ func TestTrendSCfgAsMapInterface(t *testing.T) {
 		utils.EnabledCfg:                true,
 		utils.StoreIntervalCfg:          storeInterval.String(),
 		utils.StoreUncompressedLimitCfg: storeUncompressedLimit,
-		utils.ConnsCfg:                  stripConns(conns),
+		utils.ConnsCfg:                  conns,
 		utils.ScheduledIDsCfg:           scheduledIDs,
 		utils.EEsExporterIDsCfg:         eesExporterIDs,
 	}

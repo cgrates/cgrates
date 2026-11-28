@@ -52,16 +52,14 @@ func (s *AdminSv1Service) Start(shutdown *utils.SyncedChan, registry *servmanage
 
 	s.api = apis.NewAdminSv1(s.cfg, dm, cms.ConnManager(), fs, gs.Locker())
 
-	srv, err := newRPCService(s.api, utils.AdminSv1)
+	srv, err := RegisterRPCService(cl, s.api, utils.AdminSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
-	rpl, err := newRPCService(apis.NewReplicatorSv1(dm, s.api), utils.ReplicatorSv1)
-	if err != nil {
+	if _, err := RegisterRPCService(cl, apis.NewReplicatorSv1(dm, s.api), utils.ReplicatorSv1); err != nil {
+		cl.RpcUnregisterName(utils.AdminSv1)
 		return err
 	}
-	cl.RpcRegister(rpl)
 	cms.AddInternalConn(utils.AdminS, srv)
 	return
 }
@@ -78,6 +76,7 @@ func (s *AdminSv1Service) Shutdown(registry *servmanager.Registry) (err error) {
 	s.api = nil
 	cl := registry.Lookup(utils.CommonListenerS).(*CommonListenerService).CLS()
 	cl.RpcUnregisterName(utils.AdminSv1)
+	cl.RpcUnregisterName(utils.ReplicatorSv1)
 	return
 }
 

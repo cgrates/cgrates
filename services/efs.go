@@ -47,11 +47,10 @@ func (s *ExportFailoverService) Start(shutdown *utils.SyncedChan, registry *serv
 	defer s.mu.Unlock()
 
 	s.efS = efs.NewEfs(s.cfg, cms.ConnManager())
-	s.srv, err = newRPCService(apis.NewEfSv1(s.efS), utils.EfSv1)
+	s.srv, err = RegisterRPCService(cl, apis.NewEfSv1(s.efS), utils.EfSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(s.srv)
 	cms.AddInternalConn(utils.EFs, s.srv)
 	efs.InitFailedPostCache(s.cfg.EFsCfg().FailedPostsTTL, s.cfg.EFsCfg().FailedPostsStaticTTL)
 	return

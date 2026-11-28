@@ -57,7 +57,7 @@ func (da *DNSAgentCfg) loadFromJSONCfg(jsnCfg *DNSAgentJsonCfg) (err error) {
 		da.Timezone = *jsnCfg.Timezone
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			da.Conns[connType] = opts
 		}
@@ -86,7 +86,7 @@ func (da DNSAgentCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:           da.Enabled,
 		utils.ListenersCfg:         listeners,
-		utils.ConnsCfg:             stripConns(da.Conns),
+		utils.ConnsCfg:             StripConns(da.Conns),
 		utils.TimezoneCfg:          da.Timezone,
 		utils.RequestProcessorsCfg: requestProcessors,
 	}
@@ -170,7 +170,7 @@ func diffDNSAgentJsonCfg(d *DNSAgentJsonCfg, v1, v2 *DNSAgentCfg) *DNSAgentJsonC
 	d.Listeners = diffListeners
 
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.Timezone != v2.Timezone {
 		d.Timezone = utils.StringPointer(v2.Timezone)

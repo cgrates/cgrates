@@ -44,7 +44,7 @@ func (t *TrendSCfg) loadFromJSONCfg(jsnCfg *TrendSJsonCfg) (err error) {
 		t.StoreUncompressedLimit = *jsnCfg.Store_uncompressed_limit
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			t.Conns[connType] = opts
 		}
@@ -68,7 +68,7 @@ func (t *TrendSCfg) AsMapInterface() any {
 	if t.StoreInterval != 0 {
 		mp[utils.StoreIntervalCfg] = t.StoreInterval.String()
 	}
-	mp[utils.ConnsCfg] = stripConns(t.Conns)
+	mp[utils.ConnsCfg] = StripConns(t.Conns)
 	if t.ScheduledIDs != nil {
 		mp[utils.ScheduledIDsCfg] = t.ScheduledIDs
 	}
@@ -120,7 +120,7 @@ func diffTrendsJsonCfg(d *TrendSJsonCfg, v1, v2 *TrendSCfg) *TrendSJsonCfg {
 		d.Store_uncompressed_limit = utils.IntPointer(v2.StoreUncompressedLimit)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	d.Scheduled_ids = diffMapStringSlice(d.Scheduled_ids, v1.ScheduledIDs, v2.ScheduledIDs)
 	if !slices.Equal(v1.EEsExporterIDs, v2.EEsExporterIDs) {

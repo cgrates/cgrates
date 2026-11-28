@@ -55,11 +55,10 @@ func (routeS *RouteService) Start(shutdown *utils.SyncedChan, registry *servmana
 	routeS.mu.Lock()
 	defer routeS.mu.Unlock()
 	routeS.routeS = routes.NewRouteService(dbs.DataManager(), fs.FilterS(), routeS.cfg, cms.ConnManager())
-	srv, err := newRPCService(apis.NewRouteSv1(routeS.routeS), utils.RouteSv1)
+	srv, err := RegisterRPCService(cl, apis.NewRouteSv1(routeS.routeS), utils.RouteSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.RouteS, srv)
 	return
 }

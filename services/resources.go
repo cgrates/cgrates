@@ -53,13 +53,12 @@ func (s *ResourceService) Start(shutdown *utils.SyncedChan, registry *servmanage
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	rs := resources.NewResourceService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := newRPCService(apis.NewResourceSv1(rs), utils.ResourceSv1)
+	srv, err := RegisterRPCService(cl, apis.NewResourceSv1(rs), utils.ResourceSv1)
 	if err != nil {
 		return err
 	}
 	rs.StartLoop(context.TODO())
 	s.resources = rs
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ResourceS, srv)
 	return nil
 }

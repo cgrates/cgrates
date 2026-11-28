@@ -107,7 +107,7 @@ func (fscfg *FsAgentCfg) loadFromJSONCfg(jsnCfg *FreeswitchAgentJsonCfg) error {
 		fscfg.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			fscfg.Conns[connType] = opts
 		}
@@ -155,7 +155,7 @@ func (fscfg FsAgentCfg) AsMapInterface() any {
 		utils.MaxWaitConnectionCfg:      utils.EmptyString,
 		utils.ActiveSessionDelimiterCfg: fscfg.ActiveSessionDelimiter,
 	}
-	mp[utils.ConnsCfg] = stripConns(fscfg.Conns)
+	mp[utils.ConnsCfg] = StripConns(fscfg.Conns)
 	requestProcessors := make([]map[string]any, len(fscfg.RequestProcessors))
 	for i, item := range fscfg.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
@@ -277,7 +277,7 @@ func diffFreeswitchAgentJsonCfg(d *FreeswitchAgentJsonCfg, v1, v2 *FsAgentCfg) *
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.SubscribePark != v2.SubscribePark {
 		d.SubscribePark = utils.BoolPointer(v2.SubscribePark)

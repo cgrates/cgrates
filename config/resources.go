@@ -91,7 +91,7 @@ func (c *ResourceSCfg) loadFromJSONCfg(jsnCfg *ResourceSJsonCfg) error {
 		if c.Conns == nil {
 			c.Conns = make(map[string][]*DynamicConns)
 		}
-		maps.Copy(c.Conns, tagConns(jsnCfg.Conns))
+		maps.Copy(c.Conns, TagConns(jsnCfg.Conns))
 	}
 	if jsnCfg.Store_interval != nil {
 		ivl, err := utils.ParseDurationWithNanosecs(*jsnCfg.Store_interval)
@@ -134,7 +134,7 @@ func (c ResourceSCfg) AsMapInterface() any {
 	mp := map[string]any{
 		utils.EnabledCfg:        c.Enabled,
 		utils.IndexedSelectsCfg: c.IndexedSelects,
-		utils.ConnsCfg:          stripConns(c.Conns),
+		utils.ConnsCfg:          StripConns(c.Conns),
 		utils.NestedFieldsCfg:   c.NestedFields,
 		utils.StoreIntervalCfg:  utils.EmptyString,
 		utils.OptsCfg:           opts,
@@ -260,7 +260,7 @@ func diffResourceSJsonCfg(d *ResourceSJsonCfg, v1, v2 *ResourceSCfg) *ResourceSJ
 		d.Indexed_selects = utils.BoolPointer(v2.IndexedSelects)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.StoreInterval != v2.StoreInterval {
 		d.Store_interval = utils.StringPointer(v2.StoreInterval.String())

@@ -63,7 +63,7 @@ func (alS *AnalyzerSCfg) loadFromJSONCfg(jsnCfg *AnalyzerSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		maps.Copy(alS.Conns, tagged)
 	}
 	if jsnCfg.Cleanup_interval != nil {
@@ -90,7 +90,7 @@ func (alS AnalyzerSCfg) AsMapInterface() any {
 		utils.CleanupIntervalCfg: alS.CleanupInterval.String(),
 		utils.OptsCfg:            opts,
 	}
-	mp[utils.ConnsCfg] = stripConns(alS.Conns)
+	mp[utils.ConnsCfg] = StripConns(alS.Conns)
 	return mp
 }
 
@@ -162,7 +162,7 @@ func diffAnalyzerSJsonCfg(d *AnalyzerSJsonCfg, v1, v2 *AnalyzerSCfg) *AnalyzerSJ
 		d.Ttl = utils.StringPointer(v2.TTL.String())
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.CleanupInterval != v2.CleanupInterval {
 		d.Cleanup_interval = utils.StringPointer(v2.CleanupInterval.String())

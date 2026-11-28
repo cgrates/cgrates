@@ -85,7 +85,7 @@ func (ka *KamAgentCfg) loadFromJSONCfg(jsnCfg *KamAgentJsonCfg) error {
 		ka.Enabled = *jsnCfg.Enabled
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			ka.Conns[connType] = opts
 		}
@@ -121,7 +121,7 @@ func (ka KamAgentCfg) AsMapInterface() any {
 		}
 		mp[utils.EvapiConnsCfg] = evapiConns
 	}
-	mp[utils.ConnsCfg] = stripConns(ka.Conns)
+	mp[utils.ConnsCfg] = StripConns(ka.Conns)
 	requestProcessors := make([]map[string]any, len(ka.RequestProcessors))
 	for i, item := range ka.RequestProcessors {
 		requestProcessors[i] = item.AsMapInterface()
@@ -212,7 +212,7 @@ func diffKamAgentJsonCfg(d *KamAgentJsonCfg, v1, v2 *KamAgentCfg) *KamAgentJsonC
 		d.Enabled = utils.BoolPointer(v2.Enabled)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if !equalsKamConnsCfg(v1.EvapiConns, v2.EvapiConns) {
 		dft := getDftKamConnCfg()

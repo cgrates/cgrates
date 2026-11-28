@@ -13,7 +13,7 @@ func TestAnalyzerServiceGetInternalCodec(t *testing.T) {
 	cfg := config.NewDefaultCGRConfig()
 	cfg.AnalyzerSCfg().Enabled = true
 	anz := NewAnalyzerService(cfg)
-	conn, err := newRPCService(new(rpcTestReceiver), "TestSv1")
+	conn, err := NewRPCService(new(rpcTestReceiver), "TestSv1")
 	if err != nil {
 		t.Fatal(err)
 	}

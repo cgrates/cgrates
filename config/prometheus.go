@@ -58,7 +58,7 @@ func (c *PrometheusAgentCfg) loadFromJSONCfg(jc *PrometheusAgentJsonCfg) error {
 		c.CollectProcessMetrics = *jc.CollectProcessMetrics
 	}
 	if jc.Conns != nil {
-		tagged := tagConns(jc.Conns)
+		tagged := TagConns(jc.Conns)
 		for connType, opts := range tagged {
 			c.Conns[connType] = opts
 		}
@@ -79,7 +79,7 @@ func (c PrometheusAgentCfg) AsMapInterface() any {
 		utils.PathCfg:                  c.Path,
 		utils.CollectGoMetricsCfg:      c.CollectGoMetrics,
 		utils.CollectProcessMetricsCfg: c.CollectProcessMetrics,
-		utils.ConnsCfg:                 stripConns(c.Conns),
+		utils.ConnsCfg:                 StripConns(c.Conns),
 		utils.CacheIDsCfg:              c.CacheIDs,
 		utils.StatQueueIDsCfg:          c.StatQueueIDs,
 	}
@@ -118,7 +118,7 @@ func diffPrometheusAgentJsonCfg(d *PrometheusAgentJsonCfg, v1, v2 *PrometheusAge
 		d.CollectProcessMetrics = utils.BoolPointer(v2.CollectProcessMetrics)
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if !slices.Equal(v1.CacheIDs, v2.CacheIDs) {
 		d.CacheIDs = utils.SliceStringPointer(v2.CacheIDs)

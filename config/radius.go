@@ -112,7 +112,7 @@ func (ra *RadiusAgentCfg) loadFromJSONCfg(jc *RadiusAgentJsonCfg) (err error) {
 		}
 	}
 	if jc.Conns != nil {
-		tagged := tagConns(jc.Conns)
+		tagged := TagConns(jc.Conns)
 		for connType, opts := range tagged {
 			ra.Conns[connType] = opts
 		}
@@ -159,7 +159,7 @@ func (ra RadiusAgentCfg) AsMapInterface() any {
 		utils.RequestsCacheKeyCfg:   ra.RequestsCacheKey.GetRule(),
 		utils.DMRTemplateCfg:        ra.DMRTemplate,
 		utils.CoATemplateCfg:        ra.CoATemplate,
-		utils.ConnsCfg:              stripConns(ra.Conns),
+		utils.ConnsCfg:              StripConns(ra.Conns),
 		utils.RequestProcessorsCfg:  requestProcessors,
 	}
 	return mp
@@ -295,7 +295,7 @@ func diffRadiusAgentJsonCfg(d *RadiusAgentJsonCfg, v1, v2 *RadiusAgentCfg) *Radi
 		d.ClientDaAddresses = clientDaAddresses
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	cacheKey1 := v1.RequestsCacheKey.GetRule()
 	cacheKey2 := v2.RequestsCacheKey.GetRule()

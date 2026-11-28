@@ -53,13 +53,12 @@ func (s *StatService) Start(shutdown *utils.SyncedChan, registry *servmanager.Re
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	ss := stats.NewStatService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := newRPCService(apis.NewStatSv1(ss), utils.StatSv1)
+	srv, err := RegisterRPCService(cl, apis.NewStatSv1(ss), utils.StatSv1)
 	if err != nil {
 		return err
 	}
 	ss.StartLoop(context.TODO())
 	s.sts = ss
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.StatS, srv)
 	return nil
 }

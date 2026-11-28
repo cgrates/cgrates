@@ -55,11 +55,11 @@ func (es *EventExporterService) Start(shutdown *utils.SyncedChan, registry *serv
 		return err
 	}
 
-	srv, err := newRPCService(apis.NewEeSv1(es.eeS), utils.EeSv1)
+	srv, err := RegisterRPCService(cl, apis.NewEeSv1(es.eeS), utils.EeSv1)
 	if err != nil {
+		es.eeS.ClearExporterCache()
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.EEs, srv)
 	return nil
 }

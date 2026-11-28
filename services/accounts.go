@@ -54,11 +54,10 @@ func (acts *AccountService) Start(shutdown *utils.SyncedChan, registry *servmana
 	acts.mu.Lock()
 	defer acts.mu.Unlock()
 	acts.acts = accounts.NewAccountS(acts.cfg, fs, cms.ConnManager(), dbs)
-	srv, err := newRPCService(apis.NewAccountSv1(acts.acts), utils.AccountSv1)
+	srv, err := RegisterRPCService(cl, apis.NewAccountSv1(acts.acts), utils.AccountSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.AccountS, srv)
 	return
 }

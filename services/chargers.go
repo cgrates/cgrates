@@ -55,11 +55,10 @@ func (chrS *ChargerService) Start(shutdown *utils.SyncedChan, registry *servmana
 	chrS.mu.Lock()
 	defer chrS.mu.Unlock()
 	chrS.chrS = chargers.NewChargerService(dbs.DataManager(), fs.FilterS(), chrS.cfg, cms.ConnManager())
-	srv, err := newRPCService(apis.NewChargerSv1(chrS.chrS), utils.ChargerSv1)
+	srv, err := RegisterRPCService(cl, apis.NewChargerSv1(chrS.chrS), utils.ChargerSv1)
 	if err != nil {
 		return err
 	}
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ChargerS, srv)
 	return nil
 }

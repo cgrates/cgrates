@@ -44,7 +44,7 @@ func (cS *CoreSCfg) loadFromJSONCfg(jsnCfg *CoreSJsonCfg) (err error) {
 		}
 	}
 	if jsnCfg.Conns != nil {
-		tagged := tagConns(jsnCfg.Conns)
+		tagged := TagConns(jsnCfg.Conns)
 		for connType, opts := range tagged {
 			cS.Conns[connType] = opts
 		}
@@ -64,7 +64,7 @@ func (cS CoreSCfg) AsMapInterface() any {
 		utils.CapsStrategyCfg:      cS.CapsStrategy,
 		utils.CapsStatsIntervalCfg: cS.CapsStatsInterval.String(),
 		utils.ShutdownTimeoutCfg:   cS.ShutdownTimeout.String(),
-		utils.ConnsCfg:             stripConns(cS.Conns),
+		utils.ConnsCfg:             StripConns(cS.Conns),
 	}
 	if cS.CapsStatsInterval == 0 {
 		mp[utils.CapsStatsIntervalCfg] = "0"
@@ -112,7 +112,7 @@ func diffCoreSJsonCfg(d *CoreSJsonCfg, v1, v2 *CoreSCfg) *CoreSJsonCfg {
 		d.Caps_stats_interval = utils.StringPointer(v2.CapsStatsInterval.String())
 	}
 	if !ConnsMapEqual(v1.Conns, v2.Conns) {
-		d.Conns = stripConns(v2.Conns)
+		d.Conns = StripConns(v2.Conns)
 	}
 	if v1.ShutdownTimeout != v2.ShutdownTimeout {
 		d.Shutdown_timeout = utils.StringPointer(v2.ShutdownTimeout.String())

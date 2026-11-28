@@ -53,13 +53,12 @@ func (s *ThresholdService) Start(shutdown *utils.SyncedChan, registry *servmanag
 	dbs := srvDeps[utils.DB].(*DBService)
 
 	ts := thresholds.NewThresholdService(s.cfg, dbs.DataManager(), cacheS.CacheS(), fs.FilterS(), cms.ConnManager())
-	srv, err := newRPCService(apis.NewThresholdSv1(ts), utils.ThresholdSv1)
+	srv, err := RegisterRPCService(cl, apis.NewThresholdSv1(ts), utils.ThresholdSv1)
 	if err != nil {
 		return err
 	}
 	ts.StartLoop(context.TODO())
 	s.thrs = ts
-	cl.RpcRegister(srv)
 	cms.AddInternalConn(utils.ThresholdS, srv)
 	return nil
 }
